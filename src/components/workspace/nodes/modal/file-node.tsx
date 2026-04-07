@@ -1,0 +1,264 @@
+import { Handle, Position, type NodeProps } from "@xyflow/react";
+import { memo, useState } from "react";
+import {
+    File as FileIcon,
+    FileText,
+    FileSpreadsheet,
+    Presentation,
+    FileCode,
+    FileArchive,
+    Download,
+} from "lucide-react";
+
+import { BaseNode } from "../base/base-node";
+import {
+    NodeHeader,
+    NodeHeaderActions,
+    NodeHeaderIcon,
+    NodeHeaderMenuAction,
+    NodeHeaderTitle,
+    NodeHeaderComboAction,
+} from "../base/node-header";
+import { DropdownMenuLabel } from "@/components/ui/dropdown-menu";
+import { Button } from "@/components/ui/button";
+import { useR2AsyncLoader } from "@/hooks/use-r2-async-loader";
+import { useTranslations } from "next-intl";
+
+// 根据文件扩展名获取对应的图标
+const getFileIcon = (fileKey: string) => {
+    const ext = fileKey.split(".").pop()?.toLowerCase() || "";
+
+    // Document icons
+    if (["pdf"].includes(ext)) {
+        return <FileText className="h-8 w-8 text-red-500" />;
+    }
+    if (["doc", "docx"].includes(ext)) {
+        return <FileText className="h-8 w-8 text-blue-500" />;
+    }
+    if (["txt"].includes(ext)) {
+        return <FileText className="h-8 w-8 text-gray-500" />;
+    }
+
+    // Spreadsheet icons
+    if (["xls", "xlsx", "csv"].includes(ext)) {
+        return <FileSpreadsheet className="h-8 w-8 text-green-500" />;
+    }
+
+    // Presentation icons
+    if (["ppt", "pptx"].includes(ext)) {
+        return <Presentation className="h-8 w-8 text-orange-500" />;
+    }
+
+    // Code/Archive icons
+    if (["zip", "rar", "7z", "tar", "gz"].includes(ext)) {
+        return <FileArchive className="h-8 w-8 text-purple-500" />;
+    }
+    if (["json", "xml", "html", "css", "js", "ts", "py"].includes(ext)) {
+        return <FileCode className="h-8 w-8 text-cyan-500" />;
+    }
+
+    // Default icon
+    return <FileIcon className="h-8 w-8 text-gray-400" />;
+};
+
+// 判断是否为 Office 文件
+const isOfficeFile = (fileKey: string): boolean => {
+    const ext = fileKey.split(".").pop()?.toLowerCase() || "";
+    return ["doc", "docx", "xls", "xlsx", "ppt", "pptx"].includes(ext);
+};
+
+// 获取文件打开 URL
+const getFileOpenUrl = (fileUrl: string, fileKey: string): string => {
+    const ext = fileKey.split(".").pop()?.toLowerCase() || "";
+
+    if (isOfficeFile(fileKey)) {
+        // 使用 Office 365 Web Apps 预览
+        const encodedUrl = encodeURIComponent(fileUrl);
+        return `https://view.officeapps.live.com/op/embed.aspx?src=${encodedUrl}`;
+    }
+
+    // 其他文件直接打开
+    return fileUrl;
+};
+
+// 单个文件项组件 - 使用 hook 加载 URL
+const FileItem = ({
+    fileKey,
+    onFileClick,
+}: {
+    fileKey: string;
+    onFileClick: (fileKey: string, url: string) => void;
+}) => {
+    const { url } = useR2AsyncLoader(fileKey, { priority: "high" });
+
+    const handleClick = () => {
+        if (url) {
+            onFileClick(fileKey, url);
+        }
+    };
+
+    return (
+        <div
+            className="flex flex-col items-center gap-2 cursor-pointer group"
+            onClick={handleClick}
+            title={fileKey}
+        >
+            <div className="p-3 rounded-lg bg-gray-100 group-hover:bg-gray-200 transition-colors">
+                {getFileIcon(fileKey)}
+            </div>
+            <p className="text-xs text-center text-gray-600 truncate max-w-[80px] group-hover:text-gray-900">
+                {fileKey.split("/").pop()}
+            </p>
+        </div>
+    );
+};
+
+// 单个文件显示组件
+const SingleFileDisplay = ({
+    fileKey,
+    onFileClick,
+}: {
+    fileKey: string;
+    onFileClick: (fileKey: string, url: string) => void;
+}) => {
+    const { url } = useR2AsyncLoader(fileKey, { priority: "high" });
+
+    const handleClick = () => {
+        if (url) {
+            onFileClick(fileKey, url);
+        }
+    };
+
+    return (
+        <div className="flex flex-col items-center gap-2">
+            <div
+                className="p-4 rounded-lg bg-gray-100 hover:bg-gray-200 transition-colors cursor-pointer"
+                onClick={handleClick}
+                title={fileKey}
+            >
+                {getFileIcon(fileKey)}
+            </div>
+            <p className="text-xs text-center text-gray-600 hover:text-gray-900 max-w-[120px] truncate">
+                {fileKey.split("/").pop()}
+            </p>
+        </div>
+    );
+};
+
+const FileNode = ({ selected, data }: NodeProps) => {
+    const t = useTranslations("Workspace.nodes.modal");
+    const { fileKeys } = (data as { fileKeys?: string[] }) || { fileKeys: [] };
+    const keys = fileKeys || [];
+
+    // Determine if single or multiple
+    const isSingle = keys.length === 1;
+    const count = keys.length;
+
+    // Calculate display count: <=9 items; if total>9, show 8 + 1 "more"
+    const showMore = count > 9;
+    const visibleFileCount = showMore ? 8 : Math.min(count, 9);
+    const visibleTiles = showMore ? 9 : visibleFileCount;
+    const emptyTiles = Math.max(0, 9 - visibleTiles);
+
+    const handleFileClick = (fileKey: string, fileUrl: string) => {
+        const openUrl = getFileOpenUrl(fileUrl, fileKey);
+        window.open(openUrl, "_blank");
+    };
+
+    return (
+        <BaseNode selected={selected} count={count}>
+            <NodeHeader>
+                <NodeHeaderIcon>
+                    <FileIcon />
+                </NodeHeaderIcon>
+                <NodeHeaderTitle>
+                    {isSingle ? t("file") : t("files", { count })}
+                </NodeHeaderTitle>
+                <NodeHeaderActions>
+                    <NodeHeaderComboAction
+                        onClick={() => console.log("组合模式切换")}
+                    />
+                    <NodeHeaderMenuAction label={t("moreOptions")}>
+                        <DropdownMenuLabel>{t("actions")}</DropdownMenuLabel>
+                    </NodeHeaderMenuAction>
+                </NodeHeaderActions>
+            </NodeHeader>
+
+            {/* Content */}
+            <div className="w-full p-4">
+                {isSingle ? (
+                    // Single file - show single icon
+                    <SingleFileDisplay
+                        fileKey={keys[0]}
+                        onFileClick={handleFileClick}
+                    />
+                ) : (
+                    // Multiple files - show grid
+                    <div className="grid grid-cols-3 gap-4">
+                        {/* Show file icons */}
+                        {keys
+                            .slice(0, visibleFileCount)
+                            .map((fileKey, index) => (
+                                <FileItem
+                                    key={index}
+                                    fileKey={fileKey}
+                                    onFileClick={handleFileClick}
+                                />
+                            ))}
+
+                        {/* Show "more" indicator if over 9 files */}
+                        {showMore && (
+                            <div className="flex flex-col items-center gap-2">
+                                <div className="flex aspect-square items-center justify-center rounded-lg border-2 border-dashed border-gray-300 bg-gray-50 w-16 h-16">
+                                    <div className="text-center">
+                                        <div className="text-sm font-bold text-gray-600">
+                                            +{count - 8}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Empty placeholders */}
+                        {Array.from({ length: emptyTiles }).map((_, index) => (
+                            <div
+                                key={`empty-${index}`}
+                                className="w-16 h-16 rounded-lg border-2 border-dashed border-gray-300 bg-gray-100 opacity-30"
+                            />
+                        ))}
+                    </div>
+                )}
+            </div>
+
+            <Handle
+                type="target"
+                position={Position.Left}
+                id="a"
+                isConnectable={true}
+            />
+            <Handle
+                type="source"
+                position={Position.Right}
+                id="b"
+                isConnectable={true}
+            />
+        </BaseNode>
+    );
+};
+
+// Custom comparison function to prevent unnecessary re-renders
+const areEqual = (prevProps: NodeProps, nextProps: NodeProps) => {
+    const prevFileKeys =
+        (prevProps.data as { fileKeys?: string[] })?.fileKeys || [];
+    const nextFileKeys =
+        (nextProps.data as { fileKeys?: string[] })?.fileKeys || [];
+
+    return (
+        prevProps.selected === nextProps.selected &&
+        JSON.stringify(prevFileKeys) === JSON.stringify(nextFileKeys)
+    );
+};
+
+FileNode.displayName = "FileNode";
+
+export default memo(FileNode, areEqual);

@@ -1,0 +1,73 @@
+import { Handle, Position, type NodeProps } from "@xyflow/react";
+import { memo } from "react";
+import { BaseNode } from "../base/base-node";
+import { Camera } from "lucide-react";
+import {
+    upstreamParam,
+    type GetPromptsContext,
+} from "@/utils/node-execution-config";
+import { useTranslations } from "next-intl";
+
+const GetFirstFrameNode = ({ selected, data }: NodeProps) => {
+    const t = useTranslations("Workspace.nodes");
+    const { fileKeys } = data as { fileKeys: string[] };
+
+    const workflowConfig = {
+        feature: "get_first_frame",
+        label: "首帧截图",
+        outputType: "imageNode",
+        outputField: "fileKeys" as const,
+        supportsBatch: true,
+        batchParam: "videoKey",
+        paramMappings: {
+            videoKey: {
+                sources: [upstreamParam("videoNode", "fileKeys")],
+                required: true,
+            },
+        },
+    };
+
+    return (
+        <BaseNode
+            selected={selected}
+            data={data}
+            workflowConfig={{
+                ...workflowConfig,
+                title: t("titles.getFirstFrame"),
+                icon: <Camera className="h-5 w-5" />,
+                executeLabel: t("actions.getFirstFrame"),
+                executeDisabled: !fileKeys?.length,
+                getPrompts: (ctx?: GetPromptsContext) => {
+                    const upstreamKeys = ctx?.getAllUpstreamData(
+                        "videoNode",
+                        "fileKeys",
+                    ) as string[] | undefined;
+                    const keys =
+                        upstreamKeys && upstreamKeys.length > 0
+                            ? upstreamKeys
+                            : fileKeys;
+                    return (
+                        keys?.map((fileKey) => ({
+                            videoKey: fileKey,
+                        })) || []
+                    );
+                },
+            }}
+        >
+            <Handle
+                type="target"
+                position={Position.Left}
+                id="a"
+                isConnectable={true}
+            />
+            <Handle
+                type="source"
+                position={Position.Right}
+                id="b"
+                isConnectable={true}
+            />
+        </BaseNode>
+    );
+};
+
+export default memo(GetFirstFrameNode);
