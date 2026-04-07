@@ -1,0 +1,42 @@
+appId: com.openflow.app
+productName: OpenFlow
+
+directories:
+  output: release
+
+files:
+  # Electron entry (compiled or TS via tsx in dev; in prod we keep TS and use electron's TS runtime? no)
+  # For now, we ship source and point main to electron/main.ts via tsx is dev-only.
+  - "dist-electron/**"
+  - "package.json"
+
+extraResources:
+  - from: "modal"
+    to: "modal"
+  - from: "dist-electron/node"
+    to: "node"
+  - from: "dist-electron/python"
+    to: "python"
+  - from: "dist-electron/wheelhouse"
+    to: "wheelhouse"
+
+asar: true
+
+asarUnpack:
+  - "dist-electron/app/**"
+
+mac:
+  target:
+    - dmg
+    - zip
+
+win:
+  target:
+    - nsis
+    - zip
+
+nsis:
+  oneClick: false
+  perMachine: false
+  allowToChangeInstallationDirectory: true
+

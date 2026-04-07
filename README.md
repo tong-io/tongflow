@@ -142,6 +142,43 @@ pnpm dev
 
 打开后会自动跳转到 `/workspace`。
 
+## 桌面版（Electron：macOS + Windows）
+
+> 目标：用户无需安装 Node，下载应用即可运行（Electron 会把运行时打包进去）。  
+> 注意：Modal/OpenRouter/Gemini 等外部服务仍需要你在 `.env` 里配置 API key/token。
+
+### 开发模式（Desktop Dev）
+
+同时启动 Next dev server 与 Electron：
+
+```bash
+pnpm desktop:dev
+```
+
+### 打包（Desktop Build）
+
+构建 Next standalone + 准备资源 + 打包 Electron（本地目录产物）：
+
+```bash
+pnpm desktop:build
+```
+
+产物默认在 `release/`（或 `desktop:pack` 的临时目录）中。
+
+### 发布版安装包（Desktop Dist）
+
+生成最终安装包（macOS dmg/zip、Windows nsis/zip）：
+
+```bash
+pnpm desktop:dist
+```
+
+### 签名与系统提示
+
+- **未签名**的 macOS app 可能触发 Gatekeeper 提示
+- **未签名**的 Windows 安装包可能触发 SmartScreen
+- 正式发行建议配置代码签名（macOS notarization / Windows 证书）
+
 ## 开发与扩展（Adding a new node/feature）
 
 （高层流程）
@@ -150,7 +187,7 @@ pnpm dev
 - **新增节点 UI**：在 `src/components/workspace/nodes/` 新建节点组件，并在节点 `workflowConfig.feature` 里引用 feature name
 - **新增后端 handler**：
   - LLM/API：在 `src/handlers/`** 实现并注册
-  - Modal：在 `modal/**` 写 Python 并 `modal deploy`，再补齐 `src/handlers/modal/configs.ts` 的映射
+  - Modal：在 `modal/`** 写 Python 并 `modal deploy`，再补齐 `src/handlers/modal/configs.ts` 的映射
 
 ## License
 

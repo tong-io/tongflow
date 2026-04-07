@@ -22,3 +22,11 @@ data/
 .DS_Store
 *.tsbuildinfo
 next-env.d.ts
+
+# electron
+dist-electron/
+release/
+electron-out/
+
+# desktop python/wheels (generated during release builds)
+wheelhouse/
