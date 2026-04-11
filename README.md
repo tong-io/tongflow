@@ -11,6 +11,90 @@
 - **AI 与媒体处理并存**：LLM、图像生成/编辑、视频生成/增强、ASR/TTS、文档解析、爬虫、FFmpeg 等
 - **可插拔后端**：本地 Next.js 负责编排与任务管理；耗时/重计算可交给 **Modal** 的 CPU/GPU worker
 
+## 节点源码实现状态
+
+路径均相对于 `src/components/workspace/nodes/`（不含 `base/` 下的公共组件，如 `base-node.tsx`）。
+
+**判定说明**：节点通过 `workflowConfig.feature` 对应 `src/lib/feature-registry.ts` 中的功能名；任务执行需 `src/lib/register-task-handlers.ts` 中已 `registerHandler`（含 LLM 与已接线的 Modal CPU/GPU）。`type: "api"` 的 feature 当前无统一 handler，选 Pro 走 API 的路径视为未跑通。
+
+### 已实现
+
+#### 全路径可跑通（注册表 + handler 齐全）
+
+- `transfer/text-gen-text.tsx`
+- `decompose/split_text.tsx`
+- `transfer/file-gen-text.tsx`
+- `add/add-link-node.tsx`
+- `compose/concat-video.tsx`（同时用于 `concatVideoNode` / `concatVideoComposeNode`）
+- `compose/merge-video-audio.tsx`
+- `transfer/get-first-frame.tsx`
+- `transfer/get-last-frame.tsx`
+- `decompose/split_video.tsx`
+- `transfer/separate_video_audio.tsx`
+- `transfer/text-gen-video.tsx`
+- `transfer/image-gen-text.tsx`
+- `transfer/video-gen-text.tsx`
+- `transfer/image-gen-image-upscale.tsx`
+- `transfer/video-upscale.tsx`
+- `transfer/text-gen-music.tsx`
+- `transfer/text-gen-speech.tsx`
+- `compose/image-image-gen-video.tsx`
+- `transfer/audio-gen-text-speech-recognize.tsx`
+- `transfer/video-gen-text-speech-recognize.tsx`
+
+#### 部分路径可跑通（其余选项会失败、`api`/未接线或 feature 拼写不在注册表）
+
+- `transfer/image-gen-image.tsx`：仅 **eco**（`image_edit`）；**pro**（`image_edit_pro`）为 `api`，无 handler。
+- `transfer/text-gen-image.tsx`：仅 **eco**（`image_gen`）；**pro**（`image_gen_pro`）为 `api`，无 handler。
+- `compose/image-fusion.tsx`：仅 **eco**（`image_fusion`）；**pro**（`image_fusion_pro`）为 `api`，无 handler。
+- `transfer/image-gen-video.tsx`：仅 **eco**（`image_gen_video`）；**pro**（`image_gen_video_pro`）为 `api`，无 handler。
+- `compose/texts-gen-text.tsx`：仅 **`model === "auto"`**（`combine_text`）；其它模型选项会生成未在注册表的 `combine_text_*`。
+- `compose/text-audio-gen-speech.tsx`：仅 **无情感且无风格**（`text_gen_speech_clone`）；填情感/风格走未接线的 GPU function。
+
+#### 仅画布数据 / 输入（不发起带 `feature` 的后端任务）
+
+- `modal/image-node.tsx`
+- `modal/text-node.tsx`
+- `modal/video-node.tsx`
+- `modal/audio-node.tsx`
+- `modal/file-node.tsx`
+- `modal/model-node.tsx`
+- `add/add-text-node.tsx`
+- `add/add-image-node.tsx`
+- `add/add-audio-node.tsx`
+- `add/add-video-node.tsx`
+- `add/add-file-node.tsx`
+- `add/add-model-node.tsx`
+
+### 未实现
+
+以下文件对应节点**尚未**在默认路径上同时满足「注册表可解析 + 已有 handler」；部分为 feature 名与注册表不一致、部分为后端能力未接线。
+
+- `transfer/text2voice.tsx`
+- `transfer/voice2text.tsx`
+- `transfer/image-gen-model.tsx`
+- `transfer/speech-gen-video.tsx`
+- `transfer/video2clip.tsx`
+- `transfer/music-gen.tsx`
+- `transfer/remove-subtitle.tsx`
+- `transfer/remove-watermark.tsx`
+- `transfer/denoise-audio.tsx`
+- `transfer/separate_audio_track.tsx`
+- `transfer/separate_speaker.tsx`
+- `transfer/convert-voice.tsx`
+- `batch/drop_video.tsx`
+- `batch/arrrange_text.tsx`
+- `compose/avatarvideo.tsx`
+- `compose/move-video.tsx`
+- `compose/mix-video.tsx`
+- `compose/speech-image-gen-video.tsx`
+- `compose/speech-text-gen-video.tsx`
+- `compose/speech-image-video-gen-video.tsx`
+- `compose/speech-video-gen-video.tsx`
+- `compose/video-image-gen-video-mix.tsx`
+- `compose/video-image-gen-video-move.tsx`
+- `compose/text-video-gen-video-subtitle-video.tsx`
+
 ## 节点一览（Node Catalog）
 
 下面的表格按「节点」维度列出：**节点功能 → 对应 feature key → 后端实现（type/function）→ 使用的模型/提供商**。  
@@ -82,6 +166,35 @@
 | Speech → Text（ASR）   | `speech_reco`    | （见 `transcribe` / 相关 handlers）      | Modal GPU：Qwen3 ASR（`modal/gpu/qwen3asr.py`） |
 | Text → Music         | `gen_music`      | `gpu/ace-step`                      | Modal GPU：ACE-Step（默认 DiT：`acestep-v15-xl-base`；见 `modal/gpu/ace_step.py`）  |
 | Generate Music（音乐生成） | `generate_music` | （节点侧 feature；以注册表为准）                | 取决于 feature 映射                               |
+
+
+### 组合节点（Compose）
+
+**组合节点**面向「多路输入」：通常需要同时连接多个上游节点（如文本 + 音频、图片 + 视频、双图首尾帧等），把多模态素材合成下一步结果。实现位于 `src/components/workspace/nodes/compose/`；分类列表见 `src/components/workspace/types.tsx` 中的 `NODE_CATEGORIES.COMPOSE`。
+
+> English: **Compose** nodes take multiple upstream inputs and merge multimodal data into the next step. Implemented under `src/components/workspace/nodes/compose/`; the compose node type list is `NODE_CATEGORIES.COMPOSE` in `src/components/workspace/types.tsx`.
+
+「Combine Text（合并文本）」的说明见上文「文本」一节（`combine_text`）。下表列出其余组合类节点（feature 可能随节点内选项变化，以 `src/lib/feature-registry.ts` 与节点内 `workflowConfig` 为准）。
+
+| 节点 | 作用 | Feature（主键 / 常见别名） |
+| --- | --- | --- |
+| Avatar / 数字人视频 | 数字人 / 口型驱动类视频 | `avatar_video` |
+| Move Video / 动作迁移 | 动作或姿态迁移到目标视频 | `video_image_move` 等（随模式变化） |
+| Merge Video Audio / 音视频合并 | 视频轨与音频轨合成 | `merge_video_audio` |
+| Mix Video / 人物替换 | 画面中人物替换类生成 | `wan22-i2v-allinone-repid` 等 |
+| Image Fusion / 图片融合 | 多图参考融合（含 Pro 模式） | `image_fusion` / `image_fusion_pro` |
+| Speech + Image → Video | 语音 + 图片 → 视频 | `audio_image_gen_video` |
+| Speech + Text → Video | 语音 + 文本 → 视频 | `speech_text_gen_video` |
+| Speech + Image + Video → Video | 语音 + 图 + 视频 → 视频 | `speech_image_video_gen_video` |
+| Speech + Video → Video | 语音 + 视频 → 视频 | `speech_video_gen_video` 等 |
+| Video + Image Mix / 视频图片混合 | 参考图与视频混合生成 | `wan-animate-mix` |
+| Video + Image Move / 视频图片迁移 | 视频 + 图 的动作或迁移类生成 | `video_image_move`、`wan-animate-move` 等 |
+| Image + Image → Video / 双图生成视频 | 双图（如首尾帧）生成视频 | `image-image-gen-video` |
+| Text + Audio → Speech / 文本音频生成语音 | 文本 + 参考音频：克隆 / 情感 / 风格 TTS | `text_gen_speech_clone`、`text_gen_speech_emotion`、`text_gen_speech_style` |
+| Text + Video → Subtitle Video / 字幕视频 | 字幕文本与视频等合成管线 | `text_video_gen_video_subtitle_video` |
+| Concat Videos（组合侧多路拼接） | 多段视频顺序拼接（组合节点实现） | `concat_videos` |
+
+> 说明：侧栏「合为一组 / 组合模式」用于多选节点成组的画布编排，与上表「组合类」节点（多输入合成）是不同概念。
 
 
 ### 其他（文档/网页/工具）

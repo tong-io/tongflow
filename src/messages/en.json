@@ -96,20 +96,6 @@
             "executeMode": "Execute Mode",
             "upgradeRequired": "Upgrade to unlock Execute Mode"
         },
-        "workspaceNav": {
-            "connectModal": "Connect Modal",
-            "title": "Connect Modal",
-            "desc": "This opens your browser to authenticate with Modal. After you finish, OpenFlow will detect completion automatically.",
-            "profileLabel": "Optional profile/workspace",
-            "profilePlaceholder": "e.g. caotong598",
-            "statusStarting": "Starting Modal setup...",
-            "statusAuth": "Browser opened. If nothing opens, visit:\n{url}",
-            "statusAlreadyConnected": "Already connected.\nConfig: {path}",
-            "statusDone": "Connected.\nConfig: {path}",
-            "statusFailed": "Failed to connect.\n{error}",
-            "logsPlaceholder": "(waiting for output...)",
-            "close": "Close"
-        },
         "smartIsland": {
             "category": {
                 "digitalHuman": "Digital Human",
@@ -283,7 +269,12 @@
                 "stopVoice": "Stop Voice Input",
                 "editText": "Edit Text",
                 "select": "Select",
-                "selected": "Selected"
+                "selected": "Selected",
+                "modalNotDeployedTitle": "Modal app not deployed",
+                "modalNotDeployedDescription": "Feature \"{feature}\" requires Modal app \"{app}\". Prepare and deploy before running.",
+                "modalDeployHint": "1) Set MODAL_TOKEN_ID / MODAL_TOKEN_SECRET. 2) Optionally run pnpm desktop:python:prepare and pnpm desktop:wheelhouse:prepare. 3) From the repo root, run modal deploy on the matching scripts under modal/cpu and modal/gpu. Then tap Retry.",
+                "modalDeployRetry": "Retry",
+                "modalDeployDismiss": "Close"
             },
             "common": {
                 "enterInstructions": "Enter instructions...",

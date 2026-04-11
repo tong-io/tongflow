@@ -445,45 +445,8 @@ const ActionItem = ({ buttons }: { buttons: ButtonConfig[] }) => {
     const t = useTranslations("Workspace.smartIsland");
 
     const sortedButtons = useMemo(() => {
-        const base = sortButtonsByCategory(buttons, category);
-
-        // Desktop-only: one-click deploy Modal workers (embedded Python + offline wheelhouse).
-        if (typeof window !== "undefined" && window.openflowDesktop) {
-            base.push({
-                text: t("deployModalWorkers"),
-                id: "deploy-modal-workers",
-                onClick: async () => {
-                    const api = window.openflowDesktop;
-                    if (!api) {
-                        toast.error(t("deployModalUnsupported"));
-                        return;
-                    }
-
-                    const off = api.onModalDeployLog((line) => {
-                        console.log("[modal deploy]", line);
-                    });
-
-                    const toastId = toast.loading(t("deployModalRunning"));
-                    try {
-                        const res = await api.deployModalWorkers();
-                        if (!res.ok) throw new Error(res.error);
-                        toast.success(t("deployModalSuccess"), { id: toastId });
-                    } catch (err) {
-                        const detail =
-                            err instanceof Error ? err.message : String(err);
-                        toast.error(`${t("deployModalFailed")}\n${detail}`, {
-                            id: toastId,
-                            duration: 8000,
-                        });
-                    } finally {
-                        off();
-                    }
-                },
-            });
-        }
-
-        return base;
-    }, [buttons, category, t]);
+        return sortButtonsByCategory(buttons, category);
+    }, [buttons, category]);
 
     return (
         <ActionContainer>

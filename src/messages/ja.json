@@ -96,20 +96,6 @@
             "executeMode": "実行モード",
             "upgradeRequired": "実行モードを解除するにはアップグレードが必要です"
         },
-        "workspaceNav": {
-            "connectModal": "Modal に接続",
-            "title": "Modal に接続",
-            "desc": "ブラウザを開いて Modal の認証を行います。完了後、OpenFlow が自動的に完了を検知します。",
-            "profileLabel": "任意：profile/workspace",
-            "profilePlaceholder": "例：caotong598",
-            "statusStarting": "Modal セットアップを開始しています...",
-            "statusAuth": "ブラウザを開きました。開かない場合は次へ：\n{url}",
-            "statusAlreadyConnected": "接続済みです。\n設定：{path}",
-            "statusDone": "接続しました。\n設定：{path}",
-            "statusFailed": "接続に失敗しました。\n{error}",
-            "logsPlaceholder": "（出力を待っています...）",
-            "close": "閉じる"
-        },
         "smartIsland": {
             "category": {
                 "digitalHuman": "デジタルヒューマン",
@@ -282,7 +268,12 @@
                 "stopVoice": "音声入力を停止",
                 "editText": "テキストを編集",
                 "select": "選択",
-                "selected": "選択済み"
+                "selected": "選択済み",
+                "modalNotDeployedTitle": "Modal が未デプロイです",
+                "modalNotDeployedDescription": "機能「{feature}」には Modal App「{app}」が必要です。事前に準備とデプロイを行ってください。",
+                "modalDeployHint": "1) MODAL_TOKEN_ID / MODAL_TOKEN_SECRET を設定。2) 必要なら pnpm desktop:python:prepare と pnpm desktop:wheelhouse:prepare。3) リポジトリ直下で modal/cpu・modal/gpu の該当スクリプトを modal deploy。完了後「再試行」。",
+                "modalDeployRetry": "再試行",
+                "modalDeployDismiss": "閉じる"
             },
             "common": {
                 "enterInstructions": "指示を入力してください...",

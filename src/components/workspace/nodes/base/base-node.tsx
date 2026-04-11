@@ -13,6 +13,16 @@ import { useNodeId, useReactFlow, useStore, useStoreApi } from "@xyflow/react";
 
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { useFeature } from "@/hooks/use-features";
 import {
     useTaskStore,
@@ -463,8 +473,13 @@ export const BaseNode = forwardRef<HTMLDivElement, BaseNodeProps>(
             };
         }, [nodeId, storeApi, getValueByPath, edgeMatchesTargetHandle]);
 
-        // 新版执行函数
-        const executeNew = useCallback(async () => {
+        const [modalDeployGate, setModalDeployGate] = useState<{
+            open: boolean;
+            appName?: string;
+            featureLabel?: string;
+        }>({ open: false });
+
+        const performExecute = useCallback(async () => {
             console.log(
                 `[BaseNode] executeNew called for node ${nodeId} , feature ${feature}, workflowConfig:`,
                 workflowConfig,
@@ -472,7 +487,6 @@ export const BaseNode = forwardRef<HTMLDivElement, BaseNodeProps>(
             if (!nodeId || !feature || !workflowConfig?.getPrompts) return;
             console.log(`[BaseNode] Executing node ${nodeId}...`);
 
-            // 创建上下文并传递给 getPrompts，让它可以实时获取上游数据
             const context = getPromptsContext();
             const prompts = workflowConfig.getPrompts(context);
 
@@ -482,7 +496,6 @@ export const BaseNode = forwardRef<HTMLDivElement, BaseNodeProps>(
             );
             if (prompts.length === 0) return;
 
-            // 保存执行配置到节点数据，便于导出工作流时持久化
             updateNodeData(nodeId, {
                 feature,
                 prompt: prompts.length === 1 ? prompts[0] : prompts,
@@ -512,6 +525,58 @@ export const BaseNode = forwardRef<HTMLDivElement, BaseNodeProps>(
             createBatchTasks,
             updateNodeData,
             getPromptsContext,
+        ]);
+
+        const executeNew = useCallback(async () => {
+            if (!nodeId || !feature || !workflowConfig?.getPrompts) return;
+
+            const ft = featureInfo?.type;
+            const fn = featureInfo?.function;
+            if (ft && fn) {
+                try {
+                    const res = await fetch("/api/modal/check", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        credentials: "same-origin",
+                        body: JSON.stringify({ type: ft, function: fn }),
+                    });
+                    if (!res.ok) {
+                        console.warn(
+                            "[BaseNode] Modal check HTTP",
+                            res.status,
+                        );
+                    } else {
+                        const data = (await res.json()) as {
+                            modal?: boolean;
+                            deployed?: boolean;
+                            appName?: string;
+                        };
+                        if (
+                            data.modal === true &&
+                            data.deployed === false &&
+                            data.appName
+                        ) {
+                            setModalDeployGate({
+                                open: true,
+                                appName: data.appName,
+                                featureLabel: feature,
+                            });
+                            return;
+                        }
+                    }
+                } catch (e) {
+                    console.warn("[BaseNode] Modal deploy check failed:", e);
+                }
+            }
+
+            await performExecute();
+        }, [
+            nodeId,
+            feature,
+            workflowConfig,
+            featureInfo?.type,
+            featureInfo?.function,
+            performExecute,
         ]);
 
         // Get current node's comment from store
@@ -823,6 +888,50 @@ export const BaseNode = forwardRef<HTMLDivElement, BaseNodeProps>(
                         )}
                     </div>
                 </div>
+
+                <AlertDialog
+                    open={modalDeployGate.open}
+                    onOpenChange={(open) => {
+                        if (!open) setModalDeployGate({ open: false });
+                    }}
+                >
+                    <AlertDialogContent>
+                        <AlertDialogHeader>
+                            <AlertDialogTitle>
+                                {t("modalNotDeployedTitle")}
+                            </AlertDialogTitle>
+                            <AlertDialogDescription className="space-y-3 text-left">
+                                <span className="block">
+                                    {t("modalNotDeployedDescription", {
+                                        feature:
+                                            modalDeployGate.featureLabel ??
+                                            "",
+                                        app: modalDeployGate.appName ?? "",
+                                    })}
+                                </span>
+                                <span className="block whitespace-pre-wrap text-xs leading-relaxed">
+                                    {t("modalDeployHint")}
+                                </span>
+                            </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                            <AlertDialogCancel>
+                                {t("modalDeployDismiss")}
+                            </AlertDialogCancel>
+                            <AlertDialogAction
+                                type="button"
+                                onClick={() => {
+                                    setModalDeployGate({ open: false });
+                                    setTimeout(() => {
+                                        void executeNew();
+                                    }, 0);
+                                }}
+                            >
+                                {t("modalDeployRetry")}
+                            </AlertDialogAction>
+                        </AlertDialogFooter>
+                    </AlertDialogContent>
+                </AlertDialog>
             </div>
         );
     },

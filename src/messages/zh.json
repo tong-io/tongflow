@@ -96,20 +96,6 @@
             "executeMode": "执行模式",
             "upgradeRequired": "升级订阅以解锁执行模式"
         },
-        "workspaceNav": {
-            "connectModal": "连接 Modal",
-            "title": "连接 Modal",
-            "desc": "将会打开浏览器完成 Modal 授权。授权完成后，OpenFlow 会自动检测并提示结果。",
-            "profileLabel": "可选：profile/workspace",
-            "profilePlaceholder": "例如 caotong598",
-            "statusStarting": "正在启动 Modal 授权...",
-            "statusAuth": "已打开浏览器。如未自动打开，请访问：\n{url}",
-            "statusAlreadyConnected": "已连接。\n配置文件：{path}",
-            "statusDone": "连接成功。\n配置文件：{path}",
-            "statusFailed": "连接失败。\n{error}",
-            "logsPlaceholder": "（等待输出...）",
-            "close": "关闭"
-        },
         "smartIsland": {
             "category": {
                 "digitalHuman": "数字人",
@@ -283,7 +269,12 @@
                 "stopVoice": "停止语音输入",
                 "editText": "编辑文本",
                 "select": "选择",
-                "selected": "已选"
+                "selected": "已选",
+                "modalNotDeployedTitle": "未检测到 Modal 部署",
+                "modalNotDeployedDescription": "功能「{feature}」需要 Modal App「{app}」。请先在终端完成准备与部署后再执行。",
+                "modalDeployHint": "1) 配置 MODAL_TOKEN_ID / MODAL_TOKEN_SECRET；2) 本仓库可运行 pnpm desktop:python:prepare 与 pnpm desktop:wheelhouse:prepare 使用便携 Python；3) 在项目根目录执行 modal deploy modal/cpu 与 modal/gpu 下对应脚本（或一键部署全部 .py）。部署完成后点「重试」。",
+                "modalDeployRetry": "重试",
+                "modalDeployDismiss": "关闭"
             },
             "common": {
                 "enterInstructions": "请输入指令...",

@@ -30,3 +30,6 @@ electron-out/
 
 # desktop python/wheels (generated during release builds)
 wheelhouse/
+
+# Next.js server: offline modal venv (bundled python + wheelhouse)
+.openflow-modal-venv/

@@ -165,6 +165,18 @@ function createLtxFirstLastHandler(): TaskHandler {
             const buf = toBuffer(raw);
             const fileKey = await saveFile(buf, "mp4", task.taskId);
             return { success: true, file_key: fileKey, file_keys: [fileKey] };
+        } catch (e) {
+            const msg = e instanceof Error ? e.message : String(e);
+            if (
+                msg.includes("end_image") &&
+                msg.includes("unexpected keyword argument")
+            ) {
+                throw new Error(
+                    "Modal ltx-video is out of date: redeploy modal/gpu/ltx.py (first/last frame needs Inference.generate with end_image). " +
+                        msg,
+                );
+            }
+            throw e;
         } finally {
             signal.removeEventListener("abort", onAbort);
         }
