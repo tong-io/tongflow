@@ -96,6 +96,20 @@
             "executeMode": "执行模式",
             "upgradeRequired": "升级订阅以解锁执行模式"
         },
+        "workspaceNav": {
+            "connectModal": "连接 Modal",
+            "title": "连接 Modal",
+            "desc": "将会打开浏览器完成 Modal 授权。授权完成后，OpenFlow 会自动检测并提示结果。",
+            "profileLabel": "可选：profile/workspace",
+            "profilePlaceholder": "例如 caotong598",
+            "statusStarting": "正在启动 Modal 授权...",
+            "statusAuth": "已打开浏览器。如未自动打开，请访问：\n{url}",
+            "statusAlreadyConnected": "已连接。\n配置文件：{path}",
+            "statusDone": "连接成功。\n配置文件：{path}",
+            "statusFailed": "连接失败。\n{error}",
+            "logsPlaceholder": "（等待输出...）",
+            "close": "关闭"
+        },
         "smartIsland": {
             "category": {
                 "digitalHuman": "数字人",

@@ -2,7 +2,7 @@ import modal
 
 REPO_URL = "https://github.com/ACE-Step/ACE-Step-1.5.git"
 REPO_DIR = "/app/ACE-Step-1.5"
-DIT_REPO_ID = "ACE-Step/Ace-Step1.5"
+DIT_REPO_ID = "ACE-Step/acestep-v15-xl-base"
 DIT_MODEL_DIR = f"/models/{DIT_REPO_ID}"
 LM_REPO_ID = "ACE-Step/acestep-5Hz-lm-4B"
 LM_MODEL_DIR = f"/models/{LM_REPO_ID}"
@@ -54,7 +54,7 @@ class Inference:
         self.dit_handler = AceStepHandler()
         self.dit_handler.initialize_service(
             project_root=REPO_DIR,
-            config_path="acestep-v15-turbo",
+            config_path="acestep-v15-xl-base",
             device="cuda",
         )
         self.llm_handler = LLMHandler()

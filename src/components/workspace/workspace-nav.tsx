@@ -6,6 +6,17 @@
  */
 
 import { Button } from "@/components/ui/button";
+import {
+    Dialog,
+    DialogContent,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { useTranslations } from "next-intl";
+import { useEffect, useMemo, useState } from "react";
+import { Link2, Loader2 } from "lucide-react";
 
 // Discord SVG Icon
 const DiscordIcon = ({ className }: { className?: string }) => (
@@ -15,8 +26,141 @@ const DiscordIcon = ({ className }: { className?: string }) => (
 );
 
 export function WorkspaceNav() {
+    const t = useTranslations("Workspace.workspaceNav");
+    const isDesktop = typeof window !== "undefined" && !!window.openflowDesktop;
+
+    const [open, setOpen] = useState(false);
+    const [profile, setProfile] = useState("");
+    const [running, setRunning] = useState(false);
+    const [status, setStatus] = useState<string | null>(null);
+    const [logs, setLogs] = useState<string[]>([]);
+
+    const canStart = isDesktop && !running;
+
+    const trimmedProfile = useMemo(() => {
+        const p = profile.trim();
+        return p.length ? p : null;
+    }, [profile]);
+
+    useEffect(() => {
+        if (!isDesktop) return;
+        const api = window.openflowDesktop;
+        if (!api) return;
+        return api.onModalSetupEvent((evt) => {
+            const e = evt as
+                | { type: "starting" }
+                | { type: "already_configured"; path: string }
+                | { type: "auth_url"; url: string }
+                | { type: "log"; line: string }
+                | { type: "done"; path: string };
+
+            if (e.type === "starting") {
+                setRunning(true);
+                setStatus(t("statusStarting"));
+                setLogs([]);
+            } else if (e.type === "already_configured") {
+                setRunning(false);
+                setStatus(t("statusAlreadyConnected", { path: e.path }));
+            } else if (e.type === "auth_url") {
+                setStatus(t("statusAuth", { url: e.url }));
+            } else if (e.type === "log") {
+                setLogs((prev) => {
+                    const next = [...prev, e.line];
+                    return next.length > 300 ? next.slice(next.length - 300) : next;
+                });
+            } else if (e.type === "done") {
+                setRunning(false);
+                setStatus(t("statusDone", { path: e.path }));
+            }
+        });
+    }, [isDesktop, t]);
+
+    async function start() {
+        const api = window.openflowDesktop;
+        if (!api) return;
+        setOpen(true);
+        setRunning(true);
+        setStatus(t("statusStarting"));
+        setLogs([]);
+
+        const res = await api.setupModal({ profile: trimmedProfile });
+        if (!res.ok) {
+            setRunning(false);
+            setStatus(t("statusFailed", { error: res.error }));
+        }
+    }
+
     return (
         <div className="flex items-center gap-2">
+            {isDesktop ? (
+                <>
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={start}
+                        disabled={!canStart}
+                        title={t("connectModal")}
+                        className="h-10 w-10 rounded-xl bg-white border border-gray-100 hover:bg-gray-50 text-gray-500 hover:text-gray-900 dark:bg-zinc-800 dark:border-zinc-700 dark:text-gray-400 dark:hover:text-white dark:hover:bg-zinc-700 transition-all duration-200"
+                    >
+                        {running ? (
+                            <Loader2 className="h-5 w-5 animate-spin" />
+                        ) : (
+                            <Link2 className="h-5 w-5" />
+                        )}
+                    </Button>
+
+                    <Dialog open={open} onOpenChange={setOpen}>
+                        <DialogContent aria-describedby={undefined}>
+                            <DialogHeader>
+                                <DialogTitle>{t("title")}</DialogTitle>
+                            </DialogHeader>
+
+                            <div className="space-y-3">
+                                <div className="text-sm text-muted-foreground">
+                                    {t("desc")}
+                                </div>
+
+                                <div className="space-y-2">
+                                    <div className="text-xs text-muted-foreground">
+                                        {t("profileLabel")}
+                                    </div>
+                                    <Input
+                                        value={profile}
+                                        onChange={(e) => setProfile(e.target.value)}
+                                        placeholder={t("profilePlaceholder")}
+                                        disabled={running}
+                                    />
+                                </div>
+
+                                {status ? (
+                                    <div className="text-sm whitespace-pre-wrap">
+                                        {status}
+                                    </div>
+                                ) : null}
+
+                                <div className="h-40 w-full rounded-md border p-3 overflow-auto">
+                                    <pre className="text-xs leading-5 whitespace-pre-wrap">
+                                        {logs.length
+                                            ? logs.join("\n")
+                                            : t("logsPlaceholder")}
+                                    </pre>
+                                </div>
+                            </div>
+
+                            <DialogFooter className="mt-2">
+                                <Button
+                                    variant="secondary"
+                                    onClick={() => setOpen(false)}
+                                    disabled={running}
+                                >
+                                    {t("close")}
+                                </Button>
+                            </DialogFooter>
+                        </DialogContent>
+                    </Dialog>
+                </>
+            ) : null}
+
             <Button
                 variant="ghost"
                 size="icon"

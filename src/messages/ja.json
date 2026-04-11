@@ -96,6 +96,20 @@
             "executeMode": "実行モード",
             "upgradeRequired": "実行モードを解除するにはアップグレードが必要です"
         },
+        "workspaceNav": {
+            "connectModal": "Modal に接続",
+            "title": "Modal に接続",
+            "desc": "ブラウザを開いて Modal の認証を行います。完了後、OpenFlow が自動的に完了を検知します。",
+            "profileLabel": "任意：profile/workspace",
+            "profilePlaceholder": "例：caotong598",
+            "statusStarting": "Modal セットアップを開始しています...",
+            "statusAuth": "ブラウザを開きました。開かない場合は次へ：\n{url}",
+            "statusAlreadyConnected": "接続済みです。\n設定：{path}",
+            "statusDone": "接続しました。\n設定：{path}",
+            "statusFailed": "接続に失敗しました。\n{error}",
+            "logsPlaceholder": "（出力を待っています...）",
+            "close": "閉じる"
+        },
         "smartIsland": {
             "category": {
                 "digitalHuman": "デジタルヒューマン",

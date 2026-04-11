@@ -1,0 +1,18 @@
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      NODE_ENV: production
+      PORT: "3000"
+    env_file:
+      - .env
+    volumes:
+      - openflow_data:/app/data
+    restart: unless-stopped
+
+volumes:
+  openflow_data:

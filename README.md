@@ -80,7 +80,7 @@
 | -------------------- | ---------------- | ----------------------------------- | -------------------------------------------- |
 | Text → Speech（TTS）   | `text_to_speech` | （见 Modal handlers：`qwen3tts-t2s` 等） | Modal GPU：Qwen3 TTS（`modal/gpu/qwen3tts.py`） |
 | Speech → Text（ASR）   | `speech_reco`    | （见 `transcribe` / 相关 handlers）      | Modal GPU：Qwen3 ASR（`modal/gpu/qwen3asr.py`） |
-| Text → Music         | `gen_music`      | `gpu/ace-step`                      | Modal GPU：ACE-Step（`modal/gpu/ace_step.py`）  |
+| Text → Music         | `gen_music`      | `gpu/ace-step`                      | Modal GPU：ACE-Step（默认 DiT：`acestep-v15-xl-base`；见 `modal/gpu/ace_step.py`）  |
 | Generate Music（音乐生成） | `generate_music` | （节点侧 feature；以注册表为准）                | 取决于 feature 映射                               |
 
 
@@ -105,26 +105,41 @@
 
 ## 本地运行（Quickstart）
 
-### 依赖
+### 三种启动方式
 
-- Node.js（建议 Node 20+）
-- pnpm（建议）或 npm
+#### 1) 直接下载 Release 桌面版（推荐给普通用户）
 
-### 安装
+- 到 GitHub 的 Releases 页面下载对应系统的安装包（macOS / Windows）。
+- 首次使用仍需要你在应用内/环境变量里配置 Modal/OpenRouter/Gemini 等 API key/token（见下方“环境变量”）。
+
+#### 2) Docker Compose 一键启动（推荐给自托管/部署）
+
+仓库根目录已提供 `compose.yaml`：
+
+```bash
+docker compose up --build
+```
+
+启动后访问 `http://localhost:3000`（会进入 `/workspace`）。
+
+> 数据会持久化在 Docker volume（包含 SQLite：`data/openflow.db` 与上传文件）。
+
+#### 3) 本地开发启动（pnpm dev）
+
+依赖：Node.js（建议 Node 20+）与 pnpm。
 
 ```bash
 pnpm install
+pnpm dev
 ```
 
-### 配置环境变量
+启动后访问 `http://localhost:3000`（会进入 `/workspace`）。
 
-复制 `.env.example` 到 `.env`（不要提交 `.env`）。
+### 环境变量（Modal / 各类模型提供商）
 
-```bash
-cp .env.example .env
-```
+本项目会调用外部服务（例如 Modal / OpenRouter / Gemini / DeepSeek / OpenAI）。你可以用 `.env` 来配置。
 
-常用变量（见 `.env.example`）：
+常用变量（以 `.env` 为准）：
 
 - `MODAL_TOKEN_ID` / `MODAL_TOKEN_SECRET`：Modal worker 调用
 - `OPENROUTER_API_KEY` / `OPENROUTER_FREE_MODEL`：OpenRouter LLM
@@ -134,13 +149,11 @@ cp .env.example .env
 - `NEXT_PUBLIC_TASK_API_URL`：可选，把任务 wait/stop 指向外部任务服务
 - `NEXT_PUBLIC_FILE_BASE_URL`：可选，文件存储的 base URL
 
-### 启动开发环境
+如果你要做 Modal 授权（会把 token 写入 `~/.modal.toml`）：
 
 ```bash
-pnpm dev
+pnpm modal:setup
 ```
-
-打开后会自动跳转到 `/workspace`。
 
 ## 桌面版（Electron：macOS + Windows）
 

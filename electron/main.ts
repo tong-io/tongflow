@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain, dialog } from "electron";
+import { app, BrowserWindow, ipcMain, dialog, shell } from "electron";
 import path from "node:path";
 import { spawn, type ChildProcess } from "node:child_process";
 import net from "node:net";
@@ -302,6 +302,7 @@ function startNextServer(port: number): ChildProcess {
 
 let mainWindow: BrowserWindow | null = null;
 let nextProcess: ChildProcess | null = null;
+let modalSetupRunning = false;
 
 app.on("second-instance", () => {
     // Someone tried to run a second instance, focus existing window.
@@ -455,4 +456,90 @@ ipcMain.handle("modal:deploy", async () => {
     if (!mainWindow) throw new Error("Window not ready");
     await deployModalWorkers();
 });
+
+function modalTomlPath(): string {
+    // modal CLI writes here on mac/linux; on windows it should still be under user profile.
+    return path.join(app.getPath("home"), ".modal.toml");
+}
+
+function parseTokenFlowUrl(text: string): string | null {
+    const m = text.match(/https:\/\/modal\.com\/token-flow\/[A-Za-z0-9-_]+/);
+    return m?.[0] ?? null;
+}
+
+ipcMain.handle(
+    "modal:setup",
+    async (_evt, opts?: { profile?: string | null }) => {
+        if (!mainWindow) throw new Error("Window not ready");
+        if (modalSetupRunning) {
+            throw new Error("Modal setup is already running");
+        }
+        modalSetupRunning = true;
+
+        const send = (payload: unknown) => {
+            mainWindow?.webContents.send("modal:setup:event", payload);
+        };
+
+        try {
+            send({ type: "starting" });
+
+            const toml = modalTomlPath();
+            if (fs.existsSync(toml)) {
+                send({ type: "already_configured", path: toml });
+                return;
+            }
+
+            const venvPython = await ensureModalInstalledOffline();
+
+            const args = ["-m", "modal", "setup"];
+            const profile = opts?.profile?.trim();
+            if (profile) args.push("--profile", profile);
+
+            await new Promise<void>((resolve, reject) => {
+                const child = spawn(venvPython, args, {
+                    env: process.env,
+                    windowsHide: true,
+                    stdio: ["ignore", "pipe", "pipe"],
+                });
+
+                let urlOpened = false;
+                const forward = (prefix: string, buf: Buffer) => {
+                    const text = String(buf);
+                    for (const line of text.split(/\r?\n/)) {
+                        if (!line.trim()) continue;
+                        send({ type: "log", line: `${prefix}${line}` });
+                    }
+
+                    if (!urlOpened) {
+                        const url = parseTokenFlowUrl(text);
+                        if (url) {
+                            urlOpened = true;
+                            void shell.openExternal(url);
+                            send({ type: "auth_url", url });
+                        }
+                    }
+                };
+
+                child.stdout?.on("data", (b: Buffer) => forward("", b));
+                child.stderr?.on("data", (b: Buffer) => forward("[err] ", b));
+
+                child.on("error", (e) => reject(e));
+                child.on("exit", (code) => {
+                    if (code === 0) resolve();
+                    else reject(new Error(`modal setup failed (${code ?? "unknown"})`));
+                });
+            });
+
+            if (!fs.existsSync(toml)) {
+                throw new Error(
+                    `Modal setup completed but config not found at ${toml}`,
+                );
+            }
+
+            send({ type: "done", path: toml });
+        } finally {
+            modalSetupRunning = false;
+        }
+    },
+);
 

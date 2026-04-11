@@ -96,6 +96,20 @@
             "executeMode": "Execute Mode",
             "upgradeRequired": "Upgrade to unlock Execute Mode"
         },
+        "workspaceNav": {
+            "connectModal": "Connect Modal",
+            "title": "Connect Modal",
+            "desc": "This opens your browser to authenticate with Modal. After you finish, OpenFlow will detect completion automatically.",
+            "profileLabel": "Optional profile/workspace",
+            "profilePlaceholder": "e.g. caotong598",
+            "statusStarting": "Starting Modal setup...",
+            "statusAuth": "Browser opened. If nothing opens, visit:\n{url}",
+            "statusAlreadyConnected": "Already connected.\nConfig: {path}",
+            "statusDone": "Connected.\nConfig: {path}",
+            "statusFailed": "Failed to connect.\n{error}",
+            "logsPlaceholder": "(waiting for output...)",
+            "close": "Close"
+        },
         "smartIsland": {
             "category": {
                 "digitalHuman": "Digital Human",
