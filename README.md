@@ -3,21 +3,23 @@
 
   <h1>TongFlow: A Multimodal Generative AI Studio</h1>
 
-  <!-- CI / Discord / Releases are placeholders; replace links when wired up -->
+  <!-- CI / Releases are placeholders; replace links when wired up -->
   <p>
     <a href="https://github.com/tong-io/openflow/stargazers"><img src="https://img.shields.io/github/stars/tong-io/openflow?style=flat&logo=github" alt="GitHub stars" /></a>
     <a href="https://github.com/tong-io/openflow/blob/main/LICENSE"><img src="https://img.shields.io/badge/License-AGPL--3.0-blue.svg" alt="License" /></a>
     <a href="#"><img src="https://img.shields.io/badge/CI-TBD-lightgrey" alt="CI TBD" /></a>
-    <a href="#"><img src="https://img.shields.io/badge/Discord-TBD-lightgrey?logo=discord&logoColor=white" alt="Discord TBD" /></a>
+    <a href="https://discord.gg/K7V8az94Zf"><img src="https://img.shields.io/badge/Discord-join-5865F2?logo=discord&logoColor=white" alt="Discord" /></a>
     <a href="#"><img src="https://img.shields.io/badge/Releases-TBD-lightgrey?logo=github" alt="Releases TBD" /></a>
   </p>
 </div>
 
 TongFlow is a **local-first** AI creative studio: on an infinite canvas, **add**, **transform**, and **combine** to build AIGC workflows end to end.
 
-We integrate [Modal](https://modal.com) by default; you get **$30/month FREE** for **GPU/CPU inference and computing** on hardware such as **H100**, **A100**, and **L40S**, so you can experiment with AI creation and content generation at no cost.
+<div align="center">
+  <img src="docs/assets/cover.png" alt="TongFlow" />
+</div>
 
-## If you like this project, a star on GitHub helps a lot. Thank you.
+I integrate [Modal](https://modal.com) by default; you get **$30/month FREE** for **GPU/CPU inference and computing** on hardware such as **H100**, **A100**, and **L40S**, so you can experiment with AI creation and content generation at no cost.
 
 ## Core ideas
 
@@ -27,7 +29,7 @@ We integrate [Modal](https://modal.com) by default; you get **$30/month FREE** f
 
 - **Simple mechanics**: no cryptic parameter panels and no manual node wiring; just **add**, **transform**, and **combine**. Arrange ideas freely.
 
-## Demo ideas (this is only a slice; stretch it with generative AI)
+## Demo Use Case
 
 - **Text → image → video**: generate images, then turn them into video.
 
@@ -38,6 +40,8 @@ We integrate [Modal](https://modal.com) by default; you get **$30/month FREE** f
 - **AI music**: music from a text prompt.
 
 - **AI shorts / comics**: stories or episodes from descriptions.
+
+With TongFlow, you can expand your imagination and stretch your ideas with generative AI, just have a try now!
 
 ## How To Use
 
@@ -185,26 +189,35 @@ pnpm modal:setup
 - **DeepSeek (API)**: some text orchestration / reasoning (requires `DEEPSEEK_API_KEY`)
 - **OpenAI (API)**: `openai-text` handler (default `OPENAI_CHAT_MODEL=gpt-4o-mini`)
 
-## Open-source roadmap
-
-We plan to open-source the full community edition once the project reaches a meaningful level of community interest (stars).
-
 ## Contact
 
-Join the community on **Discord** or **WeChat**.
+**For Community:** Join the community on **[Discord](https://discord.gg/K7V8az94Zf)** or scan the **WeChat group** QR code below.
 
-**Business:** business@tongflow.com. We’ll get back to you quickly.
+<div>
+  <img src="docs/assets/qr.png" alt="WeChat group QR code" width="180" />
+</div>
 
-- **Enterprise**: we can help deploy a private instance.
-- **Investors**: we’re happy to discuss a cloud offering.
-- **Model API providers / aggregators**: we can integrate your APIs.
-- **Open-model publishers**: we can prioritize integration so users can try your models sooner.
+
+**For Business:** Please contact to business@tongflow.com. I’ll get back to you.
+
+- **Open-source model publishers**: I can integrate your models so users can try them out smoothly.
+- **Enterprise**: I can help you deploy on your local GPU, build custom nodes, and more.
+- **API provider / router**: I can integrate your APIs.
+- **Investor**: I’m interested in partnering on tongflow.com, a cloud-hosted ai studio.
+
+## Open-Source
+
+I plan to go full open-source if the project reaches a meaningful level of community interest.
+
+If you like this project, a Star on GitHub helps a lot. Thank you.
+
+<div align="center">
+  <img src="docs/assets/star.gif" alt="Star on GitHub" />
+</div>
 
 ## License
 
-This project is licensed under **GNU Affero General Public License v3.0 (AGPL-3.0-only)**.
-
-- If you modify it and run it as a network service, you must offer users the corresponding source of your modified version (see AGPL section 13).
+This project is licensed under **AGPL-3.0**.
 
 ## Star History
 
