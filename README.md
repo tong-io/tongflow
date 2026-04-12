@@ -1,7 +1,7 @@
 <div align="center">
   <img src="docs/assets/logo.png" alt="TongFlow" width="320" />
 
-  <h1>TongFlow — A Multimodal Generative AI Creation Studio</h1>
+  <h1>TongFlow: A Multimodal Generative AI Studio</h1>
 
   <!-- CI / Discord / Releases are placeholders; replace links when wired up -->
   <p>
@@ -15,19 +15,19 @@
 
 TongFlow is a **local-first** AI creative studio: on an infinite canvas, **add**, **transform**, and **combine** to build AIGC workflows end to end.
 
-We integrate [Modal](https://modal.com) by default—you get **$30/month in free compute**, so you can experiment with AI creation and content generation at no cost.
+We integrate [Modal](https://modal.com) by default; you get **$30/month FREE** for **GPU/CPU inference and computing** on hardware such as **H100**, **A100**, and **L40S**, so you can experiment with AI creation and content generation at no cost.
 
-## If you like this project, a star on GitHub helps a lot—thank you.
+## If you like this project, a star on GitHub helps a lot. Thank you.
 
 ## Core ideas
 
-- **Any generative model fits the same abstraction**: every model can be thought of as a **modality transform**—e.g. LLMs are text→text, image models are text→image, music models are text→audio, and so on. TongFlow wraps each capability as a node.
+- **Any generative model fits the same abstraction**: every model can be thought of as a **modality transform** (e.g. LLMs are text→text, image models are text→image, music models are text→audio, and so on). TongFlow wraps each capability as a node.
 
 - **All modalities**: we support the modalities and formats people actually ship over the web.
 
-- **Simple mechanics**: no cryptic parameter panels and no manual node wiring—just **add**, **transform**, and **combine**. Arrange ideas freely.
+- **Simple mechanics**: no cryptic parameter panels and no manual node wiring; just **add**, **transform**, and **combine**. Arrange ideas freely.
 
-## Demo ideas (this is only a slice—stretch it with generative AI)
+## Demo ideas (this is only a slice; stretch it with generative AI)
 
 - **Text → image → video**: generate images, then turn them into video.
 
@@ -41,7 +41,7 @@ We integrate [Modal](https://modal.com) by default—you get **$30/month in free
 
 ## How To Use
 
-- Tutorial (Bilibili): [link placeholder](https://www.bilibili.com/video/BV1xxxxxxxxxx) — replace with the real video URL when published.
+- Tutorial (Bilibili): [link placeholder](https://www.bilibili.com/video/BV1xxxxxxxxxx). Replace with the real video URL when published.
 
 ## Run locally (quickstart)
 
@@ -81,13 +81,13 @@ The app calls external services (Modal, OpenRouter, Gemini, DeepSeek, OpenAI, et
 
 Common variables (see `.env` for the source of truth):
 
-- `MODAL_TOKEN_ID` / `MODAL_TOKEN_SECRET` — Modal workers
-- `OPENROUTER_API_KEY` / `OPENROUTER_FREE_MODEL` — OpenRouter LLM
-- `GEMINI_API_KEY` / `GOOGLE_API_KEY` — Gemini
-- `DEEPSEEK_API_KEY` — DeepSeek
-- `OPENAI_API_KEY` / `OPENAI_CHAT_MODEL` — OpenAI
-- `NEXT_PUBLIC_TASK_API_URL` — optional; point task wait/stop at an external task service
-- `NEXT_PUBLIC_FILE_BASE_URL` — optional; base URL for file storage
+- `MODAL_TOKEN_ID` / `MODAL_TOKEN_SECRET`: Modal workers
+- `OPENROUTER_API_KEY` / `OPENROUTER_FREE_MODEL`: OpenRouter LLM
+- `GEMINI_API_KEY` / `GOOGLE_API_KEY`: Gemini
+- `DEEPSEEK_API_KEY`: DeepSeek
+- `OPENAI_API_KEY` / `OPENAI_CHAT_MODEL`: OpenAI
+- `NEXT_PUBLIC_TASK_API_URL`: optional; point task wait/stop at an external task service
+- `NEXT_PUBLIC_FILE_BASE_URL`: optional; base URL for file storage
 
 To authorize Modal (writes tokens to `~/.modal.toml`):
 
@@ -141,7 +141,7 @@ pnpm modal:setup
 - ✅ **Speech synthesis**: text-to-speech, with optional reference voice.
 - ✅ **Speech recognition**: transcribe speech from audio or video.
 - ⬜ **Noise reduction**
-- ⬜ **Multi-track / vocal–accompaniment separation**
+- ⬜ **Multi-track / vocal-accompaniment separation**
 - ⬜ **Speaker diarization**
 - ⬜ **Voice / timbre replacement** (reference-driven)
 
@@ -149,8 +149,8 @@ pnpm modal:setup
 
 - ✅ **Image fusion**: blend or edit multiple references into one image.
 - ✅ **Lip sync**: audio + video → video (lip-sync and related variants).
-- ✅ **Character swap**: video + reference (scene blend / character replacement)—Animate Mix–style generation.
-- ✅ **Motion transfer**: video + reference (motion / retarget)—Animate Move–style generation.
+- ✅ **Character swap**: video + reference (scene blend / character replacement), Animate Mix-style generation.
+- ✅ **Motion transfer**: video + reference (motion / retarget), Animate Move-style generation.
 
 ### Other
 
@@ -171,15 +171,15 @@ pnpm modal:setup
 
 ## Backend & model providers
 
-- **FFmpeg** — transcoding, muxing, and media pipelines
-- **Scene detection** — shot boundaries for splitting clips
-- **Z-Image** — text-to-image
-- **FLUX.2 Klein 9B** — multi-reference fusion and image editing
-- **LTX-2** — text/image-to-video
-- **SeedVR2** — image and video super-resolution
-- **Gemma 4** — multimodal text (image/video understanding)
-- **Qwen3** — speech recognition and text-to-speech
-- **ACE-Step** — text-to-music
+- **FFmpeg**: transcoding, muxing, and media pipelines
+- **Scene detection**: shot boundaries for splitting clips
+- **Z-Image**: text-to-image
+- **FLUX.2 Klein 9B**: multi-reference fusion and image editing
+- **LTX-2**: text/image-to-video
+- **SeedVR2**: image and video super-resolution
+- **Gemma 4**: multimodal text (image/video understanding)
+- **Qwen3**: speech recognition and text-to-speech
+- **ACE-Step**: text-to-music
 - **OpenRouter (LLM routing)**: default free route/model for `gen_text` (override via `.env`)
 - **Google Gemini (API)**: some text / multimodal API calls (requires `GEMINI_API_KEY` or `GOOGLE_API_KEY`)
 - **DeepSeek (API)**: some text orchestration / reasoning (requires `DEEPSEEK_API_KEY`)
@@ -193,7 +193,7 @@ We plan to open-source the full community edition once the project reaches a mea
 
 Join the community on **Discord** or **WeChat**.
 
-**Business:** business@tongflow.com — we’ll get back to you quickly.
+**Business:** business@tongflow.com. We’ll get back to you quickly.
 
 - **Enterprise**: we can help deploy a private instance.
 - **Investors**: we’re happy to discuss a cloud offering.
