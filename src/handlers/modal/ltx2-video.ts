@@ -6,6 +6,7 @@
  * - ltx2-t2v: `generate` — prompt: { text, width, height, duration }
  * - ltx2-i2v: `generate` — prompt: { image, text, width, height, duration }
  * - ltx2-ii2v-first-last: 同上 `generate`，额外传 end_image（与 image 一起为首尾帧）
+ * - ltx2-a2v: `InferenceA2V.generate_a2v` — prompt: { audio, text, width, height, duration, image? }
  */
 
 import type { TaskData, TaskHandler } from "@/lib/task-runner";
@@ -16,6 +17,7 @@ import { fetchModalAssetBytes } from "./fetch-modal-asset";
 
 const APP_NAME = "ltx-video";
 const CLS_NAME = "Inference";
+const CLS_A2V_NAME = "InferenceA2V";
 const DEFAULT_FPS = 24;
 
 function toBuffer(raw: unknown): Buffer {
@@ -183,8 +185,73 @@ function createLtxFirstLastHandler(): TaskHandler {
     };
 }
 
+function createLtxA2vHandler(): TaskHandler {
+    return async (task: TaskData, signal: AbortSignal) => {
+        const p = task.prompt as Record<string, unknown>;
+        const text = pickText(p);
+        const audioUrl = typeof p.audio === "string" ? p.audio : "";
+        const width = pickNumber(p, "width", 1280);
+        const height = pickNumber(p, "height", 704);
+        const duration = pickNumber(p, "duration", 10);
+        const fps = pickNumber(p, "fps", DEFAULT_FPS);
+        const seed = Number.isFinite(Number((p as any).seed))
+            ? Number((p as any).seed)
+            : 42;
+        const numInferenceSteps = pickNumber(p, "num_inference_steps", 30);
+
+        if (!text) return { success: false, error: "Missing prompt text" };
+        if (!audioUrl)
+            return { success: false, error: "Missing audio url" };
+
+        const client = new ModalClient();
+        const cls = await client.cls.fromName(APP_NAME, CLS_A2V_NAME);
+        const instance = await cls.instance();
+        const generateA2v = instance.method("generate_a2v");
+
+        const args: Record<string, unknown> = {
+            prompt: text,
+            audio: await fetchModalAssetBytes(audioUrl),
+            width,
+            height,
+            seed,
+            frame_rate: fps,
+            num_frames: durationToFrames(duration, fps),
+            num_inference_steps: numInferenceSteps,
+        };
+
+        const imageUrl =
+            (typeof p.image === "string" && p.image) ||
+            (typeof (p as any).start_image === "string" && (p as any).start_image) ||
+            "";
+        if (imageUrl) {
+            args.image = await fetchModalAssetBytes(imageUrl);
+        }
+
+        const call = await generateA2v.spawn([], args);
+
+        const onAbort = () => {
+            call.cancel({}).catch(() => {});
+        };
+        if (signal.aborted) {
+            onAbort();
+            throw new Error("Task cancelled");
+        }
+        signal.addEventListener("abort", onAbort, { once: true });
+
+        try {
+            const raw = await call.get();
+            const buf = toBuffer(raw);
+            const fileKey = await saveFile(buf, "mp4", task.taskId);
+            return { success: true, file_key: fileKey, file_keys: [fileKey] };
+        } finally {
+            signal.removeEventListener("abort", onAbort);
+        }
+    };
+}
+
 export function registerLtx2VideoHandlers(): void {
     registerHandler("gpu", "ltx2-t2v", createLtxHandler("t2v"));
     registerHandler("gpu", "ltx2-i2v", createLtxHandler("i2v"));
     registerHandler("gpu", "ltx2-ii2v-first-last", createLtxFirstLastHandler());
+    registerHandler("gpu", "ltx2-a2v", createLtxA2vHandler());
 }

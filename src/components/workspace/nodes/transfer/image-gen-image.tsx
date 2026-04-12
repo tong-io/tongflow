@@ -5,7 +5,7 @@ import {
     useNodesData,
     type NodeProps,
 } from "@xyflow/react";
-import { memo, useMemo, useCallback } from "react";
+import { memo, useMemo } from "react";
 import { Sparkles, Atom } from "lucide-react";
 
 import { BaseNode } from "../base/base-node";
@@ -20,8 +20,15 @@ import {
 } from "@/utils/node-execution-config";
 import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import { Button } from "@/components/ui/button";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
 import useFlow from "@/hooks/use-flow";
+import { clampToAllowedModel } from "@/utils/node-model-feature";
 import { useTranslations } from "next-intl";
 
 // 工作流执行配置
@@ -53,27 +60,14 @@ const workflowConfig = {
 
 const ImageGenImageNode = ({ selected, data }: NodeProps) => {
     const t = useTranslations("Workspace.nodes");
-    const { ids = [], performanceMode = "eco" } = data as {
-        ids?: string[];
-        performanceMode?: "eco" | "pro";
-    };
+    const { ids = [] } = data as { ids?: string[]; feature?: string };
     const updates = useFlow((s) => s.updates);
     const id = useNodeId()!;
 
-    // 根据性能模式获取 feature 名称
-    const featureName =
-        performanceMode === "pro" ? "image_edit_pro" : "image_edit";
-
-    // 切换性能模式
-    const handleTogglePerformanceMode = useCallback(
-        (mode: "eco" | "pro") => {
-            updates(id, {
-                ...data,
-                performanceMode: mode,
-                feature: mode === "pro" ? "image_edit_pro" : "image_edit",
-            });
-        },
-        [id, data, updates],
+    const featureName = clampToAllowedModel(
+        (data as { feature?: string }).feature,
+        ["image_edit"],
+        "image_edit",
     );
 
     // 如果有 ids，从关联节点获取数据（组合模式）
@@ -147,42 +141,30 @@ const ImageGenImageNode = ({ selected, data }: NodeProps) => {
             }}
         >
             <div className="p-4 space-y-4">
-                {/* 性能模式选择 */}
+                {/* 模型选择 */}
                 <Card className="p-3">
                     <div className="space-y-2">
                         <Label className="text-sm font-medium text-muted-foreground">
-                            {t("imageEdit.performanceMode")}
+                            {t("common.modelSelect")}
                         </Label>
-                        <div className="flex gap-2">
-                            <Button
-                                variant={
-                                    performanceMode === "eco"
-                                        ? "default"
-                                        : "outline"
-                                }
+                        <Select
+                            value={featureName}
+                            onValueChange={(value) =>
+                                updates(id, { ...data, feature: value })
+                            }
+                        >
+                            <SelectTrigger
+                                className="w-full"
                                 size="sm"
-                                onClick={() =>
-                                    handleTogglePerformanceMode("eco")
-                                }
-                                className="flex-1"
                             >
-                                {t("imageEdit.ecoMode")}
-                            </Button>
-                            <Button
-                                variant={
-                                    performanceMode === "pro"
-                                        ? "default"
-                                        : "outline"
-                                }
-                                size="sm"
-                                onClick={() =>
-                                    handleTogglePerformanceMode("pro")
-                                }
-                                className="flex-1"
-                            >
-                                {t("imageEdit.proMode")}
-                            </Button>
-                        </div>
+                                <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="image_edit">
+                                    {t("common.models.imageEdit")}
+                                </SelectItem>
+                            </SelectContent>
+                        </Select>
                     </div>
                 </Card>
 

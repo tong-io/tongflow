@@ -23,7 +23,7 @@ import {
     type GetPromptsContext,
 } from "@/utils/node-execution-config";
 import { useTranslations, useLocale } from "next-intl";
-import { SpeakerVoiceRecorder } from "./text2voice";
+import { SpeakerVoiceRecorder } from "@/components/workspace/speaker-voice-recorder";
 import {
     crawledVoiceOptions,
     type VoiceLanguage,

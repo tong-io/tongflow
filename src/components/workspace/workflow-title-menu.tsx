@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import type { ChangeEvent } from "react";
 import toast from "react-hot-toast";
 import {
     ChevronDown,
@@ -8,17 +9,11 @@ import {
     FilePlus2,
     Trash2,
     Loader2,
-    Upload,
+    Download,
+    FileUp,
 } from "lucide-react";
 import { useFlow } from "@/hooks/use-flow";
 import { useShallow } from "zustand/react/shallow";
-import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuSeparator,
-    DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import {
     Dialog,
     DialogContent,
@@ -34,12 +29,20 @@ import { Textarea } from "@/components/ui/textarea";
 import {
     saveWorkflow,
     updateWorkflow,
-    publishWorkflow,
     SaveWorkflowRequest,
 } from "@/lib/api/workspace";
-import { exportWorkflow } from "@/utils/workflow-exporter";
+import {
+    exportWorkflow,
+    parseWorkflowImportJson,
+    type ParsedWorkflowImport,
+    WORKFLOW_IMPORT_NO_CANVAS,
+} from "@/utils/workflow-exporter";
 import { useTranslations } from "next-intl";
-import { cn } from "@/lib/utils";
+
+function safeWorkflowFileName(name: string): string {
+    const s = name.replace(/[/\\?%*:|"<>]/g, "_").trim();
+    return s || "workflow";
+}
 
 const selector = (state: any) => ({
     nodes: state.nodes,
@@ -47,7 +50,6 @@ const selector = (state: any) => ({
     workflowName: state.workflowName,
     workflowId: state.workflowId,
     workflowDescription: state.workflowDescription,
-    currentShareId: state.currentShareId,
     setWorkflowName: state.setWorkflowName,
     setWorkflowId: state.setWorkflowId,
     setWorkflowDescription: state.setWorkflowDescription,
@@ -63,7 +65,6 @@ export function WorkflowTitleMenu() {
         workflowName,
         workflowId,
         workflowDescription,
-        currentShareId,
         setWorkflowName,
         setWorkflowId,
         setWorkflowDescription,
@@ -74,7 +75,6 @@ export function WorkflowTitleMenu() {
 
     const t = useTranslations("Workspace.menu");
     const tIndex = useTranslations("Index");
-    const td = useTranslations("Workspace.dialog");
 
     const [isSaveDialogOpen, setIsSaveDialogOpen] = useState(false);
     const [isSaveAsMode, setIsSaveAsMode] = useState(false);
@@ -84,10 +84,7 @@ export function WorkflowTitleMenu() {
     );
     const [saving, setSaving] = useState(false);
 
-    // 发布相关状态
-    const [isPublishDialogOpen, setIsPublishDialogOpen] = useState(false);
-    const [publishDescription, setPublishDescription] = useState("");
-    const [publishing, setPublishing] = useState(false);
+    const importFileRef = useRef<HTMLInputElement>(null);
 
     // 下拉菜单悬停状态
     const [menuOpen, setMenuOpen] = useState(false);
@@ -193,59 +190,79 @@ export function WorkflowTitleMenu() {
         }
     };
 
-    // 打开发布对话框（三阶段检查）
-    const openPublishDialog = () => {
-        // 1. 检查工作流是否已保存
-        if (!workflowId) {
-            toast.error(t("saveFirst"));
-            // 自动打开保存对话框
-            setIsSaveAsMode(false);
-            setTempName(workflowName);
-            setTempDescription(workflowDescription || "");
-            setIsSaveDialogOpen(true);
-            return;
+    const handleExportJson = () => {
+        setMenuOpen(false);
+        try {
+            const executable = exportWorkflow(nodes, edges, {
+                name: workflowName,
+                description: workflowDescription || "",
+                includeOriginalFlow: true,
+            });
+            const text = JSON.stringify(executable, null, 2);
+            const blob = new Blob([text], {
+                type: "application/json;charset=utf-8",
+            });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = `${safeWorkflowFileName(workflowName)}.workflow.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+            toast.success(t("exportJsonSuccess"));
+        } catch (e) {
+            console.error(e);
+            toast.error(t("exportJsonFailed"));
         }
-
-        // 2. 封面检查由后端处理，前端直接打开发布对话框
-        // 如果没有封面，后端会返回错误，前端再提示用户
-        setPublishDescription(workflowDescription || "");
-        setIsPublishDialogOpen(true);
     };
 
-    // 发布工作流
-    const handlePublish = async () => {
-        if (!workflowId) return;
+    const openImportJsonPicker = () => {
+        setMenuOpen(false);
+        importFileRef.current?.click();
+    };
 
-        if (!publishDescription.trim()) {
-            toast.error(td("enterPublishDesc"));
-            return;
-        }
-
-        setPublishing(true);
+    const handleImportJsonFile = async (e: ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        e.target.value = "";
+        if (!file) return;
         try {
-            const result = await publishWorkflow({
-                workflowId: workflowId,
-                description: publishDescription,
-                // cover 不传，后端自动使用 workflow.cover（最新执行结果）
-            });
-
-            if (result.noChanges) {
-                toast.success(t("alreadyLatest"));
-            } else {
-                toast.success(
-                    result.isUpdate
-                        ? td("updatePublish")
-                        : td("publishWorkflow"),
-                );
+            const text = await file.text();
+            let parsed: unknown;
+            try {
+                parsed = JSON.parse(text);
+            } catch {
+                toast.error(t("importJsonInvalid"));
+                return;
             }
-            setCurrentShareId(result.shareId);
-            setIsPublishDialogOpen(false);
-            setPublishDescription("");
-        } catch (error) {
-            console.error("发布失败:", error);
-            toast.error(td("publishFailed"));
-        } finally {
-            setPublishing(false);
+            let result: ParsedWorkflowImport;
+            try {
+                result = parseWorkflowImportJson(parsed);
+            } catch (err) {
+                const msg = err instanceof Error ? err.message : "";
+                if (msg === WORKFLOW_IMPORT_NO_CANVAS) {
+                    toast.error(t("importJsonNoCanvas"));
+                } else {
+                    toast.error(t("importJsonInvalid"));
+                }
+                return;
+            }
+            setNodes(result.nodes);
+            setEdges(result.edges);
+            if (result.name?.trim()) {
+                setWorkflowName(result.name);
+            }
+            if (result.description !== undefined) {
+                setWorkflowDescription(result.description);
+            }
+            setWorkflowId(null);
+            setCurrentShareId(null);
+            toast.success(
+                t("importJsonSuccess", {
+                    nodes: result.nodes.length,
+                    edges: result.edges.length,
+                }),
+            );
+        } catch {
+            toast.error(t("importJsonReadFailed"));
         }
     };
 
@@ -289,11 +306,18 @@ export function WorkflowTitleMenu() {
                             {t("saveAs")}
                         </div>
                         <div
-                            onClick={openPublishDialog}
+                            onClick={handleExportJson}
                             className="flex items-center px-3 py-2 text-sm cursor-pointer hover:bg-gray-100 dark:hover:bg-zinc-800"
                         >
-                            <Upload className="mr-2 h-4 w-4" />
-                            {currentShareId ? t("upgrade") : t("publish")}
+                            <Download className="mr-2 h-4 w-4" />
+                            {t("exportJson")}
+                        </div>
+                        <div
+                            onClick={openImportJsonPicker}
+                            className="flex items-center px-3 py-2 text-sm cursor-pointer hover:bg-gray-100 dark:hover:bg-zinc-800"
+                        >
+                            <FileUp className="mr-2 h-4 w-4" />
+                            {t("importJson")}
                         </div>
                         <div className="h-px bg-gray-200 dark:bg-zinc-700 my-1" />
                         <div
@@ -368,70 +392,13 @@ export function WorkflowTitleMenu() {
                 </DialogContent>
             </Dialog>
 
-            {/* 发布对话框 */}
-            <Dialog
-                open={isPublishDialogOpen}
-                onOpenChange={(open) => {
-                    setIsPublishDialogOpen(open);
-                    if (!open) {
-                        setPublishDescription("");
-                    }
-                }}
-            >
-                <DialogContent
-                    className="max-w-md"
-                    aria-describedby={undefined}
-                >
-                    <DialogHeader>
-                        <DialogTitle>
-                            {currentShareId
-                                ? td("updatePublish")
-                                : td("publishWorkflow")}
-                            {workflowName ? ` - ${workflowName}` : ""}
-                        </DialogTitle>
-                    </DialogHeader>
-                    <div className="space-y-4 py-4">
-                        <p className="text-sm text-muted-foreground">
-                            {td("coverHint")}
-                        </p>
-                        {/* 发布描述 */}
-                        <div className="space-y-2">
-                            <Label htmlFor="publish-description">
-                                {td("publishDesc")}
-                            </Label>
-                            <Textarea
-                                id="publish-description"
-                                value={publishDescription}
-                                onChange={(e) =>
-                                    setPublishDescription(e.target.value)
-                                }
-                                placeholder={td("publishDescPlaceholder")}
-                                rows={3}
-                            />
-                        </div>
-                    </div>
-                    <DialogFooter>
-                        <DialogClose asChild>
-                            <Button variant="outline">{td("cancel")}</Button>
-                        </DialogClose>
-                        <Button onClick={handlePublish} disabled={publishing}>
-                            {publishing ? (
-                                <>
-                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                    {td("publishing")}
-                                </>
-                            ) : (
-                                <>
-                                    <Upload className="mr-2 h-4 w-4" />
-                                    {currentShareId
-                                        ? td("update")
-                                        : td("publish")}
-                                </>
-                            )}
-                        </Button>
-                    </DialogFooter>
-                </DialogContent>
-            </Dialog>
+            <input
+                ref={importFileRef}
+                type="file"
+                accept=".json,application/json"
+                className="hidden"
+                onChange={handleImportJsonFile}
+            />
         </>
     );
 }

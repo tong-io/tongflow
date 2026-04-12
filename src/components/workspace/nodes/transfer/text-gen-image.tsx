@@ -7,6 +7,13 @@ import useFlow from "@/hooks/use-flow";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 import {
     upstreamParam,
@@ -15,6 +22,7 @@ import {
     type GetPromptsContext,
 } from "@/utils/node-execution-config";
 import { useTranslations } from "next-intl";
+import { clampToAllowedModel } from "@/utils/node-model-feature";
 
 /**
  * TextGenImageNode 数据结构
@@ -39,8 +47,6 @@ interface TextGenImageNodeData extends Record<string, unknown> {
         width: number;
         height: number;
     };
-    /** 性能模式：'eco' 为性价比模式，'pro' 为高性能模式 */
-    performanceMode?: "eco" | "pro";
 }
 
 interface TextGenImageNodeProps extends NodeProps {
@@ -90,14 +96,16 @@ const workflowConfig = {
 
 const TextGenImageNode = ({ selected, data }: TextGenImageNodeProps) => {
     const t = useTranslations("Workspace.nodes");
-    const { texts = [], selectedAspectRatio, performanceMode = "eco" } = data;
+    const { texts = [], selectedAspectRatio } = data;
     const prompt = data.prompt ?? defaultPrompt;
     const id = useNodeId()!;
     const updates = useFlow((s) => s.updates);
 
-    // 根据性能模式获取 feature 名称
-    const featureName =
-        performanceMode === "pro" ? "image_gen_pro" : "image_gen";
+    const featureName = clampToAllowedModel(
+        data.feature,
+        ["image_gen"],
+        "image_gen",
+    );
 
     // 更新 prompt 参数（直接修改 data）
     const updatePrompt = useCallback(
@@ -120,18 +128,6 @@ const TextGenImageNode = ({ selected, data }: TextGenImageNodeProps) => {
             });
         },
         [id, data, prompt, updates],
-    );
-
-    // 切换性能模式
-    const handleTogglePerformanceMode = useCallback(
-        (mode: "eco" | "pro") => {
-            updates(id, {
-                ...data,
-                performanceMode: mode,
-                feature: mode === "pro" ? "image_gen_pro" : "image_gen",
-            });
-        },
-        [id, data, updates],
     );
 
     // 当前选中的宽高比（根据 prompt 中的宽高匹配）
@@ -172,42 +168,33 @@ const TextGenImageNode = ({ selected, data }: TextGenImageNodeProps) => {
             }}
         >
             <div className="p-4 space-y-4">
-                {/* 性能模式选择 */}
+                {/* 模型选择 */}
                 <Card className="p-3">
                     <div className="space-y-2">
                         <Label className="text-sm font-medium text-muted-foreground">
-                            {t("common.performanceMode")}
+                            {t("common.modelSelect")}
                         </Label>
-                        <div className="flex gap-2">
-                            <Button
-                                variant={
-                                    performanceMode === "eco"
-                                        ? "default"
-                                        : "outline"
-                                }
+                        <Select
+                            value={featureName}
+                            onValueChange={(value) =>
+                                updates(id, {
+                                    ...data,
+                                    feature: value,
+                                })
+                            }
+                        >
+                            <SelectTrigger
+                                className="w-full"
                                 size="sm"
-                                onClick={() =>
-                                    handleTogglePerformanceMode("eco")
-                                }
-                                className="flex-1"
                             >
-                                {t("common.ecoMode")}
-                            </Button>
-                            <Button
-                                variant={
-                                    performanceMode === "pro"
-                                        ? "default"
-                                        : "outline"
-                                }
-                                size="sm"
-                                onClick={() =>
-                                    handleTogglePerformanceMode("pro")
-                                }
-                                className="flex-1"
-                            >
-                                {t("common.proMode")}
-                            </Button>
-                        </div>
+                                <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="image_gen">
+                                    {t("common.models.imageGen")}
+                                </SelectItem>
+                            </SelectContent>
+                        </Select>
                     </div>
                 </Card>
 

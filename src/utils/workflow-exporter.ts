@@ -821,3 +821,75 @@ export function stringifyExecutableWorkflow(
 export function parseExecutableWorkflow(json: string): ExecutableWorkflow {
     return JSON.parse(json) as ExecutableWorkflow;
 }
+
+/** 导入 JSON 中缺少画布数据（originalFlow / flow / nodes+edges） */
+export const WORKFLOW_IMPORT_NO_CANVAS = "WORKFLOW_IMPORT_NO_CANVAS";
+
+export interface ParsedWorkflowImport {
+    nodes: Node[];
+    edges: Edge[];
+    name?: string;
+    description?: string;
+}
+
+function unwrapJsonValue(raw: unknown): unknown {
+    let v = raw;
+    if (typeof v === "string") {
+        try {
+            v = JSON.parse(v);
+        } catch {
+            return raw;
+        }
+        if (typeof v === "string") {
+            try {
+                v = JSON.parse(v);
+            } catch {
+                return v;
+            }
+        }
+    }
+    return v;
+}
+
+/**
+ * 从用户上传或粘贴的 JSON 解析出画布 nodes/edges。
+ * 支持：ExecutableWorkflow（含 originalFlow）、{ flow: { nodes, edges } }、根级 { nodes, edges }。
+ */
+export function parseWorkflowImportJson(raw: unknown): ParsedWorkflowImport {
+    const data = unwrapJsonValue(raw);
+    if (!data || typeof data !== "object") {
+        throw new Error("WORKFLOW_IMPORT_INVALID_JSON");
+    }
+    const obj = data as Record<string, unknown>;
+
+    let flowObj: Record<string, unknown> | null = null;
+
+    if (obj.originalFlow && typeof obj.originalFlow === "object") {
+        flowObj = obj.originalFlow as Record<string, unknown>;
+    } else if (obj.flow !== undefined) {
+        const f = unwrapJsonValue(obj.flow);
+        if (f && typeof f === "object") {
+            flowObj = f as Record<string, unknown>;
+        }
+    } else if (Array.isArray(obj.nodes) || Array.isArray(obj.edges)) {
+        flowObj = obj;
+    }
+
+    if (!flowObj) {
+        throw new Error(WORKFLOW_IMPORT_NO_CANVAS);
+    }
+
+    const nodes = flowObj.nodes;
+    const edges = flowObj.edges;
+    if (!Array.isArray(nodes) || !Array.isArray(edges)) {
+        throw new Error(WORKFLOW_IMPORT_NO_CANVAS);
+    }
+
+    return {
+        nodes: nodes as Node[],
+        edges: edges as Edge[],
+        name: typeof obj.name === "string" ? obj.name : undefined,
+        description:
+            typeof obj.description === "string" ? obj.description : undefined,
+    };
+}

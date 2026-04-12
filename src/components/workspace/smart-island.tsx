@@ -128,8 +128,6 @@ type ButtonActionId =
     | "generate-video"
     | "image-edit"
     | "clone-voice"
-    | "add-subtitle"
-    | "avatar-video"
     // Node Actions
     | "split"
     | "generate-audio"
@@ -164,7 +162,6 @@ type ButtonActionId =
 // 每个分类定义其"常用/推荐"的按钮 ID 列表，排序越靠前优先级越高
 const BUTTON_CATEGORY_MAP: Record<CategoryValue, ButtonActionId[]> = {
     "digital-human": [
-        "avatar-video",
         "lip-sync",
         "character-replace",
         "clone-voice",
@@ -188,7 +185,6 @@ const BUTTON_CATEGORY_MAP: Record<CategoryValue, ButtonActionId[]> = {
         "generate-video",
         "generate-video-node",
         "first-last-frame-video",
-        "add-subtitle",
         "concat-video",
         "motion-control",
         "video-transfer",
@@ -1380,7 +1376,7 @@ export default function SmartIsland() {
                                     selectedNodes[0]!.id,
                                     selectedNodes
                                         .map((node) => ({
-                                            type: "text2VoiceNode",
+                                            type: "textGenSpeechNode",
                                             data: node.data,
                                         }))
                                         .filter((n) => n.type !== ""),
@@ -1647,19 +1643,6 @@ export default function SmartIsland() {
                 <ActionItem
                     buttons={[
                         {
-                            text: t("addSubtitle"),
-                            id: "add-subtitle",
-                            onClick: () =>
-                                compose({
-                                    type: "textVideoGenVideoSubtitleVideoNode",
-                                    data: {
-                                        ids: Array.from(comboSelectedIds).map(
-                                            (id) => id,
-                                        ),
-                                    },
-                                }),
-                        },
-                        {
                             text: t("speechGenVideo"),
                             id: "speech-gen-video",
                             onClick: () =>
@@ -1690,32 +1673,6 @@ export default function SmartIsland() {
                             onClick: () =>
                                 compose({
                                     type: "speechImageVideoGenVideoNode",
-                                    data: {
-                                        ids: Array.from(comboSelectedIds).map(
-                                            (id) => id,
-                                        ),
-                                    },
-                                }),
-                        },
-                    ]}
-                />
-            );
-        }
-        // 文本 + 音频 + 图片
-        else if (
-            counts.textNode === 1 &&
-            counts.audioNode === 1 &&
-            counts.imageNode === 1
-        ) {
-            return (
-                <ActionItem
-                    buttons={[
-                        {
-                            text: t("avatarVideo"),
-                            id: "avatar-video",
-                            onClick: () =>
-                                compose({
-                                    type: "avatarVideo",
                                     data: {
                                         ids: Array.from(comboSelectedIds).map(
                                             (id) => id,
@@ -1765,7 +1722,7 @@ export default function SmartIsland() {
                                     onClick: () =>
                                         expands(id, [
                                             {
-                                                type: "text2VoiceNode",
+                                                type: "textGenSpeechNode",
                                                 data: data,
                                             },
                                         ]),
@@ -1873,15 +1830,6 @@ export default function SmartIsland() {
                 return (
                     <ActionItem
                         buttons={[
-                            {
-                                text: t("voiceToText"),
-                                id: "voice-to-text",
-                                nodeType: "voice2TextNode",
-                                onClick: () =>
-                                    expands(id, [
-                                        { type: "voice2TextNode", data: data },
-                                    ]),
-                            },
                             {
                                 text: t("speechRecognize"),
                                 nodeType: "audioGenTextSpeechRecognizeNode",

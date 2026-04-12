@@ -29,14 +29,10 @@ import AddFileNode from "./nodes/add/add-file-node";
 import { AddModelNode } from "./nodes/add/add-model-node";
 
 // Transform nodes
-import Text2VoiceNode from "./nodes/transfer/text2voice";
-import Voice2TextNode from "./nodes/transfer/voice2text";
 import ImageGenVideoNode from "./nodes/transfer/image-gen-video";
 import TextGenVideoNode from "./nodes/transfer/text-gen-video";
 import ImageGenModelNode from "./nodes/transfer/image-gen-model";
 import SpeechGenVideoNode from "./nodes/transfer/speech-gen-video";
-import Video2ClipNode from "./nodes/transfer/video2clip";
-import MusicGenNode from "./nodes/transfer/music-gen";
 import GenTextNode from "./nodes/transfer/text-gen-text";
 import TextGenImageNode from "./nodes/transfer/text-gen-image";
 import ImageGenImageNode from "./nodes/transfer/image-gen-image";
@@ -65,10 +61,7 @@ import ArrangeTextNode from "./nodes/batch/arrrange_text";
 import ConcatVideoNode from "./nodes/compose/concat-video";
 
 // Compose nodes
-import AvatarVideoNode from "./nodes/compose/avatarvideo";
-import MoveVideoNode from "./nodes/compose/move-video";
 import MergeVideoAudioNode from "./nodes/compose/merge-video-audio";
-import MixVideoNode from "./nodes/compose/mix-video";
 import ImageFusionNode from "./nodes/compose/image-fusion";
 import SpeechImageGenVideoNode from "./nodes/compose/speech-image-gen-video";
 import SpeechTextGenVideoNode from "./nodes/compose/speech-text-gen-video";
@@ -79,7 +72,6 @@ import VideoImageGenVideoMixNode from "./nodes/compose/video-image-gen-video-mix
 import VideoImageGenVideoMoveNode from "./nodes/compose/video-image-gen-video-move";
 import ImageImageGenVideoNode from "./nodes/compose/image-image-gen-video";
 import TextAudioGenSpeechNode from "./nodes/compose/text-audio-gen-speech";
-import TextVideoGenVideoSubtitleVideoNode from "./nodes/compose/text-video-gen-video-subtitle-video";
 import ConcatVideoComposeNode from "./nodes/compose/concat-video";
 // Decompose nodes
 import SplitVideoNode from "./nodes/decompose/split_video";
@@ -108,16 +100,12 @@ export const NODE_TYPES: NodeTypes = {
     addModelNode: AddModelNode,
 
     // 转换节点 - Implemented
-    text2VoiceNode: Text2VoiceNode,
-    voice2TextNode: Voice2TextNode,
     imageGenVideoNode: ImageGenVideoNode,
     textGenVideoNode: TextGenVideoNode,
     imageGenModelNode: ImageGenModelNode,
     speechGenVideoNode: SpeechGenVideoNode,
     imageGenImageNode: ImageGenImageNode,
     imageGenImageUpscaleNode: ImageGenImageUpscaleNode,
-    video2ClipNode: Video2ClipNode,
-    musicGenNode: MusicGenNode,
     genTextNode: GenTextNode,
     textGenImageNode: TextGenImageNode,
     textGenMusicNode: TextGenMusicNode,
@@ -144,10 +132,7 @@ export const NODE_TYPES: NodeTypes = {
     concatVideoNode: ConcatVideoNode,
 
     // 合成节点 - Implemented
-    avatarVideo: AvatarVideoNode,
-    moveVideoNode: MoveVideoNode,
     mergeVideoAudioNode: MergeVideoAudioNode,
-    mixVideoNode: MixVideoNode,
     imageFusionNode: ImageFusionNode,
     speechImageGenVideoNode: SpeechImageGenVideoNode,
     speechTextGenVideoNode: SpeechTextGenVideoNode,
@@ -158,7 +143,6 @@ export const NODE_TYPES: NodeTypes = {
     imageImageGenVideoNode: ImageImageGenVideoNode,
     textAudioGenSpeechNode: TextAudioGenSpeechNode,
     textsGenTextNode: TextsGenTextNode,
-    textVideoGenVideoSubtitleVideoNode: TextVideoGenVideoSubtitleVideoNode,
     concatVideoComposeNode: ConcatVideoComposeNode,
     // 分解节点 - Implemented
     splitVideoNode: SplitVideoNode,
@@ -200,16 +184,12 @@ export const NODE_CATEGORIES = {
         "addModelNode",
     ],
     TRANSFORM: [
-        "text2VoiceNode",
-        "voice2TextNode",
         "imageGenVideoNode",
         "textGenVideoNode",
         "imageGenModelNode",
         "speechGenVideoNode",
         "imageGenImageNode",
         "imageGenImageUpscaleNode",
-        "video2ClipNode",
-        "musicGenNode",
         "genTextNode",
         "textGenImageNode",
         "textGenMusicNode",
@@ -232,19 +212,17 @@ export const NODE_CATEGORIES = {
     ],
     BATCH: ["dropVideoNode", "arrangeNode", "concatVideoNode"],
     COMPOSE: [
-        "avatarVideo",
-        "moveVideoNode",
         "mergeVideoAudioNode",
-        "mixVideoNode",
         "imageFusionNode",
         "speechImageGenVideoNode",
         "speechTextGenVideoNode",
         "speechImageVideoGenVideoNode",
+        "speechVideoGenVideoNode",
+        "videoImageGenVideoMoveNode",
         "videoImageGenVideoMixNode",
         "imageImageGenVideoNode",
         "textAudioGenSpeechNode",
         "textsGenTextNode",
-        "textVideoGenVideoSubtitleVideoNode",
         "concatVideoComposeNode",
     ],
     DECOMPOSE: ["splitVideoNode", "splitTextNode"],

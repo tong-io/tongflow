@@ -7,7 +7,7 @@ import {
     useStore,
 } from "@xyflow/react";
 import type { Edge } from "@xyflow/react";
-import { memo, useMemo, useCallback } from "react";
+import { memo, useMemo } from "react";
 import { Atom, RectangleHorizontal, Clock } from "lucide-react";
 
 import { BaseNode } from "../base/base-node";
@@ -16,6 +16,13 @@ import { useNodeState } from "@/hooks/use-node-data";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
 import { NodeTextarea } from "../base/node-textarea";
 import { cn } from "@/lib/utils";
 import { getR2Url } from "@/lib/r2-utils";
@@ -26,6 +33,7 @@ import {
     type GetPromptsContext,
 } from "@/utils/node-execution-config";
 import { useTranslations } from "next-intl";
+import { clampToAllowedModel } from "@/utils/node-model-feature";
 
 const aspectRatios = [
     { value: "9:16", label: "portrait", width: 576, height: 1024 }, // 高 1024 的竖屏（保持9:16）
@@ -86,33 +94,18 @@ const workflowConfig = {
 };
 
 const TextGenVideoNode = ({ selected, data }: NodeProps) => {
-    const {
-        ids = [],
-        fileKeys: localFileKeys = [],
-        performanceMode = "eco",
-    } = data as {
+    const { ids = [], fileKeys: localFileKeys = [] } = data as {
         ids?: string[];
         fileKeys?: string[];
-        performanceMode?: "eco" | "pro";
+        feature?: string;
     };
     const nodeId = useNodeId();
     const updates = useFlow((s) => s.updates);
 
-    // 根据性能模式获取 feature 名称
-    const featureName =
-        performanceMode === "pro" ? "image_gen_video_pro" : "image_gen_video";
-
-    // 切换性能模式
-    const handleTogglePerformanceMode = useCallback(
-        (mode: "eco" | "pro") => {
-            updates(nodeId!, {
-                ...data,
-                performanceMode: mode,
-                feature:
-                    mode === "pro" ? "image_gen_video_pro" : "image_gen_video",
-            });
-        },
-        [nodeId, data, updates],
+    const featureName = clampToAllowedModel(
+        (data as { feature?: string }).feature,
+        ["image_gen_video"],
+        "image_gen_video",
     );
 
     // 获取边和节点信息，用于检测上游连接
@@ -257,42 +250,33 @@ const TextGenVideoNode = ({ selected, data }: NodeProps) => {
             }}
         >
             <div className="p-4 space-y-4">
-                {/* 性能模式选择 */}
+                {/* 模型选择 */}
                 <Card className="p-3">
                     <div className="space-y-2">
                         <Label className="text-sm font-medium text-muted-foreground">
-                            {t("imageEdit.performanceMode")}
+                            {t("common.modelSelect")}
                         </Label>
-                        <div className="flex gap-2">
-                            <Button
-                                variant={
-                                    performanceMode === "eco"
-                                        ? "default"
-                                        : "outline"
-                                }
+                        <Select
+                            value={featureName}
+                            onValueChange={(value) =>
+                                updates(nodeId!, {
+                                    ...data,
+                                    feature: value,
+                                })
+                            }
+                        >
+                            <SelectTrigger
+                                className="w-full"
                                 size="sm"
-                                onClick={() =>
-                                    handleTogglePerformanceMode("eco")
-                                }
-                                className="flex-1"
                             >
-                                {t("imageEdit.ecoMode")}
-                            </Button>
-                            <Button
-                                variant={
-                                    performanceMode === "pro"
-                                        ? "default"
-                                        : "outline"
-                                }
-                                size="sm"
-                                onClick={() =>
-                                    handleTogglePerformanceMode("pro")
-                                }
-                                className="flex-1"
-                            >
-                                {t("imageEdit.proMode")}
-                            </Button>
-                        </div>
+                                <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="image_gen_video">
+                                    {t("common.models.imageGenVideo")}
+                                </SelectItem>
+                            </SelectContent>
+                        </Select>
                     </div>
                 </Card>
 

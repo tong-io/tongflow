@@ -23,11 +23,19 @@ import useFlow from "@/hooks/use-flow";
 import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
 import { NodeTextarea } from "../base/node-textarea";
 import { useR2AsyncLoader } from "@/hooks/use-r2-async-loader";
 import { getR2Url } from "@/lib/r2-utils";
 import { cn } from "@/lib/utils";
 import { useTranslations } from "next-intl";
+import { clampToAllowedModel } from "@/utils/node-model-feature";
 
 const aspectRatios = [
     { value: "9:16", key: "portrait", width: 720, height: 1280 }, // HD 竖屏
@@ -115,14 +123,9 @@ const workflowConfig = {
 
 const ImageFusionNode = ({ selected, data }: NodeProps) => {
     const t = useTranslations("Workspace.nodes");
-    const {
-        ids,
-        performanceMode = "eco",
-        selectedAspectRatio,
-        selectedResolution,
-    } = data as {
+    const { ids, selectedAspectRatio, selectedResolution } = data as {
         ids: string[];
-        performanceMode?: "eco" | "pro";
+        feature?: string;
         selectedAspectRatio?: (typeof aspectRatios)[0];
         selectedResolution?: (typeof resolutions)[0];
     };
@@ -130,20 +133,10 @@ const ImageFusionNode = ({ selected, data }: NodeProps) => {
     const id = useNodeId()!;
     const fromNodes = useNodesData(ids);
 
-    // 根据性能模式获取 feature 名称
-    const featureName =
-        performanceMode === "pro" ? "image_fusion_pro" : "image_fusion";
-
-    // 切换性能模式
-    const handleTogglePerformanceMode = useCallback(
-        (mode: "eco" | "pro") => {
-            updates(id, {
-                ...data,
-                performanceMode: mode,
-                feature: mode === "pro" ? "image_fusion_pro" : "image_fusion",
-            });
-        },
-        [id, data, updates],
+    const featureName = clampToAllowedModel(
+        (data as { feature?: string }).feature,
+        ["image_fusion"],
+        "image_fusion",
     );
 
     // 选择宽高比
@@ -295,42 +288,30 @@ const ImageFusionNode = ({ selected, data }: NodeProps) => {
             }}
         >
             <div className="p-4 space-y-4">
-                {/* 性能模式选择 */}
+                {/* 模型选择 */}
                 <Card className="p-3">
                     <div className="space-y-2">
                         <Label className="text-sm font-medium text-muted-foreground">
-                            {t("common.performanceMode")}
+                            {t("common.modelSelect")}
                         </Label>
-                        <div className="flex gap-2">
-                            <Button
-                                variant={
-                                    performanceMode === "eco"
-                                        ? "default"
-                                        : "outline"
-                                }
+                        <Select
+                            value={featureName}
+                            onValueChange={(value) =>
+                                updates(id, { ...data, feature: value })
+                            }
+                        >
+                            <SelectTrigger
+                                className="w-full"
                                 size="sm"
-                                onClick={() =>
-                                    handleTogglePerformanceMode("eco")
-                                }
-                                className="flex-1"
                             >
-                                {t("common.ecoMode")}
-                            </Button>
-                            <Button
-                                variant={
-                                    performanceMode === "pro"
-                                        ? "default"
-                                        : "outline"
-                                }
-                                size="sm"
-                                onClick={() =>
-                                    handleTogglePerformanceMode("pro")
-                                }
-                                className="flex-1"
-                            >
-                                {t("common.proMode")}
-                            </Button>
-                        </div>
+                                <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="image_fusion">
+                                    {t("common.models.imageFusion")}
+                                </SelectItem>
+                            </SelectContent>
+                        </Select>
                     </div>
                 </Card>
 

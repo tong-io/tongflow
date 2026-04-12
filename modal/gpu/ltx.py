@@ -25,6 +25,14 @@ LTX_FILES = [
     "ltx-2.3-spatial-upscaler-x2-1.1.safetensors",
 ]
 
+# A2VidPipelineTwoStage：完整 checkpoint + stage2 distilled LoRA（见 Lightricks/LTX-2 README）
+DEV_CHECKPOINT = f"{MODEL_DIR}/ltx-2.3-22b-dev.safetensors"
+DISTILLED_LORA_384 = f"{MODEL_DIR}/ltx-2.3-22b-distilled-lora-384.safetensors"
+A2V_EXTRA_FILES = [
+    "ltx-2.3-22b-dev.safetensors",
+    "ltx-2.3-22b-distilled-lora-384.safetensors",
+]
+
 _RES_ALIGN = 64
 
 
@@ -69,16 +77,20 @@ image = (
 
 with image.imports():
     import gc
+    import subprocess
     import tempfile
     import torch
+    from ltx_core.loader import LTXV_LORA_COMFY_RENAMING_MAP, LoraPathStrengthAndSDOps
     from ltx_core.model.video_vae import (
         SpatialTilingConfig,
         TemporalTilingConfig,
         TilingConfig,
         get_video_chunks_number,
     )
+    from ltx_pipelines.a2vid_two_stage import A2VidPipelineTwoStage
     from ltx_pipelines.distilled import DistilledPipeline
     from ltx_pipelines.utils.args import ImageConditioningInput
+    from ltx_pipelines.utils.constants import DEFAULT_NEGATIVE_PROMPT, detect_params
     from ltx_pipelines.utils.media_io import encode_video
 
 
@@ -243,6 +255,166 @@ class Inference:
             )
 
 
+@app.cls(
+    image=image,
+    gpu="A100-80GB",
+    volumes={"/models": volume},
+    timeout=1800,
+)
+class InferenceA2V:
+    """LTX-2 A2VidPipelineTwoStage：音频（或含音轨的视频）+ 文本 → 音视频。"""
+
+    @modal.enter()
+    def load(self):
+        self.pipeline = A2VidPipelineTwoStage(
+            checkpoint_path=DEV_CHECKPOINT,
+            distilled_lora=[
+                LoraPathStrengthAndSDOps(
+                    DISTILLED_LORA_384,
+                    0.8,
+                    LTXV_LORA_COMFY_RENAMING_MAP,
+                )
+            ],
+            spatial_upsampler_path=SPATIAL_UPSAMPLER,
+            gemma_root=GEMMA_DIR,
+            loras=[],
+        )
+        self._params = detect_params(DEV_CHECKPOINT)
+
+    def _ffmpeg_bytes_to_wav(self, data: bytes) -> tuple[str, list[str]]:
+        """将任意媒体字节解出音轨为 WAV，供 ltx decode_audio_from_file 使用。"""
+        tmp_in = tempfile.NamedTemporaryFile(suffix=".bin", delete=False)
+        tmp_in.write(data)
+        tmp_in.close()
+        tmp_wav = tempfile.NamedTemporaryFile(suffix=".wav", delete=False)
+        tmp_wav.close()
+        paths = [tmp_in.name, tmp_wav.name]
+        subprocess.run(
+            [
+                "ffmpeg",
+                "-y",
+                "-i",
+                tmp_in.name,
+                "-vn",
+                "-acodec",
+                "pcm_s16le",
+                "-ar",
+                "48000",
+                "-ac",
+                "2",
+                tmp_wav.name,
+            ],
+            check=True,
+            capture_output=True,
+        )
+        return tmp_wav.name, paths
+
+    @modal.method()
+    def generate_a2v(
+        self,
+        prompt: str,
+        audio: bytes,
+        negative_prompt: str = "",
+        seed: int = 42,
+        height: int = DEFAULT_HEIGHT,
+        width: int = DEFAULT_WIDTH,
+        num_frames: int = DEFAULT_NUM_FRAMES,
+        frame_rate: float = 24.0,
+        num_inference_steps: int = 30,
+        enhance_prompt: bool = False,
+        image: Optional[bytes] = None,
+        image_frame_idx: int = 0,
+        image_strength: float = 1.0,
+        audio_start_time: float = 0.0,
+        audio_max_duration: Optional[float] = None,
+    ) -> bytes:
+        with torch.inference_mode():
+            height = _align_dim(height)
+            width = _align_dim(width)
+            num_frames = _align_num_frames(num_frames)
+
+            wav_path, media_paths = self._ffmpeg_bytes_to_wav(audio)
+            temp_paths: list[str] = list(media_paths)
+            images_list: list[tuple[str, int, float]] = []
+
+            try:
+                if image is not None:
+                    tmp = tempfile.NamedTemporaryFile(suffix=".png", delete=False)
+                    tmp.write(image)
+                    tmp.close()
+                    temp_paths.append(tmp.name)
+                    images_list.append((tmp.name, image_frame_idx, image_strength))
+
+                neg = (
+                    negative_prompt.strip()
+                    if negative_prompt.strip()
+                    else DEFAULT_NEGATIVE_PROMPT
+                )
+                tiling_config = TilingConfig(
+                    spatial_config=SpatialTilingConfig(
+                        tile_size_in_pixels=256,
+                        tile_overlap_in_pixels=32,
+                    ),
+                    temporal_config=TemporalTilingConfig(
+                        tile_size_in_frames=32,
+                        tile_overlap_in_frames=8,
+                    ),
+                )
+                video_chunks_number = get_video_chunks_number(
+                    num_frames, tiling_config
+                )
+                amd = (
+                    audio_max_duration
+                    if audio_max_duration is not None
+                    else num_frames / frame_rate
+                )
+
+                video_iter, audio_out = self.pipeline(
+                    prompt=prompt,
+                    negative_prompt=neg,
+                    seed=seed,
+                    height=height,
+                    width=width,
+                    num_frames=num_frames,
+                    frame_rate=frame_rate,
+                    num_inference_steps=num_inference_steps,
+                    video_guider_params=self._params.video_guider_params,
+                    images=images_list,
+                    audio_path=wav_path,
+                    audio_start_time=audio_start_time,
+                    audio_max_duration=amd,
+                    tiling_config=tiling_config,
+                    enhance_prompt=enhance_prompt,
+                    streaming_prefetch_count=STREAMING_PREFETCH_COUNT,
+                )
+
+                gc.collect()
+                torch.cuda.empty_cache()
+
+                with tempfile.NamedTemporaryFile(suffix=".mp4", delete=False) as f:
+                    output_path = f.name
+
+                encode_video(
+                    video=video_iter,
+                    fps=int(frame_rate),
+                    audio=audio_out,
+                    output_path=output_path,
+                    video_chunks_number=video_chunks_number,
+                )
+
+                with open(output_path, "rb") as f:
+                    result = f.read()
+                os.unlink(output_path)
+                return result
+            finally:
+                for p in temp_paths:
+                    try:
+                        if p and os.path.exists(p):
+                            os.unlink(p)
+                    except OSError:
+                        pass
+
+
 # -- model_downloader ---------------------------------------------------------
 
 model_downloader = modal.App("model_downloader")
@@ -262,7 +434,7 @@ def _download():
 
     token = os.environ.get("HF_TOKEN")
 
-    for filename in LTX_FILES:
+    for filename in LTX_FILES + A2V_EXTRA_FILES:
         dest = os.path.join(MODEL_DIR, filename)
         if os.path.exists(dest) and os.path.getsize(dest) > 1000:
             print(f"Already exists: {dest}")

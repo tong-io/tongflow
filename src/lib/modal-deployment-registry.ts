@@ -51,6 +51,11 @@ const GPU_AND_EXTRA: ModalHandlerProbeRow[] = [
     },
     {
         type: "gpu",
+        function: "ltx2-a2v",
+        probe: cls("ltx-video", "InferenceA2V"),
+    },
+    {
+        type: "gpu",
         function: "qwen-tts3-design",
         probe: cls("qwen3-tts", "Design"),
     },
