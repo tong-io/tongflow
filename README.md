@@ -13,13 +13,13 @@
   </p>
 </div>
 
-**TongFlow** is a **local-first** AI creative studio: on an infinite canvas, **add**, **transform**, and **combine** to build AIGC workflows end to end.
+**TongFlow** is a All-in-one AIGC Studio: on an infinite canvas, add, transform, and combine to build AIGC workflows end to end.
 
 <div align="center">
   <img src="docs/assets/cover.png" alt="TongFlow" />
 </div>
 
-I integrate [Modal](https://modal.com) by default; you get **$30/month FREE** for **GPU/CPU inference and computing** on hardware such as **H100**, **A100**, and **L40S**, so you can experiment with AI creation and content generation at no cost.
+Currently, [Modal](https://modal.com) is intergreted for AI inference and computing by default. This AI infra platform gives **$30/month FREE** quota for using cloud GPU/CPU such as **H100**, so you can experiment with AI creation and content generation at no cost.
 
 ## Core ideas
 
