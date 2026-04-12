@@ -39,119 +39,9 @@ We integrate [Modal](https://modal.com) by default—you get **$30/month in free
 
 - **AI shorts / comics**: stories or episodes from descriptions.
 
-### What’s implemented
+## How To Use
 
-#### Add
-
-- **Text input**: type text and add a text node.
-
-- **Add image**: pick a local file and add an image node.
-
-- **Add photo**: capture with the device camera and add an image node.
-
-- **Add sketch**: draw on the canvas and add an image node.
-
-- **Add audio**: pick a local audio file and add an audio node.
-
-- **Record audio**: record with the mic and add an audio node.
-
-- **Add video**: pick a local video file and add a video node.
-
-- **Record video**: record with the camera and add a video node.
-
-- **Add document**: pick a local file and add a document node.
-
-- **Add URL**: fetch a page from a link and add text, image, audio, or video nodes.
-
-- **Add 3D model**: choose a local model file and add a 3D model node.
-
-#### Transform
-
-##### Text
-
-- **Generate / rewrite**: create or edit copy from a prompt.
-
-##### Image
-
-- **Image generation**: images from text.
-
-- **Image editing**: inpaint, edit, or redraw with instructions.
-
-- **Image understanding**: captions, Q&A, or descriptions from an image.
-
-- **Image upscaling**: enlarge for sharper detail.
-
-##### Video
-
-- **Video generation**: video from text.
-
-- **Image-to-video**: animate a still into motion.
-
-- **First/last-frame video**: two key images to interpolate a clip.
-
-- **Video understanding**: summaries or descriptions from video.
-
-- **Video upscaling**: higher-resolution output.
-
-- **Extract first / last frame**: grab a frame as an image.
-
-- [ ] **Subtitle removal**
-- [ ] **Watermark removal**
-
-##### Audio
-
-- **Music generation**: music from text.
-
-- **Speech synthesis**: text-to-speech, with optional reference voice.
-
-- **Speech recognition**: transcribe speech from audio or video.
-
-- [ ] **Noise reduction**
-- [ ] **Multi-track / vocal–accompaniment separation**
-- [ ] **Speaker diarization**
-- [ ] **Voice / timbre replacement** (reference-driven)
-
-#### Combine
-
-- **Image fusion**: blend or edit multiple references into one image.
-
-- **Lip sync**: audio + video → video (lip-sync and related variants).
-
-- **Character swap**: video + reference (scene blend / character replacement)—Animate Mix–style generation.
-
-- **Motion transfer**: video + reference (motion / retarget)—Animate Move–style generation.
-
-#### Other
-
-- [ ] **Image → 3D** (single-view 3D)
-- **Document → text**: extract plain text from documents.
-
-- **Link → text**: turn page content into text.
-
-#### Helpers
-
-- **Concatenate clips**: join multiple videos end to end.
-
-- **Mux audio + video**: merge into one file.
-
-- **Split by shots**: cut a long video into segments by scene.
-
-- **Extract audio track**: pull audio into its own asset.
-
-- **Split long text**: break a long passage into chunks.
-
-- **Merge / tidy text blocks**: combine segments (use the auto-merge option).
-
-- [ ] **Filter or drop clips** (by natural language or rules)
-- [ ] **Arrange & batch groups** of clips (grouped batch output)
-
-## Backend & model providers
-
-- **Modal (CPU/GPU workers)**: FFmpeg, scene detection, GPU inference (Z-Image, FLUX, LTX-2, SeedVR2, Gemma4, Qwen3, etc.)
-- **OpenRouter (LLM routing)**: default free route/model for `gen_text` (override via `.env`)
-- **Google Gemini (API)**: some text / multimodal API calls (requires `GEMINI_API_KEY` or `GOOGLE_API_KEY`)
-- **DeepSeek (API)**: some text orchestration / reasoning (requires `DEEPSEEK_API_KEY`)
-- **OpenAI (API)**: `openai-text` handler (default `OPENAI_CHAT_MODEL=gpt-4o-mini`)
+- Tutorial (Bilibili): [link placeholder](https://www.bilibili.com/video/BV1xxxxxxxxxx) — replace with the real video URL when published.
 
 ## Run locally (quickstart)
 
@@ -204,6 +94,88 @@ To authorize Modal (writes tokens to `~/.modal.toml`):
 ```bash
 pnpm modal:setup
 ```
+
+## What’s implemented
+
+### Add
+
+- [x] **Text input**: type text and add a text node.
+- [x] **Add image**: pick a local file and add an image node.
+- [x] **Add photo**: capture with the device camera and add an image node.
+- [x] **Add sketch**: draw on the canvas and add an image node.
+- [x] **Add audio**: pick a local audio file and add an audio node.
+- [x] **Record audio**: record with the mic and add an audio node.
+- [x] **Add video**: pick a local video file and add a video node.
+- [x] **Record video**: record with the camera and add a video node.
+- [x] **Add document**: pick a local file and add a document node.
+- [x] **Add URL**: fetch a page from a link and add text, image, audio, or video nodes.
+- [x] **Add 3D model**: choose a local model file and add a 3D model node.
+
+### Transform
+
+#### Text
+
+- [x] **Generate / rewrite**: create or edit copy from a prompt.
+
+#### Image
+
+- [x] **Image generation**: images from text.
+- [x] **Image editing**: inpaint, edit, or redraw with instructions.
+- [x] **Image understanding**: captions, Q&A, or descriptions from an image.
+- [x] **Image upscaling**: enlarge for sharper detail.
+
+#### Video
+
+- [x] **Video generation**: video from text.
+- [x] **Image-to-video**: animate a still into motion.
+- [x] **First/last-frame video**: two key images to interpolate a clip.
+- [x] **Video understanding**: summaries or descriptions from video.
+- [x] **Video upscaling**: higher-resolution output.
+- [x] **Extract first / last frame**: grab a frame as an image.
+- [ ] **Subtitle removal**
+- [ ] **Watermark removal**
+
+#### Audio
+
+- [x] **Music generation**: music from text.
+- [x] **Speech synthesis**: text-to-speech, with optional reference voice.
+- [x] **Speech recognition**: transcribe speech from audio or video.
+- [ ] **Noise reduction**
+- [ ] **Multi-track / vocal–accompaniment separation**
+- [ ] **Speaker diarization**
+- [ ] **Voice / timbre replacement** (reference-driven)
+
+### Combine
+
+- [x] **Image fusion**: blend or edit multiple references into one image.
+- [x] **Lip sync**: audio + video → video (lip-sync and related variants).
+- [x] **Character swap**: video + reference (scene blend / character replacement)—Animate Mix–style generation.
+- [x] **Motion transfer**: video + reference (motion / retarget)—Animate Move–style generation.
+
+### Other
+
+- [ ] **Image → 3D** (single-view 3D)
+- [x] **Document → text**: extract plain text from documents.
+- [x] **Link → text**: turn page content into text.
+
+### Helpers
+
+- [x] **Concatenate clips**: join multiple videos end to end.
+- [x] **Mux audio + video**: merge into one file.
+- [x] **Split by shots**: cut a long video into segments by scene.
+- [x] **Extract audio track**: pull audio into its own asset.
+- [x] **Split long text**: break a long passage into chunks.
+- [x] **Merge / tidy text blocks**: combine segments (use the auto-merge option).
+- [ ] **Filter or drop clips** (by natural language or rules)
+- [ ] **Arrange & batch groups** of clips (grouped batch output)
+
+## Backend & model providers
+
+- **Modal (CPU/GPU workers)**: FFmpeg, scene detection, GPU inference (Z-Image, FLUX, LTX-2, SeedVR2, Gemma4, Qwen3, etc.)
+- **OpenRouter (LLM routing)**: default free route/model for `gen_text` (override via `.env`)
+- **Google Gemini (API)**: some text / multimodal API calls (requires `GEMINI_API_KEY` or `GOOGLE_API_KEY`)
+- **DeepSeek (API)**: some text orchestration / reasoning (requires `DEEPSEEK_API_KEY`)
+- **OpenAI (API)**: `openai-text` handler (default `OPENAI_CHAT_MODEL=gpt-4o-mini`)
 
 ## Open-source roadmap
 
