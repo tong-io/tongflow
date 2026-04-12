@@ -1,9 +1,9 @@
 <div align="center">
   <img src="docs/assets/logo.png" alt="TongFlow" width="320" />
 
-  <h1>TongFlow - 一个多模态生成式AI创作引擎</h1>
+  <h1>TongFlow — A Multimodal Generative AI Creation Engine</h1>
 
-  <!-- CI / Discord / Releases 为占位，接入后替换链接 -->
+  <!-- CI / Discord / Releases are placeholders; replace links when wired up -->
   <p>
     <a href="https://github.com/tong-io/openflow/stargazers"><img src="https://img.shields.io/github/stars/tong-io/openflow?style=flat&logo=github" alt="GitHub stars" /></a>
     <a href="https://github.com/tong-io/openflow/blob/main/LICENSE"><img src="https://img.shields.io/badge/License-AGPL--3.0-blue.svg" alt="License" /></a>
@@ -13,218 +13,218 @@
   </p>
 </div>
 
-这是能够运行在本地的AI创意工厂：在无限画布上添加，转换，组合，就能实现AIGC工作流。
+TongFlow is a local-first AI creative studio: on an infinite canvas, **add**, **transform**, and **combine** to build AIGC workflows end to end.
 
-目前我们默认接入modal.com，你可以免费获得每月30美元的算力额度，实现免费的AI创作和内容生成。
+We integrate [Modal](https://modal.com) by default—you get **$30/month in free compute**, so you can experiment with AI creation and content generation at no cost.
 
-## 如果你觉得这个项目不错，请给我一个Star，我们非常感谢。
+## If you like this project, a star on GitHub helps a lot—thank you.
 
-## 核心理念
+## Core ideas
 
-- 可集成所有生成式AI模型：任何生成式AI模型都能够抽象为“模态的转换”。如：LLM是文本转文本，图像生成是文本转图片，歌曲生成是文本转音乐，等等。基于此，tongflow可以将任何生成式AI模型封装为节点。
+- **Any generative model fits the same abstraction**: every model can be thought of as a **modality transform**—e.g. LLMs are text→text, image models are text→image, music models are text→audio, and so on. TongFlow wraps each capability as a node.
 
-- 可支持所有模态：我们实现并支持了所有能够在网络上分发的模态或传播形式。
+- **All modalities**: we support the modalities and formats people actually ship over the web.
 
-- 简单操作：没有晦涩的参数，无需拖拽连线，只需要添加，转换和组合三种操作。可以自由的编排创意。
+- **Simple mechanics**: no cryptic parameter panels and no manual node wiring—just **add**, **transform**, and **combine**. Arrange ideas freely.
 
-## Demo用例：（这只是冰山一角，用生成式AI延展你的想象力吧）
+## Demo ideas (this is only a slice—stretch it with generative AI)
 
-- 文生图生视频：出图再做成视频。
+- **Text → image → video**: generate images, then turn them into video.
 
-- 口播数字人：口播稿加数字人画面。
+- **Talking-head avatar**: script + digital human visuals.
 
-- 电商图片合成：多图融合或改商品图。
+- **E-commerce visuals**: blend multiple images or retouch product shots.
 
-- AI音乐制作：按描述生成音乐。
+- **AI music**: music from a text prompt.
 
-- AI短剧/漫剧：按描述生成音乐。
+- **AI shorts / comics**: stories or episodes from descriptions.
 
-### 已实现能力
+### What’s implemented
 
-#### 添加
+#### Add
 
-- 输入文本：输入文本，添加文本节点。
+- **Text input**: type text and add a text node.
 
-- 添加图片：选择本地文件，添加为图片节点。
+- **Add image**: pick a local file and add an image node.
 
-- 添加照片：用设备相机拍照，添加为图片节点。
+- **Add photo**: capture with the device camera and add an image node.
 
-- 添加涂鸦：在画板绘制草图，添加为图片节点。
+- **Add sketch**: draw on the canvas and add an image node.
 
-- 添加音频：选择本地音频文件，添加为音频节点。
+- **Add audio**: pick a local audio file and add an audio node.
 
-- 录制音频：用设备麦克风录制，添加为音频节点。
+- **Record audio**: record with the mic and add an audio node.
 
-- 添加视频：选择本地视频文件，添加为视频节点。
+- **Add video**: pick a local video file and add a video node.
 
-- 录制视频：用设备摄像头录制，添加为视频节点。
+- **Record video**: record with the camera and add a video node.
 
-- 添加文档：选择本地文档，添加为文档节点。
+- **Add document**: pick a local file and add a document node.
 
-- 添加网址：输入链接抓取网页，添加为文本，图片，音频或视频节点。
+- **Add URL**: fetch a page from a link and add text, image, audio, or video nodes.
 
-- 添加3D模型：选本地模型文件，生成模型类节点。，添加为图片节点。
+- **Add 3D model**: choose a local model file and add a 3D model node.
 
-#### 转换
+#### Transform
 
-##### 文本
+##### Text
 
-- 文本生成/改写：按提示生成或改写文字。
+- **Generate / rewrite**: create or edit copy from a prompt.
 
-##### 图片
+##### Image
 
-- 图像生成：文字描述出图。
+- **Image generation**: images from text.
 
-- 图像编辑：按指令改图或重绘。
+- **Image editing**: inpaint, edit, or redraw with instructions.
 
-- 图像理解：看图写说明或问答。
+- **Image understanding**: captions, Q&A, or descriptions from an image.
 
-- 图像超分：放大图片提高清晰度。
+- **Image upscaling**: enlarge for sharper detail.
 
-##### 视频
+##### Video
 
-- 视频生成：文字描述生成视频。
+- **Video generation**: video from text.
 
-- 图生视频：静态图生成动态视频。
+- **Image-to-video**: animate a still into motion.
 
-- 首尾帧生成视频：两张图固定起止画面生成视频。
+- **First/last-frame video**: two key images to interpolate a clip.
 
-- 视频理解：看视频写摘要或说明。
+- **Video understanding**: summaries or descriptions from video.
 
-- 视频超分：提高视频清晰度。
+- **Video upscaling**: higher-resolution output.
 
-- 抽取视频首帧 / 尾帧：从视频里截一帧当图。
+- **Extract first / last frame**: grab a frame as an image.
 
-- [ ] **视频去字幕**
-- [ ] **视频去水印**
+- [ ] **Subtitle removal**
+- [ ] **Watermark removal**
 
-##### 音频
+##### Audio
 
-- 音乐生成：文字描述生成音乐。
+- **Music generation**: music from text.
 
-- 语音合成：文字转语音，可录参考声线。
+- **Speech synthesis**: text-to-speech, with optional reference voice.
 
-- 语音识别：人声或视频里的说话声转成文字。
+- **Speech recognition**: transcribe speech from audio or video.
 
-- [ ] **音频降噪**
-- [ ] **多音轨 / 人声与伴奏分离**
-- [ ] **说话人分离**
-- [ ] **人声 / 音色替换**（参考音色驱动）
+- [ ] **Noise reduction**
+- [ ] **Multi-track / vocal–accompaniment separation**
+- [ ] **Speaker diarization**
+- [ ] **Voice / timbre replacement** (reference-driven)
 
-#### 组合
+#### Combine
 
-- 多图融合（Image Fusion）：多图参考合成或编辑成一张图。
+- **Image fusion**: blend or edit multiple references into one image.
 
-- 对口型：语音 + 视频 → 视频：含对口型等变体。
+- **Lip sync**: audio + video → video (lip-sync and related variants).
 
-- 人物替换：视频 + 参考图（画面混合 / 人物替换）：Animate Mix 类生成。
+- **Character swap**: video + reference (scene blend / character replacement)—Animate Mix–style generation.
 
-- 动作迁移：视频 + 参考图（动作 / 迁移）：Animate Move 类生成。
+- **Motion transfer**: video + reference (motion / retarget)—Animate Move–style generation.
 
-#### 其他
+#### Other
 
-- [ ] **Image → 3D 模型**（单视图生成 3D）
-- 文档解析为文本：文档转成纯文本。
+- [ ] **Image → 3D** (single-view 3D)
+- **Document → text**: extract plain text from documents.
 
-- 链接抓取为文本：网页内容收成文字。
+- **Link → text**: turn page content into text.
 
-#### 其他辅助
+#### Helpers
 
-- 多段视频拼接：多段视频首尾相接成一条。
+- **Concatenate clips**: join multiple videos end to end.
 
-- 音视频合成：视频与音频合成一个文件。
+- **Mux audio + video**: merge into one file.
 
-- 视频按分镜切片：按分镜把长视频切成多段。
+- **Split by shots**: cut a long video into segments by scene.
 
-- 音轨分离：抽出单独音频。
+- **Extract audio track**: pull audio into its own asset.
 
-- 长文本拆成多段：把一篇长文切成多段。
+- **Split long text**: break a long passage into chunks.
 
-- 多段文本合并/整理：合并多段字；须用自动合并选项。
+- **Merge / tidy text blocks**: combine segments (use the auto-merge option).
 
-- [ ] **按条件筛选 / 丢弃视频片段**（自然语言或规则筛选）
-- [ ] **多段视频的排列组合 / 分组编排**（批量成组输出）
+- [ ] **Filter or drop clips** (by natural language or rules)
+- [ ] **Arrange & batch groups** of clips (grouped batch output)
 
-## 后端与模型提供商（Providers）
+## Backend & model providers
 
-- **Modal（CPU/GPU workers）**：用于 FFmpeg、场景切分、GPU 推理（Z-Image / FLUX / LTX-2 / SeedVR2 / Gemma4 / Qwen3 等）
-- **OpenRouter（LLM 路由）**：默认文本生成 `gen_text` 的免费路由/模型（可用 `.env` 覆盖）
-- **Google Gemini（API）**：用于部分文本/多模态 API 任务（需要 `GEMINI_API_KEY` 或 `GOOGLE_API_KEY`）
-- **DeepSeek（API）**：用于部分文本编排/推理（需要 `DEEPSEEK_API_KEY`）
-- **OpenAI（API）**：提供 `openai-text` handler（默认 `OPENAI_CHAT_MODEL=gpt-4o-mini`）
+- **Modal (CPU/GPU workers)**: FFmpeg, scene detection, GPU inference (Z-Image, FLUX, LTX-2, SeedVR2, Gemma4, Qwen3, etc.)
+- **OpenRouter (LLM routing)**: default free route/model for `gen_text` (override via `.env`)
+- **Google Gemini (API)**: some text / multimodal API calls (requires `GEMINI_API_KEY` or `GOOGLE_API_KEY`)
+- **DeepSeek (API)**: some text orchestration / reasoning (requires `DEEPSEEK_API_KEY`)
+- **OpenAI (API)**: `openai-text` handler (default `OPENAI_CHAT_MODEL=gpt-4o-mini`)
 
-## 本地运行（Quickstart）
+## Run locally (quickstart)
 
-### 三种启动方式
+### Three ways to run
 
-#### 1) 直接下载 Release 桌面版（推荐给普通用户）
+#### 1) Download a desktop release (easiest for end users)
 
-- 到 GitHub 的 Releases 页面下载对应系统的安装包（macOS / Windows）。
-- 首次使用仍需要你在应用内/环境变量里配置 Modal/OpenRouter/Gemini 等 API key/token（见下方“环境变量”）。
+- Get the installer for your OS from GitHub **Releases** (macOS / Windows).
+- On first launch, configure Modal / OpenRouter / Gemini API keys or tokens in the app or environment (see **Environment variables** below).
 
-#### 2) Docker Compose 一键启动（推荐给自托管/部署）
+#### 2) Docker Compose (good for self-hosting)
 
-仓库根目录已提供 `compose.yaml`：
+`compose.yaml` lives at the repo root:
 
 ```bash
 docker compose up --build
 ```
 
-启动后访问 `http://localhost:3000`（会进入 `/workspace`）。
+Open `http://localhost:3000` (lands on `/workspace`).
 
-> 数据会持久化在 Docker volume（包含 SQLite：`data/openflow.db` 与上传文件）。
+> Data persists in Docker volumes (SQLite at `data/openflow.db` plus uploads).
 
-#### 3) 本地开发启动（pnpm dev）
+#### 3) Local development (`pnpm dev`)
 
-依赖：Node.js（建议 Node 20+）与 pnpm。
+Requires Node.js (20+ recommended) and pnpm.
 
 ```bash
 pnpm install
 pnpm dev
 ```
 
-启动后访问 `http://localhost:3000`（会进入 `/workspace`）。
+Open `http://localhost:3000` (lands on `/workspace`).
 
-### 环境变量（Modal / 各类模型提供商）
+### Environment variables (Modal & providers)
 
-本项目会调用外部服务（例如 Modal / OpenRouter / Gemini / DeepSeek / OpenAI）。你可以用 `.env` 来配置。
+The app calls external services (Modal, OpenRouter, Gemini, DeepSeek, OpenAI, etc.). Configure them in `.env`.
 
-常用变量（以 `.env` 为准）：
+Common variables (see `.env` for the source of truth):
 
-- `MODAL_TOKEN_ID` / `MODAL_TOKEN_SECRET`：Modal worker 调用
-- `OPENROUTER_API_KEY` / `OPENROUTER_FREE_MODEL`：OpenRouter LLM
-- `GEMINI_API_KEY` / `GOOGLE_API_KEY`：Gemini
-- `DEEPSEEK_API_KEY`：DeepSeek
-- `OPENAI_API_KEY` / `OPENAI_CHAT_MODEL`：OpenAI
-- `NEXT_PUBLIC_TASK_API_URL`：可选，把任务 wait/stop 指向外部任务服务
-- `NEXT_PUBLIC_FILE_BASE_URL`：可选，文件存储的 base URL
+- `MODAL_TOKEN_ID` / `MODAL_TOKEN_SECRET` — Modal workers
+- `OPENROUTER_API_KEY` / `OPENROUTER_FREE_MODEL` — OpenRouter LLM
+- `GEMINI_API_KEY` / `GOOGLE_API_KEY` — Gemini
+- `DEEPSEEK_API_KEY` — DeepSeek
+- `OPENAI_API_KEY` / `OPENAI_CHAT_MODEL` — OpenAI
+- `NEXT_PUBLIC_TASK_API_URL` — optional; point task wait/stop at an external task service
+- `NEXT_PUBLIC_FILE_BASE_URL` — optional; base URL for file storage
 
-如果你要做 Modal 授权（会把 token 写入 `~/.modal.toml`）：
+To authorize Modal (writes tokens to `~/.modal.toml`):
 
 ```bash
 pnpm modal:setup
 ```
 
-## 开源计划
+## Open-source roadmap
 
-我们将在star数达到一定程度后开源社区版全部代码。
+We plan to open-source the full community edition once the project reaches a meaningful level of community interest (stars).
 
-## 联系
+## Contact
 
-欢迎通过Discord或微信群加入社区
+Join the community on **Discord** or **WeChat**.
 
+**Business:** business@tongflow.com — we’ll get back to you quickly.
 
-商务合作请发邮件：business@tongflow.com，会尽快联系您。
- - 如果您是B端用户，我们可以为您定制部署私有版本
- - 如果您是投资人，我们可以探讨推进Cloud版本的构建
- - 如果您是模型API提供/中转/聚合商，我们可以将您的API集成
- - 如果您是开源模型发布者，我们可以以最快速度集成进来供用户试用
+- **Enterprise**: we can help deploy a private instance.
+- **Investors**: we’re happy to discuss a cloud offering.
+- **Model API providers / aggregators**: we can integrate your APIs.
+- **Open-model publishers**: we can prioritize integration so users can try your models sooner.
 
 ## License
 
 This project is licensed under **GNU Affero General Public License v3.0 (AGPL-3.0-only)**.
 
-- If you modify and run it as a network service, you must offer users the Corresponding Source of your modified version (see AGPL section 13).
+- If you modify it and run it as a network service, you must offer users the corresponding source of your modified version (see AGPL section 13).
 
 ## Star History
 
