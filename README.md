@@ -1,7 +1,7 @@
 <div align="center">
   <img src="docs/assets/logo.png" alt="TongFlow" width="320" />
 
-  <h1>TongFlow: A Multimodal Generative AI Studio</h1>
+  <h1>A Multi-Modal Generative AI Studio</h1>
 
   <!-- CI / Releases are placeholders; replace links when wired up -->
   <p>
@@ -13,7 +13,7 @@
   </p>
 </div>
 
-TongFlow is a **local-first** AI creative studio: on an infinite canvas, **add**, **transform**, and **combine** to build AIGC workflows end to end.
+**TongFlow** is a **local-first** AI creative studio: on an infinite canvas, **add**, **transform**, and **combine** to build AIGC workflows end to end.
 
 <div align="center">
   <img src="docs/assets/cover.png" alt="TongFlow" />
