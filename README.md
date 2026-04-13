@@ -1,9 +1,7 @@
 <div align="center">
   <img src="docs/assets/logo.png" alt="TongFlow" width="320" />
 
-  <h1>A Multi-Modal Generative AI Studio</h1>
-
-  <!-- CI / Releases are placeholders; replace links when wired up -->
+  <h1>A Multi-Modal AIGC Studio</h1>
   <p>
     <a href="https://github.com/tong-io/openflow/stargazers"><img src="https://img.shields.io/github/stars/tong-io/openflow?style=flat&logo=github" alt="GitHub stars" /></a>
     <a href="https://github.com/tong-io/openflow/blob/main/LICENSE"><img src="https://img.shields.io/badge/License-AGPL--3.0-blue.svg" alt="License" /></a>
@@ -13,21 +11,19 @@
   </p>
 </div>
 
-**TongFlow** is a All-in-one AIGC Studio: on an infinite canvas, add, transform, and combine to build AIGC workflows end to end.
+**TongFlow** is an all-in-one AIGC Studio makes you build AIGC workflows end to end with ease.
 
 <div align="center">
   <img src="docs/assets/cover.png" alt="TongFlow" />
 </div>
 
-Currently, [Modal](https://modal.com) is intergreted for AI inference and computing by default. This AI infra platform gives **$30/month FREE** quota for using cloud GPU/CPU such as **H100**, so you can experiment with AI creation and content generation at no cost.
-
 ## Core ideas
 
-- **Any generative model fits the same abstraction**: every model can be thought of as a **modality transform** (e.g. LLMs are text→text, image models are text→image, music models are text→audio, and so on). TongFlow wraps each capability as a node.
+- **All model:**:  ai models can be thought of as a **modality transform** (e.g. LLMs are text→text, image models are text→image, music models are text→audio, and so on). TongFlow wraps each capability as a node.
 
-- **All modalities**: we support the modalities and formats people actually ship over the web.
+- **All modalities**: support all the modalities and formats people actually ship over the web.
 
-- **Simple mechanics**: no cryptic parameter panels and no manual node wiring; just **add**, **transform**, and **combine**. Arrange ideas freely.
+- **Simple to use**: no complex parameter panels and no manual node connecting; just **add**, **transform**, and **combine**. Arrange ideas freely.
 
 ## Demo Use Case
 
@@ -48,6 +44,10 @@ With TongFlow, you can expand your imagination and stretch your ideas with gener
 - Tutorial (Bilibili): [link placeholder](https://www.bilibili.com/video/BV1xxxxxxxxxx). Replace with the real video URL when published.
 
 ## Run locally (quickstart)
+
+AI inference is expensive, so TongFlow use [modal.com](https://modal.com) by default as cloud inference and compute backend. 
+Because modal.com gives **$30/month FREE** quota for using cloud GPU/CPU such as **H100**.
+Check here for how to deploy the cloud inference and compute backend of TongFlow.
 
 ### Three ways to run
 
