@@ -96,22 +96,6 @@ const selector = (state: FlowState) => ({
     setWorkflowDescription: state.setWorkflowDescription,
 });
 
-// 分类选项
-// 分类选项
-const CATEGORY_OPTIONS = [
-    { value: "digital-human", labelKey: "digitalHuman" },
-    { value: "art-design", labelKey: "artDesign" },
-    { value: "video-ad", labelKey: "videoAd" },
-    { value: "doc-processing", labelKey: "docProcessing" },
-    { value: "knowledge-learning", labelKey: "knowledgeLearning" },
-    { value: "music-mv", labelKey: "musicMV" },
-] as const;
-
-type CategoryValue = (typeof CATEGORY_OPTIONS)[number]["value"];
-
-// localStorage key
-const CATEGORY_STORAGE_KEY = "smart-island-category";
-
 // 按钮 ID 定义
 type ButtonActionId =
     // Combo Actions
@@ -158,67 +142,6 @@ type ButtonActionId =
     | "parse-doc"
     | "desc-model";
 
-// 按钮与分类的关联配置
-// 每个分类定义其"常用/推荐"的按钮 ID 列表，排序越靠前优先级越高
-const BUTTON_CATEGORY_MAP: Record<CategoryValue, ButtonActionId[]> = {
-    "digital-human": [
-        "lip-sync",
-        "character-replace",
-        "clone-voice",
-        "text-to-speech",
-        "generate-audio",
-        "convert-voice",
-        "separate-speaker",
-    ],
-    "art-design": [
-        "image-fusion",
-        "image-edit",
-        "generate-image",
-        "image-refine",
-        "image-upscale",
-        "image-angles",
-        "image-segment",
-        "generate-3d",
-        "desc-image",
-    ],
-    "video-ad": [
-        "generate-video",
-        "generate-video-node",
-        "first-last-frame-video",
-        "concat-video",
-        "motion-control",
-        "video-transfer",
-        "merge-video-audio",
-        "desc-video",
-        "upscale-video",
-        "split-video",
-        "first-frame",
-        "last-frame",
-    ],
-    "music-mv": [
-        "generate-music",
-        "merge-video-audio",
-        "generate-audio",
-        "extract-audio",
-        "denoise-audio",
-        "separate-audio",
-    ],
-    "doc-processing": [
-        "generate-text",
-        "split",
-        "voice-to-text",
-        "speech-recognize",
-        "parse-doc",
-    ],
-    "knowledge-learning": [
-        "generate-text",
-        "text-to-speech",
-        "voice-to-text",
-        "speech-recognize",
-        "parse-doc",
-    ],
-};
-
 // 按钮配置类型
 interface ButtonConfig {
     text: string;
@@ -226,127 +149,6 @@ interface ButtonConfig {
     id?: string;
     nodeType?: string; // 节点类型，用于获取 feature 的 minTier
 }
-
-// 根据分类对按钮进行排序的逻辑
-const sortButtonsByCategory = (
-    buttons: ButtonConfig[],
-    category: CategoryValue,
-): ButtonConfig[] => {
-    const priorityList = BUTTON_CATEGORY_MAP[category] || [];
-
-    return [...buttons].sort((a, b) => {
-        // 如果没有 ID，放到最后
-        if (!a.id && !b.id) return 0;
-        if (!a.id) return 1;
-        if (!b.id) return -1;
-
-        const indexA = priorityList.indexOf(a.id as ButtonActionId);
-        const indexB = priorityList.indexOf(b.id as ButtonActionId);
-
-        // 如果都在优先级列表中，按列表顺序排序
-        if (indexA !== -1 && indexB !== -1) {
-            return indexA - indexB;
-        }
-
-        // 如果只有一个在列表中，在列表中的排前面
-        if (indexA !== -1) return -1;
-        if (indexB !== -1) return 1;
-
-        // 都不在列表中，保持原顺序
-        return 0;
-    });
-};
-
-const CategorySelector = ({
-    value,
-    onChange,
-}: {
-    value: CategoryValue;
-    onChange: (value: CategoryValue) => void;
-}) => {
-    const t = useTranslations("Workspace.smartIsland.category");
-    const [open, setOpen] = useState(false);
-    const closeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-
-    const currentLabel =
-        CATEGORY_OPTIONS.find((opt) => opt.value === value)?.labelKey ||
-        "digitalHuman";
-
-    // 处理鼠标移入
-    const handleMouseEnter = () => {
-        if (closeTimeoutRef.current) {
-            clearTimeout(closeTimeoutRef.current);
-            closeTimeoutRef.current = null;
-        }
-        setOpen(true);
-    };
-
-    // 处理鼠标移出（延迟关闭防止闪烁）
-    const handleMouseLeave = () => {
-        closeTimeoutRef.current = setTimeout(() => {
-            setOpen(false);
-        }, 150);
-    };
-
-    return (
-        <div
-            onMouseEnter={handleMouseEnter}
-            onMouseLeave={handleMouseLeave}
-            className="relative"
-        >
-            <button
-                type="button"
-                className={cn(
-                    "flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-medium",
-                    "bg-transparent hover:bg-gray-100 dark:hover:bg-gray-700/50",
-                    "text-gray-600 dark:text-gray-200",
-                    "cursor-pointer transition-colors duration-200",
-                )}
-            >
-                <span>{t(currentLabel)}</span>
-                <svg
-                    className={cn(
-                        "w-4 h-4 text-gray-500 transition-transform duration-200",
-                        open && "rotate-180",
-                    )}
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                >
-                    <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M5 15l7-7 7 7"
-                    />
-                </svg>
-            </button>
-
-            {open && (
-                <div className="absolute bottom-full left-0 mb-1 z-50 min-w-[140px] bg-white dark:bg-zinc-900 rounded-xl border border-gray-200/50 dark:border-zinc-700 overflow-hidden">
-                    {CATEGORY_OPTIONS.map((option) => (
-                        <div
-                            key={option.value}
-                            className={cn(
-                                "px-3 py-2.5 text-sm cursor-pointer transition-colors",
-                                "hover:bg-gray-100 dark:hover:bg-zinc-800",
-                                option.value === value
-                                    ? "text-primary font-medium bg-primary/5"
-                                    : "text-gray-700 dark:text-gray-200",
-                            )}
-                            onClick={() => {
-                                onChange(option.value);
-                                setOpen(false);
-                            }}
-                        >
-                            {t(option.labelKey)}
-                        </div>
-                    ))}
-                </div>
-            )}
-        </div>
-    );
-};
 
 // 动作容器组件
 const ActionContainer = ({ children }: { children: React.ReactNode }) => (
@@ -419,39 +221,9 @@ const IconButton = ({
 
 // 动作项组件
 const ActionItem = ({ buttons }: { buttons: ButtonConfig[] }) => {
-    // 从 localStorage 读取保存的分类
-    const [category, setCategory] = useState<CategoryValue>(() => {
-        if (typeof window !== "undefined") {
-            const saved = localStorage.getItem(CATEGORY_STORAGE_KEY);
-            if (saved && CATEGORY_OPTIONS.some((opt) => opt.value === saved)) {
-                return saved as CategoryValue;
-            }
-        }
-        return "digital-human";
-    });
-
-    // 处理分类变更
-    const handleCategoryChange = useCallback((newCategory: CategoryValue) => {
-        setCategory(newCategory);
-        if (typeof window !== "undefined") {
-            localStorage.setItem(CATEGORY_STORAGE_KEY, newCategory);
-        }
-    }, []);
-
-    const t = useTranslations("Workspace.smartIsland");
-
-    const sortedButtons = useMemo(() => {
-        return sortButtonsByCategory(buttons, category);
-    }, [buttons, category]);
-
     return (
         <ActionContainer>
-            <CategorySelector
-                value={category}
-                onChange={handleCategoryChange}
-            />
-            <Divider />
-            {sortedButtons.map((buttonItem, index) => (
+            {buttons.map((buttonItem, index) => (
                 <TextButton
                     key={index}
                     text={buttonItem.text}

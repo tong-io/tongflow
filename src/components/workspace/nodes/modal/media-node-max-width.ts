@@ -8,19 +8,19 @@ export function maxWidthClassForMediaDimensions(
 ): string {
     const long = Math.max(width, height);
     if (long >= 3600) {
-        return "max-w-[36rem]";
+        return "min-w-[14rem] max-w-[14rem]";
     }
     if (long >= 3000) {
-        return "max-w-[32rem]";
+        return "min-w-[10rem] max-w-[10rem]";
     }
     if (long >= 2400) {
-        return "max-w-[28rem]";
+        return "min-w-[9rem] max-w-[9rem]";
     }
     if (long >= 1920) {
-        return "max-w-80";
+        return "min-w-[8rem] max-w-[8rem]";
     }
     if (long >= 1440) {
-        return "max-w-72";
+        return "min-w-[7rem] max-w-[7rem]";
     }
-    return "max-w-64";
+    return "min-w-[6rem] max-w-[6rem]";
 }
