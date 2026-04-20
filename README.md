@@ -11,7 +11,7 @@
   </p>
 </div>
 
-**TongFlow** is an all-in-one AIGC Studio makes you build AIGC workflows end to end with ease.
+**TongFlow** is an all-in-one AIGC studio for building AIGC workflows end to end with ease.
 
 <div align="center">
   <img src="docs/assets/cover.png" alt="TongFlow" />
@@ -19,7 +19,7 @@
 
 ## Core ideas
 
-- **All model:**:  ai models can be thought of as a **modality transform** (e.g. LLMs are text→text, image models are text→image, music models are text→audio, and so on). TongFlow wraps each capability as a node.
+- **All models**: AI models can be thought of as a **modality transform** (e.g. LLMs are text→text, image models are text→image, music models are text→audio, and so on). TongFlow wraps each capability as a node.
 
 - **All modalities**: support all the modalities and formats people actually ship over the web.
 
@@ -45,9 +45,7 @@ With TongFlow, you can expand your imagination and stretch your ideas with gener
 
 ## Run locally (quickstart)
 
-AI inference is expensive, so TongFlow use [modal.com](https://modal.com) by default as cloud inference and compute backend. 
-Because modal.com gives **$30/month FREE** quota for using cloud GPU/CPU such as **H100**.
-Check here for how to deploy the cloud inference and compute backend of TongFlow.
+AI inference is expensive, so TongFlow uses [modal.com](https://modal.com) by default as its cloud inference and compute backend. Modal offers a **$30/month FREE** quota for cloud GPU/CPU such as **H100**. Configure Modal tokens in `.env` and run `pnpm modal:setup` (see **Environment variables** below).
 
 ### Three ways to run
 
@@ -81,15 +79,15 @@ Open `http://localhost:3000` (lands on `/workspace`).
 
 ### Environment variables (Modal & providers)
 
-The app calls external services (Modal, OpenRouter, Gemini, DeepSeek, OpenAI, etc.). Configure them in `.env`.
+The app calls external services (Modal, OpenRouter, Gemini, OpenAI, etc.). Copy [`.env.example`](.env.example) to `.env` and fill in keys.
 
-Common variables (see `.env` for the source of truth):
+Common variables:
 
 - `MODAL_TOKEN_ID` / `MODAL_TOKEN_SECRET`: Modal workers
-- `OPENROUTER_API_KEY` / `OPENROUTER_FREE_MODEL`: OpenRouter LLM
-- `GEMINI_API_KEY` / `GOOGLE_API_KEY`: Gemini
-- `DEEPSEEK_API_KEY`: DeepSeek
-- `OPENAI_API_KEY` / `OPENAI_CHAT_MODEL`: OpenAI
+- `OPENROUTER_API_KEY` (optional `OPENROUTER_FREE_MODEL`, `OPENROUTER_HTTP_REFERER`, `OPENROUTER_APP_TITLE`): default **Generate text** node (`gen_text`) uses the OpenRouter free router
+- `GEMINI_API_KEY` or `GOOGLE_API_KEY`: **Generate text** when the model slot is Gemini, and other Gemini text/multimodal handlers
+- `OPENAI_API_KEY` (optional `OPENAI_CHAT_MODEL`): **Generate text** when the model slot is OpenAI; default chat model is `gpt-4o-mini` if unset
+- `DEEPSEEK_API_KEY`: only needed for features that still call the DeepSeek API directly (for example batch arrange / grouping text), not for the main text-generation dropdown
 - `NEXT_PUBLIC_TASK_API_URL`: optional; point task wait/stop at an external task service
 - `NEXT_PUBLIC_FILE_BASE_URL`: optional; base URL for file storage
 
@@ -184,10 +182,10 @@ pnpm modal:setup
 - **Gemma 4**: multimodal text (image/video understanding)
 - **Qwen3**: speech recognition and text-to-speech
 - **ACE-Step**: text-to-music
-- **OpenRouter (LLM routing)**: default free route/model for `gen_text` (override via `.env`)
-- **Google Gemini (API)**: some text / multimodal API calls (requires `GEMINI_API_KEY` or `GOOGLE_API_KEY`)
-- **DeepSeek (API)**: some text orchestration / reasoning (requires `DEEPSEEK_API_KEY`)
-- **OpenAI (API)**: `openai-text` handler (default `OPENAI_CHAT_MODEL=gpt-4o-mini`)
+- **OpenRouter (LLM routing)**: default free route/model for `gen_text` (`OPENROUTER_API_KEY`; optional `OPENROUTER_FREE_MODEL` in `.env`)
+- **Google Gemini (API)**: `gen_text_gemini` and related handlers (set `GEMINI_API_KEY` or `GOOGLE_API_KEY`); the node UI can pick the Gemini model id
+- **OpenAI (API)**: `gen_text_openai` (`OPENAI_API_KEY`; optional default `OPENAI_CHAT_MODEL`; the node UI can pick the OpenAI model)
+- **DeepSeek (API)**: only for code paths that call DeepSeek directly (for example batch text grouping), not the main **Generate text** model list
 
 ## Contact
 
@@ -198,12 +196,12 @@ pnpm modal:setup
 </div>
 
 
-**For Business:** Please contact to business@tongflow.com. I’ll get back to you.
+**For Business:** Please contact business@tongflow.com. I’ll get back to you.
 
 - **Open-source model publishers**: I can integrate your models so users can try them out smoothly.
 - **Enterprise**: I can help you deploy on your local GPU, build custom nodes, and more.
 - **API provider / router**: I can integrate your APIs.
-- **Investor**: I’m interested in partnering on tongflow.com, a cloud-hosted ai studio.
+- **Investor**: I’m interested in partnering on tongflow.com, a cloud-hosted AI studio.
 
 ## Open-Source
 
@@ -214,6 +212,10 @@ If you like this project, a Star on GitHub helps a lot. Thank you.
 <div align="center">
   <img src="docs/assets/star.gif" alt="Star on GitHub" />
 </div>
+
+## Extending AI capabilities
+
+Feature metadata (model slots, handler routing keys, processing time hints) lives in [`config/features.default.json`](config/features.default.json). See [docs/feature-registry.md](docs/feature-registry.md) for overrides, validation (`pnpm validate-features`), and how this relates to task handlers and node allowlists. For optional post-build client obfuscation on private deployments, see [docs/closed-source-build.md](docs/closed-source-build.md). Optional closed-source hooks live in the workspace package [`@openflow/proprietary`](packages/proprietary/) — see [docs/proprietary-package.md](docs/proprietary-package.md).
 
 ## License
 

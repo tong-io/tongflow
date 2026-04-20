@@ -5,19 +5,26 @@
 
 import { useEffect } from "react";
 import { create } from "zustand";
-import { listFeatures, type Feature } from "@/lib/api/feature";
-import { resolveCanonicalFeatureName } from "@/lib/feature-registry";
+import {
+    listFeatures,
+    type Feature,
+    type FeatureRegistryAliasesPayload,
+} from "@/lib/api/feature";
 
 // -------------------- Zustand Store --------------------
 
+const emptyAliases: FeatureRegistryAliasesPayload = {
+    canonical: {},
+    labelLookup: {},
+};
+
 interface FeaturesState {
     features: Feature[];
+    aliases: FeatureRegistryAliasesPayload;
     isLoaded: boolean;
     isLoading: boolean;
     error: Error | null;
     getFeatureByName: (name: string) => Feature | undefined;
-    getFreeFeatures: () => Feature[];
-    getPaidFeatures: () => Feature[];
 }
 
 // 请求去重
@@ -25,18 +32,18 @@ let fetchPromise: Promise<void> | null = null;
 
 export const useFeaturesStore = create<FeaturesState>((set, get) => ({
     features: [],
+    aliases: emptyAliases,
     isLoaded: false,
     isLoading: false,
     error: null,
     getFeatureByName: (name) => {
-        const canonical = resolveCanonicalFeatureName(name);
+        const { canonical } = get().aliases;
+        const key = canonical[name] ?? name;
         return (
-            get().features.find((f) => f.name === canonical) ??
+            get().features.find((f) => f.name === key) ??
             get().features.find((f) => f.name === name)
         );
     },
-    getFreeFeatures: () => get().features.filter((f) => f.isFree),
-    getPaidFeatures: () => get().features.filter((f) => !f.isFree),
 }));
 
 /**
@@ -54,9 +61,10 @@ async function loadFeatures(): Promise<void> {
 
     fetchPromise = (async () => {
         try {
-            const { features } = await listFeatures();
+            const { features, aliases } = await listFeatures();
             useFeaturesStore.setState({
                 features,
+                aliases: aliases ?? emptyAliases,
                 isLoaded: true,
                 isLoading: false,
                 error: null,
@@ -97,8 +105,6 @@ export function useFeatures() {
     const isLoaded = useFeaturesStore((s) => s.isLoaded);
     const error = useFeaturesStore((s) => s.error);
     const getFeatureByName = useFeaturesStore((s) => s.getFeatureByName);
-    const getFreeFeatures = useFeaturesStore((s) => s.getFreeFeatures);
-    const getPaidFeatures = useFeaturesStore((s) => s.getPaidFeatures);
 
     // 确保已加载
     useEffect(() => {
@@ -111,8 +117,6 @@ export function useFeatures() {
         isLoaded,
         error,
         getFeatureByName,
-        getFreeFeatures,
-        getPaidFeatures,
     };
 }
 
@@ -124,32 +128,6 @@ export function useFeature(name: string) {
 
     return {
         feature: getFeatureByName(name),
-        isLoading,
-        error,
-    };
-}
-
-/**
- * 获取免费功能列表
- */
-export function useFreeFeatures() {
-    const { isLoading, error, getFreeFeatures } = useFeatures();
-
-    return {
-        features: getFreeFeatures(),
-        isLoading,
-        error,
-    };
-}
-
-/**
- * 获取付费功能列表
- */
-export function usePaidFeatures() {
-    const { isLoading, error, getPaidFeatures } = useFeatures();
-
-    return {
-        features: getPaidFeatures(),
         isLoading,
         error,
     };

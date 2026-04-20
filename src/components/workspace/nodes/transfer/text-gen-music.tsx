@@ -31,6 +31,12 @@ import {
 } from "@/utils/node-execution-config";
 import { TEXT_GEN_MUSIC_HANDLES } from "@/utils/connection-rules";
 import { useTranslations } from "next-intl";
+import useFlow from "@/hooks/use-flow";
+import { clampToAllowedModel } from "@/utils/node-model-feature";
+import { NodeModelSelect } from "../base/node-model-select";
+import { singleModelSelectOptions } from "@/utils/node-model-select-label";
+
+const DEFAULT_FEATURE = "gen_music";
 
 // 语言选项
 const LANGUAGE_OPTIONS = [
@@ -97,7 +103,7 @@ interface TextGenMusicNodeProps extends NodeProps {
 
 // 工作流执行配置
 const workflowConfig = {
-    feature: "gen_music",
+    feature: DEFAULT_FEATURE,
     label: "文本生成音乐",
     outputType: "audioNode",
     outputField: "fileKeys" as const,
@@ -213,8 +219,15 @@ function useMusicUpstreamResolved(nodeId: string | null) {
 
 const TextGenMusicNode = ({ selected, data }: TextGenMusicNodeProps) => {
     const t = useTranslations("Workspace.nodes");
+    const updates = useFlow((s) => s.updates);
     const { texts = [] } = data;
     const nodeId = useNodeId();
+
+    const featureName = clampToAllowedModel(
+        (data as { feature?: string }).feature,
+        [DEFAULT_FEATURE],
+        DEFAULT_FEATURE,
+    );
 
     const { styleText, lyricText, hasStyleUpstream, hasLyricUpstream } =
         useMusicUpstreamResolved(nodeId ?? null);
@@ -260,6 +273,7 @@ const TextGenMusicNode = ({ selected, data }: TextGenMusicNodeProps) => {
             data={data}
             workflowConfig={{
                 ...workflowConfig,
+                feature: featureName,
                 title: t("titles.textGenMusic"),
                 icon: <Music className="h-5 w-5" />,
                 executeLabel: t("actions.generateMusic"),
@@ -333,6 +347,15 @@ const TextGenMusicNode = ({ selected, data }: TextGenMusicNodeProps) => {
             }}
         >
             <div className="p-4 space-y-4">
+                <NodeModelSelect
+                    value={featureName}
+                    onValueChange={(value) =>
+                        updates(nodeId!, { ...data, feature: value })
+                    }
+                    options={singleModelSelectOptions(DEFAULT_FEATURE, (k) =>
+                        t(k as Parameters<typeof t>[0]),
+                    )}
+                />
                 <Card className="p-3">
                     <div className="flex items-center justify-between gap-2 mb-2">
                         <Label className="flex items-center gap-2 text-sm font-medium text-muted-foreground">

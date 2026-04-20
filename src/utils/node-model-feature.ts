@@ -4,6 +4,9 @@ const LEGACY_PRO_TO_DEFAULT: Record<string, string> = {
     image_gen_pro: "image_gen",
     image_fusion_pro: "image_fusion",
     image_gen_video_pro: "image_gen_video",
+    model_gen: "image_gen_model",
+    /** compose 节点曾误用下划线形式，与 registry 不一致 */
+    speech_text_gen_video: "speech-text-gen-video",
 };
 
 /**

@@ -20,16 +20,11 @@ import {
 } from "@/utils/node-execution-config";
 import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from "@/components/ui/select";
 import useFlow from "@/hooks/use-flow";
 import { clampToAllowedModel } from "@/utils/node-model-feature";
 import { useTranslations } from "next-intl";
+import { NodeModelSelect } from "../base/node-model-select";
+import { singleModelSelectOptions } from "@/utils/node-model-select-label";
 
 // 工作流执行配置
 const workflowConfig = {
@@ -141,32 +136,15 @@ const ImageGenImageNode = ({ selected, data }: NodeProps) => {
             }}
         >
             <div className="p-4 space-y-4">
-                {/* 模型选择 */}
-                <Card className="p-3">
-                    <div className="space-y-2">
-                        <Label className="text-sm font-medium text-muted-foreground">
-                            {t("common.modelSelect")}
-                        </Label>
-                        <Select
-                            value={featureName}
-                            onValueChange={(value) =>
-                                updates(id, { ...data, feature: value })
-                            }
-                        >
-                            <SelectTrigger
-                                className="w-full"
-                                size="sm"
-                            >
-                                <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="image_edit">
-                                    {t("common.models.imageEdit")}
-                                </SelectItem>
-                            </SelectContent>
-                        </Select>
-                    </div>
-                </Card>
+                <NodeModelSelect
+                    value={featureName}
+                    onValueChange={(value) =>
+                        updates(id, { ...data, feature: value })
+                    }
+                    options={singleModelSelectOptions("image_edit", (k) =>
+                        t(k as Parameters<typeof t>[0]),
+                    )}
+                />
 
                 {/* 如果有上游文本输入，显示传入的文本 */}
                 {hasUpstreamTexts ? (

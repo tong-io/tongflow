@@ -3,7 +3,7 @@ import { requireAuth } from "@/lib/auth-stub";
 import { getDb } from "@/db";
 import { tasks } from "@/db/schema";
 import { nanoid } from "nanoid";
-import { getFeatureByName } from "@/lib/feature-registry";
+import { getFeatureByName } from "@/lib/feature-registry.server";
 
 /**
  * POST /api/task/create

@@ -7,14 +7,18 @@ export interface Feature {
     name: string;
     type: string;
     function: string;
-    price: number;
-    isFree: boolean;
-    minTier: string;
     processingTime: number;
+}
+
+export interface FeatureRegistryAliasesPayload {
+    canonical: Record<string, string>;
+    labelLookup: Record<string, string>;
 }
 
 export interface ListFeaturesResponse {
     features: Feature[];
+    /** 与服务器合并后的别名；客户端用于解析旧 id / 展示映射 */
+    aliases?: FeatureRegistryAliasesPayload;
 }
 
 /**
@@ -35,22 +39,12 @@ export async function listFeatures(): Promise<ListFeaturesResponse> {
  * 根据名称获取功能
  */
 export async function getFeatureByName(name: string): Promise<Feature | null> {
-    const { features } = await listFeatures();
-    return features.find((f) => f.name === name) || null;
+    const { features, aliases } = await listFeatures();
+    const key = aliases?.canonical[name] ?? name;
+    return (
+        features.find((f) => f.name === key) ??
+        features.find((f) => f.name === name) ??
+        null
+    );
 }
 
-/**
- * 获取免费功能列表
- */
-export async function listFreeFeatures(): Promise<Feature[]> {
-    const { features } = await listFeatures();
-    return features.filter((f) => f.isFree);
-}
-
-/**
- * 获取付费功能列表
- */
-export async function listPaidFeatures(): Promise<Feature[]> {
-    const { features } = await listFeatures();
-    return features.filter((f) => !f.isFree);
-}

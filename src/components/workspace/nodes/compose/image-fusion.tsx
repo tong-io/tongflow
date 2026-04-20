@@ -23,19 +23,14 @@ import useFlow from "@/hooks/use-flow";
 import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from "@/components/ui/select";
 import { NodeTextarea } from "../base/node-textarea";
 import { useR2AsyncLoader } from "@/hooks/use-r2-async-loader";
 import { getR2Url } from "@/lib/r2-utils";
 import { cn } from "@/lib/utils";
 import { useTranslations } from "next-intl";
 import { clampToAllowedModel } from "@/utils/node-model-feature";
+import { NodeModelSelect } from "../base/node-model-select";
+import { singleModelSelectOptions } from "@/utils/node-model-select-label";
 
 const aspectRatios = [
     { value: "9:16", key: "portrait", width: 720, height: 1280 }, // HD 竖屏
@@ -288,32 +283,15 @@ const ImageFusionNode = ({ selected, data }: NodeProps) => {
             }}
         >
             <div className="p-4 space-y-4">
-                {/* 模型选择 */}
-                <Card className="p-3">
-                    <div className="space-y-2">
-                        <Label className="text-sm font-medium text-muted-foreground">
-                            {t("common.modelSelect")}
-                        </Label>
-                        <Select
-                            value={featureName}
-                            onValueChange={(value) =>
-                                updates(id, { ...data, feature: value })
-                            }
-                        >
-                            <SelectTrigger
-                                className="w-full"
-                                size="sm"
-                            >
-                                <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="image_fusion">
-                                    {t("common.models.imageFusion")}
-                                </SelectItem>
-                            </SelectContent>
-                        </Select>
-                    </div>
-                </Card>
+                <NodeModelSelect
+                    value={featureName}
+                    onValueChange={(value) =>
+                        updates(id, { ...data, feature: value })
+                    }
+                    options={singleModelSelectOptions("image_fusion", (k) =>
+                        t(k as Parameters<typeof t>[0]),
+                    )}
+                />
 
                 {/* 图片宽高比选择 */}
                 <Card className="p-3">

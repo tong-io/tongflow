@@ -1,4 +1,4 @@
-import { Handle, Position, type NodeProps } from "@xyflow/react";
+import { Handle, Position, useNodeId, type NodeProps } from "@xyflow/react";
 import { memo, useCallback, useMemo, useRef } from "react";
 import { Atom, Ear, Upload, Mic } from "lucide-react";
 import { getR2Url } from "@/lib/r2-utils";
@@ -23,6 +23,14 @@ import {
     type GetPromptsContext,
 } from "@/utils/node-execution-config";
 import { useTranslations, useLocale } from "next-intl";
+import { clampToAllowedModel } from "@/utils/node-model-feature";
+import { NodeModelSelect } from "../base/node-model-select";
+import { multiModelSelectOptions } from "@/utils/node-model-select-label";
+
+const SPEECH_MODEL_FEATURES = [
+    "text_gen_speech_clone",
+    "text_gen_speech_instruct",
+] as const;
 import { SpeakerVoiceRecorder } from "@/components/workspace/speaker-voice-recorder";
 import {
     crawledVoiceOptions,
@@ -41,6 +49,8 @@ const TextGenSpeechNode = ({ selected, data }: NodeProps) => {
     const { texts = [] } = data as { texts?: string[] };
 
     const expands = useFlow((s) => s.expands);
+    const updates = useFlow((s) => s.updates);
+    const id = useNodeId()!;
 
     const defaultVoiceLang: VoiceLanguage =
         locale in crawledVoiceOptions ? (locale as VoiceLanguage) : "zh";
@@ -194,6 +204,12 @@ const TextGenSpeechNode = ({ selected, data }: NodeProps) => {
         }
     };
 
+    const featureName = clampToAllowedModel(
+        (data as { feature?: string }).feature,
+        SPEECH_MODEL_FEATURES,
+        getFeature(),
+    );
+
     // 将预设的性别、情感和风格拼接成描述字符串
     const buildPresetDescription = () => {
         const parts: string[] = [];
@@ -238,7 +254,7 @@ const TextGenSpeechNode = ({ selected, data }: NodeProps) => {
 
     // 工作流执行配置
     const workflowConfig = {
-        feature: getFeature(),
+        feature: featureName,
         label: "文本生成语音",
         outputType: "audioNode",
         outputField: "fileKeys" as const,
@@ -316,6 +332,23 @@ const TextGenSpeechNode = ({ selected, data }: NodeProps) => {
                 },
             }}
         >
+            <div className="px-4 pt-4">
+                <NodeModelSelect
+                    value={featureName}
+                    onValueChange={(v) => {
+                        updates(id, { ...data, feature: v });
+                        if (v === "text_gen_speech_clone") {
+                            setState({ mode: "clone" });
+                        } else {
+                            setState({ mode: "preset" });
+                        }
+                    }}
+                    options={multiModelSelectOptions(
+                        [...SPEECH_MODEL_FEATURES],
+                        (k) => t(k as Parameters<typeof t>[0]),
+                    )}
+                />
+            </div>
             <Card
                 className="p-5 nodrag"
                 onPointerDown={(e) => e.stopPropagation()}

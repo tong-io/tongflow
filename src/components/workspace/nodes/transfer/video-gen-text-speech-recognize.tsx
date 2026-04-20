@@ -1,4 +1,4 @@
-import { Handle, Position, type NodeProps } from "@xyflow/react";
+import { Handle, Position, useNodeId, type NodeProps } from "@xyflow/react";
 import { memo } from "react";
 import { Video as VideoIcon } from "lucide-react";
 
@@ -8,11 +8,11 @@ import {
     upstreamParam,
     type GetPromptsContext,
 } from "@/utils/node-execution-config";
-import { useNodeState } from "@/hooks/use-node-data";
-import { Switch } from "@/components/ui/switch";
-import { Label } from "@/components/ui/label";
-import { Card } from "@/components/ui/card";
 import { useTranslations } from "next-intl";
+import useFlow from "@/hooks/use-flow";
+import { clampToAllowedModel } from "@/utils/node-model-feature";
+import { NodeModelSelect } from "../base/node-model-select";
+import { multiModelSelectOptions } from "@/utils/node-model-select-label";
 
 interface VideoGenTextSpeechRecognizeNodeProps extends NodeProps {
     data: {
@@ -20,9 +20,11 @@ interface VideoGenTextSpeechRecognizeNodeProps extends NodeProps {
     };
 }
 
+const ASR_FEATURES = ["transcribe", "transcribe_timestamp"] as const;
+
 // 工作流执行配置（基础配置，不包含动态的feature）
 const baseWorkflowConfig = {
-    label: "视频语音识别",
+    label: "语音识别",
     outputType: "textNode",
     outputField: "texts" as const,
     supportsBatch: true,
@@ -44,19 +46,15 @@ const VideoGenTextSpeechRecognizeNode = ({
     data,
 }: VideoGenTextSpeechRecognizeNodeProps) => {
     const t = useTranslations("Workspace.nodes");
+    const updates = useFlow((s) => s.updates);
+    const id = useNodeId()!;
     const { fileKeys = [] } = data;
 
-    // 使用Hook来管理时间戳开关状态
-    const [state, setState] = useNodeState(
-        {
-            withTimestamp: false,
-        },
-        data,
+    const featureName = clampToAllowedModel(
+        (data as { feature?: string }).feature,
+        ASR_FEATURES,
+        "transcribe",
     );
-    const { withTimestamp } = state;
-
-    // 根据开关状态确定feature
-    const feature = withTimestamp ? "transcribe_timestamp" : "transcribe";
 
     return (
         <BaseNode
@@ -65,7 +63,7 @@ const VideoGenTextSpeechRecognizeNode = ({
             data={data}
             workflowConfig={{
                 ...baseWorkflowConfig,
-                feature,
+                feature: featureName,
                 title: t("titles.speechRecognize"),
                 icon: <VideoIcon className="h-5 w-5" />,
                 executeLabel: t("actions.describeVideo"),
@@ -86,26 +84,16 @@ const VideoGenTextSpeechRecognizeNode = ({
             }}
         >
             <div className="p-4">
-                <Card
-                    className="p-3 nodrag"
-                    onPointerDown={(e) => e.stopPropagation()}
-                >
-                    <div className="flex items-center justify-between">
-                        <Label
-                            htmlFor="video-timestamp-switch"
-                            className="text-sm text-muted-foreground"
-                        >
-                            {t("speechRecognize.withTimestamp")}
-                        </Label>
-                        <Switch
-                            id="video-timestamp-switch"
-                            checked={withTimestamp}
-                            onCheckedChange={(checked) =>
-                                setState({ withTimestamp: checked })
-                            }
-                        />
-                    </div>
-                </Card>
+                <NodeModelSelect
+                    value={featureName}
+                    onValueChange={(value) =>
+                        updates(id, { ...data, feature: value })
+                    }
+                    options={multiModelSelectOptions(
+                        [...ASR_FEATURES],
+                        (k) => t(k as Parameters<typeof t>[0]),
+                    )}
+                />
             </div>
 
             <Handle

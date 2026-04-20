@@ -16,13 +16,6 @@ import { useNodeState } from "@/hooks/use-node-data";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from "@/components/ui/select";
 import { NodeTextarea } from "../base/node-textarea";
 import { cn } from "@/lib/utils";
 import { getR2Url } from "@/lib/r2-utils";
@@ -34,6 +27,8 @@ import {
 } from "@/utils/node-execution-config";
 import { useTranslations } from "next-intl";
 import { clampToAllowedModel } from "@/utils/node-model-feature";
+import { NodeModelSelect } from "../base/node-model-select";
+import { singleModelSelectOptions } from "@/utils/node-model-select-label";
 
 const aspectRatios = [
     { value: "9:16", label: "portrait", width: 576, height: 1024 }, // 高 1024 的竖屏（保持9:16）
@@ -250,35 +245,18 @@ const TextGenVideoNode = ({ selected, data }: NodeProps) => {
             }}
         >
             <div className="p-4 space-y-4">
-                {/* 模型选择 */}
-                <Card className="p-3">
-                    <div className="space-y-2">
-                        <Label className="text-sm font-medium text-muted-foreground">
-                            {t("common.modelSelect")}
-                        </Label>
-                        <Select
-                            value={featureName}
-                            onValueChange={(value) =>
-                                updates(nodeId!, {
-                                    ...data,
-                                    feature: value,
-                                })
-                            }
-                        >
-                            <SelectTrigger
-                                className="w-full"
-                                size="sm"
-                            >
-                                <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="image_gen_video">
-                                    {t("common.models.imageGenVideo")}
-                                </SelectItem>
-                            </SelectContent>
-                        </Select>
-                    </div>
-                </Card>
+                <NodeModelSelect
+                    value={featureName}
+                    onValueChange={(value) =>
+                        updates(nodeId!, {
+                            ...data,
+                            feature: value,
+                        })
+                    }
+                    options={singleModelSelectOptions("image_gen_video", (k) =>
+                        t(k as Parameters<typeof t>[0]),
+                    )}
+                />
 
                 {/* 视频描述输入 - 如果有组合模式的上游文本，显示预览 */}
                 {hasCompositeText ? (

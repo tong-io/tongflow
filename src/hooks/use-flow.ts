@@ -82,10 +82,6 @@ export interface FlowState {
     comboMode: boolean;
     comboSelectedIds: Set<string>;
 
-    // 放置模式状态
-    placingNodeId: string | null;
-    isPlacingMode: boolean;
-
     // 原子接口
     setComboMode: (enabled: boolean) => void;
     isInCombo: (id: string) => boolean;
@@ -95,12 +91,6 @@ export interface FlowState {
     setWorkflowId: (id: number | null) => void;
     setWorkflowDescription: (description: string) => void;
     setCurrentShareId: (id: number | null) => void;
-
-    // 放置模式接口
-    startPlacing: (node: PossibleNode) => string;
-    updatePlacingPosition: (position: { x: number; y: number }) => void;
-    confirmPlacing: () => void;
-    cancelPlacing: () => void;
 
     computeMap: Map<string, () => void>;
     registerCompute: (id: string, fn: () => void) => void;
@@ -114,7 +104,10 @@ export interface FlowState {
     expands: (nodeId: string | null, possibleNodes: PossibleNode[]) => string[];
     compose: (newNode: { type: string; data: unknown }) => string;
     updates: (nodeId: string, data: Record<string, unknown>) => void;
-    addNode: (node: PossibleNode) => string;
+    addNode: (
+        node: PossibleNode,
+        position?: { x: number; y: number },
+    ) => string;
     removeNode: (nodeId: string) => void;
     // 节点创建回调
     nodeCreatedCallbacks: Set<(nodeIds: string[]) => void>;
@@ -136,10 +129,6 @@ export const useFlow = create<FlowState>((set, get) => ({
     // 组合模式相关状态
     comboMode: false,
     comboSelectedIds: new Set<string>(),
-
-    // 放置模式相关状态
-    placingNodeId: null,
-    isPlacingMode: false,
 
     // 节点创建回调
     nodeCreatedCallbacks: new Set(),
@@ -227,14 +216,16 @@ export const useFlow = create<FlowState>((set, get) => ({
         });
         debouncedSaveNodes(newNodes);
     },
-    addNode: (node: PossibleNode) => {
+    addNode: (node: PossibleNode, position?: { x: number; y: number }) => {
         const { nodes } = get();
 
-        // 计算一个更智能的默认位置
         let defaultX = 100;
         let defaultY = 100;
 
-        if (nodes.length > 0) {
+        if (position) {
+            defaultX = position.x;
+            defaultY = position.y;
+        } else if (nodes.length > 0) {
             // 如果已有节点，在最右侧添加新节点
             const rightmostNode = nodes.reduce((rightmost, current) => {
                 const currentRight =
@@ -283,71 +274,6 @@ export const useFlow = create<FlowState>((set, get) => ({
         localStorage.setItem("edges", JSON.stringify(newEdges));
     },
 
-    // 放置模式方法
-    startPlacing: (node: PossibleNode) => {
-        const { nodes } = get();
-        const nodeId = v4();
-        const newNode = {
-            id: nodeId,
-            type: node.type,
-            position: { x: 0, y: 0 }, // 初始位置，将由鼠标位置更新
-            origin: [0.5, 0.5] as [number, number],
-            data: node?.data ?? {},
-        };
-        const newNodes = nodes.concat(newNode);
-        set({
-            nodes: newNodes,
-            placingNodeId: nodeId,
-            isPlacingMode: true,
-        });
-        // 不触发 nodeCreatedCallbacks，等确认放置后再触发
-        return nodeId;
-    },
-
-    updatePlacingPosition: (position: { x: number; y: number }) => {
-        const { placingNodeId, nodes } = get();
-        if (!placingNodeId) return;
-
-        const newNodes = nodes.map((node) => {
-            if (node.id === placingNodeId) {
-                return { ...node, position };
-            }
-            return node;
-        });
-        set({ nodes: newNodes });
-        // 不保存到 localStorage，等确认放置后再保存
-    },
-
-    confirmPlacing: () => {
-        const { placingNodeId, nodes } = get();
-        if (!placingNodeId) return;
-
-        set({
-            placingNodeId: null,
-            isPlacingMode: false,
-        });
-        debouncedSaveNodes(nodes);
-        // 确认放置后触发节点创建回调（用于 fitView 等）
-        get().nodeCreatedCallbacks.forEach((cb) => cb([placingNodeId]));
-    },
-
-    cancelPlacing: () => {
-        const { placingNodeId, nodes, edges } = get();
-        if (!placingNodeId) return;
-
-        const newNodes = nodes.filter((node) => node.id !== placingNodeId);
-        const newEdges = edges.filter(
-            (edge) =>
-                edge.source !== placingNodeId && edge.target !== placingNodeId,
-        );
-        set({
-            nodes: newNodes,
-            edges: newEdges,
-            placingNodeId: null,
-            isPlacingMode: false,
-        });
-        // 不需要保存，因为节点从未被持久化
-    },
     expands: (nodeId, possibleNodes): string[] => {
         const { nodes } = get();
         let { edges } = get();

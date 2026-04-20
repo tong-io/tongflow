@@ -10,6 +10,7 @@ import {
     ReactFlow,
     Controls,
     Background,
+    Panel,
     useReactFlow,
     ReactFlowProvider,
 } from "@xyflow/react";
@@ -37,7 +38,6 @@ const selector = (state: FlowState) => ({
     nodes: state.nodes,
     edges: state.edges,
     workflowName: state.workflowName,
-    isPlacingMode: state.isPlacingMode,
 });
 
 /**
@@ -50,9 +50,7 @@ function WorkspaceInner({ user }: { user?: { id: string; email: string } }) {
     const [colorMode, setColorMode] = useState<"light" | "dark">("light");
 
     // 分开获取数据和函数，避免函数引用变化导致重新渲染
-    const { nodes, edges, workflowName, isPlacingMode } = useFlow(
-        useShallow(selector),
-    );
+    const { nodes, edges, workflowName } = useFlow(useShallow(selector));
 
     // 直接从 store 获取函数（函数引用永不变化）
     const onNodesChange = useFlow.getState().onNodesChange;
@@ -163,63 +161,19 @@ function WorkspaceInner({ user }: { user?: { id: string; email: string } }) {
         });
     };
 
-    // 点击画布空白处退出 Combo Mode 或确认放置
+    // 点击画布空白处退出 Combo Mode
     const handlePaneClick = useCallback(() => {
         const store = useFlow.getState();
-        // 放置模式由 handleClick 处理，这里不需要处理
-        if (store.isPlacingMode) {
-            return;
-        }
         if (store.comboMode) {
             store.setComboMode(false);
         }
     }, []);
 
-    // 容器级别的点击处理（确保放置模式下点击任何地方都能确认）
-    const handleClick = useCallback((event: React.MouseEvent) => {
-        const store = useFlow.getState();
-        if (store.isPlacingMode) {
-            // 阻止事件传播到 ReactFlow，避免触发其他点击逻辑
-            event.stopPropagation();
-            store.confirmPlacing();
-        }
-    }, []);
-
-    // 右键点击取消放置
-    const handleContextMenu = useCallback((event: React.MouseEvent) => {
-        const store = useFlow.getState();
-        if (store.isPlacingMode) {
-            event.preventDefault();
-            store.cancelPlacing();
-        }
-    }, []);
-
-    // 鼠标移动时更新放置中节点的位置
-    const handleMouseMove = useCallback(
-        (event: React.MouseEvent) => {
-            const store = useFlow.getState();
-            if (!store.isPlacingMode) return;
-
-            // 将屏幕坐标转换为画布坐标
-            const position = reactFlowInstance.screenToFlowPosition({
-                x: event.clientX,
-                y: event.clientY,
-            });
-            store.updatePlacingPosition(position);
-        },
-        [reactFlowInstance],
-    );
-
-    // 监听 Escape 键退出 Combo Mode 或取消放置
+    // 监听 Escape 键退出 Combo Mode
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
             if (e.key === "Escape") {
                 const store = useFlow.getState();
-                // 优先取消放置模式
-                if (store.isPlacingMode) {
-                    store.cancelPlacing();
-                    return;
-                }
                 if (store.comboMode) {
                     store.setComboMode(false);
                 }
@@ -297,11 +251,7 @@ function WorkspaceInner({ user }: { user?: { id: string; email: string } }) {
     }, [locale, tIndex]);
 
     return (
-        <div
-            className="relative w-full h-full overflow-hidden [&_.react-flow]:!bg-[#f6f7f9] dark:[&_.react-flow]:!bg-background"
-            onMouseMove={handleMouseMove}
-            onClick={handleClick}
-        >
+        <div className="relative w-full h-full overflow-hidden [&_.react-flow]:!bg-[#f6f7f9] dark:[&_.react-flow]:!bg-background">
             <ReactFlow
                 nodes={nodes}
                 onNodesChange={onNodesChange}
@@ -319,8 +269,6 @@ function WorkspaceInner({ user }: { user?: { id: string; email: string } }) {
                 onSelectionChange={onSelectionChange}
                 onNodeDoubleClick={handleNodeDoubleClick}
                 onPaneClick={handlePaneClick}
-                onContextMenu={handleContextMenu}
-                nodesDraggable={!isPlacingMode}
                 nodeOrigin={[0.5, 0.5]}
                 selectNodesOnDrag={false}
                 fitView
@@ -331,11 +279,10 @@ function WorkspaceInner({ user }: { user?: { id: string; email: string } }) {
             >
                 <Background />
                 <Controls />
+                <Panel position="bottom-center" className="!mb-5 z-10">
+                    <SmartIsland />
+                </Panel>
             </ReactFlow>
-
-            <div className="absolute left-1/2 bottom-5 transform -translate-x-1/2 z-10">
-                <SmartIsland />
-            </div>
 
             <div className="absolute left-5 top-5 z-10 flex items-center gap-3">
                 <WorkflowTitleMenu />

@@ -19,6 +19,9 @@
     "scripts": {
         "dev": "next dev",
         "build": "next build",
+        "build:obfuscated": "next build && node scripts/obfuscate-next-client.mjs",
+        "dist:clean": "node -e \"require('node:fs').rmSync('dist',{recursive:true,force:true})\"",
+        "dist:build": "pnpm build:obfuscated && node scripts/prepare-standalone-dist.mjs",
         "start": "next start",
         "modal:setup": "node scripts/modal-setup.mjs",
         "desktop:dev": "pnpm desktop:compile && cross-env ELECTRON_DEV=1 concurrently -k -n NEXT,ELECTRON -c blue,magenta \"next dev\" \"electron .\"",
@@ -36,9 +39,11 @@
         "db:push": "drizzle-kit push",
         "db:studio": "drizzle-kit studio",
         "lint": "npx biome format --write",
-        "typecheck": "tsc --noEmit"
+        "typecheck": "tsc --noEmit",
+        "validate-features": "tsx scripts/validate-features.ts"
     },
     "dependencies": {
+        "@openflow/proprietary": "workspace:*",
         "@google/genai": "^1.47.0",
         "@hookform/resolvers": "5.2.1",
         "@radix-ui/react-alert-dialog": "1.1.15",
@@ -73,6 +78,7 @@
         "react-dom": "19.2.1",
         "react-hook-form": "7.62.0",
         "react-hot-toast": "2.6.0",
+        "server-only": "0.0.1",
         "tailwind-merge": "3.3.1",
         "three": "^0.183.2",
         "uuid": "13.0.0",
@@ -91,6 +97,7 @@
         "drizzle-kit": "0.31.4",
         "electron": "^37.3.0",
         "electron-builder": "^26.0.12",
+        "javascript-obfuscator": "^4.1.1",
         "tailwindcss": "4",
         "tsup": "^8.5.0",
         "tsx": "^4.20.5",

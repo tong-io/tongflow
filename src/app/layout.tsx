@@ -4,6 +4,7 @@ import "./globals.css";
 import { Toaster } from "react-hot-toast";
 import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getMessages } from "next-intl/server";
+import { ProprietaryAppShell } from "@openflow/proprietary";
 
 const geistSans = Geist({
     variable: "--font-geist-sans",
@@ -54,8 +55,10 @@ export default async function RootLayout({
                 className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen`}
             >
                 <NextIntlClientProvider messages={messages}>
-                    <main>{children}</main>
-                    <Toaster position="top-center" />
+                    <ProprietaryAppShell>
+                        <main>{children}</main>
+                        <Toaster position="top-center" />
+                    </ProprietaryAppShell>
                 </NextIntlClientProvider>
             </body>
         </html>

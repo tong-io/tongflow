@@ -1,4 +1,10 @@
-import { Handle, Position, useNodesData, type NodeProps } from "@xyflow/react";
+import {
+    Handle,
+    Position,
+    useNodeId,
+    useNodesData,
+    type NodeProps,
+} from "@xyflow/react";
 import { memo, useMemo } from "react";
 import { Atom, Type, Music } from "lucide-react";
 import { getR2Url } from "@/lib/r2-utils";
@@ -17,6 +23,25 @@ import { useNodeState } from "@/hooks/use-node-data";
 import { upstreamParam, configParam } from "@/utils/node-execution-config";
 import { useR2AsyncLoader } from "@/hooks/use-r2-async-loader";
 import { useTranslations } from "next-intl";
+import useFlow from "@/hooks/use-flow";
+import { clampToAllowedModel } from "@/utils/node-model-feature";
+import { NodeModelSelect } from "../base/node-model-select";
+import { multiModelSelectOptions } from "@/utils/node-model-select-label";
+
+const TEXT_AUDIO_SPEECH_FEATURES = [
+    "text_gen_speech_clone",
+    "text_gen_speech_emotion",
+    "text_gen_speech_style",
+] as const;
+
+function resolveFeatureFromEmotionStyle(
+    emotion: string,
+    style: string,
+): (typeof TEXT_AUDIO_SPEECH_FEATURES)[number] {
+    if (style) return "text_gen_speech_style";
+    if (emotion) return "text_gen_speech_emotion";
+    return "text_gen_speech_clone";
+}
 
 // 情感/风格选项 (使用 "none" 代替空字符串，因为 Select 组件不支持空值)
 const emotionOptions = [
@@ -235,6 +260,8 @@ MediaThumbnail.displayName = "MediaThumbnail";
 
 const TextAudioGenSpeechNode = ({ selected, data }: NodeProps) => {
     const t = useTranslations("Workspace.nodes");
+    const updates = useFlow((s) => s.updates);
+    const id = useNodeId()!;
     const { ids = [] } = data as { ids?: string[] };
     const fromNodes = useNodesData(ids);
 
@@ -256,12 +283,12 @@ const TextAudioGenSpeechNode = ({ selected, data }: NodeProps) => {
     );
     const { emotion, style } = state;
 
-    // 根据选择的情感/风格确定feature
-    const getFeature = () => {
-        if (style) return "text_gen_speech_style";
-        if (emotion) return "text_gen_speech_emotion";
-        return "text_gen_speech_clone";
-    };
+    const resolvedFromEmotionStyle = resolveFeatureFromEmotionStyle(emotion, style);
+    const featureName = clampToAllowedModel(
+        (data as { feature?: string }).feature,
+        TEXT_AUDIO_SPEECH_FEATURES,
+        resolvedFromEmotionStyle,
+    );
 
     // 补充 outputType 和 outputField 用于 BaseNode 自动处理任务完成
     const dataWithOutput = useMemo(
@@ -275,7 +302,7 @@ const TextAudioGenSpeechNode = ({ selected, data }: NodeProps) => {
 
     // 工作流执行配置
     const workflowConfig = {
-        feature: getFeature(),
+        feature: featureName,
         label: "文本音频生成语音",
         outputType: "audioNode",
         outputField: "fileKeys" as const,
@@ -309,6 +336,7 @@ const TextAudioGenSpeechNode = ({ selected, data }: NodeProps) => {
             workflowConfig={useMemo(
                 () => ({
                     ...workflowConfig,
+                    feature: featureName,
                     title: t("titles.textAudioGenSpeech"),
                     icon: <Atom className="h-5 w-5" />,
                     executeLabel: t("actions.generateSpeech"),
@@ -323,10 +351,40 @@ const TextAudioGenSpeechNode = ({ selected, data }: NodeProps) => {
                               }))
                             : [],
                 }),
-                [audioFileKey, texts, emotion, style, t],
+                [audioFileKey, texts, emotion, style, featureName, t],
             )}
         >
             <div className="p-4 space-y-4">
+                <NodeModelSelect
+                    value={featureName}
+                    onValueChange={(v) => {
+                        if (v === "text_gen_speech_clone") {
+                            setState({ emotion: "", style: "" });
+                            updates(id, { ...data, feature: v });
+                            return;
+                        }
+                        if (v === "text_gen_speech_emotion") {
+                            setState({
+                                style: "",
+                                emotion: emotion || "happy",
+                            });
+                            updates(id, {
+                                ...data,
+                                feature: v,
+                            });
+                            return;
+                        }
+                        setState({
+                            emotion: "",
+                            style: style || "serious",
+                        });
+                        updates(id, { ...data, feature: v });
+                    }}
+                    options={multiModelSelectOptions(
+                        TEXT_AUDIO_SPEECH_FEATURES,
+                        (k) => t(k as Parameters<typeof t>[0]),
+                    )}
+                />
                 {/* 媒体展示区 */}
                 <Card className="p-3">
                     <div className="space-y-2">
@@ -379,12 +437,19 @@ const TextAudioGenSpeechNode = ({ selected, data }: NodeProps) => {
                         </label>
                         <Select
                             value={emotion || "none"}
-                            onValueChange={(value) =>
+                            onValueChange={(value) => {
+                                const nextEmotion = value === "none" ? "" : value;
                                 setState({
-                                    emotion: value === "none" ? "" : value,
+                                    emotion: nextEmotion,
                                     style: "",
-                                })
-                            }
+                                });
+                                const nextFeature =
+                                    resolveFeatureFromEmotionStyle(nextEmotion, "");
+                                updates(id, {
+                                    ...data,
+                                    feature: nextFeature,
+                                });
+                            }}
                         >
                             <SelectTrigger
                                 id="emotion-select"
@@ -421,12 +486,21 @@ const TextAudioGenSpeechNode = ({ selected, data }: NodeProps) => {
                         </label>
                         <Select
                             value={style || "none"}
-                            onValueChange={(value) =>
+                            onValueChange={(value) => {
+                                const nextStyle = value === "none" ? "" : value;
                                 setState({
-                                    style: value === "none" ? "" : value,
+                                    style: nextStyle,
                                     emotion: "",
-                                })
-                            }
+                                });
+                                const nextFeature = resolveFeatureFromEmotionStyle(
+                                    "",
+                                    nextStyle,
+                                );
+                                updates(id, {
+                                    ...data,
+                                    feature: nextFeature,
+                                });
+                            }}
                         >
                             <SelectTrigger
                                 id="style-select"

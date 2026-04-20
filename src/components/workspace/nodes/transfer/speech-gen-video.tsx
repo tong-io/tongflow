@@ -21,6 +21,9 @@ import {
     type GetPromptsContext,
 } from "@/utils/node-execution-config";
 import { useTranslations } from "next-intl";
+import { clampToAllowedModel } from "@/utils/node-model-feature";
+import { NodeModelSelect } from "../base/node-model-select";
+import { singleModelSelectOptions } from "@/utils/node-model-select-label";
 
 // 视频缩略图组件
 const VideoThumbnail = memo(
@@ -54,6 +57,8 @@ const VideoThumbnail = memo(
 
 VideoThumbnail.displayName = "VideoThumbnail";
 
+const DEFAULT_FEATURE = "speech-text-gen-video";
+
 const SpeechGenVideoNode = ({ selected, data }: NodeProps) => {
     const t = useTranslations("Workspace.nodes");
     const { ids = [], fileKeys: localFileKeys = [] } = data as {
@@ -61,7 +66,13 @@ const SpeechGenVideoNode = ({ selected, data }: NodeProps) => {
         fileKeys?: string[];
     };
     const expands = useFlow((s) => s.expands);
+    const updates = useFlow((s) => s.updates);
     const id = useNodeId()!;
+    const featureName = clampToAllowedModel(
+        (data as { feature?: string }).feature,
+        [DEFAULT_FEATURE],
+        DEFAULT_FEATURE,
+    );
 
     // 如果有 ids，从关联节点获取数据（组合模式）
     const fromNodes = useNodesData(ids);
@@ -141,6 +152,7 @@ const SpeechGenVideoNode = ({ selected, data }: NodeProps) => {
             data={data}
             workflowConfig={{
                 ...workflowConfig,
+                feature: featureName,
                 title: t("titles.speechGenVideo"),
                 icon: <Atom className="h-5 w-5" />,
                 executeLabel: t("actions.generateAudio"),
@@ -179,6 +191,15 @@ const SpeechGenVideoNode = ({ selected, data }: NodeProps) => {
             }}
         >
             <div className="p-4 space-y-4">
+                <NodeModelSelect
+                    value={featureName}
+                    onValueChange={(value) =>
+                        updates(id, { ...data, feature: value })
+                    }
+                    options={singleModelSelectOptions(DEFAULT_FEATURE, (k) =>
+                        t(k as Parameters<typeof t>[0]),
+                    )}
+                />
                 {/* 媒体展示区 */}
                 <Card className="p-3">
                     <div className="space-y-2">

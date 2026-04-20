@@ -1,4 +1,10 @@
-import { Handle, Position, useNodesData, type NodeProps } from "@xyflow/react";
+import {
+    Handle,
+    Position,
+    useNodeId,
+    useNodesData,
+    type NodeProps,
+} from "@xyflow/react";
 import { memo, useMemo, useState, useEffect, useRef } from "react";
 import { Video } from "lucide-react";
 import { BaseNode } from "../base/base-node";
@@ -10,6 +16,12 @@ import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { useR2AsyncLoader } from "@/hooks/use-r2-async-loader";
 import { useTranslations } from "next-intl";
+import useFlow from "@/hooks/use-flow";
+import { clampToAllowedModel } from "@/utils/node-model-feature";
+import { NodeModelSelect } from "../base/node-model-select";
+import { singleModelSelectOptions } from "@/utils/node-model-select-label";
+
+const DEFAULT_FEATURE = "concat_videos";
 
 // 媒体缩略图组件
 const MediaThumbnail = memo(
@@ -85,7 +97,7 @@ MediaThumbnail.displayName = "MediaThumbnail";
 
 // 工作流执行配置
 const workflowConfig = {
-    feature: "concat_videos",
+    feature: DEFAULT_FEATURE,
     outputType: "videoNode",
     outputField: "fileKeys" as const,
     supportsBatch: false,
@@ -99,8 +111,16 @@ const workflowConfig = {
 
 const ConcatVideoNode = ({ selected, data }: NodeProps) => {
     const t = useTranslations("Workspace.nodes");
-    const { ids, feature } = data as { ids: string[]; feature: string };
+    const updates = useFlow((s) => s.updates);
+    const id = useNodeId()!;
+    const { ids } = data as { ids: string[] };
     const fromNodes = useNodesData(ids);
+
+    const featureName = clampToAllowedModel(
+        (data as { feature?: string }).feature,
+        [DEFAULT_FEATURE],
+        DEFAULT_FEATURE,
+    );
 
     // 获取所有连接过来的视频节点
     const videoNodes = fromNodes.filter((node) => node.type === "videoNode");
@@ -157,6 +177,7 @@ const ConcatVideoNode = ({ selected, data }: NodeProps) => {
             data={dataWithOutput}
             workflowConfig={{
                 ...workflowConfig,
+                feature: featureName,
                 title: t("titles.concatVideo"),
                 icon: <Video className="h-5 w-5" />,
                 executeLabel: t("actions.concatVideo"),
@@ -168,6 +189,15 @@ const ConcatVideoNode = ({ selected, data }: NodeProps) => {
             }}
         >
             <div className="p-4 space-y-4">
+                <NodeModelSelect
+                    value={featureName}
+                    onValueChange={(value) =>
+                        updates(id, { ...data, feature: value })
+                    }
+                    options={singleModelSelectOptions(DEFAULT_FEATURE, (k) =>
+                        t(k as Parameters<typeof t>[0]),
+                    )}
+                />
                 {/* 媒体展示区 */}
                 <Card className="p-3">
                     <div className="space-y-2">

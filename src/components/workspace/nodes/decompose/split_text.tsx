@@ -14,14 +14,19 @@ import {
     type GetPromptsContext,
 } from "@/utils/node-execution-config";
 import useFlow from "@/hooks/use-flow";
+import { clampToAllowedModel } from "@/utils/node-model-feature";
+import { NodeModelSelect } from "../base/node-model-select";
+import { singleModelSelectOptions } from "@/utils/node-model-select-label";
 import { useNodeTaskUpdate } from "@/hooks/use-task";
 import { useNodeState } from "@/hooks/use-node-data";
 import { NodeTextarea } from "../base/node-textarea";
 import { useTranslations } from "next-intl";
 
+const DEFAULT_FEATURE = "split_text";
+
 // 工作流执行配置
 const workflowConfig = {
-    feature: "split_text",
+    feature: DEFAULT_FEATURE,
     label: "Split Text",
     outputType: "textNode",
     outputField: "texts" as const,
@@ -49,7 +54,14 @@ const SplitTextNode = ({ selected, data }: NodeProps) => {
     };
 
     const expands = useFlow((s) => s.expands);
+    const updates = useFlow((s) => s.updates);
     const id = useNodeId()!;
+
+    const featureName = clampToAllowedModel(
+        (data as { feature?: string }).feature,
+        [DEFAULT_FEATURE],
+        DEFAULT_FEATURE,
+    );
 
     // 从上游节点获取文本
     const fromNodes = useNodesData(ids);
@@ -98,6 +110,7 @@ const SplitTextNode = ({ selected, data }: NodeProps) => {
             data={data}
             workflowConfig={{
                 ...workflowConfig,
+                feature: featureName,
                 title: t("titles.splitText"),
                 icon: <Scissors className="h-5 w-5" />,
                 executeLabel: tBase("execute"),
@@ -123,7 +136,16 @@ const SplitTextNode = ({ selected, data }: NodeProps) => {
                 onTaskUpdate: handleTaskUpdate,
             }}
         >
-            <div className="p-4 space-y-2">
+            <div className="p-4 space-y-4">
+                <NodeModelSelect
+                    value={featureName}
+                    onValueChange={(value) =>
+                        updates(id, { ...data, feature: value })
+                    }
+                    options={singleModelSelectOptions(DEFAULT_FEATURE, (k) =>
+                        t(k as Parameters<typeof t>[0]),
+                    )}
+                />
                 <NodeTextarea
                     rows={3}
                     placeholder={t("common.enterInstructions")}

@@ -25,6 +25,10 @@ import {
     type GetPromptsContext,
 } from "@/utils/node-execution-config";
 import { useTranslations } from "next-intl";
+import useFlow from "@/hooks/use-flow";
+import { clampToAllowedModel } from "@/utils/node-model-feature";
+import { NodeModelSelect } from "../base/node-model-select";
+import { singleModelSelectOptions } from "@/utils/node-model-select-label";
 
 const aspectRatios = [
     { value: "9:16", label: "portrait", width: 576, height: 1024 },
@@ -76,12 +80,20 @@ const workflowConfig = {
     },
 };
 
+const DEFAULT_FEATURE = "text_gen_video";
+
 const TextGenVideoNode = ({ selected, data }: NodeProps) => {
     const t = useTranslations("Workspace.nodes");
     const tActions = useTranslations("Workspace.nodes.actions");
+    const updates = useFlow((s) => s.updates);
 
     // 上游连接检测（仅用于 UI：提示词输入是否应禁用）
     const nodeId = useNodeId();
+    const featureName = clampToAllowedModel(
+        (data as { feature?: string }).feature,
+        [DEFAULT_FEATURE],
+        DEFAULT_FEATURE,
+    );
     const nodeLookup = useStore((state) => state.nodeLookup);
     const edges = useStore((state) => state.edges as Edge[]);
 
@@ -114,6 +126,7 @@ const TextGenVideoNode = ({ selected, data }: NodeProps) => {
             data={data}
             workflowConfig={{
                 ...workflowConfig,
+                feature: featureName,
                 title: t("titles.textGenVideo"),
                 icon: <Atom className="h-5 w-5" />,
                 executeLabel: tActions("generateVideo"),
@@ -142,6 +155,18 @@ const TextGenVideoNode = ({ selected, data }: NodeProps) => {
             }}
         >
             <div className="p-4 space-y-4">
+                <NodeModelSelect
+                    value={featureName}
+                    onValueChange={(value) =>
+                        updates(nodeId!, {
+                            ...data,
+                            feature: value,
+                        })
+                    }
+                    options={singleModelSelectOptions(DEFAULT_FEATURE, (k) =>
+                        t(k as Parameters<typeof t>[0]),
+                    )}
+                />
                 <NodeTextarea
                     rows={4}
                     placeholder={

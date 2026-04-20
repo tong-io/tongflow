@@ -1,4 +1,10 @@
-import { Handle, Position, useNodesData, type NodeProps } from "@xyflow/react";
+import {
+    Handle,
+    Position,
+    useNodeId,
+    useNodesData,
+    type NodeProps,
+} from "@xyflow/react";
 import { memo, useMemo } from "react";
 import { Video } from "lucide-react";
 import { BaseNode } from "../base/base-node";
@@ -11,6 +17,12 @@ import { Label } from "@/components/ui/label";
 import { useR2AsyncLoader } from "@/hooks/use-r2-async-loader";
 import { getR2Url } from "@/lib/r2-utils";
 import { useTranslations } from "next-intl";
+import useFlow from "@/hooks/use-flow";
+import { clampToAllowedModel } from "@/utils/node-model-feature";
+import { NodeModelSelect } from "../base/node-model-select";
+import { singleModelSelectOptions } from "@/utils/node-model-select-label";
+
+const DEFAULT_FEATURE = "speech_video_gen_video";
 
 // 媒体缩略图组件
 const MediaThumbnail = memo(
@@ -70,7 +82,7 @@ MediaThumbnail.displayName = "MediaThumbnail";
 
 // 工作流执行配置
 const workflowConfig = {
-    feature: "speech_video_gen_video",
+    feature: DEFAULT_FEATURE,
     label: "视频对口型",
     outputType: "videoNode",
     outputField: "fileKeys" as const,
@@ -89,8 +101,16 @@ const workflowConfig = {
 
 const SpeechVideoGenVideoNode = ({ selected, data }: NodeProps) => {
     const t = useTranslations("Workspace.nodes");
-    const { ids, feature } = data as { ids: string[]; feature: string };
+    const updates = useFlow((s) => s.updates);
+    const id = useNodeId()!;
+    const { ids } = data as { ids: string[] };
     const fromNodes = useNodesData(ids);
+
+    const featureName = clampToAllowedModel(
+        (data as { feature?: string }).feature,
+        [DEFAULT_FEATURE],
+        DEFAULT_FEATURE,
+    );
 
     // 获取视频和音频数据
     const video = fromNodes.find((node) => node.type === "videoNode");
@@ -103,7 +123,6 @@ const SpeechVideoGenVideoNode = ({ selected, data }: NodeProps) => {
     const dataWithOutput = useMemo(
         () => ({
             ...data,
-            feature: "speech-video-gen-video",
             outputType: "videoNode",
             outputField: "fileKeys",
         }),
@@ -118,6 +137,7 @@ const SpeechVideoGenVideoNode = ({ selected, data }: NodeProps) => {
             workflowConfig={useMemo(
                 () => ({
                     ...workflowConfig,
+                    feature: featureName,
                     title: t("titles.speechVideoGenVideo"),
                     icon: <Video className="h-5 w-5" />,
                     executeLabel: t("compose.lipSync"),
@@ -143,10 +163,19 @@ const SpeechVideoGenVideoNode = ({ selected, data }: NodeProps) => {
                             : [];
                     },
                 }),
-                [videoFileKey, audioFileKey, t],
+                [videoFileKey, audioFileKey, featureName, t],
             )}
         >
             <div className="p-4 space-y-4">
+                <NodeModelSelect
+                    value={featureName}
+                    onValueChange={(value) =>
+                        updates(id, { ...data, feature: value })
+                    }
+                    options={singleModelSelectOptions(DEFAULT_FEATURE, (k) =>
+                        t(k as Parameters<typeof t>[0]),
+                    )}
+                />
                 {/* 媒体展示区 */}
                 <Card className="p-3">
                     <div className="space-y-2">

@@ -1,4 +1,10 @@
-import { Handle, Position, useNodesData, type NodeProps } from "@xyflow/react";
+import {
+    Handle,
+    Position,
+    useNodeId,
+    useNodesData,
+    type NodeProps,
+} from "@xyflow/react";
 import { memo, useMemo } from "react";
 import { Video, Sparkles, RectangleHorizontal, Clock } from "lucide-react";
 import { BaseNode } from "../base/base-node";
@@ -16,6 +22,12 @@ import { useR2AsyncLoader } from "@/hooks/use-r2-async-loader";
 import { getR2Url } from "@/lib/r2-utils";
 import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
+import useFlow from "@/hooks/use-flow";
+import { clampToAllowedModel } from "@/utils/node-model-feature";
+import { NodeModelSelect } from "../base/node-model-select";
+import { singleModelSelectOptions } from "@/utils/node-model-select-label";
+
+const DEFAULT_FEATURE = "image-image-gen-video";
 
 const aspectRatios = [
     { value: "16:9", label: "landscape", width: 1280, height: 704 },
@@ -85,7 +97,7 @@ MediaThumbnail.displayName = "MediaThumbnail";
 
 // LTX Modal：ltx2-ii2v-first-last（generate_first_last）
 const workflowConfig = {
-    feature: "image-image-gen-video",
+    feature: DEFAULT_FEATURE,
     label: "图片首尾帧生成视频",
     outputType: "videoNode",
     outputField: "fileKeys" as const,
@@ -130,8 +142,16 @@ const workflowConfig = {
 
 const ImageImageGenVideoNode = ({ selected, data }: NodeProps) => {
     const t = useTranslations("Workspace.nodes");
+    const updates = useFlow((s) => s.updates);
+    const id = useNodeId()!;
     const { ids } = data as { ids: string[] };
     const fromNodes = useNodesData(ids);
+
+    const featureName = clampToAllowedModel(
+        (data as { feature?: string }).feature,
+        [DEFAULT_FEATURE],
+        DEFAULT_FEATURE,
+    );
 
     const imageNodes = fromNodes.filter((node) => node.type === "imageNode");
 
@@ -165,6 +185,7 @@ const ImageImageGenVideoNode = ({ selected, data }: NodeProps) => {
             workflowConfig={useMemo(
                 () => ({
                     ...workflowConfig,
+                    feature: featureName,
                     title: t("titles.imageImageGenVideo"),
                     icon: <Video className="h-5 w-5" />,
                     executeLabel: t("actions.generateVideo"),
@@ -189,11 +210,21 @@ const ImageImageGenVideoNode = ({ selected, data }: NodeProps) => {
                     videoPrompt,
                     selectedAspectRatio,
                     duration,
+                    featureName,
                     t,
                 ],
             )}
         >
             <div className="p-4 space-y-4">
+                <NodeModelSelect
+                    value={featureName}
+                    onValueChange={(value) =>
+                        updates(id, { ...data, feature: value })
+                    }
+                    options={singleModelSelectOptions(DEFAULT_FEATURE, (k) =>
+                        t(k as Parameters<typeof t>[0]),
+                    )}
+                />
                 <Card className="p-3">
                     <div className="space-y-2">
                         <Label className="text-sm font-medium text-muted-foreground">

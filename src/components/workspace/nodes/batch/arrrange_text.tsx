@@ -1,5 +1,5 @@
 import { Handle, Position, useNodeId, type NodeProps } from "@xyflow/react";
-import { memo, useCallback, useMemo } from "react";
+import { memo, useCallback } from "react";
 import { Atom } from "lucide-react";
 import { BaseNode } from "../base/base-node";
 import {
@@ -10,15 +10,20 @@ import {
 import { useNodeState } from "@/hooks/use-node-data";
 import { useNodeTaskUpdate } from "@/hooks/use-task";
 import useFlow from "@/hooks/use-flow";
+import { clampToAllowedModel } from "@/utils/node-model-feature";
+import { NodeModelSelect } from "../base/node-model-select";
+import { singleModelSelectOptions } from "@/utils/node-model-select-label";
 import { Card } from "@/components/ui/card";
 import { NodeTextarea } from "../base/node-textarea";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useTranslations } from "next-intl";
 
+const DEFAULT_FEATURE = "arrange_group";
+
 // 工作流执行配置
 const workflowConfig = {
-    feature: "arrange_group",
+    feature: DEFAULT_FEATURE,
     label: "排列组合",
     outputType: "videoNode",
     outputField: "fileKeys" as const,
@@ -45,10 +50,18 @@ const workflowConfig = {
 
 const ArrangeTextNode = ({ selected, data }: NodeProps) => {
     const t = useTranslations("Workspace.nodes.batch");
+    const tNodes = useTranslations("Workspace.nodes");
     const { fileKeys, infos } = data as { fileKeys: string[]; infos: [] };
     const expands = useFlow((s) => s.expands);
+    const updates = useFlow((s) => s.updates);
 
     const id = useNodeId()!;
+
+    const featureName = clampToAllowedModel(
+        (data as { feature?: string }).feature,
+        [DEFAULT_FEATURE],
+        DEFAULT_FEATURE,
+    );
 
     // 使用新的Hook来管理状态持久化
     const [state, setState] = useNodeState(
@@ -86,21 +99,13 @@ const ArrangeTextNode = ({ selected, data }: NodeProps) => {
     // 通过 useNodeTaskUpdate 订阅该节点的任务更新
     useNodeTaskUpdate(id || "", handleTaskUpdate);
 
-    // 补充 feature 用于 BaseNode
-    const dataWithFeature = useMemo(
-        () => ({
-            ...data,
-            feature: "arrange_group",
-        }),
-        [data],
-    );
-
     return (
         <BaseNode
             selected={selected}
-            data={dataWithFeature}
+            data={data}
             workflowConfig={{
                 ...workflowConfig,
+                feature: featureName,
                 title: t("arrangeGroup"),
                 icon: <Atom className="h-5 w-5" />,
                 executeLabel: t("startArrange"),
@@ -137,6 +142,15 @@ const ArrangeTextNode = ({ selected, data }: NodeProps) => {
                 className="p-5 space-y-4 nodrag"
                 onPointerDown={(e) => e.stopPropagation()}
             >
+                <NodeModelSelect
+                    value={featureName}
+                    onValueChange={(value) =>
+                        updates(id, { ...data, feature: value })
+                    }
+                    options={singleModelSelectOptions(DEFAULT_FEATURE, (k) =>
+                        tNodes(k as Parameters<typeof tNodes>[0]),
+                    )}
+                />
                 <NodeTextarea
                     showCard={false}
                     rows={6}

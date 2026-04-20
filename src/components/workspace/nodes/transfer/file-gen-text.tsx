@@ -10,10 +10,15 @@ import {
     type GetPromptsContext,
 } from "@/utils/node-execution-config";
 import { useTranslations } from "next-intl";
+import { clampToAllowedModel } from "@/utils/node-model-feature";
+import { NodeModelSelect } from "../base/node-model-select";
+import { singleModelSelectOptions } from "@/utils/node-model-select-label";
+
+const DEFAULT_FEATURE = "parse_document";
 
 // 工作流执行配置
 const workflowConfig = {
-    feature: "parse_document",
+    feature: DEFAULT_FEATURE,
     label: "解析文档",
     outputType: "textNode",
     outputField: "texts" as const,
@@ -42,7 +47,14 @@ const FileGenTextNode = ({ selected, data }: FileGenTextNodeProps) => {
     const { fileKeys = [] } = data;
 
     const nodeId = useNodeId();
+    const updates = useFlow((s) => s.updates);
     const expands = useFlow((s) => s.expands);
+
+    const featureName = clampToAllowedModel(
+        (data as { feature?: string }).feature,
+        [DEFAULT_FEATURE],
+        DEFAULT_FEATURE,
+    );
 
     // 自定义任务更新处理 - 需要异步获取 markdown 内容
     const handleTaskUpdate = useCallback(
@@ -88,6 +100,7 @@ const FileGenTextNode = ({ selected, data }: FileGenTextNodeProps) => {
             data={data}
             workflowConfig={{
                 ...workflowConfig,
+                feature: featureName,
                 title: t("titles.fileGenText"),
                 icon: <FileText className="h-5 w-5" />,
                 executeLabel: t("actions.parseDocument"),
@@ -108,7 +121,17 @@ const FileGenTextNode = ({ selected, data }: FileGenTextNodeProps) => {
                 onTaskUpdate: handleTaskUpdate,
             }}
         >
-            <div className="p-4" />
+            <div className="p-4">
+                <NodeModelSelect
+                    value={featureName}
+                    onValueChange={(value) =>
+                        updates(nodeId!, { ...data, feature: value })
+                    }
+                    options={singleModelSelectOptions(DEFAULT_FEATURE, (k) =>
+                        t(k as Parameters<typeof t>[0]),
+                    )}
+                />
+            </div>
 
             <Handle
                 type="target"

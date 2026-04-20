@@ -7,7 +7,8 @@
  */
 
 import { useState, useCallback, useEffect, useMemo, useRef } from "react";
-import type { FlowState } from "@/hooks/use-flow";
+import { useReactFlow } from "@xyflow/react";
+import type { FlowState, PossibleNode } from "@/hooks/use-flow";
 import { useFlow } from "@/hooks/use-flow";
 import { useShallow } from "zustand/react/shallow";
 import { getNodeExecutionConfig } from "@/utils/node-execution-config";
@@ -16,7 +17,6 @@ import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 import { getTaskStopUrl, getTaskWaitUrl } from "@/lib/task-api-url";
 import {
-    Sparkles,
     Play,
     Square,
     Loader2,
@@ -82,7 +82,7 @@ const selector = (state: FlowState) => ({
     edges: state.edges,
     comboMode: state.comboMode,
     comboSelectedIds: state.comboSelectedIds,
-    startPlacing: state.startPlacing,
+    addNode: state.addNode,
     selectedNodes: state.selectedNodes,
     expands: state.expands,
     compose: state.compose,
@@ -147,7 +147,7 @@ interface ButtonConfig {
     text: string;
     onClick: () => void;
     id?: string;
-    nodeType?: string; // 节点类型，用于获取 feature 的 minTier
+    nodeType?: string;
 }
 
 // 动作容器组件
@@ -238,7 +238,7 @@ export default function SmartIsland() {
     const {
         nodes,
         edges,
-        startPlacing,
+        addNode,
         selectedNodes,
         comboMode,
         comboSelectedIds,
@@ -257,6 +257,29 @@ export default function SmartIsland() {
     const t = useTranslations("Workspace.smartIsland");
     const tIndex = useTranslations("Index");
     const router = useRouter();
+    const { screenToFlowPosition } = useReactFlow();
+
+    const addNodeAtViewportCenter = useCallback(
+        (node: PossibleNode) => {
+            const el =
+                typeof document !== "undefined"
+                    ? document.querySelector(".react-flow")
+                    : null;
+            if (!el) {
+                addNode(node);
+                return;
+            }
+            const r = el.getBoundingClientRect();
+            addNode(
+                node,
+                screenToFlowPosition({
+                    x: r.left + r.width / 2,
+                    y: r.top + r.height / 2,
+                }),
+            );
+        },
+        [addNode, screenToFlowPosition],
+    );
 
     const workspaceMode = useTaskStore((state) => state.workspaceMode);
     const workflowExecutionStatus = useTaskStore(
@@ -297,8 +320,7 @@ export default function SmartIsland() {
         [nodes],
     );
 
-    const { estimatedPrice, estimatedTime } = useMemo(() => {
-        let totalPrice = 0;
+    const { estimatedTime } = useMemo(() => {
         let totalTime = 0;
 
         for (const type of nodeTypeKey.split(",")) {
@@ -307,13 +329,11 @@ export default function SmartIsland() {
             if (!config?.feature) continue;
             const featureInfo = getFeatureByName(config.feature);
             if (featureInfo) {
-                totalPrice += featureInfo.price ?? 0;
                 totalTime += featureInfo.processingTime ?? 0;
             }
         }
 
         return {
-            estimatedPrice: totalPrice,
             estimatedTime: totalTime,
         };
     }, [nodeTypeKey, getFeatureByName]);
@@ -1977,36 +1997,23 @@ export default function SmartIsland() {
                                 ? t("executeConfirmDescSaved")
                                 : t("executeConfirmDescNew")}
                         </p>
-                        {/* 预估费用和时间 */}
-                        {(estimatedPrice > 0 || estimatedTime > 0) && (
+                        {/* 预估用时 */}
+                        {estimatedTime > 0 && (
                             <div className="flex items-center gap-4 p-3 bg-muted/50 rounded-lg mb-4">
-                                {estimatedPrice > 0 && (
-                                    <div className="flex items-center gap-1.5">
-                                        <span className="text-sm text-muted-foreground">
-                                            {t("estimatedCost")}
-                                        </span>
-                                        <Sparkles className="w-4 h-4 text-purple-500" />
-                                        <span className="text-sm font-medium text-purple-600 dark:text-purple-400">
-                                            {estimatedPrice}
-                                        </span>
-                                    </div>
-                                )}
-                                {estimatedTime > 0 && (
-                                    <div className="flex items-center gap-1.5">
-                                        <span className="text-sm text-muted-foreground">
-                                            {t("estimatedTime")}
-                                        </span>
-                                        <span className="text-sm font-medium">
-                                            {estimatedTime >= 60
-                                                ? `${Math.floor(estimatedTime / 60)}分${
-                                                      estimatedTime % 60 > 0
-                                                          ? `${estimatedTime % 60}秒`
-                                                          : ""
-                                                  }`
-                                                : `${estimatedTime}秒`}
-                                        </span>
-                                    </div>
-                                )}
+                                <div className="flex items-center gap-1.5">
+                                    <span className="text-sm text-muted-foreground">
+                                        {t("estimatedTime")}
+                                    </span>
+                                    <span className="text-sm font-medium">
+                                        {estimatedTime >= 60
+                                            ? `${Math.floor(estimatedTime / 60)}分${
+                                                  estimatedTime % 60 > 0
+                                                      ? `${estimatedTime % 60}秒`
+                                                      : ""
+                                              }`
+                                            : `${estimatedTime}秒`}
+                                    </span>
+                                </div>
                             </div>
                         )}
                         {/* 新工作流才显示名称和描述输入 */}
@@ -2162,49 +2169,49 @@ export default function SmartIsland() {
                             icon={Box}
                             tooltip={t("tooltip3D")}
                             onClick={() =>
-                                startPlacing({ type: "addModelNode" })
+                                addNodeAtViewportCenter({ type: "addModelNode" })
                             }
                         />
                         <IconButton
                             icon={FileText}
                             tooltip={t("tooltipDocument")}
                             onClick={() =>
-                                startPlacing({ type: "addFileNode" })
+                                addNodeAtViewportCenter({ type: "addFileNode" })
                             }
                         />
                         <IconButton
                             icon={Image}
                             tooltip={t("tooltipImage")}
                             onClick={() =>
-                                startPlacing({ type: "addImageNode" })
+                                addNodeAtViewportCenter({ type: "addImageNode" })
                             }
                         />
                         <IconButton
                             icon={Type}
                             tooltip={t("tooltipText")}
                             onClick={() =>
-                                startPlacing({ type: "addTextNode" })
+                                addNodeAtViewportCenter({ type: "addTextNode" })
                             }
                         />
                         <IconButton
                             icon={Video}
                             tooltip={t("tooltipVideo")}
                             onClick={() =>
-                                startPlacing({ type: "addVideoNode" })
+                                addNodeAtViewportCenter({ type: "addVideoNode" })
                             }
                         />
                         <IconButton
                             icon={Music}
                             tooltip={t("tooltipAudio")}
                             onClick={() =>
-                                startPlacing({ type: "addAudioNode" })
+                                addNodeAtViewportCenter({ type: "addAudioNode" })
                             }
                         />
                         <IconButton
                             icon={Link}
                             tooltip={t("tooltipLink")}
                             onClick={() =>
-                                startPlacing({ type: "addLinkNode" })
+                                addNodeAtViewportCenter({ type: "addLinkNode" })
                             }
                         />
                     </div>
@@ -2237,49 +2244,49 @@ export default function SmartIsland() {
                             icon={Box}
                             tooltip={t("tooltip3D")}
                             onClick={() =>
-                                startPlacing({ type: "addModelNode" })
+                                addNodeAtViewportCenter({ type: "addModelNode" })
                             }
                         />
                         <IconButton
                             icon={FileText}
                             tooltip={t("tooltipDocument")}
                             onClick={() =>
-                                startPlacing({ type: "addFileNode" })
+                                addNodeAtViewportCenter({ type: "addFileNode" })
                             }
                         />
                         <IconButton
                             icon={Image}
                             tooltip={t("tooltipImage")}
                             onClick={() =>
-                                startPlacing({ type: "addImageNode" })
+                                addNodeAtViewportCenter({ type: "addImageNode" })
                             }
                         />
                         <IconButton
                             icon={Type}
                             tooltip={t("tooltipText")}
                             onClick={() =>
-                                startPlacing({ type: "addTextNode" })
+                                addNodeAtViewportCenter({ type: "addTextNode" })
                             }
                         />
                         <IconButton
                             icon={Video}
                             tooltip={t("tooltipVideo")}
                             onClick={() =>
-                                startPlacing({ type: "addVideoNode" })
+                                addNodeAtViewportCenter({ type: "addVideoNode" })
                             }
                         />
                         <IconButton
                             icon={Music}
                             tooltip={t("tooltipAudio")}
                             onClick={() =>
-                                startPlacing({ type: "addAudioNode" })
+                                addNodeAtViewportCenter({ type: "addAudioNode" })
                             }
                         />
                         <IconButton
                             icon={Link}
                             tooltip={t("tooltipLink")}
                             onClick={() =>
-                                startPlacing({ type: "addLinkNode" })
+                                addNodeAtViewportCenter({ type: "addLinkNode" })
                             }
                         />
                     </div>

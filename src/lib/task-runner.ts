@@ -7,7 +7,7 @@
 
 import { getDb, tasks } from "@/db";
 import { eq } from "drizzle-orm";
-import { getFeatureByName } from "@/lib/feature-registry";
+import { getFeatureByName } from "@/lib/feature-registry.server";
 import {
     notifyTask,
     registerTask,

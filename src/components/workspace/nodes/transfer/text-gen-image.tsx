@@ -7,13 +7,6 @@ import useFlow from "@/hooks/use-flow";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 import {
     upstreamParam,
@@ -23,6 +16,8 @@ import {
 } from "@/utils/node-execution-config";
 import { useTranslations } from "next-intl";
 import { clampToAllowedModel } from "@/utils/node-model-feature";
+import { NodeModelSelect } from "../base/node-model-select";
+import { singleModelSelectOptions } from "@/utils/node-model-select-label";
 
 /**
  * TextGenImageNode 数据结构
@@ -168,35 +163,19 @@ const TextGenImageNode = ({ selected, data }: TextGenImageNodeProps) => {
             }}
         >
             <div className="p-4 space-y-4">
-                {/* 模型选择 */}
-                <Card className="p-3">
-                    <div className="space-y-2">
-                        <Label className="text-sm font-medium text-muted-foreground">
-                            {t("common.modelSelect")}
-                        </Label>
-                        <Select
-                            value={featureName}
-                            onValueChange={(value) =>
-                                updates(id, {
-                                    ...data,
-                                    feature: value,
-                                })
-                            }
-                        >
-                            <SelectTrigger
-                                className="w-full"
-                                size="sm"
-                            >
-                                <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="image_gen">
-                                    {t("common.models.imageGen")}
-                                </SelectItem>
-                            </SelectContent>
-                        </Select>
-                    </div>
-                </Card>
+                <NodeModelSelect
+                    value={featureName}
+                    onValueChange={(value) =>
+                        updates(id, {
+                            ...data,
+                            feature: value,
+                        })
+                    }
+                    options={singleModelSelectOptions(
+                        "image_gen",
+                        (k) => t(k as Parameters<typeof t>[0]),
+                    )}
+                />
 
                 {/* 图片宽高比选择 */}
                 <Card className="p-3">

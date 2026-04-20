@@ -36,7 +36,6 @@ import {
     AlertDialogDescription,
     AlertDialogCancel,
 } from "@/components/ui/alert-dialog";
-import { getFeatureByName } from "@/lib/api";
 import useFlow from "@/hooks/use-flow";
 import { useTranslations } from "next-intl";
 
@@ -401,39 +400,9 @@ export interface NodeHeaderRunActionProps {
 
 export const NodeHeaderRunAction: React.FC<NodeHeaderRunActionProps> = ({
     onClick,
-    featureName,
+    featureName: _featureName,
 }) => {
-    const nodeId = useNodeId();
-    const { updateNodeData } = useReactFlow();
     const t = useTranslations("Workspace.nodes.base");
-    const [featureData, setFeatureData] = useState<{ price: number } | null>(
-        null,
-    );
-
-    useEffect(() => {
-        if (!featureName || !nodeId) return;
-
-        const fetchFeature = async () => {
-            try {
-                const feature = await getFeatureByName(featureName);
-                if (feature) {
-                    const featureData = {
-                        price: feature.price,
-                    };
-                    setFeatureData(featureData);
-
-                    // Store feature data in node's data
-                    updateNodeData(nodeId, {
-                        featureData: featureData,
-                    });
-                }
-            } catch (error) {
-                console.error("Failed to get feature info:", error);
-            }
-        };
-
-        void fetchFeature();
-    }, [featureName, nodeId, updateNodeData]);
 
     return (
         <div className="flex items-center gap-2">
@@ -444,16 +413,6 @@ export const NodeHeaderRunAction: React.FC<NodeHeaderRunActionProps> = ({
             >
                 <Play />
             </NodeHeaderAction>
-            {featureData && (
-                <div className="flex items-center gap-2 whitespace-nowrap text-xs text-muted-foreground">
-                    <span className="flex items-center gap-0.5">
-                        <span className="text-gray-600 dark:text-gray-400">
-                            💎
-                        </span>
-                        {featureData.price}
-                    </span>
-                </div>
-            )}
         </div>
     );
 };

@@ -40,6 +40,19 @@ import {
     DEFAULT_GEMINI_TEXT_MODEL,
     GEMINI_TEXT_MODEL_OPTIONS,
 } from "@/constants/gemini-text-models";
+import {
+    DEFAULT_OPENAI_TEXT_MODEL,
+    OPENAI_TEXT_MODEL_OPTIONS,
+} from "@/constants/openai-text-models";
+import { clampToAllowedModel } from "@/utils/node-model-feature";
+import { registryModelOptionLabel } from "@/utils/node-model-select-label";
+import { NodeModelSelect } from "../base/node-model-select";
+
+const GEN_TEXT_FEATURES = [
+    "gen_text",
+    "gen_text_openai",
+    "gen_text_gemini",
+] as const;
 
 // 思考框组件
 const ReasoningBox = ({ content }: { content: string }) => {
@@ -142,10 +155,11 @@ const GenTextNode = ({ selected, data }: NodeProps) => {
             userPrompt: "",
             model: "auto",
             geminiModel: DEFAULT_GEMINI_TEXT_MODEL,
+            openaiModel: DEFAULT_OPENAI_TEXT_MODEL,
         },
         data,
     );
-    const { userPrompt, model, geminiModel } = state;
+    const { userPrompt, model, geminiModel, openaiModel } = state;
     const t = useTranslations("Workspace.nodes");
     const tBase = useTranslations("Workspace.nodes.base");
 
@@ -153,10 +167,18 @@ const GenTextNode = ({ selected, data }: NodeProps) => {
         { value: "auto", label: t("params.modelDefault") },
         { value: "openai", label: "OpenAI" },
         { value: "gemini", label: "Gemini" },
-        { value: "deepseek", label: "DeepSeek" },
     ];
 
     const usesGeminiBackend = model === "gemini";
+    const usesOpenAiBackend = model === "openai";
+
+    const resolvedFeatureFromModel =
+        model === "auto" ? "gen_text" : `gen_text_${model}`;
+    const featureName = clampToAllowedModel(
+        (data as { feature?: string }).feature,
+        GEN_TEXT_FEATURES,
+        resolvedFeatureFromModel,
+    );
 
     // 获取实际使用的提示词
     const effectivePrompt = hasUpstreamPrompt ? upstreamPrompt : userPrompt;
@@ -241,8 +263,7 @@ const GenTextNode = ({ selected, data }: NodeProps) => {
                 data={data}
                 workflowConfig={{
                     ...workflowConfig,
-                    feature:
-                        model === "auto" ? "gen_text" : `gen_text_${model}`,
+                    feature: featureName,
                     title: t("titles.textGenText"),
                     icon: <Wand2 className="h-5 w-5" />,
                     headerActions: !hasUpstreamPrompt ? (
@@ -273,6 +294,7 @@ const GenTextNode = ({ selected, data }: NodeProps) => {
                         return inputTexts.map((text) => ({
                             text: `${text}\n\n${effectivePrompt}`,
                             ...(usesGeminiBackend ? { geminiModel } : {}),
+                            ...(usesOpenAiBackend ? { openaiModel } : {}),
                         }));
                     },
                     onTaskUpdate: handleTaskUpdate,
@@ -315,30 +337,27 @@ const GenTextNode = ({ selected, data }: NodeProps) => {
                         )}
                     </div>
                     <div className="flex flex-col gap-2">
-                        <div className="flex items-center gap-2">
-                            <Label className="text-xs text-muted-foreground shrink-0 w-20">
-                                {t("params.model")}
-                            </Label>
-                            <Select
-                                value={model}
-                                onValueChange={(v) => setState({ model: v })}
-                            >
-                                <SelectTrigger className="h-7 text-xs flex-1 min-w-0">
-                                    <SelectValue />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {MODEL_OPTIONS.map((opt) => (
-                                        <SelectItem
-                                            key={opt.value}
-                                            value={opt.value}
-                                            className="text-xs"
-                                        >
-                                            {opt.label}
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
-                        </div>
+                        <NodeModelSelect
+                            value={featureName}
+                            onValueChange={(v) => {
+                                updates(id, { ...data, feature: v });
+                                if (v === "gen_text") setState({ model: "auto" });
+                                else if (v === "gen_text_openai")
+                                    setState({ model: "openai" });
+                                else if (v === "gen_text_gemini")
+                                    setState({ model: "gemini" });
+                            }}
+                            options={MODEL_OPTIONS.map((opt) => {
+                                const value =
+                                    opt.value === "auto"
+                                        ? "gen_text"
+                                        : `gen_text_${opt.value}`;
+                                return {
+                                    value,
+                                    label: registryModelOptionLabel(value),
+                                };
+                            })}
+                        />
                         {usesGeminiBackend ? (
                             <div className="flex items-center gap-2">
                                 <Label className="text-xs text-muted-foreground shrink-0 w-20">
@@ -355,6 +374,36 @@ const GenTextNode = ({ selected, data }: NodeProps) => {
                                     </SelectTrigger>
                                     <SelectContent className="max-h-[min(280px,50vh)]">
                                         {GEMINI_TEXT_MODEL_OPTIONS.map(
+                                            (opt) => (
+                                                <SelectItem
+                                                    key={opt.value}
+                                                    value={opt.value}
+                                                    className="text-xs"
+                                                >
+                                                    {opt.label}
+                                                </SelectItem>
+                                            ),
+                                        )}
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                        ) : null}
+                        {usesOpenAiBackend ? (
+                            <div className="flex items-center gap-2">
+                                <Label className="text-xs text-muted-foreground shrink-0 w-20">
+                                    {t("params.openaiModel")}
+                                </Label>
+                                <Select
+                                    value={openaiModel}
+                                    onValueChange={(v) =>
+                                        setState({ openaiModel: v })
+                                    }
+                                >
+                                    <SelectTrigger className="h-7 text-xs flex-1 min-w-0">
+                                        <SelectValue />
+                                    </SelectTrigger>
+                                    <SelectContent className="max-h-[min(280px,50vh)]">
+                                        {OPENAI_TEXT_MODEL_OPTIONS.map(
                                             (opt) => (
                                                 <SelectItem
                                                     key={opt.value}

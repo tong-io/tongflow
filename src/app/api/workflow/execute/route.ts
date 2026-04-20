@@ -13,7 +13,7 @@ import { nanoid } from "nanoid";
 import { getDb } from "@/db";
 import { tasks, workflows } from "@/db/schema";
 import { eq, inArray, and, sql } from "drizzle-orm";
-import { getFeatureByName } from "@/lib/feature-registry";
+import { getFeatureByName } from "@/lib/feature-registry.server";
 
 const DEFAULT_CONCURRENT_TASKS = 3;
 

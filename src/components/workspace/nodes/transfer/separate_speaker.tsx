@@ -1,18 +1,22 @@
-import { Handle, Position, type NodeProps } from "@xyflow/react";
+import { Handle, Position, useNodeId, type NodeProps } from "@xyflow/react";
 import { memo, useCallback } from "react";
 import { BaseNode } from "../base/base-node";
 import useFlow from "@/hooks/use-flow";
-import { Card } from "@/components/ui/card";
 import { Atom } from "lucide-react";
 import {
     upstreamParam,
     type GetPromptsContext,
 } from "@/utils/node-execution-config";
 import { useTranslations } from "next-intl";
+import { clampToAllowedModel } from "@/utils/node-model-feature";
+import { NodeModelSelect } from "../base/node-model-select";
+import { singleModelSelectOptions } from "@/utils/node-model-select-label";
+
+const DEFAULT_FEATURE = "separate_speaker";
 
 // 工作流执行配置
 const workflowConfig = {
-    feature: "separate_speaker",
+    feature: DEFAULT_FEATURE,
     label: "说话人分离",
     outputType: "audioNode",
     outputField: "fileKeys" as const,
@@ -32,8 +36,16 @@ const workflowConfig = {
 
 const SeparateSpeakerNode = ({ selected, data }: NodeProps) => {
     const t = useTranslations("Workspace.nodes");
+    const updates = useFlow((s) => s.updates);
+    const id = useNodeId()!;
     const { fileKeys } = data as { fileKeys: string[] };
     const expands = useFlow((s) => s.expands);
+
+    const featureName = clampToAllowedModel(
+        (data as { feature?: string }).feature,
+        [DEFAULT_FEATURE],
+        DEFAULT_FEATURE,
+    );
 
     // 自定义任务更新处理 - 需要循环展开每个文件
     const handleTaskUpdate = useCallback(
@@ -63,6 +75,7 @@ const SeparateSpeakerNode = ({ selected, data }: NodeProps) => {
             data={data}
             workflowConfig={{
                 ...workflowConfig,
+                feature: featureName,
                 title: t("titles.separateSpeaker"),
                 icon: <Atom className="h-5 w-5" />,
                 executeLabel: t("actions.startSeparation"),
@@ -85,7 +98,17 @@ const SeparateSpeakerNode = ({ selected, data }: NodeProps) => {
                 onTaskUpdate: handleTaskUpdate,
             }}
         >
-            <Card className="p-5 space-y-4"></Card>
+            <div className="p-4">
+                <NodeModelSelect
+                    value={featureName}
+                    onValueChange={(value) =>
+                        updates(id, { ...data, feature: value })
+                    }
+                    options={singleModelSelectOptions(DEFAULT_FEATURE, (k) =>
+                        t(k as Parameters<typeof t>[0]),
+                    )}
+                />
+            </div>
             <Handle
                 type="target"
                 position={Position.Left}

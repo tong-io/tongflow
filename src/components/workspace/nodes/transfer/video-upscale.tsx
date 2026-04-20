@@ -1,10 +1,11 @@
 "use client";
 
-import { Handle, Position, type NodeProps } from "@xyflow/react";
+import { Handle, Position, useNodeId, type NodeProps } from "@xyflow/react";
 import { memo, useEffect } from "react";
 import { Sparkles, Maximize2 } from "lucide-react";
 
 import { BaseNode } from "../base/base-node";
+import useFlow from "@/hooks/use-flow";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -16,6 +17,11 @@ import {
     type GetPromptsContext,
 } from "@/utils/node-execution-config";
 import { useTranslations } from "next-intl";
+import { clampToAllowedModel } from "@/utils/node-model-feature";
+import { NodeModelSelect } from "../base/node-model-select";
+import { singleModelSelectOptions } from "@/utils/node-model-select-label";
+
+const DEFAULT_FEATURE = "video_upscale";
 
 type UpscaleTier = "1k" | "2k";
 
@@ -29,7 +35,7 @@ const UPSCALE_TIERS: {
 
 // 工作流执行配置
 const workflowConfig = {
-    feature: "video_upscale",
+    feature: DEFAULT_FEATURE,
     label: "视频高清放大",
     outputType: "videoNode",
     outputField: "fileKeys" as const,
@@ -49,7 +55,15 @@ const workflowConfig = {
 
 const VideoUpscaleNode = ({ selected, data }: NodeProps) => {
     const t = useTranslations("Workspace.nodes");
+    const updates = useFlow((s) => s.updates);
+    const nodeId = useNodeId()!;
     const { fileKeys = [] } = data as { fileKeys?: string[] };
+
+    const featureName = clampToAllowedModel(
+        (data as { feature?: string }).feature,
+        [DEFAULT_FEATURE],
+        DEFAULT_FEATURE,
+    );
 
     const [state, setState] = useNodeState<{ resolution: UpscaleTier | "4k" }>(
         { resolution: "2k" },
@@ -72,6 +86,7 @@ const VideoUpscaleNode = ({ selected, data }: NodeProps) => {
             data={data}
             workflowConfig={{
                 ...workflowConfig,
+                feature: featureName,
                 title: t("titles.videoUpscale"),
                 icon: <Sparkles className="h-5 w-5" />,
                 executeLabel: t("actions.startUpscale"),
@@ -92,6 +107,17 @@ const VideoUpscaleNode = ({ selected, data }: NodeProps) => {
                 },
             }}
         >
+            <div className="px-4 pt-4 space-y-4">
+                <NodeModelSelect
+                    value={featureName}
+                    onValueChange={(value) =>
+                        updates(nodeId, { ...data, feature: value })
+                    }
+                    options={singleModelSelectOptions(DEFAULT_FEATURE, (k) =>
+                        t(k as Parameters<typeof t>[0]),
+                    )}
+                />
+            </div>
             <Card className="mx-4 mb-4 p-3 space-y-2">
                 <Label className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
                     <Maximize2 className="h-4 w-4" />

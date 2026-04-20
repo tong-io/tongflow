@@ -1,5 +1,8 @@
 import { NextResponse } from "next/server";
-import { getAllFeatures } from "@/lib/feature-registry";
+import {
+    getAllFeatures,
+    getFeatureRegistryAliases,
+} from "@/lib/feature-registry.server";
 
 /**
  * GET /api/feature/list
@@ -8,5 +11,6 @@ import { getAllFeatures } from "@/lib/feature-registry";
 export async function GET() {
     return NextResponse.json({
         features: getAllFeatures(),
+        aliases: getFeatureRegistryAliases(),
     });
 }

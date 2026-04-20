@@ -5,7 +5,6 @@ import {
     Move,
     X,
     Wand2,
-    Diamond,
     CheckCircle,
     Circle,
 } from "lucide-react";
@@ -251,9 +250,7 @@ export const BaseNode = forwardRef<HTMLDivElement, BaseNodeProps>(
         const outputType = workflowConfig?.outputType ?? data?.outputType;
         const outputField = workflowConfig?.outputField ?? data?.outputField;
 
-        // 获取功能价格信息
         const { feature: featureInfo } = useFeature(feature ?? "");
-        const price = featureInfo?.price ?? 0;
         const processingTime = featureInfo?.processingTime ?? 0;
         const featureLoading = !featureInfo && !!feature;
 
@@ -836,14 +833,6 @@ export const BaseNode = forwardRef<HTMLDivElement, BaseNodeProps>(
                                                 {workflowConfig.executeLabel ??
                                                     t("execute")}
                                             </span>
-                                            {!featureLoading && price > 0 && (
-                                                <div className="flex items-center gap-2 text-xs">
-                                                    <span className="flex items-center gap-0.5 text-cyan-400">
-                                                        <Diamond className="h-3 w-3 fill-cyan-400" />
-                                                        {price}
-                                                    </span>
-                                                </div>
-                                            )}
                                         </div>
                                     </Button>
                                 </div>

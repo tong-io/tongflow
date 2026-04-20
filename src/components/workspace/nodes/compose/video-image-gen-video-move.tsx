@@ -1,5 +1,11 @@
-import { Handle, Position, useNodesData, type NodeProps } from "@xyflow/react";
-import { memo, useMemo, useState } from "react";
+import {
+    Handle,
+    Position,
+    useNodeId,
+    useNodesData,
+    type NodeProps,
+} from "@xyflow/react";
+import { memo, useMemo, useCallback } from "react";
 import { Video, Sparkles } from "lucide-react";
 import { BaseNode } from "../base/base-node";
 import {
@@ -14,6 +20,24 @@ import { NodeTextarea } from "../base/node-textarea";
 import { useR2AsyncLoader } from "@/hooks/use-r2-async-loader";
 import { getR2Url } from "@/lib/r2-utils";
 import { useTranslations } from "next-intl";
+import useFlow from "@/hooks/use-flow";
+import { clampToAllowedModel } from "@/utils/node-model-feature";
+import { NodeModelSelect } from "../base/node-model-select";
+import { multiModelSelectOptions } from "@/utils/node-model-select-label";
+
+const MOVE_FEATURES = [
+    "video_image_move",
+    "video_image_move_muti",
+    "video_image_move_animal",
+    "video_image_move_animal_muti",
+] as const;
+
+const DEFAULT_MOVE_FEATURE = "video_image_move";
+
+function moveFeature(isAnimal: boolean, isMulti: boolean): string {
+    const base = isAnimal ? "video_image_move_animal" : "video_image_move";
+    return isMulti ? `${base}_muti` : base;
+}
 
 // 媒体缩略图组件
 const MediaThumbnail = memo(
@@ -89,7 +113,7 @@ MediaThumbnail.displayName = "MediaThumbnail";
 
 // 工作流执行配置
 const workflowConfig = {
-    feature: "video_image_move",
+    feature: DEFAULT_MOVE_FEATURE,
     label: "视频图片混合生成视频",
     outputType: "videoNode",
     outputField: "fileKeys" as const,
@@ -111,10 +135,29 @@ const workflowConfig = {
 
 const VideoImageGenVideoMoveNode = ({ selected, data }: NodeProps) => {
     const t = useTranslations("Workspace.nodes");
-    const { ids, feature } = data as { ids: string[]; feature: string };
-    const [subjectType, setSubjectType] = useState<"human" | "animal">("human");
-    const [countType, setCountType] = useState<"single" | "multi">("single");
+    const updates = useFlow((s) => s.updates);
+    const id = useNodeId()!;
+    const { ids } = data as { ids: string[] };
     const fromNodes = useNodesData(ids);
+
+    const featureName = clampToAllowedModel(
+        (data as { feature?: string }).feature,
+        MOVE_FEATURES,
+        DEFAULT_MOVE_FEATURE,
+    );
+
+    const isAnimal = featureName.includes("animal");
+    const isMulti = featureName.endsWith("_muti");
+
+    const setMoveFeature = useCallback(
+        (nextAnimal: boolean, nextMulti: boolean) => {
+            updates(id, {
+                ...data,
+                feature: moveFeature(nextAnimal, nextMulti),
+            });
+        },
+        [data, id, updates],
+    );
 
     // 获取图片和视频数据
     const image = fromNodes.find((node) => node.type === "imageNode");
@@ -131,13 +174,6 @@ const VideoImageGenVideoMoveNode = ({ selected, data }: NodeProps) => {
         data,
     );
     const { videoPrompt } = state;
-
-    const baseFeature =
-        subjectType === "animal"
-            ? "video_image_move_animal"
-            : "video_image_move";
-    const currentFeature =
-        countType === "multi" ? `${baseFeature}_muti` : baseFeature;
 
     // 补充 outputType 和 outputField 用于 BaseNode 自动处理任务完成
     const dataWithOutput = useMemo(
@@ -157,7 +193,7 @@ const VideoImageGenVideoMoveNode = ({ selected, data }: NodeProps) => {
             workflowConfig={useMemo(
                 () => ({
                     ...workflowConfig,
-                    feature: currentFeature,
+                    feature: featureName,
                     title: t("titles.videoImageMove"),
                     icon: <Video className="h-5 w-5" />,
                     executeLabel: t("actions.generateVideo"),
@@ -184,10 +220,19 @@ const VideoImageGenVideoMoveNode = ({ selected, data }: NodeProps) => {
                             : [];
                     },
                 }),
-                [imageFileKey, videoFileKey, videoPrompt, currentFeature, t],
+                [imageFileKey, videoFileKey, videoPrompt, featureName, t],
             )}
         >
             <div className="p-4 space-y-4">
+                <NodeModelSelect
+                    value={featureName}
+                    onValueChange={(v) =>
+                        updates(id, { ...data, feature: v })
+                    }
+                    options={multiModelSelectOptions(MOVE_FEATURES, (k) =>
+                        t(k as Parameters<typeof t>[0]),
+                    )}
+                />
                 {/* 人物/动物 & 单人/多人 选择 */}
                 <div className="space-y-3">
                     <div>
@@ -199,8 +244,8 @@ const VideoImageGenVideoMoveNode = ({ selected, data }: NodeProps) => {
                                 <input
                                     type="radio"
                                     name="subjectType"
-                                    checked={subjectType === "human"}
-                                    onChange={() => setSubjectType("human")}
+                                    checked={!isAnimal}
+                                    onChange={() => setMoveFeature(false, isMulti)}
                                     className="accent-primary"
                                 />
                                 {t("options.human")}
@@ -209,8 +254,8 @@ const VideoImageGenVideoMoveNode = ({ selected, data }: NodeProps) => {
                                 <input
                                     type="radio"
                                     name="subjectType"
-                                    checked={subjectType === "animal"}
-                                    onChange={() => setSubjectType("animal")}
+                                    checked={isAnimal}
+                                    onChange={() => setMoveFeature(true, isMulti)}
                                     className="accent-primary"
                                 />
                                 {t("options.animal")}
@@ -226,8 +271,10 @@ const VideoImageGenVideoMoveNode = ({ selected, data }: NodeProps) => {
                                 <input
                                     type="radio"
                                     name="countType"
-                                    checked={countType === "single"}
-                                    onChange={() => setCountType("single")}
+                                    checked={!isMulti}
+                                    onChange={() =>
+                                        setMoveFeature(isAnimal, false)
+                                    }
                                     className="accent-primary"
                                 />
                                 {t("options.single")}
@@ -236,8 +283,10 @@ const VideoImageGenVideoMoveNode = ({ selected, data }: NodeProps) => {
                                 <input
                                     type="radio"
                                     name="countType"
-                                    checked={countType === "multi"}
-                                    onChange={() => setCountType("multi")}
+                                    checked={isMulti}
+                                    onChange={() =>
+                                        setMoveFeature(isAnimal, true)
+                                    }
                                     className="accent-primary"
                                 />
                                 {t("options.multi")}

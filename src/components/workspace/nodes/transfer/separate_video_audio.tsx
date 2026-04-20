@@ -1,17 +1,22 @@
-import { Handle, Position, type NodeProps } from "@xyflow/react";
+import { Handle, Position, useNodeId, type NodeProps } from "@xyflow/react";
 import { memo } from "react";
 import { BaseNode } from "../base/base-node";
-import { Card } from "@/components/ui/card";
 import { Atom } from "lucide-react";
 import {
     upstreamParam,
     type GetPromptsContext,
 } from "@/utils/node-execution-config";
 import { useTranslations } from "next-intl";
+import useFlow from "@/hooks/use-flow";
+import { clampToAllowedModel } from "@/utils/node-model-feature";
+import { NodeModelSelect } from "../base/node-model-select";
+import { singleModelSelectOptions } from "@/utils/node-model-select-label";
+
+const DEFAULT_FEATURE = "extract_audio";
 
 // 工作流执行配置
 const workflowConfig = {
-    feature: "extract_audio",
+    feature: DEFAULT_FEATURE,
     label: "音视频分离",
     outputType: "audioNode",
     outputField: "fileKeys" as const,
@@ -31,7 +36,15 @@ const workflowConfig = {
 
 const SeparateVideoAudioNode = ({ selected, data }: NodeProps) => {
     const t = useTranslations("Workspace.nodes");
+    const updates = useFlow((s) => s.updates);
+    const id = useNodeId()!;
     const { fileKeys } = data as { fileKeys: string[] };
+
+    const featureName = clampToAllowedModel(
+        (data as { feature?: string }).feature,
+        [DEFAULT_FEATURE],
+        DEFAULT_FEATURE,
+    );
 
     return (
         <BaseNode
@@ -39,6 +52,7 @@ const SeparateVideoAudioNode = ({ selected, data }: NodeProps) => {
             data={data}
             workflowConfig={{
                 ...workflowConfig,
+                feature: featureName,
                 title: t("titles.separateAudio"),
                 icon: <Atom className="h-5 w-5" />,
                 executeLabel: t("actions.extractAudio"),
@@ -60,7 +74,17 @@ const SeparateVideoAudioNode = ({ selected, data }: NodeProps) => {
                 },
             }}
         >
-            <Card className="p-5 space-y-4"></Card>
+            <div className="p-4">
+                <NodeModelSelect
+                    value={featureName}
+                    onValueChange={(value) =>
+                        updates(id, { ...data, feature: value })
+                    }
+                    options={singleModelSelectOptions(DEFAULT_FEATURE, (k) =>
+                        t(k as Parameters<typeof t>[0]),
+                    )}
+                />
+            </div>
             <Handle
                 type="target"
                 position={Position.Left}

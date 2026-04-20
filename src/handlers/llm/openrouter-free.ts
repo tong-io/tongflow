@@ -1,7 +1,7 @@
 /**
  * OpenRouter Free Models Router（openrouter/free）
  *
- * 与 deepseek / openai 节点 prompt 形状一致；流式按句推送。
+ * 与 openai / gemini 节点 prompt 形状一致；流式按句推送。
  * @see https://openrouter.ai/docs/models/free-models-router
  */
 

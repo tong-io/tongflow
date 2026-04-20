@@ -11,12 +11,16 @@ build/
 # env files
 .env
 .env.*
+!.env.example
 .envrc
 .env*.local
 .dev.vars
 
 # data
 data/
+
+# local feature registry overrides (see docs/feature-registry.md)
+config/features.local.json
 
 # misc
 .DS_Store

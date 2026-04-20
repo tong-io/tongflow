@@ -1,11 +1,11 @@
 /**
- * OpenAI Chat 文本生成（与 deepseek / gemini 节点 prompt 形状一致）
+ * OpenAI Chat 文本生成（与 gemini 节点 prompt 形状一致；可选 prompt.openaiModel）
  */
 
 import type { TaskData, HandlerResult } from "@/lib/task-runner";
 import { notifyTask } from "@/lib/task-emitter";
 import { TaskStatus } from "@/constants/task-status";
-import { splitBySentence } from "./utils";
+import { resolveOpenAiTextModel, splitBySentence } from "./utils";
 
 export async function handler(
     task: TaskData,
@@ -16,11 +16,10 @@ export async function handler(
     const apiKey = process.env.OPENAI_API_KEY;
     if (!apiKey) throw new Error("OPENAI_API_KEY is not set");
 
-    const model = process.env.OPENAI_CHAT_MODEL?.trim() || "gpt-4o-mini";
+    const prompt = task.prompt;
+    const model = resolveOpenAiTextModel(prompt as Record<string, unknown>);
 
     const client = new OpenAI({ apiKey });
-
-    const prompt = task.prompt;
     const text = (prompt.text as string) || "";
     const userPrompt = (prompt.userPrompt as string) || "";
 

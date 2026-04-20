@@ -1,4 +1,10 @@
-import { Handle, Position, useNodesData, type NodeProps } from "@xyflow/react";
+import {
+    Handle,
+    Position,
+    useNodeId,
+    useNodesData,
+    type NodeProps,
+} from "@xyflow/react";
 import { memo, useMemo } from "react";
 import { Video, Sparkles, FileText } from "lucide-react";
 import { BaseNode } from "../base/base-node";
@@ -14,6 +20,12 @@ import { NodeTextarea } from "../base/node-textarea";
 import { useR2AsyncLoader } from "@/hooks/use-r2-async-loader";
 import { getR2Url } from "@/lib/r2-utils";
 import { useTranslations } from "next-intl";
+import useFlow from "@/hooks/use-flow";
+import { clampToAllowedModel } from "@/utils/node-model-feature";
+import { NodeModelSelect } from "../base/node-model-select";
+import { singleModelSelectOptions } from "@/utils/node-model-select-label";
+
+const DEFAULT_FEATURE = "speech-text-gen-video";
 
 // 音频缩略图组件
 const AudioThumbnail = memo(
@@ -86,7 +98,7 @@ TextPreview.displayName = "TextPreview";
 
 // 工作流执行配置
 const workflowConfig = {
-    feature: "speech_text_gen_video",
+    feature: DEFAULT_FEATURE,
     label: "语音文本生成视频",
     outputType: "videoNode",
     outputField: "fileKeys" as const,
@@ -108,8 +120,16 @@ const workflowConfig = {
 
 const SpeechTextGenVideoNode = ({ selected, data }: NodeProps) => {
     const t = useTranslations("Workspace.nodes");
-    const { ids, feature } = data as { ids: string[]; feature: string };
+    const updates = useFlow((s) => s.updates);
+    const id = useNodeId()!;
+    const { ids } = data as { ids: string[] };
     const fromNodes = useNodesData(ids);
+
+    const featureName = clampToAllowedModel(
+        (data as { feature?: string }).feature,
+        [DEFAULT_FEATURE],
+        DEFAULT_FEATURE,
+    );
 
     // 获取文本和音频数据
     const textNode = fromNodes.find((node) => node.type === "textNode");
@@ -146,6 +166,7 @@ const SpeechTextGenVideoNode = ({ selected, data }: NodeProps) => {
             data={dataWithOutput}
             workflowConfig={{
                 ...workflowConfig,
+                feature: featureName,
                 title: t("titles.speechTextGenVideo"),
                 icon: <Video className="h-5 w-5" />,
                 executeLabel: t("actions.generateVideo"),
@@ -173,6 +194,15 @@ const SpeechTextGenVideoNode = ({ selected, data }: NodeProps) => {
             }}
         >
             <div className="p-4 space-y-4">
+                <NodeModelSelect
+                    value={featureName}
+                    onValueChange={(value) =>
+                        updates(id, { ...data, feature: value })
+                    }
+                    options={singleModelSelectOptions(DEFAULT_FEATURE, (k) =>
+                        t(k as Parameters<typeof t>[0]),
+                    )}
+                />
                 {/* 媒体展示区 */}
                 <Card className="p-3">
                     <div className="space-y-2">
