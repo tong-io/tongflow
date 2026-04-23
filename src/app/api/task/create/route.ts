@@ -3,7 +3,7 @@ import { requireAuth } from "@/lib/auth-stub";
 import { getDb } from "@/db";
 import { tasks } from "@/db/schema";
 import { nanoid } from "nanoid";
-import { getFeatureByName } from "@/lib/feature-registry.server";
+import { getAbiNodeBySlot } from "@/lib/tongflow-abi";
 
 /**
  * POST /api/task/create
@@ -46,17 +46,26 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        // 4. 获取功能信息（支持历史别名，如 ii2v_first_last → image-image-gen-video）
-        const featureData = getFeatureByName(feature);
-
-        if (!featureData) {
+        // 4. feature is treated as ABI nodeSlot
+        const abiNode = getAbiNodeBySlot(feature);
+        if (!abiNode) {
             return NextResponse.json(
-                { error: `功能${feature}不存在，该功能正在开发中，敬请期待！` },
+                { error: `nodeSlot=${feature} 不存在（请检查 ABI）` },
                 { status: 400 },
             );
         }
+        const canonicalFeature = abiNode.nodeSlot;
 
-        const canonicalFeature = featureData.name;
+        const pluginId =
+            typeof (prompt as any).pluginId === "string"
+                ? String((prompt as any).pluginId).trim()
+                : "";
+        if (!pluginId) {
+            return NextResponse.json(
+                { error: "缺少 pluginId：请先在节点里选择一个插件实现（user/repo）" },
+                { status: 400 },
+            );
+        }
 
         const db = await getDb();
 
@@ -90,7 +99,7 @@ export async function POST(request: NextRequest) {
             requestedFeature: feature,
             userId: user.id,
             taskId,
-            function: featureData.function,
+            pluginId,
         });
 
         // 7. 返回结果

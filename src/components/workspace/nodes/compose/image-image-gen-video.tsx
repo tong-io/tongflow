@@ -95,7 +95,6 @@ const MediaThumbnail = memo(
 
 MediaThumbnail.displayName = "MediaThumbnail";
 
-// LTX Modal：ltx2-ii2v-first-last（generate_first_last）
 const workflowConfig = {
     feature: DEFAULT_FEATURE,
     label: "图片首尾帧生成视频",

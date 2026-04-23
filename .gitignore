@@ -19,8 +19,16 @@ build/
 # data
 data/
 
+# runtime-generated artifacts (build-time from ABI / plugin scan)
+.tongflow/
+
+# local plugins are managed as separate repos
+plugins/tongflow/
+plugins/tongflow-llm-*/
+plugins/tongflow-modal-*/
+
 # local feature registry overrides (see docs/feature-registry.md)
-config/features.local.json
+.tongflow/features.local.json
 
 # misc
 .DS_Store

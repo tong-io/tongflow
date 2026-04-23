@@ -1,19 +1,36 @@
 /**
  * Feature Registry（客户端与通用逻辑）
  *
- * 仅打包默认 JSON + 校验，不含 `node:fs`。服务端合并后的列表见 `feature-registry.server.ts`。
+ * IMPORTANT: `config/` must only contain `tongflow.abi.json`.
+ * We derive the feature registry from ABI nodes (featureName + defaultHandler).
  */
 
-import defaultBundleJson from "../../config/features.default.json";
+import { TONGFLOW_ABI_NODES } from "@/lib/tongflow-abi";
 import {
     validateFeatureRegistryBundle,
     type FeatureRegistryBundle,
     type FeatureDefinition,
 } from "@/lib/feature-registry-schema";
 
-export type { FeatureDefinition, FeatureRegistryBundle } from "@/lib/feature-registry-schema";
+export type {
+    FeatureDefinition,
+    FeatureRegistryBundle,
+} from "@/lib/feature-registry-schema";
 
-const defaultBundle = validateFeatureRegistryBundle(defaultBundleJson);
+function deriveBundleFromAbi(): FeatureRegistryBundle {
+    const features: FeatureDefinition[] = TONGFLOW_ABI_NODES.map((n) => ({
+        name: n.featureName,
+        type: n.defaultHandler.type,
+        function: n.defaultHandler.function,
+        processingTime: n.processingTime ?? 0,
+    }));
+    return validateFeatureRegistryBundle({
+        features,
+        aliases: { canonical: {}, labelLookup: {} },
+    });
+}
+
+const defaultBundle = deriveBundleFromAbi();
 
 function buildMap(features: FeatureDefinition[]): Map<string, FeatureDefinition> {
     return new Map(features.map((f) => [f.name, f]));

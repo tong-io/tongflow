@@ -1,5 +1,5 @@
 import { Handle, Position, useNodeId, type NodeProps } from "@xyflow/react";
-import { memo, useCallback } from "react";
+import { memo, useCallback, useEffect } from "react";
 import { RectangleHorizontal, Atom } from "lucide-react";
 
 import { BaseNode } from "../base/base-node";
@@ -18,6 +18,8 @@ import { useTranslations } from "next-intl";
 import { clampToAllowedModel } from "@/utils/node-model-feature";
 import { NodeModelSelect } from "../base/node-model-select";
 import { singleModelSelectOptions } from "@/utils/node-model-select-label";
+import { NodePluginSelect } from "../base/node-plugin-select";
+import { useNodePluginIds } from "@/hooks/use-plugins-registry";
 
 /**
  * TextGenImageNode 数据结构
@@ -42,6 +44,9 @@ interface TextGenImageNodeData extends Record<string, unknown> {
         width: number;
         height: number;
     };
+    /** Directory name under `plugins/` (from registry). */
+    pluginId?: string;
+    /** @deprecated */ pluginRepo?: string;
 }
 
 interface TextGenImageNodeProps extends NodeProps {
@@ -95,6 +100,17 @@ const TextGenImageNode = ({ selected, data }: TextGenImageNodeProps) => {
     const prompt = data.prompt ?? defaultPrompt;
     const id = useNodeId()!;
     const updates = useFlow((s) => s.updates);
+
+    const pluginOptions = useNodePluginIds("image_gen");
+    const pluginId = (data.pluginId ?? (data as any).pluginRepo ?? "").trim();
+    const resolvedPluginId = (pluginId || pluginOptions[0] || "").trim();
+
+    useEffect(() => {
+        if (pluginId) return;
+        if (!resolvedPluginId) return;
+        updates(id, { ...data, pluginId: resolvedPluginId });
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [id, resolvedPluginId]);
 
     const featureName = clampToAllowedModel(
         data.feature,
@@ -158,11 +174,26 @@ const TextGenImageNode = ({ selected, data }: TextGenImageNodeProps) => {
                         text,
                         width: prompt.width,
                         height: prompt.height,
+                        ...(resolvedPluginId
+                            ? { pluginId: resolvedPluginId, nodeSlot: "image_gen" }
+                            : {}),
                     }));
                 },
             }}
         >
             <div className="p-4 space-y-4">
+                {pluginOptions.length > 0 && (
+                    <NodePluginSelect
+                        value={resolvedPluginId}
+                        onValueChange={(value) =>
+                            updates(id, { ...data, pluginId: value })
+                        }
+                        options={pluginOptions.map((r) => ({
+                            value: r,
+                            label: r,
+                        }))}
+                    />
+                )}
                 <NodeModelSelect
                     value={featureName}
                     onValueChange={(value) =>

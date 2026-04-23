@@ -276,10 +276,15 @@
                 "select": "选择",
                 "selected": "已选",
                 "modalNotDeployedTitle": "未检测到 Modal 部署",
-                "modalNotDeployedDescription": "功能「{feature}」需要 Modal App「{app}」。请先在终端完成准备与部署后再执行。",
+                "modalNotDeployedDescription": "功能「{feature}」需要 Modal App「{app}」。当前未检测到对应部署，是否现在下载/部署？",
                 "modalDeployHint": "1) 配置 MODAL_TOKEN_ID / MODAL_TOKEN_SECRET；2) 本仓库可运行 pnpm desktop:python:prepare 与 pnpm desktop:wheelhouse:prepare 使用便携 Python；3) 在项目根目录执行 modal deploy modal/cpu 与 modal/gpu 下对应脚本（或一键部署全部 .py）。部署完成后点「重试」。",
-                "modalDeployRetry": "重试",
-                "modalDeployDismiss": "关闭"
+                "modalDeployDismiss": "取消",
+                "modalDeployAction": "下载并部署",
+                "modalDeploying": "正在部署 Modal Workers…",
+                "modalDeployDone": "部署完成",
+                "modalDeployError": "部署失败",
+                "modalDeployingAction": "部署中…",
+                "modalDeployProgressHint": "已部署 {done}/{total}"
             },
             "common": {
                 "enterInstructions": "请输入指令...",

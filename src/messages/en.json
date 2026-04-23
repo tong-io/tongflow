@@ -276,10 +276,15 @@
                 "select": "Select",
                 "selected": "Selected",
                 "modalNotDeployedTitle": "Modal app not deployed",
-                "modalNotDeployedDescription": "Feature \"{feature}\" requires Modal app \"{app}\". Prepare and deploy before running.",
-                "modalDeployHint": "1) Set MODAL_TOKEN_ID / MODAL_TOKEN_SECRET. 2) Optionally run pnpm desktop:python:prepare and pnpm desktop:wheelhouse:prepare. 3) From the repo root, run modal deploy on the matching scripts under modal/cpu and modal/gpu. Then tap Retry.",
-                "modalDeployRetry": "Retry",
-                "modalDeployDismiss": "Close"
+                "modalNotDeployedDescription": "Feature \"{feature}\" requires Modal app \"{app}\". It is not deployed yet. Deploy now?",
+                "modalDeployHint": "1) Set MODAL_TOKEN_ID / MODAL_TOKEN_SECRET. 2) Optionally run pnpm desktop:python:prepare and pnpm desktop:wheelhouse:prepare. 3) From the repo root, run modal deploy on the matching scripts under modal/cpu and modal/gpu (or deploy all .py).",
+                "modalDeployDismiss": "Cancel",
+                "modalDeployAction": "Download & deploy",
+                "modalDeploying": "Deploying Modal workers…",
+                "modalDeployDone": "Deployment completed",
+                "modalDeployError": "Deployment failed",
+                "modalDeployingAction": "Deploying…",
+                "modalDeployProgressHint": "Deployed {done}/{total}"
             },
             "common": {
                 "enterInstructions": "Enter instructions...",

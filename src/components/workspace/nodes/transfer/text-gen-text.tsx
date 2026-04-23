@@ -47,12 +47,10 @@ import {
 import { clampToAllowedModel } from "@/utils/node-model-feature";
 import { registryModelOptionLabel } from "@/utils/node-model-select-label";
 import { NodeModelSelect } from "../base/node-model-select";
+import { NodePluginSelect } from "../base/node-plugin-select";
+import { useNodePluginIds } from "@/hooks/use-plugins-registry";
 
-const GEN_TEXT_FEATURES = [
-    "gen_text",
-    "gen_text_openai",
-    "gen_text_gemini",
-] as const;
+const GEN_TEXT_FEATURES = ["gen_text"] as const;
 
 // 思考框组件
 const ReasoningBox = ({ content }: { content: string }) => {
@@ -117,6 +115,8 @@ const GenTextNode = ({ selected, data }: NodeProps) => {
     const { ids = [], texts: localTexts = [] } = data as {
         ids?: string[];
         texts?: string[];
+        pluginId?: string;
+        /** @deprecated */ pluginRepo?: string;
     };
 
     const expands = useFlow((s) => s.expands);
@@ -172,13 +172,19 @@ const GenTextNode = ({ selected, data }: NodeProps) => {
     const usesGeminiBackend = model === "gemini";
     const usesOpenAiBackend = model === "openai";
 
-    const resolvedFeatureFromModel =
-        model === "auto" ? "gen_text" : `gen_text_${model}`;
-    const featureName = clampToAllowedModel(
-        (data as { feature?: string }).feature,
-        GEN_TEXT_FEATURES,
-        resolvedFeatureFromModel,
-    );
+    const featureName = "gen_text";
+
+    const pluginOptions = useNodePluginIds(featureName);
+    const pluginId = (
+        (data as any).pluginId ?? (data as any).pluginRepo ?? ""
+    ).trim();
+    const inferredDefaultPluginId = "tongflow-llm-openrouter-free";
+    useEffect(() => {
+        if (!pluginId && inferredDefaultPluginId) {
+            updates(id, { ...(data as any), pluginId: inferredDefaultPluginId });
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [id, inferredDefaultPluginId]);
 
     // 获取实际使用的提示词
     const effectivePrompt = hasUpstreamPrompt ? upstreamPrompt : userPrompt;
@@ -293,6 +299,9 @@ const GenTextNode = ({ selected, data }: NodeProps) => {
                                 : texts;
                         return inputTexts.map((text) => ({
                             text: `${text}\n\n${effectivePrompt}`,
+                            ...(pluginId
+                                ? { pluginId, nodeSlot: featureName }
+                                : {}),
                             ...(usesGeminiBackend ? { geminiModel } : {}),
                             ...(usesOpenAiBackend ? { openaiModel } : {}),
                         }));
@@ -309,6 +318,18 @@ const GenTextNode = ({ selected, data }: NodeProps) => {
                 }
             >
                 <div className="p-4 space-y-4">
+                    {pluginOptions.length > 0 && (
+                        <NodePluginSelect
+                            value={pluginId}
+                            onValueChange={(value) =>
+                                updates(id, { ...(data as any), pluginId: value })
+                            }
+                            options={pluginOptions.map((r) => ({
+                                value: r,
+                                label: r,
+                            }))}
+                        />
+                    )}
                     <div className="space-y-2">
                         {/* 如果有上游提示词，显示预览 */}
                         {hasUpstreamPrompt ? (
@@ -337,27 +358,6 @@ const GenTextNode = ({ selected, data }: NodeProps) => {
                         )}
                     </div>
                     <div className="flex flex-col gap-2">
-                        <NodeModelSelect
-                            value={featureName}
-                            onValueChange={(v) => {
-                                updates(id, { ...data, feature: v });
-                                if (v === "gen_text") setState({ model: "auto" });
-                                else if (v === "gen_text_openai")
-                                    setState({ model: "openai" });
-                                else if (v === "gen_text_gemini")
-                                    setState({ model: "gemini" });
-                            }}
-                            options={MODEL_OPTIONS.map((opt) => {
-                                const value =
-                                    opt.value === "auto"
-                                        ? "gen_text"
-                                        : `gen_text_${opt.value}`;
-                                return {
-                                    value,
-                                    label: registryModelOptionLabel(value),
-                                };
-                            })}
-                        />
                         {usesGeminiBackend ? (
                             <div className="flex items-center gap-2">
                                 <Label className="text-xs text-muted-foreground shrink-0 w-20">

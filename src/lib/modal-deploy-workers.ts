@@ -11,6 +11,11 @@
 import fs from "node:fs";
 import path from "node:path";
 import { execFile, spawn } from "node:child_process";
+import { loadPluginsRegistry } from "@/lib/plugins-registry.server";
+
+function readJsonFile(p: string): unknown {
+    return JSON.parse(fs.readFileSync(p, "utf8")) as unknown;
+}
 
 function platformKey(): "darwin" | "win32" | null {
     if (process.platform === "darwin") return "darwin";
@@ -149,6 +154,21 @@ export function listModalEntryFiles(): string[] {
     };
     pushPyFiles(cpuDir);
     pushPyFiles(gpuDir);
+
+    // Plugins: deploy.py under `plugins/<pluginId>/` (see config/plugins.registry.json)
+    try {
+        const reg = loadPluginsRegistry();
+        for (const pluginId of Object.keys(reg.plugins)) {
+            const p = reg.plugins[pluginId]?.runners.modal;
+            if (!p) continue;
+            const entry = p.deployFile || "deploy.py";
+            const dir = path.join(process.cwd(), p.localSubdir);
+            const file = path.join(dir, entry);
+            if (fs.existsSync(file)) files.push(file);
+        }
+    } catch {
+        // ignore invalid/missing plugins registry
+    }
     return files.sort();
 }
 

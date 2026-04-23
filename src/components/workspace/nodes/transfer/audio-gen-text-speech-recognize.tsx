@@ -13,10 +13,16 @@ import useFlow from "@/hooks/use-flow";
 import { clampToAllowedModel } from "@/utils/node-model-feature";
 import { NodeModelSelect } from "../base/node-model-select";
 import { multiModelSelectOptions } from "@/utils/node-model-select-label";
+import { NodePluginSelect } from "../base/node-plugin-select";
+import { useNodePluginIdsUnion } from "@/hooks/use-plugins-registry";
+import { NODE_TRANSCRIBE_SLOTS } from "@/lib/tongflow-abi";
 
 interface AudioGenTextSpeechRecognizeNodeProps extends NodeProps {
     data: {
         fileKeys?: string[];
+        /** Directory name under `plugins/` (from registry). */
+        pluginId?: string;
+        /** @deprecated */ pluginRepo?: string;
     };
 }
 
@@ -49,6 +55,12 @@ const AudioGenTextSpeechRecognizeNode = ({
     const updates = useFlow((s) => s.updates);
     const id = useNodeId()!;
     const { fileKeys = [] } = data;
+    const pluginOptions = useNodePluginIdsUnion([...NODE_TRANSCRIBE_SLOTS]);
+    const pluginId = (
+        data.pluginId ??
+        (data as { pluginRepo?: string }).pluginRepo ??
+        ""
+    ).trim();
 
     const featureName = clampToAllowedModel(
         (data as { feature?: string }).feature,
@@ -79,11 +91,29 @@ const AudioGenTextSpeechRecognizeNode = ({
                             : fileKeys;
                     return keys.map((fileKey) => ({
                         audio: getR2Url(fileKey),
+                        ...(pluginId
+                            ? {
+                                  pluginId,
+                                  nodeSlot: featureName,
+                              }
+                            : {}),
                     }));
                 },
             }}
         >
-            <div className="p-4">
+            <div className="p-4 space-y-4">
+                {pluginOptions.length > 0 && (
+                    <NodePluginSelect
+                        value={pluginId}
+                        onValueChange={(value) =>
+                            updates(id, { ...data, pluginId: value })
+                        }
+                        options={pluginOptions.map((r) => ({
+                            value: r,
+                            label: r,
+                        }))}
+                    />
+                )}
                 <NodeModelSelect
                     value={featureName}
                     onValueChange={(value) =>

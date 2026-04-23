@@ -7,13 +7,8 @@
 
 import { getDb, tasks } from "@/db";
 import { eq } from "drizzle-orm";
-import { getFeatureByName } from "@/lib/feature-registry.server";
-import {
-    notifyTask,
-    registerTask,
-    removeTask,
-    emitTaskEvent,
-} from "./task-emitter";
+import { executePlugin } from "@/lib/plugin-executor/execute";
+import { notifyTask, registerTask, removeTask, emitTaskEvent } from "./task-emitter";
 import {
     TaskStatus,
     WorkflowStatus,
@@ -25,13 +20,18 @@ import {
 export interface TaskData {
     taskId: string;
     userId: string;
-    feature: string;
-    type: string;
-    function: string;
+    nodeSlot: string;
+    pluginId: string;
     prompt: Record<string, unknown>;
     nodeId: string;
     workflowId?: number | null;
     shareId?: number | null;
+    /** @deprecated legacy */
+    feature?: string;
+    /** @deprecated legacy */
+    type?: string;
+    /** @deprecated legacy */
+    function?: string;
 }
 
 export interface HandlerResult {
@@ -52,44 +52,16 @@ export type TaskHandler = (
     signal: AbortSignal,
 ) => Promise<HandlerResult>;
 
-// ==================== Handler 注册表 ====================
-
-const handlers = new Map<string, Map<string, TaskHandler>>();
-
 /**
- * 注册一个 handler
- * @param type 任务类型 (llm, api, gpu, cpu, link)
- * @param fn 函数名
- * @param handler 处理函数
+ * @deprecated Legacy handler registry has been retired.
+ * Kept as a no-op export to avoid breaking older imports.
  */
 export function registerHandler(
-    type: string,
-    fn: string,
-    handler: TaskHandler,
-) {
-    if (!handlers.has(type)) {
-        handlers.set(type, new Map());
-    }
-    handlers.get(type)!.set(fn, handler);
-}
-
-/**
- * 获取 handler
- */
-function getHandler(type: string, fn: string): TaskHandler | undefined {
-    return handlers.get(type)?.get(fn);
-}
-
-// ==================== 核心执行逻辑 ====================
-
-/**
- * 从数据库加载任务并准备执行数据
- */
-async function ensureHandlers(): Promise<void> {
-    const { ensureHandlersRegistered } = await import(
-        "@/lib/register-task-handlers"
-    );
-    ensureHandlersRegistered();
+    _type: string,
+    _fn: string,
+    _handler: TaskHandler,
+): void {
+    // no-op
 }
 
 export async function loadTaskData(taskId: string): Promise<TaskData | null> {
@@ -101,18 +73,22 @@ export async function loadTaskData(taskId: string): Promise<TaskData | null> {
 
     if (!task) return null;
 
-    // 从注册表获取 feature 的 type 和 function
-    const featureData = getFeatureByName(task.feature);
+    const prompt = JSON.parse(task.prompt) as Record<string, unknown>;
+    const pluginId =
+        typeof prompt.pluginId === "string" ? prompt.pluginId.trim() : "";
+    const nodeSlot =
+        (typeof prompt.nodeSlot === "string" && prompt.nodeSlot.trim()) ||
+        (typeof task.feature === "string" ? task.feature.trim() : "");
 
-    if (!featureData) return null;
+    if (!pluginId) return null;
+    if (!nodeSlot) return null;
 
     return {
         taskId: task.id,
         userId: task.userId,
-        feature: task.feature,
-        type: featureData.type,
-        function: featureData.function,
-        prompt: JSON.parse(task.prompt),
+        nodeSlot,
+        pluginId,
+        prompt,
         nodeId: task.nodeId,
         workflowId: task.workflowId,
         shareId: task.shareId,
@@ -130,8 +106,6 @@ export async function loadTaskData(taskId: string): Promise<TaskData | null> {
  * 5. 更新 DB 状态
  */
 export async function executeTask(taskId: string): Promise<void> {
-    await ensureHandlers();
-
     const taskData = await loadTaskData(taskId);
     if (!taskData) {
         notifyTask(
@@ -155,16 +129,14 @@ export async function executeTask(taskId: string): Promise<void> {
 
         notifyTask(taskId, TaskStatus.RUNNING, { message: "任务开始执行" }, taskData.nodeId);
 
-        // 查找 handler
-        const handler = getHandler(taskData.type, taskData.function);
-        if (!handler) {
-            throw new Error(
-                `No handler for type=${taskData.type}, function=${taskData.function}`,
-            );
-        }
-
-        // 执行
-        const result = await handler(taskData, controller.signal);
+        // Hard requirement: pluginId + nodeSlot must exist (platform-agnostic core).
+        const result = await executePlugin({
+            pluginId: taskData.pluginId,
+            nodeSlot: taskData.nodeSlot,
+            input: taskData.prompt,
+            taskId,
+            signal: controller.signal,
+        });
 
         // 检查是否被取消
         if (controller.signal.aborted) {
@@ -239,10 +211,7 @@ export async function executeWorkflowTask(
     taskId: string,
     workflowJson: string,
     inputs: Record<string, unknown>,
-    featureMap: Record<string, { type: string; function: string }>,
 ): Promise<void> {
-    await ensureHandlers();
-
     const controller = registerTask(taskId);
 
     try {
@@ -274,37 +243,26 @@ export async function executeWorkflowTask(
             feature: string,
             params: Record<string, unknown>,
         ): Promise<Record<string, unknown>> {
-            const featureInfo = featureMap[feature];
-            if (!featureInfo) {
+            const pluginId =
+                typeof params.pluginId === "string" ? params.pluginId.trim() : "";
+            const nodeSlot =
+                typeof params.nodeSlot === "string" && params.nodeSlot.trim()
+                    ? params.nodeSlot.trim()
+                    : feature;
+
+            if (!pluginId) {
                 throw new Error(
-                    `Unknown feature: ${feature}, not found in featureMap`,
+                    `Missing pluginId for nodeSlot=${nodeSlot}. Please select a plugin implementation in the node UI.`,
                 );
             }
 
-            const handler = getHandler(featureInfo.type, featureInfo.function);
-            if (!handler) {
-                throw new Error(
-                    `No handler for type=${featureInfo.type}, function=${featureInfo.function}`,
-                );
-            }
-
-            const subTaskData: TaskData = {
-                taskId: `${taskId}_${Date.now().toString(36)}`,
-                userId: "default-user",
-                feature,
-                type: featureInfo.type,
-                function: featureInfo.function,
-                prompt: params,
-                nodeId: "",
-            };
-
-            const result = await handler(subTaskData, controller.signal);
-
-            // LLM 返回 { result: "..." } → 转换为 { text: "..." }
-            if (featureInfo.type === "llm" && result.result) {
-                return { text: result.result };
-            }
-            return result;
+            return await executePlugin({
+                pluginId,
+                nodeSlot,
+                input: params,
+                taskId,
+                signal: controller.signal,
+            });
         }
 
         // 按层级执行节点

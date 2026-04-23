@@ -37,12 +37,10 @@ import {
 import { clampToAllowedModel } from "@/utils/node-model-feature";
 import { registryModelOptionLabel } from "@/utils/node-model-select-label";
 import { NodeModelSelect } from "../base/node-model-select";
+import { NodePluginSelect } from "../base/node-plugin-select";
+import { useNodePluginIds } from "@/hooks/use-plugins-registry";
 
-const COMBINE_TEXT_FEATURES = [
-    "combine_text",
-    "combine_text_openai",
-    "combine_text_gemini",
-] as const;
+const COMBINE_TEXT_FEATURES = ["combine_text"] as const;
 
 // 思考框组件
 const ReasoningBox = ({ content }: { content: string }) => {
@@ -103,6 +101,8 @@ const TextsGenTextNode = ({ selected, data }: NodeProps) => {
     const { ids = [], texts: localTexts = [] } = data as {
         ids?: string[];
         texts?: string[];
+        pluginId?: string;
+        /** @deprecated */ pluginRepo?: string;
     };
 
     const expands = useFlow((s) => s.expands);
@@ -135,11 +135,7 @@ const TextsGenTextNode = ({ selected, data }: NodeProps) => {
     const t = useTranslations("Workspace.nodes");
     const tBase = useTranslations("Workspace.nodes.base");
 
-    const MODEL_OPTIONS = [
-        { value: "auto", label: t("params.modelDefault") },
-        { value: "openai", label: "OpenAI" },
-        { value: "gemini", label: "Gemini" },
-    ];
+    const MODEL_OPTIONS = [{ value: "auto", label: t("params.modelDefault") }];
 
     const resolvedFeatureFromModel =
         model === "auto" ? "combine_text" : `combine_text_${model}`;
@@ -149,10 +145,19 @@ const TextsGenTextNode = ({ selected, data }: NodeProps) => {
         resolvedFeatureFromModel,
     );
 
-    const usesGeminiCombineBackend =
-        featureName === "combine_text" ||
-        featureName === "combine_text_gemini";
-    const usesOpenAiCombineBackend = featureName === "combine_text_openai";
+    const usesGeminiCombineBackend = true;
+    const usesOpenAiCombineBackend = false;
+
+    const pluginOptions = useNodePluginIds("combine_text");
+    const pluginId = (
+        (data as any).pluginId ?? (data as any).pluginRepo ?? ""
+    ).trim();
+    useEffect(() => {
+        if (!pluginId) {
+            updates(id, { ...(data as any), pluginId: "tongflow-llm-gemini" });
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [id]);
 
     // 流式输出状态
     const [reasoningContent, setReasoningContent] = useState<string>("");
@@ -247,6 +252,9 @@ const TextsGenTextNode = ({ selected, data }: NodeProps) => {
                         {
                             texts: inputTexts,
                             userPrompt,
+                            ...(pluginId
+                                ? { pluginId, nodeSlot: "combine_text" }
+                                : {}),
                             ...(usesGeminiCombineBackend
                                 ? { geminiModel }
                                 : {}),
@@ -268,21 +276,26 @@ const TextsGenTextNode = ({ selected, data }: NodeProps) => {
             }
         >
             <div className="p-4 space-y-4">
+                {pluginOptions.length > 0 && (
+                    <NodePluginSelect
+                        value={pluginId}
+                        onValueChange={(value) =>
+                            updates(id, { ...(data as any), pluginId: value })
+                        }
+                        options={pluginOptions.map((r) => ({
+                            value: r,
+                            label: r,
+                        }))}
+                    />
+                )}
                 <NodeModelSelect
                     value={featureName}
                     onValueChange={(v) => {
                         updates(id, { ...data, feature: v });
                         if (v === "combine_text") setState({ model: "auto" });
-                        else if (v === "combine_text_openai")
-                            setState({ model: "openai" });
-                        else if (v === "combine_text_gemini")
-                            setState({ model: "gemini" });
                     }}
                     options={MODEL_OPTIONS.map((opt) => {
-                        const value =
-                            opt.value === "auto"
-                                ? "combine_text"
-                                : `combine_text_${opt.value}`;
+                        const value = "combine_text";
                         return {
                             value,
                             label: registryModelOptionLabel(value),

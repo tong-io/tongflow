@@ -1,0 +1,15 @@
+import { NextResponse } from "next/server";
+import { loadPluginsRegistry } from "@/lib/plugins-registry.server";
+
+export const runtime = "nodejs";
+
+/**
+ * GET /api/plugins/registry
+ * Returns generated plugin registry (nodeSlot -> pluginIds, pluginId -> Modal + methodsByNodeSlot).
+ */
+export async function GET() {
+    return NextResponse.json(loadPluginsRegistry(), {
+        headers: { "Cache-Control": "no-store" },
+    });
+}
+

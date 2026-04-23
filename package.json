@@ -40,7 +40,9 @@
         "db:studio": "drizzle-kit studio",
         "lint": "npx biome format --write",
         "typecheck": "tsc --noEmit",
-        "validate-features": "tsx scripts/validate-features.ts"
+        "abi:generate": "node scripts/generate-tongflow-abi.mjs",
+        "plugins:sync": "tsx scripts/plugins-sync.ts",
+        "tongflow:publish": "bash scripts/publish-tongflow-pypi.sh"
     },
     "dependencies": {
         "@openflow/proprietary": "workspace:*",

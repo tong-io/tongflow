@@ -22,6 +22,7 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { Progress } from "@/components/ui/progress";
 import { useFeature } from "@/hooks/use-features";
 import {
     useTaskStore,
@@ -44,6 +45,7 @@ import {
 } from "./node-header";
 import { useTranslations } from "next-intl";
 import { isModalNode } from "@/constants/modal-nodes";
+// Platform-specific setup (download/deploy) is handled by plugin runners at execution time.
 
 /** SSE data 有时为 JSON 字符串；Modal 可能把正文放在 markdown 或嵌套 result 里 */
 function normalizeTaskPayloadData(
@@ -143,6 +145,8 @@ export const BaseNode = forwardRef<HTMLDivElement, BaseNodeProps>(
     ) => {
         const [elapsedSeconds, setElapsedSeconds] = useState<number>(0);
         const [isEditingComment, setIsEditingComment] =
+            useState<boolean>(false);
+        const [missingPluginOpen, setMissingPluginOpen] =
             useState<boolean>(false);
         const nodeId = useNodeId();
         const { updateNodeData, getNode } = useReactFlow();
@@ -470,11 +474,35 @@ export const BaseNode = forwardRef<HTMLDivElement, BaseNodeProps>(
             };
         }, [nodeId, storeApi, getValueByPath, edgeMatchesTargetHandle]);
 
-        const [modalDeployGate, setModalDeployGate] = useState<{
-            open: boolean;
-            appName?: string;
-            featureLabel?: string;
-        }>({ open: false });
+        // Legacy Modal gating removed.
+
+        const mergePluginIdFromNodeData = useCallback(
+            (prompts: Record<string, unknown>[]): Record<string, unknown>[] => {
+                if (!nodeId) return prompts;
+                const n = getNode(nodeId);
+                const nodeData = (n?.data ?? undefined) as
+                    | { pluginId?: string; pluginRepo?: string }
+                    | undefined;
+                const dataPluginId = (
+                    typeof nodeData?.pluginId === "string"
+                        ? nodeData.pluginId
+                        : typeof nodeData?.pluginRepo === "string"
+                          ? nodeData.pluginRepo
+                          : ""
+                ).trim();
+                if (!dataPluginId) return prompts;
+                return prompts.map((o) => {
+                    if (typeof o.pluginId === "string" && o.pluginId.trim()) {
+                        return o;
+                    }
+                    if (typeof o.pluginRepo === "string" && o.pluginRepo.trim()) {
+                        return o;
+                    }
+                    return { ...o, pluginId: dataPluginId };
+                });
+            },
+            [nodeId, getNode],
+        );
 
         const performExecute = useCallback(async () => {
             console.log(
@@ -485,7 +513,10 @@ export const BaseNode = forwardRef<HTMLDivElement, BaseNodeProps>(
             console.log(`[BaseNode] Executing node ${nodeId}...`);
 
             const context = getPromptsContext();
-            const prompts = workflowConfig.getPrompts(context);
+            const rawPrompts = workflowConfig
+                .getPrompts(context)
+                .map((p) => p as Record<string, unknown>);
+            const prompts = mergePluginIdFromNodeData(rawPrompts);
 
             console.log(
                 `[BaseNode] Executing node ${nodeId} with prompts:`,
@@ -522,48 +553,28 @@ export const BaseNode = forwardRef<HTMLDivElement, BaseNodeProps>(
             createBatchTasks,
             updateNodeData,
             getPromptsContext,
+            mergePluginIdFromNodeData,
         ]);
 
         const executeNew = useCallback(async () => {
             if (!nodeId || !feature || !workflowConfig?.getPrompts) return;
 
-            const ft = featureInfo?.type;
-            const fn = featureInfo?.function;
-            if (ft && fn) {
-                try {
-                    const res = await fetch("/api/modal/check", {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        credentials: "same-origin",
-                        body: JSON.stringify({ type: ft, function: fn }),
-                    });
-                    if (!res.ok) {
-                        console.warn(
-                            "[BaseNode] Modal check HTTP",
-                            res.status,
-                        );
-                    } else {
-                        const data = (await res.json()) as {
-                            modal?: boolean;
-                            deployed?: boolean;
-                            appName?: string;
-                        };
-                        if (
-                            data.modal === true &&
-                            data.deployed === false &&
-                            data.appName
-                        ) {
-                            setModalDeployGate({
-                                open: true,
-                                appName: data.appName,
-                                featureLabel: feature,
-                            });
-                            return;
-                        }
-                    }
-                } catch (e) {
-                    console.warn("[BaseNode] Modal deploy check failed:", e);
-                }
+            // Hard requirement: prompt must include pluginId (enforced server-side too).
+            const context = getPromptsContext();
+            const raw = workflowConfig
+                .getPrompts(context)
+                .map((p) => p as Record<string, unknown>);
+            const merged = mergePluginIdFromNodeData(raw);
+            const first = merged[0] as Record<string, unknown> | undefined;
+            const pluginId =
+                first && typeof first.pluginId === "string"
+                    ? first.pluginId.trim()
+                    : first && typeof first.pluginRepo === "string"
+                      ? first.pluginRepo.trim()
+                      : "";
+            if (!pluginId) {
+                setMissingPluginOpen(true);
+                return;
             }
 
             await performExecute();
@@ -571,10 +582,12 @@ export const BaseNode = forwardRef<HTMLDivElement, BaseNodeProps>(
             nodeId,
             feature,
             workflowConfig,
-            featureInfo?.type,
-            featureInfo?.function,
             performExecute,
+            getPromptsContext,
+            mergePluginIdFromNodeData,
         ]);
+
+        // Legacy Modal deploy flow removed.
 
         // Get current node's comment from store
         const comment = useStore(
@@ -633,6 +646,30 @@ export const BaseNode = forwardRef<HTMLDivElement, BaseNodeProps>(
 
         return (
             <div className="relative">
+                <AlertDialog
+                    open={missingPluginOpen}
+                    onOpenChange={setMissingPluginOpen}
+                >
+                    <AlertDialogContent>
+                        <AlertDialogHeader>
+                            <AlertDialogTitle>
+                                Missing Implementation
+                            </AlertDialogTitle>
+                            <AlertDialogDescription>
+                                Please select a plugin implementation in this
+                                node before running.
+                            </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                            <AlertDialogCancel>
+                                {t("cancel")}
+                            </AlertDialogCancel>
+                            <AlertDialogAction>
+                                {t("confirm")}
+                            </AlertDialogAction>
+                        </AlertDialogFooter>
+                    </AlertDialogContent>
+                </AlertDialog>
                 {/* Comment box above the node */}
                 {comment !== undefined && (
                     <div
@@ -878,49 +915,7 @@ export const BaseNode = forwardRef<HTMLDivElement, BaseNodeProps>(
                     </div>
                 </div>
 
-                <AlertDialog
-                    open={modalDeployGate.open}
-                    onOpenChange={(open) => {
-                        if (!open) setModalDeployGate({ open: false });
-                    }}
-                >
-                    <AlertDialogContent>
-                        <AlertDialogHeader>
-                            <AlertDialogTitle>
-                                {t("modalNotDeployedTitle")}
-                            </AlertDialogTitle>
-                            <AlertDialogDescription className="space-y-3 text-left">
-                                <span className="block">
-                                    {t("modalNotDeployedDescription", {
-                                        feature:
-                                            modalDeployGate.featureLabel ??
-                                            "",
-                                        app: modalDeployGate.appName ?? "",
-                                    })}
-                                </span>
-                                <span className="block whitespace-pre-wrap text-xs leading-relaxed">
-                                    {t("modalDeployHint")}
-                                </span>
-                            </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                            <AlertDialogCancel>
-                                {t("modalDeployDismiss")}
-                            </AlertDialogCancel>
-                            <AlertDialogAction
-                                type="button"
-                                onClick={() => {
-                                    setModalDeployGate({ open: false });
-                                    setTimeout(() => {
-                                        void executeNew();
-                                    }, 0);
-                                }}
-                            >
-                                {t("modalDeployRetry")}
-                            </AlertDialogAction>
-                        </AlertDialogFooter>
-                    </AlertDialogContent>
-                </AlertDialog>
+                {/* legacy modal deploy dialog removed */}
             </div>
         );
     },

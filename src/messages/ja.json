@@ -275,10 +275,15 @@
                 "select": "選択",
                 "selected": "選択済み",
                 "modalNotDeployedTitle": "Modal が未デプロイです",
-                "modalNotDeployedDescription": "機能「{feature}」には Modal App「{app}」が必要です。事前に準備とデプロイを行ってください。",
-                "modalDeployHint": "1) MODAL_TOKEN_ID / MODAL_TOKEN_SECRET を設定。2) 必要なら pnpm desktop:python:prepare と pnpm desktop:wheelhouse:prepare。3) リポジトリ直下で modal/cpu・modal/gpu の該当スクリプトを modal deploy。完了後「再試行」。",
-                "modalDeployRetry": "再試行",
-                "modalDeployDismiss": "閉じる"
+                "modalNotDeployedDescription": "機能「{feature}」には Modal App「{app}」が必要です。まだデプロイされていません。今すぐデプロイしますか？",
+                "modalDeployHint": "1) MODAL_TOKEN_ID / MODAL_TOKEN_SECRET を設定。2) 必要なら pnpm desktop:python:prepare と pnpm desktop:wheelhouse:prepare。3) リポジトリ直下で modal/cpu・modal/gpu の該当スクリプトを modal deploy（または .py を一括デプロイ）。",
+                "modalDeployDismiss": "キャンセル",
+                "modalDeployAction": "ダウンロード＆デプロイ",
+                "modalDeploying": "Modal workers をデプロイ中…",
+                "modalDeployDone": "デプロイ完了",
+                "modalDeployError": "デプロイ失敗",
+                "modalDeployingAction": "デプロイ中…",
+                "modalDeployProgressHint": "{done}/{total} をデプロイ済み"
             },
             "common": {
                 "enterInstructions": "指示を入力してください...",

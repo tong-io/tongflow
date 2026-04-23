@@ -1,11 +1,19 @@
 import "server-only";
 
-import defaultBundleJson from "../../config/features.default.json";
 import { buildFeatureRegistry } from "@/lib/feature-registry";
-import { validateFeatureRegistryBundle } from "@/lib/feature-registry-schema";
 import { loadMergedServerBundle } from "@/lib/load-feature-registry.server";
+import { validateFeatureRegistryBundle } from "@/lib/feature-registry-schema";
+import { TONGFLOW_ABI_NODES } from "@/lib/tongflow-abi";
 
-const defaultBundle = validateFeatureRegistryBundle(defaultBundleJson);
+const defaultBundle = validateFeatureRegistryBundle({
+    features: TONGFLOW_ABI_NODES.map((n) => ({
+        name: n.featureName,
+        type: n.defaultHandler.type,
+        function: n.defaultHandler.function,
+        processingTime: n.processingTime ?? 0,
+    })),
+    aliases: { canonical: {}, labelLookup: {} },
+});
 const serverRegistry = buildFeatureRegistry(
     loadMergedServerBundle(defaultBundle),
 );

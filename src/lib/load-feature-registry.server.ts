@@ -46,7 +46,7 @@ export function loadMergedServerBundle(
 ): FeatureRegistryBundle {
     let merged = validateFeatureRegistryBundle(defaultBundle);
 
-    const localPath = join(process.cwd(), "config/features.local.json");
+    const localPath = join(process.cwd(), ".tongflow", "features.local.json");
     if (existsSync(localPath)) {
         try {
             const local = validateFeatureRegistryBundle(readJsonFile(localPath));
