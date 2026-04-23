@@ -45,3 +45,5 @@ wheelhouse/
 
 # Next.js server: offline modal venv (bundled python + wheelhouse)
 .openflow-modal-venv/
+
+plugins/
