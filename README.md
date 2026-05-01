@@ -3,11 +3,11 @@
 
   <h1>A Multi-Modal AIGC Studio</h1>
   <p>
-    <a href="https://github.com/tong-io/openflow/stargazers"><img src="https://img.shields.io/github/stars/tong-io/openflow?style=flat&logo=github" alt="GitHub stars" /></a>
-    <a href="https://github.com/tong-io/openflow/blob/main/LICENSE"><img src="https://img.shields.io/badge/License-AGPL--3.0-blue.svg" alt="License" /></a>
-    <a href="#"><img src="https://img.shields.io/badge/CI-TBD-lightgrey" alt="CI TBD" /></a>
+    <a href="https://github.com/tong-io/tongflow/stargazers"><img src="https://img.shields.io/github/stars/tong-io/tongflow?style=flat&logo=github" alt="GitHub stars" /></a>
+    <a href="https://github.com/tong-io/tongflow/blob/main/LICENSE"><img src="https://img.shields.io/badge/License-AGPL--3.0-blue.svg" alt="License" /></a>
+    <a href="https://github.com/tong-io/tongflow/actions/workflows/ci.yml"><img src="https://github.com/tong-io/tongflow/actions/workflows/ci.yml/badge.svg" alt="CI" /></a>
     <a href="https://discord.gg/K7V8az94Zf"><img src="https://img.shields.io/badge/Discord-join-5865F2?logo=discord&logoColor=white" alt="Discord" /></a>
-    <a href="#"><img src="https://img.shields.io/badge/Releases-TBD-lightgrey?logo=github" alt="Releases TBD" /></a>
+    <a href="https://github.com/tong-io/tongflow/releases"><img src="https://img.shields.io/github/v/release/tong-io/tongflow?logo=github" alt="Latest Release" /></a>
   </p>
 </div>
 
@@ -45,16 +45,13 @@ With TongFlow, you can expand your imagination and stretch your ideas with gener
 
 ## Run locally (quickstart)
 
-AI inference is expensive, so TongFlow uses [modal.com](https://modal.com) by default as its cloud inference and compute backend. Modal offers a **$30/month FREE** quota for cloud GPU/CPU such as **H100**. Configure Modal tokens in `.env` and run `pnpm modal:setup` (see **Environment variables** below).
+This is a **local-first** app: workflows and materials live in SQLite (`data/openflow.db`) and uploads on disk (`data/uploads/`). There is no hosted TongFlow account, login, or central file CDN.
 
-### Three ways to run
+AI inference uses **external APIs you configure**: [Modal](https://modal.com) for most transform plugins (Modal offers a **$30/month FREE** quota for cloud GPU/CPU such as **H100**), plus LLM vendors (OpenRouter, Gemini, OpenAI, etc.) where nodes need them. Set tokens in `.env` and run `pnpm modal:setup` when using Modal (see **Environment variables** below).
 
-#### 1) Download a desktop release (easiest for end users)
+### Two ways to run
 
-- Get the installer for your OS from GitHub **Releases** (macOS / Windows).
-- On first launch, configure Modal / OpenRouter / Gemini API keys or tokens in the app or environment (see **Environment variables** below).
-
-#### 2) Docker Compose (good for self-hosting)
+#### 1) Docker Compose (good for self-hosting)
 
 `compose.yaml` lives at the repo root:
 
@@ -66,7 +63,16 @@ Open `http://localhost:3000` (lands on `/workspace`).
 
 > Data persists in Docker volumes (SQLite at `data/openflow.db` plus uploads).
 
-#### 3) Local development (`pnpm dev`)
+**Pre-built image (GHCR):** CI publishes [`ghcr.io/tong-io/tongflow`](https://github.com/tong-io/tongflow/pkgs/container/tongflow) on pushes to `main` (tags `latest` and `main`) and on version tags `v*` (e.g. `v0.1.0` → `0.1.0`). Pull and run:
+
+```bash
+docker pull ghcr.io/tong-io/tongflow:latest
+docker run --rm -p 3000:3000 --env-file .env -v openflow_data:/app/data ghcr.io/tong-io/tongflow:latest
+```
+
+For private repositories you may need `docker login ghcr.io` with a token that has the `read:packages` scope.
+
+#### 2) Local development (`pnpm dev`)
 
 Requires Node.js (20+ recommended) and pnpm.
 
@@ -79,7 +85,7 @@ Open `http://localhost:3000` (lands on `/workspace`).
 
 ### Environment variables (Modal & providers)
 
-The app calls external services (Modal, OpenRouter, Gemini, OpenAI, etc.). Copy [`.env.example`](.env.example) to `.env` and fill in keys.
+The app calls **Modal** (worker execution) and optional **LLM/API** services. Copy [`.env.example`](.env.example) to `.env` and fill in keys. No TongFlow-hosted services are required for core editing, saving, or import/export.
 
 Common variables:
 
@@ -205,22 +211,18 @@ pnpm modal:setup
 
 ## Open-Source
 
-I plan to go full open-source if the project reaches a meaningful level of community interest.
-
 If you like this project, a Star on GitHub helps a lot. Thank you.
 
 <div align="center">
   <img src="docs/assets/star.gif" alt="Star on GitHub" />
 </div>
 
+This project is licensed under **AGPL-3.0**.
+
 ## Extending AI capabilities
 
 Feature metadata (model slots, handler routing keys, processing time hints) lives in [`config/features.default.json`](config/features.default.json). See [docs/feature-registry.md](docs/feature-registry.md) for overrides, validation (`pnpm validate-features`), and how this relates to task handlers and node allowlists. For optional post-build client obfuscation on private deployments, see [docs/closed-source-build.md](docs/closed-source-build.md). Optional closed-source hooks live in the workspace package [`@openflow/proprietary`](packages/proprietary/) — see [docs/proprietary-package.md](docs/proprietary-package.md).
 
-## License
-
-This project is licensed under **AGPL-3.0**.
-
 ## Star History
 
-[![Star History Chart](https://api.star-history.com/svg?repos=tong-io/openflow&type=Date)](https://star-history.com/#tong-io/openflow&Date)
+[![Star History Chart](https://api.star-history.com/svg?repos=tong-io/tongflow&type=Date)](https://star-history.com/#tong-io/tongflow&Date)

@@ -6,5 +6,5 @@ export const metadata = {
 };
 
 export default async function WorkspacePage() {
-    return <Workspace region="intl" />;
+    return <Workspace />;
 }

@@ -1,7 +1,7 @@
 // Auto-generated voice options
 // Generated at: 2026-03-14T08:46:48.025Z
 //
-// 注意: 需要先将音频上传到 R2 的 public/voices/{lang}/ 目录下
+// Note: Audio files must first be uploaded to the R2 public/voices/{lang}/ directory
 
 export const crawledVoiceOptions = {
     zh: [

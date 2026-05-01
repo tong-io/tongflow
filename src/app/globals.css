@@ -121,7 +121,7 @@
     }
 }
 
-/* 细滚动条样式 */
+/* Thin scrollbar */
 .scrollbar-thin {
     scrollbar-width: thin;
     scrollbar-color: rgba(156, 163, 175, 0.5) transparent;

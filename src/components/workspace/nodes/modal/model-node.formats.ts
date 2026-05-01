@@ -1,15 +1,15 @@
 /**
- * 3D Model Node - 支持格式详解
+ * 3D Model Node - Supported Formats
  *
- * 这个文档列出了 model-node.tsx 组件支持的所有 3D 文件格式及其特性
+ * This document lists all 3D file formats supported by the model-node.tsx component and their features.
  */
 
 // ============================================================================
-// 支持的格式列表
+// Supported formats
 // ============================================================================
 
 const SUPPORTED_FORMATS = {
-    // 通用3D格式
+    // General 3D formats
     glb: {
         name: "glTF Binary",
         extension: ".glb",
@@ -42,7 +42,7 @@ const SUPPORTED_FORMATS = {
         loader: "FBXLoader",
     },
 
-    // 点云格式
+    // Point cloud formats
     ply: {
         name: "Polygon File Format",
         extension: ".ply",
@@ -75,7 +75,7 @@ const SUPPORTED_FORMATS = {
         loader: "PointCloudLoader (Custom)",
     },
 
-    // 高斯泼溅格式
+    // Gaussian splat formats
     spz: {
         name: "Scaniverse Splat",
         extension: ".spz",
@@ -108,7 +108,7 @@ const SUPPORTED_FORMATS = {
         loader: "SplatMesh (Spark)",
     },
 
-    // 3D打印格式
+    // 3D printing formats
     stl: {
         name: "Stereolithography",
         extension: ".stl",
@@ -117,7 +117,7 @@ const SUPPORTED_FORMATS = {
         loader: "STLLoader",
     },
 
-    // CAD格式
+    // CAD formats
     step: {
         name: "STEP (ISO 10303)",
         extension: ".step / .stp",
@@ -134,7 +134,7 @@ const SUPPORTED_FORMATS = {
         note: "需要专门的库支持，建议转换为GLTF或OBJ",
     },
 
-    // 模型格式
+    // Model formats
     dae: {
         name: "COLLADA",
         extension: ".dae",
@@ -177,7 +177,7 @@ const SUPPORTED_FORMATS = {
 };
 
 // ============================================================================
-// 格式分类
+// Format categories
 // ============================================================================
 
 const FORMAT_CATEGORIES = {
@@ -229,85 +229,85 @@ const FORMAT_CATEGORIES = {
 };
 
 // ============================================================================
-// 使用指南
+// Usage guide
 // ============================================================================
 
 /**
- * 1. GLB 文件使用
+ * 1. Using GLB files
  *
- * GLB 是推荐的通用格式，具有以下优势：
- * - 支持动画和骨骼
- * - PBR 材质支持
- * - 文件较小，加载快速
- * - 跨平台兼容性最好
+ * GLB is the recommended general-purpose format, with these advantages:
+ * - Supports animation and skeletons
+ * - Supports PBR materials
+ * - Smaller files and fast loading
+ * - Best cross-platform compatibility
  *
- * 使用 Three.js 导出 GLB:
+ * Exporting GLB for Three.js:
  * - Blender: File > Export > glTF 2.0 (.glb/.gltf)
- * - Maya: 使用 babylon.js 导出器或第三方插件
- * - 3ds Max: 使用 babylon.js 导出器
+ * - Maya: Use the babylon.js exporter or a third-party plugin
+ * - 3ds Max: Use the babylon.js exporter
  */
 
 /**
- * 2. 点云数据
+ * 2. Point cloud data
  *
- * 支持多种点云格式：
- * - PLY: 最灵活，支持颜色和法线
- * - PTX: Leica 扫描仪标准格式
- * - PTS/XYZ: 简单的文本格式
+ * Supports multiple point cloud formats:
+ * - PLY: Most flexible, supports colors and normals
+ * - PTX: Standard format for Leica scanners
+ * - PTS/XYZ: Simple text formats
  *
- * 点云文件格式示例:
- * XYZ 格式:
+ * Point cloud file format examples:
+ * XYZ format:
  *   0.0 0.0 0.0
  *   1.0 1.0 1.0
  *
- * XYZ RGB 格式:
+ * XYZ RGB format:
  *   0.0 0.0 0.0 255 0 0
  *   1.0 1.0 1.0 0 255 0
  */
 
 /**
- * 3. 高斯泼溅格式
+ * 3. Gaussian splat formats
  *
- * 这些格式提供最高质量的实时渲染：
+ * These formats provide the highest quality real-time rendering:
  *
- * SPZ (推荐):
- * - Scaniverse 格式，压缩率最好
- * - 网址: https://scaniverse.com
+ * SPZ (recommended):
+ * - Scaniverse format, with the best compression ratio
+ * - Website: https://scaniverse.com
  *
  * SPLAT:
- * - Antimatter15 的实现
- * - 文件较大，但广泛支持
+ * - Antimatter15 implementation
+ * - Larger files, but widely supported
  *
- * 生成高斯泼溅:
- * - 使用专业工具如 Reality Capture, Metashape
- * - 或使用开源 gaussian-splatting 项目
+ * Generating Gaussian splats:
+ * - Use professional tools such as Reality Capture or Metashape
+ * - Or use the open-source gaussian-splatting project
  */
 
 /**
- * 4. CAD 格式处理
+ * 4. Handling CAD formats
  *
- * STEP/IGES 格式需要特殊处理：
- * - 组件复杂性高
- * - 需要专门的 CAD 库
- * - 建议在 CAD 软件中转换为 GLTF 或 OBJ
+ * STEP/IGES formats require special handling:
+ * - High component complexity
+ * - Requires dedicated CAD libraries
+ * - Recommended to convert to GLTF or OBJ in CAD software
  *
- * 转换步骤:
- * 1. 在 CAD 软件中打开文件
- * 2. 导出为 GLTF 或 OBJ
- * 3. 上传转换后的文件
+ * Conversion steps:
+ * 1. Open the file in CAD software
+ * 2. Export as GLTF or OBJ
+ * 3. Upload the converted file
  */
 
 /**
- * 5. 3D 打印格式
+ * 5. 3D printing formats
  *
- * STL 格式：
- * - 用于 3D 打印
- * - 网格格式，不包含纹理或颜色
- * - 可以是二进制或 ASCII
+ * STL format:
+ * - Used for 3D printing
+ * - Mesh format without textures or colors
+ * - Can be binary or ASCII
  */
 
 // ============================================================================
-// 格式选择建议
+// Format selection recommendations
 // ============================================================================
 
 const RECOMMENDATIONS = {
@@ -324,7 +324,7 @@ const RECOMMENDATIONS = {
 };
 
 // ============================================================================
-// 故障排除
+// Troubleshooting
 // ============================================================================
 
 const TROUBLESHOOTING = {

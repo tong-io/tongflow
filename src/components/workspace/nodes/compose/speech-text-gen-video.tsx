@@ -1,11 +1,8 @@
 import {
-    Handle,
-    Position,
-    useNodeId,
     useNodesData,
     type NodeProps,
 } from "@xyflow/react";
-import { memo, useMemo } from "react";
+import { memo } from "react";
 import { Video, Sparkles, FileText } from "lucide-react";
 import { BaseNode } from "../base/base-node";
 import {
@@ -17,48 +14,11 @@ import { useNodeState } from "@/hooks/use-node-data";
 import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { NodeTextarea } from "../base/node-textarea";
-import { useR2AsyncLoader } from "@/hooks/use-r2-async-loader";
-import { getR2Url } from "@/lib/r2-utils";
+import { MediaThumbnail } from "../base/media-thumbnail";
+import { getFileUrl } from "@/lib/file-url";
 import { useTranslations } from "next-intl";
-import useFlow from "@/hooks/use-flow";
-import { clampToAllowedModel } from "@/utils/node-model-feature";
-import { NodeModelSelect } from "../base/node-model-select";
-import { singleModelSelectOptions } from "@/utils/node-model-select-label";
 
-const DEFAULT_FEATURE = "speech-text-gen-video";
-
-// 音频缩略图组件
-const AudioThumbnail = memo(
-    ({ fileKey, label }: { fileKey?: string; label: string }) => {
-        const { url } = useR2AsyncLoader(fileKey, { priority: "high" });
-
-        return (
-            <div className="flex flex-col items-center gap-1.5">
-                <div className="relative w-16 h-16 rounded-md border-2 border-gray-300 overflow-hidden bg-blue-50 transition-colors">
-                    {url ? (
-                        <div className="flex items-center justify-center h-full w-full">
-                            <div className="text-2xl">🎵</div>
-                        </div>
-                    ) : (
-                        <div className="flex items-center justify-center h-full w-full">
-                            <div className="text-xs text-gray-400">
-                                加载中...
-                            </div>
-                        </div>
-                    )}
-                    <div className="absolute inset-0 bg-black/0 transition-colors" />
-                </div>
-                <div className="px-1.5 py-0.5 bg-blue-100 text-blue-700 text-xs font-medium rounded">
-                    {label}
-                </div>
-            </div>
-        );
-    },
-);
-
-AudioThumbnail.displayName = "AudioThumbnail";
-
-// 文本预览组件
+// Text preview component
 const TextPreview = memo(
     ({
         text,
@@ -96,10 +56,9 @@ const TextPreview = memo(
 
 TextPreview.displayName = "TextPreview";
 
-// 工作流执行配置
+// Workflow execution config
 const workflowConfig = {
-    feature: DEFAULT_FEATURE,
-    label: "语音文本生成视频",
+    feature: "speech-text-gen-video",
     outputType: "videoNode",
     outputField: "fileKeys" as const,
     supportsBatch: false,
@@ -120,25 +79,17 @@ const workflowConfig = {
 
 const SpeechTextGenVideoNode = ({ selected, data }: NodeProps) => {
     const t = useTranslations("Workspace.nodes");
-    const updates = useFlow((s) => s.updates);
-    const id = useNodeId()!;
     const { ids } = data as { ids: string[] };
     const fromNodes = useNodesData(ids);
 
-    const featureName = clampToAllowedModel(
-        (data as { feature?: string }).feature,
-        [DEFAULT_FEATURE],
-        DEFAULT_FEATURE,
-    );
-
-    // 获取文本和音频数据
+    // Get text and audio data
     const textNode = fromNodes.find((node) => node.type === "textNode");
     const audio = fromNodes.find((node) => node.type === "audioNode");
 
     const textContent = (textNode?.data as any)?.texts?.[0] || "";
     const audioFileKey = (audio?.data as any)?.fileKeys?.[0];
 
-    // 使用新的Hook来管理状态持久化
+    // Use the new hook to manage state persistence
     const [state, setState] = useNodeState(
         {
             text: "",
@@ -149,24 +100,13 @@ const SpeechTextGenVideoNode = ({ selected, data }: NodeProps) => {
 
     const finalText = textContent || text;
 
-    // 补充 outputType 和 outputField 用于 BaseNode 自动处理任务完成
-    const dataWithOutput = useMemo(
-        () => ({
-            ...data,
-            outputType: "videoNode",
-            outputField: "fileKeys",
-        }),
-        [data],
-    );
-
     return (
         <BaseNode
             selected={selected}
             className="min-w-[480px]"
-            data={dataWithOutput}
+            data={data}
             workflowConfig={{
                 ...workflowConfig,
-                feature: featureName,
                 title: t("titles.speechTextGenVideo"),
                 icon: <Video className="h-5 w-5" />,
                 executeLabel: t("actions.generateVideo"),
@@ -186,7 +126,7 @@ const SpeechTextGenVideoNode = ({ selected, data }: NodeProps) => {
                         ? [
                               {
                                   text: finalTextValue,
-                                  audio: getR2Url(finalAudioValue),
+                                  audio: getFileUrl(finalAudioValue),
                               },
                           ]
                         : [];
@@ -194,16 +134,7 @@ const SpeechTextGenVideoNode = ({ selected, data }: NodeProps) => {
             }}
         >
             <div className="p-4 space-y-4">
-                <NodeModelSelect
-                    value={featureName}
-                    onValueChange={(value) =>
-                        updates(id, { ...data, feature: value })
-                    }
-                    options={singleModelSelectOptions(DEFAULT_FEATURE, (k) =>
-                        t(k as Parameters<typeof t>[0]),
-                    )}
-                />
-                {/* 媒体展示区 */}
+                {/* Media display area */}
                 <Card className="p-3">
                     <div className="space-y-2">
                         <Label className="text-sm font-medium text-muted-foreground">
@@ -218,9 +149,10 @@ const SpeechTextGenVideoNode = ({ selected, data }: NodeProps) => {
                                 />
                             )}
                             {audioFileKey && (
-                                <AudioThumbnail
+                                <MediaThumbnail
                                     fileKey={audioFileKey}
                                     label={t("compose.audio")}
+                                    type="audio"
                                 />
                             )}
                         </div>
@@ -232,7 +164,7 @@ const SpeechTextGenVideoNode = ({ selected, data }: NodeProps) => {
                     </div>
                 </Card>
 
-                {/* 文本输入 - 当没有从上个节点获取到文本时显示 */}
+                {/* Text input - shown when no text is received from the previous node */}
                 {!textContent && (
                     <NodeTextarea
                         label={t("compose.inputText")}
@@ -245,18 +177,6 @@ const SpeechTextGenVideoNode = ({ selected, data }: NodeProps) => {
                 )}
             </div>
 
-            <Handle
-                type="target"
-                position={Position.Left}
-                id="a"
-                isConnectable={true}
-            />
-            <Handle
-                type="source"
-                position={Position.Right}
-                id="b"
-                isConnectable={true}
-            />
         </BaseNode>
     );
 };

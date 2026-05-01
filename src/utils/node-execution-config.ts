@@ -1,47 +1,48 @@
 /**
- * 节点执行配置类型定义
- * 每个节点组件都应该导出自己的执行配置
+ * Node execution configuration type definitions
+ * Every node component should export its own execution configuration
  */
 
 import type { ParamSource } from "./executable-workflow";
+import { logger } from "@/lib/logger";
 
 /**
- * 参数映射定义（简化版本，用于节点自包含配置）
+ * Parameter mapping definition (simplified version for self-contained node configuration)
  */
 export interface ParamSourceConfig {
-    /** 参数来源优先级 */
+    /** Parameter source priority */
     type: ParamSource;
-    /** 上游节点类型（upstream 时） */
+    /** Upstream node type (when type is "upstream") */
     upstreamType?: string;
-    /** 上游字段 */
+    /** Upstream field */
     upstreamField?: string;
-    /** 配置路径 */
+    /** Config path */
     configPath?: string;
-    /** 输入名称（input 时） */
+    /** Input name (when type is "input") */
     inputName?: string;
-    /** 是否需要 URL 转换 */
+    /** Whether URL transformation is needed */
     needsUrlTransform?: boolean;
-    /** 是否收集所有匹配类型的上游节点数据（用于 Compose 节点） */
+    /** Whether to collect data from all matching upstream nodes (used for Compose nodes) */
     collectAll?: boolean;
-    /** 目标节点上的 Handle id（多槽位同类型输入时匹配入边 targetHandle） */
+    /** Handle id on the target node (matches incoming edge targetHandle for multi-slot same-type inputs) */
     targetHandle?: string;
-    /** 默认值 */
+    /** Default value */
     defaultValue?: unknown;
 }
 
 /**
- * 参数映射配置
+ * Parameter mapping configuration
  */
 export interface ParamMappingConfig {
-    /** 参数来源优先级列表 */
+    /** List of parameter source priorities */
     sources: ParamSourceConfig[];
-    /** 是否必填 */
+    /** Whether the parameter is required */
     required?: boolean;
 }
 
 /**
- * 上游数据获取器类型
- * 用于在执行时实时获取上游节点的数据
+ * Upstream data getter type
+ * Used to retrieve upstream node data in real time during execution
  */
 export type UpstreamDataGetter = (
     upstreamType: string,
@@ -49,7 +50,7 @@ export type UpstreamDataGetter = (
 ) => unknown;
 
 /**
- * 获取所有匹配类型的上游数据
+ * Get all upstream data matching a given type
  */
 export type AllUpstreamDataGetter = (
     upstreamType: string,
@@ -57,7 +58,7 @@ export type AllUpstreamDataGetter = (
 ) => unknown[];
 
 /**
- * getPrompts 函数的上下文参数
+ * Context parameter for the getPrompts function
  */
 export type UpstreamDataByTargetHandleGetter = (
     targetHandle: string,
@@ -66,50 +67,50 @@ export type UpstreamDataByTargetHandleGetter = (
 ) => unknown;
 
 export interface GetPromptsContext {
-    /** 获取单个上游节点的数据 */
+    /** Get data from a single upstream node */
     getUpstreamData: UpstreamDataGetter;
-    /** 获取所有匹配类型的上游节点数据（合并为数组） */
+    /** Get data from all upstream nodes matching a given type (merged into an array) */
     getAllUpstreamData: AllUpstreamDataGetter;
-    /** 按目标 Handle 取单路上游（多槽位同类型，如曲风/歌词） */
+    /** Get a single upstream by target handle (multi-slot same type, e.g. style/lyrics) */
     getUpstreamDataForTargetHandle?: UpstreamDataByTargetHandleGetter;
 }
 
 /**
- * 节点执行配置
- * 每个可执行节点组件都应该导出此配置
+ * Node execution configuration
+ * Every executable node component should export this configuration
  */
 export interface NodeExecutionConfig {
-    /** 节点类型名称（必须与组件注册的 type 一致） */
+    /** Node type name (must match the type registered by the component) */
     nodeType: string;
-    /** 后端 feature 名称 */
+    /** Backend feature name */
     feature: string;
-    /** 节点标签（用于工作流导出时的节点标识） */
+    /** Node label (used to identify the node in workflow exports) */
     label?: string;
-    /** 节点显示名称（用于 Header 标题和移动端执行进度显示） */
+    /** Node display name (used for the Header title and mobile execution progress display) */
     title?: string;
-    /** 节点图标（用于 Header 显示） */
+    /** Node icon (used in the Header display) */
     icon?: React.ReactNode;
-    /** 自定义 Header Actions（在菜单按钮之前显示） */
+    /** Custom Header Actions (displayed before the menu button) */
     headerActions?: React.ReactNode;
-    /** 执行按钮文字，默认为 "执行" */
+    /** Execute button text, defaults to "Execute" */
     executeLabel?: string;
-    /** 执行按钮图标 */
+    /** Execute button icon */
     executeIcon?: React.ReactNode;
-    /** 是否禁用执行按钮 */
+    /** Whether the execute button is disabled */
     executeDisabled?: boolean;
     /**
-     * 获取执行参数的函数
-     * 返回 prompt 数组，每个 prompt 会创建一个任务
-     * 如果返回空数组，则不执行
+     * Function to get execution parameters
+     * Returns an array of prompts; each prompt creates a task
+     * If an empty array is returned, no execution happens
      *
-     * @param context 上下文，包含获取上游数据的函数
-     *   - getUpstreamData(type, field): 获取单个上游节点的数据
-     *   - getAllUpstreamData(type, field): 获取所有匹配类型的上游节点数据
+     * @param context Context containing functions for fetching upstream data
+     *   - getUpstreamData(type, field): get data from a single upstream node
+     *   - getAllUpstreamData(type, field): get data from all upstream nodes matching a given type
      *
      * @example
      * ```ts
      * getPrompts: (ctx) => {
-     *   // 从上游 audioNode 获取最新的 fileKeys
+     *   // Get the latest fileKeys from the upstream audioNode
      *   const fileKeys = ctx?.getAllUpstreamData("audioNode", "fileKeys") as string[];
      *   return fileKeys.map(key => ({ fileKey: key }));
      * }
@@ -117,48 +118,62 @@ export interface NodeExecutionConfig {
      */
     getPrompts?: (context?: GetPromptsContext) => Record<string, unknown>[];
     /**
-     * 自定义任务更新处理（可选）
-     * 用于处理流式输出等需要响应中间状态的场景
-     * 如果提供，会在每次任务更新时调用（包括 streaming、completed、failed）
-     * 返回 true 表示已处理，不再执行默认逻辑
+     * Custom task update handler (optional)
+     * Used for scenarios such as streaming output that require responding to intermediate states
+     * If provided, it is called on every task update (including streaming, completed, and failed)
+     * Returning true indicates the event was handled; default logic will not run
      */
     onTaskUpdate?: (task: any) => boolean | void | Promise<boolean | void>;
-    /** 输出类型（对应的数据节点类型） */
+    /** Output type (corresponds to the data node type) */
     outputType?: string;
-    /** 输出字段 */
+    /** Output field */
     outputField?: "fileKeys" | "texts";
-    /** 参数映射定义 */
+    /** Parameter mapping definition */
     paramMappings?: Record<string, ParamMappingConfig>;
-    /** 是否支持批量执行 */
+    /** Whether batch execution is supported */
     supportsBatch?: boolean;
-    /** 批量执行的参数名 */
+    /** Parameter name for batch execution */
     batchParam?: string;
     /**
-     * 是否为输入节点（起始节点）
-     * 如 add-image、add-text 等无上游依赖的节点
-     * 设置为 true 时，执行模式下也会显示执行按钮（如上传、添加等）
+     * Whether this is an input node (start node)
+     * e.g. add-image, add-text, and other nodes without upstream dependencies
+     * When set to true, the execute button (e.g. upload, add) is also shown in execution mode
      */
     isInputNode?: boolean;
+
+    /**
+     * Handle auto-rendering control.
+     * - `undefined` (default): render standard target("a", Left) + source("b", Right)
+     * - `false`: BaseNode does NOT render any handles (node provides its own)
+     */
+    handles?: false;
+
+    /**
+     * Whether BaseNode should auto-render `<NodePluginIdSelect>`.
+     * - `undefined` / `true` (default): render when pluginOptions exist
+     * - `false`: skip (e.g. gen_text uses custom NodeModelSelect)
+     */
+    showPluginSelect?: boolean;
 }
 
 /**
- * 节点执行配置注册表
- * 用于收集所有节点的执行配置
+ * Node execution configuration registry
+ * Used to collect the execution configuration for all nodes
  */
 const nodeExecutionConfigRegistry = new Map<string, NodeExecutionConfig>();
 
 /**
- * 注册节点执行配置
- * 注意：React Strict Mode 下 effects 会运行两次，所以相同配置的重复注册是正常的
+ * Register node execution configuration
+ * Note: In React Strict Mode, effects run twice, so duplicate registration of the same config is expected
  */
 export function registerNodeExecutionConfig(config: NodeExecutionConfig): void {
     const existing = nodeExecutionConfigRegistry.get(config.nodeType);
-    // 如果已存在相同的配置，跳过（React Strict Mode 会导致重复注册）
+    // If an identical config already exists, skip it (React Strict Mode causes duplicate registration)
     if (existing && existing.feature === config.feature) {
         return;
     }
     if (existing) {
-        console.warn(
+        logger.warn(
             `[NodeExecutionConfig] Overwriting config for node type: ${config.nodeType}`,
         );
     }
@@ -166,7 +181,7 @@ export function registerNodeExecutionConfig(config: NodeExecutionConfig): void {
 }
 
 /**
- * 获取节点执行配置
+ * Get a node execution configuration
  */
 export function getNodeExecutionConfig(
     nodeType: string,
@@ -175,25 +190,25 @@ export function getNodeExecutionConfig(
 }
 
 /**
- * 获取所有已注册的节点执行配置
+ * Get all registered node execution configurations
  */
 export function getAllNodeExecutionConfigs(): Map<string, NodeExecutionConfig> {
     return nodeExecutionConfigRegistry;
 }
 
 /**
- * 检查节点类型是否已注册
+ * Check whether a node type has been registered
  */
 export function hasNodeExecutionConfig(nodeType: string): boolean {
     return nodeExecutionConfigRegistry.has(nodeType);
 }
 
 /* ========================================================================== */
-/* 便捷的配置构建器                                                             */
+/* Convenience configuration builders                                           */
 /* ========================================================================== */
 
 /**
- * 创建上游参数配置
+ * Create an upstream parameter configuration
  */
 export function upstreamParam(
     upstreamType: string,
@@ -215,7 +230,7 @@ export function upstreamParam(
 }
 
 /**
- * 创建配置参数
+ * Create a config parameter
  */
 export function configParam(
     configPath: string,
@@ -229,7 +244,7 @@ export function configParam(
 }
 
 /**
- * 创建静态参数
+ * Create a static parameter
  */
 export function staticParam(value: unknown): ParamSourceConfig {
     return {
@@ -239,7 +254,7 @@ export function staticParam(value: unknown): ParamSourceConfig {
 }
 
 /**
- * 创建输入参数
+ * Create an input parameter
  */
 export function inputParam(inputName: string): ParamSourceConfig {
     return {

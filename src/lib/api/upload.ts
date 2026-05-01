@@ -2,6 +2,7 @@
  * File upload API - simplified for open-source version.
  * Uploads directly to local server storage.
  */
+import { apiClient } from "@/utils/api-client";
 import {
     validateFile,
     UploadValidationError,
@@ -42,21 +43,13 @@ export async function getPresignedUploadUrl(
         throw new UploadValidationError(validation);
     }
 
-    // Upload directly to local server
     const formData = new FormData();
     formData.append("file", file);
 
-    const response = await fetch("/api/upload", {
-        method: "POST",
-        body: formData,
-    });
-
-    if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || "Failed to upload file");
-    }
-
-    const data = await response.json();
+    const data = await apiClient<{ fileKey: string; url: string }>(
+        "/api/upload",
+        { method: "POST", body: formData } as RequestInit,
+    );
 
     return {
         uploadUrl: "", // Not used in local upload

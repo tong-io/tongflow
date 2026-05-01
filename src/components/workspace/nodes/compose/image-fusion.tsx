@@ -1,6 +1,4 @@
 import {
-    Handle,
-    Position,
     useNodeId,
     useNodesData,
     type NodeProps,
@@ -9,10 +7,14 @@ import { memo, useRef, useMemo, useCallback } from "react";
 import {
     Combine,
     Sparkles,
-    RectangleHorizontal,
     Maximize2,
 } from "lucide-react";
 import { BaseNode } from "../base/base-node";
+import { AspectRatioPicker } from "../base/aspect-ratio-picker";
+import {
+    IMAGE_ASPECT_RATIOS,
+    type AspectRatio,
+} from "@/constants/media-options";
 import {
     upstreamParam,
     configParam,
@@ -24,21 +26,10 @@ import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { NodeTextarea } from "../base/node-textarea";
-import { useR2AsyncLoader } from "@/hooks/use-r2-async-loader";
-import { getR2Url } from "@/lib/r2-utils";
+import { getFileUrl } from "@/lib/file-url";
 import { cn } from "@/lib/utils";
 import { useTranslations } from "next-intl";
-import { clampToAllowedModel } from "@/utils/node-model-feature";
-import { NodeModelSelect } from "../base/node-model-select";
-import { singleModelSelectOptions } from "@/utils/node-model-select-label";
-
-const aspectRatios = [
-    { value: "9:16", key: "portrait", width: 720, height: 1280 }, // HD 竖屏
-    { value: "16:9", key: "landscape", width: 1280, height: 720 }, // HD
-    { value: "1:1", key: "square", width: 1024, height: 1024 }, // 高清正方形
-    { value: "4:3", key: "standard", width: 1024, height: 768 }, // 中等标准屏
-    { value: "3:4", key: "verticalStandard", width: 768, height: 1024 }, // 中等竖屏
-];
+import { MediaThumbnail } from "../base/media-thumbnail";
 
 const resolutions = [
     { value: "512", key: "res512", label: "512" },
@@ -47,54 +38,12 @@ const resolutions = [
     { value: "4K", key: "res4K", label: "4K" },
 ];
 
-// ... [ImageThumbnail component]
-const ImageThumbnail = memo(
-    ({
-        fileKey,
-        label,
-        onInsert,
-    }: {
-        fileKey?: string;
-        label: string;
-        onInsert: () => void;
-    }) => {
-        const { url } = useR2AsyncLoader(fileKey, { priority: "high" });
-        const t = useTranslations("Workspace.nodes.imageFusion");
+const DEFAULT_FEATURE = "image_fusion";
 
-        return (
-            <div
-                className="flex flex-col items-center gap-1.5 cursor-pointer group"
-                onClick={onInsert}
-            >
-                <div className="relative w-16 h-16 rounded-md border-2 border-gray-300 group-hover:border-blue-500 overflow-hidden bg-gray-100 transition-colors">
-                    {url ? (
-                        <img
-                            src={url}
-                            alt={label}
-                            className="w-full h-full object-cover"
-                        />
-                    ) : (
-                        <div className="flex items-center justify-center h-full w-full">
-                            <div className="text-xs text-gray-400">
-                                {t("loading")}
-                            </div>
-                        </div>
-                    )}
-                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors" />
-                </div>
-                <div className="px-1.5 py-0.5 bg-blue-100 text-blue-700 text-xs font-medium rounded group-hover:bg-blue-200 transition-colors">
-                    {label}
-                </div>
-            </div>
-        );
-    },
-);
 
-ImageThumbnail.displayName = "ImageThumbnail";
-
-// 工作流执行配置
+// Workflow execution config
 const workflowConfig = {
-    feature: "image_fusion",
+    feature: DEFAULT_FEATURE,
     label: "图片融合", // Static label, usually overridden by UI
     outputType: "imageNode",
     outputField: "fileKeys" as const,
@@ -110,7 +59,7 @@ const workflowConfig = {
             required: true,
         },
         text: {
-            // 从 userPrompt 获取用户输入的提示词（不会被 BaseNode 覆盖）
+            // Get the user-entered prompt from userPrompt (not overwritten by BaseNode)
             sources: [configParam("userPrompt")],
         },
     },
@@ -121,22 +70,16 @@ const ImageFusionNode = ({ selected, data }: NodeProps) => {
     const { ids, selectedAspectRatio, selectedResolution } = data as {
         ids: string[];
         feature?: string;
-        selectedAspectRatio?: (typeof aspectRatios)[0];
+        selectedAspectRatio?: AspectRatio;
         selectedResolution?: (typeof resolutions)[0];
     };
     const updates = useFlow((s) => s.updates);
     const id = useNodeId()!;
     const fromNodes = useNodesData(ids);
 
-    const featureName = clampToAllowedModel(
-        (data as { feature?: string }).feature,
-        ["image_fusion"],
-        "image_fusion",
-    );
-
-    // 选择宽高比
+    // Select aspect ratio
     const handleSelectRatio = useCallback(
-        (ratio: (typeof aspectRatios)[0]) => {
+        (ratio: AspectRatio) => {
             updates(id, {
                 ...data,
                 selectedAspectRatio: ratio,
@@ -145,7 +88,7 @@ const ImageFusionNode = ({ selected, data }: NodeProps) => {
         [id, data, updates],
     );
 
-    // 选择分辨率
+    // Select resolution
     const handleSelectResolution = useCallback(
         (res: (typeof resolutions)[0]) => {
             updates(id, {
@@ -156,18 +99,18 @@ const ImageFusionNode = ({ selected, data }: NodeProps) => {
         [id, data, updates],
     );
 
-    // 当前选中的宽高比
-    const currentRatio = selectedAspectRatio ?? aspectRatios[2]; // 默认 1:1
-    // 当前选中的分辨率
-    const currentResolution = selectedResolution ?? resolutions[1]; // 默认 1080p (1K)
+    // Currently selected aspect ratio
+    const currentRatio = selectedAspectRatio ?? IMAGE_ASPECT_RATIOS[2]; // Default 1:1
+    // Currently selected resolution
+    const currentResolution = selectedResolution ?? resolutions[1]; // Default 1080p (1K)
 
-    // 获取所有图片节点的 fileKeys
+    // Get fileKeys from all image nodes
     const allImages = fromNodes
         .filter((node) => node.type === "imageNode")
         .map((node) => node.data?.fileKeys as string[])
         .filter((keys) => keys && keys.length > 0);
 
-    // 从组合节点获取 textNode 的文本
+    // Get textNode text from the composite node
     const textNode = fromNodes.find((node) => node.type === "textNode");
     const upstreamTexts: string[] = useMemo(() => {
         if (textNode) {
@@ -176,28 +119,28 @@ const ImageFusionNode = ({ selected, data }: NodeProps) => {
         return [];
     }, [textNode]);
 
-    // 判断是否有上游文本输入
+    // Determine whether there is upstream text input
     const hasUpstreamTexts = upstreamTexts && upstreamTexts.length > 0;
 
-    // 使用新的Hook来管理状态持久化
-    // 使用 userPrompt 字段，避免与 BaseNode 保存的 prompt 对象冲突
+    // Use the new hook to manage state persistence
+    // Use the userPrompt field to avoid conflicts with the prompt object saved by BaseNode
     const [state, setState] = useNodeState(
         {
             userPrompt: "",
         },
         data,
     );
-    // 确保 userPrompt 是字符串
+    // Ensure userPrompt is a string
     const userPrompt =
         typeof state.userPrompt === "string" ? state.userPrompt : "";
 
-    // 获取实际使用的提示词
+    // Get the prompt that will actually be used
     const effectivePrompt = hasUpstreamTexts ? upstreamTexts[0] : userPrompt;
 
     // Textarea ref for cursor position
     const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-    // 插入图片引用到光标位置
+    // Insert the image reference at the cursor position
     const insertImageRef = useCallback(
         (imageRef: string) => {
             if (!textareaRef.current) return;
@@ -213,7 +156,7 @@ const ImageFusionNode = ({ selected, data }: NodeProps) => {
                 currentText.substring(end);
             setState({ userPrompt: newText });
 
-            // 恢复光标位置
+            // Restore the cursor position
             setTimeout(() => {
                 textarea.focus();
                 const newCursorPos = start + imageRef.length;
@@ -223,24 +166,13 @@ const ImageFusionNode = ({ selected, data }: NodeProps) => {
         [userPrompt, setState],
     );
 
-    // 补充 outputType 和 outputField 用于 BaseNode 自动处理任务完成
-    const dataWithOutput = useMemo(
-        () => ({
-            ...data,
-            outputType: "imageNode",
-            outputField: "fileKeys",
-        }),
-        [data],
-    );
-
     return (
         <BaseNode
             selected={selected}
             className="min-w-[480px]"
-            data={dataWithOutput}
+            data={data}
             workflowConfig={{
                 ...workflowConfig,
-                feature: featureName,
                 title: t("titles.imageFusion"),
                 icon: <Combine className="h-5 w-5" />,
                 executeLabel: t("actions.startFusion"),
@@ -255,11 +187,9 @@ const ImageFusionNode = ({ selected, data }: NodeProps) => {
                         ? upstreamImages
                         : allImages.flat();
                     if (!imageKeys || imageKeys.length < 2) return [];
-                    const fileKeys = imageKeys.map((key: string) =>
-                        getR2Url(key),
-                    );
+                    const fileKeys = imageKeys.map((key: string) => getFileUrl(key));
 
-                    // 优先从上游节点获取最新的文本数据
+                    // Prefer the latest text data from upstream nodes
                     const ctxUpstreamTexts = ctx?.getAllUpstreamData(
                         "textNode",
                         "texts",
@@ -283,90 +213,14 @@ const ImageFusionNode = ({ selected, data }: NodeProps) => {
             }}
         >
             <div className="p-4 space-y-4">
-                <NodeModelSelect
-                    value={featureName}
-                    onValueChange={(value) =>
-                        updates(id, { ...data, feature: value })
-                    }
-                    options={singleModelSelectOptions("image_fusion", (k) =>
-                        t(k as Parameters<typeof t>[0]),
-                    )}
+                <AspectRatioPicker
+                    ratios={IMAGE_ASPECT_RATIOS}
+                    value={currentRatio}
+                    onChange={handleSelectRatio}
+                    showSize
                 />
 
-                {/* 图片宽高比选择 */}
-                <Card className="p-3">
-                    <div className="space-y-2">
-                        <Label className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
-                            <RectangleHorizontal className="h-4 w-4" />
-                            {t("common.aspectRatio")}
-                        </Label>
-                        <div className="grid grid-cols-5 gap-2">
-                            {aspectRatios.map((ratio) => (
-                                <Button
-                                    key={ratio.value}
-                                    variant={
-                                        currentRatio.value === ratio.value
-                                            ? "default"
-                                            : "outline"
-                                    }
-                                    size="sm"
-                                    onClick={() => handleSelectRatio(ratio)}
-                                    className={cn(
-                                        "h-auto py-2 px-1 flex flex-row items-center gap-1 text-xs transition-all relative",
-                                        currentRatio.value === ratio.value
-                                            ? "bg-primary text-primary-foreground shadow-md"
-                                            : "hover:bg-accent hover:text-accent-foreground",
-                                    )}
-                                >
-                                    <div
-                                        className={cn(
-                                            "border rounded transition-colors flex-shrink-0",
-                                            currentRatio.value === ratio.value
-                                                ? "border-primary-foreground bg-primary-foreground/20"
-                                                : "border-muted-foreground/30 bg-muted/30",
-                                        )}
-                                        style={{
-                                            width:
-                                                ratio.value === "1:1"
-                                                    ? "12px"
-                                                    : ratio.value === "4:3"
-                                                      ? "14px"
-                                                      : ratio.value === "16:9"
-                                                        ? "16px"
-                                                        : ratio.value === "3:4"
-                                                          ? "10px"
-                                                          : "8px",
-                                            height:
-                                                ratio.value === "1:1"
-                                                    ? "12px"
-                                                    : ratio.value === "4:3"
-                                                      ? "10px"
-                                                      : ratio.value === "16:9"
-                                                        ? "9px"
-                                                        : ratio.value === "3:4"
-                                                          ? "13px"
-                                                          : "14px",
-                                        }}
-                                    />
-                                    <div className="flex flex-col items-start min-w-0">
-                                        <span className="text-xs font-medium leading-tight truncate">
-                                            {t(`options.${ratio.key}`)}
-                                        </span>
-                                        <span className="text-xs opacity-70 leading-tight">
-                                            {ratio.value}
-                                        </span>
-                                    </div>
-                                </Button>
-                            ))}
-                        </div>
-                        <div className="text-xs text-muted-foreground text-center">
-                            {t("common.currentSize")} {currentRatio.width} ×{" "}
-                            {currentRatio.height}
-                        </div>
-                    </div>
-                </Card>
-
-                {/* 分辨率选择 */}
+                {/* Resolution selection */}
                 <Card className="p-3">
                     <div className="space-y-2">
                         <Label className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
@@ -398,7 +252,7 @@ const ImageFusionNode = ({ selected, data }: NodeProps) => {
                     </div>
                 </Card>
 
-                {/* 图片缩略图选择区 */}
+                {/* Image thumbnail selection area */}
                 <Card className="p-3">
                     <div className="space-y-2">
                         <Label className="text-sm font-medium text-muted-foreground">
@@ -409,11 +263,12 @@ const ImageFusionNode = ({ selected, data }: NodeProps) => {
                         </Label>
                         <div className="flex gap-3 flex-wrap">
                             {allImages.slice(0, 14).map((images, index) => (
-                                <ImageThumbnail
+                                <MediaThumbnail
                                     key={index}
                                     fileKey={images[0]}
                                     label={`${t("imageFusion.imageLabel")}${index + 1}`}
-                                    onInsert={() =>
+                                    type="image"
+                                    onClick={() =>
                                         insertImageRef(
                                             `${t("imageFusion.imageLabel")}${index + 1}`,
                                         )
@@ -429,7 +284,7 @@ const ImageFusionNode = ({ selected, data }: NodeProps) => {
                     </div>
                 </Card>
 
-                {/* 融合提示词输入 - 如果有上游文本，显示预览 */}
+                {/* Fusion prompt input - show a preview when upstream text exists */}
                 {hasUpstreamTexts ? (
                     <Card className="p-3 bg-muted/50">
                         <div className="space-y-2">
@@ -474,18 +329,6 @@ const ImageFusionNode = ({ selected, data }: NodeProps) => {
                 )}
             </div>
 
-            <Handle
-                type="target"
-                position={Position.Left}
-                id="a"
-                isConnectable={true}
-            />
-            <Handle
-                type="source"
-                position={Position.Right}
-                id="b"
-                isConnectable={true}
-            />
         </BaseNode>
     );
 };

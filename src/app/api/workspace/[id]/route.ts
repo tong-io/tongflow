@@ -1,24 +1,19 @@
 import { NextRequest, NextResponse } from "next/server";
-import { requireAuth } from "@/lib/auth-stub";
 import { getDb } from "@/db";
 import { workflows } from "@/db/schema";
 import { eq, and } from "drizzle-orm";
 import type { Node, Edge } from "@xyflow/react";
+import { logger } from "@/lib/logger";
 
 type Params = Promise<{ id: string }>;
 
 /**
  * GET /api/workspace/[id]
- * 获取单个工作流
  */
 export async function GET(request: NextRequest, context: { params: Params }) {
     try {
-        // 1. 认证检查
-        const user = await requireAuth();
-
-        // 2. 获取参数
         const { id } = await context.params;
-        const workflowId = Number.parseInt(id);
+        const workflowId = Number.parseInt(id, 10);
 
         if (Number.isNaN(workflowId)) {
             return NextResponse.json(
@@ -27,7 +22,6 @@ export async function GET(request: NextRequest, context: { params: Params }) {
             );
         }
 
-        // 3. 从数据库查询
         const db = await getDb();
         const result = await db
             .select()
@@ -35,7 +29,6 @@ export async function GET(request: NextRequest, context: { params: Params }) {
             .where(
                 and(
                     eq(workflows.id, workflowId),
-                    eq(workflows.userId, user.id),
                     eq(workflows.deleted, false),
                 ),
             )
@@ -48,22 +41,11 @@ export async function GET(request: NextRequest, context: { params: Params }) {
             );
         }
 
-        // 4. 返回结果
         return NextResponse.json({
             workflow: result[0],
         });
     } catch (error) {
-        console.error("Error getting workflow:", error);
-
-        if (
-            error instanceof Error &&
-            error.message === "Authentication required"
-        ) {
-            return NextResponse.json(
-                { error: "Unauthorized" },
-                { status: 401 },
-            );
-        }
+        logger.error("Error getting workflow:", error);
 
         return NextResponse.json(
             { error: "Failed to get workflow" },
@@ -74,16 +56,11 @@ export async function GET(request: NextRequest, context: { params: Params }) {
 
 /**
  * PUT /api/workspace/[id]
- * 更新工作流
  */
 export async function PUT(request: NextRequest, context: { params: Params }) {
     try {
-        // 1. 认证检查
-        const user = await requireAuth();
-
-        // 2. 获取参数
         const { id } = await context.params;
-        const workflowId = Number.parseInt(id);
+        const workflowId = Number.parseInt(id, 10);
 
         if (Number.isNaN(workflowId)) {
             return NextResponse.json(
@@ -92,22 +69,18 @@ export async function PUT(request: NextRequest, context: { params: Params }) {
             );
         }
 
-        // 3. 解析请求体
         const body = (await request.json()) as {
             name?: string;
             description?: string;
             flow?: { nodes: Node[]; edges: Edge[] };
             executable?: Record<string, unknown>;
-            isPublic?: boolean;
         };
 
-        // 4. 构建更新对象
         const updateData: {
             name?: string;
             description?: string | null;
             flow?: string;
             executable?: string | null;
-            isPublic?: boolean;
         } = {};
 
         if (body.name !== undefined) {
@@ -119,15 +92,10 @@ export async function PUT(request: NextRequest, context: { params: Params }) {
         if (body.flow !== undefined) {
             updateData.flow = JSON.stringify(body.flow);
         }
-        // 使用前端传来的 executable（因为后端没有运行时注册表）
         if (body.executable !== undefined) {
             updateData.executable = JSON.stringify(body.executable);
         }
-        if (body.isPublic !== undefined) {
-            updateData.isPublic = body.isPublic;
-        }
 
-        // 5. 更新数据库
         const db = await getDb();
         const result = await db
             .update(workflows)
@@ -135,7 +103,6 @@ export async function PUT(request: NextRequest, context: { params: Params }) {
             .where(
                 and(
                     eq(workflows.id, workflowId),
-                    eq(workflows.userId, user.id),
                     eq(workflows.deleted, false),
                 ),
             )
@@ -148,20 +115,9 @@ export async function PUT(request: NextRequest, context: { params: Params }) {
             );
         }
 
-        // 6. 返回结果
         return NextResponse.json({ success: true });
     } catch (error) {
-        console.error("Error updating workflow:", error);
-
-        if (
-            error instanceof Error &&
-            error.message === "Authentication required"
-        ) {
-            return NextResponse.json(
-                { error: "Unauthorized" },
-                { status: 401 },
-            );
-        }
+        logger.error("Error updating workflow:", error);
 
         return NextResponse.json(
             { error: "Failed to update workflow" },
@@ -172,19 +128,14 @@ export async function PUT(request: NextRequest, context: { params: Params }) {
 
 /**
  * DELETE /api/workspace/[id]
- * 删除工作流（软删除）
  */
 export async function DELETE(
     request: NextRequest,
     context: { params: Params },
 ) {
     try {
-        // 1. 认证检查
-        const user = await requireAuth();
-
-        // 2. 获取参数
         const { id } = await context.params;
-        const workflowId = Number.parseInt(id);
+        const workflowId = Number.parseInt(id, 10);
 
         if (Number.isNaN(workflowId)) {
             return NextResponse.json(
@@ -193,17 +144,11 @@ export async function DELETE(
             );
         }
 
-        // 3. 软删除
         const db = await getDb();
         const result = await db
             .update(workflows)
             .set({ deleted: true })
-            .where(
-                and(
-                    eq(workflows.id, workflowId),
-                    eq(workflows.userId, user.id),
-                ),
-            )
+            .where(eq(workflows.id, workflowId))
             .returning({ id: workflows.id });
 
         if (result.length === 0) {
@@ -213,20 +158,9 @@ export async function DELETE(
             );
         }
 
-        // 4. 返回结果
         return NextResponse.json({ success: true });
     } catch (error) {
-        console.error("Error deleting workflow:", error);
-
-        if (
-            error instanceof Error &&
-            error.message === "Authentication required"
-        ) {
-            return NextResponse.json(
-                { error: "Unauthorized" },
-                { status: 401 },
-            );
-        }
+        logger.error("Error deleting workflow:", error);
 
         return NextResponse.json(
             { error: "Failed to delete workflow" },

@@ -19,7 +19,7 @@ const CustomEdge = ({
         targetPosition,
     });
 
-    // 边的样式：更粗、更明显
+    // Edge style: thicker and more visible
     const edgeStyle = {
         ...style,
         strokeWidth: 3,

@@ -1,22 +1,18 @@
 "use client";
 
 import {
-    Handle,
-    Position,
     type NodeProps,
     useNodeId,
     useStore,
 } from "@xyflow/react";
 import type { Edge } from "@xyflow/react";
 import { memo, useMemo } from "react";
-import { Atom, RectangleHorizontal, Clock } from "lucide-react";
+import { Atom } from "lucide-react";
 
 import { BaseNode } from "../base/base-node";
-import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
+import { AspectRatioPicker } from "../base/aspect-ratio-picker";
+import { DurationPicker } from "../base/duration-picker";
 import { NodeTextarea } from "../base/node-textarea";
-import { cn } from "@/lib/utils";
 import { useNodeState } from "@/hooks/use-node-data";
 import {
     upstreamParam,
@@ -24,32 +20,12 @@ import {
     staticParam,
     type GetPromptsContext,
 } from "@/utils/node-execution-config";
+import { VIDEO_ASPECT_RATIOS, VIDEO_DURATIONS } from "@/constants/media-options";
 import { useTranslations } from "next-intl";
-import useFlow from "@/hooks/use-flow";
-import { clampToAllowedModel } from "@/utils/node-model-feature";
-import { NodeModelSelect } from "../base/node-model-select";
-import { singleModelSelectOptions } from "@/utils/node-model-select-label";
 
-const aspectRatios = [
-    { value: "9:16", label: "portrait", width: 576, height: 1024 },
-    { value: "16:9", label: "landscape", width: 1024, height: 576 },
-    { value: "1:1", label: "square", width: 1024, height: 1024 },
-    { value: "4:3", label: "standard", width: 1024, height: 768 },
-    { value: "3:4", label: "verticalStandard", width: 768, height: 1024 },
-];
-
-const durations = [
-    { value: "5", label: "5秒" },
-    { value: "10", label: "10秒" },
-    { value: "15", label: "15秒" },
-    { value: "30", label: "30秒" },
-    { value: "60", label: "1分钟" },
-];
-
-// 工作流执行配置（会被 BaseNode 自动注册）
+// Workflow execution config (BaseNode wires this automatically)
 const workflowConfig = {
     feature: "text_gen_video",
-    label: "Text to Video",
     outputType: "videoNode",
     outputField: "fileKeys" as const,
     supportsBatch: true,
@@ -80,20 +56,12 @@ const workflowConfig = {
     },
 };
 
-const DEFAULT_FEATURE = "text_gen_video";
-
 const TextGenVideoNode = ({ selected, data }: NodeProps) => {
     const t = useTranslations("Workspace.nodes");
     const tActions = useTranslations("Workspace.nodes.actions");
-    const updates = useFlow((s) => s.updates);
 
-    // 上游连接检测（仅用于 UI：提示词输入是否应禁用）
+    // Upstream connection detection (UI only: whether the prompt input should be disabled)
     const nodeId = useNodeId();
-    const featureName = clampToAllowedModel(
-        (data as { feature?: string }).feature,
-        [DEFAULT_FEATURE],
-        DEFAULT_FEATURE,
-    );
     const nodeLookup = useStore((state) => state.nodeLookup);
     const edges = useStore((state) => state.edges as Edge[]);
 
@@ -108,7 +76,7 @@ const TextGenVideoNode = ({ selected, data }: NodeProps) => {
     const [state, setState] = useNodeState(
         {
             query: "",
-            selectedAspectRatio: aspectRatios[1],
+            selectedAspectRatio: VIDEO_ASPECT_RATIOS[1],
             duration: "5",
         },
         data,
@@ -126,7 +94,6 @@ const TextGenVideoNode = ({ selected, data }: NodeProps) => {
             data={data}
             workflowConfig={{
                 ...workflowConfig,
-                feature: featureName,
                 title: t("titles.textGenVideo"),
                 icon: <Atom className="h-5 w-5" />,
                 executeLabel: tActions("generateVideo"),
@@ -155,18 +122,6 @@ const TextGenVideoNode = ({ selected, data }: NodeProps) => {
             }}
         >
             <div className="p-4 space-y-4">
-                <NodeModelSelect
-                    value={featureName}
-                    onValueChange={(value) =>
-                        updates(nodeId!, {
-                            ...data,
-                            feature: value,
-                        })
-                    }
-                    options={singleModelSelectOptions(DEFAULT_FEATURE, (k) =>
-                        t(k as Parameters<typeof t>[0]),
-                    )}
-                />
                 <NodeTextarea
                     rows={4}
                     placeholder={
@@ -179,137 +134,19 @@ const TextGenVideoNode = ({ selected, data }: NodeProps) => {
                     disabled={hasUpstreamText}
                 />
 
-                {/* 视频宽高比选择 */}
-                <Card className="p-3">
-                    <div className="space-y-2">
-                        <Label className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
-                            <RectangleHorizontal className="h-4 w-4" />
-                            {t("common.aspectRatio")}
-                        </Label>
-                        <div className="grid grid-cols-5 gap-2">
-                            {aspectRatios.map((ratio) => (
-                                <Button
-                                    key={ratio.value}
-                                    variant={
-                                        selectedAspectRatio.value ===
-                                        ratio.value
-                                            ? "default"
-                                            : "outline"
-                                    }
-                                    size="sm"
-                                    onClick={() =>
-                                        setState({ selectedAspectRatio: ratio })
-                                    }
-                                    className={cn(
-                                        "h-auto py-2 px-1 flex flex-row items-center gap-1 text-xs transition-all",
-                                        selectedAspectRatio.value ===
-                                            ratio.value
-                                            ? "bg-primary text-primary-foreground shadow-md"
-                                            : "hover:bg-accent hover:text-accent-foreground",
-                                    )}
-                                >
-                                    <div
-                                        className={cn(
-                                            "border rounded transition-colors flex-shrink-0",
-                                            selectedAspectRatio.value ===
-                                                ratio.value
-                                                ? "border-primary-foreground bg-primary-foreground/20"
-                                                : "border-muted-foreground/30 bg-muted/30",
-                                        )}
-                                        style={{
-                                            width:
-                                                ratio.value === "16:9"
-                                                    ? "16px"
-                                                    : ratio.value === "9:16"
-                                                      ? "8px"
-                                                      : ratio.value === "1:1"
-                                                        ? "12px"
-                                                        : ratio.value === "4:3"
-                                                          ? "14px"
-                                                          : "10px",
-                                            height:
-                                                ratio.value === "16:9"
-                                                    ? "9px"
-                                                    : ratio.value === "9:16"
-                                                      ? "14px"
-                                                      : ratio.value === "1:1"
-                                                        ? "12px"
-                                                        : ratio.value === "4:3"
-                                                          ? "10px"
-                                                          : "13px",
-                                        }}
-                                    />
-                                    <div className="flex flex-col items-start min-w-0">
-                                        <span className="text-xs font-medium leading-tight truncate">
-                                            {t(`options.${ratio.label}`)}
-                                        </span>
-                                        <span className="text-xs opacity-70 leading-tight">
-                                            {ratio.value}
-                                        </span>
-                                    </div>
-                                </Button>
-                            ))}
-                        </div>
-                        <div className="text-xs text-muted-foreground text-center">
-                            {t("common.currentSize")}{" "}
-                            {selectedAspectRatio.width} ×{" "}
-                            {selectedAspectRatio.height}
-                        </div>
-                    </div>
-                </Card>
+                <AspectRatioPicker
+                    ratios={VIDEO_ASPECT_RATIOS}
+                    value={selectedAspectRatio}
+                    onChange={(ratio) => setState({ selectedAspectRatio: ratio })}
+                    showSize
+                />
 
-                {/* 视频时长选择 */}
-                <Card className="p-3">
-                    <div className="space-y-2">
-                        <Label className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
-                            <Clock className="h-4 w-4" />
-                            {t("common.duration")}
-                        </Label>
-                        <div className="grid grid-cols-5 gap-2">
-                            {durations.map((dur) => (
-                                <Button
-                                    key={dur.value}
-                                    variant={
-                                        duration === dur.value
-                                            ? "default"
-                                            : "outline"
-                                    }
-                                    size="sm"
-                                    onClick={() =>
-                                        setState({ duration: dur.value })
-                                    }
-                                    className={cn(
-                                        "h-auto py-2 px-1 text-xs transition-all",
-                                        duration === dur.value
-                                            ? "bg-primary text-primary-foreground shadow-md"
-                                            : "hover:bg-accent hover:text-accent-foreground",
-                                    )}
-                                >
-                                    {dur.value}
-                                    {t("common.seconds")}
-                                </Button>
-                            ))}
-                        </div>
-                        <div className="text-xs text-muted-foreground text-center">
-                            {t("common.currentDuration")} {duration}
-                            {t("common.seconds")}
-                        </div>
-                    </div>
-                </Card>
+                <DurationPicker
+                    durations={VIDEO_DURATIONS}
+                    value={duration}
+                    onChange={(dur) => setState({ duration: dur })}
+                />
             </div>
-
-            <Handle
-                type="target"
-                position={Position.Left}
-                id="a"
-                isConnectable
-            />
-            <Handle
-                type="source"
-                position={Position.Right}
-                id="b"
-                isConnectable
-            />
         </BaseNode>
     );
 };

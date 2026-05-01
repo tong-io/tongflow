@@ -1,4 +1,4 @@
-import { Handle, Position, useNodeId, type NodeProps } from "@xyflow/react";
+import { type NodeProps } from "@xyflow/react";
 import type { ReactNode } from "react";
 import { useState, memo } from "react";
 import { Ear, Upload, Mic, Atom } from "lucide-react";
@@ -14,6 +14,7 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
+import { logger } from "@/lib/logger";
 import {
     Dialog,
     DialogTrigger,
@@ -31,23 +32,18 @@ import {
     type GetPromptsContext,
 } from "@/utils/node-execution-config";
 import { useTranslations } from "next-intl";
-import useFlow from "@/hooks/use-flow";
-import { clampToAllowedModel } from "@/utils/node-model-feature";
-import { NodeModelSelect } from "../base/node-model-select";
-import { singleModelSelectOptions } from "@/utils/node-model-select-label";
 
 const DEFAULT_FEATURE = "convert_voice";
 
 const voiceOptions = [
     { key: "female", value: "zh_famale_1.wav" },
     { key: "male", value: "zh_male_1.wav" },
-    // 可根据实际支持的音色扩展
+    // Can be extended based on the voices actually supported
 ];
 
-// 工作流执行配置
+// Workflow execution config
 const workflowConfig = {
     feature: DEFAULT_FEATURE,
-    label: "替换音色",
     outputType: "audioNode",
     outputField: "fileKeys" as const,
     supportsBatch: true,
@@ -65,17 +61,9 @@ const workflowConfig = {
 
 const ConvertVoiceNode = ({ selected, data }: NodeProps) => {
     const t = useTranslations("Workspace.nodes");
-    const updates = useFlow((s) => s.updates);
-    const id = useNodeId()!;
     const { fileKeys } = data as { fileKeys: string[] };
 
-    const featureName = clampToAllowedModel(
-        (data as { feature?: string }).feature,
-        [DEFAULT_FEATURE],
-        DEFAULT_FEATURE,
-    );
-
-    // 使用新的Hook来管理状态持久化
+    // Use the new hook to manage state persistence
     const [state, setState] = useNodeState(
         {
             voice: "zh_famale_1.wav",
@@ -91,7 +79,6 @@ const ConvertVoiceNode = ({ selected, data }: NodeProps) => {
             data={data}
             workflowConfig={{
                 ...workflowConfig,
-                feature: featureName,
                 title: t("titles.convertVoice"),
                 icon: <Atom className="h-5 w-5" />,
                 executeLabel: t("actions.startReplace"),
@@ -114,22 +101,11 @@ const ConvertVoiceNode = ({ selected, data }: NodeProps) => {
                 },
             }}
         >
-            <div className="px-4 pt-4">
-                <NodeModelSelect
-                    value={featureName}
-                    onValueChange={(value) =>
-                        updates(id, { ...data, feature: value })
-                    }
-                    options={singleModelSelectOptions(DEFAULT_FEATURE, (k) =>
-                        t(k as Parameters<typeof t>[0]),
-                    )}
-                />
-            </div>
             <Card
                 className="p-5 nodrag"
                 onPointerDown={(e) => e.stopPropagation()}
             >
-                {/* 选择音色的下拉按钮（美化版） */}
+                {/* Voice selection dropdown button (styled version) */}
                 <div className="mb-4 flex flex-wrap items-center gap-3">
                     <label
                         htmlFor="voice-select"
@@ -156,7 +132,7 @@ const ConvertVoiceNode = ({ selected, data }: NodeProps) => {
                             ))}
                         </SelectContent>
                     </Select>
-                    {/* 下拉外部试听按钮 */}
+                    {/* Preview button outside the dropdown */}
                     <Button
                         type="button"
                         variant="ghost"
@@ -165,8 +141,8 @@ const ConvertVoiceNode = ({ selected, data }: NodeProps) => {
                         title={t("convertVoice.previewVoice")}
                         onClick={async () => {
                             if (voice && voice !== "default") {
-                                // 试听功能暂未实现
-                                console.log("Playing audio:", voice);
+                                // Preview is not implemented yet
+                                logger.debug("Playing audio:", voice);
                             }
                         }}
                         disabled={!voice || voice === "default"}
@@ -217,18 +193,6 @@ const ConvertVoiceNode = ({ selected, data }: NodeProps) => {
                     />
                 </div>
             </Card>
-            <Handle
-                type="target"
-                position={Position.Left}
-                id="a"
-                isConnectable={true}
-            />
-            <Handle
-                type="source"
-                position={Position.Right}
-                id="b"
-                isConnectable={true}
-            />
         </BaseNode>
     );
 };
@@ -246,9 +210,9 @@ const SpeakerVoiceUploader = ({
     const [progress, setProgress] = useState<number>(0);
 
     const doUpload = async (files: File[]) => {
-        // 上传逻辑暂时简化
-        // 实际实现需要调用上传API
-        console.log("Uploading files:", files);
+        // Upload logic is temporarily simplified
+        // The real implementation needs to call the upload API
+        logger.debug("Uploading files:", files);
         setUploaded(true);
     };
 
@@ -284,8 +248,8 @@ export const SpeakerVoiceRecorder = ({
 
     const onFinish = async () => {
         if (!file) return;
-        // 录制上传逻辑暂时简化
-        console.log("Recording file:", file);
+        // Recording upload logic is temporarily simplified
+        logger.debug("Recording file:", file);
     };
 
     return (

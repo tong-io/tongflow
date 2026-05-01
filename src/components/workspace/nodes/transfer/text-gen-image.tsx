@@ -1,43 +1,38 @@
-import { Handle, Position, useNodeId, type NodeProps } from "@xyflow/react";
-import { memo, useCallback, useEffect } from "react";
-import { RectangleHorizontal, Atom } from "lucide-react";
-
-import { BaseNode } from "../base/base-node";
-import useFlow from "@/hooks/use-flow";
-import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
-import { cn } from "@/lib/utils";
-import {
-    upstreamParam,
-    configParam,
-    staticParam,
-    type GetPromptsContext,
-} from "@/utils/node-execution-config";
+import { type NodeProps, useNodeId } from "@xyflow/react";
+import { Atom } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { clampToAllowedModel } from "@/utils/node-model-feature";
-import { NodeModelSelect } from "../base/node-model-select";
-import { singleModelSelectOptions } from "@/utils/node-model-select-label";
-import { NodePluginSelect } from "../base/node-plugin-select";
-import { useNodePluginIds } from "@/hooks/use-plugins-registry";
+import { memo, useCallback } from "react";
+import useFlow from "@/hooks/use-flow";
+import {
+    configParam,
+    type GetPromptsContext,
+    staticParam,
+    upstreamParam,
+} from "@/utils/node-execution-config";
+import {
+    IMAGE_ASPECT_RATIOS,
+    type AspectRatio,
+} from "@/constants/media-options";
+import { AspectRatioPicker } from "../base/aspect-ratio-picker";
+import { BaseNode } from "../base/base-node";
 
 /**
- * TextGenImageNode 数据结构
- * feature 和 prompt 直接存储在 data 中，可用于后端执行
+ * TextGenImageNode data structure
+ * feature and prompt are stored directly in data and can be used by backend execution
  */
 interface TextGenImageNodeData extends Record<string, unknown> {
-    /** 功能标识 */
+    /** Feature identifier */
     feature: string;
-    /** 执行参数 */
+    /** Execution parameters */
     prompt: {
-        /** 宽度 */
+        /** Width */
         width: number;
-        /** 高度 */
+        /** Height */
         height: number;
     };
-    /** 从上游接收的文本（执行时使用） */
+    /** Text received from upstream (used during execution) */
     texts?: string[];
-    /** UI 显示用的宽高比选项 */
+    /** Aspect ratio options for UI display */
     selectedAspectRatio?: {
         value: string;
         label: string;
@@ -53,28 +48,19 @@ interface TextGenImageNodeProps extends NodeProps {
     data: TextGenImageNodeData;
 }
 
-const aspectRatios = [
-    { value: "9:16", key: "portrait", width: 720, height: 1280 }, // HD 竖屏
-    { value: "16:9", key: "landscape", width: 1280, height: 720 }, // HD
-    { value: "1:1", key: "square", width: 1024, height: 1024 }, // 高清正方形
-    { value: "4:3", key: "standard", width: 1024, height: 768 }, // 中等标准屏
-    { value: "3:4", key: "verticalStandard", width: 768, height: 1024 }, // 中等竖屏
-];
-
-// 默认 prompt 参数
+// Default prompt parameters
 const defaultPrompt = {
     width: 1024,
     height: 1024,
 };
 
-// 工作流执行配置
+// Workflow execution config
 const workflowConfig = {
     feature: "image_gen",
-    label: "文本生成图片",
     outputType: "imageNode",
     outputField: "fileKeys" as const,
     paramMappings: {
-        // 注意：text 参数优先从上游 textNode 获取，确保使用动态生成的文本
+        // Note: the text parameter is read from the upstream textNode first to ensure dynamically generated text is used
         text: {
             sources: [upstreamParam("textNode", "texts[0]")],
             required: true,
@@ -101,37 +87,9 @@ const TextGenImageNode = ({ selected, data }: TextGenImageNodeProps) => {
     const id = useNodeId()!;
     const updates = useFlow((s) => s.updates);
 
-    const pluginOptions = useNodePluginIds("image_gen");
-    const pluginId = (data.pluginId ?? (data as any).pluginRepo ?? "").trim();
-    const resolvedPluginId = (pluginId || pluginOptions[0] || "").trim();
-
-    useEffect(() => {
-        if (pluginId) return;
-        if (!resolvedPluginId) return;
-        updates(id, { ...data, pluginId: resolvedPluginId });
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [id, resolvedPluginId]);
-
-    const featureName = clampToAllowedModel(
-        data.feature,
-        ["image_gen"],
-        "image_gen",
-    );
-
-    // 更新 prompt 参数（直接修改 data）
-    const updatePrompt = useCallback(
-        (newPrompt: Partial<TextGenImageNodeData["prompt"]>) => {
-            updates(id, {
-                ...data,
-                prompt: { ...prompt, ...newPrompt },
-            });
-        },
-        [id, data, prompt, updates],
-    );
-
-    // 选择宽高比
+    // Select aspect ratio
     const handleSelectRatio = useCallback(
-        (ratio: (typeof aspectRatios)[0]) => {
+        (ratio: AspectRatio) => {
             updates(id, {
                 ...data,
                 prompt: { ...prompt, width: ratio.width, height: ratio.height },
@@ -141,13 +99,13 @@ const TextGenImageNode = ({ selected, data }: TextGenImageNodeProps) => {
         [id, data, prompt, updates],
     );
 
-    // 当前选中的宽高比（根据 prompt 中的宽高匹配）
+    // Currently selected aspect ratio (matched from width/height in prompt)
     const currentRatio =
         selectedAspectRatio ??
-        aspectRatios.find(
+        IMAGE_ASPECT_RATIOS.find(
             (r) => r.width === prompt.width && r.height === prompt.height,
         ) ??
-        aspectRatios[0];
+        IMAGE_ASPECT_RATIOS[0];
 
     return (
         <BaseNode
@@ -156,7 +114,6 @@ const TextGenImageNode = ({ selected, data }: TextGenImageNodeProps) => {
             data={data}
             workflowConfig={{
                 ...workflowConfig,
-                feature: featureName,
                 title: t("titles.textGenImage"),
                 icon: <Atom className="h-5 w-5" />,
                 executeLabel: t("actions.generateImage"),
@@ -174,126 +131,18 @@ const TextGenImageNode = ({ selected, data }: TextGenImageNodeProps) => {
                         text,
                         width: prompt.width,
                         height: prompt.height,
-                        ...(resolvedPluginId
-                            ? { pluginId: resolvedPluginId, nodeSlot: "image_gen" }
-                            : {}),
                     }));
                 },
             }}
         >
             <div className="p-4 space-y-4">
-                {pluginOptions.length > 0 && (
-                    <NodePluginSelect
-                        value={resolvedPluginId}
-                        onValueChange={(value) =>
-                            updates(id, { ...data, pluginId: value })
-                        }
-                        options={pluginOptions.map((r) => ({
-                            value: r,
-                            label: r,
-                        }))}
-                    />
-                )}
-                <NodeModelSelect
-                    value={featureName}
-                    onValueChange={(value) =>
-                        updates(id, {
-                            ...data,
-                            feature: value,
-                        })
-                    }
-                    options={singleModelSelectOptions(
-                        "image_gen",
-                        (k) => t(k as Parameters<typeof t>[0]),
-                    )}
+                <AspectRatioPicker
+                    ratios={IMAGE_ASPECT_RATIOS}
+                    value={currentRatio}
+                    onChange={handleSelectRatio}
+                    showSize
                 />
-
-                {/* 图片宽高比选择 */}
-                <Card className="p-3">
-                    <div className="space-y-2">
-                        <Label className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
-                            <RectangleHorizontal className="h-4 w-4" />
-                            {t("common.aspectRatio")}
-                        </Label>
-                        <div className="grid grid-cols-5 gap-2">
-                            {aspectRatios.map((ratio) => (
-                                <Button
-                                    key={ratio.value}
-                                    variant={
-                                        currentRatio.value === ratio.value
-                                            ? "default"
-                                            : "outline"
-                                    }
-                                    size="sm"
-                                    onClick={() => handleSelectRatio(ratio)}
-                                    className={cn(
-                                        "h-auto py-2 px-1 flex flex-row items-center gap-1 text-xs transition-all relative",
-                                        currentRatio.value === ratio.value
-                                            ? "bg-primary text-primary-foreground shadow-md"
-                                            : "hover:bg-accent hover:text-accent-foreground",
-                                    )}
-                                >
-                                    <div
-                                        className={cn(
-                                            "border rounded transition-colors flex-shrink-0",
-                                            currentRatio.value === ratio.value
-                                                ? "border-primary-foreground bg-primary-foreground/20"
-                                                : "border-muted-foreground/30 bg-muted/30",
-                                        )}
-                                        style={{
-                                            width:
-                                                ratio.value === "1:1"
-                                                    ? "12px"
-                                                    : ratio.value === "4:3"
-                                                      ? "14px"
-                                                      : ratio.value === "16:9"
-                                                        ? "16px"
-                                                        : ratio.value === "3:4"
-                                                          ? "10px"
-                                                          : "8px",
-                                            height:
-                                                ratio.value === "1:1"
-                                                    ? "12px"
-                                                    : ratio.value === "4:3"
-                                                      ? "10px"
-                                                      : ratio.value === "16:9"
-                                                        ? "9px"
-                                                        : ratio.value === "3:4"
-                                                          ? "13px"
-                                                          : "14px",
-                                        }}
-                                    />
-                                    <div className="flex flex-col items-start min-w-0">
-                                        <span className="text-xs font-medium leading-tight truncate">
-                                            {t(`options.${ratio.key}`)}
-                                        </span>
-                                        <span className="text-xs opacity-70 leading-tight">
-                                            {ratio.value}
-                                        </span>
-                                    </div>
-                                </Button>
-                            ))}
-                        </div>
-                        <div className="text-xs text-muted-foreground text-center">
-                            {t("common.currentSize")} {prompt.width} ×{" "}
-                            {prompt.height}
-                        </div>
-                    </div>
-                </Card>
             </div>
-
-            <Handle
-                type="target"
-                position={Position.Left}
-                id="a"
-                isConnectable={true}
-            />
-            <Handle
-                type="source"
-                position={Position.Right}
-                id="b"
-                isConnectable={true}
-            />
         </BaseNode>
     );
 };

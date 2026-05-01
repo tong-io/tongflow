@@ -17,9 +17,7 @@ export type PluginsRegistryPayload = {
     generatedAt: string;
     scannerVersion?: number;
     nodePluginMap: Record<string, string[]>;
-    modal: {
-        plugins: Record<string, ModalPluginPayload>;
-    };
+    plugins: Record<string, unknown>;
     errors?: Array<{ pluginId: string; message: string }>;
 };
 
@@ -87,6 +85,14 @@ export function usePluginsRegistry() {
     }, []);
 
     return { registry, isLoaded, isLoading, error };
+}
+
+/**
+ * Force refresh registry from the server (e.g. after install/update/remove).
+ */
+export async function refreshPluginsRegistry(): Promise<void> {
+    usePluginsRegistryStore.setState({ isLoaded: false });
+    await loadRegistry();
 }
 
 function dedupeIds(list: string[]): string[] {

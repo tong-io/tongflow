@@ -1,11 +1,11 @@
 /**
- * 工作流任务恢复 Hook
- * 页面刷新后自动恢复正在执行的工作流任务
+ * Workflow task recovery hook
+ * Automatically recover running workflow tasks after page refresh
  *
- * 流程：
- * 1. 页面加载时调用 /api/task/pending 获取最新未完成的工作流任务
- * 2. 如果有未完成任务，使用 reconnect 模式连接 SSE
- * 3. 继续接收任务进度并更新 UI
+ * Flow:
+ * 1. Call /api/task/pending on page load to get the latest unfinished workflow task
+ * 2. If there is an unfinished task, connect to SSE in reconnect mode
+ * 3. Continue receiving task progress and update the UI
  */
 
 import { useEffect, useCallback, useRef } from "react";
@@ -20,31 +20,32 @@ import {
     NodeStatus,
 } from "@/constants/task-status";
 import { getTaskWaitUrl } from "@/lib/task-api-url";
+import { logger } from "@/lib/logger";
 
 interface UseWorkflowRecoveryOptions {
-    /** 节点状态更新回调 */
+    /** Node status update callback */
     onNodeStatusChange?: (nodeId: string, status: string) => void;
-    /** 节点数据更新回调 */
+    /** Node data update callback */
     onNodeDataUpdate?: (
         nodeId: string,
         data: { fileKeys?: string[]; texts?: string[] },
     ) => void;
-    /** 工作流完成回调 */
+    /** Workflow completion callback */
     onWorkflowComplete?: (data?: Record<string, unknown>) => void;
-    /** 工作流失败回调 */
+    /** Workflow failure callback */
     onWorkflowFailed?: (error?: string) => void;
-    /** 工作流取消回调 */
+    /** Workflow cancellation callback */
     onWorkflowCancelled?: () => void;
 }
 
 interface RecoveryState {
     taskId: string | null;
     eventSource: EventSource | null;
-    hasAttemptedRecovery: boolean; // 是否已尝试恢复
+    hasAttemptedRecovery: boolean; // Whether recovery has already been attempted
 }
 
 /**
- * 工作流任务恢复 Hook
+ * Workflow task recovery hook
  */
 export function useWorkflowRecovery(options: UseWorkflowRecoveryOptions = {}) {
     const {
@@ -67,7 +68,7 @@ export function useWorkflowRecovery(options: UseWorkflowRecoveryOptions = {}) {
         hasAttemptedRecovery: false,
     });
 
-    // 清理函数
+    // Cleanup timers + listeners helper
     const cleanup = useCallback(() => {
         if (recoveryStateRef.current.eventSource) {
             recoveryStateRef.current.eventSource.close();
@@ -76,7 +77,7 @@ export function useWorkflowRecovery(options: UseWorkflowRecoveryOptions = {}) {
         recoveryStateRef.current.taskId = null;
     }, []);
 
-    // 处理 SSE 消息
+    // Handle SSE messages
     const handleSSEMessage = useCallback(
         (
             taskId: string,
@@ -86,9 +87,9 @@ export function useWorkflowRecovery(options: UseWorkflowRecoveryOptions = {}) {
                 data?: Record<string, unknown>;
             },
         ) => {
-            console.log("[WorkflowRecovery] SSE message:", message);
+            logger.debug("[WorkflowRecovery] SSE message:", message);
 
-            // 触发 SSE 消息事件，更新进度浮动提示
+            // Bubble SSE deltas into floating progress toast
             emitSSETaskMessage({
                 id: taskId,
                 status: message.status as any,
@@ -98,7 +99,7 @@ export function useWorkflowRecovery(options: UseWorkflowRecoveryOptions = {}) {
 
             switch (message.status) {
                 case WorkflowStatus.WORKFLOW_STARTED:
-                    console.log("[WorkflowRecovery] Workflow started");
+                    logger.debug("[WorkflowRecovery] Workflow started");
                     break;
 
                 case NodeStatus.NODE_STARTED:
@@ -132,7 +133,7 @@ export function useWorkflowRecovery(options: UseWorkflowRecoveryOptions = {}) {
                 case WorkflowStatus.WORKFLOW_COMPLETED:
                 case TaskStatus.COMPLETED:
                 case "FINISHED":
-                    console.log("[WorkflowRecovery] ✅ Workflow completed");
+                    logger.debug("[WorkflowRecovery] ✅ Workflow completed");
                     setWorkflowExecutionStatus("completed");
                     cleanup();
                     onWorkflowComplete?.(message.data);
@@ -140,7 +141,7 @@ export function useWorkflowRecovery(options: UseWorkflowRecoveryOptions = {}) {
 
                 case WorkflowStatus.WORKFLOW_CANCELLED:
                 case TaskStatus.CANCELLED:
-                    console.log("[WorkflowRecovery] ⚠️ Workflow cancelled");
+                    logger.debug("[WorkflowRecovery] ⚠️ Workflow cancelled");
                     clearNodeExecutionStatus();
                     setWorkflowExecutionStatus("idle");
                     cleanup();
@@ -150,7 +151,7 @@ export function useWorkflowRecovery(options: UseWorkflowRecoveryOptions = {}) {
                 case WorkflowStatus.WORKFLOW_FAILED:
                 case TaskStatus.FAILED:
                 case "ERROR":
-                    console.log(
+                    logger.debug(
                         "[WorkflowRecovery] ❌ Workflow failed:",
                         message.data?.error,
                     );
@@ -173,10 +174,10 @@ export function useWorkflowRecovery(options: UseWorkflowRecoveryOptions = {}) {
         ],
     );
 
-    // 重新连接 SSE
+    // Reconnect SSE
     const reconnectSSE = useCallback(
         (taskId: string) => {
-            console.log(
+            logger.debug(
                 "[WorkflowRecovery] Reconnecting SSE for task:",
                 taskId,
             );
@@ -188,7 +189,7 @@ export function useWorkflowRecovery(options: UseWorkflowRecoveryOptions = {}) {
             recoveryStateRef.current.eventSource = eventSource;
 
             eventSource.onopen = () => {
-                console.log("[WorkflowRecovery] SSE reconnected successfully");
+                logger.debug("[WorkflowRecovery] SSE reconnected successfully");
                 emitSSEConnected(taskId);
             };
 
@@ -197,7 +198,7 @@ export function useWorkflowRecovery(options: UseWorkflowRecoveryOptions = {}) {
                     const message = JSON.parse(event.data);
                     handleSSEMessage(taskId, message);
                 } catch (e) {
-                    console.error(
+                    logger.error(
                         "[WorkflowRecovery] Failed to parse SSE message:",
                         e,
                     );
@@ -205,11 +206,11 @@ export function useWorkflowRecovery(options: UseWorkflowRecoveryOptions = {}) {
             };
 
             eventSource.onerror = (error) => {
-                console.error(
+                logger.error(
                     "[WorkflowRecovery] SSE connection error:",
                     error,
                 );
-                // 连接失败，任务可能已完成
+                // Connection failed; the task may already be complete
                 setWorkflowExecutionStatus("idle");
                 cleanup();
             };
@@ -219,22 +220,22 @@ export function useWorkflowRecovery(options: UseWorkflowRecoveryOptions = {}) {
         [handleSSEMessage, setWorkflowExecutionStatus, cleanup],
     );
 
-    // 尝试恢复任务 - 从数据库查询最新未完成任务
+    // Try to recover the task - query the latest unfinished task from the database
     const tryRecoverTask = useCallback(async () => {
-        // 防止重复执行
+        // Prevent duplicate execution
         if (recoveryStateRef.current.hasAttemptedRecovery) {
             return false;
         }
         recoveryStateRef.current.hasAttemptedRecovery = true;
 
         try {
-            console.log(
+            logger.debug(
                 "[WorkflowRecovery] Checking for pending workflow tasks...",
             );
 
             const response = await fetch("/api/task/pending");
             if (!response.ok) {
-                console.log("[WorkflowRecovery] Failed to fetch pending task");
+                logger.debug("[WorkflowRecovery] Failed to fetch pending task");
                 return false;
             }
 
@@ -243,25 +244,25 @@ export function useWorkflowRecovery(options: UseWorkflowRecoveryOptions = {}) {
             const { task } = data;
 
             if (!task) {
-                console.log(
+                logger.debug(
                     "[WorkflowRecovery] No pending workflow task found",
                 );
                 return false;
             }
 
-            console.log(
+            logger.debug(
                 "[WorkflowRecovery] Found pending task:",
                 task.id,
                 "status:",
                 task.status,
             );
 
-            // 有未完成任务，尝试重连 SSE
+            // An unfinished task exists; try reconnecting SSE
             setWorkflowExecutionStatus("running");
             reconnectSSE(task.id);
             return true;
         } catch (error) {
-            console.error(
+            logger.error(
                 "[WorkflowRecovery] Failed to check pending tasks:",
                 error,
             );
@@ -269,16 +270,16 @@ export function useWorkflowRecovery(options: UseWorkflowRecoveryOptions = {}) {
         }
     }, [setWorkflowExecutionStatus, reconnectSSE]);
 
-    // 页面加载时自动尝试恢复（只执行一次）
+    // Automatically try recovery on page load (only once)
     useEffect(() => {
-        // 延迟执行，等待组件完全挂载
+        // Run after a delay so the component can fully mount
         const timer = setTimeout(() => {
             tryRecoverTask();
         }, 800);
 
         return () => {
             clearTimeout(timer);
-            // 组件卸载时关闭 SSE 连接
+            // Close the SSE connection when the component unmounts
             if (recoveryStateRef.current.eventSource) {
                 recoveryStateRef.current.eventSource.close();
             }
@@ -286,11 +287,11 @@ export function useWorkflowRecovery(options: UseWorkflowRecoveryOptions = {}) {
     }, [tryRecoverTask]);
 
     return {
-        /** 手动尝试恢复任务 */
+        /** Manually try task recovery */
         tryRecoverTask,
-        /** 获取当前恢复中的任务 ID */
+        /** Get the currently recovering task ID */
         getRecoveringTaskId: () => recoveryStateRef.current.taskId,
-        /** 清理恢复状态 */
+        /** Clear recovery state */
         cleanup,
     };
 }

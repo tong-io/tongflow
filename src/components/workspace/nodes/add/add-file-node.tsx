@@ -1,4 +1,4 @@
-import { Handle, Position, useNodeId, type NodeProps } from "@xyflow/react";
+import { useNodeId, type NodeProps } from "@xyflow/react";
 import { useState, memo, useCallback } from "react";
 import { FileText, Upload, Library } from "lucide-react";
 
@@ -16,8 +16,9 @@ import { useMultipleUpload } from "@/hooks/use-upload";
 import { LibInput } from "../../share/lib-input";
 import { cn } from "@/lib/utils";
 import { useTranslations } from "next-intl";
+import { logger } from "@/lib/logger";
 
-// 上传组件
+// Upload component
 const UploadTab = () => {
     const t = useTranslations("Workspace.nodes.add");
     const { expands } = useFlow();
@@ -32,7 +33,7 @@ const UploadTab = () => {
             }
         },
         onError: (error) => {
-            console.error("Upload failed:", error);
+            logger.error("Upload failed:", error);
         },
     });
 
@@ -106,7 +107,7 @@ const UploadTab = () => {
     );
 };
 
-// 作品集组件
+// Library component
 const LibraryTab = () => {
     return (
         <div className="w-full">
@@ -127,7 +128,7 @@ const AddFileNode = ({ selected, data }: NodeProps) => {
         }
     };
 
-    // 获取基础配置
+    // Get base configuration
     const getWorkflowConfig = useCallback(() => {
         return {
             feature: "",
@@ -182,18 +183,6 @@ const AddFileNode = ({ selected, data }: NodeProps) => {
                 </Tabs>
             </div>
 
-            <Handle
-                type="target"
-                position={Position.Left}
-                id="a"
-                isConnectable={true}
-            />
-            <Handle
-                type="source"
-                position={Position.Right}
-                id="b"
-                isConnectable={true}
-            />
         </BaseNode>
     );
 };

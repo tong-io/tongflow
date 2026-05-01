@@ -4,7 +4,7 @@ import * as React from "react";
 import { Masonry } from "masonic";
 
 /**
- * 瀑布流组件的渲染函数类型
+ * Render function type for the waterfall component
  */
 export interface WaterfallRenderProps {
     index: number;
@@ -13,49 +13,49 @@ export interface WaterfallRenderProps {
 }
 
 /**
- * 瀑布流组件的 Props 类型
+ * Props type for the waterfall component
  */
 export interface WaterfallProps {
-    /** 数据源数组 */
+    /** Data source array */
     items: any[];
 
-    /** 渲染每个项的组件 */
+    /** Component used to render each item */
     render: React.ComponentType<WaterfallRenderProps>;
 
-    /** 列宽度（最小值），单位为像素，默认 240px */
+    /** Column width (minimum value), in pixels, defaults to 240px */
     columnWidth?: number;
 
-    /** 列间距，单位为像素，默认 0px */
+    /** Column gutter, in pixels, defaults to 0px */
     columnGutter?: number;
 
-    /** 行间距，单位为像素，默认等于 columnGutter */
+    /** Row gutter, in pixels, defaults to columnGutter */
     rowGutter?: number;
 
-    /** 最大列数 */
+    /** Maximum number of columns */
     maxColumnCount?: number;
 
-    /** 最大列宽 */
+    /** Maximum column width */
     maxColumnWidth?: number;
 
-    /** 容器的 className */
+    /** Container className */
     className?: string;
 
-    /** 容器的 style */
+    /** Container style */
     style?: React.CSSProperties;
 
-    /** 项的高度预估值，用于初始渲染优化，默认 300px */
+    /** Estimated item height for initial render optimization, defaults to 300px */
     itemHeightEstimate?: number;
 
-    /** 渲染时的回调 */
+    /** Callback when items are rendered */
     onRender?: (startIndex: number, stopIndex: number, items: any[]) => void;
 
-    /** 获取项的唯一 key，默认返回 index */
+    /** Get the unique key for each item, defaults to returning the index */
     itemKey?: (data: any, index: number) => string | number;
 }
 
 /**
- * 瀑布流组件
- * 基于 masonic 库的高性能虚拟化瀑布流组件
+ * Waterfall component
+ * A high-performance virtualized waterfall layout component based on the masonic library
  *
  * @example
  * ```tsx

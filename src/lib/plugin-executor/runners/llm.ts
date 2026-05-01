@@ -1,7 +1,7 @@
 import "server-only";
 
 import { spawn } from "node:child_process";
-import { join } from "node:path";
+import { delimiter, join } from "node:path";
 import { notifyTask } from "@/lib/task-emitter";
 import { TaskStatus } from "@/constants/task-status";
 import type { PluginExecRequest, PluginExecResult } from "../types";
@@ -79,6 +79,15 @@ export async function execLlmPlugin(
     const pluginDir = join(process.cwd(), cfg.localSubdir);
     const entry = cfg.entryFile || "entry.py";
     const python = await resolvePythonLite();
+    const tongflowSdkDir = join(process.cwd(), "plugins", "tongflow");
+    const pythonPathParts = [
+        tongflowSdkDir,
+        process.env.PYTHONPATH?.trim(),
+    ].filter((x): x is string => Boolean(x));
+    const pythonEnv = {
+        ...process.env,
+        PYTHONPATH: pythonPathParts.join(delimiter),
+    };
 
     const payload = {
         pluginId: req.pluginId,
@@ -93,7 +102,7 @@ export async function execLlmPlugin(
     return await new Promise<PluginExecResult>((resolve, reject) => {
         const child = spawn(python, [entry], {
             cwd: pluginDir,
-            env: process.env,
+            env: pythonEnv,
             windowsHide: true,
             stdio: ["pipe", "pipe", "pipe"],
         });

@@ -1,13 +1,10 @@
 import {
-    Handle,
-    Position,
-    useNodeId,
     useNodesData,
     type NodeProps,
 } from "@xyflow/react";
 import { memo, useMemo } from "react";
 import { Atom, Type, Music } from "lucide-react";
-import { getR2Url } from "@/lib/r2-utils";
+import { getFileUrl } from "@/lib/file-url";
 
 import { BaseNode } from "../base/base-node";
 import { Card } from "@/components/ui/card";
@@ -21,29 +18,11 @@ import {
 } from "@/components/ui/select";
 import { useNodeState } from "@/hooks/use-node-data";
 import { upstreamParam, configParam } from "@/utils/node-execution-config";
-import { useR2AsyncLoader } from "@/hooks/use-r2-async-loader";
 import { useTranslations } from "next-intl";
-import useFlow from "@/hooks/use-flow";
-import { clampToAllowedModel } from "@/utils/node-model-feature";
-import { NodeModelSelect } from "../base/node-model-select";
-import { multiModelSelectOptions } from "@/utils/node-model-select-label";
 
-const TEXT_AUDIO_SPEECH_FEATURES = [
-    "text_gen_speech_clone",
-    "text_gen_speech_emotion",
-    "text_gen_speech_style",
-] as const;
+const DEFAULT_FEATURE = "text-audio-gen-speech";
 
-function resolveFeatureFromEmotionStyle(
-    emotion: string,
-    style: string,
-): (typeof TEXT_AUDIO_SPEECH_FEATURES)[number] {
-    if (style) return "text_gen_speech_style";
-    if (emotion) return "text_gen_speech_emotion";
-    return "text_gen_speech_clone";
-}
-
-// 情感/风格选项 (使用 "none" 代替空字符串，因为 Select 组件不支持空值)
+// Emotion/style options (use "none" instead of an empty string because the Select component does not support empty values)
 const emotionOptions = [
     { label: "无", value: "none" },
     { label: "开心", value: "happy", desc: "Expressing happiness" },
@@ -80,7 +59,7 @@ const emotionOptions = [
     },
 ];
 
-// 风格选项 (使用 "none" 代替空字符串)
+// Style options (use "none" instead of an empty string)
 const styleOptions = [
     { label: "无", value: "none" },
     {
@@ -233,47 +212,19 @@ const styleOptions = [
     },
 ];
 
-// 媒体缩略图组件
-const MediaThumbnail = memo(
-    ({ fileKey, label }: { fileKey?: string; label: string }) => {
-        const { url } = useR2AsyncLoader(fileKey, { priority: "high" });
-
-        return (
-            <div className="flex flex-col items-center gap-1.5">
-                <div className="relative w-16 h-16 rounded-md border-2 border-gray-300 overflow-hidden bg-gray-100 transition-colors">
-                    <div className="flex items-center justify-center h-full w-full bg-blue-50">
-                        <div className="text-xs text-blue-600 font-semibold">
-                            🎵
-                        </div>
-                    </div>
-                    <div className="absolute inset-0 bg-black/0 transition-colors" />
-                </div>
-                <div className="px-1.5 py-0.5 bg-blue-100 text-blue-700 text-xs font-medium rounded">
-                    {label}
-                </div>
-            </div>
-        );
-    },
-);
-
-MediaThumbnail.displayName = "MediaThumbnail";
-
 const TextAudioGenSpeechNode = ({ selected, data }: NodeProps) => {
     const t = useTranslations("Workspace.nodes");
-    const updates = useFlow((s) => s.updates);
-    const id = useNodeId()!;
     const { ids = [] } = data as { ids?: string[] };
     const fromNodes = useNodesData(ids);
-
-    // 获取上游文本数据
+    // Get upstream text data
     const textNode = fromNodes.find((node) => node.type === "textNode");
     const texts = (textNode?.data as any)?.texts as string[] | undefined;
 
-    // 获取上游音频数据作为reference
+    // Get upstream audio data as the reference
     const audio = fromNodes.find((node) => node.type === "audioNode");
     const audioFileKey = (audio?.data as any)?.fileKeys?.[0];
 
-    // 使用新的Hook来管理状态持久化
+    // Use the new hook to manage state persistence
     const [state, setState] = useNodeState(
         {
             emotion: "",
@@ -283,26 +234,9 @@ const TextAudioGenSpeechNode = ({ selected, data }: NodeProps) => {
     );
     const { emotion, style } = state;
 
-    const resolvedFromEmotionStyle = resolveFeatureFromEmotionStyle(emotion, style);
-    const featureName = clampToAllowedModel(
-        (data as { feature?: string }).feature,
-        TEXT_AUDIO_SPEECH_FEATURES,
-        resolvedFromEmotionStyle,
-    );
-
-    // 补充 outputType 和 outputField 用于 BaseNode 自动处理任务完成
-    const dataWithOutput = useMemo(
-        () => ({
-            ...data,
-            outputType: "audioNode",
-            outputField: "fileKeys",
-        }),
-        [data],
-    );
-
-    // 工作流执行配置
+    // Workflow execution config
     const workflowConfig = {
-        feature: featureName,
+        feature: DEFAULT_FEATURE,
         label: "文本音频生成语音",
         outputType: "audioNode",
         outputField: "fileKeys" as const,
@@ -332,11 +266,10 @@ const TextAudioGenSpeechNode = ({ selected, data }: NodeProps) => {
         <BaseNode
             selected={selected}
             className="min-w-[480px]"
-            data={dataWithOutput}
+            data={data}
             workflowConfig={useMemo(
                 () => ({
                     ...workflowConfig,
-                    feature: featureName,
                     title: t("titles.textAudioGenSpeech"),
                     icon: <Atom className="h-5 w-5" />,
                     executeLabel: t("actions.generateSpeech"),
@@ -344,55 +277,25 @@ const TextAudioGenSpeechNode = ({ selected, data }: NodeProps) => {
                     getPrompts: () =>
                         texts && texts.length > 0 && audioFileKey
                             ? texts.map((text) => ({
-                                  audio: getR2Url(audioFileKey),
+                                  audio: getFileUrl(audioFileKey),
                                   text: text,
                                   emotion: emotion || undefined,
                                   style: style || undefined,
                               }))
                             : [],
                 }),
-                [audioFileKey, texts, emotion, style, featureName, t],
+                [audioFileKey, texts, emotion, style, t],
             )}
         >
             <div className="p-4 space-y-4">
-                <NodeModelSelect
-                    value={featureName}
-                    onValueChange={(v) => {
-                        if (v === "text_gen_speech_clone") {
-                            setState({ emotion: "", style: "" });
-                            updates(id, { ...data, feature: v });
-                            return;
-                        }
-                        if (v === "text_gen_speech_emotion") {
-                            setState({
-                                style: "",
-                                emotion: emotion || "happy",
-                            });
-                            updates(id, {
-                                ...data,
-                                feature: v,
-                            });
-                            return;
-                        }
-                        setState({
-                            emotion: "",
-                            style: style || "serious",
-                        });
-                        updates(id, { ...data, feature: v });
-                    }}
-                    options={multiModelSelectOptions(
-                        TEXT_AUDIO_SPEECH_FEATURES,
-                        (k) => t(k as Parameters<typeof t>[0]),
-                    )}
-                />
-                {/* 媒体展示区 */}
+                {/* Media display area */}
                 <Card className="p-3">
                     <div className="space-y-2">
                         <Label className="text-sm font-medium text-muted-foreground">
                             {t("compose.inputData")}
                         </Label>
                         <div className="flex gap-4">
-                            {/* 文本图标 */}
+                            {/* Text icon */}
                             <div className="flex flex-col items-center gap-1.5">
                                 <div className="relative w-16 h-16 rounded-md border-2 border-gray-300 overflow-hidden bg-gray-100 transition-colors">
                                     <div className="flex items-center justify-center h-full w-full bg-green-50">
@@ -403,7 +306,7 @@ const TextAudioGenSpeechNode = ({ selected, data }: NodeProps) => {
                                     {t("compose.text")}
                                 </div>
                             </div>
-                            {/* 音频图标 */}
+                            {/* Audio icon */}
                             <div className="flex flex-col items-center gap-1.5">
                                 <div className="relative w-16 h-16 rounded-md border-2 border-gray-300 overflow-hidden bg-gray-100 transition-colors">
                                     <div className="flex items-center justify-center h-full w-full bg-blue-50">
@@ -427,7 +330,7 @@ const TextAudioGenSpeechNode = ({ selected, data }: NodeProps) => {
                     className="p-3 nodrag"
                     onPointerDown={(e) => e.stopPropagation()}
                 >
-                    {/* 情感选择框 */}
+                    {/* Emotion selector */}
                     <div className="mb-4 flex items-center gap-3">
                         <label
                             htmlFor="emotion-select"
@@ -442,12 +345,6 @@ const TextAudioGenSpeechNode = ({ selected, data }: NodeProps) => {
                                 setState({
                                     emotion: nextEmotion,
                                     style: "",
-                                });
-                                const nextFeature =
-                                    resolveFeatureFromEmotionStyle(nextEmotion, "");
-                                updates(id, {
-                                    ...data,
-                                    feature: nextFeature,
                                 });
                             }}
                         >
@@ -476,7 +373,7 @@ const TextAudioGenSpeechNode = ({ selected, data }: NodeProps) => {
                             </SelectContent>
                         </Select>
                     </div>
-                    {/* 风格选择框 */}
+                    {/* Style selector */}
                     <div className="flex items-center gap-3">
                         <label
                             htmlFor="style-select"
@@ -491,14 +388,6 @@ const TextAudioGenSpeechNode = ({ selected, data }: NodeProps) => {
                                 setState({
                                     style: nextStyle,
                                     emotion: "",
-                                });
-                                const nextFeature = resolveFeatureFromEmotionStyle(
-                                    "",
-                                    nextStyle,
-                                );
-                                updates(id, {
-                                    ...data,
-                                    feature: nextFeature,
                                 });
                             }}
                         >
@@ -530,18 +419,6 @@ const TextAudioGenSpeechNode = ({ selected, data }: NodeProps) => {
                 </Card>
             </div>
 
-            <Handle
-                type="target"
-                position={Position.Left}
-                id="a"
-                isConnectable={true}
-            />
-            <Handle
-                type="source"
-                position={Position.Right}
-                id="b"
-                isConnectable={true}
-            />
         </BaseNode>
     );
 };

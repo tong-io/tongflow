@@ -1,11 +1,8 @@
 import {
-    Handle,
-    Position,
-    useNodeId,
     useNodesData,
     type NodeProps,
 } from "@xyflow/react";
-import { memo, useMemo, useState, useEffect, useRef } from "react";
+import { memo, useState, useEffect, useRef } from "react";
 import { Video } from "lucide-react";
 import { BaseNode } from "../base/base-node";
 import {
@@ -14,90 +11,12 @@ import {
 } from "@/utils/node-execution-config";
 import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import { useR2AsyncLoader } from "@/hooks/use-r2-async-loader";
 import { useTranslations } from "next-intl";
-import useFlow from "@/hooks/use-flow";
-import { clampToAllowedModel } from "@/utils/node-model-feature";
-import { NodeModelSelect } from "../base/node-model-select";
-import { singleModelSelectOptions } from "@/utils/node-model-select-label";
+import { MediaThumbnail } from "../base/media-thumbnail";
 
-const DEFAULT_FEATURE = "concat_videos";
-
-// 媒体缩略图组件
-const MediaThumbnail = memo(
-    ({
-        fileKey,
-        label,
-        type,
-        loadingText,
-    }: {
-        fileKey?: string;
-        label: string;
-        type: "image" | "audio" | "video";
-        loadingText: string;
-    }) => {
-        const { url } = useR2AsyncLoader(fileKey, { priority: "high" });
-
-        return (
-            <div className="flex flex-col items-center gap-1.5">
-                <div className="relative w-16 h-16 rounded-md border-2 border-gray-300 overflow-hidden bg-gray-100 transition-colors">
-                    {type === "image" ? (
-                        url ? (
-                            <img
-                                src={url}
-                                alt={label}
-                                className="w-full h-full object-cover"
-                            />
-                        ) : (
-                            <div className="flex items-center justify-center h-full w-full">
-                                <div className="text-xs text-gray-400">
-                                    {loadingText}
-                                </div>
-                            </div>
-                        )
-                    ) : type === "video" ? (
-                        url ? (
-                            <video
-                                src={url}
-                                className="w-full h-full object-cover"
-                            />
-                        ) : (
-                            <div className="flex items-center justify-center h-full w-full">
-                                <div className="text-xs text-gray-400">
-                                    {loadingText}
-                                </div>
-                            </div>
-                        )
-                    ) : (
-                        <div className="flex items-center justify-center h-full w-full bg-blue-50">
-                            <div className="text-xs text-blue-600 font-semibold">
-                                🎵
-                            </div>
-                        </div>
-                    )}
-                    <div className="absolute inset-0 bg-black/0 transition-colors" />
-                </div>
-                <div
-                    className={`px-1.5 py-0.5 text-xs font-medium rounded ${
-                        type === "image"
-                            ? "bg-purple-100 text-purple-700"
-                            : type === "video"
-                              ? "bg-orange-100 text-orange-700"
-                              : "bg-blue-100 text-blue-700"
-                    }`}
-                >
-                    {label}
-                </div>
-            </div>
-        );
-    },
-);
-
-MediaThumbnail.displayName = "MediaThumbnail";
-
-// 工作流执行配置
+// Workflow execution config
 const workflowConfig = {
-    feature: DEFAULT_FEATURE,
+    feature: "concat_videos",
     outputType: "videoNode",
     outputField: "fileKeys" as const,
     supportsBatch: false,
@@ -111,31 +30,23 @@ const workflowConfig = {
 
 const ConcatVideoNode = ({ selected, data }: NodeProps) => {
     const t = useTranslations("Workspace.nodes");
-    const updates = useFlow((s) => s.updates);
-    const id = useNodeId()!;
     const { ids } = data as { ids: string[] };
     const fromNodes = useNodesData(ids);
 
-    const featureName = clampToAllowedModel(
-        (data as { feature?: string }).feature,
-        [DEFAULT_FEATURE],
-        DEFAULT_FEATURE,
-    );
-
-    // 获取所有连接过来的视频节点
+    // Get all connected video nodes
     const videoNodes = fromNodes.filter((node) => node.type === "videoNode");
 
-    // 收集所有视频的fileKeys
+    // Collect fileKeys from all videos
     const videoFileKeys = videoNodes.flatMap(
         (node) => (node.data as any)?.fileKeys || [],
     );
 
-    // 本地排序状态
+    // Local ordering state
     const [orderedFileKeys, setOrderedFileKeys] =
         useState<string[]>(videoFileKeys);
     const dragIndexRef = useRef<number | null>(null);
 
-    // 上游变化时重置顺序
+    // Reset order when upstream inputs change
     useEffect(() => {
         setOrderedFileKeys(videoFileKeys);
         // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -160,45 +71,29 @@ const ConcatVideoNode = ({ selected, data }: NodeProps) => {
         dragIndexRef.current = null;
     };
 
-    // 补充 outputType 和 outputField 用于 BaseNode 自动处理任务完成
-    const dataWithOutput = useMemo(
-        () => ({
-            ...data,
-            outputType: "videoNode",
-            outputField: "fileKeys",
-        }),
-        [data],
-    );
-
     return (
         <BaseNode
             selected={selected}
             className="min-w-[480px]"
-            data={dataWithOutput}
+            data={data}
             workflowConfig={{
                 ...workflowConfig,
-                feature: featureName,
                 title: t("titles.concatVideo"),
                 icon: <Video className="h-5 w-5" />,
                 executeLabel: t("actions.concatVideo"),
                 executeDisabled: orderedFileKeys.length === 0,
                 getPrompts: () =>
                     orderedFileKeys.length > 0
-                        ? [{ fileKeys: orderedFileKeys }]
+                        ? [
+                              {
+                                  fileKeys: orderedFileKeys,
+                              },
+                          ]
                         : [],
             }}
         >
             <div className="p-4 space-y-4">
-                <NodeModelSelect
-                    value={featureName}
-                    onValueChange={(value) =>
-                        updates(id, { ...data, feature: value })
-                    }
-                    options={singleModelSelectOptions(DEFAULT_FEATURE, (k) =>
-                        t(k as Parameters<typeof t>[0]),
-                    )}
-                />
-                {/* 媒体展示区 */}
+                {/* Media display area */}
                 <Card className="p-3">
                     <div className="space-y-2">
                         <Label className="text-sm font-medium text-muted-foreground">
@@ -238,18 +133,6 @@ const ConcatVideoNode = ({ selected, data }: NodeProps) => {
                 </Card>
             </div>
 
-            <Handle
-                type="target"
-                position={Position.Left}
-                id="a"
-                isConnectable={true}
-            />
-            <Handle
-                type="source"
-                position={Position.Right}
-                id="b"
-                isConnectable={true}
-            />
         </BaseNode>
     );
 };

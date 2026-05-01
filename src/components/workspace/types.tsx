@@ -1,8 +1,8 @@
 "use client";
 
 /**
- * Workspace 节点和边类型定义
- * 从 saas 项目移植，按需逐步添加节点类型
+ * Workspace node and edge type definitions
+ * Ported from the saas project; node types are added incrementally as needed
  */
 
 import "@xyflow/react/dist/style.css";
@@ -42,10 +42,11 @@ import TextGenSpeechNode from "./nodes/transfer/text-gen-speech";
 import RemoveVideoSubtitleNode from "./nodes/transfer/remove-subtitle";
 import VideoUpscaleNode from "./nodes/transfer/video-upscale";
 import RemoveWatermarkNode from "./nodes/transfer/remove-watermark";
-import SeparateVideoAudioNode from "./nodes/transfer/separate_video_audio";
+import SeparateVideoAudioNode from "./nodes/transfer/separate-video-audio";
+import ExtractAudioNode from "./nodes/transfer/extract-audio";
 import DenoiseAudioNode from "./nodes/transfer/denoise-audio";
-import SeparateAudioTrackNode from "./nodes/transfer/separate_audio_track";
-import SeparateSpeakerNode from "./nodes/transfer/separate_speaker";
+import SeparateAudioTrackNode from "./nodes/transfer/separate-audio-track";
+import SeparateSpeakerNode from "./nodes/transfer/separate-speaker";
 import ConvertVoiceNode from "./nodes/transfer/convert-voice";
 import ImageGenTextNode from "./nodes/transfer/image-gen-text";
 import VideoGenTextNode from "./nodes/transfer/video-gen-text";
@@ -56,8 +57,8 @@ import GetFirstFrameNode from "./nodes/transfer/get-first-frame";
 import GetLastFrameNode from "./nodes/transfer/get-last-frame";
 
 // Batch nodes
-import DropVideoNode from "./nodes/batch/drop_video";
-import ArrangeTextNode from "./nodes/batch/arrrange_text";
+import DropVideoNode from "./nodes/batch/drop-video";
+import ArrangeTextNode from "./nodes/batch/arrange-text";
 import ConcatVideoNode from "./nodes/compose/concat-video";
 
 // Compose nodes
@@ -74,15 +75,15 @@ import ImageImageGenVideoNode from "./nodes/compose/image-image-gen-video";
 import TextAudioGenSpeechNode from "./nodes/compose/text-audio-gen-speech";
 import ConcatVideoComposeNode from "./nodes/compose/concat-video";
 // Decompose nodes
-import SplitVideoNode from "./nodes/decompose/split_video";
-import SplitTextNode from "./nodes/decompose/split_text";
+import SplitVideoNode from "./nodes/decompose/split-video";
+import SplitTextNode from "./nodes/decompose/split-text";
 
 /**
- * 节点类型映射
- * 根据 saas 项目的完整列表
+ * Node type mapping
+ * Based on the full list from the saas project
  */
 export const NODE_TYPES: NodeTypes = {
-    // 基础数据节点 - Implemented
+    // Base data nodes - Implemented
     imageNode: ImageNode,
     textNode: TextNode,
     videoNode: VideoNode,
@@ -90,7 +91,7 @@ export const NODE_TYPES: NodeTypes = {
     fileNode: FileNode,
     modelNode: ModelNode,
 
-    // 添加节点 - Implemented
+    // Add nodes - Implemented
     addImageNode: AddImageNode,
     addTextNode: AddTextNode,
     addAudioNode: AddAudioNode,
@@ -99,7 +100,7 @@ export const NODE_TYPES: NodeTypes = {
     addFileNode: AddFileNode,
     addModelNode: AddModelNode,
 
-    // 转换节点 - Implemented
+    // Transform nodes - Implemented
     imageGenVideoNode: ImageGenVideoNode,
     textGenVideoNode: TextGenVideoNode,
     imageGenModelNode: ImageGenModelNode,
@@ -113,6 +114,7 @@ export const NODE_TYPES: NodeTypes = {
     removeVideoSubtitleNode: RemoveVideoSubtitleNode,
     videoUpscaleNode: VideoUpscaleNode,
     removeWatermarkNode: RemoveWatermarkNode,
+    extractAudioNode: ExtractAudioNode,
     separateVideoAudioNode: SeparateVideoAudioNode,
     denoiseAudioSubtitleNode: DenoiseAudioNode,
     separateAudioTrackNode: SeparateAudioTrackNode,
@@ -126,12 +128,12 @@ export const NODE_TYPES: NodeTypes = {
     getFirstFrameNode: GetFirstFrameNode,
     getLastFrameNode: GetLastFrameNode,
 
-    // 批处理节点 - Implemented
+    // Batch nodes - Implemented
     dropVideoNode: DropVideoNode,
     arrangeNode: ArrangeTextNode,
     concatVideoNode: ConcatVideoNode,
 
-    // 合成节点 - Implemented
+    // Compose nodes - Implemented
     mergeVideoAudioNode: MergeVideoAudioNode,
     imageFusionNode: ImageFusionNode,
     speechImageGenVideoNode: SpeechImageGenVideoNode,
@@ -144,26 +146,26 @@ export const NODE_TYPES: NodeTypes = {
     textAudioGenSpeechNode: TextAudioGenSpeechNode,
     textsGenTextNode: TextsGenTextNode,
     concatVideoComposeNode: ConcatVideoComposeNode,
-    // 分解节点 - Implemented
+    // Decompose nodes - Implemented
     splitVideoNode: SplitVideoNode,
     splitTextNode: SplitTextNode,
 };
 
 /**
- * 边类型映射
+ * Edge type mapping
  */
 export const EDGE_TYPES: EdgeTypes = {
     "custom-edge": CustomEdge,
 };
 
 /**
- * 节点类型枚举
- * 用于类型检查和节点创建
+ * Node type enum
+ * Used for type checking and node creation
  */
 export type NodeType = keyof typeof NODE_TYPES;
 
 /**
- * 节点分类
+ * Node categories
  */
 export const NODE_CATEGORIES = {
     DATA: [
@@ -197,6 +199,7 @@ export const NODE_CATEGORIES = {
         "removeVideoSubtitleNode",
         "removeWatermarkNode",
         "videoUpscaleNode",
+        "extractAudioNode",
         "separateVideoAudioNode",
         "denoiseAudioSubtitleNode",
         "separateAudioTrackNode",

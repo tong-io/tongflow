@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
-import { requireAuth } from "@/lib/auth-stub";
 import { getDb } from "@/db";
-import { materials, tasks } from "@/db/schema";
-import { eq, and, desc, inArray } from "drizzle-orm";
+import { materials } from "@/db/schema";
+import { eq, and, desc } from "drizzle-orm";
+import { logger } from "@/lib/logger";
+import { safeJsonParse } from "@/utils/json-utils";
 
 export type MaterialType =
     | "image"
@@ -21,13 +22,10 @@ interface CreateMaterialRequest {
 
 /**
  * GET /api/material
- * 获取用户的素材列表
- * Query params: type - 筛选素材类型
+ * Material list (local single-user database)
  */
 export async function GET(request: NextRequest) {
     try {
-        const user = await requireAuth();
-
         const { searchParams } = new URL(request.url);
         const type = searchParams.get("type") as MaterialType | null;
 
@@ -36,21 +34,14 @@ export async function GET(request: NextRequest) {
         let query = db
             .select()
             .from(materials)
-            .where(
-                and(
-                    eq(materials.userId, user.id),
-                    eq(materials.deleted, false),
-                ),
-            );
+            .where(eq(materials.deleted, false));
 
-        // 如果指定了类型，添加类型筛选
         if (type) {
             query = db
                 .select()
                 .from(materials)
                 .where(
                     and(
-                        eq(materials.userId, user.id),
                         eq(materials.deleted, false),
                         eq(materials.type, type),
                     ),
@@ -60,28 +51,13 @@ export async function GET(request: NextRequest) {
         const result = await query.orderBy(desc(materials.createdAt));
 
         return NextResponse.json({
-            materials: result.map((m) => {
-                const content = JSON.parse(m.content) as {
-                    fileKeys?: string[];
-                };
-                return {
-                    ...m,
-                    content,
-                };
-            }),
+            materials: result.map((m) => ({
+                ...m,
+                content: safeJsonParse<{ fileKeys?: string[] }>(m.content, {}),
+            })),
         });
     } catch (error) {
-        console.error("Error listing materials:", error);
-
-        if (
-            error instanceof Error &&
-            error.message === "Authentication required"
-        ) {
-            return NextResponse.json(
-                { error: "Unauthorized" },
-                { status: 401 },
-            );
-        }
+        logger.error("Error listing materials:", error);
 
         return NextResponse.json(
             { error: "Failed to list materials" },
@@ -92,12 +68,10 @@ export async function GET(request: NextRequest) {
 
 /**
  * POST /api/material
- * 创建新素材
+ * Create a new material
  */
 export async function POST(request: NextRequest) {
     try {
-        const user = await requireAuth();
-
         const body = (await request.json()) as CreateMaterialRequest;
         const { name, type, content, thumbnail } = body;
 
@@ -113,7 +87,6 @@ export async function POST(request: NextRequest) {
         const result = await db
             .insert(materials)
             .values({
-                userId: user.id,
                 name,
                 type,
                 content: JSON.stringify(content),
@@ -125,17 +98,7 @@ export async function POST(request: NextRequest) {
             materialId: result[0].id,
         });
     } catch (error) {
-        console.error("Error creating material:", error);
-
-        if (
-            error instanceof Error &&
-            error.message === "Authentication required"
-        ) {
-            return NextResponse.json(
-                { error: "Unauthorized" },
-                { status: 401 },
-            );
-        }
+        logger.error("Error creating material:", error);
 
         return NextResponse.json(
             { error: "Failed to create material" },
@@ -146,12 +109,10 @@ export async function POST(request: NextRequest) {
 
 /**
  * DELETE /api/material
- * 删除素材（软删除）
+ * Soft delete
  */
 export async function DELETE(request: NextRequest) {
     try {
-        const user = await requireAuth();
-
         const { searchParams } = new URL(request.url);
         const id = searchParams.get("id");
 
@@ -167,26 +128,11 @@ export async function DELETE(request: NextRequest) {
         await db
             .update(materials)
             .set({ deleted: true })
-            .where(
-                and(
-                    eq(materials.id, parseInt(id)),
-                    eq(materials.userId, user.id),
-                ),
-            );
+            .where(eq(materials.id, parseInt(id, 10)));
 
         return NextResponse.json({ success: true });
     } catch (error) {
-        console.error("Error deleting material:", error);
-
-        if (
-            error instanceof Error &&
-            error.message === "Authentication required"
-        ) {
-            return NextResponse.json(
-                { error: "Unauthorized" },
-                { status: 401 },
-            );
-        }
+        logger.error("Error deleting material:", error);
 
         return NextResponse.json(
             { error: "Failed to delete material" },
@@ -197,12 +143,10 @@ export async function DELETE(request: NextRequest) {
 
 /**
  * PATCH /api/material
- * 切换素材收藏状态
+ * Toggle favorite
  */
 export async function PATCH(request: NextRequest) {
     try {
-        const user = await requireAuth();
-
         const { searchParams } = new URL(request.url);
         const id = searchParams.get("id");
 
@@ -215,16 +159,10 @@ export async function PATCH(request: NextRequest) {
 
         const db = await getDb();
 
-        // 先获取当前状态
         const existing = await db
             .select({ isFavorite: materials.isFavorite })
             .from(materials)
-            .where(
-                and(
-                    eq(materials.id, parseInt(id)),
-                    eq(materials.userId, user.id),
-                ),
-            )
+            .where(eq(materials.id, parseInt(id, 10)))
             .limit(1);
 
         if (existing.length === 0) {
@@ -236,30 +174,14 @@ export async function PATCH(request: NextRequest) {
 
         const newFavoriteStatus = !existing[0].isFavorite;
 
-        // 更新状态
         await db
             .update(materials)
             .set({ isFavorite: newFavoriteStatus })
-            .where(
-                and(
-                    eq(materials.id, parseInt(id)),
-                    eq(materials.userId, user.id),
-                ),
-            );
+            .where(eq(materials.id, parseInt(id, 10)));
 
         return NextResponse.json({ isFavorite: newFavoriteStatus });
     } catch (error) {
-        console.error("Error toggling favorite:", error);
-
-        if (
-            error instanceof Error &&
-            error.message === "Authentication required"
-        ) {
-            return NextResponse.json(
-                { error: "Unauthorized" },
-                { status: 401 },
-            );
-        }
+        logger.error("Error toggling favorite:", error);
 
         return NextResponse.json(
             { error: "Failed to toggle favorite" },

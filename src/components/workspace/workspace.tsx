@@ -1,8 +1,8 @@
 "use client";
 
 /**
- * Workspace 主组件
- * ReactFlow 画布，管理节点和边
+ * Workspace main component
+ * ReactFlow canvas managing nodes and edges
  */
 
 import type { Connection, Edge, Node, IsValidConnection } from "@xyflow/react";
@@ -21,8 +21,6 @@ import { useFlow } from "@/hooks/use-flow";
 import { EDGE_TYPES, NODE_TYPES } from "./types";
 import { useEffect, useState, useCallback } from "react";
 import { useTranslations, useLocale } from "next-intl";
-import { RegionProvider } from "@/contexts/region-context";
-import type { RegionType } from "@/lib/region-utils";
 import { isValidFlowConnection } from "@/utils/connection-rules";
 import { usePreloadFeatures } from "@/hooks/use-features";
 import { useWorkflowRecovery } from "@/hooks/use-workflow-recovery";
@@ -32,8 +30,9 @@ import { WorkflowTitleMenu } from "./workflow-title-menu";
 import { TaskProgressToast } from "./task-progress-toast";
 import { WorkspaceNav } from "./workspace-nav";
 import { WorkspaceLeftNav } from "./workspace-left-nav";
+import { logger } from "@/lib/logger";
 
-// Selector for performance optimization - 只选择数据，不选择函数
+// Selector for performance optimization - select data only, not functions
 const selector = (state: FlowState) => ({
     nodes: state.nodes,
     edges: state.edges,
@@ -41,18 +40,18 @@ const selector = (state: FlowState) => ({
 });
 
 /**
- * Workspace 内部组件
- * 必须在 ReactFlowProvider 内部使用
+ * Workspace inner component
+ * Must be used inside a ReactFlowProvider
  */
 function WorkspaceInner({ user }: { user?: { id: string; email: string } }) {
     const tIndex = useTranslations("Index");
     const locale = useLocale();
     const [colorMode, setColorMode] = useState<"light" | "dark">("light");
 
-    // 分开获取数据和函数，避免函数引用变化导致重新渲染
+    // Separate data and functions to avoid re-renders caused by function reference changes
     const { nodes, edges, workflowName } = useFlow(useShallow(selector));
 
-    // 直接从 store 获取函数（函数引用永不变化）
+    // Get functions directly from the store (function references never change)
     const onNodesChange = useFlow.getState().onNodesChange;
     const onEdgesChange = useFlow.getState().onEdgesChange;
     const onSelectionChange = useFlow.getState().onSelectionChange;
@@ -71,7 +70,7 @@ function WorkspaceInner({ user }: { user?: { id: string; email: string } }) {
         [],
     );
 
-    // 监听主题变化
+    // Listen for theme changes
     useEffect(() => {
         const observer = new MutationObserver((mutations) => {
             mutations.forEach((mutation) => {
@@ -90,7 +89,7 @@ function WorkspaceInner({ user }: { user?: { id: string; email: string } }) {
             attributeFilter: ["class"],
         });
 
-        // 初始化主题
+        // Initialize theme
         setColorMode(
             document.documentElement.classList.contains("dark")
                 ? "dark"
@@ -100,10 +99,10 @@ function WorkspaceInner({ user }: { user?: { id: string; email: string } }) {
         return () => observer.disconnect();
     }, []);
 
-    // 预加载功能数据
+    // Preload feature data
     usePreloadFeatures();
 
-    // 节点数据更新回调（不依赖 nodes，直接从 store 获取最新状态）
+    // Node data update callback (does not depend on nodes; gets the latest state directly from the store)
     const handleNodeDataUpdate = useCallback(
         (nodeId: string, data: { fileKeys?: string[]; texts?: string[] }) => {
             const currentNodes = useFlow.getState().nodes;
@@ -124,16 +123,16 @@ function WorkspaceInner({ user }: { user?: { id: string; email: string } }) {
         [],
     );
 
-    // 工作流任务恢复 Hook
+    // Workflow task recovery hook
     useWorkflowRecovery({
         onNodeDataUpdate: handleNodeDataUpdate,
     });
 
-    // 订阅节点创建事件，平滑缩放到新节点
+    // Subscribe to node-creation events and smoothly zoom to the new node
     useEffect(() => {
         const unsubscribe = useFlow.getState().onNodeCreated((nodeIds) => {
             if (nodeIds.length === 0) return;
-            // 延迟执行 fitView，等待节点渲染完成
+            // Defer fitView until the node has finished rendering
             setTimeout(() => {
                 void reactFlowInstance.fitView({
                     nodes: nodeIds.map((id) => ({ id })),
@@ -147,21 +146,21 @@ function WorkspaceInner({ user }: { user?: { id: string; email: string } }) {
         return unsubscribe;
     }, [reactFlowInstance]);
 
-    // 处理节点双击，平滑缩放视图
+    // Handle node double-click: smoothly zoom the view to the node
     const handleNodeDoubleClick = (_event: React.MouseEvent, node: Node) => {
         if (!node?.position) return;
 
-        // 使用 ReactFlow 的内置方法来精确居中节点
+        // Use ReactFlow's built-in method to precisely center the node
         void reactFlowInstance.fitView({
             nodes: [{ id: node.id }],
             duration: 800,
-            padding: 0.3, // 在节点周围留出 30% 的空间
+            padding: 0.3, // Leave 30% padding around the node
             maxZoom: 1.2,
             minZoom: 0.1,
         });
     };
 
-    // 点击画布空白处退出 Combo Mode
+    // Click on empty canvas to exit Combo Mode
     const handlePaneClick = useCallback(() => {
         const store = useFlow.getState();
         if (store.comboMode) {
@@ -169,7 +168,7 @@ function WorkspaceInner({ user }: { user?: { id: string; email: string } }) {
         }
     }, []);
 
-    // 监听 Escape 键退出 Combo Mode
+    // Listen for the Escape key to exit Combo Mode
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
             if (e.key === "Escape") {
@@ -183,7 +182,7 @@ function WorkspaceInner({ user }: { user?: { id: string; email: string } }) {
         return () => window.removeEventListener("keydown", handleKeyDown);
     }, []);
 
-    // 从 localStorage 恢复节点、边和工作流元信息
+    // Restore nodes, edges, and workflow metadata from localStorage
     useEffect(() => {
         const savedNodes = localStorage.getItem("nodes");
         const savedEdges = localStorage.getItem("edges");
@@ -196,7 +195,7 @@ function WorkspaceInner({ user }: { user?: { id: string; email: string } }) {
                     useFlow.getState().setNodes(nodes);
                 }
             } catch (e) {
-                console.error("Failed to parse nodes:", e);
+                logger.error("Failed to parse nodes:", e);
             }
         }
 
@@ -207,7 +206,7 @@ function WorkspaceInner({ user }: { user?: { id: string; email: string } }) {
                     useFlow.getState().setEdges(edges);
                 }
             } catch (e) {
-                console.error("Failed to parse edges:", e);
+                logger.error("Failed to parse edges:", e);
             }
         }
 
@@ -217,33 +216,31 @@ function WorkspaceInner({ user }: { user?: { id: string; email: string } }) {
                     id: number | null;
                     name: string;
                     description: string;
-                    currentShareId?: number | null;
                 };
-                // 如果有 workflowId 且有 name，使用缓存的 name；否则使用当前语言的默认名称
+                // If workflowId and name both exist, use the cached name; otherwise use the default name for the current locale
                 const effectiveName =
                     meta.id && meta.name ? meta.name : tIndex("title");
                 useFlow.setState({
                     workflowId: meta.id,
                     workflowName: effectiveName,
                     workflowDescription: meta.description || "",
-                    currentShareId: meta.currentShareId ?? null,
                 });
             } catch (e) {
-                console.error("Failed to parse workflowMeta:", e);
+                logger.error("Failed to parse workflowMeta:", e);
             }
         } else {
-            // 没有缓存的 meta，设置默认名称
+            // No cached metadata — set the default name
             useFlow.setState({
                 workflowName: tIndex("title"),
             });
         }
     }, []);
 
-    // 监听语言切换：如果是未保存的工作流，更新为当前语言的默认名称
+    // Listen for locale changes: if the workflow is unsaved, update the name to the default for the new locale
     useEffect(() => {
         const workflowId = useFlow.getState().workflowId;
         if (!workflowId) {
-            // 未保存的工作流，更新名称为当前语言的默认名称
+            // Unsaved workflow — update the name to the default for the current locale
             useFlow.setState({
                 workflowName: tIndex("title"),
             });
@@ -272,8 +269,8 @@ function WorkspaceInner({ user }: { user?: { id: string; email: string } }) {
                 nodeOrigin={[0.5, 0.5]}
                 selectNodesOnDrag={false}
                 fitView
-                minZoom={0.001} // 极限缩小
-                maxZoom={1000} // 极限放大
+                minZoom={0.001} // Minimum zoom limit
+                maxZoom={1000} // Maximum zoom limit
                 proOptions={{ hideAttribution: true }}
                 colorMode={colorMode}
             >
@@ -297,27 +294,23 @@ function WorkspaceInner({ user }: { user?: { id: string; email: string } }) {
                 <ModeSwitch />
             </div>
 
-            {/* SSE 任务进度浮动提示 */}
+            {/* SSE task progress floating toast */}
             <TaskProgressToast />
         </div>
     );
 }
 
 /**
- * Workspace 主组件（带 Provider）
+ * Workspace main component (with Provider)
  */
 export default function Workspace({
     user,
-    region = "intl",
 }: {
     user?: { id: string; email: string };
-    region?: RegionType;
 }) {
     return (
-        <RegionProvider region={region}>
-            <ReactFlowProvider>
-                <WorkspaceInner user={user} />
-            </ReactFlowProvider>
-        </RegionProvider>
+        <ReactFlowProvider>
+            <WorkspaceInner user={user} />
+        </ReactFlowProvider>
     );
 }

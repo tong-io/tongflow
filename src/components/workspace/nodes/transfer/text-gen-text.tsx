@@ -1,6 +1,4 @@
 import {
-    Handle,
-    Position,
     useNodeId,
     useNodesData,
     type NodeProps,
@@ -36,24 +34,20 @@ import useFlow from "@/hooks/use-flow";
 import { useNodeState } from "@/hooks/use-node-data";
 import { NodeTextarea } from "../base/node-textarea";
 import { useTranslations } from "next-intl";
-import {
-    DEFAULT_GEMINI_TEXT_MODEL,
-    GEMINI_TEXT_MODEL_OPTIONS,
-} from "@/constants/gemini-text-models";
-import {
-    DEFAULT_OPENAI_TEXT_MODEL,
-    OPENAI_TEXT_MODEL_OPTIONS,
-} from "@/constants/openai-text-models";
 import { clampToAllowedModel } from "@/utils/node-model-feature";
-import { registryModelOptionLabel } from "@/utils/node-model-select-label";
 import { NodeModelSelect } from "../base/node-model-select";
-import { NodePluginSelect } from "../base/node-plugin-select";
-import { useNodePluginIds } from "@/hooks/use-plugins-registry";
+import {
+    useNodePluginIds,
+    usePluginsRegistry,
+    usePluginsRegistryStore,
+} from "@/hooks/use-plugins-registry";
+import { pluginDisplayName } from "../base/node-plugin-id-select";
 
 const GEN_TEXT_FEATURES = ["gen_text"] as const;
 
-// 思考框组件
+// Reasoning box component
 const ReasoningBox = ({ content }: { content: string }) => {
+    const tBase = useTranslations("Workspace.nodes.base");
     const scrollRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
@@ -68,11 +62,7 @@ const ReasoningBox = ({ content }: { content: string }) => {
                 <div className="flex items-center gap-2">
                     <Brain className="h-4 w-4 text-blue-600" />
                     <h3 className="text-sm font-semibold text-blue-900">
-                        {/* Note: This component logic is inside component but t is not available here easily without passing it.
-                            I will move useTranslations to GenTextNode but ReasoningBox is outside.
-                            Actually, I can pass t as prop or move ReasoningBox inside, or just use a simple hook inside.
-                         */}
-                        Thinking Process
+                        {tBase("thinkingProcess")}
                     </h3>
                 </div>
             </div>
@@ -89,10 +79,9 @@ const ReasoningBox = ({ content }: { content: string }) => {
     );
 };
 
-// 工作流执行配置
+// Workflow execution config
 const workflowConfig = {
     feature: "gen_text",
-    label: "Text Generation",
     outputType: "textNode",
     outputField: "texts" as const,
     supportsBatch: true,
@@ -122,14 +111,16 @@ const GenTextNode = ({ selected, data }: NodeProps) => {
     const expands = useFlow((s) => s.expands);
     const updates = useFlow((s) => s.updates);
     const id = useNodeId()!;
+    // Ensure plugins registry is loaded (drives model/provider options).
+    usePluginsRegistry();
 
-    // 如果有 ids，从关联节点获取数据（组合模式）
-    // 在组合模式下，可能有多个 textNode：一个作为输入文本，一个作为提示词
+    // If ids are present, get data from associated nodes (composition mode)
+    // In composition mode, there may be multiple textNodes: one for input text and one for the prompt
     const fromNodes = useNodesData(ids);
     const textNodes = fromNodes.filter((node) => node.type === "textNode");
 
-    // 从组合节点获取文本数据
-    // 第一个 textNode 作为输入文本，第二个（如果有）作为提示词
+    // Get text data from the composite node
+    // Use the first textNode as input text and the second one, if present, as the prompt
     const texts: string[] = useMemo(() => {
         if (textNodes.length > 0) {
             return (textNodes[0].data as any)?.texts || [];
@@ -137,7 +128,7 @@ const GenTextNode = ({ selected, data }: NodeProps) => {
         return localTexts;
     }, [textNodes, localTexts]);
 
-    // 如果有第二个 textNode，作为上游提示词
+    // If there is a second textNode, use it as the upstream prompt
     const upstreamPrompt: string = useMemo(() => {
         if (textNodes.length > 1) {
             const prompts = (textNodes[1].data as any)?.texts || [];
@@ -146,31 +137,20 @@ const GenTextNode = ({ selected, data }: NodeProps) => {
         return "";
     }, [textNodes]);
 
-    // 判断是否有上游提示词
+    // Determine whether there is an upstream prompt
     const hasUpstreamPrompt = !!upstreamPrompt;
 
-    // 使用 Hook 管理用户输入的提示词（仅当 model === gemini 时传 geminiModel）
+    // Use the hook to manage the user-entered prompt (the LLM plugin decides whether to use geminiModel/openaiModel)
     const [state, setState] = useNodeState(
         {
             userPrompt: "",
-            model: "auto",
-            geminiModel: DEFAULT_GEMINI_TEXT_MODEL,
-            openaiModel: DEFAULT_OPENAI_TEXT_MODEL,
         },
         data,
     );
-    const { userPrompt, model, geminiModel, openaiModel } = state;
+    const { userPrompt } = state;
     const t = useTranslations("Workspace.nodes");
     const tBase = useTranslations("Workspace.nodes.base");
-
-    const MODEL_OPTIONS = [
-        { value: "auto", label: t("params.modelDefault") },
-        { value: "openai", label: "OpenAI" },
-        { value: "gemini", label: "Gemini" },
-    ];
-
-    const usesGeminiBackend = model === "gemini";
-    const usesOpenAiBackend = model === "openai";
+    const registry = usePluginsRegistryStore((s) => s.registry);
 
     const featureName = "gen_text";
 
@@ -178,31 +158,38 @@ const GenTextNode = ({ selected, data }: NodeProps) => {
     const pluginId = (
         (data as any).pluginId ?? (data as any).pluginRepo ?? ""
     ).trim();
-    const inferredDefaultPluginId = "tongflow-llm-openrouter-free";
-    useEffect(() => {
-        if (!pluginId && inferredDefaultPluginId) {
-            updates(id, { ...(data as any), pluginId: inferredDefaultPluginId });
+    /** BaseNode persists registry default; this mirrors nodePluginMap[slot][0] for first paint. */
+    const effectivePluginId = (pluginId || pluginOptions[0] || "").trim();
+    const modelSelectOptions = useMemo(() => {
+        if (!registry) {
+            // Registry not loaded yet; show plugin ids as-is.
+            return pluginOptions.map((pid) => ({
+                value: pid,
+                label: pluginDisplayName(pid),
+            }));
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [id, inferredDefaultPluginId]);
+        return pluginOptions.map((pid) => {
+            return { value: pid, label: pluginDisplayName(pid) };
+        });
+    }, [registry, pluginOptions, featureName]);
 
-    // 获取实际使用的提示词
+    // Get the prompt that will actually be used
     const effectivePrompt = hasUpstreamPrompt ? upstreamPrompt : userPrompt;
 
-    // 全屏编辑对话框状态
+    // Fullscreen editing modal state
     const [isFullscreenOpen, setIsFullscreenOpen] = useState(false);
     const [fullscreenValue, setFullscreenValue] = useState("");
 
-    // 流式输出状态
+    // Streaming output state
     const [reasoningContent, setReasoningContent] = useState<string>("");
     const [showReasoningBox, setShowReasoningBox] = useState(false);
     const [_answerContent, setAnswerContent] = useState<string>("");
     const answerNodeIdRef = useRef<string | null>(null);
 
-    // 自定义任务更新处理（流式输出）
+    // Custom task updater — handles streaming deltas
     const handleTaskUpdate = useCallback(
         (task: any): boolean => {
-            // 处理任务完成/失败 - 重置状态
+            // Handle task completion/failure - reset state
             if (task?.status === "COMPLETED" || task?.status === "FAILED") {
                 setTimeout(() => {
                     setReasoningContent("");
@@ -210,11 +197,11 @@ const GenTextNode = ({ selected, data }: NodeProps) => {
                     setShowReasoningBox(false);
                     answerNodeIdRef.current = null;
                 }, 500);
-                // 返回 true 表示已处理，不需要默认的节点创建逻辑
+                // Return true to indicate it was handled and the default node creation logic is not needed
                 return true;
             }
 
-            // 检查流式数据
+            // Check streaming data
             if (task?.data?.content) {
                 if (task?.data?.type === "reasoning") {
                     setReasoningContent((prev) =>
@@ -233,7 +220,7 @@ const GenTextNode = ({ selected, data }: NodeProps) => {
                             ? `${prev}${task.data.content}`
                             : task.data.content;
 
-                        // 创建或更新输出节点
+                        // Create or update the output node
                         if (!answerNodeIdRef.current && id) {
                             const nodeIds = expands(id, [
                                 {
@@ -270,6 +257,7 @@ const GenTextNode = ({ selected, data }: NodeProps) => {
                 workflowConfig={{
                     ...workflowConfig,
                     feature: featureName,
+                    showPluginSelect: false,
                     title: t("titles.textGenText"),
                     icon: <Wand2 className="h-5 w-5" />,
                     headerActions: !hasUpstreamPrompt ? (
@@ -299,11 +287,6 @@ const GenTextNode = ({ selected, data }: NodeProps) => {
                                 : texts;
                         return inputTexts.map((text) => ({
                             text: `${text}\n\n${effectivePrompt}`,
-                            ...(pluginId
-                                ? { pluginId, nodeSlot: featureName }
-                                : {}),
-                            ...(usesGeminiBackend ? { geminiModel } : {}),
-                            ...(usesOpenAiBackend ? { openaiModel } : {}),
                         }));
                     },
                     onTaskUpdate: handleTaskUpdate,
@@ -311,7 +294,6 @@ const GenTextNode = ({ selected, data }: NodeProps) => {
                 overlay={
                     showReasoningBox ? (
                         <div className="w-full h-full pointer-events-auto">
-                            {/* Passing raw string for now as I left ReasoningBox outside. Ideally refactor ReasoningBox to use t or accept title prop. */}
                             <ReasoningBox content={reasoningContent} />
                         </div>
                     ) : null
@@ -319,19 +301,21 @@ const GenTextNode = ({ selected, data }: NodeProps) => {
             >
                 <div className="p-4 space-y-4">
                     {pluginOptions.length > 0 && (
-                        <NodePluginSelect
-                            value={pluginId}
-                            onValueChange={(value) =>
-                                updates(id, { ...(data as any), pluginId: value })
-                            }
-                            options={pluginOptions.map((r) => ({
-                                value: r,
-                                label: r,
-                            }))}
+                        <NodeModelSelect
+                            value={effectivePluginId}
+                            onValueChange={(value) => {
+                                const next = clampToAllowedModel(
+                                    value,
+                                    modelSelectOptions.map((o) => o.value),
+                                    effectivePluginId,
+                                );
+                                updates(id, { ...(data as any), pluginId: next });
+                            }}
+                            options={modelSelectOptions}
                         />
                     )}
                     <div className="space-y-2">
-                        {/* 如果有上游提示词，显示预览 */}
+                        {/* If there is an upstream prompt, show a preview */}
                         {hasUpstreamPrompt ? (
                             <Card className="p-3 bg-muted/50">
                                 <div className="space-y-2">
@@ -357,85 +341,10 @@ const GenTextNode = ({ selected, data }: NodeProps) => {
                             />
                         )}
                     </div>
-                    <div className="flex flex-col gap-2">
-                        {usesGeminiBackend ? (
-                            <div className="flex items-center gap-2">
-                                <Label className="text-xs text-muted-foreground shrink-0 w-20">
-                                    {t("params.geminiModel")}
-                                </Label>
-                                <Select
-                                    value={geminiModel}
-                                    onValueChange={(v) =>
-                                        setState({ geminiModel: v })
-                                    }
-                                >
-                                    <SelectTrigger className="h-7 text-xs flex-1 min-w-0">
-                                        <SelectValue />
-                                    </SelectTrigger>
-                                    <SelectContent className="max-h-[min(280px,50vh)]">
-                                        {GEMINI_TEXT_MODEL_OPTIONS.map(
-                                            (opt) => (
-                                                <SelectItem
-                                                    key={opt.value}
-                                                    value={opt.value}
-                                                    className="text-xs"
-                                                >
-                                                    {opt.label}
-                                                </SelectItem>
-                                            ),
-                                        )}
-                                    </SelectContent>
-                                </Select>
-                            </div>
-                        ) : null}
-                        {usesOpenAiBackend ? (
-                            <div className="flex items-center gap-2">
-                                <Label className="text-xs text-muted-foreground shrink-0 w-20">
-                                    {t("params.openaiModel")}
-                                </Label>
-                                <Select
-                                    value={openaiModel}
-                                    onValueChange={(v) =>
-                                        setState({ openaiModel: v })
-                                    }
-                                >
-                                    <SelectTrigger className="h-7 text-xs flex-1 min-w-0">
-                                        <SelectValue />
-                                    </SelectTrigger>
-                                    <SelectContent className="max-h-[min(280px,50vh)]">
-                                        {OPENAI_TEXT_MODEL_OPTIONS.map(
-                                            (opt) => (
-                                                <SelectItem
-                                                    key={opt.value}
-                                                    value={opt.value}
-                                                    className="text-xs"
-                                                >
-                                                    {opt.label}
-                                                </SelectItem>
-                                            ),
-                                        )}
-                                    </SelectContent>
-                                </Select>
-                            </div>
-                        ) : null}
-                    </div>
                 </div>
-
-                <Handle
-                    type="target"
-                    position={Position.Left}
-                    id="a"
-                    isConnectable={true}
-                />
-                <Handle
-                    type="source"
-                    position={Position.Right}
-                    id="b"
-                    isConnectable={true}
-                />
             </BaseNode>
 
-            {/* 全屏编辑对话框 */}
+            {/* Fullscreen editing dialog */}
             <Dialog
                 open={isFullscreenOpen}
                 onOpenChange={(open: boolean) => {

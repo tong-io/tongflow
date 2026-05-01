@@ -1,121 +1,121 @@
 /**
- * 可执行工作流定义
- * 用于导出可被后端独立执行的工作流 JSON
+ * Executable workflow definitions
+ * Used to export workflow JSON that can be independently executed by the backend
  */
 
 import type { Node, Edge } from "@xyflow/react";
 
 /* ========================================================================== */
-/* 类型定义                                                                    */
+/* Type definitions                                                             */
 /* ========================================================================== */
 
 /**
- * 参数来源类型
+ * Parameter source type
  */
 export type ParamSource =
-    | "static" // 静态值，直接使用 value
-    | "upstream" // 来自上游节点的输出
-    | "input" // 用户输入（工作流执行时提供）
-    | "config"; // 节点配置项
+    | "static" // Static value; use value directly
+    | "upstream" // From the output of an upstream node
+    | "input" // User input (provided at workflow execution time)
+    | "config"; // Node configuration item
 
 /**
- * 参数映射定义
+ * Parameter mapping definition
  */
 export interface ParamMapping {
-    /** 参数来源 */
+    /** Parameter source */
     source: ParamSource;
-    /** 上游节点 ID（source 为 upstream 时必填） */
+    /** Upstream node ID (required when source is "upstream") */
     nodeId?: string;
-    /** 多个上游节点 ID（collectAll 模式下使用） */
+    /** Multiple upstream node IDs (used in collectAll mode) */
     nodeIds?: string[];
-    /** 上游节点输出字段（source 为 upstream 时必填），如 "fileKeys[0]", "texts", "fileKeys" */
+    /** Upstream node output field (required when source is "upstream"), e.g. "fileKeys[0]", "texts", "fileKeys" */
     field?: string;
-    /** 静态值（source 为 static 时使用） */
+    /** Static value (used when source is "static") */
     value?: unknown;
-    /** 输入参数名称（source 为 input 时使用，用于标识工作流输入） */
+    /** Input parameter name (used when source is "input"; identifies the workflow input) */
     inputName?: string;
-    /** 配置字段路径（source 为 config 时使用） */
+    /** Config field path (used when source is "config") */
     configPath?: string;
-    /** 是否为数组，如果是，会对数组中每个元素执行 */
+    /** Whether this is an array; if so, execution runs for each element */
     isArray?: boolean;
-    /** 数组索引（如果需要取数组中特定元素） */
+    /** Array index (if a specific element of the array is needed) */
     arrayIndex?: number;
-    /** 转换函数名称（可选，如 "getR2Url"） */
+    /** Transform function name (optional, e.g. "getFileUrl") */
     transform?: string;
-    /** 入边目标 Handle（多槽位时与画布 edge.targetHandle 对应） */
+    /** Incoming edge target handle (corresponds to canvas edge.targetHandle in multi-slot scenarios) */
     edgeTargetHandle?: string;
 }
 
 /**
- * 可执行节点定义
+ * Executable node definition
  */
 export interface ExecutableNode {
-    /** 节点 ID */
+    /** Node ID */
     id: string;
-    /** 节点类型 */
+    /** Node type */
     type: string;
-    /** 后端 API 功能标识 */
+    /** Backend API feature identifier */
     feature: string;
-    /** 节点显示名称（用于移动端执行进度显示） */
+    /** Node display name (used for mobile execution progress display) */
     label?: string;
-    /** 节点备注（用于移动端执行进度显示） */
+    /** Node comment (used for mobile execution progress display) */
     comment?: string;
-    /** 是否锁定（锁定的节点在移动端执行时不允许编辑） */
+    /** Whether the node is locked (locked nodes cannot be edited during mobile execution) */
     locked?: boolean;
-    /** 输入参数映射 */
+    /** Input parameter mapping */
     inputMapping: Record<string, ParamMapping>;
-    /** 输出类型 */
+    /** Output type */
     outputType: string;
-    /** 输出字段 */
+    /** Output field */
     outputField: "fileKeys" | "texts";
-    /** 是否为批量执行（对数组中每个元素分别执行） */
+    /** Whether this is batch execution (executes separately for each element in the array) */
     isBatch?: boolean;
-    /** 批量执行的数组参数名 */
+    /** Array parameter name for batch execution */
     batchParam?: string;
-    /** 依赖的上游节点 ID */
+    /** IDs of upstream dependency nodes */
     dependencies: string[];
-    /** 执行层级（用于确定并行执行组） */
+    /** Execution level (used to determine parallel execution groups) */
     level: number;
-    /** 直连的下游数据节点 ID（执行完成后更新该节点的数据） */
+    /** Directly connected downstream data node ID (updated after execution completes) */
     downstreamDataNodeId?: string;
-    /** 节点原始配置数据（用于 UI 恢复） */
+    /** Raw node configuration data (used for UI restoration) */
     rawConfig?: Record<string, unknown>;
 }
 
 /**
- * 数据节点定义（入口节点，提供初始数据）
+ * Data node definition (entry node that provides initial data)
  */
 export interface DataNode {
-    /** 节点 ID */
+    /** Node ID */
     id: string;
-    /** 节点类型 */
+    /** Node type */
     type: string;
-    /** 数据类型 */
+    /** Data type */
     dataType: "text" | "image" | "audio" | "video" | "model" | "file";
-    /** 节点显示名称（用于移动端执行进度显示） */
+    /** Node display name (used for mobile execution progress display) */
     label?: string;
-    /** 节点备注（用于移动端执行进度显示） */
+    /** Node comment (used for mobile execution progress display) */
     comment?: string;
-    /** 是否为工作流输入点 */
+    /** Whether this is a workflow input point */
     isInput: boolean;
-    /** 输入名称（用于工作流执行时提供数据） */
+    /** Input name (used to provide data at workflow execution time) */
     inputName?: string;
-    /** 静态数据（如果有） */
+    /** Static data (if any) */
     staticData?: {
         texts?: string[];
         fileKeys?: string[];
     };
-    /** 执行层级 */
+    /** Execution level */
     level: number;
 }
 
 /**
- * 工作流输入定义
+ * Workflow input definition
  */
 export interface WorkflowInput {
-    /** 输入名称 */
+    /** Input name */
     name: string;
-    /** 输入类型 */
+    /** Input type */
     type:
         | "text"
         | "image"
@@ -125,23 +125,23 @@ export interface WorkflowInput {
         | "file"
         | "text[]"
         | "file[]";
-    /** 描述 */
+    /** Description */
     description?: string;
-    /** 是否必填 */
+    /** Whether the input is required */
     required: boolean;
-    /** 默认值 */
+    /** Default value */
     defaultValue?: unknown;
-    /** 关联的节点 ID */
+    /** Associated node ID */
     nodeId: string;
 }
 
 /**
- * 工作流输出定义
+ * Workflow output definition
  */
 export interface WorkflowOutput {
-    /** 输出名称 */
+    /** Output name */
     name: string;
-    /** 输出类型 */
+    /** Output type */
     type:
         | "text"
         | "image"
@@ -151,37 +151,37 @@ export interface WorkflowOutput {
         | "file"
         | "text[]"
         | "file[]";
-    /** 来源节点 ID */
+    /** Source node ID */
     nodeId: string;
-    /** 来源字段 */
+    /** Source field */
     field: string;
 }
 
 /**
- * 可执行工作流定义
+ * Executable workflow definition
  */
 export interface ExecutableWorkflow {
-    /** 工作流名称 */
+    /** Workflow name */
     name: string;
-    /** 工作流描述 */
+    /** Workflow description */
     description?: string;
-    /** 版本号 */
+    /** Version number */
     version: string;
-    /** 导出时间 */
+    /** Export timestamp */
     exportedAt: string;
-    /** 工作流输入定义 */
+    /** Workflow input definitions */
     inputs: WorkflowInput[];
-    /** 工作流输出定义 */
+    /** Workflow output definitions */
     outputs: WorkflowOutput[];
-    /** 数据节点（入口节点） */
+    /** Data nodes (entry nodes) */
     dataNodes: DataNode[];
-    /** 可执行节点（按执行层级排序） */
+    /** Executable nodes (sorted by execution level) */
     executableNodes: ExecutableNode[];
-    /** 执行层级（每层可并行执行） */
+    /** Execution levels (each level can execute in parallel) */
     executionLevels: string[][];
-    /** 数据节点之间的边关系（用于输入透传） */
+    /** Edge relationships between data nodes (used for input pass-through) */
     dataNodeEdges: Array<{ source: string; target: string }>;
-    /** 原始 flow 数据（用于 UI 恢复） */
+    /** Original flow data (used for UI restoration) */
     originalFlow: {
         nodes: Node[];
         edges: Edge[];
@@ -189,11 +189,11 @@ export interface ExecutableWorkflow {
 }
 
 /* ========================================================================== */
-/* 数据节点类型映射                                                             */
+/* Data node type mapping                                                       */
 /* ========================================================================== */
 
 /**
- * 数据节点类型映射
+ * Data node type mapping
  */
 export const DATA_NODE_TYPES: Record<
     string,

@@ -1,7 +1,7 @@
-import { Handle, Position, useNodeId, type NodeProps } from "@xyflow/react";
+import { type NodeProps } from "@xyflow/react";
 import { memo, useCallback, useMemo, useRef } from "react";
 import { Atom, Ear, Upload, Mic } from "lucide-react";
-import { getR2Url } from "@/lib/r2-utils";
+import { getFileUrl } from "@/lib/file-url";
 
 import { BaseNode } from "../base/base-node";
 import { Card } from "@/components/ui/card";
@@ -16,21 +16,14 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 import { useNodeState } from "@/hooks/use-node-data";
-import useFlow from "@/hooks/use-flow";
 import {
     upstreamParam,
     configParam,
     type GetPromptsContext,
 } from "@/utils/node-execution-config";
 import { useTranslations, useLocale } from "next-intl";
-import { clampToAllowedModel } from "@/utils/node-model-feature";
-import { NodeModelSelect } from "../base/node-model-select";
-import { multiModelSelectOptions } from "@/utils/node-model-select-label";
+import { logger } from "@/lib/logger";
 
-const SPEECH_MODEL_FEATURES = [
-    "text_gen_speech_clone",
-    "text_gen_speech_instruct",
-] as const;
 import { SpeakerVoiceRecorder } from "@/components/workspace/speaker-voice-recorder";
 import {
     crawledVoiceOptions,
@@ -43,14 +36,13 @@ const VOICE_LANG_LABELS: Record<VoiceLanguage, string> = {
     ja: "日本語",
 };
 
+/** Must match `nodePluginMap` keys in plugins.registry.json (not a display id). */
+const PLUGIN_REGISTRY_FEATURE = "gen_speech";
+
 const TextGenSpeechNode = ({ selected, data }: NodeProps) => {
     const t = useTranslations("Workspace.nodes");
     const locale = useLocale();
     const { texts = [] } = data as { texts?: string[] };
-
-    const expands = useFlow((s) => s.expands);
-    const updates = useFlow((s) => s.updates);
-    const id = useNodeId()!;
 
     const defaultVoiceLang: VoiceLanguage =
         locale in crawledVoiceOptions ? (locale as VoiceLanguage) : "zh";
@@ -138,7 +130,7 @@ const TextGenSpeechNode = ({ selected, data }: NodeProps) => {
         { label: t("genders.female"), value: "female" },
     ];
 
-    // 使用新的Hook来管理状态持久化
+    // Use the new hook to manage state persistence
     const [state, setState] = useNodeState(
         {
             mode: "clone" as "clone" | "preset" | "describe",
@@ -163,58 +155,53 @@ const TextGenSpeechNode = ({ selected, data }: NodeProps) => {
         speakers,
     } = state;
 
+    /** Modal / registry slot for this mode (BaseNode default uses PLUGIN_REGISTRY_FEATURE only). */
+    const speechNodeSlot = useMemo((): string => {
+        switch (mode) {
+            case "clone":
+                return "text_gen_speech_clone";
+            case "describe":
+                return "text_gen_speech_instruct";
+            case "preset":
+            default:
+                return "gen_speech";
+        }
+    }, [mode]);
+
     const voiceOptions = useMemo(
         () => getVoiceOptions(voiceLang),
         [voiceLang, getVoiceOptions],
     );
 
-    // 音频播放引用
+    // Audio playback reference
     const audioRef = useRef<HTMLAudioElement | null>(null);
 
-    // 试听音色
+    // Preview voice
     const playVoicePreview = useCallback(() => {
         if (!voice || voice === "default") return;
 
-        // 停止当前播放
+        // Stop current playback
         if (audioRef.current) {
             audioRef.current.pause();
             audioRef.current = null;
         }
 
-        const audioUrl = getR2Url(voice);
+        const audioUrl = getFileUrl(voice);
         const audio = new Audio(audioUrl);
         audioRef.current = audio;
         audio.play().catch((err) => {
-            console.error("Failed to play audio:", err);
+            logger.error("Failed to play audio:", err);
         });
     }, [voice]);
 
-    // 注意：不需要自定义 onTaskUpdate。
-    // BaseNode 默认逻辑会读取 task.data.file_key 并按 outputType/outputField 自动展开。
+    // Note: no custom onTaskUpdate is needed.
+    // BaseNode default logic reads task.data.file_key and expands automatically according to outputType/outputField.
 
-    // 根据选择的模式确定feature
-    const getFeature = () => {
-        switch (mode) {
-            case "preset":
-            case "describe":
-                return "text_gen_speech_instruct";
-            case "clone":
-            default:
-                return "text_gen_speech_clone";
-        }
-    };
-
-    const featureName = clampToAllowedModel(
-        (data as { feature?: string }).feature,
-        SPEECH_MODEL_FEATURES,
-        getFeature(),
-    );
-
-    // 将预设的性别、情感和风格拼接成描述字符串
+    // Concatenate the preset gender, emotion, and style into a description string
     const buildPresetDescription = () => {
         const parts: string[] = [];
 
-        // 处理性别数组
+        // Handle the gender array
         if (genders && genders.length > 0) {
             const labels = genders
                 .map(
@@ -226,7 +213,7 @@ const TextGenSpeechNode = ({ selected, data }: NodeProps) => {
             if (labels.length > 0) parts.push(...labels);
         }
 
-        // 处理情感数组
+        // Handle the emotion array
         if (emotions && emotions.length > 0) {
             const labels = emotions
                 .map(
@@ -238,7 +225,7 @@ const TextGenSpeechNode = ({ selected, data }: NodeProps) => {
             if (labels.length > 0) parts.push(...labels);
         }
 
-        // 处理风格数组
+        // Handle the style array
         if (styles && styles.length > 0) {
             const labels = styles
                 .map(
@@ -252,10 +239,9 @@ const TextGenSpeechNode = ({ selected, data }: NodeProps) => {
         return parts.join("，");
     };
 
-    // 工作流执行配置
+    // Workflow execution config
     const workflowConfig = {
-        feature: featureName,
-        label: "文本生成语音",
+        feature: PLUGIN_REGISTRY_FEATURE,
         outputType: "audioNode",
         outputField: "fileKeys" as const,
         supportsBatch: true,
@@ -306,54 +292,46 @@ const TextGenSpeechNode = ({ selected, data }: NodeProps) => {
 
                     return (
                         inputTexts?.map((text) => {
-                            const baseParams = { text };
+                            const baseParams: Record<string, unknown> = {
+                                text,
+                                nodeSlot: speechNodeSlot,
+                            };
                             switch (mode) {
-                                case "preset":
+                                case "preset": {
+                                    const presetDesc =
+                                        buildPresetDescription() || undefined;
                                     return {
                                         ...baseParams,
-                                        description:
-                                            buildPresetDescription() ||
-                                            undefined,
+                                        instruct: presetDesc,
+                                        description: presetDesc,
                                     };
+                                }
                                 case "describe":
                                     return {
                                         ...baseParams,
+                                        instruct: description || undefined,
                                         description: description || undefined,
                                     };
                                 case "clone":
-                                default:
+                                default: {
+                                    const ref = getFileUrl(voice);
                                     return {
                                         ...baseParams,
-                                        audio: getR2Url(voice),
+                                        audio: ref,
+                                        ref_audio: ref,
                                     };
+                                }
                             }
                         }) || []
                     );
                 },
             }}
         >
-            <div className="px-4 pt-4">
-                <NodeModelSelect
-                    value={featureName}
-                    onValueChange={(v) => {
-                        updates(id, { ...data, feature: v });
-                        if (v === "text_gen_speech_clone") {
-                            setState({ mode: "clone" });
-                        } else {
-                            setState({ mode: "preset" });
-                        }
-                    }}
-                    options={multiModelSelectOptions(
-                        [...SPEECH_MODEL_FEATURES],
-                        (k) => t(k as Parameters<typeof t>[0]),
-                    )}
-                />
-            </div>
             <Card
                 className="p-5 nodrag"
                 onPointerDown={(e) => e.stopPropagation()}
             >
-                {/* 模式切换 */}
+                {/* Mode switch */}
                 <Tabs
                     value={mode}
                     onValueChange={(value) =>
@@ -376,7 +354,7 @@ const TextGenSpeechNode = ({ selected, data }: NodeProps) => {
                     </TabsList>
                 </Tabs>
 
-                {/* 克隆模式：选择音色 */}
+                {/* Clone mode: select voice */}
                 {mode === "clone" && (
                     <div className="mb-4 flex flex-wrap items-center gap-3">
                         <Select
@@ -436,7 +414,7 @@ const TextGenSpeechNode = ({ selected, data }: NodeProps) => {
                                 ))}
                             </SelectContent>
                         </Select>
-                        {/* 试听按钮 */}
+                        {/* Preview button */}
                         <Button
                             type="button"
                             variant="ghost"
@@ -448,7 +426,7 @@ const TextGenSpeechNode = ({ selected, data }: NodeProps) => {
                         >
                             <Ear className="w-5 h-5 text-primary" />
                         </Button>
-                        {/* 上传音色按钮 */}
+                        {/* Upload voice button */}
                         <label className="cursor-pointer">
                             <input
                                 type="file"
@@ -459,7 +437,7 @@ const TextGenSpeechNode = ({ selected, data }: NodeProps) => {
                                         e.target.files || [],
                                     );
                                     if (files.length > 0) {
-                                        console.log("Uploading files:", files);
+                                        logger.debug("Uploading files:", files);
                                     }
                                 }}
                             />
@@ -475,7 +453,7 @@ const TextGenSpeechNode = ({ selected, data }: NodeProps) => {
                                 </span>
                             </Button>
                         </label>
-                        {/* 录制音色按钮 */}
+                        {/* Record voice button */}
                         <SpeakerVoiceRecorder
                             trigger={
                                 <Button
@@ -501,10 +479,10 @@ const TextGenSpeechNode = ({ selected, data }: NodeProps) => {
                     </div>
                 )}
 
-                {/* 预设模式：选择情感和风格 */}
+                {/* Preset mode: select emotion and style */}
                 {mode === "preset" && (
                     <>
-                        {/* 性别多选 */}
+                        {/* Gender multiselect */}
                         <div className="mb-4">
                             <label className="text-sm text-muted-foreground block mb-2">
                                 {t("common.gender")}：
@@ -554,7 +532,7 @@ const TextGenSpeechNode = ({ selected, data }: NodeProps) => {
                                     ))}
                             </div>
                         </div>
-                        {/* 情感多选 */}
+                        {/* Emotion multiselect */}
                         <div className="mb-4">
                             <label className="text-sm text-muted-foreground block mb-2">
                                 {t("common.emotion")}：
@@ -604,7 +582,7 @@ const TextGenSpeechNode = ({ selected, data }: NodeProps) => {
                                     ))}
                             </div>
                         </div>
-                        {/* 风格多选 */}
+                        {/* Style multiselect */}
                         <div className="mb-4">
                             <label className="text-sm text-muted-foreground block mb-2">
                                 {t("common.style")}：
@@ -654,7 +632,7 @@ const TextGenSpeechNode = ({ selected, data }: NodeProps) => {
                     </>
                 )}
 
-                {/* 描述模式：输入声音描述 */}
+                {/* Description mode: enter voice description */}
                 {mode === "describe" && (
                     <div className="mb-4">
                         <label
@@ -676,7 +654,7 @@ const TextGenSpeechNode = ({ selected, data }: NodeProps) => {
                         />
                     </div>
                 )}
-                {/* 显示输入文本 */}
+                {/* Show input text */}
                 {texts && texts.length > 0 && (
                     <div className="space-y-2">
                         <Label className="text-sm font-medium text-muted-foreground">
@@ -695,19 +673,6 @@ const TextGenSpeechNode = ({ selected, data }: NodeProps) => {
                     </div>
                 )}
             </Card>
-
-            <Handle
-                type="target"
-                position={Position.Left}
-                id="a"
-                isConnectable={true}
-            />
-            <Handle
-                type="source"
-                position={Position.Right}
-                id="b"
-                isConnectable={true}
-            />
         </BaseNode>
     );
 };

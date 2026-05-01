@@ -1,8 +1,8 @@
 "use client";
 
 /**
- * Workspace 左侧导航按钮组
- * 包含：工作流列表、任务列表、作品集
+ * Workspace left-side navigation button group
+ * Contains: workflow list, task list, portfolio
  */
 
 import { useState, useEffect, useRef, useCallback } from "react";
@@ -18,11 +18,12 @@ import { listTasks, type Task } from "@/lib/api/task";
 import { PortfolioDialog } from "@/components/workspace/portfolio-dialog";
 import { WorkflowDialog } from "@/components/workspace/workflow-dialog";
 import { useTranslations } from "next-intl";
+import { logger } from "@/lib/logger";
 
 export function WorkspaceLeftNav() {
     const t = useTranslations("Navigation");
 
-    // 任务列表相关状态
+    // Task list state
     const [isTaskSheetOpen, setIsTaskSheetOpen] = useState(false);
     const [taskList, setTaskList] = useState<Task[]>([]);
     const [taskLoading, setTaskLoading] = useState(false);
@@ -31,7 +32,7 @@ export function WorkspaceLeftNav() {
     const [taskHasMore, setTaskHasMore] = useState(true);
     const taskScrollContainerRef = useRef<HTMLDivElement>(null);
 
-    // 加载任务列表（首次或刷新）
+    // Load the task list (initial load or refresh)
     const loadTasks = async () => {
         setTaskLoading(true);
         setTaskPage(1);
@@ -40,13 +41,13 @@ export function WorkspaceLeftNav() {
             setTaskList(tasks);
             setTaskHasMore(tasks.length >= 20);
         } catch (error) {
-            console.error("加载任务列表失败:", error);
+            logger.error("加载任务列表失败:", error);
         } finally {
             setTaskLoading(false);
         }
     };
 
-    // 加载更多任务
+    // Load more tasks
     const loadMoreTasks = async () => {
         if (taskLoadingMore || !taskHasMore) return;
 
@@ -58,13 +59,13 @@ export function WorkspaceLeftNav() {
             setTaskPage(nextPage);
             setTaskHasMore(tasks.length >= 20);
         } catch (error) {
-            console.error("加载更多任务失败:", error);
+            logger.error("加载更多任务失败:", error);
         } finally {
             setTaskLoadingMore(false);
         }
     };
 
-    // 任务列表滚动到底部时加载更多
+    // Load more tasks when the task list is scrolled to the bottom
     const handleTaskScroll = useCallback(() => {
         const container = taskScrollContainerRef.current;
         if (!container) return;
@@ -75,7 +76,7 @@ export function WorkspaceLeftNav() {
         }
     }, [taskLoadingMore, taskHasMore, taskPage]);
 
-    // 打开任务列表时加载
+    // Load tasks when the task list sheet opens
     useEffect(() => {
         if (isTaskSheetOpen) {
             void loadTasks();
@@ -85,7 +86,7 @@ export function WorkspaceLeftNav() {
     return (
         <>
             <div className="flex items-center gap-2">
-                {/* 工作流按钮 */}
+                {/* Workflow button */}
                 <WorkflowDialog
                     trigger={
                         <Button
@@ -98,7 +99,7 @@ export function WorkspaceLeftNav() {
                     }
                 />
 
-                {/* 任务按钮 */}
+                {/* Task button */}
                 <Button
                     variant="ghost"
                     size="icon"
@@ -108,7 +109,7 @@ export function WorkspaceLeftNav() {
                     <Zap className="h-5 w-5 text-gray-600 dark:text-gray-200" />
                 </Button>
 
-                {/* 作品集按钮 */}
+                {/* Portfolio button */}
                 <PortfolioDialog
                     trigger={
                         <Button
@@ -122,7 +123,7 @@ export function WorkspaceLeftNav() {
                 />
             </div>
 
-            {/* 任务列表侧边栏 */}
+            {/* Task list sidebar */}
             <Sheet open={isTaskSheetOpen} onOpenChange={setIsTaskSheetOpen}>
                 <SheetContent side="left" className="flex flex-col">
                     <SheetHeader>

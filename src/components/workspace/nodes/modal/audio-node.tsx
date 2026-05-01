@@ -1,4 +1,4 @@
-import { Handle, Position, useNodeId, type NodeProps } from "@xyflow/react";
+import { useNodeId, type NodeProps } from "@xyflow/react";
 import { memo, useState, useEffect, useRef } from "react";
 import { Music, Trash, Maximize2, X, Download } from "lucide-react";
 import { createPortal } from "react-dom";
@@ -21,12 +21,13 @@ import { Button } from "@/components/ui/button";
 import { Waterfall } from "@/components/ui/waterfall";
 import useFlow from "@/hooks/use-flow";
 import {
-    useR2AsyncLoader,
-    useR2AsyncLoaderBatch,
-} from "@/hooks/use-r2-async-loader";
+    useFileAsyncLoader,
+    useFileAsyncLoaderBatch,
+} from "@/hooks/use-file-async-loader";
+import { logger } from "@/lib/logger";
 import { useTranslations } from "next-intl";
 
-// 单个音频全屏预览modal
+// Single-track preview modal
 const FullScreenAudioModal = ({
     fileKey,
     onClose,
@@ -35,7 +36,7 @@ const FullScreenAudioModal = ({
     onClose: () => void;
 }) => {
     const [mounted, setMounted] = useState(false);
-    const { url } = useR2AsyncLoader(fileKey, { priority: "high" });
+    const { url } = useFileAsyncLoader(fileKey, { priority: "high" });
 
     useEffect(() => {
         setMounted(true);
@@ -89,7 +90,7 @@ const FullScreenAudioModal = ({
     return createPortal(content, document.body);
 };
 
-// 多个音频全屏预览modal with 瀑布流
+// Multi-track grid modal
 const FullScreenWaterfallAudioModal = ({
     audioKeys,
     onClose,
@@ -98,7 +99,7 @@ const FullScreenWaterfallAudioModal = ({
     onClose: () => void;
 }) => {
     const [mounted, setMounted] = useState(false);
-    const { urls } = useR2AsyncLoaderBatch(audioKeys, { priority: "normal" });
+    const { urls } = useFileAsyncLoaderBatch(audioKeys, { priority: "normal" });
 
     useEffect(() => {
         setMounted(true);
@@ -192,13 +193,13 @@ const AudioNode = ({ selected, data }: NodeProps) => {
     const singleAudioRef = useRef<HTMLAudioElement>(null);
     const thumbnailAudioRefs = useRef<(HTMLAudioElement | null)[]>([]);
 
-    // 为单个音频使用异步加载
-    const { url: singleAudioUrl } = useR2AsyncLoader(keys[0], {
+    // Lazy-fetch one waveform asset
+    const { url: singleAudioUrl } = useFileAsyncLoader(keys[0], {
         priority: "high",
     });
 
-    // 为多个音频使用批量异步加载
-    const { urls: batchUrls } = useR2AsyncLoaderBatch(keys.slice(0, 6), {
+    // Hydrate playlists concurrently
+    const { urls: batchUrls } = useFileAsyncLoaderBatch(keys.slice(0, 6), {
         priority: "normal",
     });
 
@@ -245,7 +246,7 @@ const AudioNode = ({ selected, data }: NodeProps) => {
                             </Button>
                         )}
                         <NodeHeaderComboAction
-                            onClick={() => console.log("组合模式切换")}
+                            onClick={() => logger.debug("组合模式切换")}
                         />
                         <NodeHeaderMenuAction label={t("moreOptions")}>
                             <DropdownMenuLabel>
@@ -309,7 +310,7 @@ const AudioNode = ({ selected, data }: NodeProps) => {
                     >
                         <div className="grid grid-cols-3 gap-2">
                             {keys.slice(0, 6).map((key, index) => {
-                                // 如果是最后一个格子且还有更多音频，显示 +N
+                                // Overflow +N badge on last visible audio tile
                                 const isLastAndMore = index === 5 && count > 6;
                                 const remainingCount = count - 6;
                                 const url = batchUrls.get(key);
@@ -370,18 +371,6 @@ const AudioNode = ({ selected, data }: NodeProps) => {
                     </div>
                 )}
 
-                <Handle
-                    type="target"
-                    position={Position.Left}
-                    id="a"
-                    isConnectable={true}
-                />
-                <Handle
-                    type="source"
-                    position={Position.Right}
-                    id="b"
-                    isConnectable={true}
-                />
             </BaseNode>
 
             {/* Full screen modals - rendered outside BaseNode */}

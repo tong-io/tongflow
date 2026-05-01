@@ -1,9 +1,9 @@
 "use client";
 
 /**
- * Smart Island 组件
- * 底部智能工具栏，根据选中节点动态显示可用操作
- * 去除所有动画效果（符合 tongflow 规范）
+ * Smart Island component
+ * Bottom intelligent toolbar that dynamically shows available actions based on selected nodes
+ * All animations have been removed (following tongflow conventions)
  */
 
 import { useState, useCallback, useEffect, useMemo, useRef } from "react";
@@ -16,6 +16,7 @@ import { useFeaturesStore } from "@/hooks/use-features";
 import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 import { getTaskStopUrl, getTaskWaitUrl } from "@/lib/task-api-url";
+import { logger } from "@/lib/logger";
 import {
     Play,
     Square,
@@ -96,7 +97,7 @@ const selector = (state: FlowState) => ({
     setWorkflowDescription: state.setWorkflowDescription,
 });
 
-// 按钮 ID 定义
+// Button ID definitions
 type ButtonActionId =
     // Combo Actions
     | "merge-group"
@@ -142,7 +143,7 @@ type ButtonActionId =
     | "parse-doc"
     | "desc-model";
 
-// 按钮配置类型
+// Button configuration type
 interface ButtonConfig {
     text: string;
     onClick: () => void;
@@ -150,17 +151,17 @@ interface ButtonConfig {
     nodeType?: string;
 }
 
-// 动作容器组件
+// Action container component
 const ActionContainer = ({ children }: { children: React.ReactNode }) => (
     <div className="flex items-center justify-center gap-2 border border-white/20 dark:border-gray-500/30 bg-white dark:bg-zinc-800/90 h-[48px] w-max rounded-full px-4">
         {children}
     </div>
 );
 
-// 分隔线组件
+// Divider component
 const Divider = () => <div className="h-5 w-px bg-gray-200 dark:bg-gray-700" />;
 
-// 文字按钮组件（无动画）
+// Text button component (no animation)
 const TextButton = ({
     text,
     onClick,
@@ -185,7 +186,7 @@ const TextButton = ({
     );
 };
 
-// 图标按钮组件（带 Tooltip）
+// Icon button component (with Tooltip)
 const IconButton = ({
     icon: Icon,
     tooltip,
@@ -219,7 +220,7 @@ const IconButton = ({
     );
 };
 
-// 动作项组件
+// Action item component
 const ActionItem = ({ buttons }: { buttons: ButtonConfig[] }) => {
     return (
         <ActionContainer>
@@ -302,19 +303,19 @@ export default function SmartIsland() {
         null,
     );
     const [currentTaskId, setCurrentTaskId] = useState<string | null>(null);
-    const [showSaveDialog, setShowSaveDialog] = useState(false); // 执行前保存弹窗
-    const [tempName, setTempName] = useState(""); // 临时保存的名称
-    const [tempDescription, setTempDescription] = useState(""); // 临时保存的描述
-    const [isSaving, setIsSaving] = useState(false); // 保存中状态
+    const [showSaveDialog, setShowSaveDialog] = useState(false); // Save dialog shown before execution
+    const [tempName, setTempName] = useState(""); // Temporary workflow name
+    const [tempDescription, setTempDescription] = useState(""); // Temporary workflow description
+    const [isSaving, setIsSaving] = useState(false); // Saving in progress
     const isExecuteMode = workspaceMode === "execute";
     const isRunning = workflowExecutionStatus === "running";
 
-    // 获取 features store 中的 getFeatureByName 方法
+    // Get the getFeatureByName method from the features store
     const getFeatureByName = useFeaturesStore(
         (state) => state.getFeatureByName,
     );
 
-    // 计算预估费用和处理时间（基于节点类型，与节点位置无关，拖动时不重算）
+    // Compute estimated cost and processing time (based on node type; not recalculated on drag)
     const nodeTypeKey = useMemo(
         () => nodes.map((n) => n.type ?? "").join(","),
         [nodes],
@@ -338,37 +339,37 @@ export default function SmartIsland() {
         };
     }, [nodeTypeKey, getFeatureByName]);
 
-    // 执行单个节点
+    // Execute a single node
     const executeNode = useCallback(
         async (
             nodeId: string,
             nodeInfo: NodeExecutionInfo,
         ): Promise<boolean> => {
-            console.log(
+            logger.debug(
                 `[SmartIsland] Executing node: ${nodeId} (type: ${nodeInfo.type})`,
             );
 
-            // 获取节点的 compute 函数
+            // Get the node's compute function
             const compute = getCompute(nodeId);
 
             if (compute) {
                 try {
-                    // 调用节点的 compute 方法
+                    // Call the node's compute method
                     await compute();
-                    console.log(
+                    logger.debug(
                         `[SmartIsland] Node ${nodeId} compute completed`,
                     );
                     return true;
                 } catch (error) {
-                    console.error(
+                    logger.error(
                         `[SmartIsland] Node ${nodeId} compute failed:`,
                         error,
                     );
                     return false;
                 }
             } else {
-                // 没有 compute 函数的节点（如数据节点）直接标记为完成
-                console.log(
+                // Nodes without a compute function (e.g. data nodes) are marked as completed immediately
+                logger.debug(
                     `[SmartIsland] Node ${nodeId} has no compute function, marking as completed`,
                 );
                 return true;
@@ -377,30 +378,30 @@ export default function SmartIsland() {
         [getCompute],
     );
 
-    // SSE 连接引用
+    // SSE connection reference
     const [eventSourceRef, setEventSourceRef] = useState<EventSource | null>(
         null,
     );
 
-    // 执行模式下的播放按钮点击处理 - 调用后端 API 执行 + SSE 实时更新
-    // overrideWorkflowId: 保存后传入的 workflowId
+    // Execute-mode play button click handler - calls backend API and streams updates via SSE
+    // overrideWorkflowId: the workflowId passed after saving
     const handleExecute = useCallback(
         async (overrideWorkflowId: number) => {
-            console.log(
-                "[SmartIsland] Execute button clicked - 开始通过后端执行工作流 (SSE)",
+            logger.debug(
+                "[SmartIsland] Execute button clicked - starting backend workflow execution (SSE)",
             );
 
-            // 清除之前的执行状态
+            // Clear previous execution state
             clearNodeExecutionStatus();
             setWorkflowExecutionStatus("running");
 
             try {
-                console.log(
+                logger.debug(
                     "[SmartIsland] Using workflowId:",
                     overrideWorkflowId,
                 );
 
-                // 调用 Next.js API 创建任务 - 只传 workflowId，后端从数据库获取 executable
+                // Call the Next.js API to create a task - only pass workflowId; backend fetches the executable from the database
                 const response = await fetch("/api/workflow/execute", {
                     method: "POST",
                     headers: {
@@ -412,7 +413,7 @@ export default function SmartIsland() {
                 });
 
                 if (!response.ok) {
-                    // 尝试解析错误响应
+                    // Attempt to parse the error response
                     const errorData = (await response
                         .json()
                         .catch(() => ({}))) as {
@@ -431,19 +432,19 @@ export default function SmartIsland() {
                 const { taskId } = (await response.json()) as {
                     taskId: string;
                 };
-                console.log("[SmartIsland] Task created:", taskId);
+                logger.debug("[SmartIsland] Task created:", taskId);
                 setCurrentTaskId(taskId);
 
-                // 4. 连接 SSE 获取实时执行进度
+                // 4. Connect SSE for real-time execution progress
                 const sseUrl = getTaskWaitUrl(taskId);
-                console.log("[SmartIsland] Connecting to SSE:", sseUrl);
+                logger.debug("[SmartIsland] Connecting to SSE:", sseUrl);
 
                 const eventSource = new EventSource(sseUrl);
                 setEventSourceRef(eventSource);
 
                 eventSource.onopen = () => {
-                    console.log("[SmartIsland SSE] Connection opened");
-                    // 触发 SSE 连接建立事件，显示进度浮动提示
+                    logger.debug("[SmartIsland SSE] Connection opened");
+                    // Emit SSE connection event to show the progress toast
                     emitSSEConnected(taskId);
                 };
 
@@ -454,9 +455,9 @@ export default function SmartIsland() {
                             nodeId?: string;
                             data?: Record<string, unknown>;
                         };
-                        console.log("[SmartIsland SSE] Received:", message);
+                        logger.debug("[SmartIsland SSE] Received:", message);
 
-                        // 触发 SSE 消息事件，更新进度浮动提示
+                        // Emit SSE message event to update the progress toast
                         emitSSETaskMessage({
                             id: taskId,
                             status: message.status as any,
@@ -465,22 +466,22 @@ export default function SmartIsland() {
                         });
 
                         switch (message.status) {
-                            // 工作流开始
+                            // Workflow started
                             case WorkflowStatus.WORKFLOW_STARTED:
-                            case "WORKFLOW_START": // 兼容旧状态
-                                console.log(
+                            case "WORKFLOW_START": // Legacy status compat
+                                logger.debug(
                                     "[SmartIsland] Workflow started:",
                                     message.data?.totalNodes,
                                     "nodes",
                                 );
                                 break;
 
-                            // 节点开始/运行中
+                            // Node started / running
                             case NodeStatus.NODE_STARTED:
                             case NodeStatus.NODE_RUNNING:
-                            case "NODE_START": // 兼容旧状态
+                            case "NODE_START": // Legacy status compat
                                 if (message.nodeId) {
-                                    console.log(
+                                    logger.debug(
                                         "[SmartIsland] Node started:",
                                         message.nodeId,
                                     );
@@ -491,9 +492,9 @@ export default function SmartIsland() {
                                 }
                                 break;
 
-                            case "NODE_PROGRESS": // 保留用于进度更新
+                            case "NODE_PROGRESS": // Retained for progress updates
                                 if (message.nodeId) {
-                                    console.log(
+                                    logger.debug(
                                         "[SmartIsland] Node progress:",
                                         message.nodeId,
                                         message.data?.progress,
@@ -501,11 +502,11 @@ export default function SmartIsland() {
                                 }
                                 break;
 
-                            // 节点完成
+                            // Node completed
                             case NodeStatus.NODE_COMPLETED:
-                            case "NODE_COMPLETE": // 兼容旧状态
+                            case "NODE_COMPLETE": // Legacy status compat
                                 if (message.nodeId) {
-                                    console.log(
+                                    logger.debug(
                                         "[SmartIsland] Node completed:",
                                         message.nodeId,
                                         message.data,
@@ -515,7 +516,7 @@ export default function SmartIsland() {
                                         "completed",
                                     );
 
-                                    // 更新节点数据（fileKeys, texts 等）
+                                    // Update node data (fileKeys, texts, etc.)
                                     const output = message.data?.output as
                                         | {
                                               fileKeys?: string[];
@@ -523,7 +524,7 @@ export default function SmartIsland() {
                                           }
                                         | undefined;
                                     if (output) {
-                                        // 数据节点类型列表
+                                        // List of data node types
                                         const DATA_NODE_TYPES = [
                                             "textNode",
                                             "imageNode",
@@ -533,7 +534,7 @@ export default function SmartIsland() {
                                             "modelNode",
                                         ];
 
-                                        // 判断是否为数据节点
+                                        // Check whether a node is a data node
                                         const isDataNodeType = (
                                             type?: string,
                                         ) =>
@@ -541,14 +542,14 @@ export default function SmartIsland() {
                                             DATA_NODE_TYPES.includes(type);
 
                                         /**
-                                         * 更新直接下游的数据节点
+                                         * Update direct downstream data nodes
                                          *
-                                         * 工作流数据传递机制：
-                                         * - 处理节点（如 image-gen-video）执行后产生输出
-                                         * - 输出数据只写入到直接下游的数据节点（如 videoNode）
-                                         * - 后续处理节点在执行时，会通过 paramMappings 从上游数据节点读取输入
+                                         * Workflow data propagation mechanism:
+                                         * - A processing node (e.g. image-gen-video) produces output after execution
+                                         * - Output data is written only to direct downstream data nodes (e.g. videoNode)
+                                         * - Subsequent processing nodes read their inputs from upstream data nodes via paramMappings
                                          *
-                                         * 只更新直接下一层的数据节点，不递归传播
+                                         * Only the immediate next-layer data nodes are updated; propagation is not recursive
                                          */
                                         const updateDownstreamDataNodes = (
                                             sourceNodeId: string,
@@ -557,7 +558,7 @@ export default function SmartIsland() {
                                                 texts?: string[];
                                             },
                                         ) => {
-                                            // 获取所有直接下游边
+                                            // Get all direct downstream edges
                                             const downstreamEdges =
                                                 edges.filter(
                                                     (e) =>
@@ -574,7 +575,7 @@ export default function SmartIsland() {
                                                     );
                                                 if (!downstreamNode) continue;
 
-                                                // 只更新数据节点
+                                                // Only update data nodes
                                                 if (
                                                     isDataNodeType(
                                                         downstreamNode.type,
@@ -611,7 +612,7 @@ export default function SmartIsland() {
                                                         edge.target,
                                                         newDownstreamData,
                                                     );
-                                                    console.log(
+                                                    logger.debug(
                                                         "[SmartIsland] Updated downstream data node:",
                                                         edge.target,
                                                         newDownstreamData,
@@ -620,7 +621,7 @@ export default function SmartIsland() {
                                             }
                                         };
 
-                                        // 1. 更新当前节点自身的数据
+                                        // 1. Update the current node's own data
                                         const node = nodes.find(
                                             (n) => n.id === message.nodeId,
                                         );
@@ -652,14 +653,14 @@ export default function SmartIsland() {
                                             }
 
                                             updates(message.nodeId, newData);
-                                            console.log(
+                                            logger.debug(
                                                 "[SmartIsland] Updated node data:",
                                                 message.nodeId,
                                                 newData,
                                             );
                                         }
 
-                                        // 2. 递归更新所有下游数据节点
+                                        // 2. Recursively update all downstream data nodes
                                         updateDownstreamDataNodes(
                                             message.nodeId,
                                             output,
@@ -668,10 +669,10 @@ export default function SmartIsland() {
                                 }
                                 break;
 
-                            // 节点失败
+                            // Node failed
                             case NodeStatus.NODE_FAILED:
                                 if (message.nodeId) {
-                                    console.log(
+                                    logger.debug(
                                         "[SmartIsland] Node failed:",
                                         message.nodeId,
                                         message.data?.error,
@@ -683,32 +684,32 @@ export default function SmartIsland() {
                                 }
                                 break;
 
-                            // 工作流完成
+                            // Workflow completed
                             case WorkflowStatus.WORKFLOW_COMPLETED:
                             case TaskStatus.COMPLETED:
-                            case "FINISHED": // 兼容旧状态
-                                console.log(
+                            case "FINISHED": // Legacy status compat
+                                logger.debug(
                                     "[SmartIsland] ✅ Workflow completed successfully!",
                                 );
-                                console.log(
+                                logger.debug(
                                     "[SmartIsland] Outputs:",
                                     message.data?.outputs,
                                 );
                                 setWorkflowExecutionStatus("completed");
-                                // 双保险：前端也更新任务状态 + 保存素材（幂等）
+                                // Double-safety: frontend also updates task status + saves materials (idempotent)
                                 saveFromTask({
                                     taskId: taskId,
                                     status: message.status,
                                     data: message.data,
                                 })
                                     .then((result) => {
-                                        console.log(
+                                        logger.debug(
                                             "[SmartIsland] Frontend backup save result:",
                                             result,
                                         );
                                     })
                                     .catch((err) => {
-                                        console.warn(
+                                        logger.warn(
                                             "[SmartIsland] Frontend backup save failed:",
                                             err,
                                         );
@@ -716,50 +717,50 @@ export default function SmartIsland() {
                                 eventSource.close();
                                 setEventSourceRef(null);
                                 setCurrentTaskId(null);
-                                // 刷新余额（工作流完成会扣费）
+                                // Refresh balance (workflow completion deducts credits)
                                 break;
 
-                            // 工作流取消
+                            // Workflow cancelled
                             case WorkflowStatus.WORKFLOW_CANCELLED:
                             case TaskStatus.CANCELLED:
-                                console.log(
+                                logger.debug(
                                     "[SmartIsland] ⚠️ Workflow cancelled by user",
                                 );
-                                // 双保险：前端也更新任务状态
+                                // Double-safety: frontend also updates task status
                                 saveFromTask({
                                     taskId: taskId,
                                     status: message.status,
                                     data: message.data,
                                 }).catch(() => {});
-                                // 清除取消超时定时器
+                                // Clear the cancellation timeout timer
                                 if ((window as any).__cancelTimeoutId) {
                                     clearTimeout(
                                         (window as any).__cancelTimeoutId,
                                     );
                                     (window as any).__cancelTimeoutId = null;
                                 }
-                                clearNodeExecutionStatus(); // 清理节点执行状态
+                                clearNodeExecutionStatus(); // Clear node execution status
                                 setWorkflowExecutionStatus("idle");
                                 eventSource.close();
                                 setEventSourceRef(null);
                                 setCurrentTaskId(null);
-                                // 停止执行器
+                                // Stop the executor
                                 if (executorRef) {
                                     executorRef.stop();
                                     setExecutorRef(null);
                                 }
-                                // 刷新余额（工作流取消会退费）
+                                // Refresh balance (workflow cancellation refunds credits)
                                 break;
 
-                            // 工作流失败
+                            // Workflow failed
                             case WorkflowStatus.WORKFLOW_FAILED:
                             case TaskStatus.FAILED:
-                            case "ERROR": // 兼容旧状态
-                                console.log(
+                            case "ERROR": // Legacy status compat
+                                logger.debug(
                                     "[SmartIsland] ❌ Workflow failed:",
                                     message.data?.error,
                                 );
-                                // 双保险：前端也更新任务状态
+                                // Double-safety: frontend also updates task status
                                 saveFromTask({
                                     taskId: taskId,
                                     status: message.status,
@@ -769,17 +770,17 @@ export default function SmartIsland() {
                                 eventSource.close();
                                 setEventSourceRef(null);
                                 setCurrentTaskId(null);
-                                // 刷新余额（工作流失败会退费）
+                                // Refresh balance (workflow failure refunds credits)
                                 break;
 
                             default:
-                                console.log(
+                                logger.debug(
                                     "[SmartIsland SSE] Unknown status:",
                                     message.status,
                                 );
                         }
                     } catch (e) {
-                        console.error(
+                        logger.error(
                             "[SmartIsland SSE] Failed to parse message:",
                             e,
                         );
@@ -787,13 +788,13 @@ export default function SmartIsland() {
                 };
 
                 eventSource.onerror = (error) => {
-                    console.error("[SmartIsland SSE] Connection error:", error);
+                    logger.error("[SmartIsland SSE] Connection error:", error);
                     setWorkflowExecutionStatus("failed");
                     eventSource.close();
                     setEventSourceRef(null);
                 };
             } catch (error) {
-                console.error("[SmartIsland] Execution failed:", error);
+                logger.error("[SmartIsland] Execution failed:", error);
                 setWorkflowExecutionStatus("failed");
             }
         },
@@ -807,17 +808,17 @@ export default function SmartIsland() {
         ],
     );
 
-    // 点击执行按钮 - 始终弹出保存对话框（执行前需要保存最新状态）
+    // Execute button click - always shows the save dialog (latest state must be saved before execution)
     const handleExecuteClick = useCallback(() => {
-        // 始终打开保存对话框，执行前会保存最新的工作流状态
+        // Always open the save dialog; the latest workflow state is saved before execution
         setTempName(workflowName || tIndex("title"));
         setTempDescription(workflowDescription || "");
         setShowSaveDialog(true);
     }, [workflowName, workflowDescription]);
 
-    // 保存并执行工作流
+    // Save and execute the workflow
     const handleSaveAndExecute = useCallback(async () => {
-        // 已保存的工作流使用现有名称，新工作流需要输入名称
+        // Saved workflows use the existing name; new workflows require a name to be entered
         const effectiveName = workflowId ? workflowName : tempName;
         const effectiveDescription = workflowId
             ? workflowDescription
@@ -830,7 +831,7 @@ export default function SmartIsland() {
 
         setIsSaving(true);
         try {
-            // 前端生成 executable（因为需要运行时注册表中的配置）
+            // Generate the executable on the frontend (requires runtime registry configuration)
             const executable = exportWorkflow(nodes, edges, {
                 name: effectiveName,
                 description: effectiveDescription || "",
@@ -838,7 +839,7 @@ export default function SmartIsland() {
             });
 
             const workflowData = {
-                ...(workflowId ? { workflowId } : {}), // 已保存的工作流传入 ID 进行更新
+                ...(workflowId ? { workflowId } : {}), // Pass ID for saved workflows to perform an update
                 name: effectiveName,
                 description: effectiveDescription || "",
                 flow: { nodes, edges },
@@ -851,13 +852,13 @@ export default function SmartIsland() {
             setWorkflowDescription(effectiveDescription || "");
             toast.success(t("saveSuccess"));
 
-            // 关闭对话框并执行
+            // Close the dialog and execute
             setShowSaveDialog(false);
 
-            // 直接执行，传入新保存的 workflowId（避免等待状态更新的闭包问题）
+            // Execute immediately, passing the newly saved workflowId (avoids stale closure issue from state update delay)
             handleExecute(result.workflowId);
         } catch (error) {
-            console.error("保存失败:", error);
+            logger.error("保存失败:", error);
             toast.error(t("saveFailed"));
         } finally {
             setIsSaving(false);
@@ -876,13 +877,13 @@ export default function SmartIsland() {
         handleExecute,
     ]);
 
-    // 停止执行
+    // Stop execution
     const handleStop = useCallback(async () => {
-        console.log("[SmartIsland] Stop button clicked - 停止执行工作流");
+        logger.debug("[SmartIsland] Stop button clicked - stopping workflow execution");
 
         const taskIdToCancel = currentTaskId;
 
-        // 立即显示“取消中”状态
+        // Immediately show “cancelling” status
         if (taskIdToCancel) {
             emitSSETaskMessage({
                 id: taskIdToCancel,
@@ -892,7 +893,7 @@ export default function SmartIsland() {
             });
         }
 
-        // 调用后端停止接口
+        // Call the backend stop endpoint
         if (taskIdToCancel) {
             try {
                 const response = await fetch(getTaskStopUrl(), {
@@ -902,26 +903,26 @@ export default function SmartIsland() {
                     },
                     body: JSON.stringify({ taskId: taskIdToCancel }),
                 });
-                console.log(
+                logger.debug(
                     "[SmartIsland] Stop request sent for task:",
                     taskIdToCancel,
                 );
 
                 if (response.ok) {
-                    // 后端成功处理了取消请求
-                    // 等待 SSE 消息，如果 10 秒内没收到取消消息，手动触发
+                    // Backend successfully handled the cancel request
+                    // Wait for the SSE cancel message; if not received within 10 seconds, emit manually
                     const timeoutId = setTimeout(() => {
-                        console.log(
+                        logger.debug(
                             "[SmartIsland] Timeout waiting for CANCELLED message, emitting manually",
                         );
-                        // 手动触发取消事件到 Toast
+                        // Manually emit cancel event to Toast
                         emitSSETaskMessage({
                             id: taskIdToCancel,
                             status: TaskStatus.CANCELLED,
                             nodeId: null,
                             data: { message: "任务已取消" },
                         });
-                        // 清理状态
+                        // Clean up state
                         if (eventSourceRef) {
                             eventSourceRef.close();
                             setEventSourceRef(null);
@@ -929,23 +930,23 @@ export default function SmartIsland() {
                         if (executorRef) {
                             executorRef.stop();
                         }
-                        clearNodeExecutionStatus(); // 清理节点执行状态
+                        clearNodeExecutionStatus(); // Clear node execution status
                         setWorkflowExecutionStatus("idle");
                         setExecutorRef(null);
                         setCurrentTaskId(null);
-                    }, 10000); // 10 秒超时
+                    }, 10000); // 10-second timeout
 
-                    // 存储 timeoutId 以便在收到 CANCELLED 消息时清除
+                    // Store timeoutId so it can be cleared when the CANCELLED message arrives
                     (window as any).__cancelTimeoutId = timeoutId;
                 } else {
                     throw new Error(`Stop request failed: ${response.status}`);
                 }
             } catch (error) {
-                console.error(
+                logger.error(
                     "[SmartIsland] Failed to send stop request:",
                     error,
                 );
-                // 发送失败时直接清理状态并手动触发取消事件
+                // If sending fails, clean up state and manually emit the cancel event
                 emitSSETaskMessage({
                     id: taskIdToCancel,
                     status: TaskStatus.CANCELLED,
@@ -959,13 +960,13 @@ export default function SmartIsland() {
                 if (executorRef) {
                     executorRef.stop();
                 }
-                clearNodeExecutionStatus(); // 清理节点执行状态
+                clearNodeExecutionStatus(); // Clear node execution status
                 setWorkflowExecutionStatus("idle");
                 setExecutorRef(null);
                 setCurrentTaskId(null);
             }
         } else {
-            // 没有 taskId 时直接清理
+            // No taskId - clean up directly
             if (eventSourceRef) {
                 eventSourceRef.close();
                 setEventSourceRef(null);
@@ -973,7 +974,7 @@ export default function SmartIsland() {
             if (executorRef) {
                 executorRef.stop();
             }
-            clearNodeExecutionStatus(); // 清理节点执行状态
+            clearNodeExecutionStatus(); // Clear node execution status
             setWorkflowExecutionStatus("idle");
             setExecutorRef(null);
         }
@@ -985,12 +986,12 @@ export default function SmartIsland() {
         clearNodeExecutionStatus,
     ]);
 
-    // 监听取消请求事件（来自 TaskProgressToast）- 只处理工作流取消
+    // Listen for cancel request events (from TaskProgressToast) - only handles workflow cancellation
     useEffect(() => {
         const handleCancelRequest = () => {
-            // 只有在工作流执行时（有 currentTaskId）才处理
+            // Only handle when a workflow is executing (currentTaskId is set)
             if (currentTaskId) {
-                console.log(
+                logger.debug(
                     "[SmartIsland] Received cancel request from Toast for workflow",
                 );
                 handleStop();
@@ -1006,9 +1007,9 @@ export default function SmartIsland() {
         };
     }, [handleStop, currentTaskId]);
 
-    // 获取组合模式的操作
+    // Get combo mode actions
     const getComboActions = () => {
-        console.log(comboSelectedIds);
+        logger.debug(comboSelectedIds);
         const types: string[] =
             Array.from(comboSelectedIds).map((id) => {
                 const node = nodes.find((n) => n.id === id);
@@ -1022,7 +1023,7 @@ export default function SmartIsland() {
             {} as Record<string, number>,
         );
 
-        // 多个视频节点
+        // Multiple video nodes
         if (!types?.some((type) => type !== "videoNode") && types.length > 1) {
             return (
                 <ActionItem
@@ -1062,7 +1063,7 @@ export default function SmartIsland() {
                 />
             );
         }
-        // 多个图片节点
+        // Multiple image nodes
         else if (
             !types?.some((type) => type !== "imageNode") &&
             types.length > 1
@@ -1088,7 +1089,7 @@ export default function SmartIsland() {
                 },
             ];
 
-            // 2-14张图片时，添加图片融合选项（Gemini 3 Pro 支持最多14张参考图片）
+            // For 2-14 images, add image fusion option (Gemini 3 Pro supports up to 14 reference images)
             if (types.length >= 2 && types.length <= 14) {
                 buttons.push({
                     text: t("imageFusion"),
@@ -1104,7 +1105,7 @@ export default function SmartIsland() {
                         }),
                 });
 
-                // 如果是两张图片，添加首尾帧生成视频选项
+                // For exactly two images, add the first/last frame video generation option
                 if (types.length === 2) {
                     buttons.push({
                         text: t("firstLastFrameVideo"),
@@ -1124,7 +1125,7 @@ export default function SmartIsland() {
 
             return <ActionItem buttons={buttons} />;
         }
-        // 多个文本节点
+        // Multiple text nodes
         else if (counts.textNode! > 1) {
             return (
                 <ActionItem
@@ -1178,7 +1179,7 @@ export default function SmartIsland() {
                 />
             );
         }
-        // 多个音频节点
+        // Multiple audio nodes
         else if (
             !types?.some((type) => type !== "audioNode") &&
             types.length > 1
@@ -1232,7 +1233,7 @@ export default function SmartIsland() {
                 />
             );
         }
-        // 视频 + 图片
+        // Video + image
         else if (counts.videoNode === 1 && counts.imageNode === 1) {
             return (
                 <ActionItem
@@ -1267,7 +1268,7 @@ export default function SmartIsland() {
                 />
             );
         }
-        // 视频 + 音频
+        // Video + audio
         else if (counts.videoNode === 1 && counts.audioNode === 1) {
             return (
                 <ActionItem
@@ -1302,7 +1303,7 @@ export default function SmartIsland() {
                 />
             );
         }
-        // 图片 + 音频
+        // Image + audio
         else if (counts.imageNode === 1 && counts.audioNode === 1) {
             return (
                 <ActionItem
@@ -1324,7 +1325,7 @@ export default function SmartIsland() {
                 />
             );
         }
-        // 多个图片 + 一个文本（2-14张图片带提示词融合）
+        // Multiple images + one text (2-14 images with prompt-based fusion)
         else if (
             counts.imageNode! >= 2 &&
             counts.imageNode! <= 14 &&
@@ -1350,9 +1351,9 @@ export default function SmartIsland() {
                 />
             );
         }
-        // 图片 + 文本
+        // Image + text
         else if (counts.imageNode === 1 && counts.textNode === 1) {
-            // 获取文本节点的文本内容
+            // Get the text content of the text node
             const textNode = Array.from(comboSelectedIds)
                 .map((id) => nodes.find((n) => n.id === id))
                 .find((node) => node?.type === "textNode");
@@ -1386,7 +1387,7 @@ export default function SmartIsland() {
                                         ids: Array.from(comboSelectedIds).map(
                                             (id) => id,
                                         ),
-                                        // 将文本节点的内容传入 query 字段
+                                        // Pass the text node's content into the query field
                                         query: textContent,
                                     },
                                 }),
@@ -1395,7 +1396,7 @@ export default function SmartIsland() {
                 />
             );
         }
-        // 文本 + 音频
+        // Text + audio
         else if (counts.textNode === 1 && counts.audioNode === 1) {
             return (
                 <ActionItem
@@ -1429,7 +1430,7 @@ export default function SmartIsland() {
                 />
             );
         }
-        // 文本 + 视频
+        // Text + video
         else if (counts.textNode === 1 && counts.videoNode === 1) {
             return (
                 <ActionItem
@@ -1451,7 +1452,7 @@ export default function SmartIsland() {
                 />
             );
         }
-        // 图片 + 视频 + 音频
+        // Image + video + audio
         else if (
             counts.imageNode === 1 &&
             counts.videoNode === 1 &&
@@ -1480,7 +1481,7 @@ export default function SmartIsland() {
         return null;
     };
 
-    // 获取单个节点的操作
+    // Get single-node actions
     const getNodeActions = () => {
         if (selectedNodes.length !== 1) {
             return null;
@@ -1489,7 +1490,7 @@ export default function SmartIsland() {
 
         switch (type) {
             case "textNode":
-                // 多个文本的操作
+                // Actions for multiple texts
                 if ((data as any).texts?.length > 1) {
                     return (
                         <ActionItem
@@ -1523,7 +1524,7 @@ export default function SmartIsland() {
                         />
                     );
                 }
-                // 单个文本的操作
+                // Actions for a single text
                 return (
                     <ActionItem
                         buttons={[
@@ -1598,7 +1599,7 @@ export default function SmartIsland() {
                 );
 
             case "audioNode":
-                // 如果是音频组，添加打散操作
+                // If this is an audio group, add the split action
                 const audioGroupButtons =
                     (data as any).fileKeys?.length > 1
                         ? [
@@ -1698,7 +1699,7 @@ export default function SmartIsland() {
                 );
 
             case "videoNode":
-                // 如果是视频组，添加额外的操作
+                // If this is a video group, add extra actions
                 const groupButtons =
                     (data as any).fileKeys?.length > 1
                         ? [
@@ -1786,8 +1787,20 @@ export default function SmartIsland() {
                                     ]),
                             },
                             {
-                                text: t("extractAudio"),
-                                id: "extract-audio",
+                                text: t("extractAudioTrack"),
+                                id: "extract-audio-track",
+                                nodeType: "extractAudioNode",
+                                onClick: () =>
+                                    expands(id, [
+                                        {
+                                            type: "extractAudioNode",
+                                            data: data,
+                                        },
+                                    ]),
+                            },
+                            {
+                                text: t("splitVideoAudio"),
+                                id: "split-video-audio",
                                 nodeType: "separateVideoAudioNode",
                                 onClick: () =>
                                     expands(id, [
@@ -1836,7 +1849,7 @@ export default function SmartIsland() {
                 );
 
             case "imageNode":
-                // 如果是图片组，添加打散操作
+                // If this is an image group, add the split action
                 const imageGroupButtons =
                     (data as any).fileKeys?.length > 1
                         ? [
@@ -1926,7 +1939,7 @@ export default function SmartIsland() {
                 );
 
             case "fileNode":
-                // 文件节点操作
+                // File node actions
                 return (
                     <ActionItem
                         buttons={[
@@ -1943,7 +1956,7 @@ export default function SmartIsland() {
                 );
 
             case "modelNode":
-                // 3D模型节点操作
+                // 3D model node actions
                 return (
                     <ActionItem
                         buttons={[
@@ -1978,11 +1991,11 @@ export default function SmartIsland() {
         }
     };
 
-    // 执行模式：始终显示播放/停止按钮，不受节点选择影响
+    // Execute mode: always show play/stop button regardless of node selection
     if (isExecuteMode) {
         return (
             <>
-                {/* 保存并执行对话框 */}
+                {/* Save and execute dialog */}
                 <Dialog open={showSaveDialog} onOpenChange={setShowSaveDialog}>
                     <DialogContent aria-describedby={undefined}>
                         <DialogHeader>
@@ -1997,7 +2010,7 @@ export default function SmartIsland() {
                                 ? t("executeConfirmDescSaved")
                                 : t("executeConfirmDescNew")}
                         </p>
-                        {/* 预估用时 */}
+                        {/* Estimated time */}
                         {estimatedTime > 0 && (
                             <div className="flex items-center gap-4 p-3 bg-muted/50 rounded-lg mb-4">
                                 <div className="flex items-center gap-1.5">
@@ -2016,7 +2029,7 @@ export default function SmartIsland() {
                                 </div>
                             </div>
                         )}
-                        {/* 新工作流才显示名称和描述输入 */}
+                        {/* Name and description inputs are only shown for new workflows */}
                         {!workflowId && (
                             <div className="space-y-4">
                                 <div className="space-y-2">
@@ -2084,7 +2097,7 @@ export default function SmartIsland() {
                             "w-14 h-14 rounded-full",
                         )}
                     >
-                        {/* 旋转光条效果 - 只在运行时显示 */}
+                        {/* Rotating light-bar effect - only shown while running */}
                         {isRunning && (
                             <div
                                 className="absolute inset-0 rounded-full"
@@ -2096,7 +2109,7 @@ export default function SmartIsland() {
                             />
                         )}
 
-                        {/* 内圈背景 */}
+                        {/* Inner circle background */}
                         <div
                             className={cn(
                                 "relative flex items-center justify-center",
@@ -2106,9 +2119,9 @@ export default function SmartIsland() {
                             )}
                         >
                             {isRunning ? (
-                                // 运行中显示 Siri 风格多彩动态呼吸球
+                                // Show Siri-style multicolor breathing ball while running
                                 <div className="relative w-full h-full rounded-full flex items-center justify-center overflow-hidden bg-white/20">
-                                    {/* 多彩流体背景 - 模拟 Siri 动态色 */}
+                                    {/* Multicolor fluid background - simulates Siri dynamic colors */}
                                     <div
                                         className="absolute inset-[-50%] blur-xl opacity-70 animate-[spin_3s_linear_infinite]"
                                         style={{
@@ -2117,7 +2130,7 @@ export default function SmartIsland() {
                                         }}
                                     />
 
-                                    {/* 叠加流动层 - 增加层次感 */}
+                                    {/* Overlay flow layer - adds depth */}
                                     <div
                                         className="absolute inset-[-50%] blur-lg opacity-50 mix-blend-overlay animate-[spin_4s_linear_infinite_reverse]"
                                         style={{
@@ -2126,14 +2139,14 @@ export default function SmartIsland() {
                                         }}
                                     />
 
-                                    {/* 核心呼吸光晕 */}
+                                    {/* Core breathing glow */}
                                     <div className="absolute inset-1 bg-white/40 rounded-full blur-md animate-pulse" />
 
-                                    {/* 玻璃质感高光 */}
+                                    {/* Glass-effect highlight */}
                                     <div className="absolute inset-0 rounded-full" />
                                 </div>
                             ) : (
-                                // 播放按钮
+                                // Play button
                                 <button
                                     onClick={handleExecuteClick}
                                     className="w-full h-full rounded-full flex flex-col items-center justify-center gap-1 hover:bg-emerald-500/20 transition-colors"
@@ -2148,9 +2161,9 @@ export default function SmartIsland() {
         );
     }
 
-    // 如果没有选中节点，显示添加节点选项
+    // If no nodes are selected, show the add-node options
     if (selectedNodes.length === 0) {
-        // 创作模式：直接显示所有添加节点选项
+        // Creation mode: directly show all add-node options
         return (
             <div
                 className="flex items-center justify-center"
@@ -2220,12 +2233,12 @@ export default function SmartIsland() {
         );
     }
 
-    // 组合模式或单个节点操作
-    // 如果选中的是处理节点（getNodeActions 返回 null），则显示添加节点工具栏
+    // Combo mode or single-node actions
+    // If the selected node is a processing node (getNodeActions returns null), show the add-node toolbar
     const nodeActions = comboMode ? getComboActions() : getNodeActions();
 
     if (nodeActions === null) {
-        // 处理节点没有特定操作时，显示添加节点选项
+        // Processing node has no specific actions — show the add-node options
         return (
             <div
                 className="flex items-center justify-center"

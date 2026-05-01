@@ -1,13 +1,14 @@
 /**
- * 文件上传 Hook - simplified for open-source version
+ * File upload hook - simplified for open-source version
  * Uploads files directly to local server
  */
 
 import { useState, useCallback } from "react";
 import { getPresignedUploadUrl, UploadValidationError } from "@/lib/api/upload";
 import toast from "react-hot-toast";
+import { logger } from "@/lib/logger";
 
-// -------------------- 类型定义 --------------------
+// -------------------- Type definitions --------------------
 
 export interface UploadResponse {
     url: string;
@@ -37,7 +38,7 @@ export interface UseMultipleUploadOptions {
     tier?: string;
 }
 
-// -------------------- 单文件上传 Hook --------------------
+// -------------------- Single-file upload hook --------------------
 
 export function useUpload(options?: UseUploadOptions) {
     const [state, setState] = useState<UploadState>({
@@ -106,7 +107,7 @@ export function useUpload(options?: UseUploadOptions) {
     return { ...state, upload, reset };
 }
 
-// -------------------- 多文件上传 Hook --------------------
+// -------------------- Multi-file upload hook --------------------
 
 export function useMultipleUpload(options?: UseMultipleUploadOptions) {
     const [state, setState] = useState<UploadState>({
@@ -145,7 +146,7 @@ export function useMultipleUpload(options?: UseMultipleUploadOptions) {
                         results.push(response);
                         options?.onFileComplete?.(response, completed);
                     } catch (err) {
-                        console.error(
+                        logger.error(
                             `Failed to upload file ${file.name}:`,
                             err,
                         );
@@ -198,7 +199,7 @@ export function useMultipleUpload(options?: UseMultipleUploadOptions) {
     return { ...state, upload, reset };
 }
 
-// -------------------- 拖拽上传 Hook --------------------
+// -------------------- Drag-and-drop upload hook --------------------
 
 export function useDropzone(options?: {
     onDrop?: (files: File[]) => void;

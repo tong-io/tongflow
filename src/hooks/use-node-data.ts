@@ -21,7 +21,7 @@ export function useNodeState<T extends Record<string, any>>(
         ...nodeData,
     }));
 
-    // 当 nodeData 改变时，同步更新状态
+    // Synchronize state when nodeData changes
     useEffect(() => {
         setState((prev) => ({
             ...prev,

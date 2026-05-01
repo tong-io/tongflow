@@ -1,7 +1,7 @@
 import React, { useState, memo, useCallback } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Music, Upload, Mic, Library } from "lucide-react";
-import { Handle, Position, useNodeId, type NodeProps } from "@xyflow/react";
+import { useNodeId, type NodeProps } from "@xyflow/react";
 import useFlow from "@/hooks/use-flow";
 import { Button } from "@/components/ui/button";
 import { BaseNode } from "../base/base-node";
@@ -10,8 +10,9 @@ import { LibInput } from "../../share/lib-input";
 import { AudioRecorderWithVisualizer } from "@/components/ui/audio-recorder";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { useTranslations } from "next-intl";
+import { logger } from "@/lib/logger";
 
-// 录音组件
+// Recording component
 const RecordTab = () => {
     const t = useTranslations("Workspace.nodes.add");
     const expands = useFlow((s) => s.expands);
@@ -28,7 +29,7 @@ const RecordTab = () => {
             }
         },
         onError: (error) => {
-            console.error("上传失败:", error);
+            logger.error("上传失败:", error);
         },
     });
 
@@ -89,7 +90,7 @@ const RecordTab = () => {
     );
 };
 
-// 文件上传组件
+// File upload component
 const UploadTab = () => {
     const t = useTranslations("Workspace.nodes.add");
     const expands = useFlow((s) => s.expands);
@@ -104,7 +105,7 @@ const UploadTab = () => {
             }
         },
         onError: (error) => {
-            console.error("Upload failed:", error);
+            logger.error("Upload failed:", error);
         },
     });
 
@@ -191,7 +192,7 @@ const UploadTab = () => {
     );
 };
 
-// 作品集组件
+// Library component
 const LibraryTab = () => {
     return (
         <div className="w-full">
@@ -206,14 +207,14 @@ export const AddAudioNode: React.FC<NodeProps> = ({ selected, data }) => {
     const updates = useFlow((s) => s.updates);
     const activeTab = (data as any)?.activeTab || "upload";
 
-    // 处理Tab切换时保存状态
+    // Save state on tab change
     const handleTabChange = (value: string) => {
         if (id) {
             updates(id, { ...data, activeTab: value });
         }
     };
 
-    // 获取基础配置
+    // Get base configuration
     const getWorkflowConfig = useCallback(() => {
         return {
             feature: "",
@@ -283,18 +284,6 @@ export const AddAudioNode: React.FC<NodeProps> = ({ selected, data }) => {
                 </Tabs>
             </div>
 
-            <Handle
-                type="target"
-                position={Position.Left}
-                id="a"
-                isConnectable={true}
-            />
-            <Handle
-                type="source"
-                position={Position.Right}
-                id="b"
-                isConnectable={true}
-            />
         </BaseNode>
     );
 };

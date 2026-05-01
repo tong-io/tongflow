@@ -1,26 +1,34 @@
 /**
- * 图片 / 视频节点：按媒体长边像素为 BaseNode 选 max-w（与「分辨率越高预览越宽」一致）。
- * 档位与 image-node / video-node 共用，避免两套魔法数。
+ * Image/video nodes: the canvas node width is proportional to the media long-edge pixel count (for example, 1024 and 2048 are about 1:2),
+ * making resolution differences easier to compare visually. Min/max values prevent nodes from becoming too small or covering the canvas.
  */
-export function maxWidthClassForMediaDimensions(
+
+/** Reference long edge (px): this length maps to a node width of REF_DISPLAY_WIDTH_PX */
+export const MEDIA_NODE_REF_LONG_EDGE_PX = 1024;
+
+/** Target outer node width (CSS px) when the long edge equals REF */
+export const MEDIA_NODE_REF_DISPLAY_WIDTH_PX = 256;
+
+export const MEDIA_NODE_MIN_DISPLAY_WIDTH_PX = 120;
+export const MEDIA_NODE_MAX_DISPLAY_WIDTH_PX = 720;
+
+/**
+ * Calculate the canvas node width (px) linearly from the long edge, rounded and clamped.
+ */
+export function proportionalMediaNodeWidthPx(
     width: number,
     height: number,
-): string {
+): number {
     const long = Math.max(width, height);
-    if (long >= 3600) {
-        return "min-w-[14rem] max-w-[14rem]";
+    if (!Number.isFinite(long) || long <= 0) {
+        return MEDIA_NODE_REF_DISPLAY_WIDTH_PX;
     }
-    if (long >= 3000) {
-        return "min-w-[10rem] max-w-[10rem]";
-    }
-    if (long >= 2400) {
-        return "min-w-[9rem] max-w-[9rem]";
-    }
-    if (long >= 1920) {
-        return "min-w-[8rem] max-w-[8rem]";
-    }
-    if (long >= 1440) {
-        return "min-w-[7rem] max-w-[7rem]";
-    }
-    return "min-w-[6rem] max-w-[6rem]";
+    const raw =
+        (long / MEDIA_NODE_REF_LONG_EDGE_PX) * MEDIA_NODE_REF_DISPLAY_WIDTH_PX;
+    return Math.round(
+        Math.min(
+            MEDIA_NODE_MAX_DISPLAY_WIDTH_PX,
+            Math.max(MEDIA_NODE_MIN_DISPLAY_WIDTH_PX, raw),
+        ),
+    );
 }

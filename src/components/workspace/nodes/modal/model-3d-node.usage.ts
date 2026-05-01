@@ -1,42 +1,42 @@
 /**
- * 3D Model Node Component - 使用指南
+ * 3D Model Node Component - Usage Guide
  *
- * 这个组件用于在workspace中预览和交互3D模型文件。
- * 支持多种格式的3D文件，包括高斯泼溅格式。
+ * This component is used to preview and interact with 3D model files in the workspace.
+ * It supports multiple 3D file formats, including Gaussian splat formats.
  */
 
 import Model3DNode from "@/components/workspace/nodes/modal/model-node";
 
 /**
- * 节点数据结构
+ * Node data structure
  *
- * 使用该组件时，需要在节点数据中提供：
- * - fileKey: R2存储中的文件键（字符串）
- * - fileName: 文件名，用于确定文件类型（字符串）
+ * When using this component, provide these fields in the node data:
+ * - fileKey: File key in R2 storage (string)
+ * - fileName: File name used to determine the file type (string)
  */
 
-// 示例1：单个GLTF模型
+// Example 1: Single GLTF model
 const gltfNodeData = {
     fileKey: "models/character-avatar-001",
     fileName: "avatar.glb",
     type: "3d-model",
 };
 
-// 示例2：高斯泼溅模型（Butterfly示例）
+// Example 2: Gaussian splat model (Butterfly example)
 const splatNodeData = {
     fileKey: "models/gaussian-splatting/butterfly",
     fileName: "butterfly.spz",
     type: "3d-model",
 };
 
-// 示例3：OBJ模型
+// Example 3: OBJ model
 const objNodeData = {
     fileKey: "models/mesh-data/scene",
     fileName: "scene.obj",
     type: "3d-model",
 };
 
-// 示例4：FBX模型（带骨骼动画）
+// Example 4: FBX model (with skeletal animation)
 const fbxNodeData = {
     fileKey: "models/animated/character",
     fileName: "character.fbx",
@@ -44,120 +44,120 @@ const fbxNodeData = {
 };
 
 /**
- * 支持的文件格式
+ * Supported file formats
  *
- * 推荐格式（最佳体验）：
- * 1. .glb/.gltf - glTF格式
- *    - 特点：支持动画、PBR材质、轻量级、压缩
- *    - 使用场景：模型展示、实时渲染、网页应用
+ * Recommended formats (best experience):
+ * 1. .glb/.gltf - glTF format
+ *    - Features: Animation support, PBR materials, lightweight, compressed
+ *    - Use cases: Model presentation, real-time rendering, web applications
  *
- * 通用3D格式：
- * 2. .obj - Wavefront OBJ格式
- *    - 特点：基础网格格式、广泛支持
- *    - 使用场景：简单模型、网格数据
+ * General 3D formats:
+ * 2. .obj - Wavefront OBJ format
+ *    - Features: Basic mesh format, widely supported
+ *    - Use cases: Simple models, mesh data
  *
- * 3. .fbx - Autodesk FBX格式
- *    - 特点：支持骨骼、动画、材质、变形器
- *    - 使用场景：角色模型、动画模型、游戏
+ * 3. .fbx - Autodesk FBX format
+ *    - Features: Supports skeletons, animations, materials, deformers
+ *    - Use cases: Character models, animated models, games
  *
- * 4. .dae - COLLADA格式
- *    - 特点：支持动画、材质、跨平台
- *    - 使用场景：多工具协作
+ * 4. .dae - COLLADA format
+ *    - Features: Supports animations, materials, cross-platform
+ *    - Use cases: Multi-tool collaboration
  *
- * 高斯泼溅格式（新一代高质量渲染）：
- * 5. .spz/.splat/.ksplat/.sog - 高斯泼溅格式
- *    - 特点：高质量、快速渲染、点云表示
- *    - 使用场景：摄影测量、3D扫描、逼真场景
- *    - 需要Spark库支持
- *    - 推荐：.spz (Scaniverse 格式，压缩率最好)
+ * Gaussian splat formats (next-generation high-quality rendering):
+ * 5. .spz/.splat/.ksplat/.sog - Gaussian splat formats
+ *    - Features: High quality, fast rendering, point cloud representation
+ *    - Use cases: Photogrammetry, 3D scanning, realistic scenes
+ *    - Requires Spark library support
+ *    - Recommended: .spz (Scaniverse format, with the best compression ratio)
  *
- * 点云格式：
+ * Point cloud formats:
  * 6. .ply - Polygon File Format
- *    - 特点：点云和网格、支持颜色和法线
- *    - 使用场景：激光扫描、3D扫描数据
+ *    - Features: Point clouds and meshes, supports colors and normals
+ *    - Use cases: Laser scanning, 3D scan data
  *
  * 7. .ptx - Leica Point Cloud
- *    - 特点：激光扫描点云、高密度数据
- *    - 使用场景：工程测量、建筑扫描
+ *    - Features: Laser scan point clouds, high-density data
+ *    - Use cases: Engineering surveys, building scans
  *
- * 8. .pts/.xyz - 简单点云格式
- *    - 特点：轻量级、文本格式（X Y Z [R G B]）
- *    - 使用场景：快速测试、数据交换
+ * 8. .pts/.xyz - Simple point cloud formats
+ *    - Features: Lightweight, text format (X Y Z [R G B])
+ *    - Use cases: Quick testing, data exchange
  *
- * 3D打印格式：
+ * 3D printing formats:
  * 9. .stl - Stereolithography
- *    - 特点：3D打印标准、简单网格
- *    - 使用场景：3D打印预处理、网格检查
+ *    - Features: 3D printing standard, simple mesh
+ *    - Use cases: 3D printing preprocessing, mesh inspection
  *
- * CAD格式：
+ * CAD formats:
  * 10. .step/.stp - STEP (ISO 10303)
- *    - 特点：专业CAD交换、参数化几何
- *    - 使用场景：工程设计、装配体
- *    - 注意：建议先在CAD软件转换为GLTF或OBJ
+ *    - Features: Professional CAD exchange, parametric geometry
+ *    - Use cases: Engineering design, assemblies
+ *    - Note: Recommended to convert to GLTF or OBJ in CAD software first
  *
- * 11. .igs/.iges - IGES格式
- *    - 特点：CAD数据交换、精确几何
- *    - 使用场景：工业设计、机械制造
- *    - 注意：建议先在CAD软件转换为GLTF或OBJ
+ * 11. .igs/.iges - IGES format
+ *    - Features: CAD data exchange, precise geometry
+ *    - Use cases: Industrial design, mechanical manufacturing
+ *    - Note: Recommended to convert to GLTF or OBJ in CAD software first
  *
- * Apple AR格式：
- * 12. .usdz/.usd - Pixar USD格式
- *    - 特点：Apple推荐、AR/VR支持、压缩
- *    - 使用场景：增强现实、跨平台应用
+ * Apple AR formats:
+ * 12. .usdz/.usd - Pixar USD format
+ *    - Features: Recommended by Apple, AR/VR support, compressed
+ *    - Use cases: Augmented reality, cross-platform applications
  *
- * 其他格式：
+ * Other formats:
  * 13. .3ds - 3D Studio Max
- *    - 特点：经典格式、动画支持（较老）
- *    - 使用场景：遗留项目兼容
+ *    - Features: Classic format, animation support (older)
+ *    - Use cases: Legacy project compatibility
  *
  * 14. .vtp - VTK Polydata
- *    - 特点：科学计算格式、网格数据
- *    - 使用场景：数值模拟、科学可视化
+ *    - Features: Scientific computing format, mesh data
+ *    - Use cases: Numerical simulation, scientific visualization
  *
- * 完整格式列表：
+ * Complete format list:
  * .glb, .gltf, .obj, .fbx, .dae, .stl, .ply, .spz, .splat, .ksplat, .sog,
  * .ptx, .pts, .xyz, .usdz, .usd, .3ds, .step, .stp, .igs, .iges, .vtp
  */
 
 /**
- * 功能特性
+ * Features
  *
- * 1. 3D预览：
- *    - 全屏预览模式
- *    - 实时渲染
- *    - 自动缩放和居中
+ * 1. 3D preview:
+ *    - Full-screen preview mode
+ *    - Real-time rendering
+ *    - Automatic scaling and centering
  *
- * 2. 交互控制：
- *    - 鼠标拖动：旋转模型
- *    - 滚轮：缩放（zoom in/out）
- *    - 重置按钮：恢复默认视角
+ * 2. Interactive controls:
+ *    - Mouse drag: Rotate the model
+ *    - Mouse wheel: Zoom in/out
+ *    - Reset button: Restore the default view
  *
- * 3. 动画支持：
- *    - 自动播放glTF/FBX动画
- *    - 动画混合器管理
+ * 3. Animation support:
+ *    - Automatically plays glTF/FBX animations
+ *    - Animation mixer management
  *
- * 4. 高斯泼溅：
- *    - 集成Spark库进行高斯泼溅渲染
- *    - 支持多种splat格式
- *    - 动态光照和材质编辑
+ * 4. Gaussian splats:
+ *    - Integrates the Spark library for Gaussian splat rendering
+ *    - Supports multiple splat formats
+ *    - Dynamic lighting and material editing
  *
- * 5. 下载功能：
- *    - 支持直接下载原始模型文件
+ * 5. Downloading:
+ *    - Supports direct downloads of the original model file
  */
 
 /**
- * 在 workflow中添加3D节点的方式
+ * How to add a 3D node to a workflow
  *
- * 1. 在nodes列表中注册：
+ * 1. Register it in the nodes list:
  *    import 3DNode from "@/components/workspace/nodes/modal/3d-node";
  *
- *    // 在nodeTypes中添加
+ *    // Add it to nodeTypes
  *    const nodeTypes = {
  *      "3d-model": 3DNode,
- *      // ... 其他节点类型
+ *      // ... other node types
  *    };
  *
- * 2. 在workflow中创建节点时指定类型和数据：
+ * 2. Specify the type and data when creating the node in the workflow:
  *    const newNode = {
  *      id: "node-1",
  *      data: {
@@ -170,48 +170,48 @@ const fbxNodeData = {
  */
 
 /**
- * 技术栈
+ * Tech stack
  *
- * - Three.js (r181): 3D渲染引擎
- *   - GLTFLoader: 加载glTF/GLB文件
- *   - OBJLoader: 加载OBJ文件
- *   - FBXLoader: 加载FBX文件
- *   - 内置Mesh、Light、Camera等
+ * - Three.js (r181): 3D rendering engine
+ *   - GLTFLoader: Loads glTF/GLB files
+ *   - OBJLoader: Loads OBJ files
+ *   - FBXLoader: Loads FBX files
+ *   - Built-in Mesh, Light, Camera, and more
  *
- * - Spark (@sparkjsdev/spark): 高斯泼溅渲染
- *   - 建立在Three.js之上
- *   - 专门优化的点云渲染
- *   - 支持GPU加速
+ * - Spark (@sparkjsdev/spark): Gaussian splat rendering
+ *   - Built on top of Three.js
+ *   - Specially optimized point cloud rendering
+ *   - Supports GPU acceleration
  *
- * - React: 组件框架
- *   - hooks用于状态管理
- *   - useRef用于DOM/Object3D引用
+ * - React: Component framework
+ *   - hooks for state management
+ *   - useRef for DOM/Object3D references
  *
- * - XYFlow: 节点编辑框架
- *   - Handle: 节点连接点
- *   - Position: 定位枚举
+ * - XYFlow: Node editing framework
+ *   - Handle: Node connection point
+ *   - Position: Positioning enum
  */
 
 /**
- * 性能优化
+ * Performance optimization
  *
- * 1. 延迟加载：只在需要时加载Spark库
- * 2. 缓存：利用useR2AsyncLoader进行文件缓存
- * 3. 内存管理：
- *    - 正确处理renderer.dispose()
- *    - 清理event listeners
- *    - 取消动画帧
- * 4. 渲染优化：
- *    - 自适应分辨率
- *    - 缓存计算的自动缩放
+ * 1. Lazy loading: Load the Spark library only when needed
+ * 2. Caching: Use useR2AsyncLoader for file caching
+ * 3. Memory management:
+ *    - Properly handle renderer.dispose()
+ *    - Clean up event listeners
+ *    - Cancel animation frames
+ * 4. Rendering optimization:
+ *    - Adaptive resolution
+ *    - Cached automatic scaling calculation
  */
 
 /**
- * 错误处理
+ * Error handling
  *
- * 1. 不支持的格式：显示友好的错误消息
- * 2. 加载失败：显示错误信息和重试选项
- * 3. 缺少依赖：优雅降级（如Spark不可用）
+ * 1. Unsupported formats: Show a friendly error message
+ * 2. Load failures: Show error information and retry options
+ * 3. Missing dependencies: Degrade gracefully (for example, when Spark is unavailable)
  */
 
 export { gltfNodeData, splatNodeData, objNodeData, fbxNodeData };

@@ -1,12 +1,11 @@
 /**
- * Task API 客户端
+ * Task API client
  */
 
 import { apiPost, apiGet } from "@/utils/api-client";
 
 export interface Task {
     id: string;
-    userId: string;
     nodeId: string;
     feature: string;
     prompt: Record<string, unknown>;
@@ -22,8 +21,7 @@ export interface CreateTaskRequest {
     feature: string;
     prompt: Record<string, unknown>;
     nodeId: string;
-    workflowId?: number; // 执行自己的 workflow 时传入
-    shareId?: number; // 执行别人的 share 时传入
+    workflowId?: number;
 }
 
 export interface CreateTaskResponse {
@@ -31,7 +29,7 @@ export interface CreateTaskResponse {
 }
 
 /**
- * 创建任务
+ * Create task
  */
 export async function createTask(
     config: CreateTaskRequest,
@@ -44,7 +42,7 @@ export interface ListTasksResponse {
 }
 
 /**
- * 获取任务列表
+ * Get task list
  */
 export async function listTasks(
     page = 1,
@@ -68,8 +66,8 @@ export interface UpdateStatusResponse {
 }
 
 /**
- * 更新任务状态（前端双保险，单任务用）
- * 不保存素材，仅更新任务状态
+ * Update task status (frontend safety net, for single tasks)
+ * Do not save assets; only update task status
  */
 export async function updateTaskStatus(
     request: UpdateStatusRequest,

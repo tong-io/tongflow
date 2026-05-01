@@ -1,5 +1,6 @@
-import { getRequestConfig } from "next-intl/server";
 import { cookies, headers } from "next/headers";
+import { getRequestConfig } from "next-intl/server";
+import { logger } from "@/lib/logger";
 
 export default getRequestConfig(async () => {
     const cookieStore = await cookies();
@@ -27,7 +28,7 @@ export default getRequestConfig(async () => {
                 locale = "ja";
             }
         } catch (e) {
-            console.error("Error detecting locale from headers", e);
+            logger.error("Error detecting locale from headers", e);
         }
     }
 

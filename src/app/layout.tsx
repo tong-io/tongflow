@@ -5,6 +5,7 @@ import { Toaster } from "react-hot-toast";
 import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getMessages } from "next-intl/server";
 import { ProprietaryAppShell } from "@openflow/proprietary";
+import { ErrorBoundary } from "@/components/ui/error-boundary";
 
 const geistSans = Geist({
     variable: "--font-geist-sans",
@@ -56,7 +57,9 @@ export default async function RootLayout({
             >
                 <NextIntlClientProvider messages={messages}>
                     <ProprietaryAppShell>
-                        <main>{children}</main>
+                        <ErrorBoundary>
+                            <main>{children}</main>
+                        </ErrorBoundary>
                         <Toaster position="top-center" />
                     </ProprietaryAppShell>
                 </NextIntlClientProvider>

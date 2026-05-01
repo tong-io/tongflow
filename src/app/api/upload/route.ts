@@ -8,6 +8,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { writeFile, mkdir } from "node:fs/promises";
 import path from "node:path";
 import { nanoid } from "nanoid";
+import { logger } from "@/lib/logger";
 
 const UPLOAD_DIR = path.resolve(process.cwd(), "data", "uploads");
 
@@ -44,7 +45,7 @@ export async function POST(request: NextRequest) {
             name: file.name,
         });
     } catch (error) {
-        console.error("[API /api/upload] Error:", error);
+        logger.error("[API /api/upload] Error:", error);
         return NextResponse.json(
             { error: "Failed to upload file" },
             { status: 500 },

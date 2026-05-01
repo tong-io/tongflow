@@ -6,7 +6,7 @@ import {
 
 /**
  * GET /api/feature/list
- * 获取功能列表（公开接口，不需要认证）
+ * Retrieve the feature list (public endpoint, no authentication required)
  */
 export async function GET() {
     return NextResponse.json({

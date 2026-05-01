@@ -1,25 +1,21 @@
 "use client";
 
-import { Handle, Position, useNodeId, type NodeProps } from "@xyflow/react";
+import { type NodeProps } from "@xyflow/react";
 import { memo, useEffect } from "react";
 import { Sparkles, Maximize2 } from "lucide-react";
 
 import { BaseNode } from "../base/base-node";
-import useFlow from "@/hooks/use-flow";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
-import { getR2Url } from "@/lib/r2-utils";
+import { getFileUrl } from "@/lib/file-url";
 import { useNodeState } from "@/hooks/use-node-data";
 import {
     upstreamParam,
     type GetPromptsContext,
 } from "@/utils/node-execution-config";
 import { useTranslations } from "next-intl";
-import { clampToAllowedModel } from "@/utils/node-model-feature";
-import { NodeModelSelect } from "../base/node-model-select";
-import { singleModelSelectOptions } from "@/utils/node-model-select-label";
 
 const DEFAULT_FEATURE = "video_upscale";
 
@@ -33,10 +29,9 @@ const UPSCALE_TIERS: {
     { value: "2k", labelKey: "upscaleTier2k" },
 ];
 
-// 工作流执行配置
+// Workflow execution config
 const workflowConfig = {
     feature: DEFAULT_FEATURE,
-    label: "视频高清放大",
     outputType: "videoNode",
     outputField: "fileKeys" as const,
     supportsBatch: true,
@@ -55,15 +50,7 @@ const workflowConfig = {
 
 const VideoUpscaleNode = ({ selected, data }: NodeProps) => {
     const t = useTranslations("Workspace.nodes");
-    const updates = useFlow((s) => s.updates);
-    const nodeId = useNodeId()!;
     const { fileKeys = [] } = data as { fileKeys?: string[] };
-
-    const featureName = clampToAllowedModel(
-        (data as { feature?: string }).feature,
-        [DEFAULT_FEATURE],
-        DEFAULT_FEATURE,
-    );
 
     const [state, setState] = useNodeState<{ resolution: UpscaleTier | "4k" }>(
         { resolution: "2k" },
@@ -86,7 +73,7 @@ const VideoUpscaleNode = ({ selected, data }: NodeProps) => {
             data={data}
             workflowConfig={{
                 ...workflowConfig,
-                feature: featureName,
+                feature: DEFAULT_FEATURE,
                 title: t("titles.videoUpscale"),
                 icon: <Sparkles className="h-5 w-5" />,
                 executeLabel: t("actions.startUpscale"),
@@ -101,23 +88,12 @@ const VideoUpscaleNode = ({ selected, data }: NodeProps) => {
                             ? upstreamKeys
                             : fileKeys;
                     return keys.map((fileKey) => ({
-                        video: getR2Url(fileKey),
+                        video: getFileUrl(fileKey),
                         resolution,
                     }));
                 },
             }}
         >
-            <div className="px-4 pt-4 space-y-4">
-                <NodeModelSelect
-                    value={featureName}
-                    onValueChange={(value) =>
-                        updates(nodeId, { ...data, feature: value })
-                    }
-                    options={singleModelSelectOptions(DEFAULT_FEATURE, (k) =>
-                        t(k as Parameters<typeof t>[0]),
-                    )}
-                />
-            </div>
             <Card className="mx-4 mb-4 p-3 space-y-2">
                 <Label className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
                     <Maximize2 className="h-4 w-4" />
@@ -156,19 +132,6 @@ const VideoUpscaleNode = ({ selected, data }: NodeProps) => {
                     </div>
                 )}
             </Card>
-
-            <Handle
-                type="target"
-                position={Position.Left}
-                id="a"
-                isConnectable={true}
-            />
-            <Handle
-                type="source"
-                position={Position.Right}
-                id="b"
-                isConnectable={true}
-            />
         </BaseNode>
     );
 };

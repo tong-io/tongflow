@@ -1,6 +1,6 @@
 /**
- * ReactFlow 状态管理 Hook
- * 基于 Zustand，管理节点和边的状态
+ * React Flow state wrapper built on Zustand.
+ * Tracks node/edge lists and persisted workflow meta.
  */
 
 import {
@@ -18,12 +18,12 @@ import { create } from "zustand";
 import { v4 } from "uuid";
 import { DATA_NODE_TYPES } from "@/utils/executable-workflow";
 
-// 判断节点是否为数据节点
+// True when React Flow reports a persisted data/input node type
 function isDataNode(nodeType: string): boolean {
     return nodeType in DATA_NODE_TYPES;
 }
 
-// 防抖工具函数
+// Simple debouncer factory
 function createDebounce<T extends unknown[]>(
     callback: (...args: T) => void,
     delay: number,
@@ -41,23 +41,22 @@ function createDebounce<T extends unknown[]>(
     };
 }
 
-// 保存节点数据到 localStorage（带防抖）
+// Persist React Flow nodes to localStorage with debouncing
 const debouncedSaveNodes = createDebounce((nodes: Node[]) => {
     localStorage.setItem("nodes", JSON.stringify(nodes));
 }, 500);
 
-// 保存边数据到 localStorage（带防抖）
+// Persist edges similarly
 const debouncedSaveEdges = createDebounce((edges: Edge[]) => {
     localStorage.setItem("edges", JSON.stringify(edges));
 }, 500);
 
-// 保存工作流元信息到 localStorage（带防抖）
+// Persist workflow meta (title, ids, notes)
 const debouncedSaveWorkflowMeta = createDebounce(
     (meta: {
         id: number | null;
         name: string;
         description: string;
-        currentShareId: number | null;
     }) => {
         localStorage.setItem("workflowMeta", JSON.stringify(meta));
     },
@@ -76,13 +75,12 @@ export interface FlowState {
     workflowName: string;
     workflowId: number | null;
     workflowDescription: string;
-    currentShareId: number | null;
 
     selectedNodes: Node[];
     comboMode: boolean;
     comboSelectedIds: Set<string>;
 
-    // 原子接口
+    // Combo / selection helpers
     setComboMode: (enabled: boolean) => void;
     isInCombo: (id: string) => boolean;
     toggleCombo: (id: string) => void;
@@ -90,7 +88,6 @@ export interface FlowState {
     setWorkflowName: (name: string) => void;
     setWorkflowId: (id: number | null) => void;
     setWorkflowDescription: (description: string) => void;
-    setCurrentShareId: (id: number | null) => void;
 
     computeMap: Map<string, () => void>;
     registerCompute: (id: string, fn: () => void) => void;
@@ -109,7 +106,7 @@ export interface FlowState {
         position?: { x: number; y: number },
     ) => string;
     removeNode: (nodeId: string) => void;
-    // 节点创建回调
+    // Node-created listeners
     nodeCreatedCallbacks: Set<(nodeIds: string[]) => void>;
     onNodeCreated: (callback: (nodeIds: string[]) => void) => () => void;
 }
@@ -124,18 +121,15 @@ export const useFlow = create<FlowState>((set, get) => ({
     workflowName: "",
     workflowId: null,
     workflowDescription: "",
-    currentShareId: null,
-
-    // 组合模式相关状态
+    // Multi-select compose mode tracking
     comboMode: false,
     comboSelectedIds: new Set<string>(),
 
-    // 节点创建回调
     nodeCreatedCallbacks: new Set(),
     onNodeCreated: (callback) => {
         const callbacks = get().nodeCreatedCallbacks;
         callbacks.add(callback);
-        // 返回取消订阅函数
+        // Caller receives an unsubscribe closure
         return () => {
             callbacks.delete(callback);
         };
@@ -226,7 +220,7 @@ export const useFlow = create<FlowState>((set, get) => ({
             defaultX = position.x;
             defaultY = position.y;
         } else if (nodes.length > 0) {
-            // 如果已有节点，在最右侧添加新节点
+            // Spawn to the far right when the canvas already has nodes
             const rightmostNode = nodes.reduce((rightmost, current) => {
                 const currentRight =
                     current.position.x + (current.measured?.width ?? 150);
@@ -256,7 +250,7 @@ export const useFlow = create<FlowState>((set, get) => ({
         const newNodes = nodes.concat(newNode);
         set({ nodes: newNodes });
         debouncedSaveNodes(newNodes);
-        // 触发节点创建回调
+        // Notify canvas listeners that a node was inserted
         get().nodeCreatedCallbacks.forEach((cb) => cb([nodeId]));
         return nodeId;
     },
@@ -282,10 +276,10 @@ export const useFlow = create<FlowState>((set, get) => ({
             return [];
         }
 
-        // 判断源节点是否为数据节点
+        // Track whether upstream node emits persistent artifacts
         const sourceIsDataNode = isDataNode(currNode.type ?? "");
 
-        // 找到当前节点已连接的下游节点（source 为当前节点的边）
+        // Locate existing downstream nodes via outgoing edges
         const existingChildEdges = edges.filter(
             (edge) => edge.source === currNode.id,
         );
@@ -293,8 +287,8 @@ export const useFlow = create<FlowState>((set, get) => ({
             .map((edge) => nodes.find((n) => n.id === edge.target))
             .filter(Boolean) as Node[];
 
-        // 按类型建立已有子节点的映射
-        // 只有当源节点是处理节点时，才需要防止创建重复的数据节点
+        // Map downstream nodes by Flow type so we can reuse slots
+        // Processing nodes shouldn't spawn duplicate sibling data sinks
         const existingChildByType = new Map<string, Node>();
         if (!sourceIsDataNode) {
             for (const child of existingChildNodes) {
@@ -310,22 +304,18 @@ export const useFlow = create<FlowState>((set, get) => ({
         const newlyCreatedIds: string[] = [];
         let updatedNodes = [...nodes];
 
-        // 筛选出需要新建的节点（没有同类型已存在的）
+        // Only materialize missing downstream types
         const nodesToCreate = possibleNodes.filter(
             ({ type }) => !existingChildByType.has(type),
         );
 
-        // 计算x方向的固定距离
-        const X_OFFSET = 250;
-        // 计算y方向的间距
-        const Y_SPACING = 150;
+        const X_OFFSET = 250; // Horizontal gap from parent
+        const Y_SPACING = 150; // Vertical spacing between spawned nodes
 
-        // 新节点的x位置：原节点右边缘 + 固定距离
-        // 由于 origin: [0.5, 0.5]，position.x 是节点中心的 x 坐标
+        // Child center.x = parent's right edge + offset (origin at [0.5, 0.5])
         const newX = position.x + (measured?.width ?? 150) / 2 + X_OFFSET;
 
-        // 计算起始y位置，使多个新节点在原节点周围垂直居中分布
-        // 由于 origin: [0.5, 0.5]，position.y 已是节点中心的 y 坐标
+        // Vertically distribute new nodes around the parent's center.y
         const centerY = position.y;
         const startY = centerY - (Y_SPACING * (nodesToCreate.length - 1)) / 2;
 
@@ -334,7 +324,7 @@ export const useFlow = create<FlowState>((set, get) => ({
             const existingChild = existingChildByType.get(type);
 
             if (existingChild) {
-                // 已存在同类型节点，更新其 data
+                // Reuse sibling data node shell; merge payloads
                 ids.push(existingChild.id);
                 updatedNodes = updatedNodes.map((node) => {
                     if (node.id === existingChild.id) {
@@ -346,7 +336,7 @@ export const useFlow = create<FlowState>((set, get) => ({
                     return node;
                 });
             } else {
-                // 不存在同类型节点，创建新节点
+                // Instantiate a fresh downstream node plus edge bridge
                 const newNodeId = v4();
                 ids.push(newNodeId);
                 newlyCreatedIds.push(newNodeId);
@@ -384,7 +374,7 @@ export const useFlow = create<FlowState>((set, get) => ({
         });
         debouncedSaveNodes(allNodes);
         debouncedSaveEdges(edges);
-        // 触发节点创建回调（只对新创建的节点）
+        // Announce only the brand-new node ids
         if (newlyCreatedIds.length > 0) {
             get().nodeCreatedCallbacks.forEach((cb) => cb(newlyCreatedIds));
         }
@@ -394,7 +384,7 @@ export const useFlow = create<FlowState>((set, get) => ({
         const { comboSelectedIds, nodes, edges } = get();
         const nodeId = v4();
 
-        // 计算所有选中节点的边界
+        // Bounding volume of the multi-select set
         const positions = Array.from(comboSelectedIds)
             .map((id) => {
                 const node = nodes.find((n) => n.id === id);
@@ -413,14 +403,12 @@ export const useFlow = create<FlowState>((set, get) => ({
             height: number;
         }>;
 
-        // 找到最右边的节点位置
-        // 由于 origin: [0.5, 0.5]，pos.x 是节点中心，需要加上宽度的一半
+        // Right edge uses center.x + half width (origin [0.5, 0.5])
         const rightmostX = Math.max(
             ...positions.map((pos) => pos.x + pos.width / 2),
         );
 
-        // 计算所有节点的垂直中心
-        // 由于 origin: [0.5, 0.5]，pos.y 已是节点中心
+        // Stack selection around the shared vertical midpoint
         const minY = Math.min(
             ...positions.map((pos) => pos.y - pos.height / 2),
         );
@@ -429,14 +417,14 @@ export const useFlow = create<FlowState>((set, get) => ({
         );
         const centerY = (minY + maxY) / 2;
 
-        // 新节点位置：最右侧 + 固定距离，垂直居中
+        // Place composed node to the right, vertically centered on selection
         const X_OFFSET = 250;
         const newNode: Node = {
             id: nodeId,
             type: type,
             position: {
                 x: rightmostX + X_OFFSET,
-                y: centerY, // 已正确计算为中心点
+                y: centerY, // Already node-center coordinates
             },
             origin: [0.5, 0.5],
             data: (data ?? {}) as Record<string, unknown>,
@@ -465,16 +453,16 @@ export const useFlow = create<FlowState>((set, get) => ({
         debouncedSaveNodes(allNodes);
         debouncedSaveEdges(allEdges);
         get().clearCombo();
-        // 触发节点创建回调
+        // Same notification path as addNode
         get().nodeCreatedCallbacks.forEach((cb) => cb([nodeId]));
         return nodeId;
     },
 
     setComboMode: (enabled) => {
         if (!enabled) {
-            set({ comboMode: false, comboSelectedIds: new Set() }); // 新 Set，保持引用变化
+            set({ comboMode: false, comboSelectedIds: new Set() }); // Fresh Set bumps referential equality
         } else {
-            set({ comboMode: true }); // 不动选集合
+            set({ comboMode: true }); // Preserve combo selection refs
         }
     },
 
@@ -490,7 +478,7 @@ export const useFlow = create<FlowState>((set, get) => ({
         }
         set({
             comboSelectedIds: next,
-            comboMode: next.size > 0, // 自动开/关组合模式
+            comboMode: next.size > 0, // Auto toggle combo UX
         });
     },
 
@@ -499,12 +487,11 @@ export const useFlow = create<FlowState>((set, get) => ({
     setWorkflowName: (name) => {
         set({ workflowName: name });
         const state = get();
-        // 如果 workflowId 为 null（未保存的工作流），不缓存 name，以便切换语言时使用正确的默认名称
+        // Unsaved canvases omit cached titles so localized defaults survive language toggles
         debouncedSaveWorkflowMeta({
             id: state.workflowId,
             name: state.workflowId ? name : "",
             description: state.workflowDescription,
-            currentShareId: state.currentShareId,
         });
     },
 
@@ -515,7 +502,6 @@ export const useFlow = create<FlowState>((set, get) => ({
             id: id,
             name: state.workflowName,
             description: state.workflowDescription,
-            currentShareId: state.currentShareId,
         });
     },
 
@@ -526,18 +512,6 @@ export const useFlow = create<FlowState>((set, get) => ({
             id: state.workflowId,
             name: state.workflowName,
             description: description,
-            currentShareId: state.currentShareId,
-        });
-    },
-
-    setCurrentShareId: (id) => {
-        set({ currentShareId: id });
-        const state = get();
-        debouncedSaveWorkflowMeta({
-            id: state.workflowId,
-            name: state.workflowName,
-            description: state.workflowDescription,
-            currentShareId: id,
         });
     },
 }));

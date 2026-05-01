@@ -1,7 +1,7 @@
 import React, { useState, useCallback, memo } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Video, Upload, Camera, Library } from "lucide-react";
-import { Handle, Position, useNodeId, type NodeProps } from "@xyflow/react";
+import { useNodeId, type NodeProps } from "@xyflow/react";
 import useFlow from "@/hooks/use-flow";
 import { Button } from "@/components/ui/button";
 import { BaseNode } from "../base/base-node";
@@ -9,8 +9,9 @@ import { useMultipleUpload, useUpload } from "@/hooks/use-upload";
 import { LibInput } from "../../share/lib-input";
 import { VideoRecorder } from "@/components/ui/video-recorder";
 import { useTranslations } from "next-intl";
+import { logger } from "@/lib/logger";
 
-// 文件上传组件
+// File upload component
 const UploadTab = () => {
     const t = useTranslations("Workspace.nodes.add");
     const expands = useFlow((s) => s.expands);
@@ -25,7 +26,7 @@ const UploadTab = () => {
             }
         },
         onError: (error) => {
-            console.error("Upload failed:", error);
+            logger.error("Upload failed:", error);
         },
     });
 
@@ -112,7 +113,7 @@ const UploadTab = () => {
     );
 };
 
-// 相机录制组件
+// Camera recording component
 const CameraTab = () => {
     const t = useTranslations("Workspace.nodes.add");
     const expands = useFlow((s) => s.expands);
@@ -131,7 +132,7 @@ const CameraTab = () => {
             }
         },
         onError: (error) => {
-            console.error("Upload failed:", error);
+            logger.error("Upload failed:", error);
         },
     });
 
@@ -146,7 +147,7 @@ const CameraTab = () => {
             });
             upload(file);
         } catch (error) {
-            console.error("Upload failed:", error);
+            logger.error("Upload failed:", error);
         }
     };
 
@@ -215,7 +216,7 @@ const CameraTab = () => {
     );
 };
 
-// 作品集组件
+// Portfolio component
 const LibraryTab = () => {
     return (
         <div className="w-full">
@@ -230,16 +231,16 @@ export const AddVideoNode: React.FC<NodeProps> = ({ selected, data }) => {
     const updates = useFlow((s) => s.updates);
     const activeTab = (data as any)?.activeTab || "upload";
 
-    console.log("AddVideoNode data:", data);
+    logger.debug("AddVideoNode data:", data);
 
-    // 处理Tab切换时保存状态
+    // Save state when switching tabs
     const handleTabChange = (value: string) => {
         if (id) {
             updates(id, { ...data, activeTab: value });
         }
     };
 
-    // 获取基础配置
+    // Get base config
     const getWorkflowConfig = useCallback(() => {
         return {
             feature: "",
@@ -309,18 +310,6 @@ export const AddVideoNode: React.FC<NodeProps> = ({ selected, data }) => {
                 </Tabs>
             </div>
 
-            <Handle
-                type="target"
-                position={Position.Left}
-                id="a"
-                isConnectable={true}
-            />
-            <Handle
-                type="source"
-                position={Position.Right}
-                id="b"
-                isConnectable={true}
-            />
         </BaseNode>
     );
 };

@@ -25,7 +25,7 @@ import { Mic, MicOff, Maximize2 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 
-// Web Speech API 类型声明
+// Web Speech API shims
 interface SpeechRecognitionEvent extends Event {
     results: SpeechRecognitionResultList;
     resultIndex: number;
@@ -75,46 +75,46 @@ declare global {
 
 export interface NodeTextareaProps
     extends Omit<React.ComponentProps<"textarea">, "onChange"> {
-    /** 标签文本 */
+    /** Label text */
     label?: string;
-    /** 标签图标 */
+    /** Label icon */
     icon?: LucideIcon;
-    /** 是否显示卡片包装 */
+    /** Whether to show the card wrapper */
     showCard?: boolean;
-    /** 卡片的额外类名 */
+    /** Extra class name for the card */
     cardClassName?: string;
-    /** 标签的额外类名 */
+    /** Extra class name for the label */
     labelClassName?: string;
-    /** textarea 的值 */
+    /** Textarea value */
     value?: string;
-    /** 值改变时的回调 */
+    /** Callback when the value changes */
     onChange?: (value: string) => void;
-    /** 是否启用语音输入（默认为 true，如果浏览器支持） */
+    /** Whether to enable voice input (defaults to true when supported by the browser) */
     enableVoiceInput?: boolean;
-    /** 语音识别语言（默认为 zh-CN） */
+    /** Speech recognition language (defaults to zh-CN) */
     voiceLang?: string;
-    /** 是否启用全屏编辑（默认为 true） */
+    /** Whether to enable fullscreen editing (defaults to true) */
     enableFullscreen?: boolean;
-    /** 全屏对话框标题 */
+    /** Fullscreen dialog title */
     fullscreenTitle?: string;
 }
 
 /**
- * 节点通用的 Textarea 组件，支持语音输入
+ * Shared node Textarea component with voice input support
  *
  * @example
- * // 带标签的用法
+ * // Labelled usage example
  * <NodeTextarea
- *   label="编辑指令"
+ *   label="Edit instructions"
  *   icon={Sparkles}
- *   placeholder="输入图片编辑指令..."
+ *   placeholder="Enter image editing instructions..."
  *   value={editText}
  *   onChange={(value) => setState({ editText: value })}
  *   rows={4}
  * />
  *
  * @example
- * // 简单用法（无标签）
+ * // Minimal usage example
  * <NodeTextarea
  *   placeholder="Enter your instructions..."
  *   value={prompt}
@@ -123,7 +123,7 @@ export interface NodeTextareaProps
  * />
  *
  * @example
- * // 禁用语音输入
+ * // Disable dictation helper
  * <NodeTextarea
  *   placeholder="Enter your instructions..."
  *   value={prompt}
@@ -200,7 +200,7 @@ const NodeTextarea = forwardRef<HTMLTextAreaElement, NodeTextareaProps>(
             fullscreenValueRef.current = fullscreenValue;
         }, [fullscreenValue]);
 
-        // 合并 ref
+        // Merge forwarded refs
         const setRefs = useCallback(
             (element: HTMLTextAreaElement | null) => {
                 textareaRef.current = element;
@@ -213,14 +213,14 @@ const NodeTextarea = forwardRef<HTMLTextAreaElement, NodeTextareaProps>(
             [ref],
         );
 
-        // 检测浏览器是否支持语音识别
+        // Feature-detect SpeechRecognition
         useEffect(() => {
             const SpeechRecognitionAPI =
                 window.SpeechRecognition || window.webkitSpeechRecognition;
             setSpeechSupported(!!SpeechRecognitionAPI);
         }, []);
 
-        // 记录光标位置
+        // Track caret offsets
         const saveCursorPosition = useCallback(() => {
             if (isFullscreenRef.current && fullscreenTextareaRef.current) {
                 cursorPositionRef.current =
@@ -230,7 +230,7 @@ const NodeTextarea = forwardRef<HTMLTextAreaElement, NodeTextareaProps>(
             }
         }, []);
 
-        // 在光标位置插入文本
+        // Insert transcript at caret
         const insertTextAtCursor = useCallback(
             (text: string) => {
                 const currentValue = isFullscreenRef.current
@@ -271,13 +271,13 @@ const NodeTextarea = forwardRef<HTMLTextAreaElement, NodeTextareaProps>(
             [debouncedFlush],
         );
 
-        // 开始语音识别
+        // Start dictation
         const startListening = useCallback(() => {
             const SpeechRecognitionAPI =
                 window.SpeechRecognition || window.webkitSpeechRecognition;
             if (!SpeechRecognitionAPI) return;
 
-            // 保存当前光标位置
+            // Snapshot caret prior to edits
             saveCursorPosition();
 
             const recognition = new SpeechRecognitionAPI();
@@ -335,7 +335,7 @@ const NodeTextarea = forwardRef<HTMLTextAreaElement, NodeTextareaProps>(
             setInterimText("");
         }, []);
 
-        // 切换语音识别状态
+        // Toggle SpeechRecognition lifecycle
         const toggleListening = useCallback(() => {
             if (isListening) {
                 stopListening();
@@ -344,7 +344,7 @@ const NodeTextarea = forwardRef<HTMLTextAreaElement, NodeTextareaProps>(
             }
         }, [isListening, startListening, stopListening]);
 
-        // 清理
+        // Teardown timers/listeners
         useEffect(() => {
             return () => {
                 if (recognitionRef.current) {
@@ -359,29 +359,29 @@ const NodeTextarea = forwardRef<HTMLTextAreaElement, NodeTextareaProps>(
             debouncedFlush(e.target.value);
         };
 
-        // 更新光标位置当用户点击或选择时
+        // Refresh caret on pointer + selection updates
         const handleSelect = () => {
             saveCursorPosition();
         };
 
-        // 打开全屏编辑
+        // Expand composer dialog
         const openFullscreen = useCallback(() => {
             setFullscreenValue(localValue || "");
             setIsFullscreenOpen(true);
             isFullscreenRef.current = true;
         }, [localValue]);
 
-        // 关闭全屏编辑（不保存）
+        // Dismiss fullscreen without persisting edits
         const closeFullscreen = useCallback(() => {
             setIsFullscreenOpen(false);
             isFullscreenRef.current = false;
-            // 如果正在语音输入，停止
+            // Stop dictation if active before closing modal
             if (isListening) {
                 stopListening();
             }
         }, [isListening, stopListening]);
 
-        // 保存并关闭全屏编辑
+        // Persist textarea + close fullscreen shell
         const saveAndCloseFullscreen = useCallback(() => {
             onChange?.(fullscreenValue);
             setLocalValue(fullscreenValue);
@@ -392,7 +392,7 @@ const NodeTextarea = forwardRef<HTMLTextAreaElement, NodeTextareaProps>(
             }
         }, [fullscreenValue, onChange, isListening, stopListening]);
 
-        // 处理全屏对话框中的文本变化
+        // Mirror fullscreen textarea value
         const handleFullscreenChange = useCallback(
             (e: React.ChangeEvent<HTMLTextAreaElement>) => {
                 setFullscreenValue(e.target.value);
@@ -404,7 +404,7 @@ const NodeTextarea = forwardRef<HTMLTextAreaElement, NodeTextareaProps>(
         const showFullscreenButton = enableFullscreen;
         const hasButtons = showVoiceButton || showFullscreenButton;
 
-        // 语音按钮组件
+        // Dictation shortcut button subtree
         const VoiceButton = ({
             className: btnClassName,
         }: {
@@ -490,7 +490,7 @@ const NodeTextarea = forwardRef<HTMLTextAreaElement, NodeTextareaProps>(
             </div>
         );
 
-        // 全屏编辑对话框
+        // Fullscreen editing modal shell
         const fullscreenDialog = (
             <Dialog
                 open={isFullscreenOpen}

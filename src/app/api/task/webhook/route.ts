@@ -1,9 +1,9 @@
 /**
  * POST /api/task/webhook
- * 任务状态更新 Webhook
+ * Task status update Webhook
  *
- * OpenAPI 在任务状态变化（完成/失败/取消）时回调此接口
- * 幂等处理：更新任务状态 + 保存素材
+ * Called back by OpenAPI when a task status changes (completed/failed/cancelled)
+ * Idempotent handling: update task status + save materials
  */
 
 import { NextRequest, NextResponse } from "next/server";
@@ -11,8 +11,9 @@ import {
     handleTaskCompletion,
     type TaskCompletionData,
 } from "@/services/task-completion";
+import { logger } from "@/lib/logger";
 
-// Webhook Token 验证
+// Webhook Token validation
 const WEBHOOK_TOKEN = process.env.TASK_WEBHOOK_TOKEN;
 
 interface WebhookPayload {
@@ -23,17 +24,17 @@ interface WebhookPayload {
 
 export async function POST(request: NextRequest) {
     try {
-        // 1. 验证 Token
+        // 1. Validate Token
         const token = request.headers.get("x-token");
         if (!WEBHOOK_TOKEN || token !== WEBHOOK_TOKEN) {
-            console.error("[Webhook] Invalid token");
+            logger.error("[Webhook] Invalid token");
             return NextResponse.json(
                 { error: "Unauthorized" },
                 { status: 401 },
             );
         }
 
-        // 2. 解析请求体
+        // 2. Parse request body
         const body = (await request.json()) as WebhookPayload;
         const { taskId, status, data } = body;
 
@@ -44,7 +45,7 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        // 3. 幂等处理任务完成
+        // 3. Idempotently handle task completion
         const result = await handleTaskCompletion(
             taskId,
             status,
@@ -67,7 +68,7 @@ export async function POST(request: NextRequest) {
             savedMaterials: result.savedMaterials,
         });
     } catch (error) {
-        console.error("[Webhook] Error:", error);
+        logger.error("[Webhook] Error:", error);
         return NextResponse.json(
             { error: "Internal server error" },
             { status: 500 },

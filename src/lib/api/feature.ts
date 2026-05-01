@@ -1,7 +1,4 @@
-/**
- * Feature API 客户端
- * 用于获取功能列表
- */
+import { apiGet } from "@/utils/api-client";
 
 export interface Feature {
     name: string;
@@ -17,26 +14,16 @@ export interface FeatureRegistryAliasesPayload {
 
 export interface ListFeaturesResponse {
     features: Feature[];
-    /** 与服务器合并后的别名；客户端用于解析旧 id / 展示映射 */
+    /** Aliases merged from the server; clients use them to resolve old ids / display mappings */
     aliases?: FeatureRegistryAliasesPayload;
 }
 
-/**
- * 获取功能列表
- */
 export async function listFeatures(): Promise<ListFeaturesResponse> {
-    const response = await fetch("/api/feature/list");
-
-    if (!response.ok) {
-        const error = (await response.json()) as { error?: string };
-        throw new Error(error.error || "Failed to list features");
-    }
-
-    return await response.json();
+    return apiGet<ListFeaturesResponse>("/api/feature/list");
 }
 
 /**
- * 根据名称获取功能
+ * Get a feature by name
  */
 export async function getFeatureByName(name: string): Promise<Feature | null> {
     const { features, aliases } = await listFeatures();

@@ -1,5 +1,5 @@
 /**
- * React Flow 连线校验：按节点「逻辑输出类型」与目标节点 paramMappings 中的 upstream 声明匹配。
+ * React Flow connection validation: matches by the node's "logical output type" against the upstream declarations in the target node's paramMappings.
  */
 
 import type { Connection, Edge, Node } from "@xyflow/react";
@@ -10,7 +10,7 @@ import {
     type ParamMappingConfig,
 } from "./node-execution-config";
 
-/** 文本生成音乐节点：曲风 / 歌词 输入口（单口仅允许一条边） */
+/** Text-to-music node: style / lyrics input handles (each handle allows only one edge) */
 export const TEXT_GEN_MUSIC_HANDLES = {
     style: "in:style",
     lyric: "in:lyric",
@@ -21,7 +21,7 @@ const SINGLE_EDGE_TARGET_HANDLES = new Set<string>([
     TEXT_GEN_MUSIC_HANDLES.lyric,
 ]);
 
-/** Add 节点类型 → 逻辑输出类型（与 workflow-exporter getAddNodeOutputType 一致） */
+/** Add node type → logical output type (consistent with workflow-exporter getAddNodeOutputType) */
 const ADD_NODE_OUTPUT_TYPE: Record<string, string> = {
     addImageNode: "imageNode",
     addVideoNode: "videoNode",
@@ -60,7 +60,7 @@ function getEffectiveNodeConfig(
 }
 
 /**
- * 源节点的「逻辑输出类型」：数据节点即自身类型；处理/Add 节点用 outputType 或映射。
+ * The "logical output type" of a source node: for data nodes it is their own type; for processing/Add nodes it uses outputType or the mapping.
  */
 export function getEffectiveOutputType(
     nodeType: string | undefined,
@@ -97,7 +97,7 @@ function normalizeTargetHandle(id: string | null | undefined): string {
 }
 
 /**
- * 是否已存在占用同一 targetHandle 的入边（用于 in:style / in:lyric 等单槽位）
+ * Check whether an incoming edge already occupies the same targetHandle (for single-slot handles such as in:style / in:lyric)
  */
 export function hasDuplicateTargetHandle(
     edges: Edge[],
@@ -113,7 +113,7 @@ export function hasDuplicateTargetHandle(
 }
 
 /**
- * 校验连线是否允许。未知配置时宽松放行，避免未注册节点无法连线。
+ * Validate whether a connection is allowed. Unknown configurations are allowed by default to prevent unregistered nodes from being unable to connect.
  */
 export function isValidFlowConnection(
     connection: Connection,
@@ -137,12 +137,12 @@ export function isValidFlowConnection(
 
     const targetType = targetNode.type ?? "";
 
-    // 数据节点作为目标：仅接受「逻辑输出类型」与自身类型一致的上游
+    // Data node as target: only accepts upstream whose "logical output type" matches its own type
     if (targetType in DATA_NODE_TYPES) {
         return outType === targetType;
     }
 
-    // 文本生成音乐：语义口仅接受文本类输出
+    // Text-to-music: semantic handles only accept text-type output
     if (targetType === "textGenMusicNode") {
         const th = connection.targetHandle;
         if (

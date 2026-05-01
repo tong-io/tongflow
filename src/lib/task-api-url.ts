@@ -1,8 +1,8 @@
 /**
- * 任务 SSE（wait）与 stop 的请求地址。
+ * Request URLs for task SSE (wait) and stop.
  *
- * - 未设置 `NEXT_PUBLIC_TASK_API_URL`：使用当前站点的 Next.js Route Handlers（`/api/task/wait`、`/api/task/stop`），适合本地开发。
- * - 已设置（例如 `https://api.tongflow.com`）：使用兼容旧版 Python openapi 的路径：`{origin}/wait`、`{origin}/stop`。
+ * - When `NEXT_PUBLIC_TASK_API_URL` is not set: use the current site's Next.js Route Handlers (`/api/task/wait`, `/api/task/stop`), suitable for local development.
+ * - When set (for example `https://api.tongflow.com`): use paths compatible with the legacy Python openapi: `{origin}/wait`, `{origin}/stop`.
  */
 
 function getTaskApiOrigin(): string {

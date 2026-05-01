@@ -5,7 +5,7 @@ export const runtime = "nodejs";
 
 /**
  * GET /api/plugins/registry
- * Returns generated plugin registry (nodeSlot -> pluginIds, pluginId -> Modal + methodsByNodeSlot).
+ * Returns generated plugin registry (no-store).
  */
 export async function GET() {
     return NextResponse.json(loadPluginsRegistry(), {

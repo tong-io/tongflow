@@ -1,6 +1,4 @@
 import {
-    Handle,
-    Position,
     useNodeId,
     useNodesData,
     type NodeProps,
@@ -13,49 +11,14 @@ import useFlow from "@/hooks/use-flow";
 import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { NodeTextarea } from "../base/node-textarea";
-import { useR2AsyncLoader } from "@/hooks/use-r2-async-loader";
-import { getR2Url } from "@/lib/r2-utils";
+import { MediaThumbnail } from "../base/media-thumbnail";
+import { getFileUrl } from "@/lib/file-url";
 import {
     upstreamParam,
     configParam,
     type GetPromptsContext,
 } from "@/utils/node-execution-config";
 import { useTranslations } from "next-intl";
-import { clampToAllowedModel } from "@/utils/node-model-feature";
-import { NodeModelSelect } from "../base/node-model-select";
-import { singleModelSelectOptions } from "@/utils/node-model-select-label";
-
-// 视频缩略图组件
-const VideoThumbnail = memo(
-    ({ fileKey, label }: { fileKey?: string; label: string }) => {
-        const { url } = useR2AsyncLoader(fileKey, { priority: "high" });
-        const t = useTranslations("Workspace.nodes.speechGenVideo");
-
-        return (
-            <div className="flex flex-col items-center gap-1.5">
-                <div className="relative w-16 h-16 rounded-md border-2 border-gray-300 overflow-hidden bg-gray-50 transition-colors">
-                    {url ? (
-                        <div className="flex items-center justify-center h-full w-full">
-                            <div className="text-2xl">🎬</div>
-                        </div>
-                    ) : (
-                        <div className="flex items-center justify-center h-full w-full">
-                            <div className="text-xs text-gray-400">
-                                {t("loading")}
-                            </div>
-                        </div>
-                    )}
-                    <div className="absolute inset-0 bg-black/0 transition-colors" />
-                </div>
-                <div className="px-1.5 py-0.5 bg-gray-100 text-gray-700 text-xs font-medium rounded">
-                    {label}
-                </div>
-            </div>
-        );
-    },
-);
-
-VideoThumbnail.displayName = "VideoThumbnail";
 
 const DEFAULT_FEATURE = "speech-text-gen-video";
 
@@ -66,20 +29,14 @@ const SpeechGenVideoNode = ({ selected, data }: NodeProps) => {
         fileKeys?: string[];
     };
     const expands = useFlow((s) => s.expands);
-    const updates = useFlow((s) => s.updates);
     const id = useNodeId()!;
-    const featureName = clampToAllowedModel(
-        (data as { feature?: string }).feature,
-        [DEFAULT_FEATURE],
-        DEFAULT_FEATURE,
-    );
 
-    // 如果有 ids，从关联节点获取数据（组合模式）
+    // If ids are present, get data from associated nodes (composition mode)
     const fromNodes = useNodesData(ids);
     const videoNode = fromNodes.find((node) => node.type === "videoNode");
     const textNode = fromNodes.find((node) => node.type === "textNode");
 
-    // 从组合节点或直接从 data 获取 fileKeys 和 texts
+    // Get fileKeys and texts from the composite node or directly from data
     const fileKeys: string[] = useMemo(() => {
         if (videoNode) {
             return (videoNode.data as any)?.fileKeys || [];
@@ -94,12 +51,12 @@ const SpeechGenVideoNode = ({ selected, data }: NodeProps) => {
         return (data as any)?.texts || [];
     }, [textNode, data]);
 
-    // 判断是否有上游文本输入
+    // Determine whether there is upstream text input
     const hasUpstreamTexts = upstreamTexts && upstreamTexts.length > 0;
-    // 获取实际使用的提示词
+    // Get the prompt that will actually be used
     const effectivePrompt = hasUpstreamTexts ? upstreamTexts[0] : "";
 
-    // 使用新的Hook来管理状态持久化
+    // Use the new hook to manage state persistence
     const [state, setState] = useNodeState(
         {
             videoPrompt: "",
@@ -108,26 +65,10 @@ const SpeechGenVideoNode = ({ selected, data }: NodeProps) => {
     );
     const { videoPrompt } = state;
 
-    // 自定义任务更新处理 - 因为返回字段是 file_key
-    const handleTaskUpdate = useCallback(
-        (task: any) => {
-            if (task?.status === "COMPLETED") {
-                const audioKey = task?.data?.file_key;
-                if (audioKey) {
-                    expands("", [
-                        { type: "videoNode", data: { fileKeys: [audioKey] } },
-                    ]);
-                }
-                return true; // 已处理，跳过默认逻辑
-            }
-            return false;
-        },
-        [expands],
-    );
+    // No custom onTaskUpdate needed; BaseNode auto-expands `file_key` / `file_keys`.
 
     const workflowConfig = {
         feature: "speech-text-gen-video",
-        label: "音频生成视频",
         outputType: "videoNode",
         outputField: "fileKeys" as const,
         paramMappings: {
@@ -152,7 +93,6 @@ const SpeechGenVideoNode = ({ selected, data }: NodeProps) => {
             data={data}
             workflowConfig={{
                 ...workflowConfig,
-                feature: featureName,
                 title: t("titles.speechGenVideo"),
                 icon: <Atom className="h-5 w-5" />,
                 executeLabel: t("actions.generateAudio"),
@@ -168,7 +108,7 @@ const SpeechGenVideoNode = ({ selected, data }: NodeProps) => {
                             ? upstreamKeys
                             : fileKeys;
 
-                    // 优先从上游节点获取最新的文本数据
+                    // Prefer the latest text data from upstream nodes
                     const ctxUpstreamTexts = ctx?.getAllUpstreamData(
                         "textNode",
                         "texts",
@@ -183,24 +123,14 @@ const SpeechGenVideoNode = ({ selected, data }: NodeProps) => {
                     return [
                         {
                             text,
-                            audio: getR2Url(keys[0]),
+                            audio: getFileUrl(keys[0]),
                         },
                     ];
                 },
-                onTaskUpdate: handleTaskUpdate,
             }}
         >
             <div className="p-4 space-y-4">
-                <NodeModelSelect
-                    value={featureName}
-                    onValueChange={(value) =>
-                        updates(id, { ...data, feature: value })
-                    }
-                    options={singleModelSelectOptions(DEFAULT_FEATURE, (k) =>
-                        t(k as Parameters<typeof t>[0]),
-                    )}
-                />
-                {/* 媒体展示区 */}
+                {/* Media display area */}
                 <Card className="p-3">
                     <div className="space-y-2">
                         <Label className="text-sm font-medium text-muted-foreground">
@@ -208,9 +138,10 @@ const SpeechGenVideoNode = ({ selected, data }: NodeProps) => {
                         </Label>
                         <div className="flex gap-4">
                             {fileKeys && fileKeys.length > 0 && (
-                                <VideoThumbnail
+                                <MediaThumbnail
                                     fileKey={fileKeys[0]}
                                     label={t("speechGenVideo.video")}
+                                    type="video"
                                 />
                             )}
                         </div>
@@ -222,7 +153,7 @@ const SpeechGenVideoNode = ({ selected, data }: NodeProps) => {
                     </div>
                 </Card>
 
-                {/* 音频描述输入 - 如果有上游文本，显示预览 */}
+                {/* Audio description input - show a preview when upstream text exists */}
                 {hasUpstreamTexts ? (
                     <Card className="p-3 bg-muted/50">
                         <div className="space-y-2">
@@ -253,19 +184,6 @@ const SpeechGenVideoNode = ({ selected, data }: NodeProps) => {
                     />
                 )}
             </div>
-
-            <Handle
-                type="target"
-                position={Position.Left}
-                id="a"
-                isConnectable={true}
-            />
-            <Handle
-                type="source"
-                position={Position.Right}
-                id="b"
-                isConnectable={true}
-            />
         </BaseNode>
     );
 };

@@ -3,10 +3,11 @@ import { abortTask, notifyTask } from "@/lib/task-emitter";
 import { TaskStatus } from "@/constants/task-status";
 import { getDb, tasks } from "@/db";
 import { eq } from "drizzle-orm";
+import { logger } from "@/lib/logger";
 
 /**
  * POST /api/task/stop
- * 取消正在执行的任务
+ * Cancel a running task
  */
 export async function POST(request: NextRequest) {
     try {
@@ -20,15 +21,15 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        console.log(`[Stop] Received stop request: ${taskId}`);
+        logger.debug(`[Stop] Received stop request: ${taskId}`);
 
-        // 1. 取消任务（通过 AbortController）
+        // 1. Abort the task (via AbortController)
         const aborted = abortTask(taskId);
 
-        // 2. 通知前端任务已取消
-        notifyTask(taskId, TaskStatus.CANCELLED, { message: "任务已取消" });
+        // 2. Notify the frontend that the task has been cancelled
+        notifyTask(taskId, TaskStatus.CANCELLED, { message: "Task cancelled" });
 
-        // 3. 更新数据库状态
+        // 3. Update database status
         const db = await getDb();
         await db
             .update(tasks)
@@ -40,7 +41,7 @@ export async function POST(request: NextRequest) {
             wasRunning: aborted,
         });
     } catch (error) {
-        console.error("[Stop] Error:", error);
+        logger.error("[Stop] Error:", error);
         return NextResponse.json(
             { error: "Failed to stop task" },
             { status: 500 },

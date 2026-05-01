@@ -1,6 +1,4 @@
 import {
-    Handle,
-    Position,
     useNodeId,
     useNodesData,
     type NodeProps,
@@ -41,7 +39,7 @@ const ManualInputTab = ({
     );
     const { manualValue } = state;
 
-    // 查找下游节点
+    // Locate downstream nodes
     const downstreamEdge = useMemo(
         () => edges.find((e) => e.source === id),
         [edges, id],
@@ -52,19 +50,19 @@ const ManualInputTab = ({
     );
     const downstreamNode = downstreamNodeData[0];
 
-    // Add Text 按钮：仅在没有下游节点时添加新节点
+    // Add-text control only spawns neighbours when absent
     const addTextNode = () => {
         if (!manualValue.trim() || !id) return;
         if (!downstreamNodeId) {
             expands(id, [{ type: "textNode", data: { texts: [manualValue] } }]);
-            // 不再清空 manualValue，保留用户输入的值用于工作流执行
+            // Keep manualValue so execution reuses composer text
         }
     };
 
-    // onBlur: 如果有下游节点则自动更新
+    // On blur propagate manual edits when wired downstream
     const handleBlur = () => {
         if (!manualValue.trim() || !downstreamNodeId) return;
-        // 假设下游节点类型为 textNode，且有 texts 字段
+        // Assume downstream textNode owns a texts payload
         updateNode(downstreamNodeId, {
             ...downstreamNode?.data,
             texts: [manualValue],
@@ -106,11 +104,10 @@ const LibraryTab = ({ locked }: { locked?: boolean }) => {
     );
 };
 
-// 工作流执行配置 - 手动输入模式（透传用户输入的文本，无需调用 API）
-// 不设置 feature，后端会直接从 rawConfig.manualValue 读取并透传
+// Workflow config: manual typing mode (forward text without API)
+// Omit feature; backend reads rawConfig.manualValue verbatim
 const manualWorkflowConfig = {
     feature: "",
-    label: "Manual Input", // Kept as internal label or use generic
     outputType: "textNode",
     outputField: "texts" as const,
     supportsBatch: false,
@@ -132,7 +129,7 @@ const AddTextNode: React.FC<NodeProps> = ({ selected, data }) => {
     const t = useTranslations("Workspace.nodes");
     const tBase = useTranslations("Workspace.nodes.base");
 
-    // 切换锁定状态
+    // Toggle lock state
     const handleToggleLock = useCallback(() => {
         if (id) {
             updates(id, { ...data, locked: !locked });
@@ -140,21 +137,21 @@ const AddTextNode: React.FC<NodeProps> = ({ selected, data }) => {
     }, [id, data, locked, updates]);
 
     const handleTabChange = (value: string) => {
-        // 锁定时不允许切换 Tab
+        // Locks block tab switches
         if (locked) return;
         if (id) {
             updates(id, { ...data, activeTab: value });
         }
     };
 
-    // 获取带配置的 data（manual 模式不需要 feature）
+    // Build exec payload — manual omits feature
     const dataWithFeature = useMemo(() => {
         return data;
     }, [data]);
 
-    // 获取统一的工作流配置
+    // Central workflow executor config blob
     const getWorkflowConfig = useCallback(() => {
-        // 锁定按钮 - 只在创作模式下显示
+        // Lock control — create-mode only
         const lockAction =
             workspaceMode === "create" ? (
                 <NodeHeaderAction
@@ -244,18 +241,6 @@ const AddTextNode: React.FC<NodeProps> = ({ selected, data }) => {
                 </Tabs>
             </div>
 
-            <Handle
-                type="target"
-                position={Position.Left}
-                id="a"
-                isConnectable={true}
-            />
-            <Handle
-                type="source"
-                position={Position.Right}
-                id="b"
-                isConnectable={true}
-            />
         </BaseNode>
     );
 };

@@ -1,28 +1,7 @@
 import toast from "react-hot-toast";
 
 /**
- * 登录页面路径
- */
-const LOGIN_PATH = "/login";
-
-/**
- * 处理认证错误（401/403），跳转到登录页面
- */
-function handleAuthError(status: number): void {
-    // 只在客户端执行跳转
-    if (typeof window !== "undefined") {
-        const currentPath = window.location.pathname;
-        // 避免在登录页面重复跳转
-        if (currentPath !== LOGIN_PATH && currentPath !== "/signup") {
-            // 保存当前页面路径，登录后可以跳转回来
-            const redirectUrl = encodeURIComponent(window.location.href);
-            window.location.href = `${LOGIN_PATH}?redirect=${redirectUrl}`;
-        }
-    }
-}
-
-/**
- * API 响应类型
+ * API response type
  */
 interface ApiResponse<T = unknown> {
     success?: boolean;
@@ -33,41 +12,37 @@ interface ApiResponse<T = unknown> {
 }
 
 /**
- * 请求配置选项
+ * Request configuration options
  */
 interface FetchOptions extends Omit<RequestInit, "body"> {
     /**
-     * 是否显示错误 toast，默认为 true
+     * Whether to show an error toast, defaults to true
      */
     showErrorToast?: boolean;
     /**
-     * 是否显示成功 toast，默认为 false
+     * Whether to show a success toast, defaults to false
      */
     showSuccessToast?: boolean;
     /**
-     * 自定义成功消息
+     * Custom success message
      */
     successMessage?: string;
     /**
-     * 自定义错误消息
+     * Custom error message
      */
     errorMessage?: string;
     /**
-     * 是否自动解析 JSON，默认为 true
+     * Whether to automatically parse JSON, defaults to true
      */
     parseJson?: boolean;
     /**
-     * 响应超时时间（毫秒），默认为 30000
+     * Response timeout in milliseconds, defaults to 30000
      */
     timeout?: number;
-    /**
-     * 是否在 401/403 错误时自动跳转到登录页面，默认为 true
-     */
-    redirectOnAuthError?: boolean;
 }
 
 /**
- * 获取错误消息
+ * Get error message
  */
 function getErrorMessage(error: unknown): string {
     if (error instanceof Error) {
@@ -88,8 +63,8 @@ function getErrorMessage(error: unknown): string {
 }
 
 /**
- * 提取 API 响应中的错误信息
- * 优先级：error > errorMessage > message
+ * Extract error information from an API response
+ * Priority: error > errorMessage > message
  */
 function extractErrorFromResponse(data: unknown): string | null {
     if (typeof data !== "object" || data === null) {
@@ -98,13 +73,13 @@ function extractErrorFromResponse(data: unknown): string | null {
 
     const response = data as Record<string, unknown>;
 
-    // 尝试从常见的错误字段中提取错误信息（按优先级）
-    // 1. error 字段（常见的错误格式）
+    // Try to extract the error message from common error fields (by priority)
+    // 1. error field (common error format)
     if (typeof response.error === "string" && response.error.trim()) {
         return response.error.trim();
     }
 
-    // 2. errorMessage 字段
+    // 2. errorMessage field
     if (
         typeof response.errorMessage === "string" &&
         response.errorMessage.trim()
@@ -112,7 +87,7 @@ function extractErrorFromResponse(data: unknown): string | null {
         return response.errorMessage.trim();
     }
 
-    // 3. message 字段（仅当明确表示错误时）
+    // 3. message field (only when it clearly indicates an error)
     if (
         typeof response.message === "string" &&
         response.message.trim() &&
@@ -125,25 +100,25 @@ function extractErrorFromResponse(data: unknown): string | null {
 }
 
 /**
- * 统一的 fetch 包装函数
+ * Unified fetch wrapper function
  *
  * @example
- * // 简单的 GET 请求
+ * // Simple GET request
  * const data = await apiClient('/api/users');
  *
  * @example
- * // POST 请求并显示成功消息
+ * // POST request with success message
  * const result = await apiClient('/api/users', {
  *   method: 'POST',
  *   body: JSON.stringify({ name: 'John' }),
  *   showSuccessToast: true,
- *   successMessage: '创建成功！',
+ *   successMessage: 'Created successfully!',
  * });
  *
  * @example
- * // 自定义错误处理
+ * // Custom error handling
  * const data = await apiClient('/api/users', {
- *   errorMessage: '加载用户失败',
+ *   errorMessage: 'Failed to load users',
  * });
  */
 export async function apiClient<T = unknown>(
@@ -157,14 +132,13 @@ export async function apiClient<T = unknown>(
         errorMessage,
         parseJson = true,
         timeout = 30000,
-        redirectOnAuthError = true,
         ...fetchOptions
     } = options;
 
-    let errorToastShown = false; // 追踪是否已显示错误 toast
+    let errorToastShown = false; // Track whether an error toast has already been shown
 
     try {
-        // 创建带超时的 fetch 请求
+        // Create a fetch request with timeout
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), timeout);
 
@@ -178,7 +152,7 @@ export async function apiClient<T = unknown>(
             clearTimeout(timeoutId);
         }
 
-        // 处理响应
+        // Handle response
         let data: unknown;
         if (parseJson) {
             try {
@@ -190,19 +164,14 @@ export async function apiClient<T = unknown>(
             data = await response.text();
         }
 
-        // 检查 HTTP 状态
+        // Check HTTP status
         if (!response.ok) {
-            // 处理认证错误：401（未认证）和 403（无权限）
+            // Handle authentication errors: 401 (unauthenticated) and 403 (forbidden)
             if (response.status === 401 || response.status === 403) {
-                // 401/403 错误 - 跳转到登录页
-                if (redirectOnAuthError) {
-                    handleAuthError(response.status);
-                }
-                // 仍然抛出错误，但可能页面会跳转
                 const authErrorMsg =
                     response.status === 401
-                        ? "登录已过期，请重新登录"
-                        : "您没有权限访问此资源";
+                        ? "未授权访问"
+                        : "拒绝访问";
                 if (showErrorToast) {
                     toast.error(authErrorMsg);
                     errorToastShown = true;
@@ -212,7 +181,7 @@ export async function apiClient<T = unknown>(
                 throw error;
             }
 
-            // 优先级：自定义错误消息 > 后端返回的错误 > 默认错误消息
+            // Priority: custom error message > backend error > default error message
             const backendError = extractErrorFromResponse(data);
             const errorMsg =
                 errorMessage ||
@@ -220,9 +189,9 @@ export async function apiClient<T = unknown>(
                 `请求失败: ${response.status} ${response.statusText}`;
 
             if (showErrorToast) {
-                // 后端错误信息自动显示到 toast
+                // Backend error message is automatically shown in the toast
                 toast.error(errorMsg);
-                errorToastShown = true; // 标记已显示
+                errorToastShown = true; // Mark as shown
             }
 
             const error = new Error(errorMsg);
@@ -230,7 +199,7 @@ export async function apiClient<T = unknown>(
             throw error;
         }
 
-        // 显示成功消息
+        // Show success message
         if (showSuccessToast) {
             const message = successMessage || "操作成功";
             toast.success(message);
@@ -238,7 +207,7 @@ export async function apiClient<T = unknown>(
 
         return data as T;
     } catch (error) {
-        // 处理网络错误和其他错误
+        // Handle network errors and other errors
         if (error instanceof Error && error.name === "AbortError") {
             const msg = errorMessage || "请求超时，请重试";
             if (showErrorToast && !errorToastShown) {
@@ -248,12 +217,12 @@ export async function apiClient<T = unknown>(
             throw new Error(msg);
         }
 
-        // 如果已经显示过错误 toast，就直接抛出，不再显示
+        // If an error toast has already been shown, just rethrow without showing again
         if (errorToastShown) {
             throw error;
         }
 
-        // 显示通用错误消息（仅当还未显示过 toast 时）
+        // Show a generic error message (only when no toast has been shown yet)
         const msg = errorMessage || getErrorMessage(error);
         if (showErrorToast) {
             toast.error(msg);
@@ -264,7 +233,7 @@ export async function apiClient<T = unknown>(
 }
 
 /**
- * 便捷方法：GET 请求
+ * Convenience method: GET request
  */
 export async function apiGet<T = unknown>(
     url: string,
@@ -277,7 +246,7 @@ export async function apiGet<T = unknown>(
 }
 
 /**
- * 便捷方法：POST 请求
+ * Convenience method: POST request
  */
 export async function apiPost<T = unknown>(
     url: string,
@@ -296,7 +265,7 @@ export async function apiPost<T = unknown>(
 }
 
 /**
- * 便捷方法：PUT 请求
+ * Convenience method: PUT request
  */
 export async function apiPut<T = unknown>(
     url: string,
@@ -315,7 +284,7 @@ export async function apiPut<T = unknown>(
 }
 
 /**
- * 便捷方法：DELETE 请求
+ * Convenience method: DELETE request
  */
 export async function apiDelete<T = unknown>(
     url: string,
@@ -328,7 +297,7 @@ export async function apiDelete<T = unknown>(
 }
 
 /**
- * 便捷方法：PATCH 请求
+ * Convenience method: PATCH request
  */
 export async function apiPatch<T = unknown>(
     url: string,

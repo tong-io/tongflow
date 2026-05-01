@@ -1,0 +1,29 @@
+# Dependencies & build artifacts
+node_modules
+.next
+out
+dist
+wheelhouse
+dist-electron
+release
+electron-out
+.venv
+*.tsbuildinfo
+
+# Local env & runtime data (never bake into image)
+.env
+.env.*
+!.env.example
+data
+.tongflow
+
+# Large / optional local trees (not required for Next standalone web build)
+plugins
+
+# VCS & tooling
+.git
+.github
+.cursor
+
+# OS / editor
+.DS_Store

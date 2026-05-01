@@ -1,4 +1,4 @@
-import { Handle, Position, type NodeProps } from "@xyflow/react";
+import { type NodeProps } from "@xyflow/react";
 import { memo, useState, useEffect } from "react";
 import { Image as ImageIcon, Maximize2, X } from "lucide-react";
 import { createPortal } from "react-dom";
@@ -16,14 +16,15 @@ import { DropdownMenuLabel } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { Waterfall } from "@/components/ui/waterfall";
 import {
-    useR2AsyncLoader,
-    useR2AsyncLoaderBatch,
-} from "@/hooks/use-r2-async-loader";
+    useFileAsyncLoader,
+    useFileAsyncLoaderBatch,
+} from "@/hooks/use-file-async-loader";
 import { useTranslations } from "next-intl";
+import { logger } from "@/lib/logger";
 
-import { maxWidthClassForMediaDimensions } from "./media-node-max-width";
+import { proportionalMediaNodeWidthPx } from "./media-node-max-width";
 
-// 单个图片全屏预览modal
+// Single-image lightbox modal
 const FullScreenImageModal = ({
     fileKey,
     onClose,
@@ -32,7 +33,7 @@ const FullScreenImageModal = ({
     onClose: () => void;
 }) => {
     const [mounted, setMounted] = useState(false);
-    const { url } = useR2AsyncLoader(fileKey, { priority: "high" });
+    const { url } = useFileAsyncLoader(fileKey, { priority: "high" });
 
     useEffect(() => {
         setMounted(true);
@@ -76,7 +77,7 @@ const FullScreenImageModal = ({
     return createPortal(content, document.body);
 };
 
-// 多个图片全屏预览modal with 瀑布流
+// Multi-image masonry lightbox
 const FullScreenWaterfallImageModal = ({
     imageKeys,
     onClose,
@@ -85,7 +86,7 @@ const FullScreenWaterfallImageModal = ({
     onClose: () => void;
 }) => {
     const [mounted, setMounted] = useState(false);
-    const { urls } = useR2AsyncLoaderBatch(imageKeys, { priority: "normal" });
+    const { urls } = useFileAsyncLoaderBatch(imageKeys, { priority: "normal" });
 
     useEffect(() => {
         setMounted(true);
@@ -172,17 +173,17 @@ const ImageNode = ({ selected, data }: NodeProps) => {
         height: number;
     } | null>(null);
 
-    // 为单个图片使用异步加载
-    const { url: singleImageUrl } = useR2AsyncLoader(keys[0], {
+    // Lazy-load one asset via async hook
+    const { url: singleImageUrl } = useFileAsyncLoader(keys[0], {
         priority: "high",
     });
 
-    // 为多个图片使用批量异步加载
-    const { urls: batchUrls } = useR2AsyncLoaderBatch(keys.slice(0, 6), {
+    // Batch lazy-load multiple assets
+    const { urls: batchUrls } = useFileAsyncLoaderBatch(keys.slice(0, 6), {
         priority: "normal",
     });
 
-    // 获取单个图片的尺寸
+    // Resolve intrinsic dimensions for one image
     useEffect(() => {
         if (!singleImageUrl) {
             setImageDimensions(null);
@@ -206,9 +207,9 @@ const ImageNode = ({ selected, data }: NodeProps) => {
     const isSingle = keys.length === 1;
     const count = keys.length;
 
-    const nodeMaxWidthClass =
+    const mediaNodeWidthPx =
         isSingle && imageDimensions
-            ? maxWidthClassForMediaDimensions(
+            ? proportionalMediaNodeWidthPx(
                   imageDimensions.width,
                   imageDimensions.height,
               )
@@ -219,7 +220,14 @@ const ImageNode = ({ selected, data }: NodeProps) => {
             <BaseNode
                 selected={selected}
                 count={count}
-                className={nodeMaxWidthClass}
+                className={
+                    mediaNodeWidthPx != null ? "min-w-0 max-w-none" : undefined
+                }
+                style={
+                    mediaNodeWidthPx != null
+                        ? { width: mediaNodeWidthPx }
+                        : undefined
+                }
             >
                 <NodeHeader>
                     <NodeHeaderIcon>
@@ -250,7 +258,7 @@ const ImageNode = ({ selected, data }: NodeProps) => {
                             </Button>
                         )}
                         <NodeHeaderComboAction
-                            onClick={() => console.log("组合模式切换")}
+                            onClick={() => logger.debug("组合模式切换")}
                         />
                         <NodeHeaderMenuAction label={t("moreOptions")}>
                             <DropdownMenuLabel>
@@ -287,7 +295,7 @@ const ImageNode = ({ selected, data }: NodeProps) => {
                     <div className="w-full p-2">
                         <div className="grid grid-cols-3 gap-2">
                             {keys.slice(0, 6).map((key, index) => {
-                                // 如果是最后一个格子且还有更多图片，显示 +N
+                                // Overlay +N chip on final thumb when overflow
                                 const isLastAndMore = index === 5 && count > 6;
                                 const remainingCount = count - 6;
                                 const url = batchUrls.get(key);
@@ -331,18 +339,6 @@ const ImageNode = ({ selected, data }: NodeProps) => {
                     </div>
                 )}
 
-                <Handle
-                    type="target"
-                    position={Position.Left}
-                    id="a"
-                    isConnectable={true}
-                />
-                <Handle
-                    type="source"
-                    position={Position.Right}
-                    id="b"
-                    isConnectable={true}
-                />
             </BaseNode>
 
             {/* Full screen modals - rendered outside BaseNode */}

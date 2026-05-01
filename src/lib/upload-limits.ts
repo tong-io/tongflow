@@ -1,10 +1,10 @@
 /**
- * 上传限制配置
- * 积分充值制，所有用户统一限制
+ * Upload limit configuration
+ * Credit recharge model; all users share the same limits
  */
 
 // ============================================================================
-// 验证结果类型
+// Validation result type
 // ============================================================================
 
 export interface ValidationResult {

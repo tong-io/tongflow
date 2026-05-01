@@ -1,75 +1,14 @@
 /**
- * Server-side Modal worker deploy (same behavior as electron/main deployModalWorkers).
- * Used by POST /api/modal/deploy when running the Next.js server (pnpm dev / self-hosted).
+ * Runs `modal deploy` on plugin deploy scripts listed in `.tongflow/plugins.registry.json`
+ * (artifact of `pnpm plugins:sync`, which scans TongFlow annotations under `plugins/`).
+ * Platform-specific Modal code lives in each plugin under `plugins/`, not in this repo root.
  *
- * When `dist-electron/python` + `dist-electron/wheelhouse` exist (from
- * `pnpm desktop:python:prepare` / `pnpm desktop:wheelhouse:prepare`), we create
- * `.openflow-modal-venv` with offline `pip install modal` — same idea as Electron's
- * userData pyenv, but pinned under the repo for Next.js.
+ * Used by POST /api/modal/deploy when running the Next.js server (pnpm dev / self-hosted).
  */
 
-import fs from "node:fs";
 import path from "node:path";
-import { execFile, spawn } from "node:child_process";
-import { loadPluginsRegistry } from "@/lib/plugins-registry.server";
-
-function readJsonFile(p: string): unknown {
-    return JSON.parse(fs.readFileSync(p, "utf8")) as unknown;
-}
-
-function platformKey(): "darwin" | "win32" | null {
-    if (process.platform === "darwin") return "darwin";
-    if (process.platform === "win32") return "win32";
-    return null;
-}
-
-/** Same layout as `electron/main.ts` getEmbeddedPythonExecutable (dev cwd). */
-function getEmbeddedPythonExecutable(): string | null {
-    const pk = platformKey();
-    if (!pk) return null;
-
-    const base = path.join(process.cwd(), "dist-electron", "python", pk);
-    const candidates =
-        process.platform === "win32"
-            ? [
-                  path.join(base, "python", "python.exe"),
-                  path.join(base, "python.exe"),
-              ]
-            : [
-                  path.join(base, "python", "bin", "python3"),
-                  path.join(base, "python", "bin", "python"),
-              ];
-
-    for (const c of candidates) {
-        if (fs.existsSync(c)) return c;
-    }
-    return null;
-}
-
-function getWheelhouseDir(): string | null {
-    const pk = platformKey();
-    if (!pk) return null;
-    const p = path.join(process.cwd(), "dist-electron", "wheelhouse", pk);
-    return fs.existsSync(p) ? p : null;
-}
-
-function execFileP(
-    file: string,
-    args: string[],
-    opts: { cwd?: string; env?: NodeJS.ProcessEnv } = {},
-): Promise<void> {
-    return new Promise((resolve, reject) => {
-        execFile(
-            file,
-            args,
-            { ...opts, windowsHide: true },
-            (err) => {
-                if (err) reject(err);
-                else resolve();
-            },
-        );
-    });
-}
+import { spawn } from "node:child_process";
+import { listModalRunnerDeployScriptsFromRegistry } from "@/lib/plugin-registry-deploy-scripts";
 
 async function canRunModal(exe: string): Promise<boolean> {
     try {
@@ -91,44 +30,6 @@ async function canRunModal(exe: string): Promise<boolean> {
     }
 }
 
-/**
- * Offline venv at repo root, using embedded Python + wheelhouse (mirrors Electron ensureModalInstalledOffline).
- */
-async function ensureBundledModalVenv(): Promise<string | null> {
-    const embedded = getEmbeddedPythonExecutable();
-    const wheelhouse = getWheelhouseDir();
-    if (!embedded || !wheelhouse) return null;
-
-    const venvRoot = path.join(process.cwd(), ".openflow-modal-venv");
-    const marker = path.join(venvRoot, ".openflow_modal_ok");
-    const venvPython =
-        process.platform === "win32"
-            ? path.join(venvRoot, "Scripts", "python.exe")
-            : path.join(venvRoot, "bin", "python3");
-
-    if (fs.existsSync(venvRoot) && fs.existsSync(venvPython)) {
-        if (fs.existsSync(marker) && (await canRunModal(venvPython))) {
-            return venvPython;
-        }
-        fs.rmSync(venvRoot, { recursive: true, force: true });
-    }
-
-    await execFileP(embedded, ["-m", "venv", venvRoot]);
-    await execFileP(venvPython, [
-        "-m",
-        "pip",
-        "install",
-        "--no-index",
-        "--find-links",
-        wheelhouse,
-        "modal",
-    ]);
-    fs.writeFileSync(marker, "ok\n");
-
-    if (!(await canRunModal(venvPython))) return null;
-    return venvPython;
-}
-
 export function requireModalTokenEnv(): void {
     const id = process.env.MODAL_TOKEN_ID?.trim();
     const secret = process.env.MODAL_TOKEN_SECRET?.trim();
@@ -140,36 +41,9 @@ export function requireModalTokenEnv(): void {
     }
 }
 
+/** Deploy targets from the plugins registry (`runner: modal`). */
 export function listModalEntryFiles(): string[] {
-    const modalDir = path.join(process.cwd(), "modal");
-    const cpuDir = path.join(modalDir, "cpu");
-    const gpuDir = path.join(modalDir, "gpu");
-    const files: string[] = [];
-
-    const pushPyFiles = (dir: string) => {
-        if (!fs.existsSync(dir)) return;
-        for (const name of fs.readdirSync(dir)) {
-            if (name.endsWith(".py")) files.push(path.join(dir, name));
-        }
-    };
-    pushPyFiles(cpuDir);
-    pushPyFiles(gpuDir);
-
-    // Plugins: deploy.py under `plugins/<pluginId>/` (see config/plugins.registry.json)
-    try {
-        const reg = loadPluginsRegistry();
-        for (const pluginId of Object.keys(reg.plugins)) {
-            const p = reg.plugins[pluginId]?.runners.modal;
-            if (!p) continue;
-            const entry = p.deployFile || "deploy.py";
-            const dir = path.join(process.cwd(), p.localSubdir);
-            const file = path.join(dir, entry);
-            if (fs.existsSync(file)) files.push(file);
-        }
-    } catch {
-        // ignore invalid/missing plugins registry
-    }
-    return files.sort();
+    return listModalRunnerDeployScriptsFromRegistry(process.cwd());
 }
 
 /** Python that can run `python -m modal` (used by deploy and setup APIs). */
@@ -183,26 +57,18 @@ export async function resolvePython(): Promise<string> {
         if (await canRunModal(cmd)) return cmd;
     }
 
-    const fromBundledVenv = await ensureBundledModalVenv();
-    if (fromBundledVenv) return fromBundledVenv;
-
-    const embedded = getEmbeddedPythonExecutable();
-    if (embedded && (await canRunModal(embedded))) return embedded;
-
     for (const cmd of ["python3", "python"]) {
         if (await canRunModal(cmd)) return cmd;
     }
 
     throw new Error(
-        "Could not run `python -m modal`. Options: (1) set MODAL_PYTHON or PYTHON; " +
-            "(2) run `pnpm desktop:python:prepare` and `pnpm desktop:wheelhouse:prepare`, " +
-            "then restart `next dev` to create `.openflow-modal-venv` from the bundled wheelhouse; " +
-            "(3) install Modal: pip install modal.",
+        "Could not run `python -m modal`. Set MODAL_PYTHON or PYTHON to a Python that has " +
+            "the Modal SDK (`pip install modal`), or install `modal` on your default python3/python.",
     );
 }
 
 /**
- * Deploy every `modal/cpu/*.py` and `modal/gpu/*.py` entry, sequentially.
+ * Deploy each plugin Modal entry script (`deploy.py`) from the plugins registry.
  */
 export async function runModalDeploy(
     onLine: (line: string) => void,
@@ -210,7 +76,10 @@ export async function runModalDeploy(
     requireModalTokenEnv();
     const files = listModalEntryFiles();
     if (files.length === 0) {
-        throw new Error("No Modal python entry files found to deploy.");
+        throw new Error(
+            "No Modal deploy scripts found from plugins.registry.json. Run `pnpm plugins:sync` " +
+                "with `plugins/` present, or verify `.tongflow/plugins.registry.json` lists modal plugins.",
+        );
     }
 
     const python = await resolvePython();

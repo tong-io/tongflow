@@ -1,6 +1,4 @@
 import {
-    Handle,
-    Position,
     useNodeId,
     useNodesData,
     type NodeProps,
@@ -26,23 +24,8 @@ import useFlow from "@/hooks/use-flow";
 import { useNodeState } from "@/hooks/use-node-data";
 import { NodeTextarea } from "../base/node-textarea";
 import { useTranslations } from "next-intl";
-import {
-    DEFAULT_GEMINI_TEXT_MODEL,
-    GEMINI_TEXT_MODEL_OPTIONS,
-} from "@/constants/gemini-text-models";
-import {
-    DEFAULT_OPENAI_TEXT_MODEL,
-    OPENAI_TEXT_MODEL_OPTIONS,
-} from "@/constants/openai-text-models";
-import { clampToAllowedModel } from "@/utils/node-model-feature";
-import { registryModelOptionLabel } from "@/utils/node-model-select-label";
-import { NodeModelSelect } from "../base/node-model-select";
-import { NodePluginSelect } from "../base/node-plugin-select";
-import { useNodePluginIds } from "@/hooks/use-plugins-registry";
 
-const COMBINE_TEXT_FEATURES = ["combine_text"] as const;
-
-// 思考框组件
+// Reasoning box component
 const ReasoningBox = ({ content }: { content: string }) => {
     const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -79,10 +62,9 @@ const ReasoningBox = ({ content }: { content: string }) => {
     );
 };
 
-// 工作流执行配置
+// Workflow execution config
 const workflowConfig = {
     feature: "combine_text",
-    label: "Combine Text",
     outputType: "textNode",
     outputField: "texts" as const,
     supportsBatch: false,
@@ -109,11 +91,11 @@ const TextsGenTextNode = ({ selected, data }: NodeProps) => {
     const updates = useFlow((s) => s.updates);
     const id = useNodeId()!;
 
-    // 从所有上游 textNode 收集文本（合并模式）
+    // Collect text from all upstream textNodes (merge mode)
     const fromNodes = useNodesData(ids);
     const textNodes = fromNodes.filter((node) => node.type === "textNode");
 
-    // 收集所有上游 textNode 的文本
+    // Collect text from all upstream textNodes
     const texts: string[] = useMemo(() => {
         if (textNodes.length > 0) {
             return textNodes.flatMap((node) => (node.data as any)?.texts || []);
@@ -121,54 +103,27 @@ const TextsGenTextNode = ({ selected, data }: NodeProps) => {
         return localTexts;
     }, [textNodes, localTexts]);
 
-    // 使用 Hook 管理用户输入的提示词
+    // Use the hook to manage the user-entered prompt
     const [state, setState] = useNodeState(
         {
             userPrompt: "",
-            model: "auto",
-            geminiModel: DEFAULT_GEMINI_TEXT_MODEL,
-            openaiModel: DEFAULT_OPENAI_TEXT_MODEL,
         },
         data,
     );
-    const { userPrompt, model, geminiModel, openaiModel } = state;
+    const { userPrompt } = state;
     const t = useTranslations("Workspace.nodes");
     const tBase = useTranslations("Workspace.nodes.base");
 
-    const MODEL_OPTIONS = [{ value: "auto", label: t("params.modelDefault") }];
-
-    const resolvedFeatureFromModel =
-        model === "auto" ? "combine_text" : `combine_text_${model}`;
-    const featureName = clampToAllowedModel(
-        (data as { feature?: string }).feature,
-        COMBINE_TEXT_FEATURES,
-        resolvedFeatureFromModel,
-    );
-
-    const usesGeminiCombineBackend = true;
-    const usesOpenAiCombineBackend = false;
-
-    const pluginOptions = useNodePluginIds("combine_text");
-    const pluginId = (
-        (data as any).pluginId ?? (data as any).pluginRepo ?? ""
-    ).trim();
-    useEffect(() => {
-        if (!pluginId) {
-            updates(id, { ...(data as any), pluginId: "tongflow-llm-gemini" });
-        }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [id]);
-
-    // 流式输出状态
+    // Streaming output state
     const [reasoningContent, setReasoningContent] = useState<string>("");
     const [showReasoningBox, setShowReasoningBox] = useState(false);
     const [_answerContent, setAnswerContent] = useState<string>("");
     const answerNodeIdRef = useRef<string | null>(null);
 
-    // 自定义任务更新处理（流式输出）
+    // Custom task updater — handles streaming deltas
     const handleTaskUpdate = useCallback(
         (task: any): boolean => {
-            // 处理任务完成/失败 - 重置状态
+            // Handle task completion/failure - reset state
             if (task?.status === "COMPLETED" || task?.status === "FAILED") {
                 setTimeout(() => {
                     setReasoningContent("");
@@ -176,11 +131,11 @@ const TextsGenTextNode = ({ selected, data }: NodeProps) => {
                     setShowReasoningBox(false);
                     answerNodeIdRef.current = null;
                 }, 500);
-                // 返回 true 表示已处理，不需要默认的节点创建逻辑
+                // Return true to indicate it was handled and the default node creation logic is not needed
                 return true;
             }
 
-            // 检查流式数据
+            // Check streaming data
             if (task?.data?.content) {
                 if (task?.data?.type === "reasoning") {
                     setReasoningContent((prev) =>
@@ -199,7 +154,7 @@ const TextsGenTextNode = ({ selected, data }: NodeProps) => {
                             ? `${prev}${task.data.content}`
                             : task.data.content;
 
-                        // 创建或更新输出节点
+                        // Create or update the output node
                         if (!answerNodeIdRef.current && id) {
                             const nodeIds = expands(id, [
                                 {
@@ -234,7 +189,6 @@ const TextsGenTextNode = ({ selected, data }: NodeProps) => {
             data={data}
             workflowConfig={{
                 ...workflowConfig,
-                feature: featureName,
                 title: t("titles.combineText"),
                 icon: <Wand2 className="h-5 w-5" />,
                 executeLabel: tBase("execute"),
@@ -252,15 +206,6 @@ const TextsGenTextNode = ({ selected, data }: NodeProps) => {
                         {
                             texts: inputTexts,
                             userPrompt,
-                            ...(pluginId
-                                ? { pluginId, nodeSlot: "combine_text" }
-                                : {}),
-                            ...(usesGeminiCombineBackend
-                                ? { geminiModel }
-                                : {}),
-                            ...(usesOpenAiCombineBackend
-                                ? { openaiModel }
-                                : {}),
                         },
                     ];
                 },
@@ -276,88 +221,6 @@ const TextsGenTextNode = ({ selected, data }: NodeProps) => {
             }
         >
             <div className="p-4 space-y-4">
-                {pluginOptions.length > 0 && (
-                    <NodePluginSelect
-                        value={pluginId}
-                        onValueChange={(value) =>
-                            updates(id, { ...(data as any), pluginId: value })
-                        }
-                        options={pluginOptions.map((r) => ({
-                            value: r,
-                            label: r,
-                        }))}
-                    />
-                )}
-                <NodeModelSelect
-                    value={featureName}
-                    onValueChange={(v) => {
-                        updates(id, { ...data, feature: v });
-                        if (v === "combine_text") setState({ model: "auto" });
-                    }}
-                    options={MODEL_OPTIONS.map((opt) => {
-                        const value = "combine_text";
-                        return {
-                            value,
-                            label: registryModelOptionLabel(value),
-                        };
-                    })}
-                />
-                {usesGeminiCombineBackend ? (
-                    <div className="flex items-center gap-2">
-                        <Label className="text-xs text-muted-foreground shrink-0 w-20">
-                            {t("params.geminiModel")}
-                        </Label>
-                        <Select
-                            value={geminiModel}
-                            onValueChange={(v) =>
-                                setState({ geminiModel: v })
-                            }
-                        >
-                            <SelectTrigger className="h-7 text-xs flex-1 min-w-0">
-                                <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent className="max-h-[min(280px,50vh)]">
-                                {GEMINI_TEXT_MODEL_OPTIONS.map((opt) => (
-                                    <SelectItem
-                                        key={opt.value}
-                                        value={opt.value}
-                                        className="text-xs"
-                                    >
-                                        {opt.label}
-                                    </SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
-                    </div>
-                ) : null}
-                {usesOpenAiCombineBackend ? (
-                    <div className="flex items-center gap-2">
-                        <Label className="text-xs text-muted-foreground shrink-0 w-20">
-                            {t("params.openaiModel")}
-                        </Label>
-                        <Select
-                            value={openaiModel}
-                            onValueChange={(v) =>
-                                setState({ openaiModel: v })
-                            }
-                        >
-                            <SelectTrigger className="h-7 text-xs flex-1 min-w-0">
-                                <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent className="max-h-[min(280px,50vh)]">
-                                {OPENAI_TEXT_MODEL_OPTIONS.map((opt) => (
-                                    <SelectItem
-                                        key={opt.value}
-                                        value={opt.value}
-                                        className="text-xs"
-                                    >
-                                        {opt.label}
-                                    </SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
-                    </div>
-                ) : null}
                 <div className="space-y-2">
                     <NodeTextarea
                         rows={6}
@@ -369,18 +232,6 @@ const TextsGenTextNode = ({ selected, data }: NodeProps) => {
                 </div>
             </div>
 
-            <Handle
-                type="target"
-                position={Position.Left}
-                id="a"
-                isConnectable={true}
-            />
-            <Handle
-                type="source"
-                position={Position.Right}
-                id="b"
-                isConnectable={true}
-            />
         </BaseNode>
     );
 };

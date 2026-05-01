@@ -30,7 +30,7 @@ const WhiteBoard = forwardRef<WhiteBoardRef, WhiteBoardProps>(
             const ctx = canvas.getContext("2d");
             if (!ctx) return;
 
-            // 设置画布大小和DPI
+            // Set canvas size and DPI
             const rect = canvas.parentElement?.getBoundingClientRect();
             if (rect) {
                 canvas.width = rect.width;
@@ -40,7 +40,7 @@ const WhiteBoard = forwardRef<WhiteBoardRef, WhiteBoardProps>(
                 canvas.height = 300;
             }
 
-            // 填充白色背景
+            // Fill with white background
             ctx.fillStyle = "white";
             ctx.fillRect(0, 0, canvas.width, canvas.height);
         }, []);

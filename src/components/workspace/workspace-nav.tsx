@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * Workspace 右上角：主题、语言、社区链接
+ * Workspace top-right corner: theme toggle, language selector, community links
  */
 
 import { useEffect, useState } from "react";

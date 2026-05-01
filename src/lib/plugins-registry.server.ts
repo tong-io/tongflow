@@ -9,6 +9,7 @@ import {
     type PluginsRegistry,
     type PluginConfig,
 } from "@/lib/plugins-registry-schema";
+import { logger } from "@/lib/logger";
 
 const DEFAULT_PATH = join(process.cwd(), ".tongflow", "plugins.registry.json");
 const LEGACY_PATH = join(process.cwd(), "config", "plugins.registry.json");
@@ -46,8 +47,7 @@ export function loadPluginsRegistry(): PluginsRegistry {
         cached = parsed.data;
         return cached;
     }
-    // eslint-disable-next-line no-console
-    console.warn(
+    logger.warn(
         "[plugins] Invalid plugins.registry.json, using empty:",
         parsed.error.message,
     );

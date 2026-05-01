@@ -4,6 +4,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "./tooltip";
 import { Button } from "./button";
 import { Mic, StopCircle, Trash } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { logger } from "@/lib/logger";
 
 interface Props {
     className?: string;
@@ -117,7 +118,7 @@ export const AudioRecorderWithVisualizer = ({
                 })
                 .catch((error) => {
                     alert(error);
-                    console.log(error);
+                    logger.error(error);
                 });
         }
     }
@@ -285,7 +286,7 @@ export const AudioRecorderWithVisualizer = ({
                 </div>
             ) : (
                 <div className="w-full space-y-3">
-                    {/* 波形可视化区域 */}
+                    {/* Waveform visualization area */}
                     <div className="relative w-full h-32 bg-muted rounded-lg overflow-hidden border">
                         <canvas
                             ref={canvasRef}
@@ -293,7 +294,7 @@ export const AudioRecorderWithVisualizer = ({
                             width={800}
                             height={128}
                         />
-                        {/* 录音时长显示 */}
+                        {/* Recording duration display */}
                         <div className="absolute top-3 left-3 flex items-center gap-2 bg-red-500 text-white px-3 py-1.5 rounded-full text-sm font-medium">
                             <div className="h-2 w-2 rounded-full bg-white animate-pulse" />
                             <span className="font-mono">
@@ -303,7 +304,7 @@ export const AudioRecorderWithVisualizer = ({
                         </div>
                     </div>
 
-                    {/* 控制按钮 */}
+                    {/* Control buttons */}
                     <div className="flex gap-2">
                         <Tooltip>
                             <TooltipTrigger asChild>

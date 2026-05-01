@@ -1,5 +1,5 @@
-import { Handle, Position, type NodeProps } from "@xyflow/react";
-import { memo, useRef, useState, useEffect, useLayoutEffect } from "react";
+import { type NodeProps } from "@xyflow/react";
+import { memo, useRef, useState, useEffect } from "react";
 import { Video as VideoIcon, Maximize2, X, Download } from "lucide-react";
 import { createPortal } from "react-dom";
 
@@ -20,14 +20,15 @@ import {
 import { Button } from "@/components/ui/button";
 import { Waterfall } from "@/components/ui/waterfall";
 import {
-    useR2AsyncLoader,
-    useR2AsyncLoaderBatch,
-} from "@/hooks/use-r2-async-loader";
+    useFileAsyncLoader,
+    useFileAsyncLoaderBatch,
+} from "@/hooks/use-file-async-loader";
 import { useTranslations } from "next-intl";
+import { logger } from "@/lib/logger";
 
-import { maxWidthClassForMediaDimensions } from "./media-node-max-width";
+import { proportionalMediaNodeWidthPx } from "./media-node-max-width";
 
-// 单个视频全屏预览modal
+// Single-video fullscreen modal
 const FullScreenVideoModal = ({
     fileKey,
     onClose,
@@ -36,7 +37,7 @@ const FullScreenVideoModal = ({
     onClose: () => void;
 }) => {
     const [mounted, setMounted] = useState(false);
-    const { url } = useR2AsyncLoader(fileKey, { priority: "high" });
+    const { url } = useFileAsyncLoader(fileKey, { priority: "high" });
 
     useEffect(() => {
         setMounted(true);
@@ -67,7 +68,7 @@ const FullScreenVideoModal = ({
                         <video
                             src={url}
                             controls
-                            className="w-full h-full max-w-full max-h-full"
+                            className="max-w-full max-h-full object-contain"
                             autoPlay
                         >
                             Your browser does not support the video tag.
@@ -83,7 +84,7 @@ const FullScreenVideoModal = ({
     return createPortal(content, document.body);
 };
 
-// 多个视频全屏预览modal with 瀑布流
+// Multi-video gallery modal
 const FullScreenWaterfallModal = ({
     videoKeys,
     onClose,
@@ -92,7 +93,7 @@ const FullScreenWaterfallModal = ({
     onClose: () => void;
 }) => {
     const [mounted, setMounted] = useState(false);
-    const { urls } = useR2AsyncLoaderBatch(videoKeys, { priority: "normal" });
+    const { urls } = useFileAsyncLoaderBatch(videoKeys, { priority: "normal" });
 
     useEffect(() => {
         setMounted(true);
@@ -122,7 +123,7 @@ const FullScreenWaterfallModal = ({
 
                 const handleLoadedMetadata = () => {
                     if (video.videoWidth && video.videoHeight) {
-                        // 根据视频的实际宽高比计算高度（固定宽度200）
+                        // Derive tile height using intrinsic ratio at fixed 200px width
                         const aspectRatio =
                             video.videoHeight / video.videoWidth;
                         setVideoHeight(200 * aspectRatio);
@@ -131,7 +132,7 @@ const FullScreenWaterfallModal = ({
 
                 video.addEventListener("loadedmetadata", handleLoadedMetadata);
 
-                // 如果视频已经加载过，直接调用
+                // Shortcut when metadata cached
                 if (video.readyState >= 1) {
                     handleLoadedMetadata();
                 }
@@ -144,7 +145,7 @@ const FullScreenWaterfallModal = ({
                 };
             }, [url]);
 
-            const height = videoHeight || 200 * 0.5625; // 默认 16:9
+            const height = videoHeight || 200 * 0.5625; // Default portrait baseline 16:9
 
             return (
                 <div
@@ -238,41 +239,50 @@ const VideoNode = ({ selected, data }: NodeProps) => {
         height: number;
     } | null>(null);
 
-    // 为单个视频使用异步加载
-    const { url: singleVideoUrl } = useR2AsyncLoader(keys[0], {
+    // Async embed one remote video preview
+    const { url: singleVideoUrl } = useFileAsyncLoader(keys[0], {
         priority: "high",
     });
 
-    // 为多个视频使用批量异步加载
-    const { urls: batchUrls } = useR2AsyncLoaderBatch(keys.slice(0, 6), {
+    // Batch hydrate many clips
+    const { urls: batchUrls } = useFileAsyncLoaderBatch(keys.slice(0, 6), {
         priority: "normal",
     });
 
     const isSingle = keys.length === 1;
     const count = keys.length;
 
-    useLayoutEffect(() => {
+    // Mirror image-node trick: detached video for intrinsic ratio before mount
+    useEffect(() => {
         if (!isSingle || !singleVideoUrl) {
             setVideoDimensions(null);
             return;
         }
-        const el = singleVideoRef.current;
-        if (!el) {
-            return;
-        }
-        const onLoaded = () => {
-            const w = el.videoWidth;
-            const h = el.videoHeight;
+
+        const video = document.createElement("video");
+        video.preload = "metadata";
+
+        const onLoadedMetadata = () => {
+            const w = video.videoWidth;
+            const h = video.videoHeight;
             if (w > 0 && h > 0) {
                 setVideoDimensions({ width: w, height: h });
+            } else {
+                setVideoDimensions(null);
             }
         };
-        el.addEventListener("loadedmetadata", onLoaded);
-        if (el.readyState >= 1) {
-            onLoaded();
-        }
+
+        const onError = () => setVideoDimensions(null);
+
+        video.addEventListener("loadedmetadata", onLoadedMetadata);
+        video.addEventListener("error", onError);
+        video.src = singleVideoUrl;
+
         return () => {
-            el.removeEventListener("loadedmetadata", onLoaded);
+            video.removeEventListener("loadedmetadata", onLoadedMetadata);
+            video.removeEventListener("error", onError);
+            video.removeAttribute("src");
+            video.load();
         };
     }, [isSingle, singleVideoUrl]);
 
@@ -283,9 +293,9 @@ const VideoNode = ({ selected, data }: NodeProps) => {
         window.open(downloadUrl, "_blank");
     };
 
-    const nodeMaxWidthClass =
+    const mediaNodeWidthPx =
         isSingle && videoDimensions
-            ? maxWidthClassForMediaDimensions(
+            ? proportionalMediaNodeWidthPx(
                   videoDimensions.width,
                   videoDimensions.height,
               )
@@ -293,7 +303,18 @@ const VideoNode = ({ selected, data }: NodeProps) => {
 
     return (
         <>
-            <BaseNode selected={selected} count={count} className={nodeMaxWidthClass}>
+            <BaseNode
+                selected={selected}
+                count={count}
+                className={
+                    mediaNodeWidthPx != null ? "min-w-0 max-w-none" : undefined
+                }
+                style={
+                    mediaNodeWidthPx != null
+                        ? { width: mediaNodeWidthPx }
+                        : undefined
+                }
+            >
                 <NodeHeader>
                     <NodeHeaderIcon>
                         <VideoIcon />
@@ -323,7 +344,7 @@ const VideoNode = ({ selected, data }: NodeProps) => {
                             </Button>
                         )}
                         <NodeHeaderComboAction
-                            onClick={() => console.log("组合模式切换")}
+                            onClick={() => logger.debug("组合模式切换")}
                         />
                         <NodeHeaderMenuAction label={t("moreOptions")}>
                             <DropdownMenuLabel>
@@ -351,7 +372,7 @@ const VideoNode = ({ selected, data }: NodeProps) => {
 
                 {/* Content */}
                 {isSingle ? (
-                    // Single video display
+                    // Single-player layout akin to image node with resolution badge
                     <div
                         className="relative w-full nodrag"
                         onPointerDown={(e) => e.stopPropagation()}
@@ -362,7 +383,7 @@ const VideoNode = ({ selected, data }: NodeProps) => {
                                 src={singleVideoUrl}
                                 controls
                                 controlsList="nodownload"
-                                className="w-full h-auto"
+                                className="w-full h-auto object-contain"
                                 preload="metadata"
                                 onMouseEnter={() =>
                                     singleVideoRef.current?.play()
@@ -378,6 +399,12 @@ const VideoNode = ({ selected, data }: NodeProps) => {
                                 {t("loading")}
                             </div>
                         )}
+                        {videoDimensions && (
+                            <div className="absolute bottom-2 right-2 text-xs text-white bg-black/50 px-2 py-1 rounded pointer-events-none">
+                                {videoDimensions.width} ×{" "}
+                                {videoDimensions.height}
+                            </div>
+                        )}
                     </div>
                 ) : (
                     // Multiple videos with Grid layout
@@ -387,7 +414,7 @@ const VideoNode = ({ selected, data }: NodeProps) => {
                     >
                         <div className="grid grid-cols-3 gap-2">
                             {keys.slice(0, 6).map((key, index) => {
-                                // 如果是最后一个格子且还有更多视频，显示 +N
+                                // Overflow chip on thumbnail rail
                                 const isLastAndMore =
                                     index === 5 && keys.length > 6;
                                 const remainingCount = keys.length - 6;
@@ -453,18 +480,6 @@ const VideoNode = ({ selected, data }: NodeProps) => {
                     </div>
                 )}
 
-                <Handle
-                    type="target"
-                    position={Position.Left}
-                    id="a"
-                    isConnectable={true}
-                />
-                <Handle
-                    type="source"
-                    position={Position.Right}
-                    id="b"
-                    isConnectable={true}
-                />
             </BaseNode>
 
             {/* Full screen modals - rendered outside BaseNode */}

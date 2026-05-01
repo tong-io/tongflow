@@ -35,15 +35,13 @@ plugins/tongflow-modal-*/
 *.tsbuildinfo
 next-env.d.ts
 
-# electron
+# local Python venv (optional, e.g. pip install modal)
+.venv/
+
+# removed Electron / old desktop tooling — ignore if folders still exist locally
+wheelhouse/
 dist-electron/
 release/
 electron-out/
-
-# desktop python/wheels (generated during release builds)
-wheelhouse/
-
-# Next.js server: offline modal venv (bundled python + wheelhouse)
-.openflow-modal-venv/
 
 plugins/

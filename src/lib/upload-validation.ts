@@ -1,7 +1,7 @@
 /**
- * 客户端文件验证工具
+ * Client file validation utilities
  *
- * 在上传前验证文件大小
+ * Validate file size before upload
  */
 
 import { type ValidationResult } from "@/lib/upload-limits";
@@ -9,11 +9,11 @@ import { type ValidationResult } from "@/lib/upload-limits";
 export { type ValidationResult } from "@/lib/upload-limits";
 
 // ============================================================================
-// 文件元数据读取
+// File metadata reading
 // ============================================================================
 
 /**
- * 读取图片分辨率
+ * Read image dimensions
  */
 export function getImageDimensions(
     file: File,
@@ -37,7 +37,7 @@ export function getImageDimensions(
 }
 
 /**
- * 读取视频元数据
+ * Read video metadata
  */
 export function getVideoMetadata(
     file: File,
@@ -67,7 +67,7 @@ export function getVideoMetadata(
 }
 
 // ============================================================================
-// 文件类型判断
+// File type checks
 // ============================================================================
 
 export function isImageFile(file: File): boolean {
@@ -79,7 +79,7 @@ export function isVideoFile(file: File): boolean {
 }
 
 // ============================================================================
-// 综合验证函数
+// Combined validation function
 // ============================================================================
 
 export interface FileValidationResult extends ValidationResult {
@@ -92,17 +92,17 @@ export interface FileValidationResult extends ValidationResult {
 }
 
 /**
- * 验证文件是否符合上传限制
+ * Validate whether the file meets upload limits
  *
- * @param file 要验证的文件
- * @param _tier 用户等级（已弃用，保留参数兼容性）
- * @returns 验证结果
+ * @param file File to validate
+ * @param _tier User tier (deprecated; kept for parameter compatibility)
+ * @returns Validation result
  */
 export async function validateFile(
     file: File,
     _tier?: string,
 ): Promise<FileValidationResult> {
-    // 统一 50MB 文件大小限制
+    // Unified 50MB file size limit
     const MAX_FILE_SIZE = 50 * 1024 * 1024;
 
     if (file.size > MAX_FILE_SIZE) {
@@ -114,7 +114,7 @@ export async function validateFile(
         };
     }
 
-    // 读取媒体文件信息（仅用于返回元数据，不做限制）
+    // Read media file information (only to return metadata, not for limits)
     if (isImageFile(file)) {
         try {
             const { width, height } = await getImageDimensions(file);
@@ -146,7 +146,7 @@ export async function validateFile(
 }
 
 // ============================================================================
-// 自定义错误类
+// Custom error class
 // ============================================================================
 
 export class UploadValidationError extends Error {

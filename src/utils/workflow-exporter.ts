@@ -1,6 +1,6 @@
 /**
- * 工作流导出器
- * 将 ReactFlow 工作流转换为可执行工作流 JSON
+ * Workflow exporter
+ * Converts a ReactFlow workflow to an executable workflow JSON
  */
 
 import type { Node, Edge } from "@xyflow/react";
@@ -20,11 +20,12 @@ import {
     type ParamMappingConfig,
 } from "./node-execution-config";
 import { WorkflowParser } from "./workflow-parser";
+import { logger } from "@/lib/logger";
 
 /**
- * 从 node.data 构建 NodeExecutionConfig
- * 优先使用 node.data 中的配置，这样后端不需要依赖前端运行时注册表
- * 只有当 node.data 中同时有 feature 和 paramMappings 时才返回配置
+ * Build a NodeExecutionConfig from node.data
+ * The config in node.data is preferred so the backend does not need to rely on the front-end runtime registry
+ * A config is returned only when both feature and paramMappings are present in node.data
  */
 function getNodeConfigFromData(
     nodeData: Record<string, unknown>,
@@ -34,12 +35,12 @@ function getNodeConfigFromData(
         | Record<string, ParamMappingConfig>
         | undefined;
 
-    // 必须同时有 feature 和 paramMappings 才认为是完整的配置
-    // 否则应该 fallback 到注册表获取完整配置
+    // Both feature and paramMappings must be present for the config to be considered complete
+    // Otherwise fall back to the registry for the full config
     if (!feature || !paramMappings) return undefined;
 
     return {
-        nodeType: "", // 后端不需要
+        nodeType: "", // Not needed by the backend
         feature,
         outputType: nodeData.outputType as string | undefined,
         outputField: nodeData.outputField as "fileKeys" | "texts" | undefined,
@@ -51,26 +52,26 @@ function getNodeConfigFromData(
 }
 
 /**
- * 获取节点执行配置（优先从注册表获取最新配置，fallback 到 node.data）
+ * Get the node execution configuration (prefers the latest config from the registry; falls back to node.data)
  */
 function getEffectiveNodeConfig(
     nodeType: string,
     nodeData: Record<string, unknown>,
 ): NodeExecutionConfig | undefined {
-    // 优先从运行时注册表读取最新配置（前端场景）
+    // Prefer the latest config from the runtime registry (front-end scenario)
     const registryConfig = getNodeExecutionConfig(nodeType);
     if (registryConfig) return registryConfig;
 
-    // fallback 到 node.data（后端场景或未注册的节点）
+    // Fall back to node.data (back-end scenario or unregistered nodes)
     return getNodeConfigFromData(nodeData);
 }
 
 /* ========================================================================== */
-/* 工具函数                                                                    */
+/* Utility functions                                                            */
 /* ========================================================================== */
 
 /**
- * 从配置路径获取值
+ * Get a value from a config path
  */
 function getValueFromPath(obj: Record<string, unknown>, path: string): unknown {
     const parts = path.split(".");
@@ -81,7 +82,7 @@ function getValueFromPath(obj: Record<string, unknown>, path: string): unknown {
             return undefined;
         }
 
-        // 处理数组索引，如 "fileKeys[0]"
+        // Handle array index, e.g. "fileKeys[0]"
         const arrayMatch = part.match(/^(\w+)\[(\d+)\]$/);
         if (arrayMatch) {
             const [, key, indexStr] = arrayMatch;
@@ -100,21 +101,21 @@ function getValueFromPath(obj: Record<string, unknown>, path: string): unknown {
 }
 
 /**
- * 判断节点是否为数据节点（不需要执行，只提供数据）
+ * Check whether a node is a data node (no execution needed; provides data only)
  */
 function isDataNode(nodeType: string): boolean {
     return nodeType in DATA_NODE_TYPES;
 }
 
 /**
- * 判断节点是否为 Add 节点（可能有上传数据或 AI 生成）
+ * Check whether a node is an Add node (may have uploaded data or AI generation)
  */
 function isAddNode(nodeType: string): boolean {
     return nodeType.startsWith("add");
 }
 
 /**
- * 获取上游节点数据
+ * Get upstream node data
  */
 function normalizeEdgeTargetHandle(id: string | null | undefined): string {
     return id ?? "a";
@@ -143,7 +144,7 @@ function getUpstreamNodeData(
 }
 
 /**
- * 根据节点类型从 ids 数组获取上游节点
+ * Get an upstream node from the ids array by node type
  */
 function getUpstreamNodeByType(
     ids: string[],
@@ -158,15 +159,15 @@ function getUpstreamNodeByType(
 }
 
 /* ========================================================================== */
-/* 主导出类                                                                    */
+/* Main exporter class                                                          */
 /* ========================================================================== */
 
 export interface ExportOptions {
-    /** 工作流名称 */
+    /** Workflow name */
     name?: string;
-    /** 工作流描述 */
+    /** Workflow description */
     description?: string;
-    /** 是否包含原始 flow 数据 */
+    /** Whether to include the original flow data */
     includeOriginalFlow?: boolean;
 }
 
@@ -182,7 +183,7 @@ export class WorkflowExporter {
     }
 
     /**
-     * 导出为可执行工作流
+     * Export as an executable workflow
      */
     export(options: ExportOptions = {}): ExecutableWorkflow {
         const plan = this.parser.generateExecutionPlan();
@@ -192,7 +193,7 @@ export class WorkflowExporter {
         const inputs: WorkflowInput[] = [];
         const outputs: WorkflowOutput[] = [];
 
-        // 按层级处理节点
+        // Process nodes by level
         for (
             let levelIndex = 0;
             levelIndex < plan.levels.length;
@@ -207,7 +208,7 @@ export class WorkflowExporter {
                 const nodeType = node.type ?? "unknown";
                 const nodeData = (node.data as Record<string, unknown>) ?? {};
 
-                // 处理数据节点
+                // Process data node
                 if (isDataNode(nodeType)) {
                     const dataNodeInfo = this.processDataNode(
                         node,
@@ -218,7 +219,7 @@ export class WorkflowExporter {
                     continue;
                 }
 
-                // 处理 Add 节点
+                // Process Add node
                 if (isAddNode(nodeType)) {
                     const result = this.processAddNode(
                         node,
@@ -234,7 +235,7 @@ export class WorkflowExporter {
                     continue;
                 }
 
-                // 处理可执行节点
+                // Process executable node
                 const execNode = this.processExecutableNode(node, levelIndex);
                 if (execNode) {
                     executableNodes.push(execNode);
@@ -242,7 +243,7 @@ export class WorkflowExporter {
             }
         }
 
-        // 处理输出节点（出度为 0 的节点）
+        // Process output nodes (nodes with out-degree 0)
         const endNodes = this.parser.getEndNodes();
         for (const nodeId of endNodes) {
             const node = this.nodes.find((n) => n.id === nodeId);
@@ -259,7 +260,7 @@ export class WorkflowExporter {
                     field: dataTypeInfo.outputField,
                 });
             } else {
-                // 可执行节点的输出
+                // Output of executable nodes
                 const nodeData = (node.data as Record<string, unknown>) ?? {};
                 const mapping = getEffectiveNodeConfig(nodeType, nodeData);
                 if (mapping && mapping.outputType) {
@@ -276,15 +277,15 @@ export class WorkflowExporter {
             }
         }
 
-        // 过滤 executionLevels，只保留可执行节点
+        // Filter executionLevels to keep only executable nodes
         const executableNodeIds = new Set(executableNodes.map((n) => n.id));
         const filteredLevels = plan.levels
             .map((level) =>
                 level.filter((nodeId) => executableNodeIds.has(nodeId)),
             )
-            .filter((level) => level.length > 0); // 移除空层级
+            .filter((level) => level.length > 0); // Remove empty levels
 
-        // 提取数据节点之间的边关系（用于输入透传）
+        // Extract edge relationships between data nodes (used for input pass-through)
         const dataNodeIds = new Set(dataNodes.map((n) => n.id));
         const dataNodeEdges = this.edges
             .filter(
@@ -313,7 +314,7 @@ export class WorkflowExporter {
     }
 
     /**
-     * 处理数据节点
+     * Process a data node
      */
     private processDataNode(
         node: Node,
@@ -324,13 +325,13 @@ export class WorkflowExporter {
         const nodeData = (node.data as Record<string, unknown>) ?? {};
         const dataTypeInfo = DATA_NODE_TYPES[nodeType];
 
-        // 检查是否有静态数据
+        // Check for static data
         const fileKeys = nodeData.fileKeys as string[] | undefined;
         const texts = nodeData.texts as string[] | undefined;
         const hasStaticData =
             (fileKeys && fileKeys.length > 0) || (texts && texts.length > 0);
 
-        // 如果是入口节点且没有静态数据，创建输入定义
+        // If this is a start node without static data, create an input definition
         const isStartNode = this.parser.getStartNodes().includes(node.id);
         const isInput = isStartNode && !hasStaticData;
 
@@ -346,7 +347,7 @@ export class WorkflowExporter {
             });
         }
 
-        // 获取 label 和 comment
+        // Get label and comment
         const label = nodeData.label as string | undefined;
         const comment = nodeData.comment as string | undefined;
 
@@ -364,7 +365,7 @@ export class WorkflowExporter {
     }
 
     /**
-     * 处理 Add 节点
+     * Process an Add node
      */
     private processAddNode(
         node: Node,
@@ -377,27 +378,27 @@ export class WorkflowExporter {
         const feature = nodeData.feature as string | undefined;
         const manualValue = nodeData.manualValue as string | undefined;
 
-        // 判断是上传模式（不需要执行，只提供数据）
-        // - upload/draw/canvas/lib/library/camera/record 模式：用户上传、选择、录制文件
-        // - activeTab 为 undefined：节点尚未配置，默认作为数据节点处理
-        // - manual 模式（有 manualValue）：用户手动输入文本，作为数据节点处理
+        // Determine upload mode (no execution needed; provides data only)
+        // - upload/draw/canvas/lib/library/camera/record mode: user uploads, selects, or records files
+        // - activeTab is undefined: node is not yet configured; treated as a data node by default
+        // - manual mode (manualValue present): user manually enters text; treated as a data node
         const isUploadMode =
             activeTab === "upload" ||
             activeTab === "draw" ||
-            activeTab === "canvas" || // addImageNode 涂鸦模式
+            activeTab === "canvas" || // addImageNode drawing mode
             activeTab === "lib" ||
-            activeTab === "library" || // addAudioNode 作品集模式
+            activeTab === "library" || // addAudioNode portfolio mode
             activeTab === "camera" ||
             activeTab === "record" ||
             activeTab === undefined;
-        // addTextNode 的手动输入模式：有 manualValue 且没有 feature
+        // addTextNode manual input mode: manualValue is present and there is no feature
         const isManualTextMode =
             nodeType === "addTextNode" &&
             manualValue !== undefined &&
             manualValue !== "";
         const fileKeys = nodeData.fileKeys as string[] | undefined;
         const texts = nodeData.texts as string[] | undefined;
-        // 对于手动输入模式，将 manualValue 作为 texts 数据
+        // For manual input mode, use manualValue as the texts data
         const effectiveTexts =
             isManualTextMode && (!texts || texts.length === 0)
                 ? [manualValue]
@@ -406,10 +407,10 @@ export class WorkflowExporter {
             (fileKeys && fileKeys.length > 0) ||
             (effectiveTexts && effectiveTexts.length > 0);
 
-        // AI 模式或有 feature，作为可执行节点处理
+        // AI mode or has a feature; treat as an executable node
         const hasFeature = !!feature && feature.length > 0;
 
-        // 如果节点本身没有静态数据，尝试从直连的下游 DataNode 获取（透传场景）
+        // If the node itself has no static data, try to get it from the directly connected downstream DataNode (pass-through scenario)
         let currentFileKeys = fileKeys;
         let currentTexts = effectiveTexts;
         let hasActualData = hasStaticData;
@@ -437,17 +438,17 @@ export class WorkflowExporter {
             }
         }
 
-        // 如果是上传模式或手动输入模式，且没有 feature，作为数据节点处理
-        // 如果是 AI 模式或有 feature，作为可执行节点处理
+        // If in upload mode or manual input mode and no feature, treat as a data node
+        // If in AI mode or has a feature, treat as an executable node
         if ((isUploadMode || isManualTextMode) && !hasFeature) {
             const outputType = this.getAddNodeOutputType(nodeType);
             const dataTypeInfo = DATA_NODE_TYPES[outputType];
 
             if (dataTypeInfo) {
-                // level=0 的 Add 节点始终标记为 isInput，即使有静态数据
-                // 这样 App 端可以覆盖静态数据（用户拍照/上传自己的图片）
+                // Add nodes at level=0 are always marked as isInput, even if they have static data
+                // This allows the App side to override static data (e.g. user takes a photo or uploads their own image)
                 const isStartNode = level === 0;
-                const isInput = isStartNode; // Add 节点在 level=0 时始终是输入节点
+                const isInput = isStartNode; // Add nodes at level=0 are always input nodes
                 const inputName = `input_${node.id.substring(0, 8)}`;
 
                 if (isInput) {
@@ -458,7 +459,7 @@ export class WorkflowExporter {
                                 ? "text[]"
                                 : "file[]",
                         description: `Input data for ${nodeType}`,
-                        required: !hasStaticData, // 如果节点本身没有固化数据，标记为必填以在 UI 上提醒
+                        required: !hasStaticData, // If the node itself has no fixed data, mark as required to prompt the user in the UI
                         defaultValue: hasActualData
                             ? { fileKeys: currentFileKeys, texts: currentTexts }
                             : undefined,
@@ -466,7 +467,7 @@ export class WorkflowExporter {
                     });
                 }
 
-                // 获取 label 和 comment
+                // Get label and comment
                 const label = nodeData.label as string | undefined;
                 const comment = nodeData.comment as string | undefined;
 
@@ -488,10 +489,10 @@ export class WorkflowExporter {
             }
         }
 
-        // AI 生成模式，作为可执行节点处理
+        // AI generation mode; treat as an executable node
         const mapping = getEffectiveNodeConfig(nodeType, nodeData);
         if (!mapping) {
-            console.warn(
+            logger.warn(
                 `[WorkflowExporter] Unknown add node type: ${nodeType}`,
             );
             return {};
@@ -507,7 +508,7 @@ export class WorkflowExporter {
     }
 
     /**
-     * 获取 Add 节点对应的输出类型
+     * Get the output type corresponding to an Add node
      */
     private getAddNodeOutputType(nodeType: string): string {
         const typeMap: Record<string, string> = {
@@ -523,8 +524,8 @@ export class WorkflowExporter {
     }
 
     /**
-     * 查找执行节点直连的下游数据节点
-     * 遍历所有从该节点出发的边，找到第一个数据节点类型的目标
+     * Find the downstream data node directly connected to an executable node
+     * Traverses all edges from the node and returns the first target that is a data node type
      */
     private findDownstreamDataNode(nodeId: string): string | undefined {
         for (const edge of this.edges) {
@@ -539,7 +540,7 @@ export class WorkflowExporter {
     }
 
     /**
-     * 处理可执行节点
+     * Process an executable node
      */
     private processExecutableNode(
         node: Node,
@@ -548,10 +549,10 @@ export class WorkflowExporter {
         const nodeType = node.type ?? "unknown";
         const nodeData = (node.data as Record<string, unknown>) ?? {};
 
-        // 查找节点类型映射（优先从 node.data，fallback 到注册表）
+        // Look up the node type mapping (prefer node.data; fall back to the registry)
         const mapping = getEffectiveNodeConfig(nodeType, nodeData);
         if (!mapping) {
-            console.warn(
+            logger.warn(
                 `[WorkflowExporter] Unknown node type: ${nodeType}, skipping...`,
             );
             return null;
@@ -561,7 +562,7 @@ export class WorkflowExporter {
     }
 
     /**
-     * 构建可执行节点
+     * Build an executable node
      */
     private buildExecutableNode(
         node: Node,
@@ -576,10 +577,10 @@ export class WorkflowExporter {
             this.edges,
         );
 
-        // 对于 Compose 节点，使用 ids 数组
+        // For Compose nodes, use the ids array
         const ids = nodeData.ids as string[] | undefined;
 
-        // 构建输入参数映射
+        // Build the input parameter mapping
         const inputMapping: Record<string, ParamMapping> = {};
 
         for (const [paramName, paramConfig] of Object.entries(
@@ -595,15 +596,15 @@ export class WorkflowExporter {
             inputMapping[paramName] = paramMapping;
         }
 
-        // 获取依赖节点
+        // Get dependency nodes
         const dependencies = upstreamNodes.map((u) => u.node.id);
 
-        // 获取 label 和 comment
+        // Get label and comment
         const label = mapping.label ?? (nodeData.label as string | undefined);
         const comment = nodeData.comment as string | undefined;
         const locked = nodeData.locked as boolean | undefined;
 
-        // 找到直连的下游数据节点
+        // Find the directly connected downstream data node
         const downstreamDataNodeId = this.findDownstreamDataNode(node.id);
 
         return {
@@ -626,7 +627,7 @@ export class WorkflowExporter {
     }
 
     /**
-     * 解析参数映射
+     * Resolve parameter mapping
      */
     private resolveParamMapping(
         paramName: string,
@@ -656,19 +657,19 @@ export class WorkflowExporter {
                 }
 
                 case "upstream": {
-                    // 查找匹配类型的上游节点
+                    // Find upstream nodes matching the type
                     let upstreamNode: Node | undefined;
                     let arrayIndex: number | undefined;
 
                     if (ids && ids.length > 0) {
-                        // Compose 节点：从 ids 中按类型查找
+                        // Compose node: find by type from the ids array
                         const matchingNodes = this.nodes.filter(
                             (n) =>
                                 ids.includes(n.id) &&
                                 n.type === sourceConfig.upstreamType,
                         );
 
-                        // collectAll 模式：收集所有匹配节点的数据
+                        // collectAll mode: collect data from all matching nodes
                         if (
                             sourceConfig.collectAll &&
                             matchingNodes.length > 0
@@ -678,13 +679,13 @@ export class WorkflowExporter {
                                 nodeIds: matchingNodes.map((n) => n.id),
                                 field: sourceConfig.upstreamField,
                                 transform: sourceConfig.needsUrlTransform
-                                    ? "getR2Url"
+                                    ? "getFileUrl"
                                     : undefined,
                             };
                         }
 
-                        // 如果有多个同类型节点，需要确定使用哪个
-                        // 对于首尾帧等场景，根据参数名判断
+                        // If there are multiple nodes of the same type, determine which one to use
+                        // For scenarios like first/last frame, determine by parameter name
                         if (matchingNodes.length > 1) {
                             if (
                                 paramName.includes("start") ||
@@ -705,7 +706,7 @@ export class WorkflowExporter {
                             upstreamNode = matchingNodes[0];
                         }
                     } else {
-                        // Transfer 节点：从边关系中查找（支持 targetHandle 区分多槽位）
+                        // Transfer node: find from edge relationships (supports targetHandle to distinguish multi-slot)
                         const upstream = upstreamNodes.find((u) => {
                             if (u.node.type !== sourceConfig.upstreamType) {
                                 return false;
@@ -728,7 +729,7 @@ export class WorkflowExporter {
                             nodeId: upstreamNode.id,
                             field: sourceConfig.upstreamField,
                             transform: sourceConfig.needsUrlTransform
-                                ? "getR2Url"
+                                ? "getFileUrl"
                                 : undefined,
                             arrayIndex,
                             edgeTargetHandle: sourceConfig.targetHandle,
@@ -756,7 +757,7 @@ export class WorkflowExporter {
             }
         }
 
-        // 默认返回静态空值
+        // Default to a static empty value
         return {
             source: "static",
             value: paramConfig.required ? undefined : "",
@@ -764,12 +765,12 @@ export class WorkflowExporter {
     }
 
     /**
-     * 提取原始配置（用于 UI 恢复）
+     * Extract the raw configuration (used for UI restoration)
      */
     private extractRawConfig(
         nodeData: Record<string, unknown>,
     ): Record<string, unknown> {
-        // 排除一些不需要保存的字段
+        // Exclude fields that do not need to be saved
         const excludeFields = [
             "feature",
             "prompt",
@@ -790,11 +791,11 @@ export class WorkflowExporter {
 }
 
 /* ========================================================================== */
-/* 便捷导出函数                                                                */
+/* Convenience export functions                                                 */
 /* ========================================================================== */
 
 /**
- * 导出工作流为可执行 JSON
+ * Export a workflow as executable JSON
  */
 export function exportWorkflow(
     nodes: Node[],
@@ -806,7 +807,7 @@ export function exportWorkflow(
 }
 
 /**
- * 将可执行工作流转换为 JSON 字符串
+ * Serialize an executable workflow to a JSON string
  */
 export function stringifyExecutableWorkflow(
     workflow: ExecutableWorkflow,
@@ -816,13 +817,13 @@ export function stringifyExecutableWorkflow(
 }
 
 /**
- * 从 JSON 字符串解析可执行工作流
+ * Parse an executable workflow from a JSON string
  */
 export function parseExecutableWorkflow(json: string): ExecutableWorkflow {
     return JSON.parse(json) as ExecutableWorkflow;
 }
 
-/** 导入 JSON 中缺少画布数据（originalFlow / flow / nodes+edges） */
+/** The imported JSON is missing canvas data (originalFlow / flow / nodes+edges) */
 export const WORKFLOW_IMPORT_NO_CANVAS = "WORKFLOW_IMPORT_NO_CANVAS";
 
 export interface ParsedWorkflowImport {
@@ -852,8 +853,8 @@ function unwrapJsonValue(raw: unknown): unknown {
 }
 
 /**
- * 从用户上传或粘贴的 JSON 解析出画布 nodes/edges。
- * 支持：ExecutableWorkflow（含 originalFlow）、{ flow: { nodes, edges } }、根级 { nodes, edges }。
+ * Parse canvas nodes/edges from a JSON uploaded or pasted by the user.
+ * Supports: ExecutableWorkflow (with originalFlow), { flow: { nodes, edges } }, and root-level { nodes, edges }.
  */
 export function parseWorkflowImportJson(raw: unknown): ParsedWorkflowImport {
     const data = unwrapJsonValue(raw);

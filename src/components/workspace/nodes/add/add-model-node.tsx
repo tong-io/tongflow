@@ -1,7 +1,7 @@
 import React, { useState, memo, useCallback } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Upload, Library, Box } from "lucide-react";
-import { Handle, Position, useNodeId, type NodeProps } from "@xyflow/react";
+import { useNodeId, type NodeProps } from "@xyflow/react";
 import useFlow from "@/hooks/use-flow";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -10,8 +10,9 @@ import { useMultipleUpload } from "@/hooks/use-upload";
 import { LibInput } from "../../share/lib-input";
 import { Progress } from "@/components/ui/progress";
 import { useTranslations } from "next-intl";
+import { logger } from "@/lib/logger";
 
-// 作品集标签页
+// Portfolio tab
 const LibraryTab = () => {
     return (
         <div className="space-y-3">
@@ -22,7 +23,7 @@ const LibraryTab = () => {
     );
 };
 
-// 上传标签页
+// Upload tab
 const UploadTab = () => {
     const t = useTranslations("Workspace.nodes.add");
     const { expands } = useFlow();
@@ -33,7 +34,7 @@ const UploadTab = () => {
         onSuccess: (responses) => {
             if (id && responses.length > 0) {
                 const response = responses[0];
-                // 上传成功后展开为modelNode
+                // Expand into a modelNode after upload
                 expands(id, [
                     {
                         type: "modelNode",
@@ -45,7 +46,7 @@ const UploadTab = () => {
             }
         },
         onError: (error) => {
-            console.error("上传失败:", error);
+            logger.error("上传失败:", error);
         },
     });
 
@@ -153,14 +154,14 @@ export const AddModelNode: React.FC<NodeProps> = ({ selected, data }) => {
     const updates = useFlow((s) => s.updates);
     const activeTab = (data as any)?.activeTab || "upload";
 
-    // 处理Tab切换时保存状态
+    // Save state when switching tabs
     const handleTabChange = (value: string) => {
         if (id) {
             updates(id, { ...data, activeTab: value });
         }
     };
 
-    // 获取基础配置
+    // Get base config
     const getWorkflowConfig = useCallback(() => {
         return {
             feature: "",
@@ -224,18 +225,6 @@ export const AddModelNode: React.FC<NodeProps> = ({ selected, data }) => {
                 </Tabs>
             </div>
 
-            <Handle
-                type="target"
-                position={Position.Left}
-                id="a"
-                isConnectable={true}
-            />
-            <Handle
-                type="source"
-                position={Position.Right}
-                id="b"
-                isConnectable={true}
-            />
         </BaseNode>
     );
 };

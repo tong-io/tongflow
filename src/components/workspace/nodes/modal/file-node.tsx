@@ -1,4 +1,4 @@
-import { Handle, Position, type NodeProps } from "@xyflow/react";
+import { type NodeProps } from "@xyflow/react";
 import { memo, useState } from "react";
 import {
     File as FileIcon,
@@ -21,10 +21,11 @@ import {
 } from "../base/node-header";
 import { DropdownMenuLabel } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import { useR2AsyncLoader } from "@/hooks/use-r2-async-loader";
+import { useFileAsyncLoader } from "@/hooks/use-file-async-loader";
 import { useTranslations } from "next-intl";
+import { logger } from "@/lib/logger";
 
-// 根据文件扩展名获取对应的图标
+// Get the corresponding icon based on the file extension
 const getFileIcon = (fileKey: string) => {
     const ext = fileKey.split(".").pop()?.toLowerCase() || "";
 
@@ -61,27 +62,27 @@ const getFileIcon = (fileKey: string) => {
     return <FileIcon className="h-8 w-8 text-gray-400" />;
 };
 
-// 判断是否为 Office 文件
+// Determine whether this is an Office file
 const isOfficeFile = (fileKey: string): boolean => {
     const ext = fileKey.split(".").pop()?.toLowerCase() || "";
     return ["doc", "docx", "xls", "xlsx", "ppt", "pptx"].includes(ext);
 };
 
-// 获取文件打开 URL
+// Get the file open URL
 const getFileOpenUrl = (fileUrl: string, fileKey: string): string => {
     const ext = fileKey.split(".").pop()?.toLowerCase() || "";
 
     if (isOfficeFile(fileKey)) {
-        // 使用 Office 365 Web Apps 预览
+        // Preview using Office 365 Web Apps
         const encodedUrl = encodeURIComponent(fileUrl);
         return `https://view.officeapps.live.com/op/embed.aspx?src=${encodedUrl}`;
     }
 
-    // 其他文件直接打开
+    // Open other files directly
     return fileUrl;
 };
 
-// 单个文件项组件 - 使用 hook 加载 URL
+// Single file item component - loads the URL with a hook
 const FileItem = ({
     fileKey,
     onFileClick,
@@ -89,7 +90,7 @@ const FileItem = ({
     fileKey: string;
     onFileClick: (fileKey: string, url: string) => void;
 }) => {
-    const { url } = useR2AsyncLoader(fileKey, { priority: "high" });
+    const { url } = useFileAsyncLoader(fileKey, { priority: "high" });
 
     const handleClick = () => {
         if (url) {
@@ -113,7 +114,7 @@ const FileItem = ({
     );
 };
 
-// 单个文件显示组件
+// Single file display component
 const SingleFileDisplay = ({
     fileKey,
     onFileClick,
@@ -121,7 +122,7 @@ const SingleFileDisplay = ({
     fileKey: string;
     onFileClick: (fileKey: string, url: string) => void;
 }) => {
-    const { url } = useR2AsyncLoader(fileKey, { priority: "high" });
+    const { url } = useFileAsyncLoader(fileKey, { priority: "high" });
 
     const handleClick = () => {
         if (url) {
@@ -176,7 +177,7 @@ const FileNode = ({ selected, data }: NodeProps) => {
                 </NodeHeaderTitle>
                 <NodeHeaderActions>
                     <NodeHeaderComboAction
-                        onClick={() => console.log("组合模式切换")}
+                        onClick={() => logger.debug("组合模式切换")}
                     />
                     <NodeHeaderMenuAction label={t("moreOptions")}>
                         <DropdownMenuLabel>{t("actions")}</DropdownMenuLabel>
@@ -230,18 +231,6 @@ const FileNode = ({ selected, data }: NodeProps) => {
                 )}
             </div>
 
-            <Handle
-                type="target"
-                position={Position.Left}
-                id="a"
-                isConnectable={true}
-            />
-            <Handle
-                type="source"
-                position={Position.Right}
-                id="b"
-                isConnectable={true}
-            />
         </BaseNode>
     );
 };

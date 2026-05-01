@@ -285,6 +285,28 @@
       }
     },
     {
+      "nodeSlot": "separate_video_audio",
+      "featureName": "separate_video_audio",
+      "defaultHandler": {
+        "type": "cpu",
+        "function": "ffmpeg-separate-av"
+      },
+      "processingTime": 10,
+      "taskPromptSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "title": "ModalTaskPrompt",
+        "type": "object",
+        "description": "Payload merged into task.prompt. Plugins receive the Openflow task object.",
+        "additionalProperties": true
+      },
+      "resultSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "title": "HandlerResult",
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    {
       "nodeSlot": "merge_video_audio",
       "featureName": "merge_video_audio",
       "defaultHandler": {

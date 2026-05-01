@@ -1,4 +1,4 @@
-import { Handle, Position, type NodeProps } from "@xyflow/react";
+import { type NodeProps } from "@xyflow/react";
 import { useCallback, useMemo, memo } from "react";
 import { Link as LinkIcon, Plus, Trash } from "lucide-react";
 
@@ -10,10 +10,9 @@ import { Card } from "@/components/ui/card";
 import { useNodeState } from "@/hooks/use-node-data";
 import { useTranslations } from "next-intl";
 
-// 工作流执行配置：Modal cpu/crawl4ai，将网页转为 Markdown 并展开为文本节点
+// Workflow execution config: Modal cpu/crawl4ai, converts webpage to Markdown and expands into text nodes
 const workflowConfig = {
     feature: "link",
-    label: "添加链接",
     outputType: "textNode",
     outputField: "texts" as const,
     supportsBatch: true,
@@ -29,7 +28,7 @@ const workflowConfig = {
 const AddLinkNode = ({ selected, data }: NodeProps) => {
     const t = useTranslations("Workspace.nodes.add");
 
-    // 使用新的Hook来管理状态持久化
+    // Use the new hook to manage state persistence
     const [state, setState] = useNodeState<{
         input: string;
         previews: string[];
@@ -61,7 +60,7 @@ const AddLinkNode = ({ selected, data }: NodeProps) => {
         });
     };
 
-    // 补充 feature 用于 BaseNode
+    // Augment data with feature for BaseNode
     const dataWithFeature = useMemo(
         () => ({
             ...data,
@@ -70,7 +69,7 @@ const AddLinkNode = ({ selected, data }: NodeProps) => {
         [data],
     );
 
-    // 获取统一的工作流配置
+    // Single source of workflow configuration
     const getWorkflowConfig = useCallback(() => {
         return {
             ...workflowConfig,
@@ -90,9 +89,9 @@ const AddLinkNode = ({ selected, data }: NodeProps) => {
             data={dataWithFeature}
             workflowConfig={getWorkflowConfig()}
         >
-            {/* 内容区域 */}
+            {/* Body */}
             <div className="p-4 space-y-2">
-                {/* 预览卡片 */}
+                {/* Preview card */}
                 {previews.length > 0 && (
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         {previews.map((preview, idx) => (
@@ -124,7 +123,7 @@ const AddLinkNode = ({ selected, data }: NodeProps) => {
                     </div>
                 )}
 
-                {/* 输入区域 */}
+                {/* Input */}
                 <div
                     className="flex gap-2 items-center nodrag"
                     onPointerDown={(e) => e.stopPropagation()}
@@ -152,19 +151,6 @@ const AddLinkNode = ({ selected, data }: NodeProps) => {
                 </div>
             </div>
 
-            {/* Handles */}
-            <Handle
-                type="target"
-                position={Position.Left}
-                id="a"
-                isConnectable={true}
-            />
-            <Handle
-                type="source"
-                position={Position.Right}
-                id="b"
-                isConnectable={true}
-            />
         </BaseNode>
     );
 };

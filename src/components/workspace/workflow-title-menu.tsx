@@ -38,6 +38,7 @@ import {
     WORKFLOW_IMPORT_NO_CANVAS,
 } from "@/utils/workflow-exporter";
 import { useTranslations } from "next-intl";
+import { logger } from "@/lib/logger";
 
 function safeWorkflowFileName(name: string): string {
     const s = name.replace(/[/\\?%*:|"<>]/g, "_").trim();
@@ -53,7 +54,6 @@ const selector = (state: any) => ({
     setWorkflowName: state.setWorkflowName,
     setWorkflowId: state.setWorkflowId,
     setWorkflowDescription: state.setWorkflowDescription,
-    setCurrentShareId: state.setCurrentShareId,
     setNodes: state.setNodes,
     setEdges: state.setEdges,
 });
@@ -68,7 +68,6 @@ export function WorkflowTitleMenu() {
         setWorkflowName,
         setWorkflowId,
         setWorkflowDescription,
-        setCurrentShareId,
         setNodes,
         setEdges,
     } = useFlow(useShallow(selector));
@@ -86,11 +85,11 @@ export function WorkflowTitleMenu() {
 
     const importFileRef = useRef<HTMLInputElement>(null);
 
-    // 下拉菜单悬停状态
+    // Dropdown menu hover state
     const [menuOpen, setMenuOpen] = useState(false);
     const closeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-    // 处理鼠标移入
+    // Handle mouse enter
     const handleMenuMouseEnter = () => {
         if (closeTimeoutRef.current) {
             clearTimeout(closeTimeoutRef.current);
@@ -99,14 +98,14 @@ export function WorkflowTitleMenu() {
         setMenuOpen(true);
     };
 
-    // 处理鼠标移出（延迟关闭防止闪烁）
+    // Handle mouse leave (delayed close to prevent flickering)
     const handleMenuMouseLeave = () => {
         closeTimeoutRef.current = setTimeout(() => {
             setMenuOpen(false);
         }, 150);
     };
 
-    // 同步名称
+    // Sync name
     useEffect(() => {
         setTempName(workflowName);
     }, [workflowName]);
@@ -115,7 +114,7 @@ export function WorkflowTitleMenu() {
         setTempDescription(workflowDescription || "");
     }, [workflowDescription]);
 
-    // 保存工作流
+    // Save the workflow
     const handleSave = async () => {
         if (!tempName.trim()) {
             toast.error(t("enterName"));
@@ -124,7 +123,7 @@ export function WorkflowTitleMenu() {
 
         setSaving(true);
         try {
-            // 前端生成 executable（因为需要运行时注册表中的配置）
+            // Generate the executable on the frontend (requires runtime registry configuration)
             const executable = exportWorkflow(nodes, edges, {
                 name: tempName,
                 description: tempDescription || "",
@@ -154,14 +153,14 @@ export function WorkflowTitleMenu() {
             setIsSaveDialogOpen(false);
             setIsSaveAsMode(false);
         } catch (error) {
-            console.error("保存失败:", error);
+            logger.error("保存失败:", error);
             toast.error(t("saveFailed"));
         } finally {
             setSaving(false);
         }
     };
 
-    // 打开保存对话框
+    // Open the save dialog
     const openSaveDialog = () => {
         setIsSaveAsMode(false);
         setTempName(workflowName);
@@ -169,7 +168,7 @@ export function WorkflowTitleMenu() {
         setIsSaveDialogOpen(true);
     };
 
-    // 打开另存为对话框
+    // Open the "save as" dialog
     const openSaveAsDialog = () => {
         setIsSaveAsMode(true);
         setTempName(workflowName);
@@ -177,7 +176,7 @@ export function WorkflowTitleMenu() {
         setIsSaveDialogOpen(true);
     };
 
-    // 清空工作流
+    // Clear the workflow
     const handleClear = () => {
         if (confirm(t("confirmClear"))) {
             setNodes([]);
@@ -185,7 +184,6 @@ export function WorkflowTitleMenu() {
             setWorkflowName(tIndex("title"));
             setWorkflowDescription("");
             setWorkflowId(null);
-            setCurrentShareId(null);
             toast.success(t("cleared"));
         }
     };
@@ -210,7 +208,7 @@ export function WorkflowTitleMenu() {
             URL.revokeObjectURL(url);
             toast.success(t("exportJsonSuccess"));
         } catch (e) {
-            console.error(e);
+            logger.error(e);
             toast.error(t("exportJsonFailed"));
         }
     };
@@ -254,7 +252,6 @@ export function WorkflowTitleMenu() {
                 setWorkflowDescription(result.description);
             }
             setWorkflowId(null);
-            setCurrentShareId(null);
             toast.success(
                 t("importJsonSuccess", {
                     nodes: result.nodes.length,
@@ -331,7 +328,7 @@ export function WorkflowTitleMenu() {
                 )}
             </div>
 
-            {/* 保存对话框 */}
+            {/* Save dialog */}
             <Dialog
                 open={isSaveDialogOpen}
                 onOpenChange={(open) => {

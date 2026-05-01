@@ -9,6 +9,7 @@ import {
     NodeStatus,
 } from "@/constants/task-status";
 import { useTranslations } from "next-intl";
+import { logger } from "@/lib/logger";
 
 interface NodeInfo {
     id: string;
@@ -16,24 +17,24 @@ interface NodeInfo {
     feature: string;
 }
 
-interface SSEMessage {
+/** SSE payload used by TaskProgressToast / `emitSSETaskMessage` */
+export interface SSEMessage {
     id: string;
-    status: string; // 使用 string 以兼容所有状态
+    /** Status string for the task / workflow / node (see task-status.ts) */
+    status: string;
     nodeId: string | null;
     data?: {
-        // 工作流相关
         totalNodes?: number;
         levels?: number;
-        nodes?: NodeInfo[]; // WORKFLOW_STARTED 时包含所有节点信息
+        nodes?: NodeInfo[];
         level?: number;
         feature?: string;
-        label?: string; // 节点的显示名称
+        label?: string;
         output?: Record<string, unknown>;
         duration?: number;
         totalDuration?: number;
-        // 普通任务相关
-        message?: string; // 任务进度消息
-        code?: number; // 状态码
+        message?: string;
+        code?: number;
         error?: string;
         status?: string;
         file_key?: string;
@@ -42,7 +43,7 @@ interface SSEMessage {
 
 interface NodeProgress {
     nodeId: string;
-    label: string; // 节点显示名称
+    label: string; // Node display name
     feature: string;
     level: number;
     status: "running" | "completed" | "failed";
@@ -66,36 +67,36 @@ export function TaskProgressToast({ className }: TaskProgressToastProps) {
         "success" | "failed" | "cancelled" | null
     >(null);
     const [totalDuration, setTotalDuration] = useState<number | null>(null);
-    const [statusMessage, setStatusMessage] = useState<string | null>(null); // 普通任务的进度消息
+    const [statusMessage, setStatusMessage] = useState<string | null>(null); // Progress message for regular (non-workflow) tasks
     const hideTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-    // 隐藏动画处理
+    // Handle hide animation
     const hideWithAnimation = (delay: number) => {
         hideTimeoutRef.current = setTimeout(() => {
             setIsAnimatingOut(true);
             setTimeout(() => {
                 setIsVisible(false);
                 setIsAnimatingOut(false);
-            }, 300); // 动画持续时间
+            }, 300); // Animation duration
         }, delay);
     };
 
-    // 监听全局 SSE 消息事件
+    // Listen for global SSE message events
     useEffect(() => {
         const handleSSEMessage = (event: CustomEvent<SSEMessage>) => {
             const message = event.detail;
 
-            // 清除之前的隐藏定时器
+            // Clear any pending hide timer
             if (hideTimeoutRef.current) {
                 clearTimeout(hideTimeoutRef.current);
                 hideTimeoutRef.current = null;
             }
 
-            console.log("[TaskProgressToast] Received message:", message);
+            logger.debug("[TaskProgressToast] Received message:", message);
 
             switch (message.status) {
                 case "SSE_CONNECTED":
-                    // SSE 连接建立时显示
+                    // Show when SSE connection is established
                     setIsAnimatingOut(false);
                     setIsVisible(true);
                     setTaskId(message.id);
@@ -123,14 +124,14 @@ export function TaskProgressToast({ className }: TaskProgressToastProps) {
 
                 case TaskStatus.PENDING:
                 case TaskStatus.RUNNING:
-                    // 普通任务状态
+                    // Regular task status
                     if (!isVisible) {
                         setIsAnimatingOut(false);
                         setIsVisible(true);
                         setTaskId(message.id);
                         setFinalStatus(null);
                     }
-                    // 更新进度消息
+                    // Update the progress message
                     if (message.data?.message) {
                         setStatusMessage(message.data.message);
                     }
@@ -150,7 +151,7 @@ export function TaskProgressToast({ className }: TaskProgressToastProps) {
                             status: "running",
                         };
                         setCurrentNode(node);
-                        setStatusMessage(null); // 工作流模式清除普通消息
+                        setStatusMessage(null); // Clear regular message in workflow mode
                     }
                     break;
 
@@ -163,7 +164,7 @@ export function TaskProgressToast({ className }: TaskProgressToastProps) {
                                 duration: message.data?.duration,
                             };
                             setNodeHistory((history) => {
-                                // 检查是否已存在该节点，避免重复添加
+                                // Check for an existing entry to avoid duplicates
                                 if (
                                     history.some(
                                         (n) =>
@@ -189,7 +190,7 @@ export function TaskProgressToast({ className }: TaskProgressToastProps) {
                                 status: "failed",
                             };
                             setNodeHistory((history) => {
-                                // 检查是否已存在该节点，避免重复添加
+                                // Check for an existing entry to avoid duplicates
                                 if (
                                     history.some(
                                         (n) => n.nodeId === failedNode.nodeId,
@@ -250,7 +251,7 @@ export function TaskProgressToast({ className }: TaskProgressToastProps) {
         };
     }, []);
 
-    // 格式化时长
+    // Format duration
     const formatDuration = (ms: number) => {
         if (ms < 1000) return `${ms}ms`;
         return `${(ms / 1000).toFixed(1)}s`;
@@ -286,7 +287,7 @@ export function TaskProgressToast({ className }: TaskProgressToastProps) {
         }
       `}</style>
 
-            {/* 头部 */}
+            {/* Header */}
             <div className="px-3 py-2 border-b bg-muted/50 flex items-center justify-between">
                 <div className="flex items-center gap-2">
                     {finalStatus === null ? (
@@ -314,12 +315,12 @@ export function TaskProgressToast({ className }: TaskProgressToastProps) {
                             {completedNodes}/{totalNodes} {t("nodes")}
                         </span>
                     )}
-                    {/* 取消按钮 - 只在运行中显示 */}
+                    {/* Cancel button - only shown while running */}
                     {finalStatus === null &&
                         !statusMessage?.includes("取消中") && (
                             <button
                                 onClick={() => {
-                                    // 触发取消事件
+                                    // Dispatch cancel event
                                     if (typeof window !== "undefined") {
                                         window.dispatchEvent(
                                             new CustomEvent(
@@ -340,7 +341,7 @@ export function TaskProgressToast({ className }: TaskProgressToastProps) {
                 </div>
             </div>
 
-            {/* 进度条 */}
+            {/* Progress bar */}
             {totalNodes > 0 && (
                 <div className="h-1 bg-muted">
                     <div
@@ -359,9 +360,9 @@ export function TaskProgressToast({ className }: TaskProgressToastProps) {
                 </div>
             )}
 
-            {/* 内容区域 */}
+            {/* Content area */}
             <div className="p-3 max-h-48 overflow-y-auto">
-                {/* 普通任务的进度消息（非工作流模式）或终态消息 */}
+                {/* Progress message for regular tasks (non-workflow mode) or terminal status message */}
                 {statusMessage && !currentNode && totalNodes === 0 && (
                     <div
                         className={cn(
@@ -394,7 +395,7 @@ export function TaskProgressToast({ className }: TaskProgressToastProps) {
                     </div>
                 )}
 
-                {/* 当前执行的节点（工作流模式） */}
+                {/* Currently executing node (workflow mode) */}
                 {currentNode && (
                     <div className="flex items-center gap-2 p-2 rounded-md bg-primary/10 border border-primary/20 mb-2">
                         <Loader2 className="h-3.5 w-3.5 animate-spin text-primary flex-shrink-0" />
@@ -409,7 +410,7 @@ export function TaskProgressToast({ className }: TaskProgressToastProps) {
                     </div>
                 )}
 
-                {/* 已完成的节点列表 */}
+                {/* Completed node list */}
                 {nodeHistory.length > 0 && (
                     <div className="space-y-1.5">
                         {nodeHistory.slice(-3).map((node) => (
@@ -440,7 +441,7 @@ export function TaskProgressToast({ className }: TaskProgressToastProps) {
                     </div>
                 )}
 
-                {/* 总耗时 */}
+                {/* Total duration */}
                 {finalStatus === "success" && totalDuration && (
                     <div className="mt-2 pt-2 border-t text-xs text-muted-foreground text-center">
                         {t("totalDuration")}:{" "}
@@ -452,16 +453,16 @@ export function TaskProgressToast({ className }: TaskProgressToastProps) {
     );
 }
 
-// 触发 SSE 消息的辅助函数（供 use-task.ts 调用）
+// Helper function to emit SSE messages (called by use-task.ts)
 export function emitSSETaskMessage(message: SSEMessage) {
     if (typeof window !== "undefined") {
-        console.log("[emitSSETaskMessage] Emitting:", message);
+        logger.debug("[emitSSETaskMessage] Emitting:", message);
         const event = new CustomEvent("sse-task-message", { detail: message });
         window.dispatchEvent(event);
     }
 }
 
-// SSE 连接建立时调用
+// Called when the SSE connection is established
 export function emitSSEConnected(taskId: string) {
     emitSSETaskMessage({
         id: taskId,

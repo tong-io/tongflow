@@ -1,5 +1,5 @@
 /**
- * Local Next.js server: run `modal setup` like electron/main (writes ~/.modal.toml).
+ * Local Next.js server: run `modal setup` (writes ~/.modal.toml).
  */
 
 import fs from "node:fs";

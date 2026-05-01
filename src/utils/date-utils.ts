@@ -1,18 +1,18 @@
 /**
- * 日期工具函数
- * 处理数据库中可能存在的秒级或毫秒级时间戳
+ * Date utility functions
+ * Handles second-level or millisecond-level timestamps that may exist in the database
  */
 
 /**
- * 安全地将时间戳转换为 Date 对象
- * 处理以下情况：
- * 1. 已经是 Date 对象
- * 2. ISO 日期字符串
- * 3. 秒级时间戳（正确的数据库格式）
- * 4. 毫秒级时间戳（错误存储的数据）
+ * Safely convert a timestamp to a Date object
+ * Handles the following cases:
+ * 1. Already a Date object
+ * 2. ISO date string
+ * 3. Second-level timestamp (correct database format)
+ * 4. Millisecond-level timestamp (incorrectly stored data)
  *
- * @param value - 时间戳值（可以是 Date、string 或 number）
- * @returns Date 对象
+ * @param value - Timestamp value (can be Date, string, or number)
+ * @returns Date object
  */
 export function toSafeDate(
     value: Date | string | number | null | undefined,
@@ -21,37 +21,37 @@ export function toSafeDate(
         return new Date();
     }
 
-    // 已经是 Date 对象
+    // Already a Date object
     if (value instanceof Date) {
-        // 检查是否是异常日期（年份 > 3000）
+        // Check for an abnormal date (year > 3000)
         if (value.getFullYear() > 3000) {
-            // 可能是毫秒时间戳被当作秒处理了，需要修正
-            // Drizzle 的 timestamp 模式会把秒数乘以1000，所以这里要除以1000再转换
+            // The millisecond timestamp may have been treated as seconds; correction needed.
+            // Drizzle's timestamp mode multiplies seconds by 1000, so divide by 1000 before converting.
             const correctedMs = value.getTime() / 1000;
             return new Date(correctedMs);
         }
         return value;
     }
 
-    // 字符串类型
+    // String type
     if (typeof value === "string") {
         const date = new Date(value);
         if (!isNaN(date.getTime())) {
-            return toSafeDate(date); // 递归检查结果
+            return toSafeDate(date); // Recursively check the result
         }
         return new Date();
     }
 
-    // 数字类型
+    // Number type
     if (typeof value === "number") {
-        // 判断是秒级还是毫秒级时间戳
-        // 秒级时间戳通常小于 10^10（2001年之后的秒级时间戳约为 10^9）
-        // 毫秒级时间戳通常大于 10^12（2001年之后的毫秒级时间戳约为 10^12）
+        // Determine whether it is a second-level or millisecond-level timestamp.
+        // Second-level timestamps are usually less than 10^10 (after 2001, ~10^9).
+        // Millisecond-level timestamps are usually greater than 10^12 (after 2001, ~10^12).
         if (value > 1e11) {
-            // 毫秒级时间戳
+            // Millisecond-level timestamp
             return new Date(value);
         } else {
-            // 秒级时间戳
+            // Second-level timestamp
             return new Date(value * 1000);
         }
     }
@@ -60,11 +60,11 @@ export function toSafeDate(
 }
 
 /**
- * 格式化日期为本地日期字符串
+ * Format a date as a locale date string
  *
- * @param value - 时间戳值
- * @param locale - 语言环境，默认自动检测
- * @returns 格式化后的日期字符串
+ * @param value - Timestamp value
+ * @param locale - Locale, auto-detected by default
+ * @returns Formatted date string
  */
 export function formatDate(
     value: Date | string | number | null | undefined,
@@ -75,11 +75,11 @@ export function formatDate(
 }
 
 /**
- * 格式化日期时间为本地日期时间字符串
+ * Format a date-time as a locale date-time string
  *
- * @param value - 时间戳值
- * @param locale - 语言环境，默认自动检测
- * @returns 格式化后的日期时间字符串
+ * @param value - Timestamp value
+ * @param locale - Locale, auto-detected by default
+ * @returns Formatted date-time string
  */
 export function formatDateTime(
     value: Date | string | number | null | undefined,

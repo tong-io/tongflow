@@ -1,5 +1,5 @@
 /**
- * Feature Registry（客户端与通用逻辑）
+ * Feature Registry (client and shared logic)
  *
  * IMPORTANT: `config/` must only contain `tongflow.abi.json`.
  * We derive the feature registry from ABI nodes (featureName + defaultHandler).
@@ -61,7 +61,7 @@ export function buildFeatureRegistry(bundle: FeatureRegistryBundle) {
 
 const clientRegistry = buildFeatureRegistry(defaultBundle);
 
-/** 客户端 / 同步工具：基于默认 JSON（不含 features.local 合并） */
+/** Client / sync tools: based on the default JSON (without features.local merging) */
 export const getAllFeatures = clientRegistry.getAllFeatures;
 export const resolveCanonicalFeatureName =
     clientRegistry.resolveCanonicalFeatureName;

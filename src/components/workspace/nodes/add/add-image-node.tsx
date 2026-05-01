@@ -7,7 +7,7 @@ import {
     Library,
     Camera,
 } from "lucide-react";
-import { Handle, Position, useNodeId, type NodeProps } from "@xyflow/react";
+import { useNodeId, type NodeProps } from "@xyflow/react";
 import useFlow from "@/hooks/use-flow";
 import { Button } from "@/components/ui/button";
 import { BaseNode } from "../base/base-node";
@@ -23,9 +23,10 @@ import { useMultipleUpload, useUpload } from "@/hooks/use-upload";
 import { LibInput } from "../../share/lib-input";
 import { WhiteBoard, type WhiteBoardRef } from "@/components/ui/whiteboard";
 import { cn } from "@/lib/utils";
+import { logger } from "@/lib/logger";
 import { useTranslations } from "next-intl";
 
-// 文件上传组件
+// File upload component
 const UploadTab = () => {
     const t = useTranslations("Workspace.nodes.add");
     const expands = useFlow((s) => s.expands);
@@ -40,7 +41,7 @@ const UploadTab = () => {
             }
         },
         onError: (error) => {
-            console.error("Upload failed:", error);
+            logger.error("Upload failed:", error);
         },
     });
 
@@ -123,7 +124,7 @@ const UploadTab = () => {
     );
 };
 
-// 涂鸦组件
+// Canvas drawing component
 const CanvasTab = () => {
     const t = useTranslations("Workspace.nodes.add");
     const expands = useFlow((s) => s.expands);
@@ -138,18 +139,18 @@ const CanvasTab = () => {
                 expands(id, [
                     { type: "imageNode", data: { fileKeys: [response.key] } },
                 ]);
-                // 清空画布并关闭对话框
+                // Clear canvas and close dialog
                 whiteBoardRef.current?.clear();
                 setDataUrl("");
                 setIsDialogOpen(false);
             }
         },
         onError: (error) => {
-            console.error("Error uploading canvas drawing:", error);
+            logger.error("Error uploading canvas drawing:", error);
         },
     });
 
-    // 将data URL转换为Blob
+    // Convert data URL to Blob
     const dataURLtoBlob = (dataURL: string): Blob => {
         const arr = dataURL.split(",");
         const mime = arr[0]?.match(/:(.*?);/)?.[1] ?? "image/png";
@@ -234,7 +235,7 @@ const CanvasTab = () => {
     );
 };
 
-// 作品集选择组件
+// Library selection component
 const LibraryTab = () => {
     return (
         <div className="w-full">
@@ -243,7 +244,7 @@ const LibraryTab = () => {
     );
 };
 
-// 相机组件
+// Camera component
 const CameraTab = () => {
     const t = useTranslations("Workspace.nodes.add");
     const expands = useFlow((s) => s.expands);
@@ -263,11 +264,11 @@ const CameraTab = () => {
             }
         },
         onError: (error) => {
-            console.error("Failed to upload photo:", error);
+            logger.error("Failed to upload photo:", error);
         },
     });
 
-    // 组件卸载时清理摄像头
+    // Cleanup camera on component unmount
     React.useEffect(() => {
         return () => {
             if (stream) {
@@ -276,7 +277,7 @@ const CameraTab = () => {
         };
     }, [stream]);
 
-    // 当stream变化时设置video源
+    // Set video source when stream changes
     React.useEffect(() => {
         if (stream && videoRef.current) {
             videoRef.current.srcObject = stream;
@@ -298,7 +299,7 @@ const CameraTab = () => {
 
             setStream(mediaStream);
         } catch (err) {
-            console.error("Error accessing camera:", err);
+            logger.error("Error accessing camera:", err);
             setError(err instanceof Error ? err.message : t("cameraError"));
         }
     };
@@ -402,16 +403,16 @@ export const AddImageNode: React.FC<NodeProps> = ({ selected, data }) => {
     const id = useNodeId();
     const updates = useFlow((s) => s.updates);
     const activeTab = (data as any)?.activeTab || "upload";
-    console.log("AddImageNode");
+    logger.debug("AddImageNode");
 
-    // 处理Tab切换时保存状态
+    // Save state on tab change
     const handleTabChange = (value: string) => {
         if (id) {
             updates(id, { ...data, activeTab: value });
         }
     };
 
-    // 获取基础配置
+    // Get base configuration
     const getWorkflowConfig = useCallback(() => {
         return {
             feature: "",
@@ -509,18 +510,6 @@ export const AddImageNode: React.FC<NodeProps> = ({ selected, data }) => {
                 </Tabs>
             </div>
 
-            <Handle
-                type="target"
-                position={Position.Left}
-                id="a"
-                isConnectable={true}
-            />
-            <Handle
-                type="source"
-                position={Position.Right}
-                id="b"
-                isConnectable={true}
-            />
         </BaseNode>
     );
 };

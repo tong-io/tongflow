@@ -4,6 +4,7 @@ import { Camera, Circle, Square } from "lucide-react";
 import { useEffect, useRef, useState, useCallback } from "react";
 import { Button } from "./button";
 import { cn } from "@/lib/utils";
+import { logger } from "@/lib/logger";
 
 interface VideoRecorderProps {
     onRecord: (blobUrl?: string) => void;
@@ -24,7 +25,7 @@ export const VideoRecorder = ({ onRecord, className }: VideoRecorderProps) => {
     const chunksRef = useRef<Blob[]>([]);
     const timerRef = useRef<NodeJS.Timeout | null>(null);
 
-    // 清理函数
+    // Cleanup function
     const cleanup = useCallback(() => {
         if (timerRef.current) {
             clearInterval(timerRef.current);
@@ -35,7 +36,7 @@ export const VideoRecorder = ({ onRecord, className }: VideoRecorderProps) => {
         }
     }, [previewStream]);
 
-    // 开始录制
+    // Start recording
     const startRecording = useCallback(async () => {
         try {
             const stream = await navigator.mediaDevices.getUserMedia({
@@ -71,27 +72,27 @@ export const VideoRecorder = ({ onRecord, className }: VideoRecorderProps) => {
                 setMediaBlobUrl(url);
                 onRecord(url);
 
-                // 停止所有轨道
+                // Stop all tracks
                 stream.getTracks().forEach((track) => track.stop());
                 setPreviewStream(null);
             };
 
             mediaRecorderRef.current = mediaRecorder;
-            mediaRecorder.start(1000); // 每秒记录一次数据
+            mediaRecorder.start(1000); // Record data every second
             setStatus("recording");
             setRecordingTime(0);
 
-            // 开始计时
+            // Start the timer
             timerRef.current = setInterval(() => {
                 setRecordingTime((prev) => prev + 1);
             }, 1000);
         } catch (error) {
-            console.error("Failed to start recording:", error);
+            logger.error("Failed to start recording:", error);
             alert("无法访问摄像头和麦克风。请确保已授予权限。");
         }
     }, [onRecord]);
 
-    // 停止录制
+    // Stop recording
     const stopRecording = useCallback(() => {
         if (mediaRecorderRef.current && status === "recording") {
             mediaRecorderRef.current.stop();
@@ -104,7 +105,7 @@ export const VideoRecorder = ({ onRecord, className }: VideoRecorderProps) => {
         }
     }, [status]);
 
-    // 组件卸载时清理
+    // Cleanup on unmount
     useEffect(() => {
         return () => {
             cleanup();
@@ -122,7 +123,7 @@ export const VideoRecorder = ({ onRecord, className }: VideoRecorderProps) => {
 
     return (
         <div className={cn("relative w-full", className)}>
-            {/* 预览区域 */}
+            {/* Preview area */}
             <div className="relative w-full aspect-video bg-black rounded-lg overflow-hidden">
                 {status === "idle" && (
                     <div className="absolute inset-0 flex items-center justify-center">

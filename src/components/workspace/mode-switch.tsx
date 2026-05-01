@@ -20,9 +20,9 @@ interface ModeSwitchProps {
 }
 
 /**
- * 模式切换组件
- * 创作模式 / 执行模式
- * 所有用户均可使用（积分充值制，无 tier 限制）
+ * Mode switch component
+ * Creation mode / Execution mode
+ * Available to all users (credit top-up system, no tier restrictions)
  */
 export function ModeSwitch({ onChange }: ModeSwitchProps) {
     const t = useTranslations("Workspace.modeSwitch");

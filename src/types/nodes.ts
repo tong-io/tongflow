@@ -1,11 +1,11 @@
 import type { Node } from "@xyflow/react";
 
 /* ========================================================================== */
-/* 基础类型定义                                                                 */
+/* Base Type Definitions                                                       */
 /* ========================================================================== */
 
 /**
- * 输出节点类型
+ * Output node type
  */
 export type OutputNodeType =
     | "textNode"
@@ -15,47 +15,60 @@ export type OutputNodeType =
     | "modelNode";
 
 /**
- * 处理节点的数据结构
- * 包含 feature、prompt 和输出配置，可直接用于后端执行
+ * Transfer node data structure
+ * Contains feature, prompt, and output config; can be submitted directly to the backend for execution
  */
 export interface TransferNodeData extends Record<string, unknown> {
-    /** 功能标识，对应后端 API */
+    /** Feature identifier, corresponding to the backend API */
     feature: string;
-    /** 执行参数，直接提交给后端 */
+    /** Execution parameters, submitted directly to the backend */
     prompt: Record<string, unknown>;
-    /** 输出节点类型，如 "audioNode"、"videoNode"、"textNode" 等 */
+    /** Output node type, e.g. "audioNode", "videoNode", "textNode" */
     outputType?: OutputNodeType;
-    /** 输出数据字段，"fileKeys" 或 "texts" */
+    /** Output data field: "fileKeys" or "texts" */
     outputField?: "fileKeys" | "texts";
 }
 
 /**
- * 合成节点的数据结构
- * 包含 feature、ids（连接的节点）和输出配置
+ * Compose node data structure
+ * Contains feature, ids (connected nodes), and output config
  */
 export interface ComposeNodeData extends Record<string, unknown> {
-    /** 功能标识，对应后端 API */
+    /** Feature identifier, corresponding to the backend API */
     feature: string;
-    /** 连接的上游节点 ID 列表 */
+    /** List of upstream node IDs connected to this node */
     ids: string[];
-    /** 输出节点类型 */
+    /** Output node type */
     outputType?: OutputNodeType;
-    /** 输出数据字段 */
+    /** Output data field */
     outputField?: "fileKeys" | "texts";
 }
 
 /**
- * 数据节点的基础数据结构
+ * Base data structure for data nodes
  */
 export interface DataNodeData extends Record<string, unknown> {
-    /** 文本数组 */
+    /** Array of text values */
     texts?: string[];
-    /** 文件 key 数组 */
+    /** Array of file keys */
     fileKeys?: string[];
 }
 
-/* ==========================================================================
-/* 原有类型定义（保持兼容）                                                      */
+/* ========================================================================== */
+/* BaseNode — Generic React Flow `data` shape (shared by plugin selector and execution) */
+/* ========================================================================== */
+
+/** Default `data` shape for nodes using BaseNode / plugin selector; concrete nodes can extend this interface */
+export interface BaseNodeData extends Record<string, unknown> {
+    feature?: string;
+    prompt?: Record<string, unknown>;
+    /** Currently selected plugin ID (registry `nodeSlot` → `pluginIds`) */
+    pluginId?: string;
+    pluginRepo?: string;
+}
+
+/* ========================================================================== */
+/* Legacy type definitions (kept for backward compatibility)                   */
 /* ========================================================================== */
 
 export interface TextNodeData extends Record<string, unknown> {

@@ -2,15 +2,17 @@ import { type NextRequest } from "next/server";
 import { onTaskEvent, isTaskRunning, type TaskEvent } from "@/lib/task-emitter";
 import { executeTask } from "@/lib/task-runner";
 import { isTerminalStatus } from "@/constants/task-status";
+import { jsonStringifyForSse } from "@/lib/json-sse";
+import { logger } from "@/lib/logger";
 
 /**
  * GET /api/task/wait?taskId=xxx&reconnect=false
  *
- * SSE 端点，实时推送任务执行状态。
- * 替代 Python openapi 的 /wait 端点。
+ * SSE endpoint that streams real-time task execution status.
+ * Replaces the Python openapi /wait endpoint.
  *
- * - 非 reconnect 模式：启动任务执行并监听事件
- * - reconnect 模式：仅监听已运行任务的事件
+ * - Non-reconnect mode: starts task execution and listens for events
+ * - Reconnect mode: only listens for events of an already-running task
  */
 export async function GET(request: NextRequest) {
     const taskId = request.nextUrl.searchParams.get("taskId");
@@ -20,9 +22,9 @@ export async function GET(request: NextRequest) {
         return new Response("taskId is required", { status: 400 });
     }
 
-    // reconnect 模式：检查任务是否仍在运行
+    // Reconnect mode: check whether the task is still running
     if (reconnect && !isTaskRunning(taskId)) {
-        return new Response("任务不存在或已完成", { status: 404 });
+        return new Response("Task does not exist or has already completed", { status: 404 });
     }
 
     const encoder = new TextEncoder();
@@ -39,17 +41,17 @@ export async function GET(request: NextRequest) {
                 }
             }
 
-            // 订阅任务事件
+            // Subscribe to task events
             const unsubscribe = onTaskEvent(taskId, (event: TaskEvent) => {
                 if (closed) return;
 
                 try {
-                    const data = JSON.stringify(event);
+                    const data = jsonStringifyForSse(event);
                     controller.enqueue(encoder.encode(`data: ${data}\n\n`));
 
-                    // 终态 → 关闭 SSE 连接
+                    // Terminal state → close the SSE connection
                     if (isTerminalStatus(event.status)) {
-                        console.log(
+                        logger.debug(
                             `[SSE] Task ${taskId} reached terminal status: ${event.status}`,
                         );
                         close();
@@ -59,7 +61,7 @@ export async function GET(request: NextRequest) {
                 }
             });
 
-            // 心跳定时器（每 10 秒）
+            // Heartbeat timer (every 10 seconds)
             const heartbeat = setInterval(() => {
                 if (closed) {
                     clearInterval(heartbeat);
@@ -73,26 +75,26 @@ export async function GET(request: NextRequest) {
                 }
             }, 10_000);
 
-            // 客户端断开连接时清理
+            // Clean up when the client disconnects
             request.signal.addEventListener("abort", () => {
                 clearInterval(heartbeat);
                 close();
             });
 
-            // 非 reconnect 模式：启动任务执行
+            // Non-reconnect mode: start task execution
             if (!reconnect) {
                 executeTask(taskId).catch((error) => {
-                    console.error(
+                    logger.error(
                         `[SSE] Failed to start task ${taskId}:`,
                         error,
                     );
                     if (!closed) {
                         try {
-                            const errEvent = JSON.stringify({
+                            const errEvent = jsonStringifyForSse({
                                 id: taskId,
                                 status: "FAILED",
                                 data: {
-                                    message: "任务启动失败",
+                                    message: "Task failed to start",
                                     error: String(error),
                                 },
                             });

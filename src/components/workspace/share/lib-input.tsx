@@ -21,14 +21,15 @@ import {
     type Material,
     type MaterialType,
 } from "@/lib/api/material";
-import { useR2AsyncLoaderBatch } from "@/hooks/use-r2-async-loader";
+import { useFileAsyncLoaderBatch } from "@/hooks/use-file-async-loader";
 import toast from "react-hot-toast";
+import { logger } from "@/lib/logger";
 
 interface LibInputProps {
     resourceType: "TEXT" | "IMAGE" | "VIDEO" | "AUDIO" | "FILE" | "MODEL";
 }
 
-// 映射前端类型到后端类型
+// Map frontend types to backend types
 const resourceTypeToMaterialType: Record<string, MaterialType> = {
     TEXT: "text",
     IMAGE: "image",
@@ -38,7 +39,7 @@ const resourceTypeToMaterialType: Record<string, MaterialType> = {
     MODEL: "model",
 };
 
-// 映射素材类型到节点类型
+// Map material types to node types
 const materialTypeToNodeType: Record<MaterialType, string> = {
     image: "imageNode",
     video: "videoNode",
@@ -48,7 +49,7 @@ const materialTypeToNodeType: Record<MaterialType, string> = {
     model: "modelNode",
 };
 
-// 素材类型对应的图标
+// Icons corresponding to each material type
 const MaterialTypeIcon: Record<MaterialType, React.ReactNode> = {
     image: <ImageIcon className="h-6 w-6" />,
     video: <Video className="h-6 w-6" />,
@@ -58,7 +59,7 @@ const MaterialTypeIcon: Record<MaterialType, React.ReactNode> = {
     model: <Box className="h-6 w-6" />,
 };
 
-// 单个素材项组件
+// Individual material item component
 const MaterialItem = memo(
     ({
         material,
@@ -85,7 +86,7 @@ const MaterialItem = memo(
                 onDelete(material.id);
                 toast.success("素材已删除");
             } catch (error) {
-                console.error("Failed to delete material:", error);
+                logger.error("Failed to delete material:", error);
                 toast.error("删除失败");
             } finally {
                 setIsDeleting(false);
@@ -125,7 +126,7 @@ const MaterialItem = memo(
                 );
             }
 
-            // 默认显示图标
+            // Fallback: show the type icon
             return (
                 <div className="h-full w-full flex items-center justify-center text-muted-foreground">
                     {MaterialTypeIcon[material.type]}
@@ -143,7 +144,7 @@ const MaterialItem = memo(
             >
                 {renderThumbnail()}
 
-                {/* 删除按钮 */}
+                {/* Delete button */}
                 <Button
                     size="icon"
                     variant="destructive"
@@ -161,7 +162,7 @@ const MaterialItem = memo(
                     )}
                 </Button>
 
-                {/* 名称标签 */}
+                {/* Name label */}
                 <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-2">
                     <p className="text-xs text-white truncate">
                         {material.name}
@@ -183,7 +184,7 @@ export const LibInput = ({ resourceType }: LibInputProps) => {
 
     const materialType = resourceTypeToMaterialType[resourceType];
 
-    // 获取所有需要加载的缩略图 keys
+    // Collect all thumbnail keys that need to be loaded
     const thumbnailKeys = materials
         .filter(
             (m) => m.thumbnail && (m.type === "image" || m.type === "video"),
@@ -191,9 +192,9 @@ export const LibInput = ({ resourceType }: LibInputProps) => {
         .map((m) => m.thumbnail as string);
 
     const { urls: thumbnailUrls, isLoading: thumbnailsLoading } =
-        useR2AsyncLoaderBatch(thumbnailKeys, { priority: "normal" });
+        useFileAsyncLoaderBatch(thumbnailKeys, { priority: "normal" });
 
-    // 加载素材列表
+    // Load the material list
     const loadMaterials = useCallback(async () => {
         setIsLoading(true);
         setError(null);
@@ -201,7 +202,7 @@ export const LibInput = ({ resourceType }: LibInputProps) => {
             const response = await listMaterials(materialType);
             setMaterials(response.materials);
         } catch (err) {
-            console.error("Failed to load materials:", err);
+            logger.error("Failed to load materials:", err);
             setError("加载素材失败");
         } finally {
             setIsLoading(false);
@@ -212,7 +213,7 @@ export const LibInput = ({ resourceType }: LibInputProps) => {
         loadMaterials();
     }, [loadMaterials]);
 
-    // 选择素材
+    // Select a material
     const handleSelect = useCallback(
         (material: Material) => {
             if (!id) return;
@@ -229,7 +230,7 @@ export const LibInput = ({ resourceType }: LibInputProps) => {
         [id, expands],
     );
 
-    // 删除素材后更新列表
+    // Update the list after deleting a material
     const handleDelete = useCallback((deletedId: number) => {
         setMaterials((prev) => prev.filter((m) => m.id !== deletedId));
     }, []);

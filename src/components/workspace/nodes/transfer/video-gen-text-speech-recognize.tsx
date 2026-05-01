@@ -1,21 +1,14 @@
-import { Handle, Position, useNodeId, type NodeProps } from "@xyflow/react";
+import { type NodeProps } from "@xyflow/react";
 import { memo } from "react";
 import { Video as VideoIcon } from "lucide-react";
 
 import { BaseNode } from "../base/base-node";
-import { getR2Url } from "@/lib/r2-utils";
+import { getFileUrl } from "@/lib/file-url";
 import {
     upstreamParam,
     type GetPromptsContext,
 } from "@/utils/node-execution-config";
 import { useTranslations } from "next-intl";
-import useFlow from "@/hooks/use-flow";
-import { clampToAllowedModel } from "@/utils/node-model-feature";
-import { NodeModelSelect } from "../base/node-model-select";
-import { multiModelSelectOptions } from "@/utils/node-model-select-label";
-import { NodePluginSelect } from "../base/node-plugin-select";
-import { useNodePluginIdsUnion } from "@/hooks/use-plugins-registry";
-import { NODE_TRANSCRIBE_SLOTS } from "@/lib/tongflow-abi";
 
 interface VideoGenTextSpeechRecognizeNodeProps extends NodeProps {
     data: {
@@ -25,11 +18,9 @@ interface VideoGenTextSpeechRecognizeNodeProps extends NodeProps {
     };
 }
 
-const ASR_FEATURES = ["transcribe", "transcribe_timestamp"] as const;
-
-// 工作流执行配置（基础配置，不包含动态的feature）
+// Workflow execution config (static shape only; omit dynamic features)
 const baseWorkflowConfig = {
-    label: "语音识别",
+    feature: "transcribe",
     outputType: "textNode",
     outputField: "texts" as const,
     supportsBatch: true,
@@ -51,21 +42,7 @@ const VideoGenTextSpeechRecognizeNode = ({
     data,
 }: VideoGenTextSpeechRecognizeNodeProps) => {
     const t = useTranslations("Workspace.nodes");
-    const updates = useFlow((s) => s.updates);
-    const id = useNodeId()!;
     const { fileKeys = [] } = data;
-    const pluginOptions = useNodePluginIdsUnion([...NODE_TRANSCRIBE_SLOTS]);
-    const pluginId = (
-        data.pluginId ??
-        (data as { pluginRepo?: string }).pluginRepo ??
-        ""
-    ).trim();
-
-    const featureName = clampToAllowedModel(
-        (data as { feature?: string }).feature,
-        ASR_FEATURES,
-        "transcribe",
-    );
 
     return (
         <BaseNode
@@ -74,7 +51,6 @@ const VideoGenTextSpeechRecognizeNode = ({
             data={data}
             workflowConfig={{
                 ...baseWorkflowConfig,
-                feature: featureName,
                 title: t("titles.speechRecognize"),
                 icon: <VideoIcon className="h-5 w-5" />,
                 executeLabel: t("actions.describeVideo"),
@@ -89,52 +65,11 @@ const VideoGenTextSpeechRecognizeNode = ({
                             ? upstreamKeys
                             : fileKeys;
                     return keys.map((fileKey) => ({
-                        video: getR2Url(fileKey),
-                        ...(pluginId
-                            ? { pluginId, nodeSlot: featureName }
-                            : {}),
+                        video: getFileUrl(fileKey),
                     }));
                 },
             }}
-        >
-            <div className="p-4 space-y-4">
-                {pluginOptions.length > 0 && (
-                    <NodePluginSelect
-                        value={pluginId}
-                        onValueChange={(value) =>
-                            updates(id, { ...data, pluginId: value })
-                        }
-                        options={pluginOptions.map((r) => ({
-                            value: r,
-                            label: r,
-                        }))}
-                    />
-                )}
-                <NodeModelSelect
-                    value={featureName}
-                    onValueChange={(value) =>
-                        updates(id, { ...data, feature: value })
-                    }
-                    options={multiModelSelectOptions(
-                        [...ASR_FEATURES],
-                        (k) => t(k as Parameters<typeof t>[0]),
-                    )}
-                />
-            </div>
-
-            <Handle
-                type="target"
-                position={Position.Left}
-                id="a"
-                isConnectable={true}
-            />
-            <Handle
-                type="source"
-                position={Position.Right}
-                id="b"
-                isConnectable={true}
-            />
-        </BaseNode>
+        />
     );
 };
 

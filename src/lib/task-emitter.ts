@@ -1,14 +1,14 @@
 /**
- * 全局任务事件系统
+ * Global task event system
  *
- * 替代 Redis pub/sub，使用进程内 EventEmitter 实现实时通知。
- * SSE 端点监听事件，handler 发布事件。
+ * Replaces Redis pub/sub with in-process EventEmitter realtime notifications.
+ * SSE endpoints listen for events, and handlers publish events.
  */
 
 import { EventEmitter } from "node:events";
 import { type SSEStatusType, isTerminalStatus } from "@/constants/task-status";
 
-// ==================== 类型定义 ====================
+// ==================== Types ====================
 
 export interface TaskEvent {
     id: string;
@@ -17,29 +17,29 @@ export interface TaskEvent {
     data?: Record<string, unknown>;
 }
 
-// ==================== 全局单例 ====================
+// ==================== Global singleton ====================
 
 const emitter = new EventEmitter();
 emitter.setMaxListeners(1000);
 
 /**
- * 运行中的任务 → AbortController 映射
- * 用于取消正在执行的任务
+ * Running task -> AbortController mapping
+ * Used to cancel running tasks
  */
 const runningTasks = new Map<string, AbortController>();
 
-// ==================== 公共 API ====================
+// ==================== Public API ====================
 
 /**
- * 发布任务事件（handler 调用）
+ * Publish task events (called by handlers)
  */
 export function emitTaskEvent(taskId: string, event: TaskEvent) {
     emitter.emit(`task:${taskId}`, event);
 }
 
 /**
- * 订阅任务事件（SSE 端点调用）
- * 返回取消订阅函数
+ * Subscribe to task events (called by SSE endpoints)
+ * Return an unsubscribe function
  */
 export function onTaskEvent(
     taskId: string,
@@ -53,7 +53,7 @@ export function onTaskEvent(
 }
 
 /**
- * 注册运行中的任务
+ * Register a running task
  */
 export function registerTask(taskId: string): AbortController {
     const controller = new AbortController();
@@ -62,7 +62,7 @@ export function registerTask(taskId: string): AbortController {
 }
 
 /**
- * 取消任务
+ * Cancel task
  */
 export function abortTask(taskId: string): boolean {
     const controller = runningTasks.get(taskId);
@@ -75,21 +75,21 @@ export function abortTask(taskId: string): boolean {
 }
 
 /**
- * 移除已完成的任务
+ * Remove completed tasks
  */
 export function removeTask(taskId: string) {
     runningTasks.delete(taskId);
 }
 
 /**
- * 检查任务是否正在运行
+ * Check whether a task is running
  */
 export function isTaskRunning(taskId: string): boolean {
     return runningTasks.has(taskId);
 }
 
 /**
- * 发送任务通知的便捷函数（替代 Python 版的 notifyTask）
+ * Convenience function for sending task notifications (replaces the Python notifyTask)
  */
 export function notifyTask(
     taskId: string,

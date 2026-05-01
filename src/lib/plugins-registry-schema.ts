@@ -8,6 +8,8 @@ import { z } from "zod";
  */
 export const ModalMethodSchema = z.object({
     methodName: z.string().min(1),
+    /** When set, Modal `cls.fromName(appName, clsName)` uses this class for this slot. */
+    clsName: z.string().min(1).optional(),
 });
 
 export const ModalPluginConfigSchema = z.object({

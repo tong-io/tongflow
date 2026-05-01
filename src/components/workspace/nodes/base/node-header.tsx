@@ -235,7 +235,7 @@ export const NodeHeaderMenuAction = forwardRef<
             return getDescendantNodeIds(id, edges).size;
         }, [id, edges]);
 
-        // Delete only this node（与 useFlow 单一数据源一致，并同步删除相关边）
+        // Delete lone node mirroring Flow store plus dangling edges
         const handleDeleteNode = useCallback(() => {
             if (!id) return;
             useFlow.getState().removeNode(id);
@@ -430,7 +430,7 @@ export const NodeHeaderComboAction: React.FC<NodeHeaderComboActionProps> = ({
 }) => {
     const nodeId = useNodeId();
 
-    // ✅ 只订阅布尔/函数，不订阅数组/对象
+    // Subscribe primitives/functions only — avoid rerenders from collections
     const comboMode = useFlow((s) => s.comboMode);
     const isInCombo = useFlow((s) => (nodeId ? s.isInCombo(nodeId) : false));
     const toggleCombo = useFlow((s) => s.toggleCombo);

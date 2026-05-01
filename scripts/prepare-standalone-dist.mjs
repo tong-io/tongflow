@@ -63,18 +63,5 @@ for (const name of fs.readdirSync(out)) {
 	}
 }
 
-// Optional pruning: standalone tracing may include unrelated folders.
-// Keep this list conservative; prefer to prune only obviously non-runtime artifacts.
-for (const p of [
-	"dist-electron",
-	"release",
-	"electron-out",
-	".openflow-modal-venv",
-	"wheelhouse",
-]) {
-	const full = path.join(out, p);
-	if (fs.existsSync(full)) rmrf(full);
-}
-
 console.log(`[dist] Prepared Next standalone at ${out}`);
 

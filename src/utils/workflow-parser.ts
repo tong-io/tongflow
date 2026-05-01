@@ -1,11 +1,12 @@
 /**
- * 工作流解析工具
- * 用于解析ReactFlow格式的工作流JSON，生成执行顺序规划
+ * Workflow parsing utility
+ * Parses ReactFlow-format workflow JSON and generates an execution order plan
  */
 
 import type { Node, Edge } from "@xyflow/react";
+import { logger } from "@/lib/logger";
 
-// 工作流JSON格式接口
+// Workflow JSON format interface
 export interface WorkflowJSON {
     name: string;
     description?: string;
@@ -17,53 +18,53 @@ export interface WorkflowJSON {
     version?: string;
 }
 
-// 节点执行状态
+// Node execution status
 export type NodeExecutionStatus =
-    | "pending" // 等待执行
-    | "ready" // 准备就绪（所有依赖已完成）
-    | "running" // 正在执行
-    | "completed" // 执行完成
-    | "failed" // 执行失败
-    | "skipped"; // 跳过
+    | "pending" // Waiting to execute
+    | "ready" // Ready (all dependencies have completed)
+    | "running" // Executing
+    | "completed" // Execution completed
+    | "failed" // Execution failed
+    | "skipped"; // Skipped
 
-// 节点执行信息
+// Node execution info
 export interface NodeExecutionInfo {
     id: string;
     type: string;
     status: NodeExecutionStatus;
-    dependencies: string[]; // 依赖的节点ID
-    dependents: string[]; // 被依赖的节点ID（下游节点）
-    level: number; // 执行层级（用于确定执行顺序）
+    dependencies: string[]; // IDs of dependency nodes
+    dependents: string[]; // IDs of dependent nodes (downstream nodes)
+    level: number; // Execution level (used to determine execution order)
     data: Record<string, unknown>;
 }
 
-// 执行计划
+// Execution plan
 export interface ExecutionPlan {
-    // 按层级分组的节点ID（同一层级可以并行执行）
+    // Node IDs grouped by level (nodes at the same level can execute in parallel)
     levels: string[][];
-    // 节点执行信息映射
+    // Node execution info mapping
     nodeInfoMap: Map<string, NodeExecutionInfo>;
-    // 开始节点（入度为0）
+    // Start nodes (in-degree 0)
     startNodes: string[];
-    // 结束节点（出度为0）
+    // End nodes (out-degree 0)
     endNodes: string[];
-    // 总节点数
+    // Total number of nodes
     totalNodes: number;
-    // 总边数
+    // Total number of edges
     totalEdges: number;
 }
 
 /**
- * 工作流解析器类
+ * Workflow parser class
  */
 export class WorkflowParser {
     private nodes: Node[];
     private edges: Edge[];
     private nodeMap: Map<string, Node>;
-    private inDegreeMap: Map<string, number>; // 入度（有多少节点指向它）
-    private outDegreeMap: Map<string, number>; // 出度（它指向多少节点）
-    private adjacencyList: Map<string, string[]>; // 邻接表（source -> targets）
-    private reverseAdjacencyList: Map<string, string[]>; // 反向邻接表（target -> sources）
+    private inDegreeMap: Map<string, number>; // In-degree (how many nodes point to this node)
+    private outDegreeMap: Map<string, number>; // Out-degree (how many nodes this node points to)
+    private adjacencyList: Map<string, string[]>; // Adjacency list (source -> targets)
+    private reverseAdjacencyList: Map<string, string[]>; // Reverse adjacency list (target -> sources)
 
     constructor(workflow: WorkflowJSON | { nodes: Node[]; edges: Edge[] }) {
         if ("flow" in workflow) {
@@ -84,10 +85,10 @@ export class WorkflowParser {
     }
 
     /**
-     * 构建图结构
+     * Build the graph structure
      */
     private buildGraph(): void {
-        // 初始化节点映射和度数
+        // Initialize the node map and degree counts
         for (const node of this.nodes) {
             this.nodeMap.set(node.id, node);
             this.inDegreeMap.set(node.id, 0);
@@ -96,20 +97,20 @@ export class WorkflowParser {
             this.reverseAdjacencyList.set(node.id, []);
         }
 
-        // 根据边构建邻接表和度数
+        // Build the adjacency list and degree counts from edges
         for (const edge of this.edges) {
             const { source, target } = edge;
 
-            // 确保节点存在
+            // Ensure the nodes exist
             if (!this.nodeMap.has(source) || !this.nodeMap.has(target)) {
                 continue;
             }
 
-            // 更新邻接表
+            // Update the adjacency list
             this.adjacencyList.get(source)!.push(target);
             this.reverseAdjacencyList.get(target)!.push(source);
 
-            // 更新度数
+            // Update degree counts
             this.outDegreeMap.set(
                 source,
                 (this.outDegreeMap.get(source) ?? 0) + 1,
@@ -122,7 +123,7 @@ export class WorkflowParser {
     }
 
     /**
-     * 获取开始节点（入度为0的节点）
+     * Get start nodes (nodes with in-degree 0)
      */
     getStartNodes(): string[] {
         const startNodes: string[] = [];
@@ -135,7 +136,7 @@ export class WorkflowParser {
     }
 
     /**
-     * 获取结束节点（出度为0的节点）
+     * Get end nodes (nodes with out-degree 0)
      */
     getEndNodes(): string[] {
         const endNodes: string[] = [];
@@ -148,32 +149,32 @@ export class WorkflowParser {
     }
 
     /**
-     * 获取节点的依赖（上游节点）
+     * Get a node's dependencies (upstream nodes)
      */
     getDependencies(nodeId: string): string[] {
         return this.reverseAdjacencyList.get(nodeId) ?? [];
     }
 
     /**
-     * 获取节点的下游节点
+     * Get a node's downstream nodes
      */
     getDependents(nodeId: string): string[] {
         return this.adjacencyList.get(nodeId) ?? [];
     }
 
     /**
-     * 使用拓扑排序生成执行计划
-     * 基于Kahn算法，按层级分组（同一层级可以并行执行）
+     * Generate an execution plan using topological sort
+     * Based on Kahn's algorithm, grouped by level (same level can execute in parallel)
      */
     generateExecutionPlan(): ExecutionPlan {
         const nodeInfoMap = new Map<string, NodeExecutionInfo>();
         const levels: string[][] = [];
         const visited = new Set<string>();
 
-        // 复制入度映射用于计算
+        // Copy the in-degree map for computation
         const inDegreeWorkingCopy = new Map(this.inDegreeMap);
 
-        // 初始化节点执行信息
+        // Initialize node execution info
         for (const node of this.nodes) {
             nodeInfoMap.set(node.id, {
                 id: node.id,
@@ -186,7 +187,7 @@ export class WorkflowParser {
             });
         }
 
-        // 第一层：所有入度为0的节点
+        // First level: all nodes with in-degree 0
         let currentLevel: string[] = [];
         for (const [nodeId, inDegree] of inDegreeWorkingCopy) {
             if (inDegree === 0) {
@@ -201,23 +202,23 @@ export class WorkflowParser {
 
         let levelIndex = 0;
 
-        // BFS遍历，按层级分组
+        // BFS traversal, grouped by level
         while (currentLevel.length > 0) {
             levels.push([...currentLevel]);
 
             const nextLevel: string[] = [];
 
             for (const nodeId of currentLevel) {
-                // 获取所有下游节点
+                // Get all downstream nodes
                 const dependents = this.getDependents(nodeId);
 
                 for (const dependent of dependents) {
-                    // 减少下游节点的入度
+                    // Decrease the in-degree of the downstream node
                     const newInDegree =
                         (inDegreeWorkingCopy.get(dependent) ?? 1) - 1;
                     inDegreeWorkingCopy.set(dependent, newInDegree);
 
-                    // 如果入度变为0且未访问过，加入下一层
+                    // If the in-degree drops to 0 and the node has not been visited, add it to the next level
                     if (newInDegree === 0 && !visited.has(dependent)) {
                         nextLevel.push(dependent);
                         visited.add(dependent);
@@ -233,12 +234,12 @@ export class WorkflowParser {
             levelIndex++;
         }
 
-        // 检测是否有环（如果有节点未被访问）
+        // Detect cycles (if any nodes were not visited)
         if (visited.size !== this.nodes.length) {
-            console.warn(
-                "[WorkflowParser] 检测到工作流中存在环，部分节点无法执行",
+            logger.warn(
+                "[WorkflowParser] A cycle was detected in the workflow; some nodes cannot execute",
             );
-            // 将未访问的节点标记为跳过
+            // Mark unvisited nodes as skipped
             for (const node of this.nodes) {
                 if (!visited.has(node.id)) {
                     const info = nodeInfoMap.get(node.id);
@@ -260,28 +261,28 @@ export class WorkflowParser {
     }
 
     /**
-     * 获取节点信息
+     * Get node info
      */
     getNode(nodeId: string): Node | undefined {
         return this.nodeMap.get(nodeId);
     }
 
     /**
-     * 获取所有节点
+     * Get all nodes
      */
     getAllNodes(): Node[] {
         return this.nodes;
     }
 
     /**
-     * 获取所有边
+     * Get all edges
      */
     getAllEdges(): Edge[] {
         return this.edges;
     }
 
     /**
-     * 检查工作流是否有效（无环）
+     * Check whether the workflow is valid (no cycles)
      */
     isValid(): boolean {
         const plan = this.generateExecutionPlan();
@@ -293,7 +294,7 @@ export class WorkflowParser {
     }
 
     /**
-     * 获取从指定节点到结束的所有路径
+     * Get all paths from a given node to the end
      */
     getPathsToEnd(startNodeId: string): string[][] {
         const paths: string[][] = [];
@@ -319,22 +320,22 @@ export class WorkflowParser {
     }
 
     /**
-     * 获取执行顺序的可视化字符串（用于调试）
+     * Get a visualized string of the execution order (for debugging)
      */
     getExecutionOrderString(): string {
         const plan = this.generateExecutionPlan();
         const lines: string[] = [];
 
-        lines.push(`=== 工作流执行计划 ===`);
-        lines.push(`总节点数: ${plan.totalNodes}`);
-        lines.push(`总边数: ${plan.totalEdges}`);
-        lines.push(`开始节点: ${plan.startNodes.join(", ")}`);
-        lines.push(`结束节点: ${plan.endNodes.join(", ")}`);
+        lines.push(`=== Workflow Execution Plan ===`);
+        lines.push(`Total nodes: ${plan.totalNodes}`);
+        lines.push(`Total edges: ${plan.totalEdges}`);
+        lines.push(`Start nodes: ${plan.startNodes.join(", ")}`);
+        lines.push(`End nodes: ${plan.endNodes.join(", ")}`);
         lines.push("");
 
         for (let i = 0; i < plan.levels.length; i++) {
             const level = plan.levels[i];
-            lines.push(`第 ${i + 1} 层 (${level.length} 个节点可并行执行):`);
+            lines.push(`Level ${i + 1} (${level.length} nodes can execute in parallel):`);
             for (const nodeId of level) {
                 const info = plan.nodeInfoMap.get(nodeId);
                 if (info) {
@@ -353,8 +354,8 @@ export class WorkflowParser {
 }
 
 /**
- * 工作流执行器类
- * 负责按照执行计划执行工作流
+ * Workflow executor class
+ * Responsible for executing the workflow according to the execution plan
  */
 export class WorkflowExecutor {
     private parser: WorkflowParser;
@@ -384,7 +385,7 @@ export class WorkflowExecutor {
         this.plan = this.parser.generateExecutionPlan();
         this.nodeStatusMap = new Map();
 
-        // 初始化所有节点状态
+        // Initialize all node statuses
         for (const [nodeId, info] of this.plan.nodeInfoMap) {
             this.nodeStatusMap.set(nodeId, info.status);
         }
@@ -395,21 +396,21 @@ export class WorkflowExecutor {
     }
 
     /**
-     * 获取当前执行计划
+     * Get the current execution plan
      */
     getPlan(): ExecutionPlan {
         return this.plan;
     }
 
     /**
-     * 获取节点状态
+     * Get node status
      */
     getNodeStatus(nodeId: string): NodeExecutionStatus {
         return this.nodeStatusMap.get(nodeId) ?? "pending";
     }
 
     /**
-     * 更新节点状态
+     * Update node status
      */
     updateNodeStatus(nodeId: string, status: NodeExecutionStatus): void {
         this.nodeStatusMap.set(nodeId, status);
@@ -417,7 +418,7 @@ export class WorkflowExecutor {
     }
 
     /**
-     * 检查节点是否可以执行（所有依赖都已完成）
+     * Check whether a node can execute (all dependencies have completed)
      */
     canExecute(nodeId: string): boolean {
         const info = this.plan.nodeInfoMap.get(nodeId);
@@ -429,7 +430,7 @@ export class WorkflowExecutor {
     }
 
     /**
-     * 获取当前可执行的节点
+     * Get the currently executable nodes
      */
     getReadyNodes(): string[] {
         const readyNodes: string[] = [];
@@ -442,14 +443,14 @@ export class WorkflowExecutor {
     }
 
     /**
-     * 检查是否正在运行
+     * Check whether execution is in progress
      */
     getIsRunning(): boolean {
         return this.isRunning;
     }
 
     /**
-     * 停止执行
+     * Stop execution
      */
     stop(): void {
         this.isStopped = true;
@@ -457,7 +458,7 @@ export class WorkflowExecutor {
     }
 
     /**
-     * 重置执行器状态
+     * Reset the executor state
      */
     reset(): void {
         this.isStopped = false;
@@ -468,8 +469,8 @@ export class WorkflowExecutor {
     }
 
     /**
-     * 开始执行工作流
-     * @param executeNode 执行单个节点的函数，返回Promise
+     * Start executing the workflow
+     * @param executeNode Function to execute a single node, returns a Promise
      */
     async execute(
         executeNode: (
@@ -478,7 +479,7 @@ export class WorkflowExecutor {
         ) => Promise<boolean>,
     ): Promise<boolean> {
         if (this.isRunning) {
-            console.warn("[WorkflowExecutor] 工作流已在执行中");
+            logger.warn("[WorkflowExecutor] Workflow is already executing");
             return false;
         }
 
@@ -487,31 +488,31 @@ export class WorkflowExecutor {
         let success = true;
 
         try {
-            // 按层级执行
+            // Execute level by level
             for (
                 let levelIndex = 0;
                 levelIndex < this.plan.levels.length;
                 levelIndex++
             ) {
                 if (this.isStopped) {
-                    console.log("[WorkflowExecutor] 执行被停止");
+                    logger.debug("[WorkflowExecutor] Execution stopped");
                     success = false;
                     break;
                 }
 
                 const level = this.plan.levels[levelIndex];
-                console.log(
-                    `[WorkflowExecutor] 执行第 ${levelIndex + 1} 层，共 ${
+                logger.debug(
+                    `[WorkflowExecutor] Executing level ${levelIndex + 1}, total ${
                         level.length
-                    } 个节点`,
+                    } nodes`,
                 );
 
-                // 将当前层的节点标记为ready
+                // Mark nodes in the current level as ready
                 for (const nodeId of level) {
                     this.updateNodeStatus(nodeId, "ready");
                 }
 
-                // 并行执行当前层的所有节点
+                // Execute all nodes in the current level in parallel
                 const results = await Promise.all(
                     level.map(async (nodeId) => {
                         if (this.isStopped) return false;
@@ -529,8 +530,8 @@ export class WorkflowExecutor {
                             );
                             return result;
                         } catch (error) {
-                            console.error(
-                                `[WorkflowExecutor] 节点 ${nodeId} 执行失败:`,
+                            logger.error(
+                                `[WorkflowExecutor] Node ${nodeId} execution failed:`,
                                 error,
                             );
                             this.updateNodeStatus(nodeId, "failed");
@@ -539,14 +540,14 @@ export class WorkflowExecutor {
                     }),
                 );
 
-                // 检查是否有失败的节点
+                // Check whether any nodes failed
                 if (results.some((r) => !r)) {
-                    console.warn(
-                        `[WorkflowExecutor] 第 ${levelIndex + 1} 层有节点执行失败`,
+                    logger.warn(
+                        `[WorkflowExecutor] Level ${levelIndex + 1} has nodes that failed execution`,
                     );
                     success = false;
-                    // 根据需求决定是否继续执行后续层级
-                    // 这里选择继续执行
+                    // Decide whether to continue executing subsequent levels
+                    // Here we choose to continue
                 }
 
                 this.onLevelComplete?.(levelIndex, level);
@@ -561,7 +562,7 @@ export class WorkflowExecutor {
 }
 
 /**
- * 便捷函数：解析工作流并返回执行计划
+ * Convenience function: parse a workflow and return the execution plan
  */
 export function parseWorkflow(
     workflow: WorkflowJSON | { nodes: Node[]; edges: Edge[] },
@@ -571,7 +572,7 @@ export function parseWorkflow(
 }
 
 /**
- * 便捷函数：获取工作流的开始节点
+ * Convenience function: get the start nodes of a workflow
  */
 export function getWorkflowStartNodes(
     workflow: WorkflowJSON | { nodes: Node[]; edges: Edge[] },
@@ -581,7 +582,7 @@ export function getWorkflowStartNodes(
 }
 
 /**
- * 便捷函数：获取工作流的结束节点
+ * Convenience function: get the end nodes of a workflow
  */
 export function getWorkflowEndNodes(
     workflow: WorkflowJSON | { nodes: Node[]; edges: Edge[] },
@@ -591,7 +592,7 @@ export function getWorkflowEndNodes(
 }
 
 /**
- * 便捷函数：检查工作流是否有效
+ * Convenience function: check whether a workflow is valid
  */
 export function isWorkflowValid(
     workflow: WorkflowJSON | { nodes: Node[]; edges: Edge[] },

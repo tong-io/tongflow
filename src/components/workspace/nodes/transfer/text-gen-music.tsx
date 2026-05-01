@@ -31,14 +31,10 @@ import {
 } from "@/utils/node-execution-config";
 import { TEXT_GEN_MUSIC_HANDLES } from "@/utils/connection-rules";
 import { useTranslations } from "next-intl";
-import useFlow from "@/hooks/use-flow";
-import { clampToAllowedModel } from "@/utils/node-model-feature";
-import { NodeModelSelect } from "../base/node-model-select";
-import { singleModelSelectOptions } from "@/utils/node-model-select-label";
 
 const DEFAULT_FEATURE = "gen_music";
 
-// 语言选项
+// Language options
 const LANGUAGE_OPTIONS = [
     { value: "zh", label: "中文" },
     { value: "en", label: "English" },
@@ -49,7 +45,7 @@ const LANGUAGE_OPTIONS = [
     { value: "es", label: "Español" },
 ];
 
-// BPM 选项
+// BPM options
 const BPM_OPTIONS = [
     { value: "auto", label: "Auto" },
     { value: "60", label: "60" },
@@ -64,7 +60,7 @@ const BPM_OPTIONS = [
     { value: "180", label: "180" },
 ];
 
-// 调式选项
+// Mode options
 const KEYSCALE_OPTIONS = [
     "C major",
     "C minor",
@@ -85,7 +81,7 @@ const KEYSCALE_OPTIONS = [
 interface MusicNodeState {
     songTitle: string;
     tags: string;
-    /** 未连接 in:lyric 时的本地歌词 */
+    /** Local lyrics when in:lyric is not connected */
     lyrics: string;
     selectedDuration: string;
     language: string;
@@ -101,10 +97,9 @@ interface TextGenMusicNodeProps extends NodeProps {
     } & Partial<MusicNodeState>;
 }
 
-// 工作流执行配置
+// Workflow execution config
 const workflowConfig = {
     feature: DEFAULT_FEATURE,
-    label: "文本生成音乐",
     outputType: "audioNode",
     outputField: "fileKeys" as const,
     paramMappings: {
@@ -138,9 +133,9 @@ function firstTextFromTextNodeData(
 }
 
 /**
- * 直接从 edges 解析曲风/歌词入边（含 targetHandle 为空时的 loose 边）。
- * 显式 in:style / in:lyric 优先；剩余 loose 按顺序先补曲风、再补歌词，
- * 避免「已连歌词后再连一条无 handle 的曲风边」时曲风被丢掉。
+ * Parse incoming style/lyrics edges directly from edges (including loose edges with an empty targetHandle).
+ * Explicit in:style / in:lyric takes priority; remaining loose edges fill style first, then lyrics, in order,
+ * so the style is not lost when a no-handle style edge is added after lyrics are already connected.
  */
 function resolveMusicIncomingEdges(
     edges: Edge[],
@@ -168,7 +163,7 @@ function resolveMusicIncomingEdges(
         }
     }
 
-    // 未标明 handle 的边按顺序补全缺的一侧：常见情况是「曲风=null + 歌词=in:lyric」
+    // Backfill loose edges sequentially (style-null + lyric handle is common)
     const unassigned = [...loose];
     if (!styleEdge && unassigned.length >= 1) {
         styleEdge = unassigned.shift();
@@ -219,15 +214,8 @@ function useMusicUpstreamResolved(nodeId: string | null) {
 
 const TextGenMusicNode = ({ selected, data }: TextGenMusicNodeProps) => {
     const t = useTranslations("Workspace.nodes");
-    const updates = useFlow((s) => s.updates);
     const { texts = [] } = data;
     const nodeId = useNodeId();
-
-    const featureName = clampToAllowedModel(
-        (data as { feature?: string }).feature,
-        [DEFAULT_FEATURE],
-        DEFAULT_FEATURE,
-    );
 
     const { styleText, lyricText, hasStyleUpstream, hasLyricUpstream } =
         useMusicUpstreamResolved(nodeId ?? null);
@@ -273,7 +261,7 @@ const TextGenMusicNode = ({ selected, data }: TextGenMusicNodeProps) => {
             data={data}
             workflowConfig={{
                 ...workflowConfig,
-                feature: featureName,
+                handles: false,
                 title: t("titles.textGenMusic"),
                 icon: <Music className="h-5 w-5" />,
                 executeLabel: t("actions.generateMusic"),
@@ -347,15 +335,6 @@ const TextGenMusicNode = ({ selected, data }: TextGenMusicNodeProps) => {
             }}
         >
             <div className="p-4 space-y-4">
-                <NodeModelSelect
-                    value={featureName}
-                    onValueChange={(value) =>
-                        updates(nodeId!, { ...data, feature: value })
-                    }
-                    options={singleModelSelectOptions(DEFAULT_FEATURE, (k) =>
-                        t(k as Parameters<typeof t>[0]),
-                    )}
-                />
                 <Card className="p-3">
                     <div className="flex items-center justify-between gap-2 mb-2">
                         <Label className="flex items-center gap-2 text-sm font-medium text-muted-foreground">

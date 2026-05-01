@@ -1,8 +1,8 @@
 /**
- * 任务分发器
+ * Task dispatcher
  *
- * 根据任务的 type + function 路由到对应的 handler。
- * 替代 Python 版 main.py 中的 start_task / _execute_* 函数。
+ * Routes to the matching handler based on task type + function.
+ * Replaces the start_task / _execute_* functions from the Python main.py.
  */
 
 import { getDb, tasks } from "@/db";
@@ -14,18 +14,17 @@ import {
     WorkflowStatus,
     NodeStatus,
 } from "@/constants/task-status";
+import { logger } from "@/lib/logger";
 
-// ==================== 类型定义 ====================
+// ==================== Types ====================
 
 export interface TaskData {
     taskId: string;
-    userId: string;
     nodeSlot: string;
     pluginId: string;
     prompt: Record<string, unknown>;
     nodeId: string;
     workflowId?: number | null;
-    shareId?: number | null;
     /** @deprecated legacy */
     feature?: string;
     /** @deprecated legacy */
@@ -45,7 +44,7 @@ export interface HandlerResult {
 }
 
 /**
- * Handler 函数签名
+ * Handler function signature
  */
 export type TaskHandler = (
     task: TaskData,
@@ -85,25 +84,23 @@ export async function loadTaskData(taskId: string): Promise<TaskData | null> {
 
     return {
         taskId: task.id,
-        userId: task.userId,
         nodeSlot,
         pluginId,
         prompt,
         nodeId: task.nodeId,
         workflowId: task.workflowId,
-        shareId: task.shareId,
     };
 }
 
 /**
- * 执行任务（供 SSE 端点调用）
+ * Execute a task (called by the SSE endpoint)
  *
- * 流程：
- * 1. 从 DB 加载任务数据
- * 2. 注册 AbortController
- * 3. 路由到对应 handler
- * 4. 发送完成/失败通知
- * 5. 更新 DB 状态
+ * Flow:
+ * 1. Load task data from the DB
+ * 2. Register AbortController
+ * 3. Route to the matching handler
+ * 4. Send completion/failure notifications
+ * 5. Update DB status
  */
 export async function executeTask(taskId: string): Promise<void> {
     const taskData = await loadTaskData(taskId);
@@ -120,7 +117,7 @@ export async function executeTask(taskId: string): Promise<void> {
     const controller = registerTask(taskId);
 
     try {
-        // 更新 DB 状态为 running
+        // Mark task running in DB
         const db = await getDb();
         await db
             .update(tasks)
@@ -138,16 +135,16 @@ export async function executeTask(taskId: string): Promise<void> {
             signal: controller.signal,
         });
 
-        // 检查是否被取消
+        // Abort if executor cancelled early
         if (controller.signal.aborted) {
-            return; // 取消通知由 abortTask 发送
+            return; // Cancel notifications come from abortTask
         }
 
         if (result == null || typeof result !== "object") {
             throw new Error("Handler returned no result");
         }
 
-        // 发送完成通知
+        // Emit completion payloads
         if (result.success === false) {
             notifyTask(
                 taskId,
@@ -182,7 +179,7 @@ export async function executeTask(taskId: string): Promise<void> {
 
         const errorMsg =
             error instanceof Error ? error.message : "Unknown error";
-        console.error(`[TaskRunner] Task ${taskId} failed:`, errorMsg);
+        logger.error(`[TaskRunner] Task ${taskId} failed:`, errorMsg);
 
         notifyTask(
             taskId,
@@ -205,7 +202,7 @@ export async function executeTask(taskId: string): Promise<void> {
 }
 
 /**
- * 执行工作流任务
+ * Execute workflow task
  */
 export async function executeWorkflowTask(
     taskId: string,
@@ -231,14 +228,14 @@ export async function executeWorkflowTask(
             }),
         );
 
-        // 通知工作流开始
+        // Announce workflow execution start
         notifyTask(taskId, WorkflowStatus.WORKFLOW_STARTED, {
             totalNodes: execNodes.length,
             levels: (workflow.executionLevels || []).length,
             nodes: nodesInfo,
         });
 
-        // callApi 函数 — 供 workflow runner 调用执行子任务
+        // callApi bridge used by the workflow runner to spawn child tasks
         async function callApi(
             feature: string,
             params: Record<string, unknown>,
@@ -265,7 +262,7 @@ export async function executeWorkflowTask(
             });
         }
 
-        // 按层级执行节点
+        // Execute nodes tier-by-tier
         const executionLevels: string[][] = workflow.executionLevels || [];
         const dataNodes: Record<string, unknown>[] = workflow.dataNodes || [];
         const nodeOutputs = new Map<string, Record<string, unknown>>();
@@ -311,7 +308,7 @@ export async function executeWorkflowTask(
                 );
 
                 try {
-                    // 解析节点参数 — 从上游输出或工作流输入中获取
+                    // Resolve node inputs from upstream outputs / workflow payloads
                     const params = resolveNodeParams(
                         node,
                         nodeOutputs,
@@ -354,7 +351,7 @@ export async function executeWorkflowTask(
             if (errors.length > 0) break;
         }
 
-        // 收集输出并通知
+        // Aggregate outputs and notify listeners
         const totalDuration = Date.now() - startTime;
         const outputs = Object.fromEntries(nodeOutputs);
 
@@ -385,7 +382,7 @@ export async function executeWorkflowTask(
 
         const errorMsg =
             error instanceof Error ? error.message : "Unknown error";
-        console.error(`[Workflow] Task ${taskId} failed:`, errorMsg);
+        logger.error(`[Workflow] Task ${taskId} failed:`, errorMsg);
 
         notifyTask(taskId, WorkflowStatus.WORKFLOW_FAILED, {
             message: "工作流执行失败",
@@ -402,10 +399,10 @@ export async function executeWorkflowTask(
     }
 }
 
-// ==================== 工具函数 ====================
+// ==================== Utilities ====================
 
 /**
- * 解析节点参数：从上游节点输出和工作流输入中获取参数值
+ * Resolve node parameters: get parameter values from upstream node outputs and workflow inputs
  */
 function resolveNodeParams(
     node: {
@@ -426,7 +423,7 @@ function resolveNodeParams(
 
     for (const param of node.params) {
         if (param.mapping) {
-            // 从上游节点输出获取
+            // Pull values from ancestor node outputs
             const sourceOutput = nodeOutputs.get(param.mapping.sourceNodeId);
             if (sourceOutput) {
                 params[param.name] = sourceOutput[param.mapping.sourceParam];

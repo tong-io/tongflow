@@ -14,6 +14,7 @@ import {
     DialogClose,
 } from "@/components/ui/dialog";
 import { useTranslations } from "next-intl";
+import { logger } from "@/lib/logger";
 
 export const SpeakerVoiceRecorder = ({
     trigger,
@@ -74,7 +75,7 @@ export const SpeakerVoiceRecorder = ({
                 setRecordingTime((prev) => prev + 1);
             }, 1000);
         } catch (err) {
-            console.error("Failed to start recording:", err);
+            logger.error("Failed to start recording:", err);
             setError(t("micError"));
         }
     };
@@ -138,7 +139,7 @@ export const SpeakerVoiceRecorder = ({
             setRecordedBlob(null);
             setRecordingTime(0);
         } catch (err) {
-            console.error("Upload failed:", err);
+            logger.error("Upload failed:", err);
             setError(t("uploadError"));
         } finally {
             setIsUploading(false);

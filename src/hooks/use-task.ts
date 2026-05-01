@@ -1,34 +1,51 @@
 /**
- * 任务管理 Hook
- * 使用 SSE (Server-Sent Events) 进行实时任务更新
+ * Task management hook.
+ * Uses SSE (Server-Sent Events) for realtime task updates.
  */
 
 import { create } from "zustand";
 import { useState, useCallback, useEffect, useRef } from "react";
 import { createTask as apiCreateTask, updateTaskStatus } from "@/lib/api/task";
-import type { Task as ApiTask } from "@/lib/api/task";
 import toast from "react-hot-toast";
 import {
     type SSEStatusType,
+    TaskStatus,
     mapSSEStatusToTaskStatus,
     isTerminalStatus,
 } from "@/constants/task-status";
 import {
     emitSSETaskMessage,
     emitSSEConnected,
+    type SSEMessage,
 } from "@/components/workspace/task-progress-toast";
 import { getTaskStopUrl, getTaskWaitUrl } from "@/lib/task-api-url";
+import { logger } from "@/lib/logger";
 
-// SSE 消息类型定义
+// SSE message shape for the `/api/task/wait` stream
 interface SSETaskMessage {
     id: string;
     status: SSEStatusType;
     data?: Record<string, unknown>;
     progress?: number;
     error?: string;
+    /** Optional field from backend (e.g. workflow NODE_* metadata) */
+    nodeId?: string | null;
 }
 
-// -------------------- 类型定义 --------------------
+function emitTaskProgressFromSSE(payload: SSETaskMessage) {
+    const nodeId =
+        payload.nodeId != null && payload.nodeId !== ""
+            ? String(payload.nodeId)
+            : null;
+    emitSSETaskMessage({
+        id: payload.id,
+        status: payload.status,
+        nodeId,
+        data: payload.data as SSEMessage["data"],
+    });
+}
+
+// -------------------- Type definitions --------------------
 
 export interface Task {
     id: string;
@@ -37,43 +54,43 @@ export interface Task {
     progress?: number;
     result?: unknown;
     error?: string;
-    nodeId?: string; // 关联的节点ID
+    nodeId?: string; // Linked node id
 }
 
-// 节点处理器映射：taskId -> nodeId -> 处理函数
+// Node handler map: taskId -> nodeId -> handler
 export type NodeTaskHandler = (task: Task) => void;
 
-// 工作区模式类型
+// Workspace mode type
 export type WorkspaceMode = "create" | "execute";
 
-// 工作流执行状态
+// Workflow execution status
 export type WorkflowExecutionStatus =
-    | "idle" // 空闲
-    | "running" // 运行中
-    | "paused" // 暂停
-    | "completed" // 完成
-    | "failed"; // 失败
+    | "idle" // Idle
+    | "running" // Running
+    | "paused" // Paused
+    | "completed" // Completed
+    | "failed"; // Failed
 
 export const WORKSPACE_MODE_KEY = "workspace-mode";
 
 export interface TaskState {
     tasks: Map<string, Task>;
-    // 工作区模式
+    // Workspace mode
     workspaceMode: WorkspaceMode;
     setWorkspaceMode: (mode: WorkspaceMode) => void;
-    // 工作流执行状态
+    // Workflow execution status
     workflowExecutionStatus: WorkflowExecutionStatus;
     setWorkflowExecutionStatus: (status: WorkflowExecutionStatus) => void;
-    // 当前执行的层级
+    // Current execution level
     currentExecutionLevel: number;
     setCurrentExecutionLevel: (level: number) => void;
-    // 节点执行状态映射
+    // Node id -> execution status
     nodeExecutionStatusMap: Map<string, string>; // nodeId -> status
     setNodeExecutionStatus: (nodeId: string, status: string) => void;
     clearNodeExecutionStatus: () => void;
-    // 节点任务映射：trackTaskToNode(taskId, nodeId) 记录任务来自哪个节点
+    // trackTaskToNode(taskId, nodeId) remembers which node created the task
     taskNodeMap: Map<string, string>; // taskId -> nodeId
-    // 节点处理器：registerNodeHandler(nodeId, handler) 注册节点的处理函数
+    // registerNodeHandler(nodeId, handler) registers per-node handlers
     nodeHandlers: Map<string, NodeTaskHandler[]>; // nodeId -> handlers[]
     setTask: (taskId: string | number, task: Task) => void;
     getTask: (taskId: string | number) => Task | undefined;
@@ -81,40 +98,39 @@ export interface TaskState {
     clearCompletedTasks: () => void;
     getActiveTasks: () => Task[];
     hasActiveTasks: () => boolean;
-    // 新增方法：记录任务与节点的关联
+    // Track task -> node association
     trackTaskToNode: (taskId: string, nodeId: string) => void;
-    // 新增方法：获取任务关联的节点ID
+    // Resolve node id for a task id
     getTaskNodeId: (taskId: string) => string | undefined;
-    // 新增方法：注册节点处理器
+    // Register handlers for a node
     registerNodeHandler: (nodeId: string, handler: NodeTaskHandler) => void;
-    // 新增方法：注销节点处理器
+    // Unregister handlers for a node
     unregisterNodeHandler: (nodeId: string, handler: NodeTaskHandler) => void;
-    // 新增方法：分发任务更新给对应节点
+    // Deliver task updates to the owning node handlers
     routeTaskToNode: (task: Task) => void;
 }
 
-// 任务创建配置
+// Single-task creation payload
 export interface TaskCreationConfig {
     feature: string;
     prompt: Record<string, unknown>;
     nodeId: string;
-    workflowId?: number; // 执行自己的 workflow 时传入
-    shareId?: number; // 执行别人的 share 时传入
+    workflowId?: number;
 }
 
-// 批量任务配置
+// Batch task options
 export interface BatchTaskConfig {
     onBatchComplete?: (tasks: Task[]) => void;
     onProgress?: (completed: number, total: number) => void;
 }
 
-// 订阅配置选项
+// Task subscription options
 export interface TaskSubscriptionOptions {
     onError?: (error: unknown) => void;
     maxRetries?: number;
     retryDelay?: number;
     onTaskUpdate?: (task: Task) => void;
-    // 连接状态变化回调：connecting | connected | reconnecting | disconnected | error
+    // Connection callback: connecting | connected | reconnecting | disconnected | error
     onStatusChange?: (
         status:
             | "connecting"
@@ -125,22 +141,22 @@ export interface TaskSubscriptionOptions {
     ) => void;
 }
 
-// SSE 连接默认配置
-const SSE_DEFAULT_MAX_RETRIES = 10; // 增加到10次重试
-const SSE_DEFAULT_RETRY_DELAY = 2000; // 2秒起始延迟
-const SSE_MAX_RETRY_DELAY = 30000; // 最大30秒延迟
+// Default SSE client settings
+const SSE_DEFAULT_MAX_RETRIES = 10; // Up to 10 reconnect attempts
+const SSE_DEFAULT_RETRY_DELAY = 2000; // Base delay 2s
+const SSE_MAX_RETRY_DELAY = 30000; // Cap at 30s
 
 // -------------------- Zustand Store --------------------
 
 export const useTaskStore = create<TaskState>((set, get) => ({
     tasks: new Map(),
-    taskNodeMap: new Map(), // taskId -> nodeId 映射
-    nodeHandlers: new Map(), // nodeId -> handlers 映射
-    // 工作区模式，初始化为 "create" 以避免 SSR hydration 不匹配
-    // 客户端 hydration 后会通过 useEffect 从 localStorage 恢复
+    taskNodeMap: new Map(), // taskId -> nodeId
+    nodeHandlers: new Map(), // nodeId -> handlers
+    // Default workspace mode "create" to avoid SSR/client hydration mismatch
+    // After hydration, useEffect restores from localStorage
     workspaceMode: "create" as WorkspaceMode,
 
-    // 工作流执行状态
+    // Workflow execution status
     workflowExecutionStatus: "idle" as WorkflowExecutionStatus,
     currentExecutionLevel: -1,
     nodeExecutionStatusMap: new Map(),
@@ -187,7 +203,7 @@ export const useTaskStore = create<TaskState>((set, get) => ({
             const taskIdStr = String(taskId);
             newTasks.delete(taskIdStr);
 
-            // 同时移除任务-节点映射
+            // Drop task-node mapping as well
             const newTaskNodeMap = new Map(state.taskNodeMap);
             newTaskNodeMap.delete(taskIdStr);
 
@@ -203,11 +219,11 @@ export const useTaskStore = create<TaskState>((set, get) => ({
                 if (task.status === "PENDING" || task.status === "PROCESSING") {
                     newTasks.set(taskId, task);
                 } else {
-                    // 移除已完成任务的节点映射
+                    // Drop node mapping for finished tasks
                     newTaskNodeMap.delete(taskId);
                 }
             }
-            console.log(
+            logger.debug(
                 `[Task Store] Cleared completed tasks, ${
                     state.tasks.size - newTasks.size
                 } tasks removed`,
@@ -229,36 +245,36 @@ export const useTaskStore = create<TaskState>((set, get) => ({
         );
     },
 
-    // 记录任务与节点的关联
+    // Track task -> node
     trackTaskToNode: (taskId, nodeId) => {
         set((state) => {
             const newTaskNodeMap = new Map(state.taskNodeMap);
             newTaskNodeMap.set(taskId, nodeId);
-            console.log(
+            logger.debug(
                 `[Task Store] Task ${taskId} tracked to node ${nodeId}`,
             );
             return { taskNodeMap: newTaskNodeMap };
         });
     },
 
-    // 获取任务关联的节点ID
+    // Resolve node id for a task
     getTaskNodeId: (taskId) => get().taskNodeMap.get(taskId),
 
-    // 注册节点处理器
+    // Register node handler
     registerNodeHandler: (nodeId, handler) => {
         set((state) => {
             const newNodeHandlers = new Map(state.nodeHandlers);
             const handlers = newNodeHandlers.get(nodeId) || [];
             handlers.push(handler);
             newNodeHandlers.set(nodeId, handlers);
-            console.log(
+            logger.debug(
                 `[Task Store] Registered handler for node ${nodeId}, total handlers: ${handlers.length}`,
             );
             return { nodeHandlers: newNodeHandlers };
         });
     },
 
-    // 注销节点处理器
+    // Unregister node handler
     unregisterNodeHandler: (nodeId, handler) => {
         set((state) => {
             const newNodeHandlers = new Map(state.nodeHandlers);
@@ -272,14 +288,14 @@ export const useTaskStore = create<TaskState>((set, get) => ({
             } else {
                 newNodeHandlers.set(nodeId, handlers);
             }
-            console.log(
+            logger.debug(
                 `[Task Store] Unregistered handler for node ${nodeId}, remaining handlers: ${handlers.length}`,
             );
             return { nodeHandlers: newNodeHandlers };
         });
     },
 
-    // 分发任务更新给对应节点
+    // Route task updates to handlers
     routeTaskToNode: (task) => {
         const state = get();
         const nodeId =
@@ -288,7 +304,7 @@ export const useTaskStore = create<TaskState>((set, get) => ({
 
         if (nodeId) {
             const handlers = state.nodeHandlers.get(nodeId) || [];
-            console.log(
+            logger.debug(
                 `[Task Router] Routing task ${task.id} (status: ${task.status}) to node ${nodeId}, handlers: ${handlers.length}`,
             );
 
@@ -296,28 +312,25 @@ export const useTaskStore = create<TaskState>((set, get) => ({
                 try {
                     handler(task);
                 } catch (error) {
-                    console.error(
+                    logger.error(
                         `[Task Router] Error calling handler for node ${nodeId}:`,
                         error,
                     );
                 }
             });
         } else {
-            console.warn(
+            logger.warn(
                 `[Task Router] No node found for task ${task.id}, storing in global store only`,
             );
         }
     },
 }));
 
-// -------------------- Realtime 订阅 Hook --------------------
+// -------------------- Realtime subscription hook --------------------
 
 /**
- * 订阅任务更新（使用 SSE - Server-Sent Events）
- * 自动处理：
- * - 连接管理
- * - 自动重连
- * - 消息解析
+ * Subscribe to task updates over SSE (Server-Sent Events).
+ * Handles connection lifecycle, reconnect, and parsing.
  */
 export function useTaskSubscription(
     taskId?: string,
@@ -351,7 +364,7 @@ export function useTaskSubscription(
                         : "connecting",
                 );
 
-                // 创建 SSE 连接
+                // Open SSE connection
                 const eventSource = new EventSource(getTaskWaitUrl(taskId));
                 eventSourceRef.current = eventSource;
 
@@ -359,7 +372,7 @@ export function useTaskSubscription(
                     if (!isSubscribed) return;
                     setStatus("connected");
                     reconnectAttemptsRef.current = 0;
-                    // 触发 SSE 连接建立事件
+                    // Emit SSE connected
                     emitSSEConnected(taskId);
                     if (options?.onStatusChange) {
                         options.onStatusChange("connected");
@@ -371,24 +384,16 @@ export function useTaskSubscription(
 
                     try {
                         const message: SSETaskMessage = JSON.parse(event.data);
-                        console.log(`[SSE] Received message:`, message);
+                        logger.debug(`[SSE] Received message:`, message);
 
-                        // 触发 SSE 消息事件，用于 TaskProgressToast
-                        emitSSETaskMessage({
-                            id: message.id,
-                            status: message.status as any,
-                            nodeId: (message as any).nodeId || null,
-                            data: message.data as any,
-                        });
+                        emitTaskProgressFromSSE(message);
 
-                        // 使用统一的状态映射函数
                         const taskStatus = mapSSEStatusToTaskStatus(
                             message.status,
                         );
 
-                        const msg = message as SSETaskMessage & {
-                            nodeId?: string | null;
-                        };
+                        const msgNodeId = message.nodeId;
+
                         const internalTask: Task = {
                             id: message.id,
                             status: taskStatus,
@@ -399,21 +404,21 @@ export function useTaskSubscription(
                                 ((message.data as Record<string, unknown>)
                                     ?.error as string),
                             nodeId:
-                                (msg.nodeId != null && msg.nodeId !== ""
-                                    ? String(msg.nodeId)
+                                (msgNodeId != null && msgNodeId !== ""
+                                    ? String(msgNodeId)
                                     : undefined) ??
                                 useTaskStore
                                     .getState()
                                     .getTaskNodeId(message.id),
                         };
 
-                        // 更新全局任务存储
+                        // Update global task store
                         setTask(internalTask.id, internalTask);
-                        console.log(
+                        logger.debug(
                             `[SSE] Task updated: ${internalTask.id} (${internalTask.status})`,
                         );
 
-                        // 任务结束时弹出 toast 提示
+                        // Toast on terminal outcomes
                         if (taskStatus === "COMPLETED") {
                             toast.success(`任务完成`);
                         } else if (taskStatus === "FAILED") {
@@ -426,29 +431,29 @@ export function useTaskSubscription(
                             );
                         }
 
-                        // 单任务终态时，调用前端双保险更新任务状态（不保存素材）
+                        // Frontend backup: persist terminal status without saving materials
                         if (isTerminalStatus(message.status)) {
                             updateTaskStatus({
                                 taskId: message.id,
                                 status: message.status,
                                 data: message.data,
                             }).catch((error) => {
-                                console.error(
+                                logger.error(
                                     "[SSE] Failed to update task status (frontend backup):",
                                     error,
                                 );
                             });
                         }
 
-                        // 路由任务到对应的节点
+                        // Route to node handlers
                         routeTaskToNode(internalTask);
 
-                        // 通知全局回调
+                        // Invoke optional subscriber
                         if (options?.onTaskUpdate) {
                             options.onTaskUpdate(internalTask);
                         }
                     } catch (error) {
-                        console.error(
+                        logger.error(
                             "[SSE] Error parsing message:",
                             error,
                             event.data,
@@ -456,11 +461,11 @@ export function useTaskSubscription(
                     }
                 };
 
-                // 监听后端发送的 close 事件（自定义事件）
+                // Backend may emit custom `close` event
                 eventSource.addEventListener("close", () => {
-                    console.log("[SSE] Server sent close event");
+                    logger.debug("[SSE] Server sent close event");
                     if (!isSubscribed) return;
-                    isSubscribed = false; // 阻止重连
+                    isSubscribed = false; // Stop reconnect loops
                     eventSource.close();
                     eventSourceRef.current = null;
                     setStatus("disconnected");
@@ -472,20 +477,20 @@ export function useTaskSubscription(
                 eventSource.onerror = (error) => {
                     if (!isSubscribed) return;
 
-                    console.error("[SSE] Connection error:", error);
+                    logger.error("[SSE] Connection error:", error);
                     eventSource.close();
                     eventSourceRef.current = null;
 
-                    // 尝试重连（指数退避）
+                    // Reconnect with exponential backoff
                     if (reconnectAttemptsRef.current < maxRetries) {
                         reconnectAttemptsRef.current++;
-                        // 指数退避: 2s, 4s, 8s, 16s, 最大30s
+                        // Backoff: 2s, 4s, 8s, 16s, capped at 30s
                         const delay = Math.min(
                             baseRetryDelay *
                                 Math.pow(2, reconnectAttemptsRef.current - 1),
                             SSE_MAX_RETRY_DELAY,
                         );
-                        console.log(
+                        logger.debug(
                             `[SSE] Reconnecting in ${delay}ms (attempt ${reconnectAttemptsRef.current}/${maxRetries})`,
                         );
 
@@ -500,7 +505,7 @@ export function useTaskSubscription(
                             }
                         }, delay);
                     } else {
-                        console.error(
+                        logger.error(
                             "[SSE] Max reconnection attempts reached",
                         );
                         setStatus("error");
@@ -515,7 +520,7 @@ export function useTaskSubscription(
                     }
                 };
             } catch (error) {
-                console.error("[SSE] Failed to create EventSource:", error);
+                logger.error("[SSE] Failed to create EventSource:", error);
                 setStatus("error");
                 if (options?.onStatusChange) {
                     options.onStatusChange("error");
@@ -528,7 +533,7 @@ export function useTaskSubscription(
 
         connect();
 
-        // 清理函数
+        // Teardown
         return () => {
             isSubscribed = false;
             if (eventSourceRef.current) {
@@ -543,14 +548,14 @@ export function useTaskSubscription(
         };
     }, [taskId, setTask, routeTaskToNode, maxRetries, baseRetryDelay, options]);
 
-    // 返回连接状态
+    // SSE connection status
     return { status };
 }
 
-// -------------------- 任务创建 Hook --------------------
+// -------------------- Single-task creation hook --------------------
 
 /**
- * 创建单个任务并自动建立 SSE 连接
+ * Create a task and automatically attach SSE streaming.
  */
 export function useCreateTask(options?: TaskSubscriptionOptions) {
     const { setTask, trackTaskToNode } = useTaskStore();
@@ -558,7 +563,7 @@ export function useCreateTask(options?: TaskSubscriptionOptions) {
     const [error, setError] = useState<Error | null>(null);
     const [createdTaskId, setCreatedTaskId] = useState<string | null>(null);
 
-    // 当 taskId 更新时，自动建立 SSE 连接
+    // Hydrate SSE after task id is known
     useTaskSubscription(createdTaskId ?? undefined, options);
 
     const createTask = useCallback(
@@ -569,22 +574,22 @@ export function useCreateTask(options?: TaskSubscriptionOptions) {
             try {
                 const { taskId } = await apiCreateTask(config);
 
-                // 保存 taskId，会触发 SSE 连接
+                // Persisted id kicks off SSE subscription
                 setCreatedTaskId(taskId);
 
-                // 立即添加到 store
+                // Seed store immediately
                 setTask(taskId, {
                     id: taskId,
                     status: "PENDING",
                     progress: 0,
                     data: config.prompt,
-                    nodeId: config.nodeId, // 记录来源节点
+                    nodeId: config.nodeId, // Source node id
                 });
 
-                // 记录任务与节点的关联关系
+                // Link task -> node for routing
                 trackTaskToNode(taskId, config.nodeId);
 
-                console.log(
+                logger.debug(
                     `[useCreateTask] Task ${taskId} created from node ${config.nodeId}`,
                 );
 
@@ -606,12 +611,11 @@ export function useCreateTask(options?: TaskSubscriptionOptions) {
     return { createTask, isLoading, error };
 }
 
-// -------------------- 批量任务管理 Hook --------------------
+// -------------------- Batch task manager hook --------------------
 
 /**
- * 批量任务管理 Hook
- * 为每个任务建立独立的 SSE 连接
- * loading 状态在 SSE 连接断开时自动结束
+ * Manage many tasks concurrently.
+ * Opens one SSE channel per task; loading stops when streams finish or drop.
  */
 export function useBatchTaskManager(
     config?: BatchTaskConfig,
@@ -625,15 +629,27 @@ export function useBatchTaskManager(
         new Set(),
     );
     const eventSourcesRef = useRef<Map<string, EventSource>>(new Map());
-    const activeConnectionsRef = useRef<Set<string>>(new Set()); // 跟踪活跃的 SSE 连接
+    const activeConnectionsRef = useRef<Set<string>>(new Set());
+    /** Shared cancel fallback timeout between SSE handlers and cancelTasks */
+    const batchCancelTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(
+        null,
+    );
+    const reconnectAttemptsRef = useRef<Map<string, number>>(new Map());
+    const reconnectTimeoutsRef = useRef<
+        Map<string, ReturnType<typeof setTimeout>>
+    >(new Map());
 
     const createBatchTasks = useCallback(
         async (taskConfigs: TaskCreationConfig[]) => {
-            // 立即设置 loading 状态，不等待 API 返回或 SSE 连接
+            // Flip loading immediately, before SSE connects
             setIsLoading(true);
             setCompletedTasks([]);
             setTotalTasks(taskConfigs.length);
             activeConnectionsRef.current.clear();
+            if (batchCancelTimeoutRef.current != null) {
+                clearTimeout(batchCancelTimeoutRef.current);
+                batchCancelTimeoutRef.current = null;
+            }
 
             try {
                 const taskIds: string[] = [];
@@ -650,156 +666,169 @@ export function useBatchTaskManager(
                         nodeId: taskConfig.nodeId,
                     });
 
-                    // 记录任务与节点的关联关系
+                    // Link task -> node for routing
                     trackTaskToNode(taskId, taskConfig.nodeId);
 
-                    // 为每个任务建立 SSE 连接
-                    const eventSource = new EventSource(getTaskWaitUrl(taskId));
+                    // Per-task SSE (with backoff reconnect)
+                    const connectTaskSSE = (tid: string) => {
+                        const es = new EventSource(getTaskWaitUrl(tid));
 
-                    eventSource.onopen = () => {
-                        console.log(`[SSE Batch] Connected for task ${taskId}`);
-                        // 标记连接为活跃
-                        activeConnectionsRef.current.add(taskId);
-                        // 触发 SSE 连接建立事件
-                        emitSSEConnected(taskId);
-                    };
-
-                    eventSource.onmessage = (event) => {
-                        try {
-                            const message: SSETaskMessage = JSON.parse(
-                                event.data,
+                        es.onopen = () => {
+                            logger.debug(
+                                `[SSE Batch] Connected for task ${tid}`,
                             );
-                            console.log(
-                                `[SSE Batch] Message for task ${taskId}:`,
-                                message,
-                            );
+                            reconnectAttemptsRef.current.set(tid, 0);
+                            activeConnectionsRef.current.add(tid);
+                            emitSSEConnected(tid);
+                        };
 
-                            // 触发 SSE 消息事件，用于 TaskProgressToast
-                            emitSSETaskMessage({
-                                id: message.id,
-                                status: message.status as any,
-                                nodeId: (message as any).nodeId || null,
-                                data: message.data as any,
-                            });
-
-                            // 使用统一的状态映射函数
-                            const taskStatus = mapSSEStatusToTaskStatus(
-                                message.status,
-                            );
-
-                            const msg = message as SSETaskMessage & {
-                                nodeId?: string | null;
-                            };
-                            const internalTask: Task = {
-                                id: message.id,
-                                status: taskStatus,
-                                progress: message.progress || 0,
-                                data: message.data,
-                                error: message.error,
-                                nodeId:
-                                    (msg.nodeId != null && msg.nodeId !== ""
-                                        ? String(msg.nodeId)
-                                        : undefined) ??
-                                    useTaskStore
-                                        .getState()
-                                        .getTaskNodeId(message.id),
-                            };
-
-                            // 更新任务状态
-                            setTask(internalTask.id, internalTask);
-                            routeTaskToNode(internalTask);
-
-                            // 任务结束时弹出 toast 提示
-                            if (taskStatus === "COMPLETED") {
-                                toast.success(`任务完成`);
-                            } else if (taskStatus === "FAILED") {
-                                toast.error(
-                                    `任务失败${message.error ? `：${message.error}` : ""}`,
+                        es.onmessage = (event) => {
+                            try {
+                                const message: SSETaskMessage = JSON.parse(
+                                    event.data,
                                 );
-                            } else if (taskStatus === "CANCELLED") {
-                                // 收到 CANCELLED 消息，清除超时定时器
-                                if ((window as any).__batchCancelTimeoutId) {
-                                    clearTimeout(
-                                        (window as any).__batchCancelTimeoutId,
-                                    );
-                                    (window as any).__batchCancelTimeoutId =
-                                        null;
-                                }
-                                // 关闭 SSE 连接
-                                eventSource.close();
-                                eventSourcesRef.current.delete(taskId);
-                                activeConnectionsRef.current.delete(taskId);
-                                // 检查是否所有连接都已关闭
-                                if (activeConnectionsRef.current.size === 0) {
-                                    setIsLoading(false);
-                                    setCurrentBatchTaskIds(new Set());
-                                }
-                            }
+                                logger.debug(
+                                    `[SSE Batch] Message for task ${tid}:`,
+                                    message,
+                                );
 
-                            // 单任务终态时，调用前端双保险更新任务状态（不保存素材）
-                            if (isTerminalStatus(message.status)) {
-                                updateTaskStatus({
-                                    taskId: message.id,
-                                    status: message.status,
+                                emitTaskProgressFromSSE(message);
+
+                                const taskStatus = mapSSEStatusToTaskStatus(
+                                    message.status,
+                                );
+                                const msgNodeId = message.nodeId;
+
+                                const internalTask: Task = {
+                                    id: message.id,
+                                    status: taskStatus,
+                                    progress: message.progress || 0,
                                     data: message.data,
-                                }).catch((error) => {
-                                    console.error(
-                                        "[SSE Batch] Failed to update task status (frontend backup):",
-                                        error,
+                                    error: message.error,
+                                    nodeId:
+                                        (msgNodeId != null && msgNodeId !== ""
+                                            ? String(msgNodeId)
+                                            : undefined) ??
+                                        useTaskStore
+                                            .getState()
+                                            .getTaskNodeId(message.id),
+                                };
+
+                                setTask(internalTask.id, internalTask);
+                                routeTaskToNode(internalTask);
+
+                                if (taskStatus === "COMPLETED") {
+                                    toast.success(`任务完成`);
+                                } else if (taskStatus === "FAILED") {
+                                    toast.error(
+                                        `任务失败${message.error ? `：${message.error}` : ""}`,
                                     );
-                                });
-                            }
+                                } else if (taskStatus === "CANCELLED") {
+                                    if (batchCancelTimeoutRef.current != null) {
+                                        clearTimeout(
+                                            batchCancelTimeoutRef.current,
+                                        );
+                                        batchCancelTimeoutRef.current = null;
+                                    }
+                                    es.close();
+                                    eventSourcesRef.current.delete(tid);
+                                    activeConnectionsRef.current.delete(tid);
+                                    if (
+                                        activeConnectionsRef.current.size === 0
+                                    ) {
+                                        setIsLoading(false);
+                                        setCurrentBatchTaskIds(new Set());
+                                    }
+                                }
 
-                            if (options?.onTaskUpdate) {
-                                options.onTaskUpdate(internalTask);
+                                if (isTerminalStatus(message.status)) {
+                                    updateTaskStatus({
+                                        taskId: message.id,
+                                        status: message.status,
+                                        data: message.data,
+                                    }).catch((err) => {
+                                        logger.error(
+                                            "[SSE Batch] Failed to update task status (frontend backup):",
+                                            err,
+                                        );
+                                    });
+                                }
+
+                                if (options?.onTaskUpdate) {
+                                    options.onTaskUpdate(internalTask);
+                                }
+                            } catch (err) {
+                                logger.error(
+                                    `[SSE Batch] Error parsing message:`,
+                                    err,
+                                );
                             }
-                        } catch (error) {
-                            console.error(
-                                `[SSE Batch] Error parsing message:`,
-                                error,
+                        };
+
+                        es.addEventListener("close", () => {
+                            logger.debug(
+                                `[SSE Batch] Server sent close event for task ${tid}`,
                             );
-                        }
+                            es.close();
+                            eventSourcesRef.current.delete(tid);
+                            activeConnectionsRef.current.delete(tid);
+                            if (activeConnectionsRef.current.size === 0) {
+                                setIsLoading(false);
+                                logger.debug(
+                                    "[SSE Batch] All connections closed, loading stopped",
+                                );
+                            }
+                        });
+
+                        es.onerror = () => {
+                            es.close();
+                            eventSourcesRef.current.delete(tid);
+
+                            const attempts =
+                                (reconnectAttemptsRef.current.get(tid) ?? 0) +
+                                1;
+                            if (attempts <= SSE_DEFAULT_MAX_RETRIES) {
+                                reconnectAttemptsRef.current.set(tid, attempts);
+                                const delay = Math.min(
+                                    SSE_DEFAULT_RETRY_DELAY *
+                                        Math.pow(2, attempts - 1),
+                                    SSE_MAX_RETRY_DELAY,
+                                );
+                                logger.debug(
+                                    `[SSE Batch] Reconnecting task ${tid} in ${delay}ms (attempt ${attempts}/${SSE_DEFAULT_MAX_RETRIES})`,
+                                );
+                                const timeoutId = setTimeout(() => {
+                                    reconnectTimeoutsRef.current.delete(tid);
+                                    connectTaskSSE(tid);
+                                }, delay);
+                                reconnectTimeoutsRef.current.set(
+                                    tid,
+                                    timeoutId,
+                                );
+                            } else {
+                                logger.error(
+                                    `[SSE Batch] Max reconnection attempts reached for task ${tid}`,
+                                );
+                                activeConnectionsRef.current.delete(tid);
+                                if (
+                                    activeConnectionsRef.current.size === 0
+                                ) {
+                                    setIsLoading(false);
+                                }
+                                if (options?.onError) {
+                                    options.onError(
+                                        new Error(
+                                            `Max reconnection attempts reached for task ${tid}`,
+                                        ),
+                                    );
+                                }
+                            }
+                        };
+
+                        eventSourcesRef.current.set(tid, es);
                     };
 
-                    // 监听后端发送的 close 事件（自定义事件）
-                    eventSource.addEventListener("close", () => {
-                        console.log(
-                            `[SSE Batch] Server sent close event for task ${taskId}`,
-                        );
-                        eventSource.close();
-                        eventSourcesRef.current.delete(taskId);
-                        activeConnectionsRef.current.delete(taskId);
-                        // 检查是否所有连接都已关闭
-                        if (activeConnectionsRef.current.size === 0) {
-                            setIsLoading(false);
-                            console.log(
-                                "[SSE Batch] All connections closed, loading stopped",
-                            );
-                        }
-                    });
-
-                    eventSource.onerror = (error) => {
-                        console.error(
-                            `[SSE Batch] Connection error for task ${taskId}:`,
-                            error,
-                        );
-                        // 关闭连接
-                        eventSource.close();
-                        eventSourcesRef.current.delete(taskId);
-                        // 错误时也要移除活跃连接标记，并检查是否需要结束 loading
-                        activeConnectionsRef.current.delete(taskId);
-                        if (activeConnectionsRef.current.size === 0) {
-                            setIsLoading(false);
-                            console.log(
-                                "[SSE Batch] All connections closed due to error, loading stopped",
-                            );
-                        }
-                        if (options?.onError) {
-                            options.onError(error);
-                        }
-                    };
-
-                    eventSourcesRef.current.set(taskId, eventSource);
+                    connectTaskSSE(taskId);
 
                     return taskId;
                 });
@@ -809,8 +838,8 @@ export function useBatchTaskManager(
 
                 return createdTaskIds;
             } catch (error) {
-                console.error("Failed to create batch tasks:", error);
-                // 如果创建失败，确保也结束 loading
+                logger.error("Failed to create batch tasks:", error);
+                // Ensure loading clears if creation blows up
                 setIsLoading(false);
 
                 throw error;
@@ -819,7 +848,7 @@ export function useBatchTaskManager(
         [setTask, trackTaskToNode, routeTaskToNode, options],
     );
 
-    // 监听批量任务完成
+    // Notify when entire batch settles
     useEffect(() => {
         if (currentBatchTaskIds.size === 0) return;
 
@@ -849,24 +878,24 @@ export function useBatchTaskManager(
         return () => clearInterval(interval);
     }, [currentBatchTaskIds, totalTasks, config]);
 
-    // 取消任务
+    // Cancel in-flight tasks
     const cancelTasks = useCallback(async () => {
         if (currentBatchTaskIds.size === 0) return;
 
         const taskIds = Array.from(currentBatchTaskIds);
-        console.log("[BatchTaskManager] Cancelling tasks:", taskIds);
+        logger.debug("[BatchTaskManager] Cancelling tasks:", taskIds);
 
-        // 1. 立即显示"取消中"状态
+        // 1. Show cancelling state immediately
         for (const taskId of taskIds) {
             emitSSETaskMessage({
                 id: taskId,
-                status: "RUNNING" as any,
+                status: TaskStatus.RUNNING,
                 nodeId: null,
                 data: { message: "取消中..." },
             });
         }
 
-        // 2. 调用后端停止接口
+        // 2. Hit backend stop endpoints
         const stopPromises = taskIds.map(async (taskId) => {
             try {
                 const response = await fetch(getTaskStopUrl(), {
@@ -876,12 +905,12 @@ export function useBatchTaskManager(
                     },
                     body: JSON.stringify({ taskId }),
                 });
-                console.log(
+                logger.debug(
                     `[BatchTaskManager] Stop request sent for task: ${taskId}`,
                 );
                 return response.ok;
             } catch (error) {
-                console.error(
+                logger.error(
                     `[BatchTaskManager] Failed to send stop request for task ${taskId}:`,
                     error,
                 );
@@ -889,46 +918,51 @@ export function useBatchTaskManager(
             }
         });
 
-        // 等待所有停止请求完成
+        // Drain stop RPCs
         await Promise.all(stopPromises);
 
-        // 3. 设置超时，等待后端 CANCELLED 消息或 10 秒后手动触发
+        if (batchCancelTimeoutRef.current != null) {
+            clearTimeout(batchCancelTimeoutRef.current);
+            batchCancelTimeoutRef.current = null;
+        }
+
+        // 3. Wait for backend CANCELLED or synthesize cancel after 10s
         const timeoutId = setTimeout(() => {
-            console.log(
+            batchCancelTimeoutRef.current = null;
+            logger.debug(
                 "[BatchTaskManager] Timeout waiting for CANCELLED message, emitting manually",
             );
-            // 手动触发取消事件到 Toast
+            // Synthesize toast events if SSE is silent
             for (const taskId of taskIds) {
                 emitSSETaskMessage({
                     id: taskId,
-                    status: "CANCELLED" as any,
+                    status: TaskStatus.CANCELLED,
                     nodeId: null,
                     data: { message: "任务已取消" },
                 });
             }
 
-            // 关闭 SSE 连接
+            // Tear down SSE clients
             eventSourcesRef.current.forEach((eventSource) => {
                 eventSource.close();
             });
             eventSourcesRef.current.clear();
             activeConnectionsRef.current.clear();
 
-            // 重置状态
+            // Reset manager state
             setIsLoading(false);
             setCurrentBatchTaskIds(new Set());
         }, 10000);
 
-        // 存储 timeoutId 以便在收到 CANCELLED 消息时清除
-        (window as any).__batchCancelTimeoutId = timeoutId;
+        batchCancelTimeoutRef.current = timeoutId;
     }, [currentBatchTaskIds]);
 
-    // 监听取消请求事件（来自 TaskProgressToast）
+    // React to toast-driven cancel intents
     useEffect(() => {
         const handleCancelRequest = () => {
-            // 只在有批量任务运行时才处理
+            // Only react while a batch owns tasks
             if (currentBatchTaskIds.size > 0) {
-                console.log(
+                logger.debug(
                     "[BatchTaskManager] Received cancel request from Toast",
                 );
                 cancelTasks();
@@ -944,14 +978,21 @@ export function useBatchTaskManager(
         };
     }, [currentBatchTaskIds, cancelTasks]);
 
-    // 清理 EventSource 连接
+    // Tear down SSE registries on unmount
     useEffect(() => {
         return () => {
+            if (batchCancelTimeoutRef.current != null) {
+                clearTimeout(batchCancelTimeoutRef.current);
+                batchCancelTimeoutRef.current = null;
+            }
             eventSourcesRef.current.forEach((eventSource) => {
                 eventSource.close();
             });
             eventSourcesRef.current.clear();
             activeConnectionsRef.current.clear();
+            reconnectTimeoutsRef.current.forEach(clearTimeout);
+            reconnectTimeoutsRef.current.clear();
+            reconnectAttemptsRef.current.clear();
         };
     }, []);
 
@@ -965,13 +1006,12 @@ export function useBatchTaskManager(
     };
 }
 
-// -------------------- 主 Hook（组合订阅和存储） --------------------
+// -------------------- Composition hook --------------------
 
 /**
- * 主任务管理 Hook
- * 提供任务状态管理和节点路由功能
+ * Convenience hook bridging the Zustand store with routing helpers.
  *
- * 注意：SSE 连接由 useCreateTask 自动管理，无需手动订阅
+ * SSE handling is encapsulated by useCreateTask; consumers rarely subscribe manually.
  */
 export function useTask() {
     const tasks = useTaskStore((state) => state.tasks);
@@ -1001,7 +1041,7 @@ export function useTask() {
         clearCompletedTasks,
         getActiveTasks,
         hasActiveTasks,
-        // 节点管理方法
+        // Node association helpers
         trackTaskToNode,
         getTaskNodeId,
         registerNodeHandler,
@@ -1010,17 +1050,16 @@ export function useTask() {
     };
 }
 
-// -------------------- 节点任务订阅 Hook --------------------
+// -------------------- Node-scoped subscriptions --------------------
 
 /**
- * 订阅特定节点的任务更新
- * 当某个节点创建的任务有更新时，会自动调用注册的处理函数
+ * Subscribe handlers for updates emitted by tasks created from nodeId.
  */
 export function useNodeTaskUpdate(nodeId: string, handler: NodeTaskHandler) {
     const { registerNodeHandler, unregisterNodeHandler } = useTaskStore();
     const handlerRef = useRef(handler);
 
-    // 保持 handler 最新
+    // Keep latest handler without re-register storm
     useEffect(() => {
         handlerRef.current = handler;
     }, [handler]);
@@ -1028,18 +1067,18 @@ export function useNodeTaskUpdate(nodeId: string, handler: NodeTaskHandler) {
     useEffect(() => {
         if (!nodeId) return;
 
-        // 创建包装的处理函数，确保使用最新的 handler
+        // Stable wrapper referencing handlerRef.current
         const wrappedHandler: NodeTaskHandler = (task) => {
             handlerRef.current(task);
         };
 
-        console.log(
+        logger.debug(
             `[useNodeTaskUpdate] Registering task update handler for node: ${nodeId}`,
         );
         registerNodeHandler(nodeId, wrappedHandler);
 
         return () => {
-            console.log(
+            logger.debug(
                 `[useNodeTaskUpdate] Unregistering task update handler for node: ${nodeId}`,
             );
             unregisterNodeHandler(nodeId, wrappedHandler);

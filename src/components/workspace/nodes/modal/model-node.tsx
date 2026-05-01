@@ -1,6 +1,6 @@
 "use client";
 
-import { Handle, Position, type NodeProps } from "@xyflow/react";
+import { type NodeProps } from "@xyflow/react";
 import { memo, useRef, useState, useEffect, useCallback } from "react";
 import { Box, Maximize2, X, Download, RotateCcw } from "lucide-react";
 import { createPortal } from "react-dom";
@@ -17,22 +17,23 @@ import {
 } from "../base/node-header";
 import { DropdownMenuLabel } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import { useR2AsyncLoader } from "@/hooks/use-r2-async-loader";
+import { useFileAsyncLoader } from "@/hooks/use-file-async-loader";
 import { useTranslations } from "next-intl";
+import { logger } from "@/lib/logger";
 
-// 动态导入Spark（因为它需要browser环境）
-// 注意：因为Spark的WASM依赖导致Next.js构建问题，暂时移除
-// 可以通过CDN的方式在生产环境中单独加载
+// Spark must stay dynamic (browser-only entry)
+// Spark WASM currently breaks Next build — disabled
+// Production can load Spark via CDN chunk
 let SplatMesh: any = null;
 
-// 初始化Spark - 暂时禁用
+// Spark bootstrap — disabled for now
 async function initSparkIfNeeded() {
     // Spark WASM module disabled due to Next.js webpack compatibility issues
-    // 在生产环境中，可以使用CDN版本或单独的加载方式
-    console.info("Gaussian Splatting support requires separate CDN loading");
+    // Prefer CDN bundle in production
+    logger.debug("Gaussian Splatting support requires separate CDN loading");
 }
 
-// 自动调整相机以适应模型
+// Frame camera to bound the mesh
 const fitCameraToSelection = (
     camera: THREE.PerspectiveCamera,
     controls: any,
@@ -67,7 +68,7 @@ const fitCameraToSelection = (
     controls.update();
 };
 
-// 简单的自动缩放和居中
+// Naive fit + center helper
 const autoScaleAndCenter = (
     model: THREE.Object3D,
     camera: THREE.PerspectiveCamera,
@@ -78,36 +79,36 @@ const autoScaleAndCenter = (
     const size = box.getSize(new THREE.Vector3());
     const center = box.getCenter(new THREE.Vector3());
 
-    // 居中模型
+    // Recenter mesh pivot
     model.position.x += model.position.x - center.x;
     model.position.y += model.position.y - center.y;
     model.position.z += model.position.z - center.z;
 
-    // 归一化模型大小 - 确保模型大小适中，以便灯光效果一致
+    // Normalize scale for consistent lighting response
     const maxDim = Math.max(size.x, size.y, size.z);
-    const targetSize = 8; // 将模型缩放到约8个单位大小
+    const targetSize = 8; // Target ~8 world units for preview scale
     if (maxDim > 0) {
         const scale = targetSize / maxDim;
         model.scale.multiplyScalar(scale);
     }
 
-    // 调整相机位置
-    // 使用targetSize计算相机距离
+    // Reposition orbit camera
+    // Derive camera distance via targetSize
     const fov = camera.fov * (Math.PI / 180);
     let cameraZ = Math.abs(targetSize / 2 / Math.tan(fov / 2));
 
-    // 增加一点边距
+    // Add breathing room around framing box
     cameraZ *= 1.5;
 
     camera.position.set(0, 0, cameraZ);
     camera.lookAt(0, 0, 0);
 
-    // 更新相机投影矩阵
+    // Refresh projection matrices
     camera.aspect = containerWidth / containerHeight;
     camera.updateProjectionMatrix();
 };
 
-// 全屏3D预览Modal
+// Immersive 3D inspector modal
 const FullScreen3DModal = ({
     fileKey,
     fileExtension,
@@ -126,28 +127,28 @@ const FullScreen3DModal = ({
     const animationIdRef = useRef<number | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    const { url } = useR2AsyncLoader(fileKey, { priority: "high" });
+    const { url } = useFileAsyncLoader(fileKey, { priority: "high" });
 
     const setupScene = useCallback(() => {
         if (!mountRef.current || !url) return;
 
-        // 返回一个cleanup函数
+        // Return teardown closure
         const init = async () => {
             try {
                 setIsLoading(true);
                 setError(null);
 
-                console.log(
+                logger.debug(
                     "[FullScreen3DModal] Starting scene setup with URL:",
                     url,
                     "Extension:",
                     fileExtension,
                 );
                 const scene = new THREE.Scene();
-                scene.background = new THREE.Color(0xf0f0f0); // 使用浅灰色背景，避免白屏看起来像没加载
+                scene.background = new THREE.Color(0xf0f0f0); // Light-gray backdrop so blank canvas reads as intentional
                 sceneRef.current = scene;
 
-                // 相机设置
+                // Camera rig setup
                 const width = mountRef.current!.clientWidth;
                 const height = mountRef.current!.clientHeight;
                 const camera = new THREE.PerspectiveCamera(
@@ -159,26 +160,26 @@ const FullScreen3DModal = ({
                 camera.position.set(5, 5, 5);
                 cameraRef.current = camera;
 
-                // 渲染器设置
+                // Renderer + tone mapping knobs
                 const renderer = new THREE.WebGLRenderer({
                     antialias: true,
                     alpha: true,
                 });
                 renderer.setSize(width, height);
                 renderer.setPixelRatio(window.devicePixelRatio);
-                renderer.outputColorSpace = THREE.SRGBColorSpace; // 确保颜色显示正确
+                renderer.outputColorSpace = THREE.SRGBColorSpace; // Respect sRGB color space
                 rendererRef.current = renderer;
 
-                // 清空容器并添加渲染器
+                // Mount renderer canvas in host
                 if (mountRef.current) {
                     mountRef.current.innerHTML = "";
                     mountRef.current.appendChild(renderer.domElement);
                 }
 
-                // 灯光设置
-                // 灯光设置 - 优化后的自然光照
-                // 灯光设置 - 优化后的自然光照
-                // 1. 环境光 - 使用半球光模拟天空和地面的自然光照
+                // Scene lighting rig
+                // Tweaked ambient + key fills
+                // Tweaked ambient + key fills
+                // Hemisphere light approximates sky versus ground bounce
                 const hemisphereLight = new THREE.HemisphereLight(
                     0xffffff,
                     0x444444,
@@ -187,27 +188,27 @@ const FullScreen3DModal = ({
                 hemisphereLight.position.set(0, 20, 0);
                 scene.add(hemisphereLight);
 
-                // 2. 跟随相机的光源 (Headlamp) - 确保视角处总是亮的
-                // 必须将相机添加到场景中，子对象(灯光)才能生效
+                // Camera-attached headlamp prevents dark interiors
+                // Parent camera into scene graph so child lights illuminate
                 scene.add(camera);
                 const cameraLight = new THREE.DirectionalLight(0xffffff, 2.5);
-                cameraLight.position.set(0, 0, 1); // 沿着相机视线方向
+                cameraLight.position.set(0, 0, 1); // Align with camera-forward axis
                 camera.add(cameraLight);
 
-                // 3. 补光 - 稍微增加一点侧后方的光，增加立体感
+                // Rim light exaggerates curvature
                 const backLight = new THREE.DirectionalLight(0xffffff, 1.0);
                 backLight.position.set(0, 5, -5);
                 scene.add(backLight);
 
-                // 旋转控制变量
+                // Orbit / drag damping state
                 let isDragging = false;
                 let previousMousePosition = { x: 0, y: 0 };
                 const rotation = { x: 0, y: 0 };
                 let targetRotation = { x: 0, y: 0 };
 
-                // 事件处理器
+                // Pointer listeners
                 const pointerdownHandler = (e: any) => {
-                    // 确保点击的是canvas
+                    // Ignore UI chrome outside WebGL canvas
                     if (e.target !== renderer.domElement) return;
                     e.stopPropagation();
                     e.preventDefault();
@@ -225,7 +226,7 @@ const FullScreen3DModal = ({
 
                     targetRotation.y += deltaX * 0.01;
                     targetRotation.x += deltaY * 0.01;
-                    // 限制垂直旋转角度
+                    // Clamp polar orbit extremes
                     targetRotation.x = Math.max(
                         -Math.PI / 2,
                         Math.min(Math.PI / 2, targetRotation.x),
@@ -250,13 +251,13 @@ const FullScreen3DModal = ({
                     e.stopPropagation();
                     const scrollDelta = e.deltaY > 0 ? 1.1 : 0.9;
                     camera.position.multiplyScalar(scrollDelta);
-                    // 限制缩放范围
+                    // Clamp dollying distance
                     const distance = camera.position.length();
                     if (distance < 1) camera.position.setLength(1);
                     if (distance > 100) camera.position.setLength(100);
                 };
 
-                // 添加事件监听器
+                // Attach pointer observers
                 const canvas = renderer.domElement;
                 canvas.addEventListener(
                     "pointerdown",
@@ -267,7 +268,7 @@ const FullScreen3DModal = ({
                     "pointermove",
                     pointermoveHandler,
                     true,
-                ); // 监听window以获得更流畅的拖动
+                ); // Window-level listeners for smoother drags outside canvas bounds
                 window.addEventListener("pointerup", pointerupHandler, true);
                 canvas.addEventListener(
                     "pointerleave",
@@ -278,7 +279,7 @@ const FullScreen3DModal = ({
                     passive: false,
                 });
 
-                // 加载模型
+                // Stream chosen loader path
                 const extension = fileExtension.toLowerCase();
 
                 try {
@@ -324,20 +325,20 @@ const FullScreen3DModal = ({
                         );
                     }
                 } catch (loadErr) {
-                    console.error("Failed to load model:", loadErr);
+                    logger.error("Failed to load model:", loadErr);
                     throw loadErr;
                 }
 
-                // 自动缩放模型
+                // Autoscale after parse completes
                 if (modelRef.current) {
                     autoScaleAndCenter(modelRef.current, camera, width, height);
 
-                    // 初始化旋转目标为当前旋转
+                    // Seed inertia target quaternion
                     targetRotation.x = modelRef.current.rotation.x;
                     targetRotation.y = modelRef.current.rotation.y;
                 }
 
-                // 动画循环
+                // requestAnimationFrame driver
                 const animate = () => {
                     animationIdRef.current = requestAnimationFrame(animate);
 
@@ -354,7 +355,7 @@ const FullScreen3DModal = ({
                 };
                 animate();
 
-                // 处理窗口大小变化
+                // Resize handler for DPR swaps
                 const resizeObserver = new ResizeObserver(() => {
                     if (
                         !mountRef.current ||
@@ -374,9 +375,9 @@ const FullScreen3DModal = ({
                 }
 
                 setIsLoading(false);
-                console.log("[FullScreen3DModal] Scene setup complete");
+                logger.debug("[FullScreen3DModal] Scene setup complete");
 
-                // 返回cleanup函数
+                // Dispose geometries + textures
                 return () => {
                     resizeObserver.disconnect();
                     window.removeEventListener(
@@ -409,7 +410,7 @@ const FullScreen3DModal = ({
                     renderer.dispose();
                 };
             } catch (err) {
-                console.error("3D loading error:", err);
+                logger.error("3D loading error:", err);
                 setError(
                     err instanceof Error
                         ? err.message
@@ -419,7 +420,7 @@ const FullScreen3DModal = ({
             }
         };
 
-        // 执行初始化并保存cleanup函数
+        // Kick off preview + stash disposer promise
         let cleanup: (() => void) | undefined;
         init().then((c) => (cleanup = c));
 
@@ -434,8 +435,8 @@ const FullScreen3DModal = ({
 
         let cleanup: (() => void) | undefined;
         if (url) {
-            // setupScene现在返回一个cleanup函数（或者是Promise<cleanup>）
-            // 我们需要正确处理它
+            // setupScene may sync/async return disposer handles
+            // Normalize cleanup whether sync or awaited
             const start = async () => {
                 // @ts-ignore
                 cleanup = await setupScene();
@@ -557,7 +558,7 @@ const FullScreen3DModal = ({
     return createPortal(content, document.body);
 };
 
-// 小型的交互式预览组件，用于节点内部
+// Inline Three preview for condensed node chrome
 const MiniModelPreview = ({
     url,
     fileExtension,
@@ -606,7 +607,7 @@ const MiniModelPreview = ({
                 });
                 renderer.setSize(width, height);
                 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2)); // Limit pixel ratio for performance
-                renderer.outputColorSpace = THREE.SRGBColorSpace; // 确保颜色显示正确
+                renderer.outputColorSpace = THREE.SRGBColorSpace; // Respect sRGB color space
                 rendererRef.current = renderer;
 
                 if (mountRef.current) {
@@ -615,9 +616,9 @@ const MiniModelPreview = ({
                 }
 
                 // Lights
-                // Lights - 优化后的自然光照
-                // Lights - 优化后的自然光照
-                // 1. 环境光
+                // Lights — polished ambient stack
+                // Lights — polished ambient stack
+                // 1. Ambient fill preset
                 const hemisphereLight = new THREE.HemisphereLight(
                     0xffffff,
                     0x444444,
@@ -626,7 +627,7 @@ const MiniModelPreview = ({
                 hemisphereLight.position.set(0, 20, 0);
                 scene.add(hemisphereLight);
 
-                // 2. 跟随相机的光源
+                // 2. Camera-parented spotlight
                 scene.add(camera);
                 const cameraLight = new THREE.DirectionalLight(0xffffff, 2.0);
                 cameraLight.position.set(0, 0, 1);
@@ -731,7 +732,7 @@ const MiniModelPreview = ({
                         await loadSTEP(url, scene, modelHolder);
                     else throw new Error("Unsupported");
                 } catch (e) {
-                    console.error("Mini preview load error", e);
+                    logger.error("Mini preview load error", e);
                 }
 
                 if (modelHolder.current) {
@@ -779,7 +780,7 @@ const MiniModelPreview = ({
                     renderer.dispose();
                 };
             } catch (err) {
-                console.error("Mini preview init error", err);
+                logger.error("Mini preview init error", err);
                 setIsLoading(false);
             }
         };
@@ -806,7 +807,7 @@ const MiniModelPreview = ({
     );
 };
 
-// 加载GLTF/GLB文件
+// Loader: glTF / GLB
 async function loadGLTF(
     url: string,
     scene: THREE.Scene,
@@ -825,7 +826,7 @@ async function loadGLTF(
                 scene.add(model);
                 modelRef.current = model;
 
-                // 播放动画如果存在
+                // Attach first glTF mixer clip when available
                 if (gltf.animations.length > 0) {
                     const mixer = new THREE.AnimationMixer(model);
                     gltf.animations.forEach((clip: any) => {
@@ -848,7 +849,7 @@ async function loadGLTF(
     });
 }
 
-// 加载OBJ文件
+// Loader: Wavefront OBJ
 async function loadOBJ(
     url: string,
     scene: THREE.Scene,
@@ -866,7 +867,7 @@ async function loadOBJ(
                 scene.add(object);
                 modelRef.current = object;
 
-                // 为OBJ对象添加基础材质
+                // Provide default Lambert for untextured OBJ
                 object.traverse((child: any) => {
                     if (child instanceof THREE.Mesh) {
                         if (!child.material) {
@@ -885,7 +886,7 @@ async function loadOBJ(
     });
 }
 
-// 加载高斯泼溅文件
+// Loader: Gaussian splat payload
 async function loadSplat(
     url: string,
     scene: THREE.Scene,
@@ -904,12 +905,12 @@ async function loadSplat(
     scene.add(mesh);
     modelRef.current = mesh;
 
-    console.info(
+    logger.debug(
         "Gaussian Splatting (.splat, .spz) files require separate CDN loading. Showing placeholder.",
     );
 }
 
-// 加载FBX文件
+// Loader: Autodesk FBX
 async function loadFBX(
     url: string,
     scene: THREE.Scene,
@@ -927,7 +928,7 @@ async function loadFBX(
                 scene.add(object);
                 modelRef.current = object;
 
-                // 播放第一个动画
+                // Play first FBX clip if multiple
                 if (object.animations && object.animations.length > 0) {
                     const mixer = new THREE.AnimationMixer(object);
                     mixer.clipAction(object.animations[0]).play();
@@ -940,7 +941,7 @@ async function loadFBX(
     });
 }
 
-// 加载STL文件
+// Loader: stereolithography mesh
 async function loadSTL(
     url: string,
     scene: THREE.Scene,
@@ -955,7 +956,7 @@ async function loadSTL(
         loader.load(
             url,
             (geometry: any) => {
-                console.log("STL loaded successfully, creating mesh");
+                logger.debug("STL loaded successfully, creating mesh");
                 geometry.computeVertexNormals?.();
                 const material = new THREE.MeshPhongMaterial({
                     color: 0x0088ff,
@@ -967,14 +968,14 @@ async function loadSTL(
             },
             undefined,
             (error: any) => {
-                console.error("STL loading error:", error);
+                logger.error("STL loading error:", error);
                 reject(error);
             },
         );
     });
 }
 
-// 加载DAE (Collada)文件
+// Loader: COLLADA interchange
 async function loadDAE(
     url: string,
     scene: THREE.Scene,
@@ -1000,7 +1001,7 @@ async function loadDAE(
     });
 }
 
-// 加载PLY文件（独立于Splat格式）
+// Loader: Stanford PLY (non-splat)
 async function loadPLY(
     url: string,
     scene: THREE.Scene,
@@ -1030,7 +1031,7 @@ async function loadPLY(
     });
 }
 
-// 加载USDZ/USD文件
+// Loader: Pixar USD family
 async function loadUSDZ(
     url: string,
     scene: THREE.Scene,
@@ -1055,7 +1056,7 @@ async function loadUSDZ(
     });
 }
 
-// 加载3DS文件
+// Loader: legacy 3DS Max binary
 async function load3DS(
     url: string,
     scene: THREE.Scene,
@@ -1080,21 +1081,21 @@ async function load3DS(
     });
 }
 
-// 加载STEP文件（CAD格式）
+// Loader: ISO STEP solids
 async function loadSTEP(
     url: string,
     scene: THREE.Scene,
     modelRef: React.MutableRefObject<THREE.Object3D | null>,
 ): Promise<void> {
     try {
-        // STEP格式需要专门的库，这里作为fallback使用OBJ格式
+        // STEP needs CAD libs — fallback to OBJ importer
         const response = await fetch(url);
         const text = await response.text();
 
-        // 尝试作为纯文本解析并创建简单的网格
+        // Best-effort ASCII STEP to placeholder mesh
         const lines = text.split("\n");
 
-        // 创建一个简单的占位符网格
+        // Stub mesh so UI still renders
         const geometry = new THREE.BoxGeometry(1, 1, 1);
         const material = new THREE.MeshPhongMaterial({ color: 0x4488ff });
         const mesh = new THREE.Mesh(geometry, material);
@@ -1108,18 +1109,18 @@ async function loadSTEP(
     }
 }
 
-// 加载IGES文件（CAD格式）
+// Loader: IGES surfaces
 async function loadIGES(
     url: string,
     scene: THREE.Scene,
     modelRef: React.MutableRefObject<THREE.Object3D | null>,
 ): Promise<void> {
     try {
-        // IGES格式需要专门的库，这里作为fallback使用OBJ格式
+        // IGES needs CAD libs — fallback to OBJ importer
         const response = await fetch(url);
         const text = await response.text();
 
-        // 创建一个简单的占位符网格
+        // Stub mesh so UI still renders
         const geometry = new THREE.BoxGeometry(1, 1, 1);
         const material = new THREE.MeshPhongMaterial({ color: 0xff8844 });
         const mesh = new THREE.Mesh(geometry, material);
@@ -1133,7 +1134,7 @@ async function loadIGES(
     }
 }
 
-// 加载VTP文件（VTK多边形格式）
+// Loader: VTK polydata XML
 async function loadVTP(
     url: string,
     scene: THREE.Scene,
@@ -1163,7 +1164,7 @@ async function loadVTP(
     });
 }
 
-// 加载点云文件 (PTX, PTS, XYZ)
+// Loader: raw point-cloud dumps
 async function loadPointCloud(
     url: string,
     scene: THREE.Scene,
@@ -1181,19 +1182,19 @@ async function loadPointCloud(
             const positions: number[] = [];
             const colors: number[] = [];
 
-            // 解析点云数据
+            // Parse whitespace-delimited cloud rows
             lines.forEach((line: string) => {
                 const parts = line.trim().split(/\s+/);
 
                 if (parts.length >= 3) {
-                    // 前3个数字是坐标
+                    // First triplet encodes XYZ
                     positions.push(
                         parseFloat(parts[0]),
                         parseFloat(parts[1]),
                         parseFloat(parts[2]),
                     );
 
-                    // 如果有颜色信息（RGB或RGBA）
+                    // Optional RGB/A columns after xyz
                     if (parts.length >= 6) {
                         colors.push(
                             parseFloat(parts[3]) / 255,
@@ -1231,7 +1232,7 @@ async function loadPointCloud(
     });
 }
 
-// 主节点组件
+// Primary exported node surface
 const ModelNode = ({ selected, data }: NodeProps) => {
     const t = useTranslations("Workspace.nodes.modal");
     const { fileKeys, fileName } = (data as {
@@ -1245,9 +1246,9 @@ const ModelNode = ({ selected, data }: NodeProps) => {
     const fileKey = fileKeys && fileKeys.length > 0 ? fileKeys[0] : undefined;
 
     const [isFullScreen, setIsFullScreen] = useState(false);
-    const { url } = useR2AsyncLoader(fileKey, { priority: "high" });
+    const { url } = useFileAsyncLoader(fileKey, { priority: "high" });
 
-    // 提取文件扩展名 - 从 fileKey 中提取（fileKey 本身包含扩展名）
+    // Derive MIME/ext from persisted fileKey tails
     const fileExtension = fileKey
         ? "." + fileKey.split(".").pop()?.toLowerCase() || ".glb"
         : ".glb";
@@ -1290,18 +1291,6 @@ const ModelNode = ({ selected, data }: NodeProps) => {
                         {t("noModelLoaded")}
                     </p>
                 </div>
-                <Handle
-                    type="target"
-                    position={Position.Left}
-                    id="a"
-                    isConnectable={true}
-                />
-                <Handle
-                    type="source"
-                    position={Position.Right}
-                    id="b"
-                    isConnectable={true}
-                />
             </BaseNode>
         );
     }
@@ -1330,7 +1319,7 @@ const ModelNode = ({ selected, data }: NodeProps) => {
                             </Button>
                         )}
                         <NodeHeaderComboAction
-                            onClick={() => console.log("组合模式切换")}
+                            onClick={() => logger.debug("组合模式切换")}
                         />
                         <NodeHeaderMenuAction label={t("moreOptions")}>
                             <DropdownMenuLabel>
@@ -1375,18 +1364,6 @@ const ModelNode = ({ selected, data }: NodeProps) => {
                     )}
                 </div>
 
-                <Handle
-                    type="target"
-                    position={Position.Left}
-                    id="a"
-                    isConnectable={true}
-                />
-                <Handle
-                    type="source"
-                    position={Position.Right}
-                    id="b"
-                    isConnectable={true}
-                />
             </BaseNode>
 
             {/* Full screen modal */}
@@ -1401,7 +1378,7 @@ const ModelNode = ({ selected, data }: NodeProps) => {
     );
 };
 
-// 自定义比较函数防止不必要的重新渲染
+// Custom comparator suppresses needless React.memo churn
 const areEqual = (prevProps: NodeProps, nextProps: NodeProps) => {
     const prevFileKey = (prevProps.data as { fileKey?: string })?.fileKey;
     const nextFileKey = (nextProps.data as { fileKey?: string })?.fileKey;

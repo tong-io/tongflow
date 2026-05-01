@@ -1,6 +1,6 @@
 /**
- * 功能列表管理 Hook
- * 页面加载时请求一次，之后从 store 获取
+ * Feature list management hook
+ * Request once on page load, then read from the store
  */
 
 import { useEffect } from "react";
@@ -27,7 +27,7 @@ interface FeaturesState {
     getFeatureByName: (name: string) => Feature | undefined;
 }
 
-// 请求去重
+// Request deduplication
 let fetchPromise: Promise<void> | null = null;
 
 export const useFeaturesStore = create<FeaturesState>((set, get) => ({
@@ -47,12 +47,12 @@ export const useFeaturesStore = create<FeaturesState>((set, get) => ({
 }));
 
 /**
- * 加载功能列表（只执行一次）
+ * Load the feature list (only once)
  */
 async function loadFeatures(): Promise<void> {
     const state = useFeaturesStore.getState();
 
-    // 已加载或正在加载，直接返回
+    // Already loaded or loading; return directly
     if (state.isLoaded || fetchPromise) {
         return fetchPromise ?? Promise.resolve();
     }
@@ -88,7 +88,7 @@ async function loadFeatures(): Promise<void> {
 // -------------------- Hooks --------------------
 
 /**
- * 预加载功能列表（放在顶层组件）
+ * Preload the feature list (place in a top-level component)
  */
 export function usePreloadFeatures() {
     useEffect(() => {
@@ -97,7 +97,7 @@ export function usePreloadFeatures() {
 }
 
 /**
- * 获取功能列表
+ * Get the feature list
  */
 export function useFeatures() {
     const features = useFeaturesStore((s) => s.features);
@@ -106,7 +106,7 @@ export function useFeatures() {
     const error = useFeaturesStore((s) => s.error);
     const getFeatureByName = useFeaturesStore((s) => s.getFeatureByName);
 
-    // 确保已加载
+    // Ensure it is loaded
     useEffect(() => {
         void loadFeatures();
     }, []);
@@ -121,7 +121,7 @@ export function useFeatures() {
 }
 
 /**
- * 获取单个功能
+ * Get a single feature
  */
 export function useFeature(name: string) {
     const { isLoading, error, getFeatureByName } = useFeatures();

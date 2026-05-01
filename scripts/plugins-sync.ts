@@ -1,8 +1,12 @@
+import { execFile, execFileSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
-import { execFile, execFileSync } from "node:child_process";
 import { z } from "zod";
-import { PluginsRegistrySchema, type PluginsRegistry } from "../src/lib/plugins-registry-schema";
+import { logger } from "../src/lib/logger";
+import {
+    type PluginsRegistry,
+    PluginsRegistrySchema,
+} from "../src/lib/plugins-registry-schema";
 
 function readJson(p: string): unknown {
     return JSON.parse(fs.readFileSync(p, "utf8")) as unknown;
@@ -21,9 +25,7 @@ const PythonScanOutSchema = z
         nodePluginMap: z.record(z.string(), z.array(z.string())).optional(),
         plugins: z.record(z.string(), z.unknown()).optional(),
         errors: z
-            .array(
-                z.object({ pluginId: z.string(), message: z.string() }),
-            )
+            .array(z.object({ pluginId: z.string(), message: z.string() }))
             .optional(),
     })
     .passthrough();
@@ -40,8 +42,7 @@ async function runScan(repoRoot: string): Promise<PluginsRegistry> {
     const abi = path.join(repoRoot, "config", "tongflow.abi.json");
 
     if (!fs.existsSync(abi)) {
-        // eslint-disable-next-line no-console
-        console.error(
+        logger.error(
             "[plugins:sync] Missing config/tongflow.abi.json. Run: node scripts/generate-tongflow-abi.mjs",
         );
         const empty: PluginsRegistry = {
@@ -50,7 +51,10 @@ async function runScan(repoRoot: string): Promise<PluginsRegistry> {
             nodePluginMap: {},
             plugins: {},
             errors: [
-                { pluginId: "<sync>", message: "Missing config/tongflow.abi.json" },
+                {
+                    pluginId: "<sync>",
+                    message: "Missing config/tongflow.abi.json",
+                },
             ],
         };
         return empty;
@@ -58,11 +62,22 @@ async function runScan(repoRoot: string): Promise<PluginsRegistry> {
 
     // Keep Python SDK constants in sync with ABI (plugins use NodeSlots.*).
     try {
-        execFileSync(pickPython(), ["-m", "tongflow.gen_node_slots", "--abi", abi, "--out", path.join(sdk, "tongflow", "node_slots.py")], {
-            cwd: repoRoot,
-            env: { ...process.env, PYTHONPATH: `${sdk}` },
-            stdio: "inherit",
-        });
+        execFileSync(
+            pickPython(),
+            [
+                "-m",
+                "tongflow.gen_node_slots",
+                "--abi",
+                abi,
+                "--out",
+                path.join(sdk, "tongflow", "node_slots.py"),
+            ],
+            {
+                cwd: repoRoot,
+                env: { ...process.env, PYTHONPATH: `${sdk}` },
+                stdio: "inherit",
+            },
+        );
     } catch {
         // best-effort; scan will fail plugins if constants missing
     }
@@ -129,21 +144,24 @@ async function runScan(repoRoot: string): Promise<PluginsRegistry> {
         }
     })();
     if (!raw) {
-        // eslint-disable-next-line no-console
-        console.error("[plugins:sync] scan stdout was not valid JSON", out);
+        logger.error("[plugins:sync] scan stdout was not valid JSON", out);
         return {
             version: 1,
             generatedAt: new Date().toISOString(),
             nodePluginMap: {},
             plugins: {},
-            errors: [{ pluginId: "<sync>", message: "Python scan did not return JSON" }],
+            errors: [
+                {
+                    pluginId: "<sync>",
+                    message: "Python scan did not return JSON",
+                },
+            ],
         };
     }
 
     const s = PythonScanOutSchema.safeParse(raw);
     if (!s.success) {
-        // eslint-disable-next-line no-console
-        console.error("[plugins:sync] parse scan JSON:", s.error.message);
+        logger.error("[plugins:sync] parse scan JSON:", s.error.message);
         return {
             version: 1,
             generatedAt: new Date().toISOString(),
@@ -154,8 +172,7 @@ async function runScan(repoRoot: string): Promise<PluginsRegistry> {
     }
     const j = s.data;
     if (!j.plugins || Object.keys(j.plugins).length === 0) {
-        // eslint-disable-next-line no-console
-        console.warn(
+        logger.warn(
             "[plugins:sync] scan reported no plugins (see errors in registry)",
         );
     }
@@ -180,8 +197,7 @@ async function main(): Promise<void> {
         const reg = await runScan(repoRoot);
         writeJson(outPath, reg);
         if (reg.errors?.length) {
-            // eslint-disable-next-line no-console
-            console.warn(
+            logger.warn(
                 `[plugins:sync] ${reg.errors.length} plugin(s) skipped; see "errors" in ${path.relative(
                     repoRoot,
                     outPath,
@@ -189,8 +205,7 @@ async function main(): Promise<void> {
             );
         }
     } catch (e) {
-        // eslint-disable-next-line no-console
-        console.error("[plugins:sync] scan failed, writing empty registry", e);
+        logger.error("[plugins:sync] scan failed, writing empty registry", e);
         const fallback: PluginsRegistry = {
             version: 1,
             generatedAt: new Date().toISOString(),
@@ -206,8 +221,7 @@ async function main(): Promise<void> {
         writeJson(outPath, fallback);
     }
 
-    // eslint-disable-next-line no-console
-    console.log(
+    logger.info(
         `[plugins:sync] Wrote ${path.relative(process.cwd(), outPath)}`,
     );
 }

@@ -1,6 +1,4 @@
 import {
-    Handle,
-    Position,
     type NodeProps,
     useReactFlow,
     useNodeId,
@@ -21,8 +19,9 @@ import {
 import { DropdownMenuLabel } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { useTranslations } from "next-intl";
+import { logger } from "@/lib/logger";
 
-// 全屏预览modal
+// Lightweight fullscreen inspector shell
 const FullScreenTextModal = ({
     text,
     onClose,
@@ -130,7 +129,7 @@ const TextNode = ({ selected, data }: NodeProps) => {
                             </Button>
                         )}
                         <NodeHeaderComboAction
-                            onClick={() => console.log("组合模式切换")}
+                            onClick={() => logger.debug("组合模式切换")}
                         />
                         <NodeHeaderMenuAction label={t("moreOptions")}>
                             <DropdownMenuLabel>
@@ -198,18 +197,6 @@ const TextNode = ({ selected, data }: NodeProps) => {
                     </div>
                 )}
 
-                <Handle
-                    type="target"
-                    position={Position.Left}
-                    id="a"
-                    isConnectable={true}
-                />
-                <Handle
-                    type="source"
-                    position={Position.Right}
-                    id="b"
-                    isConnectable={true}
-                />
             </BaseNode>
 
             {/* Full screen modal - rendered outside BaseNode */}
