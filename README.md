@@ -41,8 +41,6 @@ With TongFlow, you can expand your imagination and stretch your ideas with gener
 
 ## How To Use
 
-- Tutorial (Bilibili): [link placeholder](https://www.bilibili.com/video/BV1xxxxxxxxxx). Replace with the real video URL when published.
-
 ## Run locally (quickstart)
 
 This is a **local-first** app: workflows and materials live in SQLite (`data/openflow.db`) and uploads on disk (`data/uploads/`). There is no hosted TongFlow account, login, or central file CDN.

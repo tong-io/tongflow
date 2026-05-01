@@ -1,7 +1,7 @@
 import { type NodeProps } from "@xyflow/react";
 import type { ReactNode } from "react";
 import { useState, memo } from "react";
-import { Ear, Upload, Mic, Atom } from "lucide-react";
+import { Upload, Mic, Atom } from "lucide-react";
 
 import { BaseNode } from "../base/base-node";
 import { useNodeState } from "@/hooks/use-node-data";
@@ -132,23 +132,6 @@ const ConvertVoiceNode = ({ selected, data }: NodeProps) => {
                             ))}
                         </SelectContent>
                     </Select>
-                    {/* Preview button outside the dropdown */}
-                    <Button
-                        type="button"
-                        variant="ghost"
-                        size="icon"
-                        className="ml-1"
-                        title={t("convertVoice.previewVoice")}
-                        onClick={async () => {
-                            if (voice && voice !== "default") {
-                                // Preview is not implemented yet
-                                logger.debug("Playing audio:", voice);
-                            }
-                        }}
-                        disabled={!voice || voice === "default"}
-                    >
-                        <Ear className="w-5 h-5 text-primary" />
-                    </Button>
                     <SpeakerVoiceUploader
                         trigger={
                             <Button

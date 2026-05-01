@@ -1,6 +1,14 @@
 {
     "name": "openflow",
     "version": "0.1.0",
+    "description": "A multi-modal AIGC studio for building generative AI workflows",
+    "author": "tong-io",
+    "keywords": ["aigc", "ai", "workflow", "multimodal", "next.js"],
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/tong-io/tongflow"
+    },
+    "homepage": "https://github.com/tong-io/tongflow#readme",
     "license": "AGPL-3.0-only",
     "private": true,
     "pnpm": {
@@ -29,7 +37,8 @@
         "typecheck": "tsc --noEmit",
         "abi:generate": "node scripts/generate-tongflow-abi.mjs",
         "plugins:sync": "tsx scripts/plugins-sync.ts",
-        "tongflow:publish": "bash scripts/publish-tongflow-pypi.sh"
+        "tongflow:publish": "bash scripts/publish-tongflow-pypi.sh",
+        "test": "echo \"No test suite yet\" && exit 0"
     },
     "dependencies": {
         "@openflow/proprietary": "workspace:*",
