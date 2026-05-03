@@ -6,7 +6,11 @@ import {
     getPluginFileAbsolutePath,
     loadPluginsRegistry,
 } from "@/lib/plugins-registry.server";
-import { requireModalTokenEnv, resolvePython } from "@/lib/modal-deploy-workers";
+import {
+    modalPluginPythonEnv,
+    requireModalTokenEnv,
+    resolvePython,
+} from "@/lib/modal-deploy-workers";
 
 /**
  * We intentionally do NOT cache download state locally.
@@ -52,7 +56,7 @@ export async function runModalDownload(
                 ["-m", "modal", "run", `${file}::download`],
                 {
                     cwd: path.dirname(file),
-                    env: process.env,
+                    env: modalPluginPythonEnv(),
                     windowsHide: true,
                     stdio: ["ignore", "pipe", "pipe"],
                 },

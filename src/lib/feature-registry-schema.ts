@@ -4,14 +4,12 @@ export interface FeatureDefinition {
     name: string;
     type: string;
     function: string;
-    processingTime: number;
 }
 
 const FeatureDefinitionSchema = z.object({
     name: z.string().min(1).max(256),
     type: z.string().min(1).max(64),
     function: z.string().min(1).max(512),
-    processingTime: z.number(),
 });
 
 const AliasesSchema = z.object({

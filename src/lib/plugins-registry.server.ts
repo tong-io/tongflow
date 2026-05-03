@@ -1,58 +1,99 @@
 import "server-only";
 
-import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
-import {
-    PluginsRegistrySchema,
-    type ModalPluginConfig,
-    type LlmPluginConfig,
-    type PluginsRegistry,
-    type PluginConfig,
-} from "@/lib/plugins-registry-schema";
+import chokidar, { type FSWatcher } from "chokidar";
 import { logger } from "@/lib/logger";
-
-const DEFAULT_PATH = join(process.cwd(), ".tongflow", "plugins.registry.json");
-const LEGACY_PATH = join(process.cwd(), "config", "plugins.registry.json");
-
-function readJsonFile(path: string): unknown {
-    const text = readFileSync(path, "utf8");
-    return JSON.parse(text) as unknown;
-}
+import type {
+    LlmPluginConfig,
+    ModalPluginConfig,
+    PluginConfig,
+    PluginsRegistry,
+} from "@/lib/plugins-registry-schema";
+import { runPluginsScanner } from "@/lib/plugins-scanner.server";
 
 let cached: PluginsRegistry | null = null;
+let watcher: FSWatcher | null = null;
+let rescanTimer: NodeJS.Timeout | null = null;
 
-function emptyRegistry(): PluginsRegistry {
+function emptyRegistry(message?: string): PluginsRegistry {
     return {
         version: 1,
-        generatedAt: new Date(0).toISOString(),
+        generatedAt: new Date().toISOString(),
         nodePluginMap: {},
         plugins: {},
+        errors: message
+            ? [
+                  {
+                      pluginId: "<scan>",
+                      message,
+                  },
+              ]
+            : undefined,
     };
 }
 
-export function loadPluginsRegistry(): PluginsRegistry {
-    if (cached && process.env.NODE_ENV === "production") return cached;
-    const pathToRead = existsSync(DEFAULT_PATH)
-        ? DEFAULT_PATH
-        : existsSync(LEGACY_PATH)
-          ? LEGACY_PATH
-          : null;
-    if (!pathToRead) {
-        cached = emptyRegistry();
+function scanAndCache(): PluginsRegistry {
+    ensureDevWatcher();
+    try {
+        cached = runPluginsScanner();
         return cached;
+    } catch (e) {
+        const message = e instanceof Error ? e.message : String(e);
+        logger.warn("[plugins] Scanner failed, using empty registry:", message);
+        return emptyRegistry(message);
     }
-    const raw = readJsonFile(pathToRead);
-    const parsed = PluginsRegistrySchema.safeParse(raw);
-    if (parsed.success) {
-        cached = parsed.data;
-        return cached;
-    }
-    logger.warn(
-        "[plugins] Invalid plugins.registry.json, using empty:",
-        parsed.error.message,
+}
+
+function scheduleRescan(): void {
+    if (rescanTimer) clearTimeout(rescanTimer);
+    rescanTimer = setTimeout(() => {
+        try {
+            cached = runPluginsScanner();
+            logger.debug("[plugins] Registry refreshed from scanner");
+        } catch (e) {
+            logger.warn(
+                "[plugins] Registry rescan failed; keeping previous cache:",
+                e instanceof Error ? e.message : String(e),
+            );
+        }
+    }, 300);
+}
+
+// The dev watcher starts on the first explicit registry load/refresh, not via
+// feature-registry module initialization, so lifecycle APIs can refresh safely.
+function ensureDevWatcher(): void {
+    if (process.env.NODE_ENV === "production" || watcher) return;
+    watcher = chokidar.watch(
+        [
+            join(process.cwd(), "plugins", "**", "*.py"),
+            join(process.cwd(), "config", "tongflow.abi.json"),
+        ],
+        {
+            ignoreInitial: true,
+            ignored: ["**/__pycache__/**", "**/.venv/**", "**/node_modules/**"],
+        },
     );
-    cached = emptyRegistry();
-    return cached;
+    watcher.on("all", scheduleRescan);
+    watcher.on("error", (e) => {
+        logger.warn(
+            "[plugins] Registry watcher error:",
+            e instanceof Error ? e.message : String(e),
+        );
+    });
+}
+
+export function loadPluginsRegistry(): PluginsRegistry {
+    if (cached) return cached;
+    return scanAndCache();
+}
+
+export function invalidatePluginsRegistry(): PluginsRegistry {
+    cached = null;
+    if (rescanTimer) {
+        clearTimeout(rescanTimer);
+        rescanTimer = null;
+    }
+    return scanAndCache();
 }
 
 export function getNodePluginIds(nodeSlot: string): string[] {
@@ -72,7 +113,9 @@ export function getNodePluginIds(nodeSlot: string): string[] {
 /** @deprecated */
 export const getNodePluginRepos = getNodePluginIds;
 
-export function getModalPluginConfig(pluginId: string): ModalPluginConfig | null {
+export function getModalPluginConfig(
+    pluginId: string,
+): ModalPluginConfig | null {
     const reg = loadPluginsRegistry();
     const p = reg.plugins[pluginId];
     if (!p || p.runner !== "modal") return null;
@@ -92,8 +135,7 @@ export function getPluginConfig(pluginId: string): PluginConfig | null {
 }
 
 /** @deprecated */
-export const getModalRepoConfig = (repo: string) =>
-    getModalPluginConfig(repo);
+export const getModalRepoConfig = (repo: string) => getModalPluginConfig(repo);
 
 /**
  * On-disk path to a file inside a plugin, e.g. `plugins/x/download.py`

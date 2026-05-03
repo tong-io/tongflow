@@ -18,92 +18,84 @@ if (fs.existsSync(outPath)) {
     process.exit(0);
 }
 
-// Minimal starter ABI: includes only the transcribe slots as an example.
-const list = [
+// Minimal starter ABI: only two slots; mirrors `config/tongflow.abi.json` shape (nodeSlot + inputs + outputs + $defs.Asset).
+const Asset = { $ref: "#/$defs/Asset" };
+const nodes = [
     {
-        name: "transcribe",
-        type: "gpu",
-        function: "qwen3-asr",
-        processingTime: 10,
+        nodeSlot: "transcribe",
+        inputs: {
+            type: "object",
+            required: ["audio"],
+            properties: {
+                audio: Asset,
+                context: { type: "string" },
+                language: { type: "string" },
+                max_new_tokens: { type: "number" },
+            },
+            additionalProperties: false,
+        },
+        outputs: {
+            type: "object",
+            required: ["text"],
+            properties: {
+                text: { type: "string", minLength: 1 },
+                language: { type: "string" },
+            },
+            additionalProperties: false,
+        },
     },
     {
-        name: "transcribe_timestamp",
-        type: "gpu",
-        function: "qwen3-asr-timestamp",
-        processingTime: 10,
+        nodeSlot: "transcribe_timestamp",
+        inputs: {
+            type: "object",
+            required: ["audio"],
+            properties: {
+                audio: Asset,
+                context: { type: "string" },
+                language: { type: "string" },
+                max_new_tokens: { type: "number" },
+            },
+            additionalProperties: false,
+        },
+        outputs: {
+            type: "object",
+            required: ["text"],
+            properties: {
+                text: { type: "string", minLength: 1 },
+                language: { type: "string" },
+                time_stamps: {
+                    type: "array",
+                    items: {
+                        type: "object",
+                        required: ["text", "start_time", "end_time"],
+                        properties: {
+                            text: { type: "string", minLength: 1 },
+                            start_time: { type: "number" },
+                            end_time: { type: "number" },
+                        },
+                        additionalProperties: false,
+                    },
+                },
+            },
+            additionalProperties: false,
+        },
     },
 ];
 
-const genericTaskPrompt = {
-    $schema: "https://json-schema.org/draft/2020-12/schema",
-    title: "ModalTaskPrompt",
-    type: "object",
-    description:
-        "Payload merged into task.prompt. Plugins receive the Openflow task object.",
-    additionalProperties: true,
-};
-
-const genericResult = {
-    $schema: "https://json-schema.org/draft/2020-12/schema",
-    title: "HandlerResult",
-    type: "object",
-    additionalProperties: true,
-};
-
-const transcribePrompt = {
-    $schema: "https://json-schema.org/draft/2020-12/schema",
-    title: "TranscribeTaskPrompt",
-    type: "object",
-    additionalProperties: true,
-    properties: {
-        audio: { type: "string" },
-        video: { type: "string" },
-        audioUrl: { type: "string" },
-        videoUrl: { type: "string" },
-        context: { type: "string" },
-        prompt: { type: "string" },
-        text: { type: "string" },
-        language: { type: "string" },
-        max_new_tokens: { type: "number" },
-        pluginId: { type: "string" },
-        nodeSlot: { type: "string" },
-    },
-};
-
-const transcribeResult = {
-    $schema: "https://json-schema.org/draft/2020-12/schema",
-    title: "TranscribeHandlerResult",
-    type: "object",
-    additionalProperties: true,
-    properties: {
-        success: { type: "boolean" },
-        text: { type: "string" },
-        error: { type: "string" },
-        language: { type: "string" },
-        time_stamps: { type: "array" },
-    },
-};
-
-const nodes = list.map((f) => {
-    const name = f.name;
-    const useTranscribe =
-        name === "transcribe" || name === "transcribe_timestamp";
-    return {
-        nodeSlot: name,
-        featureName: name,
-        defaultHandler: {
-            type: String(f.type),
-            function: String(f.function),
-        },
-        processingTime: f.processingTime,
-        taskPromptSchema: useTranscribe ? transcribePrompt : genericTaskPrompt,
-        resultSchema: useTranscribe ? transcribeResult : genericResult,
-    };
-});
-
 const abi = {
     version: 1,
-    generatedAt: new Date().toISOString(),
+    $defs: {
+        Asset: {
+            type: "object",
+            required: ["bytesBase64"],
+            properties: {
+                bytesBase64: { type: "string", minLength: 1 },
+                filename: { type: "string" },
+                mime: { type: "string" },
+            },
+            additionalProperties: false,
+        },
+    },
     nodes,
 };
 

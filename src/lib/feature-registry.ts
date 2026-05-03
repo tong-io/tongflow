@@ -1,28 +1,30 @@
 /**
- * Feature Registry (client and shared logic)
+ * Feature Registry (shared wiring)
  *
- * IMPORTANT: `config/` must only contain `tongflow.abi.json`.
- * We derive the feature registry from ABI nodes (featureName + defaultHandler).
+ * Runtime feature metadata (type / function) is derived on the server from
+ * the plugin scanner registry + ABI `nodeSlot` names. This module only builds the
+ * generic registry helper; the default bundle is a stable fallback so client
+ * bundles that import this file do not need filesystem access.
  */
 
-import { TONGFLOW_ABI_NODES } from "@/lib/tongflow-abi";
 import {
-    validateFeatureRegistryBundle,
-    type FeatureRegistryBundle,
     type FeatureDefinition,
+    type FeatureRegistryBundle,
+    validateFeatureRegistryBundle,
 } from "@/lib/feature-registry-schema";
+import { TONGFLOW_ABI_NODES } from "@/lib/tongflow-abi";
 
 export type {
     FeatureDefinition,
     FeatureRegistryBundle,
 } from "@/lib/feature-registry-schema";
 
-function deriveBundleFromAbi(): FeatureRegistryBundle {
+/** Placeholder until `/api/feature/list` hydrates the client store. */
+function deriveFallbackBundleFromAbiSlots(): FeatureRegistryBundle {
     const features: FeatureDefinition[] = TONGFLOW_ABI_NODES.map((n) => ({
-        name: n.featureName,
-        type: n.defaultHandler.type,
-        function: n.defaultHandler.function,
-        processingTime: n.processingTime ?? 0,
+        name: n.nodeSlot,
+        type: "unregistered",
+        function: "unregistered",
     }));
     return validateFeatureRegistryBundle({
         features,
@@ -30,9 +32,11 @@ function deriveBundleFromAbi(): FeatureRegistryBundle {
     });
 }
 
-const defaultBundle = deriveBundleFromAbi();
+const defaultBundle = deriveFallbackBundleFromAbiSlots();
 
-function buildMap(features: FeatureDefinition[]): Map<string, FeatureDefinition> {
+function buildMap(
+    features: FeatureDefinition[],
+): Map<string, FeatureDefinition> {
     return new Map(features.map((f) => [f.name, f]));
 }
 
@@ -61,11 +65,12 @@ export function buildFeatureRegistry(bundle: FeatureRegistryBundle) {
 
 const clientRegistry = buildFeatureRegistry(defaultBundle);
 
-/** Client / sync tools: based on the default JSON (without features.local merging) */
+/** Client / sync tools: fallback only; prefer features from `/api/feature/list`. */
 export const getAllFeatures = clientRegistry.getAllFeatures;
 export const resolveCanonicalFeatureName =
     clientRegistry.resolveCanonicalFeatureName;
 export const resolveLabelLookupFeatureName =
     clientRegistry.resolveLabelLookupFeatureName;
 export const getFeatureByName = clientRegistry.getFeatureByName;
-export const getFeatureRegistryAliases = clientRegistry.getFeatureRegistryAliases;
+export const getFeatureRegistryAliases =
+    clientRegistry.getFeatureRegistryAliases;

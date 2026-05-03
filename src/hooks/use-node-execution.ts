@@ -1,7 +1,6 @@
 import { useEffect, useState, useCallback, useRef } from "react";
 import { useNodeId, useReactFlow, useStore, useStoreApi } from "@xyflow/react";
 
-import { useFeature } from "@/hooks/use-features";
 import {
     useTaskStore,
     useBatchTaskManager,
@@ -128,9 +127,6 @@ export function useNodeExecution({
         useBatchTaskManager();
 
     const loading = taskLoading || nodeExecutionStatus === "running";
-
-    const { feature: featureInfo } = useFeature(feature ?? "");
-    const processingTime = featureInfo?.processingTime ?? 0;
 
     /* ---------- plugin resolution ---------------------------------- */
 
@@ -381,7 +377,6 @@ export function useNodeExecution({
     return {
         loading,
         elapsedSeconds,
-        processingTime,
         executeNew,
         isExecuteMode,
         feature,

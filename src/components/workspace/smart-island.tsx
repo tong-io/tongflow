@@ -6,13 +6,11 @@
  * All animations have been removed (following tongflow conventions)
  */
 
-import { useState, useCallback, useEffect, useMemo, useRef } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import { useReactFlow } from "@xyflow/react";
 import type { FlowState, PossibleNode } from "@/hooks/use-flow";
 import { useFlow } from "@/hooks/use-flow";
 import { useShallow } from "zustand/react/shallow";
-import { getNodeExecutionConfig } from "@/utils/node-execution-config";
-import { useFeaturesStore } from "@/hooks/use-features";
 import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 import { getTaskStopUrl, getTaskWaitUrl } from "@/lib/task-api-url";
@@ -104,7 +102,9 @@ type ButtonActionId =
     | "concat-video"
     | "image-fusion"
     | "first-last-frame-video"
-    | "text-to-speech"
+    | "text-to-speech-clone"
+    | "text-to-speech-preset"
+    | "text-to-speech-instruct"
     | "motion-control"
     | "video-transfer"
     | "character-replace"
@@ -115,7 +115,9 @@ type ButtonActionId =
     | "clone-voice"
     // Node Actions
     | "split"
-    | "generate-audio"
+    | "generate-audio-clone"
+    | "generate-audio-preset"
+    | "generate-audio-instruct"
     | "generate-text"
     | "generate-image"
     | "generate-music"
@@ -309,35 +311,6 @@ export default function SmartIsland() {
     const [isSaving, setIsSaving] = useState(false); // Saving in progress
     const isExecuteMode = workspaceMode === "execute";
     const isRunning = workflowExecutionStatus === "running";
-
-    // Get the getFeatureByName method from the features store
-    const getFeatureByName = useFeaturesStore(
-        (state) => state.getFeatureByName,
-    );
-
-    // Compute estimated cost and processing time (based on node type; not recalculated on drag)
-    const nodeTypeKey = useMemo(
-        () => nodes.map((n) => n.type ?? "").join(","),
-        [nodes],
-    );
-
-    const { estimatedTime } = useMemo(() => {
-        let totalTime = 0;
-
-        for (const type of nodeTypeKey.split(",")) {
-            if (!type) continue;
-            const config = getNodeExecutionConfig(type);
-            if (!config?.feature) continue;
-            const featureInfo = getFeatureByName(config.feature);
-            if (featureInfo) {
-                totalTime += featureInfo.processingTime ?? 0;
-            }
-        }
-
-        return {
-            estimatedTime: totalTime,
-        };
-    }, [nodeTypeKey, getFeatureByName]);
 
     // Execute a single node
     const executeNode = useCallback(
@@ -1162,14 +1135,42 @@ export default function SmartIsland() {
                                 }),
                         },
                         {
-                            text: t("textToSpeech"),
-                            id: "text-to-speech",
+                            text: t("textToSpeechClone"),
+                            id: "text-to-speech-clone",
                             onClick: () =>
                                 expands(
                                     selectedNodes[0]!.id,
                                     selectedNodes
                                         .map((node) => ({
-                                            type: "textGenSpeechNode",
+                                            type: "textGenSpeechCloneNode",
+                                            data: node.data,
+                                        }))
+                                        .filter((n) => n.type !== ""),
+                                ),
+                        },
+                        {
+                            text: t("textToSpeechPreset"),
+                            id: "text-to-speech-preset",
+                            onClick: () =>
+                                expands(
+                                    selectedNodes[0]!.id,
+                                    selectedNodes
+                                        .map((node) => ({
+                                            type: "textGenSpeechPresetNode",
+                                            data: node.data,
+                                        }))
+                                        .filter((n) => n.type !== ""),
+                                ),
+                        },
+                        {
+                            text: t("textToSpeechInstruct"),
+                            id: "text-to-speech-instruct",
+                            onClick: () =>
+                                expands(
+                                    selectedNodes[0]!.id,
+                                    selectedNodes
+                                        .map((node) => ({
+                                            type: "textGenSpeechInstructNode",
                                             data: node.data,
                                         }))
                                         .filter((n) => n.type !== ""),
@@ -1510,12 +1511,34 @@ export default function SmartIsland() {
                                         ),
                                 },
                                 {
-                                    text: t("generateAudio"),
-                                    id: "generate-audio",
+                                    text: t("textToSpeechClone"),
+                                    id: "generate-audio-clone",
                                     onClick: () =>
                                         expands(id, [
                                             {
-                                                type: "textGenSpeechNode",
+                                                type: "textGenSpeechCloneNode",
+                                                data: data,
+                                            },
+                                        ]),
+                                },
+                                {
+                                    text: t("textToSpeechPreset"),
+                                    id: "generate-audio-preset",
+                                    onClick: () =>
+                                        expands(id, [
+                                            {
+                                                type: "textGenSpeechPresetNode",
+                                                data: data,
+                                            },
+                                        ]),
+                                },
+                                {
+                                    text: t("textToSpeechInstruct"),
+                                    id: "generate-audio-instruct",
+                                    onClick: () =>
+                                        expands(id, [
+                                            {
+                                                type: "textGenSpeechInstructNode",
                                                 data: data,
                                             },
                                         ]),
@@ -1571,13 +1594,34 @@ export default function SmartIsland() {
                                     ]),
                             },
                             {
-                                text: t("generateAudio"),
-                                id: "generate-audio",
-                                nodeType: "textGenSpeechNode",
+                                text: t("textToSpeechClone"),
+                                id: "generate-audio-clone",
                                 onClick: () =>
                                     expands(id, [
                                         {
-                                            type: "textGenSpeechNode",
+                                            type: "textGenSpeechCloneNode",
+                                            data: data,
+                                        },
+                                    ]),
+                            },
+                            {
+                                text: t("textToSpeechPreset"),
+                                id: "generate-audio-preset",
+                                onClick: () =>
+                                    expands(id, [
+                                        {
+                                            type: "textGenSpeechPresetNode",
+                                            data: data,
+                                        },
+                                    ]),
+                            },
+                            {
+                                text: t("textToSpeechInstruct"),
+                                id: "generate-audio-instruct",
+                                onClick: () =>
+                                    expands(id, [
+                                        {
+                                            type: "textGenSpeechInstructNode",
                                             data: data,
                                         },
                                     ]),
@@ -2010,25 +2054,7 @@ export default function SmartIsland() {
                                 ? t("executeConfirmDescSaved")
                                 : t("executeConfirmDescNew")}
                         </p>
-                        {/* Estimated time */}
-                        {estimatedTime > 0 && (
-                            <div className="flex items-center gap-4 p-3 bg-muted/50 rounded-lg mb-4">
-                                <div className="flex items-center gap-1.5">
-                                    <span className="text-sm text-muted-foreground">
-                                        {t("estimatedTime")}
-                                    </span>
-                                    <span className="text-sm font-medium">
-                                        {estimatedTime >= 60
-                                            ? `${Math.floor(estimatedTime / 60)}分${
-                                                  estimatedTime % 60 > 0
-                                                      ? `${estimatedTime % 60}秒`
-                                                      : ""
-                                              }`
-                                            : `${estimatedTime}秒`}
-                                    </span>
-                                </div>
-                            </div>
-                        )}
+
                         {/* Name and description inputs are only shown for new workflows */}
                         {!workflowId && (
                             <div className="space-y-4">

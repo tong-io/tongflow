@@ -37,7 +37,7 @@ The following are in scope:
 
 - TongFlow web application (`src/`)
 - API endpoints (`src/app/api/`)
-- Official Modal plugins (`plugins/tongflow-modal-*`)
+- Official Modal plugins (`plugins/*/deploy.py`)
 
 The following are out of scope:
 

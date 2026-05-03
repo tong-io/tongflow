@@ -152,9 +152,9 @@ const GenTextNode = ({ selected, data }: NodeProps) => {
     const tBase = useTranslations("Workspace.nodes.base");
     const registry = usePluginsRegistryStore((s) => s.registry);
 
-    const featureName = "gen_text";
+    const nodeSlot = "gen_text";
 
-    const pluginOptions = useNodePluginIds(featureName);
+    const pluginOptions = useNodePluginIds(nodeSlot);
     const pluginId = (
         (data as any).pluginId ?? (data as any).pluginRepo ?? ""
     ).trim();
@@ -171,7 +171,7 @@ const GenTextNode = ({ selected, data }: NodeProps) => {
         return pluginOptions.map((pid) => {
             return { value: pid, label: pluginDisplayName(pid) };
         });
-    }, [registry, pluginOptions, featureName]);
+    }, [registry, pluginOptions, nodeSlot]);
 
     // Get the prompt that will actually be used
     const effectivePrompt = hasUpstreamPrompt ? upstreamPrompt : userPrompt;
@@ -256,7 +256,7 @@ const GenTextNode = ({ selected, data }: NodeProps) => {
                 data={data}
                 workflowConfig={{
                     ...workflowConfig,
-                    feature: featureName,
+                    feature: nodeSlot,
                     showPluginSelect: false,
                     title: t("titles.textGenText"),
                     icon: <Wand2 className="h-5 w-5" />,

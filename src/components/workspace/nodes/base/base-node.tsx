@@ -79,7 +79,6 @@ export const BaseNode = forwardRef<HTMLDivElement, BaseNodeProps>(
         const {
             loading,
             elapsedSeconds,
-            processingTime,
             executeNew,
             isExecuteMode,
             feature,
@@ -146,7 +145,6 @@ export const BaseNode = forwardRef<HTMLDivElement, BaseNodeProps>(
                         <NodeLoadingOverlay
                             loading={loading}
                             elapsedSeconds={elapsedSeconds}
-                            processingTime={processingTime}
                         />
 
                         {/* Stack effect background cards */}

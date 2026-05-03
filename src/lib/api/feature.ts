@@ -4,7 +4,6 @@ export interface Feature {
     name: string;
     type: string;
     function: string;
-    processingTime: number;
 }
 
 export interface FeatureRegistryAliasesPayload {

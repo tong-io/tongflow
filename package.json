@@ -3,7 +3,13 @@
     "version": "0.1.0",
     "description": "A multi-modal AIGC studio for building generative AI workflows",
     "author": "tong-io",
-    "keywords": ["aigc", "ai", "workflow", "multimodal", "next.js"],
+    "keywords": [
+        "aigc",
+        "ai",
+        "workflow",
+        "multimodal",
+        "next.js"
+    ],
     "repository": {
         "type": "git",
         "url": "https://github.com/tong-io/tongflow"
@@ -36,7 +42,6 @@
         "lint:check": "npx biome check --error-on-warnings .",
         "typecheck": "tsc --noEmit",
         "abi:generate": "node scripts/generate-tongflow-abi.mjs",
-        "plugins:sync": "tsx scripts/plugins-sync.ts",
         "tongflow:publish": "bash scripts/publish-tongflow-pypi.sh",
         "test": "echo \"No test suite yet\" && exit 0"
     },
@@ -60,6 +65,7 @@
         "@types/three": "^0.183.1",
         "@xyflow/react": "12.9.0",
         "better-sqlite3": "12.2.0",
+        "chokidar": "^4.0.3",
         "class-variance-authority": "0.7.1",
         "clsx": "2.1.1",
         "dotenv": "17.2.2",

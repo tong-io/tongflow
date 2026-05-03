@@ -1,13 +1,12 @@
 /**
- * Runs `modal deploy` on plugin deploy scripts listed in `.tongflow/plugins.registry.json`
- * (artifact of `pnpm plugins:sync`, which scans TongFlow annotations under `plugins/`).
+ * Runs `modal deploy` on plugin deploy scripts listed by the in-memory registry.
  * Platform-specific Modal code lives in each plugin under `plugins/`, not in this repo root.
  *
  * Used by POST /api/modal/deploy when running the Next.js server (pnpm dev / self-hosted).
  */
 
-import path from "node:path";
 import { spawn } from "node:child_process";
+import path, { delimiter } from "node:path";
 import { listModalRunnerDeployScriptsFromRegistry } from "@/lib/plugin-registry-deploy-scripts";
 
 async function canRunModal(exe: string): Promise<boolean> {
@@ -67,6 +66,15 @@ export async function resolvePython(): Promise<string> {
     );
 }
 
+export function modalPluginPythonEnv(): NodeJS.ProcessEnv {
+    const sdk = path.join(process.cwd(), "plugins", "tongflow");
+    const pythonPath = [sdk, process.env.PYTHONPATH?.trim()].filter(Boolean);
+    return {
+        ...process.env,
+        PYTHONPATH: pythonPath.join(delimiter),
+    };
+}
+
 /**
  * Deploy each plugin Modal entry script (`deploy.py`) from the plugins registry.
  */
@@ -77,8 +85,7 @@ export async function runModalDeploy(
     const files = listModalEntryFiles();
     if (files.length === 0) {
         throw new Error(
-            "No Modal deploy scripts found from plugins.registry.json. Run `pnpm plugins:sync` " +
-                "with `plugins/` present, or verify `.tongflow/plugins.registry.json` lists modal plugins.",
+            "No Modal deploy scripts found from the plugin scanner. Ensure `plugins/` is present and contains modal plugins.",
         );
     }
 
@@ -87,16 +94,12 @@ export async function runModalDeploy(
     for (const file of files) {
         onLine(`Deploying: ${file}`);
         await new Promise<void>((resolve, reject) => {
-            const child = spawn(
-                python,
-                ["-m", "modal", "deploy", file],
-                {
-                    cwd: path.dirname(file),
-                    env: process.env,
-                    windowsHide: true,
-                    stdio: ["ignore", "pipe", "pipe"],
-                },
-            );
+            const child = spawn(python, ["-m", "modal", "deploy", file], {
+                cwd: path.dirname(file),
+                env: modalPluginPythonEnv(),
+                windowsHide: true,
+                stdio: ["ignore", "pipe", "pipe"],
+            });
 
             const forward = (prefix: string, buf: Buffer) => {
                 const text = String(buf);
@@ -113,9 +116,7 @@ export async function runModalDeploy(
                 if (code === 0) resolve();
                 else
                     reject(
-                        new Error(
-                            `modal deploy failed (${code}) for ${file}`,
-                        ),
+                        new Error(`modal deploy failed (${code}) for ${file}`),
                     );
             });
         });

@@ -395,12 +395,10 @@ NodeHeaderMenuAction.displayName = "NodeHeaderMenuAction";
 
 export interface NodeHeaderRunActionProps {
     onClick: () => void;
-    featureName?: string;
 }
 
 export const NodeHeaderRunAction: React.FC<NodeHeaderRunActionProps> = ({
     onClick,
-    featureName: _featureName,
 }) => {
     const t = useTranslations("Workspace.nodes.base");
 

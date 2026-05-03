@@ -1,16 +1,18 @@
 import "server-only";
 
-import { readFileSync, existsSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
+
 import { buildFeatureRegistry } from "@/lib/feature-registry";
 import {
-    validateFeatureRegistryBundle,
-    FeatureRegistryBundleSchema,
-    type FeatureRegistryBundle,
     type FeatureDefinition,
+    type FeatureRegistryBundle,
+    FeatureRegistryBundleSchema,
+    validateFeatureRegistryBundle,
 } from "@/lib/feature-registry-schema";
-import { TONGFLOW_ABI_NODES } from "@/lib/tongflow-abi";
 import { logger } from "@/lib/logger";
+import { loadPluginsRegistry } from "@/lib/plugins-registry.server";
+import { TONGFLOW_ABI_NODES } from "@/lib/tongflow-abi";
 
 function mergeBundles(
     base: FeatureRegistryBundle,
@@ -42,6 +44,58 @@ function readJsonFile(path: string): unknown {
     return JSON.parse(readFileSync(path, "utf8")) as unknown;
 }
 
+function featureDefinitionForSlot(nodeSlot: string): FeatureDefinition {
+    const reg = loadPluginsRegistry();
+    const ids = reg.nodePluginMap[nodeSlot] ?? [];
+    if (ids.length === 0) {
+        logger.warn(
+            `[feature-registry] No plugins in nodePluginMap for nodeSlot="${nodeSlot}"; using type=function=unregistered`,
+        );
+        return {
+            name: nodeSlot,
+            type: "unregistered",
+            function: "unregistered",
+        };
+    }
+    const pid = ids[0].trim();
+    const p = reg.plugins[pid];
+    if (!p) {
+        throw new Error(
+            `[feature-registry] nodePluginMap lists ${pid} for ${nodeSlot} but plugins.${pid} is missing`,
+        );
+    }
+    switch (p.runner) {
+        case "llm": {
+            return {
+                name: nodeSlot,
+                type: "llm",
+                function: pid,
+            };
+        }
+        case "modal": {
+            const appName = p.runners.modal?.appName ?? pid;
+            return {
+                name: nodeSlot,
+                type: "modal",
+                function: appName,
+            };
+        }
+        default: {
+            const r: never = p;
+            throw new Error(`[feature-registry] Unknown runner ${String(r)}`);
+        }
+    }
+}
+
+function deriveBundleFromPluginsRegistry(): FeatureRegistryBundle {
+    return validateFeatureRegistryBundle({
+        features: TONGFLOW_ABI_NODES.map((n) =>
+            featureDefinitionForSlot(n.nodeSlot),
+        ),
+        aliases: { canonical: {}, labelLookup: {} },
+    });
+}
+
 function loadMergedServerBundle(
     defaultBundle: FeatureRegistryBundle,
 ): FeatureRegistryBundle {
@@ -50,7 +104,9 @@ function loadMergedServerBundle(
     const localPath = join(process.cwd(), ".tongflow", "features.local.json");
     if (existsSync(localPath)) {
         try {
-            const local = validateFeatureRegistryBundle(readJsonFile(localPath));
+            const local = validateFeatureRegistryBundle(
+                readJsonFile(localPath),
+            );
             merged = mergeBundles(merged, local);
         } catch (e) {
             const msg = e instanceof Error ? e.message : String(e);
@@ -86,17 +142,9 @@ function loadMergedServerBundle(
     return merged;
 }
 
-const defaultBundle = validateFeatureRegistryBundle({
-    features: TONGFLOW_ABI_NODES.map((n) => ({
-        name: n.featureName,
-        type: n.defaultHandler.type,
-        function: n.defaultHandler.function,
-        processingTime: n.processingTime ?? 0,
-    })),
-    aliases: { canonical: {}, labelLookup: {} },
-});
+const mergedBundle = loadMergedServerBundle(deriveBundleFromPluginsRegistry());
 
-const serverRegistry = buildFeatureRegistry(loadMergedServerBundle(defaultBundle));
+const serverRegistry = buildFeatureRegistry(mergedBundle);
 
 /** Server-side bundle merges features.local.json plus FEATURES_CONFIG_PATH overrides */
 export const getAllFeatures = serverRegistry.getAllFeatures;

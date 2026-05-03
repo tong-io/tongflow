@@ -95,8 +95,6 @@ export async function execLlmPlugin(
         taskId: req.taskId,
         input: req.input,
         prompt,
-        engine: method.engine,
-        mode: method.mode,
     };
 
     return await new Promise<PluginExecResult>((resolve, reject) => {

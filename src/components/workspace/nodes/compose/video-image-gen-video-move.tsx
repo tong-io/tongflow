@@ -20,7 +20,7 @@ import { useTranslations } from "next-intl";
 
 // Workflow execution config
 const workflowConfig = {
-    feature: "video_image_move",
+    feature: "video-image-gen-video-move",
     outputType: "videoNode",
     outputField: "fileKeys" as const,
     supportsBatch: false,

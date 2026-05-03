@@ -9,14 +9,15 @@ import {
     applyNodeChanges,
     type Edge,
     type Node,
-    type OnSelectionChangeFunc,
-    type OnNodesChange,
-    type OnEdgesChange,
     type OnConnect,
+    type OnEdgesChange,
+    type OnNodesChange,
+    type OnSelectionChangeFunc,
 } from "@xyflow/react";
-import { create } from "zustand";
 import { v4 } from "uuid";
+import { create } from "zustand";
 import { DATA_NODE_TYPES } from "@/utils/executable-workflow";
+import { migrateWorkflowNodes } from "@/utils/migrate-workflow-nodes";
 
 // True when React Flow reports a persisted data/input node type
 function isDataNode(nodeType: string): boolean {
@@ -53,11 +54,7 @@ const debouncedSaveEdges = createDebounce((edges: Edge[]) => {
 
 // Persist workflow meta (title, ids, notes)
 const debouncedSaveWorkflowMeta = createDebounce(
-    (meta: {
-        id: number | null;
-        name: string;
-        description: string;
-    }) => {
+    (meta: { id: number | null; name: string; description: string }) => {
         localStorage.setItem("workflowMeta", JSON.stringify(meta));
     },
     500,
@@ -188,8 +185,9 @@ export const useFlow = create<FlowState>((set, get) => ({
         debouncedSaveEdges(edges);
     },
     setNodes: (nodes) => {
-        set({ nodes });
-        debouncedSaveNodes(nodes);
+        const migrated = migrateWorkflowNodes(nodes);
+        set({ nodes: migrated });
+        debouncedSaveNodes(migrated);
     },
     setEdges: (edges) => {
         set({ edges });
@@ -367,7 +365,7 @@ export const useFlow = create<FlowState>((set, get) => ({
             }
         }
 
-        const allNodes = updatedNodes.concat(newNodes);
+        const allNodes = migrateWorkflowNodes(updatedNodes.concat(newNodes));
         set({
             nodes: allNodes,
             edges: [...edges],
@@ -444,7 +442,7 @@ export const useFlow = create<FlowState>((set, get) => ({
             .filter(Boolean) as Edge[];
 
         const allEdges = edges.concat(newEdges);
-        const allNodes = nodes.concat([newNode]);
+        const allNodes = migrateWorkflowNodes(nodes.concat([newNode]));
 
         set({
             nodes: allNodes,

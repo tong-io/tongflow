@@ -11,18 +11,14 @@ import type { BaseNodeData } from "@/types/nodes";
 import { NodePluginSelect } from "./node-plugin-select";
 
 export function pluginDisplayName(pluginId: string): string {
-    // Human-facing suffix of plugin id.
-    // - `tongflow-llm-openrouter-free` -> `openrouter-free`
-    // - `tongflow-modal-gpu-z-image` -> `z-image`
     const parts = pluginId.split("-").filter(Boolean);
-    if (parts.length <= 2) return pluginId;
-    if (parts[0] === "tongflow" && parts[1] === "modal") {
-        if (parts[2] === "gpu" || parts[2] === "cpu") {
-            return parts.slice(3).join("-") || pluginId;
-        }
-        return parts.slice(2).join("-") || pluginId;
-    }
-    return parts.slice(2).join("-") || pluginId;
+    const semantic =
+        parts[0] === "tongflow" && (parts[1] === "modal" || parts[1] === "llm")
+            ? parts.slice(2)
+            : parts;
+    return semantic
+        .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+        .join(" ");
 }
 
 type NodePluginIdSelectProps = {

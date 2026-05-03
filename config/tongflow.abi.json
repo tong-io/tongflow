@@ -1,15 +1,22 @@
 {
-  "$schema": "./tongflow.abi.schema.json",
   "version": 1,
-  "generatedAt": "2026-04-22T05:21:20.067Z",
   "$defs": {
     "Asset": {
       "type": "object",
-      "required": ["bytesBase64"],
+      "required": [
+        "bytesBase64"
+      ],
       "properties": {
-        "bytesBase64": { "type": "string", "minLength": 1 },
-        "filename": { "type": "string" },
-        "mime": { "type": "string" }
+        "bytesBase64": {
+          "type": "string",
+          "minLength": 1
+        },
+        "filename": {
+          "type": "string"
+        },
+        "mime": {
+          "type": "string"
+        }
       },
       "additionalProperties": false
     }
@@ -17,196 +24,18 @@
   "nodes": [
     {
       "nodeSlot": "gen_text",
-      "featureName": "gen_text",
-      "defaultHandler": {
-        "type": "llm",
-        "function": "openrouter_free"
-      },
-      "processingTime": 10,
-      "taskPromptSchema": {
-        "$schema": "https://json-schema.org/draft/2020-12/schema",
-        "title": "ModalTaskPrompt",
-        "type": "object",
-        "description": "Payload merged into task.prompt. Plugins receive the Openflow task object.",
-        "additionalProperties": true
-      },
-      "resultSchema": {
-        "$schema": "https://json-schema.org/draft/2020-12/schema",
-        "title": "HandlerResult",
-        "type": "object",
-        "additionalProperties": true
-      }
-    },
-    {
-      "nodeSlot": "split_text",
-      "featureName": "split_text",
-      "defaultHandler": {
-        "type": "llm",
-        "function": "openrouter_t2mt"
-      },
-      "processingTime": 0,
-      "taskPromptSchema": {
-        "$schema": "https://json-schema.org/draft/2020-12/schema",
-        "title": "ModalTaskPrompt",
-        "type": "object",
-        "description": "Payload merged into task.prompt. Plugins receive the Openflow task object.",
-        "additionalProperties": true
-      },
-      "resultSchema": {
-        "$schema": "https://json-schema.org/draft/2020-12/schema",
-        "title": "HandlerResult",
-        "type": "object",
-        "additionalProperties": true
-      }
-    },
-    {
-      "nodeSlot": "combine_text",
-      "featureName": "combine_text",
-      "defaultHandler": {
-        "type": "llm",
-        "function": "gemini_mt2t"
-      },
-      "processingTime": 0,
-      "taskPromptSchema": {
-        "$schema": "https://json-schema.org/draft/2020-12/schema",
-        "title": "ModalTaskPrompt",
-        "type": "object",
-        "description": "Payload merged into task.prompt. Plugins receive the Openflow task object.",
-        "additionalProperties": true
-      },
-      "resultSchema": {
-        "$schema": "https://json-schema.org/draft/2020-12/schema",
-        "title": "HandlerResult",
-        "type": "object",
-        "additionalProperties": true
-      }
-    },
-    {
-      "nodeSlot": "image_fusion",
-      "featureName": "image_fusion",
-      "defaultHandler": {
-        "type": "gpu",
-        "function": "flux2-klein9b-fusion"
-      },
-      "processingTime": 15,
-      "taskPromptSchema": {
-        "$schema": "https://json-schema.org/draft/2020-12/schema",
-        "title": "ModalTaskPrompt",
-        "type": "object",
-        "description": "Payload merged into task.prompt. Plugins receive the Openflow task object.",
-        "additionalProperties": true
-      },
-      "resultSchema": {
-        "$schema": "https://json-schema.org/draft/2020-12/schema",
-        "title": "HandlerResult",
-        "type": "object",
-        "additionalProperties": true
-      }
-    },
-    {
-      "nodeSlot": "image_gen_text",
-      "featureName": "image_gen_text",
-      "defaultHandler": {
-        "type": "gpu",
-        "function": "gemma4-i2t"
-      },
-      "processingTime": 10,
-      "taskPromptSchema": {
-        "$schema": "https://json-schema.org/draft/2020-12/schema",
-        "title": "ModalTaskPrompt",
-        "type": "object",
-        "description": "Payload merged into task.prompt. Plugins receive the Openflow task object.",
-        "additionalProperties": true
-      },
-      "resultSchema": {
-        "$schema": "https://json-schema.org/draft/2020-12/schema",
-        "title": "HandlerResult",
-        "type": "object",
-        "additionalProperties": true
-      }
-    },
-    {
-      "nodeSlot": "video_gen_text",
-      "featureName": "video_gen_text",
-      "defaultHandler": {
-        "type": "gpu",
-        "function": "gemma4-v2t"
-      },
-      "processingTime": 0,
-      "taskPromptSchema": {
-        "$schema": "https://json-schema.org/draft/2020-12/schema",
-        "title": "ModalTaskPrompt",
-        "type": "object",
-        "description": "Payload merged into task.prompt. Plugins receive the Openflow task object.",
-        "additionalProperties": true
-      },
-      "resultSchema": {
-        "$schema": "https://json-schema.org/draft/2020-12/schema",
-        "title": "HandlerResult",
-        "type": "object",
-        "additionalProperties": true
-      }
-    },
-    {
-      "nodeSlot": "transcribe",
-      "featureName": "transcribe",
-      "defaultHandler": {
-        "type": "gpu",
-        "function": "qwen3-asr"
-      },
-      "processingTime": 10,
       "inputs": {
         "type": "object",
-        "required": ["audio"],
+        "required": [
+          "text"
+        ],
         "properties": {
-          "audio": { "$ref": "#/$defs/Asset" },
-          "context": { "type": "string" },
-          "language": { "type": "string" },
-          "max_new_tokens": { "type": "number" }
-        },
-        "additionalProperties": false
-      },
-      "outputs": {
-        "type": "object",
-        "required": ["text"],
-        "properties": {
-          "text": { "type": "string" },
-          "language": { "type": "string" }
-        },
-        "additionalProperties": false
-      },
-      "taskPromptSchema": {
-        "$schema": "https://json-schema.org/draft/2020-12/schema",
-        "title": "TranscribeTaskPrompt",
-        "type": "object",
-        "additionalProperties": true,
-        "properties": {
-          "audio": {
-            "type": "string"
-          },
-          "video": {
-            "type": "string"
-          },
-          "audioUrl": {
-            "type": "string"
-          },
-          "videoUrl": {
-            "type": "string"
-          },
-          "context": {
-            "type": "string"
-          },
-          "prompt": {
-            "type": "string"
-          },
           "text": {
-            "type": "string"
+            "type": "string",
+            "minLength": 1
           },
-          "language": {
+          "userPrompt": {
             "type": "string"
-          },
-          "max_new_tokens": {
-            "type": "number"
           },
           "pluginId": {
             "type": "string"
@@ -214,748 +43,2943 @@
           "nodeSlot": {
             "type": "string"
           }
-        }
-      },
-      "resultSchema": {
-        "$schema": "https://json-schema.org/draft/2020-12/schema",
-        "title": "TranscribeHandlerResult",
-        "type": "object",
-        "additionalProperties": true,
-        "properties": {
-          "success": {
-            "type": "boolean"
-          },
-          "text": {
-            "type": "string"
-          },
-          "error": {
-            "type": "string"
-          },
-          "language": {
-            "type": "string"
-          },
-          "time_stamps": {
-            "type": "array"
-          }
-        }
-      }
-    },
-    {
-      "nodeSlot": "concat_videos",
-      "featureName": "concat_videos",
-      "defaultHandler": {
-        "type": "cpu",
-        "function": "ffmpeg"
-      },
-      "processingTime": 10,
-      "taskPromptSchema": {
-        "$schema": "https://json-schema.org/draft/2020-12/schema",
-        "title": "ModalTaskPrompt",
-        "type": "object",
-        "description": "Payload merged into task.prompt. Plugins receive the Openflow task object.",
-        "additionalProperties": true
-      },
-      "resultSchema": {
-        "$schema": "https://json-schema.org/draft/2020-12/schema",
-        "title": "HandlerResult",
-        "type": "object",
-        "additionalProperties": true
-      }
-    },
-    {
-      "nodeSlot": "extract_audio",
-      "featureName": "extract_audio",
-      "defaultHandler": {
-        "type": "cpu",
-        "function": "ffmpeg-extract-audio"
-      },
-      "processingTime": 10,
-      "taskPromptSchema": {
-        "$schema": "https://json-schema.org/draft/2020-12/schema",
-        "title": "ModalTaskPrompt",
-        "type": "object",
-        "description": "Payload merged into task.prompt. Plugins receive the Openflow task object.",
-        "additionalProperties": true
-      },
-      "resultSchema": {
-        "$schema": "https://json-schema.org/draft/2020-12/schema",
-        "title": "HandlerResult",
-        "type": "object",
-        "additionalProperties": true
-      }
-    },
-    {
-      "nodeSlot": "separate_video_audio",
-      "featureName": "separate_video_audio",
-      "defaultHandler": {
-        "type": "cpu",
-        "function": "ffmpeg-separate-av"
-      },
-      "processingTime": 10,
-      "taskPromptSchema": {
-        "$schema": "https://json-schema.org/draft/2020-12/schema",
-        "title": "ModalTaskPrompt",
-        "type": "object",
-        "description": "Payload merged into task.prompt. Plugins receive the Openflow task object.",
-        "additionalProperties": true
-      },
-      "resultSchema": {
-        "$schema": "https://json-schema.org/draft/2020-12/schema",
-        "title": "HandlerResult",
-        "type": "object",
-        "additionalProperties": true
-      }
-    },
-    {
-      "nodeSlot": "merge_video_audio",
-      "featureName": "merge_video_audio",
-      "defaultHandler": {
-        "type": "cpu",
-        "function": "ffmpeg-merge"
-      },
-      "processingTime": 0,
-      "taskPromptSchema": {
-        "$schema": "https://json-schema.org/draft/2020-12/schema",
-        "title": "ModalTaskPrompt",
-        "type": "object",
-        "description": "Payload merged into task.prompt. Plugins receive the Openflow task object.",
-        "additionalProperties": true
-      },
-      "resultSchema": {
-        "$schema": "https://json-schema.org/draft/2020-12/schema",
-        "title": "HandlerResult",
-        "type": "object",
-        "additionalProperties": true
-      }
-    },
-    {
-      "nodeSlot": "get_first_frame",
-      "featureName": "get_first_frame",
-      "defaultHandler": {
-        "type": "cpu",
-        "function": "ffmpeg-first-frame"
-      },
-      "processingTime": 10,
-      "taskPromptSchema": {
-        "$schema": "https://json-schema.org/draft/2020-12/schema",
-        "title": "ModalTaskPrompt",
-        "type": "object",
-        "description": "Payload merged into task.prompt. Plugins receive the Openflow task object.",
-        "additionalProperties": true
-      },
-      "resultSchema": {
-        "$schema": "https://json-schema.org/draft/2020-12/schema",
-        "title": "HandlerResult",
-        "type": "object",
-        "additionalProperties": true
-      }
-    },
-    {
-      "nodeSlot": "get_last_frame",
-      "featureName": "get_last_frame",
-      "defaultHandler": {
-        "type": "cpu",
-        "function": "ffmpeg-last-frame"
-      },
-      "processingTime": 10,
-      "taskPromptSchema": {
-        "$schema": "https://json-schema.org/draft/2020-12/schema",
-        "title": "ModalTaskPrompt",
-        "type": "object",
-        "description": "Payload merged into task.prompt. Plugins receive the Openflow task object.",
-        "additionalProperties": true
-      },
-      "resultSchema": {
-        "$schema": "https://json-schema.org/draft/2020-12/schema",
-        "title": "HandlerResult",
-        "type": "object",
-        "additionalProperties": true
-      }
-    },
-    {
-      "nodeSlot": "parse_document",
-      "featureName": "parse_document",
-      "defaultHandler": {
-        "type": "cpu",
-        "function": "docling"
-      },
-      "processingTime": 0,
-      "taskPromptSchema": {
-        "$schema": "https://json-schema.org/draft/2020-12/schema",
-        "title": "ModalTaskPrompt",
-        "type": "object",
-        "description": "Payload merged into task.prompt. Plugins receive the Openflow task object.",
-        "additionalProperties": true
-      },
-      "resultSchema": {
-        "$schema": "https://json-schema.org/draft/2020-12/schema",
-        "title": "HandlerResult",
-        "type": "object",
-        "additionalProperties": true
-      }
-    },
-    {
-      "nodeSlot": "split_video",
-      "featureName": "split_video",
-      "defaultHandler": {
-        "type": "cpu",
-        "function": "scenedetect"
-      },
-      "processingTime": 10,
-      "taskPromptSchema": {
-        "$schema": "https://json-schema.org/draft/2020-12/schema",
-        "title": "ModalTaskPrompt",
-        "type": "object",
-        "description": "Payload merged into task.prompt. Plugins receive the Openflow task object.",
-        "additionalProperties": true
-      },
-      "resultSchema": {
-        "$schema": "https://json-schema.org/draft/2020-12/schema",
-        "title": "HandlerResult",
-        "type": "object",
-        "additionalProperties": true
-      }
-    },
-    {
-      "nodeSlot": "link",
-      "featureName": "link",
-      "defaultHandler": {
-        "type": "cpu",
-        "function": "crawl4ai"
-      },
-      "processingTime": 30,
-      "taskPromptSchema": {
-        "$schema": "https://json-schema.org/draft/2020-12/schema",
-        "title": "ModalTaskPrompt",
-        "type": "object",
-        "description": "Payload merged into task.prompt. Plugins receive the Openflow task object.",
-        "additionalProperties": true
-      },
-      "resultSchema": {
-        "$schema": "https://json-schema.org/draft/2020-12/schema",
-        "title": "HandlerResult",
-        "type": "object",
-        "additionalProperties": true
-      }
-    },
-    {
-      "nodeSlot": "gen_video",
-      "featureName": "gen_video",
-      "defaultHandler": {
-        "type": "gpu",
-        "function": "wan22-t2v-smoothmix"
-      },
-      "processingTime": 10,
-      "taskPromptSchema": {
-        "$schema": "https://json-schema.org/draft/2020-12/schema",
-        "title": "ModalTaskPrompt",
-        "type": "object",
-        "description": "Payload merged into task.prompt. Plugins receive the Openflow task object.",
-        "additionalProperties": true
-      },
-      "resultSchema": {
-        "$schema": "https://json-schema.org/draft/2020-12/schema",
-        "title": "HandlerResult",
-        "type": "object",
-        "additionalProperties": true
-      }
-    },
-    {
-      "nodeSlot": "image_gen",
-      "featureName": "image_gen",
-      "defaultHandler": {
-        "type": "gpu",
-        "function": "zimage-t2i"
-      },
-      "processingTime": 10,
-      "taskPromptSchema": {
-        "$schema": "https://json-schema.org/draft/2020-12/schema",
-        "title": "ModalTaskPrompt",
-        "type": "object",
-        "description": "Payload merged into task.prompt. Plugins receive the Openflow task object.",
-        "additionalProperties": true
-      },
-      "resultSchema": {
-        "$schema": "https://json-schema.org/draft/2020-12/schema",
-        "title": "HandlerResult",
-        "type": "object",
-        "additionalProperties": true
-      }
-    },
-    {
-      "nodeSlot": "gen_music",
-      "featureName": "gen_music",
-      "defaultHandler": {
-        "type": "gpu",
-        "function": "ace-step"
-      },
-      "processingTime": 10,
-      "taskPromptSchema": {
-        "$schema": "https://json-schema.org/draft/2020-12/schema",
-        "title": "ModalTaskPrompt",
-        "type": "object",
-        "description": "Payload merged into task.prompt. Plugins receive the Openflow task object.",
-        "additionalProperties": true
-      },
-      "resultSchema": {
-        "$schema": "https://json-schema.org/draft/2020-12/schema",
-        "title": "HandlerResult",
-        "type": "object",
-        "additionalProperties": true
-      }
-    },
-    {
-      "nodeSlot": "gen_speech",
-      "featureName": "gen_speech",
-      "defaultHandler": {
-        "type": "gpu",
-        "function": "indextts2"
-      },
-      "processingTime": 10,
-      "taskPromptSchema": {
-        "$schema": "https://json-schema.org/draft/2020-12/schema",
-        "title": "ModalTaskPrompt",
-        "type": "object",
-        "description": "Payload merged into task.prompt. Plugins receive the Openflow task object.",
-        "additionalProperties": true
-      },
-      "resultSchema": {
-        "$schema": "https://json-schema.org/draft/2020-12/schema",
-        "title": "HandlerResult",
-        "type": "object",
-        "additionalProperties": true
-      }
-    },
-    {
-      "nodeSlot": "image_gen_video",
-      "featureName": "image_gen_video",
-      "defaultHandler": {
-        "type": "gpu",
-        "function": "ltx2-i2v"
-      },
-      "processingTime": 10,
-      "taskPromptSchema": {
-        "$schema": "https://json-schema.org/draft/2020-12/schema",
-        "title": "ModalTaskPrompt",
-        "type": "object",
-        "description": "Payload merged into task.prompt. Plugins receive the Openflow task object.",
-        "additionalProperties": true
-      },
-      "resultSchema": {
-        "$schema": "https://json-schema.org/draft/2020-12/schema",
-        "title": "HandlerResult",
-        "type": "object",
-        "additionalProperties": true
-      }
-    },
-    {
-      "nodeSlot": "image_edit",
-      "featureName": "image_edit",
-      "defaultHandler": {
-        "type": "gpu",
-        "function": "flux2-klein9b-edit"
-      },
-      "processingTime": 10,
-      "taskPromptSchema": {
-        "$schema": "https://json-schema.org/draft/2020-12/schema",
-        "title": "ModalTaskPrompt",
-        "type": "object",
-        "description": "Payload merged into task.prompt. Plugins receive the Openflow task object.",
-        "additionalProperties": true
-      },
-      "resultSchema": {
-        "$schema": "https://json-schema.org/draft/2020-12/schema",
-        "title": "HandlerResult",
-        "type": "object",
-        "additionalProperties": true
-      }
-    },
-    {
-      "nodeSlot": "image_upscale",
-      "featureName": "image_upscale",
-      "defaultHandler": {
-        "type": "gpu",
-        "function": "seedvr2-image-upscale"
-      },
-      "processingTime": 10,
-      "taskPromptSchema": {
-        "$schema": "https://json-schema.org/draft/2020-12/schema",
-        "title": "ModalTaskPrompt",
-        "type": "object",
-        "description": "Payload merged into task.prompt. Plugins receive the Openflow task object.",
-        "additionalProperties": true
-      },
-      "resultSchema": {
-        "$schema": "https://json-schema.org/draft/2020-12/schema",
-        "title": "HandlerResult",
-        "type": "object",
-        "additionalProperties": true
-      }
-    },
-    {
-      "nodeSlot": "video_upscale",
-      "featureName": "video_upscale",
-      "defaultHandler": {
-        "type": "gpu",
-        "function": "seedvr2-video-upscale"
-      },
-      "processingTime": 10,
-      "taskPromptSchema": {
-        "$schema": "https://json-schema.org/draft/2020-12/schema",
-        "title": "ModalTaskPrompt",
-        "type": "object",
-        "description": "Payload merged into task.prompt. Plugins receive the Openflow task object.",
-        "additionalProperties": true
-      },
-      "resultSchema": {
-        "$schema": "https://json-schema.org/draft/2020-12/schema",
-        "title": "HandlerResult",
-        "type": "object",
-        "additionalProperties": true
-      }
-    },
-    {
-      "nodeSlot": "image_describe",
-      "featureName": "image_describe",
-      "defaultHandler": {
-        "type": "gpu",
-        "function": "qwen3vl-image"
-      },
-      "processingTime": 10,
-      "taskPromptSchema": {
-        "$schema": "https://json-schema.org/draft/2020-12/schema",
-        "title": "ModalTaskPrompt",
-        "type": "object",
-        "description": "Payload merged into task.prompt. Plugins receive the Openflow task object.",
-        "additionalProperties": true
-      },
-      "resultSchema": {
-        "$schema": "https://json-schema.org/draft/2020-12/schema",
-        "title": "HandlerResult",
-        "type": "object",
-        "additionalProperties": true
-      }
-    },
-    {
-      "nodeSlot": "video_describe",
-      "featureName": "video_describe",
-      "defaultHandler": {
-        "type": "gpu",
-        "function": "qwen3vl-video"
-      },
-      "processingTime": 10,
-      "taskPromptSchema": {
-        "$schema": "https://json-schema.org/draft/2020-12/schema",
-        "title": "ModalTaskPrompt",
-        "type": "object",
-        "description": "Payload merged into task.prompt. Plugins receive the Openflow task object.",
-        "additionalProperties": true
-      },
-      "resultSchema": {
-        "$schema": "https://json-schema.org/draft/2020-12/schema",
-        "title": "HandlerResult",
-        "type": "object",
-        "additionalProperties": true
-      }
-    },
-    {
-      "nodeSlot": "audio_image_gen_video",
-      "featureName": "audio_image_gen_video",
-      "defaultHandler": {
-        "type": "gpu",
-        "function": "infinitetalk-si2v"
-      },
-      "processingTime": 10,
-      "taskPromptSchema": {
-        "$schema": "https://json-schema.org/draft/2020-12/schema",
-        "title": "ModalTaskPrompt",
-        "type": "object",
-        "description": "Payload merged into task.prompt. Plugins receive the Openflow task object.",
-        "additionalProperties": true
-      },
-      "resultSchema": {
-        "$schema": "https://json-schema.org/draft/2020-12/schema",
-        "title": "HandlerResult",
-        "type": "object",
-        "additionalProperties": true
-      }
-    },
-    {
-      "nodeSlot": "speech-text-gen-video",
-      "featureName": "speech-text-gen-video",
-      "defaultHandler": {
-        "type": "gpu",
-        "function": "ltx2-a2v"
-      },
-      "processingTime": 10,
-      "taskPromptSchema": {
-        "$schema": "https://json-schema.org/draft/2020-12/schema",
-        "title": "ModalTaskPrompt",
-        "type": "object",
-        "description": "Payload merged into task.prompt. Plugins receive the Openflow task object.",
-        "additionalProperties": true
-      },
-      "resultSchema": {
-        "$schema": "https://json-schema.org/draft/2020-12/schema",
-        "title": "HandlerResult",
-        "type": "object",
-        "additionalProperties": true
-      }
-    },
-    {
-      "nodeSlot": "speech_image_video_gen_video",
-      "featureName": "speech_image_video_gen_video",
-      "defaultHandler": {
-        "type": "gpu",
-        "function": "wan22-siv2v"
-      },
-      "processingTime": 10,
-      "taskPromptSchema": {
-        "$schema": "https://json-schema.org/draft/2020-12/schema",
-        "title": "ModalTaskPrompt",
-        "type": "object",
-        "description": "Payload merged into task.prompt. Plugins receive the Openflow task object.",
-        "additionalProperties": true
-      },
-      "resultSchema": {
-        "$schema": "https://json-schema.org/draft/2020-12/schema",
-        "title": "HandlerResult",
-        "type": "object",
-        "additionalProperties": true
-      }
-    },
-    {
-      "nodeSlot": "video-image-gen-video-mix",
-      "featureName": "video-image-gen-video-mix",
-      "defaultHandler": {
-        "type": "gpu",
-        "function": "wan-animate-mix"
-      },
-      "processingTime": 10,
-      "taskPromptSchema": {
-        "$schema": "https://json-schema.org/draft/2020-12/schema",
-        "title": "ModalTaskPrompt",
-        "type": "object",
-        "description": "Payload merged into task.prompt. Plugins receive the Openflow task object.",
-        "additionalProperties": true
-      },
-      "resultSchema": {
-        "$schema": "https://json-schema.org/draft/2020-12/schema",
-        "title": "HandlerResult",
-        "type": "object",
-        "additionalProperties": true
-      }
-    },
-    {
-      "nodeSlot": "video-image-gen-video-move",
-      "featureName": "video-image-gen-video-move",
-      "defaultHandler": {
-        "type": "gpu",
-        "function": "wan-animate-move"
-      },
-      "processingTime": 10,
-      "taskPromptSchema": {
-        "$schema": "https://json-schema.org/draft/2020-12/schema",
-        "title": "ModalTaskPrompt",
-        "type": "object",
-        "description": "Payload merged into task.prompt. Plugins receive the Openflow task object.",
-        "additionalProperties": true
-      },
-      "resultSchema": {
-        "$schema": "https://json-schema.org/draft/2020-12/schema",
-        "title": "HandlerResult",
-        "type": "object",
-        "additionalProperties": true
-      }
-    },
-    {
-      "nodeSlot": "image-image-gen-video",
-      "featureName": "image-image-gen-video",
-      "defaultHandler": {
-        "type": "gpu",
-        "function": "ltx2-ii2v-first-last"
-      },
-      "processingTime": 10,
-      "taskPromptSchema": {
-        "$schema": "https://json-schema.org/draft/2020-12/schema",
-        "title": "ModalTaskPrompt",
-        "type": "object",
-        "description": "Payload merged into task.prompt. Plugins receive the Openflow task object.",
-        "additionalProperties": true
-      },
-      "resultSchema": {
-        "$schema": "https://json-schema.org/draft/2020-12/schema",
-        "title": "HandlerResult",
-        "type": "object",
-        "additionalProperties": true
-      }
-    },
-    {
-      "nodeSlot": "text_gen_video",
-      "featureName": "text_gen_video",
-      "defaultHandler": {
-        "type": "gpu",
-        "function": "ltx2-t2v"
-      },
-      "processingTime": 10,
-      "taskPromptSchema": {
-        "$schema": "https://json-schema.org/draft/2020-12/schema",
-        "title": "ModalTaskPrompt",
-        "type": "object",
-        "description": "Payload merged into task.prompt. Plugins receive the Openflow task object.",
-        "additionalProperties": true
-      },
-      "resultSchema": {
-        "$schema": "https://json-schema.org/draft/2020-12/schema",
-        "title": "HandlerResult",
-        "type": "object",
-        "additionalProperties": true
-      }
-    },
-    {
-      "nodeSlot": "image_gen_model",
-      "featureName": "image_gen_model",
-      "defaultHandler": {
-        "type": "gpu",
-        "function": "hunyuan3d-single-view"
-      },
-      "processingTime": 10,
-      "taskPromptSchema": {
-        "$schema": "https://json-schema.org/draft/2020-12/schema",
-        "title": "ModalTaskPrompt",
-        "type": "object",
-        "description": "Payload merged into task.prompt. Plugins receive the Openflow task object.",
-        "additionalProperties": true
-      },
-      "resultSchema": {
-        "$schema": "https://json-schema.org/draft/2020-12/schema",
-        "title": "HandlerResult",
-        "type": "object",
-        "additionalProperties": true
-      }
-    },
-    {
-      "nodeSlot": "speech_video_gen_video",
-      "featureName": "speech_video_gen_video",
-      "defaultHandler": {
-        "type": "gpu",
-        "function": "infinitetalk-sv2v"
-      },
-      "processingTime": 10,
-      "taskPromptSchema": {
-        "$schema": "https://json-schema.org/draft/2020-12/schema",
-        "title": "ModalTaskPrompt",
-        "type": "object",
-        "description": "Payload merged into task.prompt. Plugins receive the Openflow task object.",
-        "additionalProperties": true
-      },
-      "resultSchema": {
-        "$schema": "https://json-schema.org/draft/2020-12/schema",
-        "title": "HandlerResult",
-        "type": "object",
-        "additionalProperties": true
-      }
-    },
-    {
-      "nodeSlot": "text_gen_speech_clone",
-      "featureName": "text_gen_speech_clone",
-      "defaultHandler": {
-        "type": "gpu",
-        "function": "qwen-tts3-reference"
-      },
-      "processingTime": 60,
-      "taskPromptSchema": {
-        "$schema": "https://json-schema.org/draft/2020-12/schema",
-        "title": "ModalTaskPrompt",
-        "type": "object",
-        "description": "Payload merged into task.prompt. Plugins receive the Openflow task object.",
-        "additionalProperties": true
-      },
-      "resultSchema": {
-        "$schema": "https://json-schema.org/draft/2020-12/schema",
-        "title": "HandlerResult",
-        "type": "object",
-        "additionalProperties": true
-      }
-    },
-    {
-      "nodeSlot": "text_gen_speech_emotion",
-      "featureName": "text_gen_speech_emotion",
-      "defaultHandler": {
-        "type": "gpu",
-        "function": "setpaudio-editx-emotion"
-      },
-      "processingTime": 30,
-      "taskPromptSchema": {
-        "$schema": "https://json-schema.org/draft/2020-12/schema",
-        "title": "ModalTaskPrompt",
-        "type": "object",
-        "description": "Payload merged into task.prompt. Plugins receive the Openflow task object.",
-        "additionalProperties": true
-      },
-      "resultSchema": {
-        "$schema": "https://json-schema.org/draft/2020-12/schema",
-        "title": "HandlerResult",
-        "type": "object",
-        "additionalProperties": true
-      }
-    },
-    {
-      "nodeSlot": "text_gen_speech_style",
-      "featureName": "text_gen_speech_style",
-      "defaultHandler": {
-        "type": "gpu",
-        "function": "setpaudio-editx-style"
-      },
-      "processingTime": 30,
-      "taskPromptSchema": {
-        "$schema": "https://json-schema.org/draft/2020-12/schema",
-        "title": "ModalTaskPrompt",
-        "type": "object",
-        "description": "Payload merged into task.prompt. Plugins receive the Openflow task object.",
-        "additionalProperties": true
-      },
-      "resultSchema": {
-        "$schema": "https://json-schema.org/draft/2020-12/schema",
-        "title": "HandlerResult",
-        "type": "object",
-        "additionalProperties": true
-      }
-    },
-    {
-      "nodeSlot": "transcribe_timestamp",
-      "featureName": "transcribe_timestamp",
-      "defaultHandler": {
-        "type": "gpu",
-        "function": "qwen3-asr-timestamp"
-      },
-      "processingTime": 10,
-      "inputs": {
-        "type": "object",
-        "required": ["audio"],
-        "properties": {
-          "audio": { "$ref": "#/$defs/Asset" },
-          "context": { "type": "string" },
-          "language": { "type": "string" },
-          "max_new_tokens": { "type": "number" }
         },
         "additionalProperties": false
       },
       "outputs": {
         "type": "object",
-        "required": ["text"],
+        "required": [
+          "success"
+        ],
         "properties": {
-          "text": { "type": "string" },
-          "language": { "type": "string" },
+          "success": {
+            "type": "boolean"
+          },
+          "error": {
+            "type": "string"
+          },
+          "text": {
+            "type": "string"
+          },
+          "result": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "nodeSlot": "split_text",
+      "inputs": {
+        "type": "object",
+        "required": [
+          "text"
+        ],
+        "properties": {
+          "text": {
+            "type": "string",
+            "minLength": 1
+          },
+          "userPrompt": {
+            "type": "string"
+          },
+          "pluginId": {
+            "type": "string"
+          },
+          "nodeSlot": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      },
+      "outputs": {
+        "type": "object",
+        "required": [
+          "success"
+        ],
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "error": {
+            "type": "string"
+          },
+          "text": {
+            "type": "string"
+          },
+          "result": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "nodeSlot": "combine_text",
+      "inputs": {
+        "type": "object",
+        "required": [
+          "texts"
+        ],
+        "properties": {
+          "texts": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "userPrompt": {
+            "type": "string"
+          },
+          "pluginId": {
+            "type": "string"
+          },
+          "nodeSlot": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      },
+      "outputs": {
+        "type": "object",
+        "required": [
+          "success"
+        ],
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "error": {
+            "type": "string"
+          },
+          "text": {
+            "type": "string"
+          },
+          "result": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "nodeSlot": "image_fusion",
+      "inputs": {
+        "type": "object",
+        "required": [
+          "text"
+        ],
+        "properties": {
+          "text": {
+            "type": "string",
+            "minLength": 1
+          },
+          "images": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "image_base64": {
+            "type": "string",
+            "minLength": 1
+          },
+          "image2_base64": {
+            "type": "string",
+            "minLength": 1
+          },
+          "seed": {
+            "type": "integer"
+          },
+          "width": {
+            "type": "integer"
+          },
+          "height": {
+            "type": "integer"
+          }
+        },
+        "additionalProperties": false
+      },
+      "outputs": {
+        "type": "object",
+        "required": [
+          "success"
+        ],
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "error": {
+            "type": "string"
+          },
+          "text": {
+            "type": "string"
+          },
+          "thinking": {
+            "type": "string"
+          },
+          "image_base64": {
+            "type": "string",
+            "minLength": 1
+          },
+          "video_base64": {
+            "type": "string",
+            "minLength": 1
+          },
+          "audio_base64": {
+            "type": "string",
+            "minLength": 1
+          },
+          "texts": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "nodeSlot": "image_gen_text",
+      "inputs": {
+        "type": "object",
+        "required": [
+          "text"
+        ],
+        "properties": {
+          "text": {
+            "type": "string"
+          },
+          "texts": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "system": {
+            "type": "string"
+          },
+          "max_new_tokens": {
+            "type": "integer"
+          },
+          "enable_thinking": {
+            "type": "boolean"
+          },
+          "temperature": {
+            "type": "number"
+          },
+          "top_p": {
+            "type": "number"
+          },
+          "top_k": {
+            "type": "integer"
+          },
+          "image_base64": {
+            "type": "string",
+            "minLength": 1
+          },
+          "images": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "image_base64s": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "additionalProperties": false
+      },
+      "outputs": {
+        "type": "object",
+        "required": [
+          "success"
+        ],
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "error": {
+            "type": "string"
+          },
+          "text": {
+            "type": "string"
+          },
+          "thinking": {
+            "type": "string"
+          },
+          "image_base64": {
+            "type": "string",
+            "minLength": 1
+          },
+          "video_base64": {
+            "type": "string",
+            "minLength": 1
+          },
+          "audio_base64": {
+            "type": "string",
+            "minLength": 1
+          },
+          "texts": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "nodeSlot": "video_gen_text",
+      "inputs": {
+        "type": "object",
+        "required": [
+          "text",
+          "video_base64"
+        ],
+        "properties": {
+          "text": {
+            "type": "string"
+          },
+          "texts": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "system": {
+            "type": "string"
+          },
+          "max_new_tokens": {
+            "type": "integer"
+          },
+          "enable_thinking": {
+            "type": "boolean"
+          },
+          "temperature": {
+            "type": "number"
+          },
+          "top_p": {
+            "type": "number"
+          },
+          "top_k": {
+            "type": "integer"
+          },
+          "image_base64": {
+            "type": "string",
+            "minLength": 1
+          },
+          "images": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "image_base64s": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "video_base64": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "additionalProperties": false
+      },
+      "outputs": {
+        "type": "object",
+        "required": [
+          "success"
+        ],
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "error": {
+            "type": "string"
+          },
+          "text": {
+            "type": "string"
+          },
+          "thinking": {
+            "type": "string"
+          },
+          "image_base64": {
+            "type": "string",
+            "minLength": 1
+          },
+          "video_base64": {
+            "type": "string",
+            "minLength": 1
+          },
+          "audio_base64": {
+            "type": "string",
+            "minLength": 1
+          },
+          "texts": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "nodeSlot": "transcribe",
+      "inputs": {
+        "type": "object",
+        "required": [
+          "audio"
+        ],
+        "properties": {
+          "audio": {
+            "$ref": "#/$defs/Asset"
+          },
+          "context": {
+            "type": "string"
+          },
+          "language": {
+            "type": "string"
+          },
+          "max_new_tokens": {
+            "type": "number"
+          }
+        },
+        "additionalProperties": false
+      },
+      "outputs": {
+        "type": "object",
+        "required": [
+          "text"
+        ],
+        "properties": {
+          "text": {
+            "type": "string",
+            "minLength": 1
+          },
+          "language": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "nodeSlot": "concat_videos",
+      "inputs": {
+        "type": "object",
+        "required": [
+          "videos_bytes"
+        ],
+        "properties": {
+          "fileKeys": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "videos_bytes": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "filenames": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "additionalProperties": false
+      },
+      "outputs": {
+        "type": "object",
+        "required": [
+          "success"
+        ],
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "error": {
+            "type": "string"
+          },
+          "text": {
+            "type": "string"
+          },
+          "thinking": {
+            "type": "string"
+          },
+          "image_base64": {
+            "type": "string",
+            "minLength": 1
+          },
+          "video_base64": {
+            "type": "string",
+            "minLength": 1
+          },
+          "audio_base64": {
+            "type": "string",
+            "minLength": 1
+          },
+          "texts": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "nodeSlot": "extract_audio",
+      "inputs": {
+        "type": "object",
+        "required": [],
+        "properties": {
+          "fileKey": {
+            "type": "string"
+          },
+          "videoKey": {
+            "type": "string"
+          },
+          "video_bytes": {
+            "type": "string",
+            "minLength": 1
+          },
+          "video_filename": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      },
+      "outputs": {
+        "type": "object",
+        "required": [
+          "success"
+        ],
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "error": {
+            "type": "string"
+          },
+          "text": {
+            "type": "string"
+          },
+          "thinking": {
+            "type": "string"
+          },
+          "image_base64": {
+            "type": "string",
+            "minLength": 1
+          },
+          "video_base64": {
+            "type": "string",
+            "minLength": 1
+          },
+          "audio_base64": {
+            "type": "string",
+            "minLength": 1
+          },
+          "texts": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "nodeSlot": "separate_video_audio",
+      "inputs": {
+        "type": "object",
+        "required": [],
+        "properties": {
+          "fileKey": {
+            "type": "string"
+          },
+          "videoKey": {
+            "type": "string"
+          },
+          "video_bytes": {
+            "type": "string",
+            "minLength": 1
+          },
+          "video_filename": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      },
+      "outputs": {
+        "type": "object",
+        "required": [
+          "success"
+        ],
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "error": {
+            "type": "string"
+          },
+          "text": {
+            "type": "string"
+          },
+          "thinking": {
+            "type": "string"
+          },
+          "image_base64": {
+            "type": "string",
+            "minLength": 1
+          },
+          "video_base64": {
+            "type": "string",
+            "minLength": 1
+          },
+          "audio_base64": {
+            "type": "string",
+            "minLength": 1
+          },
+          "texts": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "nodeSlot": "merge_video_audio",
+      "inputs": {
+        "type": "object",
+        "required": [],
+        "properties": {
+          "video_key": {
+            "type": "string"
+          },
+          "audio_key": {
+            "type": "string"
+          },
+          "video_bytes": {
+            "type": "string",
+            "minLength": 1
+          },
+          "audio_bytes": {
+            "type": "string",
+            "minLength": 1
+          },
+          "video_filename": {
+            "type": "string"
+          },
+          "audio_filename": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      },
+      "outputs": {
+        "type": "object",
+        "required": [
+          "success"
+        ],
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "error": {
+            "type": "string"
+          },
+          "text": {
+            "type": "string"
+          },
+          "thinking": {
+            "type": "string"
+          },
+          "image_base64": {
+            "type": "string",
+            "minLength": 1
+          },
+          "video_base64": {
+            "type": "string",
+            "minLength": 1
+          },
+          "audio_base64": {
+            "type": "string",
+            "minLength": 1
+          },
+          "texts": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "nodeSlot": "get_first_frame",
+      "inputs": {
+        "type": "object",
+        "required": [],
+        "properties": {
+          "fileKey": {
+            "type": "string"
+          },
+          "videoKey": {
+            "type": "string"
+          },
+          "video_bytes": {
+            "type": "string",
+            "minLength": 1
+          },
+          "video_filename": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      },
+      "outputs": {
+        "type": "object",
+        "required": [
+          "success"
+        ],
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "error": {
+            "type": "string"
+          },
+          "text": {
+            "type": "string"
+          },
+          "thinking": {
+            "type": "string"
+          },
+          "image_base64": {
+            "type": "string",
+            "minLength": 1
+          },
+          "video_base64": {
+            "type": "string",
+            "minLength": 1
+          },
+          "audio_base64": {
+            "type": "string",
+            "minLength": 1
+          },
+          "texts": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "nodeSlot": "get_last_frame",
+      "inputs": {
+        "type": "object",
+        "required": [],
+        "properties": {
+          "fileKey": {
+            "type": "string"
+          },
+          "videoKey": {
+            "type": "string"
+          },
+          "video_bytes": {
+            "type": "string",
+            "minLength": 1
+          },
+          "video_filename": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      },
+      "outputs": {
+        "type": "object",
+        "required": [
+          "success"
+        ],
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "error": {
+            "type": "string"
+          },
+          "text": {
+            "type": "string"
+          },
+          "thinking": {
+            "type": "string"
+          },
+          "image_base64": {
+            "type": "string",
+            "minLength": 1
+          },
+          "video_base64": {
+            "type": "string",
+            "minLength": 1
+          },
+          "audio_base64": {
+            "type": "string",
+            "minLength": 1
+          },
+          "texts": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "nodeSlot": "parse_document",
+      "inputs": {
+        "type": "object",
+        "required": [],
+        "properties": {
+          "document": {
+            "$ref": "#/$defs/Asset"
+          },
+          "mime": {
+            "type": "string"
+          },
+          "filename": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      },
+      "outputs": {
+        "type": "object",
+        "required": [
+          "success"
+        ],
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "error": {
+            "type": "string"
+          },
+          "text": {
+            "type": "string"
+          },
+          "thinking": {
+            "type": "string"
+          },
+          "image_base64": {
+            "type": "string",
+            "minLength": 1
+          },
+          "video_base64": {
+            "type": "string",
+            "minLength": 1
+          },
+          "audio_base64": {
+            "type": "string",
+            "minLength": 1
+          },
+          "texts": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "nodeSlot": "split_video",
+      "inputs": {
+        "type": "object",
+        "required": [],
+        "properties": {
+          "video": {
+            "$ref": "#/$defs/Asset"
+          },
+          "video_base64": {
+            "type": "string",
+            "minLength": 1
+          },
+          "video_bytes": {
+            "type": "string",
+            "minLength": 1
+          },
+          "fileKey": {
+            "type": "string"
+          },
+          "videoKey": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      },
+      "outputs": {
+        "type": "object",
+        "required": [
+          "success"
+        ],
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "error": {
+            "type": "string"
+          },
+          "text": {
+            "type": "string"
+          },
+          "thinking": {
+            "type": "string"
+          },
+          "image_base64": {
+            "type": "string",
+            "minLength": 1
+          },
+          "video_base64": {
+            "type": "string",
+            "minLength": 1
+          },
+          "audio_base64": {
+            "type": "string",
+            "minLength": 1
+          },
+          "texts": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "nodeSlot": "link",
+      "inputs": {
+        "type": "object",
+        "required": [
+          "url"
+        ],
+        "properties": {
+          "url": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "additionalProperties": false
+      },
+      "outputs": {
+        "type": "object",
+        "required": [
+          "success"
+        ],
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "error": {
+            "type": "string"
+          },
+          "text": {
+            "type": "string"
+          },
+          "thinking": {
+            "type": "string"
+          },
+          "image_base64": {
+            "type": "string",
+            "minLength": 1
+          },
+          "video_base64": {
+            "type": "string",
+            "minLength": 1
+          },
+          "audio_base64": {
+            "type": "string",
+            "minLength": 1
+          },
+          "texts": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "nodeSlot": "gen_video",
+      "inputs": {
+        "type": "object",
+        "required": [
+          "text"
+        ],
+        "properties": {
+          "text": {
+            "type": "string"
+          },
+          "texts": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "seed": {
+            "type": "number"
+          },
+          "height": {
+            "type": "integer"
+          },
+          "width": {
+            "type": "integer"
+          },
+          "num_frames": {
+            "type": "integer"
+          },
+          "frame_rate": {
+            "type": "number"
+          },
+          "num_inference_steps": {
+            "type": "integer"
+          },
+          "enhance_prompt": {
+            "type": "boolean"
+          },
+          "negative_prompt": {
+            "type": "string"
+          },
+          "image_base64": {
+            "type": "string",
+            "minLength": 1
+          },
+          "image_frame_idx": {
+            "type": "integer"
+          },
+          "image_strength": {
+            "type": "number"
+          },
+          "end_image_base64": {
+            "type": "string",
+            "minLength": 1
+          },
+          "image2_base64": {
+            "type": "string",
+            "minLength": 1
+          },
+          "speech_base64": {
+            "type": "string",
+            "minLength": 1
+          },
+          "audio_base64": {
+            "type": "string",
+            "minLength": 1
+          },
+          "audio_max_duration": {
+            "type": "number"
+          },
+          "audio_start_time": {
+            "type": "number"
+          }
+        },
+        "additionalProperties": false
+      },
+      "outputs": {
+        "type": "object",
+        "required": [
+          "success"
+        ],
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "error": {
+            "type": "string"
+          },
+          "text": {
+            "type": "string"
+          },
+          "thinking": {
+            "type": "string"
+          },
+          "image_base64": {
+            "type": "string",
+            "minLength": 1
+          },
+          "video_base64": {
+            "type": "string",
+            "minLength": 1
+          },
+          "audio_base64": {
+            "type": "string",
+            "minLength": 1
+          },
+          "texts": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "nodeSlot": "image_gen",
+      "inputs": {
+        "type": "object",
+        "required": [],
+        "properties": {
+          "text": {
+            "type": "string",
+            "minLength": 1
+          },
+          "texts": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "width": {
+            "type": "integer"
+          },
+          "height": {
+            "type": "integer"
+          },
+          "num_inference_steps": {
+            "type": "integer"
+          },
+          "guidance_scale": {
+            "type": "number"
+          },
+          "seed": {
+            "type": "integer"
+          }
+        },
+        "additionalProperties": false
+      },
+      "outputs": {
+        "type": "object",
+        "required": [
+          "success"
+        ],
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "error": {
+            "type": "string"
+          },
+          "text": {
+            "type": "string"
+          },
+          "thinking": {
+            "type": "string"
+          },
+          "image_base64": {
+            "type": "string",
+            "minLength": 1
+          },
+          "video_base64": {
+            "type": "string",
+            "minLength": 1
+          },
+          "audio_base64": {
+            "type": "string",
+            "minLength": 1
+          },
+          "texts": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "nodeSlot": "gen_music",
+      "inputs": {
+        "type": "object",
+        "required": [],
+        "properties": {
+          "text": {
+            "type": "string",
+            "minLength": 1
+          },
+          "lyrics": {
+            "type": "string"
+          },
+          "duration": {
+            "type": "number"
+          },
+          "seed": {
+            "type": "integer"
+          }
+        },
+        "additionalProperties": false
+      },
+      "outputs": {
+        "type": "object",
+        "required": [
+          "success"
+        ],
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "error": {
+            "type": "string"
+          },
+          "text": {
+            "type": "string"
+          },
+          "thinking": {
+            "type": "string"
+          },
+          "image_base64": {
+            "type": "string",
+            "minLength": 1
+          },
+          "video_base64": {
+            "type": "string",
+            "minLength": 1
+          },
+          "audio_base64": {
+            "type": "string",
+            "minLength": 1
+          },
+          "texts": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "nodeSlot": "text_gen_speech_preset",
+      "inputs": {
+        "type": "object",
+        "required": [
+          "text"
+        ],
+        "properties": {
+          "text": {
+            "type": "string",
+            "minLength": 1
+          },
+          "language": {
+            "type": "string"
+          },
+          "instruct": {
+            "type": "string"
+          },
+          "max_new_tokens": {
+            "type": "integer"
+          }
+        },
+        "additionalProperties": false
+      },
+      "outputs": {
+        "type": "object",
+        "required": [
+          "success"
+        ],
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "error": {
+            "type": "string"
+          },
+          "text": {
+            "type": "string"
+          },
+          "thinking": {
+            "type": "string"
+          },
+          "image_base64": {
+            "type": "string",
+            "minLength": 1
+          },
+          "video_base64": {
+            "type": "string",
+            "minLength": 1
+          },
+          "audio_base64": {
+            "type": "string",
+            "minLength": 1
+          },
+          "texts": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "nodeSlot": "image_gen_video",
+      "inputs": {
+        "type": "object",
+        "required": [
+          "text",
+          "image_base64"
+        ],
+        "properties": {
+          "text": {
+            "type": "string"
+          },
+          "texts": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "seed": {
+            "type": "number"
+          },
+          "height": {
+            "type": "integer"
+          },
+          "width": {
+            "type": "integer"
+          },
+          "num_frames": {
+            "type": "integer"
+          },
+          "frame_rate": {
+            "type": "number"
+          },
+          "num_inference_steps": {
+            "type": "integer"
+          },
+          "enhance_prompt": {
+            "type": "boolean"
+          },
+          "negative_prompt": {
+            "type": "string"
+          },
+          "image_base64": {
+            "type": "string",
+            "minLength": 1
+          },
+          "image_frame_idx": {
+            "type": "integer"
+          },
+          "image_strength": {
+            "type": "number"
+          },
+          "end_image_base64": {
+            "type": "string",
+            "minLength": 1
+          },
+          "image2_base64": {
+            "type": "string",
+            "minLength": 1
+          },
+          "speech_base64": {
+            "type": "string",
+            "minLength": 1
+          },
+          "audio_base64": {
+            "type": "string",
+            "minLength": 1
+          },
+          "audio_max_duration": {
+            "type": "number"
+          },
+          "audio_start_time": {
+            "type": "number"
+          }
+        },
+        "additionalProperties": false
+      },
+      "outputs": {
+        "type": "object",
+        "required": [
+          "success"
+        ],
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "error": {
+            "type": "string"
+          },
+          "text": {
+            "type": "string"
+          },
+          "thinking": {
+            "type": "string"
+          },
+          "image_base64": {
+            "type": "string",
+            "minLength": 1
+          },
+          "video_base64": {
+            "type": "string",
+            "minLength": 1
+          },
+          "audio_base64": {
+            "type": "string",
+            "minLength": 1
+          },
+          "texts": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "nodeSlot": "image_edit",
+      "inputs": {
+        "type": "object",
+        "required": [
+          "text",
+          "image_base64"
+        ],
+        "properties": {
+          "text": {
+            "type": "string",
+            "minLength": 1
+          },
+          "image_base64": {
+            "type": "string",
+            "minLength": 1
+          },
+          "seed": {
+            "type": "integer"
+          },
+          "match_input_size": {
+            "type": "boolean"
+          },
+          "width": {
+            "type": "integer"
+          },
+          "height": {
+            "type": "integer"
+          }
+        },
+        "additionalProperties": false
+      },
+      "outputs": {
+        "type": "object",
+        "required": [
+          "success"
+        ],
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "error": {
+            "type": "string"
+          },
+          "text": {
+            "type": "string"
+          },
+          "thinking": {
+            "type": "string"
+          },
+          "image_base64": {
+            "type": "string",
+            "minLength": 1
+          },
+          "video_base64": {
+            "type": "string",
+            "minLength": 1
+          },
+          "audio_base64": {
+            "type": "string",
+            "minLength": 1
+          },
+          "texts": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "nodeSlot": "image_upscale",
+      "inputs": {
+        "type": "object",
+        "required": [
+          "image_base64"
+        ],
+        "properties": {
+          "image_base64": {
+            "type": "string",
+            "minLength": 1
+          },
+          "video_base64": {
+            "type": "string",
+            "minLength": 1
+          },
+          "resolution": {
+            "type": "string"
+          },
+          "seed": {
+            "type": "integer"
+          },
+          "dit_variant": {
+            "type": "string"
+          },
+          "color_correction": {
+            "type": "string"
+          },
+          "out_fps": {
+            "type": "number"
+          },
+          "batch_size": {
+            "type": "integer"
+          },
+          "uniform_batch_size": {
+            "type": "boolean"
+          },
+          "temporal_overlap": {
+            "type": "integer"
+          }
+        },
+        "additionalProperties": false
+      },
+      "outputs": {
+        "type": "object",
+        "required": [
+          "success"
+        ],
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "error": {
+            "type": "string"
+          },
+          "text": {
+            "type": "string"
+          },
+          "thinking": {
+            "type": "string"
+          },
+          "image_base64": {
+            "type": "string",
+            "minLength": 1
+          },
+          "video_base64": {
+            "type": "string",
+            "minLength": 1
+          },
+          "audio_base64": {
+            "type": "string",
+            "minLength": 1
+          },
+          "texts": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "nodeSlot": "video_upscale",
+      "inputs": {
+        "type": "object",
+        "required": [
+          "video_base64"
+        ],
+        "properties": {
+          "image_base64": {
+            "type": "string",
+            "minLength": 1
+          },
+          "video_base64": {
+            "type": "string",
+            "minLength": 1
+          },
+          "resolution": {
+            "type": "string"
+          },
+          "seed": {
+            "type": "integer"
+          },
+          "dit_variant": {
+            "type": "string"
+          },
+          "color_correction": {
+            "type": "string"
+          },
+          "out_fps": {
+            "type": "number"
+          },
+          "batch_size": {
+            "type": "integer"
+          },
+          "uniform_batch_size": {
+            "type": "boolean"
+          },
+          "temporal_overlap": {
+            "type": "integer"
+          }
+        },
+        "additionalProperties": false
+      },
+      "outputs": {
+        "type": "object",
+        "required": [
+          "success"
+        ],
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "error": {
+            "type": "string"
+          },
+          "text": {
+            "type": "string"
+          },
+          "thinking": {
+            "type": "string"
+          },
+          "image_base64": {
+            "type": "string",
+            "minLength": 1
+          },
+          "video_base64": {
+            "type": "string",
+            "minLength": 1
+          },
+          "audio_base64": {
+            "type": "string",
+            "minLength": 1
+          },
+          "texts": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "nodeSlot": "image_describe",
+      "inputs": {
+        "type": "object",
+        "required": [],
+        "properties": {
+          "image": {
+            "type": "string",
+            "minLength": 1
+          },
+          "text": {
+            "type": "string"
+          },
+          "userPrompt": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      },
+      "outputs": {
+        "type": "object",
+        "required": [
+          "success"
+        ],
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "error": {
+            "type": "string"
+          },
+          "text": {
+            "type": "string"
+          },
+          "thinking": {
+            "type": "string"
+          },
+          "image_base64": {
+            "type": "string",
+            "minLength": 1
+          },
+          "video_base64": {
+            "type": "string",
+            "minLength": 1
+          },
+          "audio_base64": {
+            "type": "string",
+            "minLength": 1
+          },
+          "texts": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "nodeSlot": "video_describe",
+      "inputs": {
+        "type": "object",
+        "required": [],
+        "properties": {
+          "video": {
+            "type": "string",
+            "minLength": 1
+          },
+          "text": {
+            "type": "string"
+          },
+          "userPrompt": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      },
+      "outputs": {
+        "type": "object",
+        "required": [
+          "success"
+        ],
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "error": {
+            "type": "string"
+          },
+          "text": {
+            "type": "string"
+          },
+          "thinking": {
+            "type": "string"
+          },
+          "image_base64": {
+            "type": "string",
+            "minLength": 1
+          },
+          "video_base64": {
+            "type": "string",
+            "minLength": 1
+          },
+          "audio_base64": {
+            "type": "string",
+            "minLength": 1
+          },
+          "texts": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "nodeSlot": "audio_image_gen_video",
+      "inputs": {
+        "type": "object",
+        "required": [
+          "image",
+          "audio"
+        ],
+        "properties": {
+          "image": {
+            "type": "string",
+            "minLength": 1
+          },
+          "audio": {
+            "type": "string",
+            "minLength": 1
+          },
+          "text": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      },
+      "outputs": {
+        "type": "object",
+        "required": [
+          "success"
+        ],
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "error": {
+            "type": "string"
+          },
+          "text": {
+            "type": "string"
+          },
+          "thinking": {
+            "type": "string"
+          },
+          "image_base64": {
+            "type": "string",
+            "minLength": 1
+          },
+          "video_base64": {
+            "type": "string",
+            "minLength": 1
+          },
+          "audio_base64": {
+            "type": "string",
+            "minLength": 1
+          },
+          "texts": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "nodeSlot": "speech-text-gen-video",
+      "inputs": {
+        "type": "object",
+        "required": [
+          "text",
+          "audio_base64"
+        ],
+        "properties": {
+          "text": {
+            "type": "string"
+          },
+          "texts": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "seed": {
+            "type": "number"
+          },
+          "height": {
+            "type": "integer"
+          },
+          "width": {
+            "type": "integer"
+          },
+          "num_frames": {
+            "type": "integer"
+          },
+          "frame_rate": {
+            "type": "number"
+          },
+          "num_inference_steps": {
+            "type": "integer"
+          },
+          "enhance_prompt": {
+            "type": "boolean"
+          },
+          "negative_prompt": {
+            "type": "string"
+          },
+          "image_base64": {
+            "type": "string",
+            "minLength": 1
+          },
+          "image_frame_idx": {
+            "type": "integer"
+          },
+          "image_strength": {
+            "type": "number"
+          },
+          "end_image_base64": {
+            "type": "string",
+            "minLength": 1
+          },
+          "image2_base64": {
+            "type": "string",
+            "minLength": 1
+          },
+          "speech_base64": {
+            "type": "string",
+            "minLength": 1
+          },
+          "audio_base64": {
+            "type": "string",
+            "minLength": 1
+          },
+          "audio_max_duration": {
+            "type": "number"
+          },
+          "audio_start_time": {
+            "type": "number"
+          }
+        },
+        "additionalProperties": false
+      },
+      "outputs": {
+        "type": "object",
+        "required": [
+          "success"
+        ],
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "error": {
+            "type": "string"
+          },
+          "text": {
+            "type": "string"
+          },
+          "thinking": {
+            "type": "string"
+          },
+          "image_base64": {
+            "type": "string",
+            "minLength": 1
+          },
+          "video_base64": {
+            "type": "string",
+            "minLength": 1
+          },
+          "audio_base64": {
+            "type": "string",
+            "minLength": 1
+          },
+          "texts": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "nodeSlot": "speech_image_video_gen_video",
+      "inputs": {
+        "type": "object",
+        "required": [
+          "image",
+          "video",
+          "audio"
+        ],
+        "properties": {
+          "image": {
+            "type": "string",
+            "minLength": 1
+          },
+          "video": {
+            "type": "string",
+            "minLength": 1
+          },
+          "audio": {
+            "type": "string",
+            "minLength": 1
+          },
+          "text": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      },
+      "outputs": {
+        "type": "object",
+        "required": [
+          "success"
+        ],
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "error": {
+            "type": "string"
+          },
+          "text": {
+            "type": "string"
+          },
+          "thinking": {
+            "type": "string"
+          },
+          "image_base64": {
+            "type": "string",
+            "minLength": 1
+          },
+          "video_base64": {
+            "type": "string",
+            "minLength": 1
+          },
+          "audio_base64": {
+            "type": "string",
+            "minLength": 1
+          },
+          "texts": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "nodeSlot": "video-image-gen-video-mix",
+      "inputs": {
+        "type": "object",
+        "required": [
+          "image",
+          "video"
+        ],
+        "properties": {
+          "image": {
+            "type": "string",
+            "minLength": 1
+          },
+          "video": {
+            "type": "string",
+            "minLength": 1
+          },
+          "text": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      },
+      "outputs": {
+        "type": "object",
+        "required": [
+          "success"
+        ],
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "error": {
+            "type": "string"
+          },
+          "text": {
+            "type": "string"
+          },
+          "thinking": {
+            "type": "string"
+          },
+          "image_base64": {
+            "type": "string",
+            "minLength": 1
+          },
+          "video_base64": {
+            "type": "string",
+            "minLength": 1
+          },
+          "audio_base64": {
+            "type": "string",
+            "minLength": 1
+          },
+          "texts": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "nodeSlot": "video-image-gen-video-move",
+      "inputs": {
+        "type": "object",
+        "required": [
+          "image",
+          "video"
+        ],
+        "properties": {
+          "image": {
+            "type": "string",
+            "minLength": 1
+          },
+          "video": {
+            "type": "string",
+            "minLength": 1
+          },
+          "text": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      },
+      "outputs": {
+        "type": "object",
+        "required": [
+          "success"
+        ],
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "error": {
+            "type": "string"
+          },
+          "text": {
+            "type": "string"
+          },
+          "thinking": {
+            "type": "string"
+          },
+          "image_base64": {
+            "type": "string",
+            "minLength": 1
+          },
+          "video_base64": {
+            "type": "string",
+            "minLength": 1
+          },
+          "audio_base64": {
+            "type": "string",
+            "minLength": 1
+          },
+          "texts": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "nodeSlot": "image-image-gen-video",
+      "inputs": {
+        "type": "object",
+        "required": [
+          "text",
+          "image_base64",
+          "end_image_base64"
+        ],
+        "properties": {
+          "text": {
+            "type": "string"
+          },
+          "texts": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "seed": {
+            "type": "number"
+          },
+          "height": {
+            "type": "integer"
+          },
+          "width": {
+            "type": "integer"
+          },
+          "num_frames": {
+            "type": "integer"
+          },
+          "frame_rate": {
+            "type": "number"
+          },
+          "num_inference_steps": {
+            "type": "integer"
+          },
+          "enhance_prompt": {
+            "type": "boolean"
+          },
+          "negative_prompt": {
+            "type": "string"
+          },
+          "image_base64": {
+            "type": "string",
+            "minLength": 1
+          },
+          "image_frame_idx": {
+            "type": "integer"
+          },
+          "image_strength": {
+            "type": "number"
+          },
+          "end_image_base64": {
+            "type": "string",
+            "minLength": 1
+          },
+          "image2_base64": {
+            "type": "string",
+            "minLength": 1
+          },
+          "speech_base64": {
+            "type": "string",
+            "minLength": 1
+          },
+          "audio_base64": {
+            "type": "string",
+            "minLength": 1
+          },
+          "audio_max_duration": {
+            "type": "number"
+          },
+          "audio_start_time": {
+            "type": "number"
+          }
+        },
+        "additionalProperties": false
+      },
+      "outputs": {
+        "type": "object",
+        "required": [
+          "success"
+        ],
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "error": {
+            "type": "string"
+          },
+          "text": {
+            "type": "string"
+          },
+          "thinking": {
+            "type": "string"
+          },
+          "image_base64": {
+            "type": "string",
+            "minLength": 1
+          },
+          "video_base64": {
+            "type": "string",
+            "minLength": 1
+          },
+          "audio_base64": {
+            "type": "string",
+            "minLength": 1
+          },
+          "texts": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "nodeSlot": "text_gen_video",
+      "inputs": {
+        "type": "object",
+        "required": [
+          "text"
+        ],
+        "properties": {
+          "text": {
+            "type": "string"
+          },
+          "texts": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "seed": {
+            "type": "number"
+          },
+          "height": {
+            "type": "integer"
+          },
+          "width": {
+            "type": "integer"
+          },
+          "num_frames": {
+            "type": "integer"
+          },
+          "frame_rate": {
+            "type": "number"
+          },
+          "num_inference_steps": {
+            "type": "integer"
+          },
+          "enhance_prompt": {
+            "type": "boolean"
+          },
+          "negative_prompt": {
+            "type": "string"
+          },
+          "image_base64": {
+            "type": "string",
+            "minLength": 1
+          },
+          "image_frame_idx": {
+            "type": "integer"
+          },
+          "image_strength": {
+            "type": "number"
+          },
+          "end_image_base64": {
+            "type": "string",
+            "minLength": 1
+          },
+          "image2_base64": {
+            "type": "string",
+            "minLength": 1
+          },
+          "speech_base64": {
+            "type": "string",
+            "minLength": 1
+          },
+          "audio_base64": {
+            "type": "string",
+            "minLength": 1
+          },
+          "audio_max_duration": {
+            "type": "number"
+          },
+          "audio_start_time": {
+            "type": "number"
+          }
+        },
+        "additionalProperties": false
+      },
+      "outputs": {
+        "type": "object",
+        "required": [
+          "success"
+        ],
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "error": {
+            "type": "string"
+          },
+          "text": {
+            "type": "string"
+          },
+          "thinking": {
+            "type": "string"
+          },
+          "image_base64": {
+            "type": "string",
+            "minLength": 1
+          },
+          "video_base64": {
+            "type": "string",
+            "minLength": 1
+          },
+          "audio_base64": {
+            "type": "string",
+            "minLength": 1
+          },
+          "texts": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "nodeSlot": "image_gen_model",
+      "inputs": {
+        "type": "object",
+        "required": [],
+        "properties": {
+          "text": {
+            "type": "string",
+            "minLength": 1
+          },
+          "texts": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "width": {
+            "type": "integer"
+          },
+          "height": {
+            "type": "integer"
+          },
+          "num_inference_steps": {
+            "type": "integer"
+          },
+          "guidance_scale": {
+            "type": "number"
+          },
+          "seed": {
+            "type": "integer"
+          }
+        },
+        "additionalProperties": false
+      },
+      "outputs": {
+        "type": "object",
+        "required": [
+          "success"
+        ],
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "error": {
+            "type": "string"
+          },
+          "text": {
+            "type": "string"
+          },
+          "thinking": {
+            "type": "string"
+          },
+          "image_base64": {
+            "type": "string",
+            "minLength": 1
+          },
+          "video_base64": {
+            "type": "string",
+            "minLength": 1
+          },
+          "audio_base64": {
+            "type": "string",
+            "minLength": 1
+          },
+          "texts": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "nodeSlot": "speech_video_gen_video",
+      "inputs": {
+        "type": "object",
+        "required": [
+          "video",
+          "audio"
+        ],
+        "properties": {
+          "video": {
+            "type": "string",
+            "minLength": 1
+          },
+          "audio": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "additionalProperties": false
+      },
+      "outputs": {
+        "type": "object",
+        "required": [
+          "success"
+        ],
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "error": {
+            "type": "string"
+          },
+          "text": {
+            "type": "string"
+          },
+          "thinking": {
+            "type": "string"
+          },
+          "image_base64": {
+            "type": "string",
+            "minLength": 1
+          },
+          "video_base64": {
+            "type": "string",
+            "minLength": 1
+          },
+          "audio_base64": {
+            "type": "string",
+            "minLength": 1
+          },
+          "texts": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "nodeSlot": "text_gen_speech_clone",
+      "inputs": {
+        "type": "object",
+        "required": [
+          "text",
+          "ref_audio_base64"
+        ],
+        "properties": {
+          "text": {
+            "type": "string",
+            "minLength": 1
+          },
+          "ref_audio_base64": {
+            "type": "string",
+            "minLength": 1
+          },
+          "audio_base64": {
+            "type": "string",
+            "minLength": 1
+          },
+          "language": {
+            "type": "string"
+          },
+          "ref_text": {
+            "type": "string"
+          },
+          "x_vector_only": {
+            "type": "boolean"
+          },
+          "max_new_tokens": {
+            "type": "integer"
+          }
+        },
+        "additionalProperties": false
+      },
+      "outputs": {
+        "type": "object",
+        "required": [
+          "success"
+        ],
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "error": {
+            "type": "string"
+          },
+          "text": {
+            "type": "string"
+          },
+          "thinking": {
+            "type": "string"
+          },
+          "image_base64": {
+            "type": "string",
+            "minLength": 1
+          },
+          "video_base64": {
+            "type": "string",
+            "minLength": 1
+          },
+          "audio_base64": {
+            "type": "string",
+            "minLength": 1
+          },
+          "texts": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "nodeSlot": "transcribe_timestamp",
+      "inputs": {
+        "type": "object",
+        "required": [
+          "audio"
+        ],
+        "properties": {
+          "audio": {
+            "$ref": "#/$defs/Asset"
+          },
+          "context": {
+            "type": "string"
+          },
+          "language": {
+            "type": "string"
+          },
+          "max_new_tokens": {
+            "type": "number"
+          }
+        },
+        "additionalProperties": false
+      },
+      "outputs": {
+        "type": "object",
+        "required": [
+          "text"
+        ],
+        "properties": {
+          "text": {
+            "type": "string",
+            "minLength": 1
+          },
+          "language": {
+            "type": "string"
+          },
           "time_stamps": {
             "type": "array",
             "items": {
               "type": "object",
-              "required": ["text", "start_time", "end_time"],
+              "required": [
+                "text",
+                "start_time",
+                "end_time"
+              ],
               "properties": {
-                "text": { "type": "string" },
-                "start_time": { "type": "number" },
-                "end_time": { "type": "number" }
+                "text": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "start_time": {
+                  "type": "number"
+                },
+                "end_time": {
+                  "type": "number"
+                }
+              },
+              "additionalProperties": false
+            }
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "nodeSlot": "text_gen_speech_instruct",
+      "inputs": {
+        "type": "object",
+        "required": [
+          "text"
+        ],
+        "properties": {
+          "text": {
+            "type": "string",
+            "minLength": 1
+          },
+          "language": {
+            "type": "string"
+          },
+          "speaker": {
+            "type": "string"
+          },
+          "instruct": {
+            "type": "string"
+          },
+          "max_new_tokens": {
+            "type": "integer"
+          }
+        },
+        "additionalProperties": false
+      },
+      "outputs": {
+        "type": "object",
+        "required": [
+          "success"
+        ],
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "error": {
+            "type": "string"
+          },
+          "text": {
+            "type": "string"
+          },
+          "thinking": {
+            "type": "string"
+          },
+          "image_base64": {
+            "type": "string",
+            "minLength": 1
+          },
+          "video_base64": {
+            "type": "string",
+            "minLength": 1
+          },
+          "audio_base64": {
+            "type": "string",
+            "minLength": 1
+          },
+          "texts": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "nodeSlot": "video_image_move_animal",
+      "inputs": {
+        "type": "object",
+        "required": [
+          "image",
+          "video"
+        ],
+        "properties": {
+          "image": {
+            "type": "string",
+            "minLength": 1
+          },
+          "video": {
+            "type": "string",
+            "minLength": 1
+          },
+          "text": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      },
+      "outputs": {
+        "type": "object",
+        "required": [
+          "success"
+        ],
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "error": {
+            "type": "string"
+          },
+          "text": {
+            "type": "string"
+          },
+          "thinking": {
+            "type": "string"
+          },
+          "image_base64": {
+            "type": "string",
+            "minLength": 1
+          },
+          "video_base64": {
+            "type": "string",
+            "minLength": 1
+          },
+          "audio_base64": {
+            "type": "string",
+            "minLength": 1
+          },
+          "texts": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "nodeSlot": "wan-animate-mix",
+      "inputs": {
+        "type": "object",
+        "required": [
+          "image",
+          "video"
+        ],
+        "properties": {
+          "image": {
+            "type": "string",
+            "minLength": 1
+          },
+          "video": {
+            "type": "string",
+            "minLength": 1
+          },
+          "text": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      },
+      "outputs": {
+        "type": "object",
+        "required": [
+          "success"
+        ],
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "error": {
+            "type": "string"
+          },
+          "text": {
+            "type": "string"
+          },
+          "thinking": {
+            "type": "string"
+          },
+          "image_base64": {
+            "type": "string",
+            "minLength": 1
+          },
+          "video_base64": {
+            "type": "string",
+            "minLength": 1
+          },
+          "audio_base64": {
+            "type": "string",
+            "minLength": 1
+          },
+          "texts": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "nodeSlot": "drop_video",
+      "inputs": {
+        "type": "object",
+        "required": [],
+        "properties": {
+          "fileKeys": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "query": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      },
+      "outputs": {
+        "type": "object",
+        "required": [
+          "success"
+        ],
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "error": {
+            "type": "string"
+          },
+          "text": {
+            "type": "string"
+          },
+          "thinking": {
+            "type": "string"
+          },
+          "image_base64": {
+            "type": "string",
+            "minLength": 1
+          },
+          "video_base64": {
+            "type": "string",
+            "minLength": 1
+          },
+          "audio_base64": {
+            "type": "string",
+            "minLength": 1
+          },
+          "texts": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "nodeSlot": "arrange_group",
+      "inputs": {
+        "type": "object",
+        "required": [],
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [],
+              "properties": {
+                "text": {
+                  "type": "string"
+                },
+                "id": {
+                  "type": "string"
+                }
               },
               "additionalProperties": false
             }
@@ -963,179 +2987,44 @@
         },
         "additionalProperties": false
       },
-      "taskPromptSchema": {
-        "$schema": "https://json-schema.org/draft/2020-12/schema",
-        "title": "TranscribeTaskPrompt",
+      "outputs": {
         "type": "object",
-        "additionalProperties": true,
-        "properties": {
-          "audio": {
-            "type": "string"
-          },
-          "video": {
-            "type": "string"
-          },
-          "audioUrl": {
-            "type": "string"
-          },
-          "videoUrl": {
-            "type": "string"
-          },
-          "context": {
-            "type": "string"
-          },
-          "prompt": {
-            "type": "string"
-          },
-          "text": {
-            "type": "string"
-          },
-          "language": {
-            "type": "string"
-          },
-          "max_new_tokens": {
-            "type": "number"
-          },
-          "pluginId": {
-            "type": "string"
-          },
-          "nodeSlot": {
-            "type": "string"
-          }
-        }
-      },
-      "resultSchema": {
-        "$schema": "https://json-schema.org/draft/2020-12/schema",
-        "title": "TranscribeHandlerResult",
-        "type": "object",
-        "additionalProperties": true,
+        "required": [
+          "success"
+        ],
         "properties": {
           "success": {
             "type": "boolean"
           },
-          "text": {
-            "type": "string"
-          },
           "error": {
             "type": "string"
           },
-          "language": {
+          "text": {
             "type": "string"
           },
-          "time_stamps": {
-            "type": "array"
+          "thinking": {
+            "type": "string"
+          },
+          "image_base64": {
+            "type": "string",
+            "minLength": 1
+          },
+          "video_base64": {
+            "type": "string",
+            "minLength": 1
+          },
+          "audio_base64": {
+            "type": "string",
+            "minLength": 1
+          },
+          "texts": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
           }
-        }
-      }
-    },
-    {
-      "nodeSlot": "text_gen_speech_instruct",
-      "featureName": "text_gen_speech_instruct",
-      "defaultHandler": {
-        "type": "gpu",
-        "function": "qwen-tts3-design"
-      },
-      "processingTime": 0,
-      "taskPromptSchema": {
-        "$schema": "https://json-schema.org/draft/2020-12/schema",
-        "title": "ModalTaskPrompt",
-        "type": "object",
-        "description": "Payload merged into task.prompt. Plugins receive the Openflow task object.",
-        "additionalProperties": true
-      },
-      "resultSchema": {
-        "$schema": "https://json-schema.org/draft/2020-12/schema",
-        "title": "HandlerResult",
-        "type": "object",
-        "additionalProperties": true
-      }
-    },
-    {
-      "nodeSlot": "video_image_move_animal",
-      "featureName": "video_image_move_animal",
-      "defaultHandler": {
-        "type": "gpu",
-        "function": "steadydancer"
-      },
-      "processingTime": 0,
-      "taskPromptSchema": {
-        "$schema": "https://json-schema.org/draft/2020-12/schema",
-        "title": "ModalTaskPrompt",
-        "type": "object",
-        "description": "Payload merged into task.prompt. Plugins receive the Openflow task object.",
-        "additionalProperties": true
-      },
-      "resultSchema": {
-        "$schema": "https://json-schema.org/draft/2020-12/schema",
-        "title": "HandlerResult",
-        "type": "object",
-        "additionalProperties": true
-      }
-    },
-    {
-      "nodeSlot": "wan-animate-mix",
-      "featureName": "wan-animate-mix",
-      "defaultHandler": {
-        "type": "gpu",
-        "function": "wan-animate-mix"
-      },
-      "processingTime": 0,
-      "taskPromptSchema": {
-        "$schema": "https://json-schema.org/draft/2020-12/schema",
-        "title": "ModalTaskPrompt",
-        "type": "object",
-        "description": "Payload merged into task.prompt. Plugins receive the Openflow task object.",
-        "additionalProperties": true
-      },
-      "resultSchema": {
-        "$schema": "https://json-schema.org/draft/2020-12/schema",
-        "title": "HandlerResult",
-        "type": "object",
-        "additionalProperties": true
-      }
-    },
-    {
-      "nodeSlot": "drop_video",
-      "featureName": "drop_video",
-      "defaultHandler": {
-        "type": "batch",
-        "function": "clip-filter"
-      },
-      "processingTime": 0,
-      "taskPromptSchema": {
-        "$schema": "https://json-schema.org/draft/2020-12/schema",
-        "title": "ModalTaskPrompt",
-        "type": "object",
-        "description": "Payload merged into task.prompt. Plugins receive the Openflow task object.",
-        "additionalProperties": true
-      },
-      "resultSchema": {
-        "$schema": "https://json-schema.org/draft/2020-12/schema",
-        "title": "HandlerResult",
-        "type": "object",
-        "additionalProperties": true
-      }
-    },
-    {
-      "nodeSlot": "arrange_group",
-      "featureName": "arrange_group",
-      "defaultHandler": {
-        "type": "batch",
-        "function": "video-arrange-groups"
-      },
-      "processingTime": 0,
-      "taskPromptSchema": {
-        "$schema": "https://json-schema.org/draft/2020-12/schema",
-        "title": "ModalTaskPrompt",
-        "type": "object",
-        "description": "Payload merged into task.prompt. Plugins receive the Openflow task object.",
-        "additionalProperties": true
-      },
-      "resultSchema": {
-        "$schema": "https://json-schema.org/draft/2020-12/schema",
-        "title": "HandlerResult",
-        "type": "object",
-        "additionalProperties": true
+        },
+        "additionalProperties": false
       }
     }
   ]

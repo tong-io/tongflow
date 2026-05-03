@@ -318,7 +318,7 @@ async function persistBase64AssetIfPresent(
         }
     }
 
-    /** CPU plugins (e.g. tongflow-modal-cpu-ffmpeg) return { output_bytes, output_ext } */
+    /** Some plugins (e.g. ffmpeg) return { output_bytes, output_ext }. */
     const outBytes = bufferFromModalBytes(out["output_bytes"]);
     const outExtRaw = out["output_ext"];
     if (outBytes && outBytes.length > 0) {

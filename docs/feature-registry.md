@@ -16,7 +16,7 @@
 
 ## JSON 结构
 
-- **`features`**：每条为 `name`, `type`, `function`, `processingTime`（本地运行不设计价与档位）。
+- **`features`**：每条为 `name`, `type`, `function`。
 - **`aliases.canonical`**：旧画布或别名 → 注册表中的规范 `name`（影响任务解析与查找）。
 - **`aliases.labelLookup`**：仅用于节点下拉等 **展示文案** 映射到另一条注册表记录，不改变任务路由。
 
