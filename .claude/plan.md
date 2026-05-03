@@ -828,11 +828,11 @@ def node_slot(*slots: str) -> Callable[[F], F]:
 
 ### 2.1 TS 类型生成器（🟢）
 
-- [ ] 2.1-1 选型：`json-schema-to-ts` 或 `quicktype`，一致性测试 transcribe schema 输出
-- [ ] 2.1-2 新增 `scripts/gen-abi-types.ts`：读 ABI → 输出 `src/generated/abi/index.ts`（含 `NodeSlot` / `SlotInput<S>` / `SlotOutput<S>` / `ABI_NODES`）
-- [ ] 2.1-3 `package.json` 加 `gen:abi` 脚本，加进 `prebuild` / `predev`
-- [ ] 2.1-4 把 `src/generated/abi/` 加进 git（生成结果入库，diff 可见）
-- [ ] 2.1-5 提 PR：「build: generate TS types from ABI」
+- [x] 2.1-1 选型：`json-schema-to-ts` 或 `quicktype`，一致性测试 transcribe schema 输出
+- [x] 2.1-2 新增 `scripts/gen-abi-types.ts`：读 ABI → 输出 `src/generated/abi/index.ts`（含 `NodeSlot` / `SlotInput<S>` / `SlotOutput<S>` / `ABI_NODES`）
+- [x] 2.1-3 `package.json` 加 `gen:abi` 脚本，加进 `prebuild` / `predev`
+- [x] 2.1-4 把 `src/generated/abi/` 加进 git（生成结果入库，diff 可见）
+- [x] 2.1-5 提 PR：「build: generate TS types from ABI」
 
 ### 2.2 ReactFlow handle 类型化（🟡）
 

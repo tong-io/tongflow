@@ -36,7 +36,7 @@ function readAbi(): AbiFile {
         const n = data.nodes[i];
         if (!n || typeof n.nodeSlot !== "string" || n.nodeSlot.length === 0) {
             console.error(
-                `gen-abi-types: nodes[${i}] missing invalid nodeSlot`,
+                `gen-abi-types: nodes[${i}] missing or invalid nodeSlot`,
             );
             process.exit(1);
         }
@@ -55,6 +55,7 @@ function slotToPascalBase(slot: string): string {
     return parts.map((p) => p.charAt(0).toUpperCase() + p.slice(1)).join("");
 }
 
+/** Walk schema and resolve `#/$defs/*` refs to copies from `defs` (for FromSchema inference). Keep when ABI uses `$ref` on slots; refs still compile at runtime via `ABI_DEFINITIONS`. */
 function inlineRefs(schema: unknown, defs: Record<string, unknown>): unknown {
     if (schema === null || typeof schema !== "object") return schema;
     if (Array.isArray(schema)) {
@@ -116,8 +117,7 @@ function generateTs(abi: AbiFile): string {
     lines.push("");
 
     if (defs.Asset === undefined) {
-        console.error("gen-abi-types: ABI missing $defs.Asset");
-        process.exit(1);
+        throw new Error("gen-abi-types: ABI missing $defs.Asset");
     }
 
     const inlinedAsset = inlineRefs(defs.Asset, defs);
@@ -132,10 +132,9 @@ function generateTs(abi: AbiFile): string {
     const seen = new Set<string>();
     for (const s of slotOrder) {
         if (seen.has(s)) {
-            console.error(
+            throw new Error(
                 `gen-abi-types: duplicate nodeSlot ${JSON.stringify(s)}`,
             );
-            process.exit(1);
         }
         seen.add(s);
     }
@@ -202,11 +201,21 @@ function generateTs(abi: AbiFile): string {
     }
 
     lines.push("");
-    lines.push("// --- Runtime ABI fragment (preserve $refs for AJV etc.) ---");
+    lines.push(
+        "// --- Runtime ABI: keep per-node schemas as-is and expose $defs so AJV can resolve #/$defs/* ---",
+    );
     lines.push("export type AbiNodeSchemas = {");
     lines.push("\treadonly inputs: JSONSchema7;");
     lines.push("\treadonly outputs: JSONSchema7;");
     lines.push("};");
+    lines.push("");
+    const defsJson = JSON.stringify(defs, null, "\t");
+    lines.push(
+        "// Pass as root `$defs` (or AJV equivalently); merge with `{ ...inputsSchema }` when validating",
+    );
+    lines.push(
+        `export const ABI_DEFINITIONS: Record<string, JSONSchema7> = ${defsJson};`,
+    );
     lines.push("");
     lines.push(
         `export const ABI_NODES: Record<NodeSlot, AbiNodeSchemas> = ${JSON.stringify(abiRuntime, null, "\t")};`,

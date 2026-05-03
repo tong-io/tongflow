@@ -3235,10 +3235,33 @@ export type SlotOutputsMap = {
 export type SlotInput<S extends NodeSlot> = SlotInputsMap[S];
 export type SlotOutput<S extends NodeSlot> = SlotOutputsMap[S];
 
-// --- Runtime ABI fragment (preserve $refs for AJV etc.) ---
+// --- Runtime ABI: keep per-node schemas as-is and expose $defs so AJV can resolve #/$defs/* ---
 export type AbiNodeSchemas = {
 	readonly inputs: JSONSchema7;
 	readonly outputs: JSONSchema7;
+};
+
+// Pass as root `$defs` (or AJV equivalently); merge with `{ ...inputsSchema }` when validating
+export const ABI_DEFINITIONS: Record<string, JSONSchema7> = {
+	"Asset": {
+		"type": "object",
+		"required": [
+			"bytesBase64"
+		],
+		"properties": {
+			"bytesBase64": {
+				"type": "string",
+				"minLength": 1
+			},
+			"filename": {
+				"type": "string"
+			},
+			"mime": {
+				"type": "string"
+			}
+		},
+		"additionalProperties": false
+	}
 };
 
 export const ABI_NODES: Record<NodeSlot, AbiNodeSchemas> = {
