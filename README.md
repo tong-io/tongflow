@@ -138,29 +138,31 @@ pnpm modal:setup
 - ✅ **Video understanding**: summaries or descriptions from video.
 - ✅ **Video upscaling**: higher-resolution output.
 - ✅ **Extract first / last frame**: grab a frame as an image.
-- ⬜ **Subtitle removal**
-- ⬜ **Watermark removal**
+- ✅ **Subtitle removal**: clean subtitles from a video.
+- ✅ **Watermark removal**: remove watermarks from a video.
 
 #### Audio
 
 - ✅ **Music generation**: music from text.
-- ✅ **Speech synthesis**: text-to-speech, with optional reference voice.
+- ✅ **Speech synthesis**: text-to-speech — preset style, voice clone (reference audio), or instruction-driven.
 - ✅ **Speech recognition**: transcribe speech from audio or video.
-- ⬜ **Noise reduction**
+- ✅ **Noise reduction**: denoise audio.
+- ✅ **Speaker diarization**: separate audio by speaker.
+- ✅ **Voice / timbre replacement**: replace or clone a voice with a reference sample.
 - ⬜ **Multi-track / vocal-accompaniment separation**
-- ⬜ **Speaker diarization**
-- ⬜ **Voice / timbre replacement** (reference-driven)
 
 ### Combine
 
 - ✅ **Image fusion**: blend or edit multiple references into one image.
-- ✅ **Lip sync**: audio + video → video (lip-sync and related variants).
+- ✅ **Lip sync**: audio + video → video (lip-sync); also audio + image → video, audio + text → video, and audio + image + video → video variants.
+- ✅ **Clone voice**: text + reference audio → speech with a cloned voice.
 - ✅ **Character swap**: video + reference (scene blend / character replacement), Animate Mix-style generation.
 - ✅ **Motion transfer**: video + reference (motion / retarget), Animate Move-style generation.
+- ✅ **Combine text**: merge multiple text nodes into one.
 
 ### Other
 
-- ⬜ **Image → 3D** (single-view 3D)
+- ✅ **Image → 3D**: single-view 3D model from an image.
 - ✅ **Document → text**: extract plain text from documents.
 - ✅ **Link → text**: turn page content into text.
 
@@ -169,11 +171,12 @@ pnpm modal:setup
 - ✅ **Concatenate clips**: join multiple videos end to end.
 - ✅ **Mux audio + video**: merge into one file.
 - ✅ **Split by shots**: cut a long video into segments by scene.
+- ✅ **Split video & audio**: demux a video into separate video and audio tracks.
 - ✅ **Extract audio track**: pull audio into its own asset.
 - ✅ **Split long text**: break a long passage into chunks.
 - ✅ **Merge / tidy text blocks**: combine segments (use the auto-merge option).
-- ⬜ **Filter or drop clips** (by natural language or rules)
-- ⬜ **Arrange & batch groups** of clips (grouped batch output)
+- ✅ **Filter or drop clips**: drop unwanted clips by rule or selection.
+- ✅ **Arrange & batch groups**: group and arrange text/clip batches for downstream processing.
 
 ## Backend & model providers
 

@@ -138,11 +138,21 @@ tongflow/
 │   ├── components/       # React components
 │   │   └── workspace/    # Main workspace components
 │   │       └── nodes/    # Node implementations
+│   │           ├── add/      # Source nodes (text, image, audio, video, …)
+│   │           ├── transfer/ # Single-input transform nodes
+│   │           ├── compose/  # Multi-input combine nodes
+│   │           ├── decompose/# Split nodes (text, video)
+│   │           ├── batch/    # Batch helper nodes
+│   │           ├── modal/    # Passthrough display nodes
+│   │           └── base/     # Shared base components
 │   ├── hooks/            # Custom hooks and stores
-│   ├── lib/              # Core libraries
-│   └── handlers/         # Backend handlers
-├── plugins/              # Modal GPU plugins (separate repos)
-├── config/               # Configuration files
+│   ├── lib/              # Core libraries and plugin executor
+│   ├── messages/         # i18n strings (en, zh, ja)
+│   ├── generated/        # Auto-generated code (ABI types via pnpm gen:abi)
+│   └── services/         # Server-side service layer
+├── config/               # Feature registry JSON and ABI definition
+├── packages/             # Workspace packages (@openflow/proprietary)
+├── scripts/              # Build, codegen, and publish scripts
 └── docs/                 # Documentation
 ```
 
