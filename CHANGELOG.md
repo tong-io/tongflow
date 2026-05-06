@@ -9,6 +9,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - GitHub Actions workflow to build and push the web image to GitHub Container Registry (`ghcr.io/tong-io/tongflow`).
+- Audio nodes: noise reduction (`denoise_audio`), speaker diarization (`separate_speaker`), voice/timbre replacement (`convert_voice`).
+- Video nodes: subtitle removal (`subtitle_remove`), watermark removal (`remove_watermark`).
+- Image-to-3D node (`image-gen-model`).
+- Additional lip-sync compose variants: audio+image→video, audio+text→video, audio+image+video→video.
+- Clone-voice synthesis compose node (text + reference audio → speech).
+- Combine text node: merge multiple text nodes into one.
+- Batch helper nodes: filter/drop clips (`drop-video`) and arrange & batch groups (`arrange-group`).
+- Split video & audio helper node: demux video into separate video and audio tracks.
+- TTS expanded to three variants: preset style, voice clone (reference audio), instruction-driven.
+- TongFlow ABI JSON with codegen script (`pnpm gen:abi`) producing TypeScript types under `src/generated/abi/`.
+- Chinese README (`README_ZH.md`).
 
 ### Removed
 - Electron desktop app, electron-builder packaging, and related CI workflows; use Docker or `pnpm dev` for the web app.
