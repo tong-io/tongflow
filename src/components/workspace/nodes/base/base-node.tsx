@@ -82,16 +82,13 @@ export const BaseNode = forwardRef<HTMLDivElement, BaseNodeProps>(
             executeNew,
             isExecuteMode,
             feature,
-            pluginOptions,
             missingPluginOpen,
             setMissingPluginOpen,
         } = useNodeExecution({ workflowConfig, data });
 
         const autoHandles = workflowConfig?.handles !== false;
         const autoPluginSelect =
-            workflowConfig?.showPluginSelect !== false &&
-            pluginOptions.length > 0 &&
-            !!feature;
+            workflowConfig?.showPluginSelect !== false && !!feature;
 
         return (
             <div className="relative">

@@ -188,7 +188,11 @@
                 "modalDeployDone": "デプロイ完了",
                 "modalDeployError": "デプロイ失敗",
                 "modalDeployingAction": "デプロイ中…",
-                "modalDeployProgressHint": "{done}/{total} をデプロイ済み"
+                "modalDeployProgressHint": "{done}/{total} をデプロイ済み",
+                "pluginImplementationTitle": "実装",
+                "pluginImplementationLoading": "プラグイン実装一覧を読み込み中…",
+                "pluginImplementationEmpty": "この機能向けのプラグイン実装がスキャン結果にありません。リポジトリの plugins/ に Modal または LLM プラグインを追加してください（README 参照）。ページを再読み込みしてください。",
+                "pluginRegistryLoadError": "プラグイン登録情報を読み込めませんでした：{message}"
             },
             "common": {
                 "enterInstructions": "指示を入力してください...",

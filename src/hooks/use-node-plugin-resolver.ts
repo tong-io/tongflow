@@ -1,11 +1,15 @@
 import { useLayoutEffect, useCallback } from "react";
 import { useNodeId, useReactFlow } from "@xyflow/react";
-import { useNodePluginIds } from "@/hooks/use-plugins-registry";
+import {
+    useNodePluginIds,
+    usePluginsRegistry,
+} from "@/hooks/use-plugins-registry";
 
 /**
  * Resolves the active plugin for a node given its ABI feature/nodeSlot.
  *
  * Responsibilities:
+ * - Ensures the plugins registry is fetched (so `nodePluginMap` populates on any BaseNode).
  * - Reads pluginOptions from the scanned registry (`nodePluginMap[feature]`).
  * - Persists a default `pluginId` into node data before paint so getPrompts()
  *   closures always see a value (avoids run-before-effect race).
@@ -13,6 +17,7 @@ import { useNodePluginIds } from "@/hooks/use-plugins-registry";
  *   objects that don't already carry one (legacy flat `pluginId` still honored when reading).
  */
 export function useNodePluginResolver(feature: string | undefined) {
+    usePluginsRegistry();
     const nodeId = useNodeId();
     const { updateNodeData, getNode } = useReactFlow();
     const pluginOptions = useNodePluginIds(feature ?? "");

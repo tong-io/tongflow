@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import {
@@ -29,11 +30,12 @@ export function NodePluginSelect({
     onValueChange,
     options,
 }: NodePluginSelectProps) {
+    const t = useTranslations("Workspace.nodes.base");
     return (
         <Card className="p-3">
             <div className="space-y-2">
                 <Label className="text-sm font-medium text-muted-foreground">
-                    Implementation
+                    {t("pluginImplementationTitle")}
                 </Label>
                 <Select value={value} onValueChange={onValueChange}>
                     <SelectTrigger className="w-full" size="sm">

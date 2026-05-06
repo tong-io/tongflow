@@ -188,7 +188,11 @@
                 "modalDeployDone": "部署完成",
                 "modalDeployError": "部署失败",
                 "modalDeployingAction": "部署中…",
-                "modalDeployProgressHint": "已部署 {done}/{total}"
+                "modalDeployProgressHint": "已部署 {done}/{total}",
+                "pluginImplementationTitle": "实现",
+                "pluginImplementationLoading": "正在加载插件实现列表…",
+                "pluginImplementationEmpty": "未扫描到适用于该能力的插件实现。请在仓库的 plugins/ 目录下添加 Modal 或 LLM 插件（见 README），然后刷新页面。",
+                "pluginRegistryLoadError": "无法加载插件注册表：{message}"
             },
             "common": {
                 "enterInstructions": "请输入指令...",

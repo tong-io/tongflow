@@ -188,7 +188,11 @@
                 "modalDeployDone": "Deployment completed",
                 "modalDeployError": "Deployment failed",
                 "modalDeployingAction": "Deploying…",
-                "modalDeployProgressHint": "Deployed {done}/{total}"
+                "modalDeployProgressHint": "Deployed {done}/{total}",
+                "pluginImplementationTitle": "Implementation",
+                "pluginImplementationLoading": "Loading plugin implementations…",
+                "pluginImplementationEmpty": "No plugin implementations were scanned for this capability. Add Modal or LLM plugins under the repo's plugins/ directory (see README), then reload this page.",
+                "pluginRegistryLoadError": "Could not load the plugin registry: {message}"
             },
             "common": {
                 "enterInstructions": "Enter instructions...",

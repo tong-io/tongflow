@@ -156,7 +156,7 @@ export interface NodeExecutionConfig {
     /**
      * Whether BaseNode should auto-render `<NodePluginIdSelect>`.
      * - `undefined` / `true` (default): render when pluginOptions exist
-     * - `false`: skip (e.g. gen_text uses custom NodeModelSelect)
+     * - `false`: skip (e.g. node provides its own implementation picker)
      */
     showPluginSelect?: boolean;
 }

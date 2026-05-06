@@ -10,13 +10,6 @@ import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import {
-    Select,
-    SelectTrigger,
-    SelectContent,
-    SelectItem,
-    SelectValue,
-} from "@/components/ui/select";
-import {
     Dialog,
     DialogContent,
     DialogHeader,
@@ -33,17 +26,29 @@ import useFlow from "@/hooks/use-flow";
 import { useNodeState } from "@/hooks/use-node-data";
 import { NodeTextarea } from "../base/node-textarea";
 import { useTranslations } from "next-intl";
-import { clampToAllowedModel } from "@/utils/node-model-feature";
-import { NodeModelSelect } from "../base/node-model-select";
-import {
-    useNodePluginIds,
-    usePluginsRegistry,
-    usePluginsRegistryStore,
-} from "@/hooks/use-plugins-registry";
-import { pluginDisplayName } from "../base/node-plugin-id-select";
 import type { TongflowPluginNodeProps } from "@/types/tongflow-flow";
 
-const GEN_TEXT_FEATURES = ["gen-text"] as const;
+// Workflow execution config
+const workflowConfig = {
+    feature: "gen-text",
+    outputType: "textNode",
+    outputField: "texts" as const,
+    supportsBatch: true,
+    batchParam: "text",
+    abiProducerPropertyCandidates: ["text", "result", "texts"] as const,
+    paramMappings: {
+        text: {
+            sources: [
+                upstreamParam("textNode", "texts[0]"),
+                configParam("texts[0]"),
+            ],
+            required: true,
+        },
+        userPrompt: {
+            sources: [configParam("userPrompt")],
+        },
+    },
+};
 
 // Reasoning box component
 const ReasoningBox = ({ content }: { content: string }) => {
@@ -79,28 +84,6 @@ const ReasoningBox = ({ content }: { content: string }) => {
     );
 };
 
-// Workflow execution config
-const workflowConfig = {
-    feature: "gen-text",
-    outputType: "textNode",
-    outputField: "texts" as const,
-    supportsBatch: true,
-    batchParam: "text",
-    abiProducerPropertyCandidates: ["text", "result", "texts"] as const,
-    paramMappings: {
-        text: {
-            sources: [
-                upstreamParam("textNode", "texts[0]"),
-                configParam("texts[0]"),
-            ],
-            required: true,
-        },
-        userPrompt: {
-            sources: [configParam("userPrompt")],
-        },
-    },
-};
-
 const GenTextNode = ({
     selected,
     data,
@@ -110,8 +93,6 @@ const GenTextNode = ({
     const expands = useFlow((s) => s.expands);
     const updates = useFlow((s) => s.updates);
     const id = useNodeId()!;
-    // Ensure plugins registry is loaded (drives model/provider options).
-    usePluginsRegistry();
 
     // If ids are present, get data from associated nodes (composition mode)
     // In composition mode, there may be multiple textNodes: one for input text and one for the prompt
@@ -149,26 +130,8 @@ const GenTextNode = ({
     const { userPrompt } = state;
     const t = useTranslations("Workspace.nodes");
     const tBase = useTranslations("Workspace.nodes.base");
-    const registry = usePluginsRegistryStore((s) => s.registry);
 
     const nodeSlot = "gen-text";
-
-    const pluginOptions = useNodePluginIds(nodeSlot);
-    const pluginId = (data.pluginId ?? data.pluginRepo ?? "").trim();
-    /** BaseNode persists registry default; this mirrors nodePluginMap[slot][0] for first paint. */
-    const effectivePluginId = (pluginId || pluginOptions[0] || "").trim();
-    const modelSelectOptions = useMemo(() => {
-        if (!registry) {
-            // Registry not loaded yet; show plugin ids as-is.
-            return pluginOptions.map((pid) => ({
-                value: pid,
-                label: pluginDisplayName(pid),
-            }));
-        }
-        return pluginOptions.map((pid) => {
-            return { value: pid, label: pluginDisplayName(pid) };
-        });
-    }, [registry, pluginOptions, nodeSlot]);
 
     // Get the prompt that will actually be used
     const effectivePrompt = hasUpstreamPrompt ? upstreamPrompt : userPrompt;
@@ -254,7 +217,6 @@ const GenTextNode = ({
                 workflowConfig={{
                     ...workflowConfig,
                     feature: nodeSlot,
-                    showPluginSelect: false,
                     title: t("titles.textGenText"),
                     icon: <Wand2 className="h-5 w-5" />,
                     headerActions: !hasUpstreamPrompt ? (
@@ -297,20 +259,6 @@ const GenTextNode = ({
                 }
             >
                 <div className="p-4 space-y-4">
-                    {pluginOptions.length > 0 && (
-                        <NodeModelSelect
-                            value={effectivePluginId}
-                            onValueChange={(value) => {
-                                const next = clampToAllowedModel(
-                                    value,
-                                    modelSelectOptions.map((o) => o.value),
-                                    effectivePluginId,
-                                );
-                                updates(id, { ...(data as any), pluginId: next });
-                            }}
-                            options={modelSelectOptions}
-                        />
-                    )}
                     <div className="space-y-2">
                         {/* If there is an upstream prompt, show a preview */}
                         {hasUpstreamPrompt ? (
