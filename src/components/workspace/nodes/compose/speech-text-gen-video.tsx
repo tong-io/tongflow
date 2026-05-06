@@ -1,7 +1,5 @@
-import {
-    useNodesData,
-    type NodeProps,
-} from "@xyflow/react";
+import { useNodesData } from "@xyflow/react";
+import type { TongflowPluginNodeProps } from "@/types/tongflow-flow";
 import { memo } from "react";
 import { Video, Sparkles, FileText } from "lucide-react";
 import { BaseNode } from "../base/base-node";
@@ -77,9 +75,12 @@ const workflowConfig = {
     },
 };
 
-const SpeechTextGenVideoNode = ({ selected, data }: NodeProps) => {
+const SpeechTextGenVideoNode = ({
+    selected,
+    data,
+}: TongflowPluginNodeProps<"speech-text-gen-video", "speechTextGenVideoNode">) => {
     const t = useTranslations("Workspace.nodes");
-    const { ids } = data as { ids: string[] };
+    const ids = data.ids ?? [];
     const fromNodes = useNodesData(ids);
 
     // Get text and audio data

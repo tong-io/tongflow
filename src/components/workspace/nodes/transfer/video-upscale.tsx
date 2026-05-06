@@ -1,6 +1,7 @@
 "use client";
 
-import { type NodeProps } from "@xyflow/react";
+
+import type { TongflowPluginNodeProps } from "@/types/tongflow-flow";
 import { memo, useEffect } from "react";
 import { Sparkles, Maximize2 } from "lucide-react";
 
@@ -17,7 +18,7 @@ import {
 } from "@/utils/node-execution-config";
 import { useTranslations } from "next-intl";
 
-const DEFAULT_FEATURE = "video_upscale";
+const DEFAULT_FEATURE = "video-upscale";
 
 type UpscaleTier = "1k" | "2k";
 
@@ -48,9 +49,12 @@ const workflowConfig = {
     },
 };
 
-const VideoUpscaleNode = ({ selected, data }: NodeProps) => {
+const VideoUpscaleNode = ({
+    selected,
+    data,
+}: TongflowPluginNodeProps<"video-upscale", "videoUpscaleNode">) => {
     const t = useTranslations("Workspace.nodes");
-    const { fileKeys = [] } = data as { fileKeys?: string[] };
+    const fileKeys = data.fileKeys ?? [];
 
     const [state, setState] = useNodeState<{ resolution: UpscaleTier | "4k" }>(
         { resolution: "2k" },

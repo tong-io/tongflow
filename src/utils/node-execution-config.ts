@@ -128,6 +128,11 @@ export interface NodeExecutionConfig {
     outputType?: string;
     /** Output field */
     outputField?: "fileKeys" | "texts";
+    /**
+     * Ordered `outputs.properties` keys to try when narrowing producer schema for ABI edge checks.
+     * Falls back to built-in heuristics when omitted (see `connection-validator`).
+     */
+    abiProducerPropertyCandidates?: readonly string[];
     /** Parameter mapping definition */
     paramMappings?: Record<string, ParamMappingConfig>;
     /** Whether batch execution is supported */

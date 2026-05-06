@@ -38,6 +38,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import useFlow from "@/hooks/use-flow";
 import { useTranslations } from "next-intl";
+import { coerceBaseNodeData } from "@/utils/flow-node-data";
 
 /**
  * Recursively collect all downstream node IDs starting from a given node.
@@ -223,7 +224,7 @@ export const NodeHeaderMenuAction = forwardRef<
             useCallback(
                 (state) => {
                     const node = state.nodeLookup.get(id ?? "");
-                    return (node?.data as { comment?: string })?.comment;
+                    return coerceBaseNodeData(node?.data).comment;
                 },
                 [id],
             ),

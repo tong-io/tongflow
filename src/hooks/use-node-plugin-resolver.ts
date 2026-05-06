@@ -9,8 +9,8 @@ import { useNodePluginIds } from "@/hooks/use-plugins-registry";
  * - Reads pluginOptions from the scanned registry (`nodePluginMap[feature]`).
  * - Persists a default `pluginId` into node data before paint so getPrompts()
  *   closures always see a value (avoids run-before-effect race).
- * - Provides `mergePluginIdIntoPrompts` to inject pluginId into prompt objects
- *   that don't already carry one.
+ * - Provides `mergePluginIdIntoPrompts` to inject `routing.pluginId` into prompt
+ *   objects that don't already carry one (legacy flat `pluginId` still honored when reading).
  */
 export function useNodePluginResolver(feature: string | undefined) {
     const nodeId = useNodeId();
@@ -68,11 +68,28 @@ export function useNodePluginResolver(feature: string | undefined) {
             const resolvedPluginId = validData || defaultPluginIdFromRegistry;
             if (!resolvedPluginId) return prompts;
             return prompts.map((o) => {
-                if (typeof o.pluginId === "string" && o.pluginId.trim())
+                const rec = o as Record<string, unknown>;
+                const routing = rec.routing;
+                const routedPid =
+                    routing &&
+                    typeof routing === "object" &&
+                    !Array.isArray(routing)
+                        ? (routing as Record<string, unknown>).pluginId
+                        : undefined;
+                if (typeof routedPid === "string" && routedPid.trim()) {
                     return o;
-                if (typeof o.pluginRepo === "string" && o.pluginRepo.trim())
+                }
+                if (typeof rec.pluginId === "string" && rec.pluginId.trim())
                     return o;
-                return { ...o, pluginId: resolvedPluginId };
+                if (
+                    typeof rec.pluginRepo === "string" &&
+                    rec.pluginRepo.trim()
+                )
+                    return o;
+                return {
+                    ...rec,
+                    routing: { pluginId: resolvedPluginId },
+                };
             });
         },
         [nodeId, getNode, defaultPluginIdFromRegistry, pluginOptions],

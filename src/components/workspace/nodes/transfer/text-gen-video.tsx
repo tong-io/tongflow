@@ -1,10 +1,10 @@
 "use client";
 
 import {
-    type NodeProps,
     useNodeId,
     useStore,
 } from "@xyflow/react";
+import type { TongflowPluginNodeProps } from "@/types/tongflow-flow";
 import type { Edge } from "@xyflow/react";
 import { memo, useMemo } from "react";
 import { Atom } from "lucide-react";
@@ -25,7 +25,7 @@ import { useTranslations } from "next-intl";
 
 // Workflow execution config (BaseNode wires this automatically)
 const workflowConfig = {
-    feature: "text_gen_video",
+    feature: "text-gen-video",
     outputType: "videoNode",
     outputField: "fileKeys" as const,
     supportsBatch: true,
@@ -56,7 +56,10 @@ const workflowConfig = {
     },
 };
 
-const TextGenVideoNode = ({ selected, data }: NodeProps) => {
+const TextGenVideoNode = ({
+    selected,
+    data,
+}: TongflowPluginNodeProps<"text-gen-video", "textGenVideoNode">) => {
     const t = useTranslations("Workspace.nodes");
     const tActions = useTranslations("Workspace.nodes.actions");
 

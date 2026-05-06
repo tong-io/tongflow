@@ -1,4 +1,5 @@
-import { useNodeId, type NodeProps } from "@xyflow/react";
+import { useNodeId } from "@xyflow/react";
+import type { TongflowPluginNodeProps } from "@/types/tongflow-flow";
 import { memo, useCallback } from "react";
 import { Atom } from "lucide-react";
 import { BaseNode } from "../base/base-node";
@@ -12,7 +13,7 @@ import useFlow from "@/hooks/use-flow";
 import { NodeTextarea } from "../base/node-textarea";
 import { useTranslations } from "next-intl";
 
-const DEFAULT_FEATURE = "drop_video";
+const DEFAULT_FEATURE = "drop-video";
 
 // Workflow execution config
 const workflowConfig = {
@@ -31,10 +32,13 @@ const workflowConfig = {
     },
 };
 
-const DropVideoNode = ({ selected, data }: NodeProps) => {
+const DropVideoNode = ({
+    selected,
+    data,
+}: TongflowPluginNodeProps<"drop-video", "dropVideoNode">) => {
     const t = useTranslations("Workspace.nodes.batch");
     const tNodes = useTranslations("Workspace.nodes");
-    const { fileKeys } = data as { fileKeys: string[] };
+    const fileKeys = data.fileKeys;
     const expands = useFlow((s) => s.expands);
 
     const id = useNodeId()!;
@@ -52,7 +56,10 @@ const DropVideoNode = ({ selected, data }: NodeProps) => {
     const handleTaskUpdate = useCallback(
         (task: any): boolean => {
             if (task?.status === "COMPLETED") {
-                const filteredData = (task.data as unknown as any[]) || [];
+                const clips = task?.data?.clips as
+                    | { keep: boolean; fileKey: string }[]
+                    | undefined;
+                const filteredData = clips ?? [];
                 const videoFileKeys = filteredData
                     .filter((item) => item?.keep)
                     .map((item) => item.fileKey);

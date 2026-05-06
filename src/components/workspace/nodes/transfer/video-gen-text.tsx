@@ -1,4 +1,5 @@
-import { type NodeProps } from "@xyflow/react";
+
+import type { TongflowPluginNodeProps } from "@/types/tongflow-flow";
 import { memo } from "react";
 import { Video as VideoIcon, MessageSquare } from "lucide-react";
 
@@ -14,7 +15,7 @@ import {
 } from "@/utils/node-execution-config";
 import { useTranslations } from "next-intl";
 
-const DEFAULT_FEATURE = "video_gen_text";
+const DEFAULT_FEATURE = "video-gen-text";
 
 // Workflow execution config
 const workflowConfig = {
@@ -38,9 +39,12 @@ const workflowConfig = {
     },
 };
 
-const VideoGenTextNode = ({ selected, data }: NodeProps) => {
+const VideoGenTextNode = ({
+    selected,
+    data,
+}: TongflowPluginNodeProps<"video-gen-text", "videoGenTextNode">) => {
     const t = useTranslations("Workspace.nodes");
-    const { fileKeys = [] } = data as { fileKeys?: string[] };
+    const fileKeys = data.fileKeys ?? [];
 
     const [state, setState] = useNodeState({ customPrompt: "" }, data);
     const { customPrompt } = state;

@@ -1,4 +1,4 @@
-import type { NodeProps } from "@xyflow/react";
+import type { TongflowPluginNodeProps } from "@/types/tongflow-flow";
 import { Atom, Ear, Mic, Upload } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { memo, useCallback, useMemo, useRef } from "react";
@@ -33,10 +33,13 @@ import {
     VOICE_LANG_LABELS,
 } from "./text-gen-speech-shared";
 
-const TextGenSpeechCloneNode = ({ selected, data }: NodeProps) => {
+const TextGenSpeechCloneNode = ({
+    selected,
+    data,
+}: TongflowPluginNodeProps<"text-gen-speech-clone", "textGenSpeechCloneNode">) => {
     const t = useTranslations("Workspace.nodes");
     const locale = useLocale();
-    const { texts = [] } = data as { texts?: string[] };
+    const texts = data.texts ?? [];
 
     const defaultVoiceLang: VoiceLanguage =
         locale in crawledVoiceOptions ? (locale as VoiceLanguage) : "zh";

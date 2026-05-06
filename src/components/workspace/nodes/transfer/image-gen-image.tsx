@@ -1,7 +1,5 @@
-import {
-    useNodesData,
-    type NodeProps,
-} from "@xyflow/react";
+import { useNodesData } from "@xyflow/react";
+import type { TongflowPluginNodeProps } from "@/types/tongflow-flow";
 import { memo, useMemo } from "react";
 import { Sparkles, Atom } from "lucide-react";
 
@@ -18,10 +16,11 @@ import {
 import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { useTranslations } from "next-intl";
+import { coerceBaseNodeData } from "@/utils/flow-node-data";
 
 // Workflow execution config
 const workflowConfig = {
-    feature: "image_edit",
+    feature: "image-edit",
     outputType: "imageNode",
     outputField: "fileKeys" as const,
     supportsBatch: true,
@@ -45,9 +44,12 @@ const workflowConfig = {
     },
 };
 
-const ImageGenImageNode = ({ selected, data }: NodeProps) => {
+const ImageGenImageNode = ({
+    selected,
+    data,
+}: TongflowPluginNodeProps<"image-edit", "imageGenImageNode">) => {
     const t = useTranslations("Workspace.nodes");
-    const { ids = [] } = data as { ids?: string[]; feature?: string };
+    const ids = data.ids ?? [];
 
     // If ids are present, get data from associated nodes (composition mode)
     const fromNodes = useNodesData(ids);
@@ -57,16 +59,16 @@ const ImageGenImageNode = ({ selected, data }: NodeProps) => {
     // Get fileKeys and texts from the composite node or directly from data
     const fileKeys: string[] = useMemo(() => {
         if (imageNode) {
-            return (imageNode.data as any)?.fileKeys || [];
+            return coerceBaseNodeData(imageNode.data).fileKeys || [];
         }
-        return (data as any)?.fileKeys || [];
+        return data.fileKeys || [];
     }, [imageNode, data]);
 
     const upstreamTexts: string[] = useMemo(() => {
         if (textNode) {
-            return (textNode.data as any)?.texts || [];
+            return coerceBaseNodeData(textNode.data).texts || [];
         }
-        return (data as any)?.texts || [];
+        return data.texts || [];
     }, [textNode, data]);
 
     // Use the hook to manage edit instructions

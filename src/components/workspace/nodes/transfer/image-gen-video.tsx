@@ -1,9 +1,9 @@
 import {
-    type NodeProps,
     useNodeId,
     useNodesData,
     useStore,
 } from "@xyflow/react";
+import type { TongflowPluginNodeProps } from "@/types/tongflow-flow";
 import type { Edge } from "@xyflow/react";
 import { memo, useMemo } from "react";
 import { Atom } from "lucide-react";
@@ -24,10 +24,11 @@ import {
 } from "@/utils/node-execution-config";
 import { VIDEO_ASPECT_RATIOS, VIDEO_DURATIONS } from "@/constants/media-options";
 import { useTranslations } from "next-intl";
+import { coerceBaseNodeData } from "@/utils/flow-node-data";
 
 // Workflow execution config (BaseNode wires this automatically)
 const workflowConfig = {
-    feature: "image_gen_video",
+    feature: "image-gen-video",
     outputType: "videoNode",
     outputField: "fileKeys" as const,
     supportsBatch: true,
@@ -66,12 +67,12 @@ const workflowConfig = {
     },
 };
 
-const TextGenVideoNode = ({ selected, data }: NodeProps) => {
-    const { ids = [], fileKeys: localFileKeys = [] } = data as {
-        ids?: string[];
-        fileKeys?: string[];
-        feature?: string;
-    };
+const ImageGenVideoNode = ({
+    selected,
+    data,
+}: TongflowPluginNodeProps<"image-gen-video", "imageGenVideoNode">) => {
+    const ids = data.ids ?? [];
+    const localFileKeys = data.fileKeys ?? [];
     const nodeId = useNodeId();
 
     // Get edge and node information to detect upstream connections
@@ -86,16 +87,16 @@ const TextGenVideoNode = ({ selected, data }: NodeProps) => {
     // Get fileKeys and texts from the composite node or directly from data
     const fileKeys: string[] = useMemo(() => {
         if (imageNode) {
-            return (imageNode.data as any)?.fileKeys || [];
+            return coerceBaseNodeData(imageNode.data).fileKeys || [];
         }
         return localFileKeys;
     }, [imageNode, localFileKeys]);
 
     const upstreamTexts: string[] = useMemo(() => {
         if (textNode) {
-            return (textNode.data as any)?.texts || [];
+            return coerceBaseNodeData(textNode.data).texts || [];
         }
-        return (data as any)?.texts || [];
+        return data.texts || [];
     }, [textNode, data]);
 
     // Determine whether there is upstream text input in composition mode
@@ -131,8 +132,9 @@ const TextGenVideoNode = ({ selected, data }: NodeProps) => {
                 const sourceNode = nodeLookup.get(edge.source);
                 if (sourceNode?.type === "imageNode") {
                     hasImage = true;
-                    const nodeData = sourceNode.data as { fileKeys?: string[] };
-                    if (nodeData?.fileKeys && nodeData.fileKeys.length > 0) {
+                    const nodeKeys = coerceBaseNodeData(sourceNode.data)
+                        .fileKeys;
+                    if (nodeKeys?.length) {
                         imageHasData = true;
                     }
                 }
@@ -266,6 +268,6 @@ const TextGenVideoNode = ({ selected, data }: NodeProps) => {
     );
 };
 
-TextGenVideoNode.displayName = "TextGenVideoNode";
+ImageGenVideoNode.displayName = "ImageGenVideoNode";
 
-export default memo(TextGenVideoNode);
+export default memo(ImageGenVideoNode);

@@ -46,7 +46,8 @@
         "gen:abi": "tsx scripts/gen-abi-types.ts",
         "abi:generate": "node scripts/generate-tongflow-abi.mjs",
         "tongflow:publish": "bash scripts/publish-tongflow-pypi.sh",
-        "test": "echo \"No test suite yet\" && exit 0"
+        "test": "vitest run",
+        "verify:plugins": "tsx scripts/verify-plugins-scan.ts"
     },
     "dependencies": {
         "@google/genai": "^1.47.0",
@@ -67,6 +68,7 @@
         "@radix-ui/react-tooltip": "1.2.8",
         "@types/three": "^0.183.1",
         "@xyflow/react": "12.9.0",
+        "ajv": "8.18.0",
         "better-sqlite3": "12.2.0",
         "chokidar": "^4.0.3",
         "class-variance-authority": "0.7.1",
@@ -106,6 +108,7 @@
         "tailwindcss": "4",
         "tsx": "^4.20.5",
         "tw-animate-css": "1.3.8",
-        "typescript": "5"
+        "typescript": "5",
+        "vitest": "^4.1.5"
     }
 }

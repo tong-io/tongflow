@@ -1,8 +1,8 @@
 import {
     useNodeId,
     useNodesData,
-    type NodeProps,
 } from "@xyflow/react";
+import type { TongflowPluginNodeProps } from "@/types/tongflow-flow";
 import { memo, useCallback, useMemo } from "react";
 import { Scissors } from "lucide-react";
 import { BaseNode } from "../base/base-node";
@@ -15,8 +15,9 @@ import useFlow from "@/hooks/use-flow";
 import { useNodeState } from "@/hooks/use-node-data";
 import { NodeTextarea } from "../base/node-textarea";
 import { useTranslations } from "next-intl";
+import { coerceBaseNodeData } from "@/utils/flow-node-data";
 
-const DEFAULT_FEATURE = "split_text";
+const DEFAULT_FEATURE = "split-text";
 
 // Workflow execution config
 const workflowConfig = {
@@ -38,13 +39,14 @@ const workflowConfig = {
     },
 };
 
-const SplitTextNode = ({ selected, data }: NodeProps) => {
+const SplitTextNode = ({
+    selected,
+    data,
+}: TongflowPluginNodeProps<"split-text", "splitTextNode">) => {
     const t = useTranslations("Workspace.nodes");
     const tBase = useTranslations("Workspace.nodes.base");
-    const { ids = [], texts: localTexts = [] } = data as {
-        ids?: string[];
-        texts?: string[];
-    };
+    const ids = data.ids ?? [];
+    const localTexts = data.texts ?? [];
 
     const expands = useFlow((s) => s.expands);
     const id = useNodeId()!;
@@ -55,7 +57,7 @@ const SplitTextNode = ({ selected, data }: NodeProps) => {
 
     const texts: string[] = useMemo(() => {
         if (textNodes.length > 0) {
-            return (textNodes[0].data as any)?.texts || [];
+            return coerceBaseNodeData(textNodes[0].data).texts || [];
         }
         return localTexts;
     }, [textNodes, localTexts]);

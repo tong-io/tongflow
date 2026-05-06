@@ -92,7 +92,10 @@ function deriveBundleFromPluginsRegistry(): FeatureRegistryBundle {
         features: TONGFLOW_ABI_NODES.map((n) =>
             featureDefinitionForSlot(n.nodeSlot),
         ),
-        aliases: { canonical: {}, labelLookup: {} },
+        aliases: {
+            canonical: {},
+            labelLookup: {},
+        },
     });
 }
 

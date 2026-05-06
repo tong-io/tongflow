@@ -1,4 +1,4 @@
-import type { NodeProps } from "@xyflow/react";
+import type { TongflowPluginNodeProps } from "@/types/tongflow-flow";
 import { Atom } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { memo, useCallback, useMemo } from "react";
@@ -20,9 +20,12 @@ import {
     TEXT_GEN_SPEECH_PRESET,
 } from "./text-gen-speech-shared";
 
-const TextGenSpeechPresetNode = ({ selected, data }: NodeProps) => {
+const TextGenSpeechPresetNode = ({
+    selected,
+    data,
+}: TongflowPluginNodeProps<"text-gen-speech-preset", "textGenSpeechPresetNode">) => {
     const t = useTranslations("Workspace.nodes");
-    const { texts = [] } = data as { texts?: string[] };
+    const texts = data.texts ?? [];
 
     const genderOptions = useMemo(() => buildGenderOptions(t), [t]);
     const emotionOptions = useMemo(() => buildEmotionOptions(t), [t]);

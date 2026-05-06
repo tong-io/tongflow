@@ -1,7 +1,5 @@
-import {
-    useNodesData,
-    type NodeProps,
-} from "@xyflow/react";
+import { useNodesData } from "@xyflow/react";
+import type { TongflowPluginNodeProps } from "@/types/tongflow-flow";
 import { memo, useMemo } from "react";
 import { Video, Sparkles } from "lucide-react";
 import { BaseNode } from "../base/base-node";
@@ -39,9 +37,12 @@ const workflowConfig = {
     },
 };
 
-const VideoImageGenVideoMoveNode = ({ selected, data }: NodeProps) => {
+const VideoImageGenVideoMoveNode = ({
+    selected,
+    data,
+}: TongflowPluginNodeProps<"video-image-gen-video-move", "videoImageGenVideoMoveNode">) => {
     const t = useTranslations("Workspace.nodes");
-    const { ids } = data as { ids: string[] };
+    const ids = data.ids ?? [];
     const fromNodes = useNodesData(ids);
 
     // Get image and video data

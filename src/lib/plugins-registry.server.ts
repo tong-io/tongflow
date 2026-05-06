@@ -110,9 +110,6 @@ export function getNodePluginIds(nodeSlot: string): string[] {
     return out;
 }
 
-/** @deprecated */
-export const getNodePluginRepos = getNodePluginIds;
-
 export function getModalPluginConfig(
     pluginId: string,
 ): ModalPluginConfig | null {
@@ -133,9 +130,6 @@ export function getPluginConfig(pluginId: string): PluginConfig | null {
     const reg = loadPluginsRegistry();
     return reg.plugins[pluginId] ?? null;
 }
-
-/** @deprecated */
-export const getModalRepoConfig = (repo: string) => getModalPluginConfig(repo);
 
 /**
  * On-disk path to a file inside a plugin, e.g. `plugins/x/download.py`

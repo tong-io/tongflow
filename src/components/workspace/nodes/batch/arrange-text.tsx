@@ -1,4 +1,5 @@
-import { useNodeId, type NodeProps } from "@xyflow/react";
+import { useNodeId } from "@xyflow/react";
+import type { TongflowPluginNodeProps } from "@/types/tongflow-flow";
 import { memo, useCallback } from "react";
 import { Atom } from "lucide-react";
 import { BaseNode } from "../base/base-node";
@@ -16,7 +17,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useTranslations } from "next-intl";
 
-const DEFAULT_FEATURE = "arrange_group";
+const DEFAULT_FEATURE = "arrange-group";
 
 // Workflow execution config
 const workflowConfig = {
@@ -44,10 +45,14 @@ const workflowConfig = {
     },
 };
 
-const ArrangeTextNode = ({ selected, data }: NodeProps) => {
+const ArrangeTextNode = ({
+    selected,
+    data,
+}: TongflowPluginNodeProps<"arrange-group", "arrangeNode">) => {
     const t = useTranslations("Workspace.nodes.batch");
     const tNodes = useTranslations("Workspace.nodes");
-    const { fileKeys, infos } = data as { fileKeys: string[]; infos: [] };
+    const fileKeys = data.fileKeys ?? [];
+    const infos = data.infos ?? [];
     const expands = useFlow((s) => s.expands);
 
     const id = useNodeId()!;
@@ -67,7 +72,7 @@ const ArrangeTextNode = ({ selected, data }: NodeProps) => {
     const handleTaskUpdate = useCallback(
         (task: any): boolean => {
             if (task?.status === "COMPLETED") {
-                const groups = task?.data?.groups as any[];
+                const groups = task?.data?.groups as string[][] | undefined;
                 if (groups && groups.length > 0 && id) {
                     groups.forEach((group) => {
                         expands(id, [

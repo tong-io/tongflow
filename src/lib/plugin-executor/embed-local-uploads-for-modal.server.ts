@@ -113,7 +113,7 @@ async function embedFileKeysArrayForConcat(
     const raw = out["fileKeys"];
     if (!Array.isArray(raw) || raw.length === 0) return;
 
-    const toVideos = nodeSlot === "concat_videos";
+    const toVideos = nodeSlot === "concat-videos";
     const toAudios = nodeSlot === "concat_audios";
     if (!toVideos && !toAudios) return;
 

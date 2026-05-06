@@ -1,7 +1,9 @@
-import { useNodeId, type NodeProps } from "@xyflow/react";
+import { useNodeId } from "@xyflow/react";
 import { memo, useState, useEffect, useRef } from "react";
 import { Music, Trash, Maximize2, X, Download } from "lucide-react";
 import { createPortal } from "react-dom";
+
+import type { RfDataNodeProps } from "@/types/nodes";
 
 import { BaseNode } from "../base/base-node";
 import {
@@ -26,6 +28,8 @@ import {
 } from "@/hooks/use-file-async-loader";
 import { logger } from "@/lib/logger";
 import { useTranslations } from "next-intl";
+
+type AudioNodeRfProps = RfDataNodeProps<"audioNode">;
 
 // Single-track preview modal
 const FullScreenAudioModal = ({
@@ -180,10 +184,9 @@ const FullScreenWaterfallAudioModal = ({
     return createPortal(content, document.body);
 };
 
-const AudioNode = ({ selected, data }: NodeProps) => {
+const AudioNode = ({ selected, data }: AudioNodeRfProps) => {
     const t = useTranslations("Workspace.nodes.modal");
-    const { fileKeys } = (data as { fileKeys?: string[] }) || { fileKeys: [] };
-    const keys = fileKeys || [];
+    const keys: string[] = data.fileKeys ?? [];
     const { removeNode } = useFlow();
     const id = useNodeId();
     const [isFullScreen, setIsFullScreen] = useState(false);
@@ -391,11 +394,9 @@ const AudioNode = ({ selected, data }: NodeProps) => {
 };
 
 // Custom comparison function to prevent unnecessary re-renders
-const areEqual = (prevProps: NodeProps, nextProps: NodeProps) => {
-    const prevFileKeys =
-        (prevProps.data as { fileKeys?: string[] })?.fileKeys || [];
-    const nextFileKeys =
-        (nextProps.data as { fileKeys?: string[] })?.fileKeys || [];
+const areEqual = (prevProps: AudioNodeRfProps, nextProps: AudioNodeRfProps) => {
+    const prevFileKeys = prevProps.data.fileKeys || [];
+    const nextFileKeys = nextProps.data.fileKeys || [];
 
     return (
         prevProps.selected === nextProps.selected &&

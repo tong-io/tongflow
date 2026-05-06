@@ -21,6 +21,7 @@ data/
 
 # runtime-generated artifacts (build-time from ABI / plugin scan)
 .tongflow/
+.openflow/
 
 # local plugins are managed as separate repos
 plugins/tongflow/

@@ -1,4 +1,5 @@
-import { type NodeProps } from "@xyflow/react";
+
+import type { TongflowPluginNodeProps } from "@/types/tongflow-flow";
 import { memo } from "react";
 import { BaseNode } from "../base/base-node";
 import { Music } from "lucide-react";
@@ -8,7 +9,7 @@ import {
 } from "@/utils/node-execution-config";
 import { useTranslations } from "next-intl";
 
-const DEFAULT_FEATURE = "extract_audio";
+const DEFAULT_FEATURE = "extract-audio";
 
 const workflowConfig = {
     feature: DEFAULT_FEATURE,
@@ -28,9 +29,12 @@ const workflowConfig = {
     },
 };
 
-const ExtractAudioNode = ({ selected, data }: NodeProps) => {
+const ExtractAudioNode = ({
+    selected,
+    data,
+}: TongflowPluginNodeProps<"extract-audio", "extractAudioNode">) => {
     const t = useTranslations("Workspace.nodes");
-    const { fileKeys } = data as { fileKeys: string[] };
+    const fileKeys = data.fileKeys;
 
     return (
         <BaseNode

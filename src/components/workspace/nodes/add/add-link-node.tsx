@@ -1,4 +1,4 @@
-import { type NodeProps } from "@xyflow/react";
+import type { TongflowPluginNodeProps } from "@/types/tongflow-flow";
 import { useCallback, useMemo, memo } from "react";
 import { Link as LinkIcon, Plus, Trash } from "lucide-react";
 
@@ -25,7 +25,10 @@ const workflowConfig = {
     },
 };
 
-const AddLinkNode = ({ selected, data }: NodeProps) => {
+const AddLinkNode = ({
+    selected,
+    data,
+}: TongflowPluginNodeProps<"link", "addLinkNode">) => {
     const t = useTranslations("Workspace.nodes.add");
 
     // Use the new hook to manage state persistence

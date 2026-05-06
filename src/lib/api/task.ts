@@ -20,6 +20,8 @@ export interface Task {
 export interface CreateTaskRequest {
     feature: string;
     prompt: Record<string, unknown>;
+    /** Optional; merges over `prompt.routing` for plugin selection */
+    routing?: { pluginId: string };
     nodeId: string;
     workflowId?: number;
 }

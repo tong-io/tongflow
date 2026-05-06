@@ -19,6 +19,7 @@ import {
     type NodeExecutionConfig,
     type ParamMappingConfig,
 } from "./node-execution-config";
+import { migrateWorkflowNodes } from "@/utils/migrate-workflow-nodes";
 import { WorkflowParser } from "./workflow-parser";
 import { logger } from "@/lib/logger";
 
@@ -887,7 +888,7 @@ export function parseWorkflowImportJson(raw: unknown): ParsedWorkflowImport {
     }
 
     return {
-        nodes: nodes as Node[],
+        nodes: migrateWorkflowNodes(nodes as Node[]),
         edges: edges as Edge[],
         name: typeof obj.name === "string" ? obj.name : undefined,
         description:

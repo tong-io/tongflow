@@ -1,7 +1,8 @@
-import { type NodeProps } from "@xyflow/react";
 import { memo, useState, useEffect } from "react";
 import { Image as ImageIcon, Maximize2, X } from "lucide-react";
 import { createPortal } from "react-dom";
+
+import type { RfDataNodeProps } from "@/types/nodes";
 
 import { BaseNode } from "../base/base-node";
 import {
@@ -23,6 +24,8 @@ import { useTranslations } from "next-intl";
 import { logger } from "@/lib/logger";
 
 import { proportionalMediaNodeWidthPx } from "./media-node-max-width";
+
+type ImageNodeRfProps = RfDataNodeProps<"imageNode">;
 
 // Single-image lightbox modal
 const FullScreenImageModal = ({
@@ -162,10 +165,9 @@ const FullScreenWaterfallImageModal = ({
     return createPortal(content, document.body);
 };
 
-const ImageNode = ({ selected, data }: NodeProps) => {
+const ImageNode = ({ selected, data }: ImageNodeRfProps) => {
     const t = useTranslations("Workspace.nodes.modal");
-    const { fileKeys } = (data as { fileKeys?: string[] }) || { fileKeys: [] };
-    const keys = fileKeys || [];
+    const keys: string[] = data.fileKeys ?? [];
     const [isFullScreen, setIsFullScreen] = useState(false);
     const [isWaterfallFullScreen, setIsWaterfallFullScreen] = useState(false);
     const [imageDimensions, setImageDimensions] = useState<{
@@ -359,11 +361,12 @@ const ImageNode = ({ selected, data }: NodeProps) => {
 };
 
 // Custom comparison function to prevent unnecessary re-renders
-const areEqual = (prevProps: NodeProps, nextProps: NodeProps) => {
-    const prevFileKeys =
-        (prevProps.data as { fileKeys?: string[] })?.fileKeys || [];
-    const nextFileKeys =
-        (nextProps.data as { fileKeys?: string[] })?.fileKeys || [];
+const areEqual = (
+    prevProps: ImageNodeRfProps,
+    nextProps: ImageNodeRfProps,
+) => {
+    const prevFileKeys = prevProps.data.fileKeys || [];
+    const nextFileKeys = nextProps.data.fileKeys || [];
 
     return (
         prevProps.selected === nextProps.selected &&

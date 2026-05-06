@@ -4,7 +4,7 @@ const LOCAL_SCHEMA_VERSION = 1;
 
 type TableInfoRow = { name: string };
 
-function tableExists(db: Database.Database, name: string): boolean {
+export function tableExists(db: Database.Database, name: string): boolean {
     const row = db
         .prepare(
             "SELECT name FROM sqlite_master WHERE type='table' AND name=?",

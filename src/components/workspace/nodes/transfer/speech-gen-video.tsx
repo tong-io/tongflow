@@ -1,8 +1,8 @@
 import {
     useNodeId,
     useNodesData,
-    type NodeProps,
 } from "@xyflow/react";
+import type { TongflowPluginNodeProps } from "@/types/tongflow-flow";
 import { memo, useCallback, useMemo } from "react";
 import { Atom, Wand2 } from "lucide-react";
 import { BaseNode } from "../base/base-node";
@@ -19,15 +19,17 @@ import {
     type GetPromptsContext,
 } from "@/utils/node-execution-config";
 import { useTranslations } from "next-intl";
+import { coerceBaseNodeData } from "@/utils/flow-node-data";
 
 const DEFAULT_FEATURE = "speech-text-gen-video";
 
-const SpeechGenVideoNode = ({ selected, data }: NodeProps) => {
+const SpeechGenVideoNode = ({
+    selected,
+    data,
+}: TongflowPluginNodeProps<"speech-text-gen-video", "speechGenVideoNode">) => {
     const t = useTranslations("Workspace.nodes");
-    const { ids = [], fileKeys: localFileKeys = [] } = data as {
-        ids?: string[];
-        fileKeys?: string[];
-    };
+    const ids = data.ids ?? [];
+    const localFileKeys = data.fileKeys ?? [];
     const expands = useFlow((s) => s.expands);
     const id = useNodeId()!;
 
@@ -39,16 +41,16 @@ const SpeechGenVideoNode = ({ selected, data }: NodeProps) => {
     // Get fileKeys and texts from the composite node or directly from data
     const fileKeys: string[] = useMemo(() => {
         if (videoNode) {
-            return (videoNode.data as any)?.fileKeys || [];
+            return coerceBaseNodeData(videoNode.data).fileKeys || [];
         }
         return localFileKeys;
     }, [videoNode, localFileKeys]);
 
     const upstreamTexts: string[] = useMemo(() => {
         if (textNode) {
-            return (textNode.data as any)?.texts || [];
+            return coerceBaseNodeData(textNode.data).texts || [];
         }
-        return (data as any)?.texts || [];
+        return data.texts || [];
     }, [textNode, data]);
 
     // Determine whether there is upstream text input

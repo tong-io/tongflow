@@ -1,11 +1,9 @@
-import {
-    type NodeProps,
-    useReactFlow,
-    useNodeId,
-} from "@xyflow/react";
+import { useReactFlow, useNodeId } from "@xyflow/react";
 import { memo, useState, useEffect } from "react";
 import { FileText, Maximize2, X } from "lucide-react";
 import { createPortal } from "react-dom";
+
+import type { RfDataNodeProps } from "@/types/nodes";
 
 import { BaseNode } from "../base/base-node";
 import {
@@ -20,6 +18,8 @@ import { DropdownMenuLabel } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { useTranslations } from "next-intl";
 import { logger } from "@/lib/logger";
+
+type TextNodeRfProps = RfDataNodeProps<"textNode">;
 
 // Lightweight fullscreen inspector shell
 const FullScreenTextModal = ({
@@ -82,10 +82,10 @@ const FullScreenTextModal = ({
     return createPortal(content, document.body);
 };
 
-const TextNode = ({ selected, data }: NodeProps) => {
+const TextNode = ({ selected, data }: TextNodeRfProps) => {
     const t = useTranslations("Workspace.nodes.modal");
-    const { texts } = (data as { texts?: string[] }) || { texts: [] };
-    const textList = texts || [];
+    const texts = data.texts;
+    const textList: string[] = texts ?? [];
     const [isFullScreen, setIsFullScreen] = useState(false);
     const { updateNodeData } = useReactFlow();
     const nodeId = useNodeId();
@@ -212,9 +212,9 @@ const TextNode = ({ selected, data }: NodeProps) => {
 };
 
 // Custom comparison function to prevent unnecessary re-renders
-const areEqual = (prevProps: NodeProps, nextProps: NodeProps) => {
-    const prevTexts = (prevProps.data as { texts?: string[] })?.texts || [];
-    const nextTexts = (nextProps.data as { texts?: string[] })?.texts || [];
+const areEqual = (prevProps: TextNodeRfProps, nextProps: TextNodeRfProps) => {
+    const prevTexts = prevProps.data.texts || [];
+    const nextTexts = nextProps.data.texts || [];
 
     return (
         prevProps.selected === nextProps.selected &&

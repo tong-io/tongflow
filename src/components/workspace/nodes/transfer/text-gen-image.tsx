@@ -1,4 +1,5 @@
-import { type NodeProps, useNodeId } from "@xyflow/react";
+import { useNodeId } from "@xyflow/react";
+import type { TongflowPluginNodeProps } from "@/types/tongflow-flow";
 import { Atom } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { memo, useCallback } from "react";
@@ -16,38 +17,6 @@ import {
 import { AspectRatioPicker } from "../base/aspect-ratio-picker";
 import { BaseNode } from "../base/base-node";
 
-/**
- * TextGenImageNode data structure
- * feature and prompt are stored directly in data and can be used by backend execution
- */
-interface TextGenImageNodeData extends Record<string, unknown> {
-    /** Feature identifier */
-    feature: string;
-    /** Execution parameters */
-    prompt: {
-        /** Width */
-        width: number;
-        /** Height */
-        height: number;
-    };
-    /** Text received from upstream (used during execution) */
-    texts?: string[];
-    /** Aspect ratio options for UI display */
-    selectedAspectRatio?: {
-        value: string;
-        label: string;
-        width: number;
-        height: number;
-    };
-    /** Directory name under `plugins/` (from registry). */
-    pluginId?: string;
-    /** @deprecated */ pluginRepo?: string;
-}
-
-interface TextGenImageNodeProps extends NodeProps {
-    data: TextGenImageNodeData;
-}
-
 // Default prompt parameters
 const defaultPrompt = {
     width: 1024,
@@ -56,7 +25,7 @@ const defaultPrompt = {
 
 // Workflow execution config
 const workflowConfig = {
-    feature: "image_gen",
+    feature: "image-gen",
     outputType: "imageNode",
     outputField: "fileKeys" as const,
     paramMappings: {
@@ -80,10 +49,16 @@ const workflowConfig = {
     },
 };
 
+type TextGenImageNodeProps =
+    TongflowPluginNodeProps<"image-gen", "textGenImageNode">;
+
 const TextGenImageNode = ({ selected, data }: TextGenImageNodeProps) => {
     const t = useTranslations("Workspace.nodes");
-    const { texts = [], selectedAspectRatio } = data;
-    const prompt = data.prompt ?? defaultPrompt;
+    const { texts = [] } = data;
+    const selectedAspectRatio = data.selectedAspectRatio as
+        | AspectRatio
+        | undefined;
+    const prompt = { ...defaultPrompt, ...(data.prompt ?? {}) };
     const id = useNodeId()!;
     const updates = useFlow((s) => s.updates);
 

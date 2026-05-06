@@ -1,4 +1,5 @@
-import { useNodesData, type NodeProps } from "@xyflow/react";
+import { useNodesData } from "@xyflow/react";
+import type { TongflowPluginNodeProps } from "@/types/tongflow-flow";
 import { memo } from "react";
 import { Atom } from "lucide-react";
 import { BaseNode } from "../base/base-node";
@@ -8,7 +9,7 @@ import {
 } from "@/utils/node-execution-config";
 import { useTranslations } from "next-intl";
 
-const DEFAULT_FEATURE = "merge_video_audio";
+const DEFAULT_FEATURE = "merge-video-audio";
 
 // Workflow execution config
 const workflowConfig = {
@@ -27,9 +28,12 @@ const workflowConfig = {
     },
 };
 
-const MergeVideoAudioNode = ({ selected, data }: NodeProps) => {
+const MergeVideoAudioNode = ({
+    selected,
+    data,
+}: TongflowPluginNodeProps<"merge-video-audio", "mergeVideoAudioNode">) => {
     const t = useTranslations("Workspace.nodes");
-    const { ids } = data as { ids: string[] };
+    const ids = data.ids ?? [];
     const fromNodes = useNodesData(ids);
     const audios = fromNodes.find((node) => node.type === "audioNode")?.data
         ?.fileKeys as string[];

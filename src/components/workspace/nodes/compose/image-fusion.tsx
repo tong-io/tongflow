@@ -1,8 +1,5 @@
-import {
-    useNodeId,
-    useNodesData,
-    type NodeProps,
-} from "@xyflow/react";
+import { useNodeId, useNodesData } from "@xyflow/react";
+import type { TongflowPluginNodeProps } from "@/types/tongflow-flow";
 import { memo, useRef, useMemo, useCallback } from "react";
 import {
     Combine,
@@ -30,6 +27,7 @@ import { getFileUrl } from "@/lib/file-url";
 import { cn } from "@/lib/utils";
 import { useTranslations } from "next-intl";
 import { MediaThumbnail } from "../base/media-thumbnail";
+import { coerceBaseNodeData } from "@/utils/flow-node-data";
 
 const resolutions = [
     { value: "512", key: "res512", label: "512" },
@@ -38,7 +36,7 @@ const resolutions = [
     { value: "4K", key: "res4K", label: "4K" },
 ];
 
-const DEFAULT_FEATURE = "image_fusion";
+const DEFAULT_FEATURE = "image-fusion";
 
 
 // Workflow execution config
@@ -65,14 +63,16 @@ const workflowConfig = {
     },
 };
 
-const ImageFusionNode = ({ selected, data }: NodeProps) => {
+const ImageFusionNode = ({
+    selected,
+    data,
+}: TongflowPluginNodeProps<"image-fusion", "imageFusionNode">) => {
     const t = useTranslations("Workspace.nodes");
-    const { ids, selectedAspectRatio, selectedResolution } = data as {
-        ids: string[];
-        feature?: string;
-        selectedAspectRatio?: AspectRatio;
-        selectedResolution?: (typeof resolutions)[0];
-    };
+    const ids = data.ids ?? [];
+    const selectedAspectRatio = data.selectedAspectRatio;
+    const selectedResolution = data.selectedResolution as
+        | (typeof resolutions)[0]
+        | undefined;
     const updates = useFlow((s) => s.updates);
     const id = useNodeId()!;
     const fromNodes = useNodesData(ids);
@@ -107,14 +107,14 @@ const ImageFusionNode = ({ selected, data }: NodeProps) => {
     // Get fileKeys from all image nodes
     const allImages = fromNodes
         .filter((node) => node.type === "imageNode")
-        .map((node) => node.data?.fileKeys as string[])
-        .filter((keys) => keys && keys.length > 0);
+        .map((node) => coerceBaseNodeData(node.data).fileKeys)
+        .filter((keys): keys is string[] => !!keys && keys.length > 0);
 
     // Get textNode text from the composite node
     const textNode = fromNodes.find((node) => node.type === "textNode");
     const upstreamTexts: string[] = useMemo(() => {
         if (textNode) {
-            return (textNode.data as any)?.texts || [];
+            return coerceBaseNodeData(textNode?.data).texts || [];
         }
         return [];
     }, [textNode]);

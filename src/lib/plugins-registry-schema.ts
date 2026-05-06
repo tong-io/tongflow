@@ -72,6 +72,3 @@ export type PluginsRegistry = z.infer<typeof PluginsRegistrySchema>;
 export type ModalPluginConfig = z.infer<typeof ModalPluginConfigSchema>;
 export type LlmPluginConfig = z.infer<typeof LlmPluginConfigSchema>;
 export type PluginConfig = z.infer<typeof PluginConfigSchema>;
-
-/** @deprecated use ModalPluginConfig */
-export type ModalPluginRepo = ModalPluginConfig;

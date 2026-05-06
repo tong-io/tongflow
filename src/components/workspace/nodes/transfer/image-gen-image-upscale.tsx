@@ -1,6 +1,7 @@
 "use client";
 
-import { type NodeProps } from "@xyflow/react";
+
+import type { TongflowPluginNodeProps } from "@/types/tongflow-flow";
 import { memo } from "react";
 import { Sparkles, Maximize2 } from "lucide-react";
 
@@ -17,7 +18,7 @@ import {
 } from "@/utils/node-execution-config";
 import { useTranslations } from "next-intl";
 
-const DEFAULT_FEATURE = "image_upscale";
+const DEFAULT_FEATURE = "image-upscale";
 
 type UpscaleTier = "1k" | "2k" | "4k";
 
@@ -49,9 +50,12 @@ const workflowConfig = {
     },
 };
 
-const ImageGenImageUpscaleNode = ({ selected, data }: NodeProps) => {
+const ImageGenImageUpscaleNode = ({
+    selected,
+    data,
+}: TongflowPluginNodeProps<"image-upscale", "imageGenImageUpscaleNode">) => {
     const t = useTranslations("Workspace.nodes");
-    const { fileKeys = [] } = data as { fileKeys?: string[] };
+    const fileKeys = data.fileKeys ?? [];
 
     const [state, setState] = useNodeState<{ resolution: UpscaleTier }>(
         { resolution: "2k" },

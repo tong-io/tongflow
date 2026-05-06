@@ -337,12 +337,18 @@ export function useNodeExecution({
             .map((p) => p as Record<string, unknown>);
         const merged = mergePluginIdIntoPrompts(raw);
         const first = merged[0] as Record<string, unknown> | undefined;
+        const routing =
+            first?.routing && typeof first.routing === "object"
+                ? (first.routing as Record<string, unknown>)
+                : undefined;
         const pluginId =
-            first && typeof first.pluginId === "string"
-                ? first.pluginId.trim()
-                : first && typeof first.pluginRepo === "string"
-                  ? first.pluginRepo.trim()
-                  : "";
+            routing && typeof routing.pluginId === "string"
+                ? routing.pluginId.trim()
+                : first && typeof first.pluginId === "string"
+                  ? first.pluginId.trim()
+                  : first && typeof first.pluginRepo === "string"
+                    ? first.pluginRepo.trim()
+                    : "";
 
         if (!pluginId) {
             setMissingPluginOpen(true);

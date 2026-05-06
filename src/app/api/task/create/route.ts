@@ -1,9 +1,23 @@
-import { NextRequest, NextResponse } from "next/server";
+import { nanoid } from "nanoid";
+import { type NextRequest, NextResponse } from "next/server";
 import { getDb } from "@/db";
 import { tasks } from "@/db/schema";
-import { nanoid } from "nanoid";
-import { getAbiNodeBySlot } from "@/lib/tongflow-abi";
+import { ABI_NODES, type NodeSlot } from "@/generated/abi";
+import {
+    extractAbiBusinessInput,
+    validateSlotInput,
+} from "@/lib/abi-schema-validate";
 import { logger } from "@/lib/logger";
+import {
+    buildPersistedTaskPrompt,
+    resolveRoutingPluginId,
+} from "@/lib/task-prompt-routing";
+import { getAbiNodeBySlot } from "@/lib/tongflow-abi";
+import { canonicalizeNodeSlot } from "@/lib/legacy-slot-map";
+
+function isAbiNodeSlot(s: string): s is NodeSlot {
+    return Object.hasOwn(ABI_NODES, s);
+}
 
 /**
  * POST /api/task/create
@@ -15,8 +29,10 @@ export async function POST(request: NextRequest) {
             prompt: Record<string, unknown>;
             nodeId: string;
             workflowId?: number;
+            routing?: { pluginId?: string };
         };
-        const { feature, prompt, nodeId, workflowId } = body;
+        const { feature, prompt, nodeId, workflowId, routing: bodyRouting } =
+            body;
 
         if (!feature || typeof feature !== "string") {
             return NextResponse.json(
@@ -39,7 +55,8 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        const abiNode = getAbiNodeBySlot(feature);
+        const normalizedFeature = canonicalizeNodeSlot(feature.trim());
+        const abiNode = getAbiNodeBySlot(normalizedFeature);
         if (!abiNode) {
             return NextResponse.json(
                 { error: `nodeSlot=${feature} 不存在（请检查 ABI）` },
@@ -48,13 +65,46 @@ export async function POST(request: NextRequest) {
         }
         const canonicalFeature = abiNode.nodeSlot;
 
-        const pluginId =
-            typeof (prompt as any).pluginId === "string"
-                ? String((prompt as any).pluginId).trim()
-                : "";
+        const mergedPrompt: Record<string, unknown> = { ...prompt };
+        if (bodyRouting && typeof bodyRouting === "object") {
+            const prev =
+                mergedPrompt.routing &&
+                typeof mergedPrompt.routing === "object" &&
+                !Array.isArray(mergedPrompt.routing)
+                    ? (mergedPrompt.routing as Record<string, unknown>)
+                    : {};
+            mergedPrompt.routing = { ...prev, ...bodyRouting };
+        }
+
+        const pluginId = resolveRoutingPluginId(mergedPrompt);
         if (!pluginId) {
             return NextResponse.json(
-                { error: "缺少 pluginId：请先在节点里选择一个插件实现（user/repo）" },
+                {
+                    error: "缺少 pluginId：请先在节点里选择一个插件实现（user/repo）",
+                },
+                { status: 400 },
+            );
+        }
+
+        if (!isAbiNodeSlot(canonicalFeature)) {
+            logger.error(
+                `[Task] ABI_TYPES missing slot while tongflow Abi has ${canonicalFeature}`,
+            );
+            return NextResponse.json(
+                { error: "节点槽位与生成 ABI 不一致，请联系管理员" },
+                { status: 500 },
+            );
+        }
+
+        const businessInput = extractAbiBusinessInput(mergedPrompt);
+        const inputCheck = validateSlotInput(canonicalFeature, businessInput);
+        if (!inputCheck.ok) {
+            return NextResponse.json(
+                {
+                    error: "输入参数不符合该节点 ABI 校验",
+                    details: inputCheck.failure.errorsText,
+                    ajvErrors: inputCheck.failure.ajvErrors,
+                },
                 { status: 400 },
             );
         }
@@ -68,7 +118,9 @@ export async function POST(request: NextRequest) {
                 id: taskId,
                 nodeId,
                 feature: canonicalFeature,
-                prompt: JSON.stringify(prompt),
+                prompt: JSON.stringify(
+                    buildPersistedTaskPrompt(mergedPrompt, pluginId),
+                ),
                 status: "pending",
                 progress: 0,
                 workflowId: workflowId ?? null,

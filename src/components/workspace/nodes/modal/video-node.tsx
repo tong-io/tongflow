@@ -1,7 +1,8 @@
-import { type NodeProps } from "@xyflow/react";
 import { memo, useRef, useState, useEffect } from "react";
 import { Video as VideoIcon, Maximize2, X, Download } from "lucide-react";
 import { createPortal } from "react-dom";
+
+import type { RfDataNodeProps } from "@/types/nodes";
 
 import { BaseNode } from "../base/base-node";
 import {
@@ -27,6 +28,8 @@ import { useTranslations } from "next-intl";
 import { logger } from "@/lib/logger";
 
 import { proportionalMediaNodeWidthPx } from "./media-node-max-width";
+
+type VideoNodeRfProps = RfDataNodeProps<"videoNode">;
 
 // Single-video fullscreen modal
 const FullScreenVideoModal = ({
@@ -225,10 +228,9 @@ const FullScreenWaterfallModal = ({
     return createPortal(content, document.body);
 };
 
-const VideoNode = ({ selected, data }: NodeProps) => {
+const VideoNode = ({ selected, data }: VideoNodeRfProps) => {
     const t = useTranslations("Workspace.nodes.modal");
-    const { fileKeys } = (data as { fileKeys?: string[] }) || { fileKeys: [] };
-    const keys = fileKeys || [];
+    const keys: string[] = data.fileKeys ?? [];
 
     // Refs for video elements
     const singleVideoRef = useRef<HTMLVideoElement>(null);

@@ -24,8 +24,8 @@
 
 ## 扩展一条 AI 能力时的三步
 
-1. **在 JSON 中增加 `features` 行**（或 `features.local.json`），`function` 必须与后端 handler 注册键一致。
-2. **实现或复用任务 handler**：[`src/lib/register-task-handlers.ts`](../src/lib/register-task-handlers.ts) 通过 `(type, function)` 路由到 `registerHandler`；只改 JSON 不注册 handler 会导致任务执行失败。
+1. **在 JSON 中增加 `features` 行**（或 `features.local.json`）；画布节点能力与 ABI [`nodeSlot`](../config/tongflow.abi.json) 对齐。
+2. **实现对应插件**：在 `plugins/` 下配置 Modal / LLM 插件并由 scanner 注册；任务执行走 [`executePlugin`](../src/lib/plugin-executor/execute.ts)，不再使用旧的 `(type, function)` handler 注册表。
 3. **若要在某节点下拉出现新 `name`**：更新该节点内的 **allowed feature 常量**（如 `GEN_TEXT_FEATURES`）——节点白名单与注册表解耦，避免误暴露未实现能力。
 
 ## 客户端与服务器

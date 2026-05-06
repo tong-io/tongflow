@@ -1,7 +1,7 @@
 import {
     useNodesData,
-    type NodeProps,
 } from "@xyflow/react";
+import type { RfDataNodeProps } from "@/types/nodes";
 import { memo, useMemo } from "react";
 import { Atom, Type, Music } from "lucide-react";
 import { getFileUrl } from "@/lib/file-url";
@@ -19,6 +19,7 @@ import {
 import { useNodeState } from "@/hooks/use-node-data";
 import { upstreamParam, configParam } from "@/utils/node-execution-config";
 import { useTranslations } from "next-intl";
+import { coerceBaseNodeData } from "@/utils/flow-node-data";
 
 const DEFAULT_FEATURE = "text-audio-gen-speech";
 
@@ -212,17 +213,22 @@ const styleOptions = [
     },
 ];
 
-const TextAudioGenSpeechNode = ({ selected, data }: NodeProps) => {
+type TextAudioGenSpeechRfProps = RfDataNodeProps<"textAudioGenSpeechNode">;
+
+const TextAudioGenSpeechNode = ({
+    selected,
+    data,
+}: TextAudioGenSpeechRfProps) => {
     const t = useTranslations("Workspace.nodes");
-    const { ids = [] } = data as { ids?: string[] };
+    const ids: string[] = [...(data.ids ?? [])];
     const fromNodes = useNodesData(ids);
     // Get upstream text data
     const textNode = fromNodes.find((node) => node.type === "textNode");
-    const texts = (textNode?.data as any)?.texts as string[] | undefined;
+    const texts = coerceBaseNodeData(textNode?.data).texts;
 
     // Get upstream audio data as the reference
     const audio = fromNodes.find((node) => node.type === "audioNode");
-    const audioFileKey = (audio?.data as any)?.fileKeys?.[0];
+    const audioFileKey = coerceBaseNodeData(audio?.data).fileKeys?.[0];
 
     // Use the new hook to manage state persistence
     const [state, setState] = useNodeState(

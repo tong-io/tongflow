@@ -1,4 +1,3 @@
-import { type NodeProps } from "@xyflow/react";
 import { memo, useState } from "react";
 import {
     File as FileIcon,
@@ -24,6 +23,10 @@ import { Button } from "@/components/ui/button";
 import { useFileAsyncLoader } from "@/hooks/use-file-async-loader";
 import { useTranslations } from "next-intl";
 import { logger } from "@/lib/logger";
+
+import type { RfDataNodeProps } from "@/types/nodes";
+
+type FileNodeRfProps = RfDataNodeProps<"fileNode">;
 
 // Get the corresponding icon based on the file extension
 const getFileIcon = (fileKey: string) => {
@@ -146,10 +149,9 @@ const SingleFileDisplay = ({
     );
 };
 
-const FileNode = ({ selected, data }: NodeProps) => {
+const FileNode = ({ selected, data }: FileNodeRfProps) => {
     const t = useTranslations("Workspace.nodes.modal");
-    const { fileKeys } = (data as { fileKeys?: string[] }) || { fileKeys: [] };
-    const keys = fileKeys || [];
+    const keys: string[] = data.fileKeys ?? [];
 
     // Determine if single or multiple
     const isSingle = keys.length === 1;
@@ -236,11 +238,9 @@ const FileNode = ({ selected, data }: NodeProps) => {
 };
 
 // Custom comparison function to prevent unnecessary re-renders
-const areEqual = (prevProps: NodeProps, nextProps: NodeProps) => {
-    const prevFileKeys =
-        (prevProps.data as { fileKeys?: string[] })?.fileKeys || [];
-    const nextFileKeys =
-        (nextProps.data as { fileKeys?: string[] })?.fileKeys || [];
+const areEqual = (prevProps: FileNodeRfProps, nextProps: FileNodeRfProps) => {
+    const prevFileKeys = prevProps.data.fileKeys || [];
+    const nextFileKeys = nextProps.data.fileKeys || [];
 
     return (
         prevProps.selected === nextProps.selected &&

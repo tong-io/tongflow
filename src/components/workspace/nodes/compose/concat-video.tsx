@@ -1,7 +1,5 @@
-import {
-    useNodesData,
-    type NodeProps,
-} from "@xyflow/react";
+import { useNodesData } from "@xyflow/react";
+import type { TongflowPluginNodeProps } from "@/types/tongflow-flow";
 import { memo, useState, useEffect, useRef } from "react";
 import { Video } from "lucide-react";
 import { BaseNode } from "../base/base-node";
@@ -16,7 +14,7 @@ import { MediaThumbnail } from "../base/media-thumbnail";
 
 // Workflow execution config
 const workflowConfig = {
-    feature: "concat_videos",
+    feature: "concat-videos",
     outputType: "videoNode",
     outputField: "fileKeys" as const,
     supportsBatch: false,
@@ -28,9 +26,12 @@ const workflowConfig = {
     },
 };
 
-const ConcatVideoNode = ({ selected, data }: NodeProps) => {
+const ConcatVideoNode = ({
+    selected,
+    data,
+}: TongflowPluginNodeProps<"concat-videos", "concatVideoNode">) => {
     const t = useTranslations("Workspace.nodes");
-    const { ids } = data as { ids: string[] };
+    const ids = data.ids ?? [];
     const fromNodes = useNodesData(ids);
 
     // Get all connected video nodes

@@ -4,6 +4,7 @@ import { spawn } from "node:child_process";
 import { delimiter, join } from "node:path";
 import { notifyTask } from "@/lib/task-emitter";
 import { TaskStatus } from "@/constants/task-status";
+import type { NodeSlot } from "@/generated/abi";
 import type { PluginExecRequest, PluginExecResult } from "../types";
 import { getLlmPluginConfig } from "@/lib/plugins-registry.server";
 import { resolvePythonLite } from "@/lib/python-lite";
@@ -41,11 +42,35 @@ function parseNdjsonLine(line: string): LlmNdjsonEvent | null {
     return null;
 }
 
+function llmSlotOutputFromCompleted<S extends NodeSlot>(
+    nodeSlot: S,
+    resultStr: string,
+): PluginExecResult<S> {
+    if (nodeSlot === "drop-video" || nodeSlot === "arrange-group") {
+        try {
+            const raw = JSON.parse(resultStr) as Record<string, unknown>;
+            return {
+                ...raw,
+                success: raw.success !== false,
+            } as PluginExecResult<S>;
+        } catch {
+            throw new Error(
+                `Expected JSON object string in completed.result for ${nodeSlot}`,
+            );
+        }
+    }
+    return {
+        success: true,
+        result: resultStr,
+        text: resultStr,
+    } as PluginExecResult<S>;
+}
+
 function normalizePromptForNodeSlot(
     nodeSlot: string,
     input: Record<string, unknown>,
 ): Record<string, unknown> {
-    if (nodeSlot !== "combine_text") return input;
+    if (nodeSlot !== "combine-text") return input;
 
     // `combine_text` node sends `{ texts: string[], userPrompt?: string, ... }`.
     // LLM text handlers expect `{ text: string, userPrompt?: string, ... }`.
@@ -61,9 +86,9 @@ function normalizePromptForNodeSlot(
     return input;
 }
 
-export async function execLlmPlugin(
-    req: PluginExecRequest,
-): Promise<PluginExecResult> {
+export async function execLlmPlugin<S extends NodeSlot>(
+    req: PluginExecRequest<S>,
+): Promise<PluginExecResult<S>> {
     const cfg = getLlmPluginConfig(req.pluginId);
     if (!cfg) throw new Error(`Unknown llm plugin: ${req.pluginId}`);
 
@@ -74,7 +99,10 @@ export async function execLlmPlugin(
         );
     }
 
-    const prompt = normalizePromptForNodeSlot(req.nodeSlot, req.input);
+    const prompt = normalizePromptForNodeSlot(
+        req.nodeSlot,
+        req.input as unknown as Record<string, unknown>,
+    );
 
     const pluginDir = join(process.cwd(), cfg.localSubdir);
     const entry = cfg.entryFile || "entry.py";
@@ -93,11 +121,10 @@ export async function execLlmPlugin(
         pluginId: req.pluginId,
         nodeSlot: req.nodeSlot,
         taskId: req.taskId,
-        input: req.input,
         prompt,
     };
 
-    return await new Promise<PluginExecResult>((resolve, reject) => {
+    return await new Promise<PluginExecResult<S>>((resolve, reject) => {
         const child = spawn(python, [entry], {
             cwd: pluginDir,
             env: pythonEnv,
@@ -154,10 +181,25 @@ export async function execLlmPlugin(
                 } else if (evt.type === "completed") {
                     sawCompleted = true;
                     lastResult = evt.result;
-                    notifyTask(req.taskId, TaskStatus.COMPLETED, {
+                    let data: Record<string, unknown> = {
                         result: evt.result,
                         mode: "stream",
-                    });
+                    };
+                    if (
+                        req.nodeSlot === "drop-video" ||
+                        req.nodeSlot === "arrange-group"
+                    ) {
+                        try {
+                            const parsed = JSON.parse(evt.result) as Record<
+                                string,
+                                unknown
+                            >;
+                            data = { ...parsed, mode: "stream" };
+                        } catch {
+                            /* keep minimal payload */
+                        }
+                    }
+                    notifyTask(req.taskId, TaskStatus.COMPLETED, data);
                 } else if (evt.type === "error") {
                     notifyTask(req.taskId, TaskStatus.FAILED, {
                         message: evt.message,
@@ -178,7 +220,7 @@ export async function execLlmPlugin(
         child.on("exit", (code) => {
             if (code === 0) {
                 if (sawCompleted && lastResult != null) {
-                    resolve({ result: lastResult });
+                    resolve(llmSlotOutputFromCompleted(req.nodeSlot, lastResult));
                 } else {
                     reject(
                         new Error(

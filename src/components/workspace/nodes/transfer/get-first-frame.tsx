@@ -1,4 +1,5 @@
-import { type NodeProps } from "@xyflow/react";
+
+import type { TongflowPluginNodeProps } from "@/types/tongflow-flow";
 import { memo } from "react";
 import { BaseNode } from "../base/base-node";
 import { Camera } from "lucide-react";
@@ -8,11 +9,14 @@ import {
 } from "@/utils/node-execution-config";
 import { useTranslations } from "next-intl";
 
-const DEFAULT_FEATURE = "get_first_frame";
+const DEFAULT_FEATURE = "get-first-frame";
 
-const GetFirstFrameNode = ({ selected, data }: NodeProps) => {
+const GetFirstFrameNode = ({
+    selected,
+    data,
+}: TongflowPluginNodeProps<"get-first-frame", "getFirstFrameNode">) => {
     const t = useTranslations("Workspace.nodes");
-    const { fileKeys } = data as { fileKeys: string[] };
+    const fileKeys = data.fileKeys;
 
     const workflowConfig = {
         feature: DEFAULT_FEATURE,

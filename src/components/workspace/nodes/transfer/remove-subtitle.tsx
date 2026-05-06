@@ -1,12 +1,15 @@
-import { type NodeProps } from "@xyflow/react";
 import { memo } from "react";
+
 import { BaseNode } from "../base/base-node";
+import type { RfDataNodeProps } from "@/types/nodes";
 import { Atom } from "lucide-react";
 import {
     upstreamParam,
     type GetPromptsContext,
 } from "@/utils/node-execution-config";
 import { useTranslations } from "next-intl";
+
+type RemoveVideoSubtitleRfProps = RfDataNodeProps<"removeVideoSubtitleNode">;
 
 const DEFAULT_FEATURE = "subtitle_remove";
 
@@ -24,9 +27,12 @@ const workflowConfig = {
     },
 };
 
-const RemoveVideoSubtitleNode = ({ selected, data }: NodeProps) => {
+const RemoveVideoSubtitleNode = ({
+    selected,
+    data,
+}: RemoveVideoSubtitleRfProps) => {
     const t = useTranslations("Workspace.nodes");
-    const { fileKeys } = data as { fileKeys: string[] };
+    const fileKeys = data.fileKeys;
 
     return (
         <BaseNode

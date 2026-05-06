@@ -5,32 +5,46 @@
  * Replaces the start_task / _execute_* functions from the Python main.py.
  */
 
-import { getDb, tasks } from "@/db";
 import { eq } from "drizzle-orm";
-import { executePlugin } from "@/lib/plugin-executor/execute";
-import { notifyTask, registerTask, removeTask, emitTaskEvent } from "./task-emitter";
 import {
+    NodeStatus,
     TaskStatus,
     WorkflowStatus,
-    NodeStatus,
 } from "@/constants/task-status";
+import { getDb, tasks } from "@/db";
+import { ABI_NODES, type NodeSlot } from "@/generated/abi";
+import {
+    AbiValidationError,
+    extractAbiBusinessInput,
+    isAbiValidationError,
+    type SerializedWorkflowFailure,
+    serializeTaskErrorForDb,
+    standaloneAbiValidationEnvelope,
+    validateSlotInput,
+    validateSlotOutput,
+    workflowTaskFailureEnvelope,
+} from "@/lib/abi-schema-validate";
 import { logger } from "@/lib/logger";
+import { canonicalizeNodeSlot } from "@/lib/legacy-slot-map";
+import { executePlugin } from "@/lib/plugin-executor/execute";
+import {
+    resolveRoutingPluginId,
+} from "@/lib/task-prompt-routing";
+import { notifyTask, registerTask, removeTask } from "./task-emitter";
+
+export function isNodeSlot(s: string): s is NodeSlot {
+    return Object.hasOwn(ABI_NODES, s);
+}
 
 // ==================== Types ====================
 
 export interface TaskData {
     taskId: string;
-    nodeSlot: string;
+    nodeSlot: NodeSlot;
     pluginId: string;
     prompt: Record<string, unknown>;
     nodeId: string;
     workflowId?: number | null;
-    /** @deprecated legacy */
-    feature?: string;
-    /** @deprecated legacy */
-    type?: string;
-    /** @deprecated legacy */
-    function?: string;
 }
 
 export interface HandlerResult {
@@ -43,73 +57,6 @@ export interface HandlerResult {
     [key: string]: unknown;
 }
 
-const LEGACY_PLUGIN_ID_MAP: Record<string, string> = {
-    "tongflow-llm-gemini": "tongflow-llm-gemini-text",
-    "tongflow-llm-openai": "tongflow-llm-openai-text",
-    "tongflow-llm-openrouter-free": "tongflow-llm-openrouter-free",
-    "openrouter-free": "tongflow-llm-openrouter-free",
-    "tongflow-modal-Qwen3-ASR": "tongflow-modal-qwen3asr",
-    "tongflow-modal-cpu-crawl4ai-app": "tongflow-modal-crawl4ai",
-    "tongflow-modal-cpu-docling": "tongflow-modal-docling",
-    "tongflow-modal-cpu-ffmpeg": "tongflow-modal-ffmpeg",
-    "tongflow-modal-cpu-paddle": "tongflow-modal-paddle",
-    "tongflow-modal-cpu-pyscenedetect": "tongflow-modal-pyscenedetect",
-    "tongflow-modal-cpu-whisper": "tongflow-modal-whisper",
-    "tongflow-modal-gpu-ace-step": "tongflow-modal-ace-step",
-    "tongflow-modal-gpu-color-fix-lab": "tongflow-modal-color-fix-lab",
-    "tongflow-modal-gpu-color_fix_lab": "tongflow-modal-color-fix-lab",
-    "tongflow-modal-gpu-ernie-image": "tongflow-modal-ernie-image",
-    "tongflow-modal-gpu-flux2-klein9b": "tongflow-modal-flux2-klein9b",
-    "tongflow-modal-gpu-gemma4": "tongflow-modal-gemma4",
-    "tongflow-modal-gpu-ltx": "tongflow-modal-ltx",
-    "tongflow-modal-gpu-qwen3asr": "tongflow-modal-qwen3asr",
-    "tongflow-modal-gpu-qwen3tts": "tongflow-modal-qwen3tts",
-    "tongflow-modal-gpu-seedvr2": "tongflow-modal-seedvr2",
-    "tongflow-modal-gpu-z-image": "tongflow-modal-z-image",
-    "ace-step": "tongflow-modal-ace-step",
-    "color-fix-lab": "tongflow-modal-color-fix-lab",
-    "crawl4ai": "tongflow-modal-crawl4ai",
-    "docling": "tongflow-modal-docling",
-    "ernie-image": "tongflow-modal-ernie-image",
-    "ffmpeg": "tongflow-modal-ffmpeg",
-    "flux2-klein9b": "tongflow-modal-flux2-klein9b",
-    "gemini-text": "tongflow-llm-gemini-text",
-    "gemma4": "tongflow-modal-gemma4",
-    "ltx": "tongflow-modal-ltx",
-    "openai-text": "tongflow-llm-openai-text",
-    "paddle": "tongflow-modal-paddle",
-    "pyscenedetect": "tongflow-modal-pyscenedetect",
-    "qwen3asr": "tongflow-modal-qwen3asr",
-    "qwen3tts": "tongflow-modal-qwen3tts",
-    "seedvr2": "tongflow-modal-seedvr2",
-    "whisper": "tongflow-modal-whisper",
-    "z-image": "tongflow-modal-z-image",
-};
-
-function normalizePluginId(pluginId: string): string {
-    return LEGACY_PLUGIN_ID_MAP[pluginId] ?? pluginId;
-}
-
-/**
- * Handler function signature
- */
-export type TaskHandler = (
-    task: TaskData,
-    signal: AbortSignal,
-) => Promise<HandlerResult>;
-
-/**
- * @deprecated Legacy handler registry has been retired.
- * Kept as a no-op export to avoid breaking older imports.
- */
-export function registerHandler(
-    _type: string,
-    _fn: string,
-    _handler: TaskHandler,
-): void {
-    // no-op
-}
-
 export async function loadTaskData(taskId: string): Promise<TaskData | null> {
     const db = await getDb();
 
@@ -120,16 +67,15 @@ export async function loadTaskData(taskId: string): Promise<TaskData | null> {
     if (!task) return null;
 
     const prompt = JSON.parse(task.prompt) as Record<string, unknown>;
-    const pluginId =
-        typeof prompt.pluginId === "string"
-            ? normalizePluginId(prompt.pluginId.trim())
-            : "";
-    const nodeSlot =
+    const pluginId = resolveRoutingPluginId(prompt);
+    const rawSlot =
         (typeof prompt.nodeSlot === "string" && prompt.nodeSlot.trim()) ||
         (typeof task.feature === "string" ? task.feature.trim() : "");
+    const nodeSlot = rawSlot ? canonicalizeNodeSlot(rawSlot) : "";
 
     if (!pluginId) return null;
     if (!nodeSlot) return null;
+    if (!isNodeSlot(nodeSlot)) return null;
 
     return {
         taskId: task.id,
@@ -173,13 +119,18 @@ export async function executeTask(taskId: string): Promise<void> {
             .set({ status: "processing" })
             .where(eq(tasks.id, taskId));
 
-        notifyTask(taskId, TaskStatus.RUNNING, { message: "任务开始执行" }, taskData.nodeId);
+        notifyTask(
+            taskId,
+            TaskStatus.RUNNING,
+            { message: "任务开始执行" },
+            taskData.nodeId,
+        );
 
         // Hard requirement: pluginId + nodeSlot must exist (platform-agnostic core).
         const result = await executePlugin({
             pluginId: taskData.pluginId,
             nodeSlot: taskData.nodeSlot,
-            input: taskData.prompt,
+            input: extractAbiBusinessInput(taskData.prompt) as never,
             taskId,
             signal: controller.signal,
         });
@@ -193,8 +144,39 @@ export async function executeTask(taskId: string): Promise<void> {
             throw new Error("Handler returned no result");
         }
 
+        const outputCheck = validateSlotOutput(taskData.nodeSlot, result);
+        if (!outputCheck.ok) {
+            const persisted = serializeTaskErrorForDb(
+                standaloneAbiValidationEnvelope(outputCheck.failure),
+            );
+            notifyTask(
+                taskId,
+                TaskStatus.FAILED,
+                {
+                    message: "任务产出不符合 ABI 校验",
+                    error: outputCheck.failure.errorsText,
+                    ajvErrors: outputCheck.failure.ajvErrors,
+                },
+                taskData.nodeId,
+            );
+            await db
+                .update(tasks)
+                .set({
+                    status: "failed",
+                    error: persisted,
+                })
+                .where(eq(tasks.id, taskId));
+            return;
+        }
+
         // Emit completion payloads
         if (result.success === false) {
+            const rec = result as Record<string, unknown>;
+            const rawErr = rec.error;
+            const failMsg =
+                typeof rawErr === "string" && rawErr.trim().length > 0
+                    ? rawErr.trim()
+                    : "任务失败";
             notifyTask(
                 taskId,
                 TaskStatus.FAILED,
@@ -205,7 +187,7 @@ export async function executeTask(taskId: string): Promise<void> {
                 .update(tasks)
                 .set({
                     status: "failed",
-                    error: JSON.stringify(result),
+                    error: serializeTaskErrorForDb({ message: failMsg }),
                 })
                 .where(eq(tasks.id, taskId));
         } else {
@@ -243,7 +225,10 @@ export async function executeTask(taskId: string): Promise<void> {
         const db = await getDb();
         await db
             .update(tasks)
-            .set({ status: "failed", error: errorMsg })
+            .set({
+                status: "failed",
+                error: serializeTaskErrorForDb({ message: errorMsg }),
+            })
             .where(eq(tasks.id, taskId));
     } finally {
         removeTask(taskId);
@@ -289,12 +274,12 @@ export async function executeWorkflowTask(
             feature: string,
             params: Record<string, unknown>,
         ): Promise<Record<string, unknown>> {
-            const pluginId =
-                typeof params.pluginId === "string" ? params.pluginId.trim() : "";
-            const nodeSlot =
+            const pluginId = resolveRoutingPluginId(params);
+            const rawSlot =
                 typeof params.nodeSlot === "string" && params.nodeSlot.trim()
                     ? params.nodeSlot.trim()
-                    : feature;
+                    : feature.trim();
+            const nodeSlot = canonicalizeNodeSlot(rawSlot);
 
             if (!pluginId) {
                 throw new Error(
@@ -302,20 +287,49 @@ export async function executeWorkflowTask(
                 );
             }
 
-            return await executePlugin({
+            if (!isNodeSlot(nodeSlot)) {
+                throw new Error(
+                    `Invalid nodeSlot=${nodeSlot}: not in ABI. Cannot execute workflow node.`,
+                );
+            }
+
+            const businessInput = extractAbiBusinessInput(params);
+            const inputCheck = validateSlotInput(nodeSlot, businessInput);
+            if (!inputCheck.ok) {
+                throw new AbiValidationError(
+                    "input",
+                    nodeSlot,
+                    inputCheck.failure,
+                );
+            }
+
+            const result = await executePlugin({
                 pluginId,
                 nodeSlot,
-                input: params,
+                input: businessInput as never,
                 taskId,
                 signal: controller.signal,
             });
+
+            const raw = result as Record<string, unknown>;
+            const outputCheck = validateSlotOutput(nodeSlot, raw);
+            if (!outputCheck.ok) {
+                throw new AbiValidationError(
+                    "output",
+                    nodeSlot,
+                    outputCheck.failure,
+                );
+            }
+
+            return raw;
         }
 
         // Execute nodes tier-by-tier
         const executionLevels: string[][] = workflow.executionLevels || [];
         const dataNodes: Record<string, unknown>[] = workflow.dataNodes || [];
         const nodeOutputs = new Map<string, Record<string, unknown>>();
-        const errors: string[] = [];
+        const workflowErrorSummaries: string[] = [];
+        const workflowFailures: SerializedWorkflowFailure[] = [];
         const startTime = Date.now();
 
         for (let levelIdx = 0; levelIdx < executionLevels.length; levelIdx++) {
@@ -381,7 +395,20 @@ export async function executeWorkflowTask(
                 } catch (e) {
                     const errMsg =
                         e instanceof Error ? e.message : "Unknown error";
-                    errors.push(`Node ${nodeId} failed: ${errMsg}`);
+                    const summaryLine = `Node ${nodeId} failed: ${errMsg}`;
+                    workflowErrorSummaries.push(summaryLine);
+
+                    const failureRow: SerializedWorkflowFailure = {
+                        nodeId,
+                        summary: errMsg,
+                    };
+                    if (isAbiValidationError(e)) {
+                        failureRow.validationKind = e.kind;
+                        failureRow.nodeSlot = e.nodeSlot;
+                        failureRow.details = e.failure.errorsText;
+                        failureRow.ajvErrors = e.failure.ajvErrors;
+                    }
+                    workflowFailures.push(failureRow);
 
                     notifyTask(
                         taskId,
@@ -390,6 +417,14 @@ export async function executeWorkflowTask(
                             message: "节点执行失败",
                             error: errMsg,
                             label: nodeLabel,
+                            ...(isAbiValidationError(e)
+                                ? {
+                                      details: e.failure.errorsText,
+                                      ajvErrors: e.failure.ajvErrors,
+                                      validationKind: e.kind,
+                                      nodeSlot: e.nodeSlot,
+                                  }
+                                : {}),
                         },
                         nodeId,
                     );
@@ -397,14 +432,14 @@ export async function executeWorkflowTask(
                 }
             }
 
-            if (errors.length > 0) break;
+            if (workflowErrorSummaries.length > 0) break;
         }
 
         // Aggregate outputs and notify listeners
         const totalDuration = Date.now() - startTime;
         const outputs = Object.fromEntries(nodeOutputs);
 
-        if (errors.length === 0) {
+        if (workflowErrorSummaries.length === 0) {
             notifyTask(taskId, WorkflowStatus.WORKFLOW_COMPLETED, {
                 status: "success",
                 outputs,
@@ -419,11 +454,20 @@ export async function executeWorkflowTask(
                 status: "failed",
                 outputs,
                 totalDuration,
-                errors,
+                errors: workflowErrorSummaries,
+                failures: workflowFailures,
             });
             await db
                 .update(tasks)
-                .set({ status: "failed", error: errors.join("; ") })
+                .set({
+                    status: "failed",
+                    error: serializeTaskErrorForDb(
+                        workflowTaskFailureEnvelope(
+                            workflowErrorSummaries,
+                            workflowFailures,
+                        ),
+                    ),
+                })
                 .where(eq(tasks.id, taskId));
         }
     } catch (error) {
@@ -441,7 +485,10 @@ export async function executeWorkflowTask(
         const db = await getDb();
         await db
             .update(tasks)
-            .set({ status: "failed", error: errorMsg })
+            .set({
+                status: "failed",
+                error: serializeTaskErrorForDb({ message: errorMsg }),
+            })
             .where(eq(tasks.id, taskId));
     } finally {
         removeTask(taskId);
@@ -463,8 +510,8 @@ function resolveNodeParams(
         }>;
     },
     nodeOutputs: Map<string, Record<string, unknown>>,
-    dataNodes: Record<string, unknown>[],
-    inputs: Record<string, unknown>,
+    _dataNodes: Record<string, unknown>[],
+    _inputs: Record<string, unknown>,
 ): Record<string, unknown> {
     const params: Record<string, unknown> = {};
 

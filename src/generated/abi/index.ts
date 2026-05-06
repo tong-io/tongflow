@@ -224,16 +224,61 @@ const _slot_image_fusion_outputs = {
             "type": "string"
         },
         "image_base64": {
-            "type": "string",
-            "minLength": 1
+            "type": "object",
+            "required": [
+                "file_key"
+            ],
+            "properties": {
+                "file_key": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "mime": {
+                    "type": "string"
+                },
+                "filename": {
+                    "type": "string"
+                }
+            },
+            "additionalProperties": false
         },
         "video_base64": {
-            "type": "string",
-            "minLength": 1
+            "type": "object",
+            "required": [
+                "file_key"
+            ],
+            "properties": {
+                "file_key": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "mime": {
+                    "type": "string"
+                },
+                "filename": {
+                    "type": "string"
+                }
+            },
+            "additionalProperties": false
         },
         "audio_base64": {
-            "type": "string",
-            "minLength": 1
+            "type": "object",
+            "required": [
+                "file_key"
+            ],
+            "properties": {
+                "file_key": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "mime": {
+                    "type": "string"
+                },
+                "filename": {
+                    "type": "string"
+                }
+            },
+            "additionalProperties": false
         },
         "texts": {
             "type": "array",
@@ -318,16 +363,61 @@ const _slot_image_gen_text_outputs = {
             "type": "string"
         },
         "image_base64": {
-            "type": "string",
-            "minLength": 1
+            "type": "object",
+            "required": [
+                "file_key"
+            ],
+            "properties": {
+                "file_key": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "mime": {
+                    "type": "string"
+                },
+                "filename": {
+                    "type": "string"
+                }
+            },
+            "additionalProperties": false
         },
         "video_base64": {
-            "type": "string",
-            "minLength": 1
+            "type": "object",
+            "required": [
+                "file_key"
+            ],
+            "properties": {
+                "file_key": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "mime": {
+                    "type": "string"
+                },
+                "filename": {
+                    "type": "string"
+                }
+            },
+            "additionalProperties": false
         },
         "audio_base64": {
-            "type": "string",
-            "minLength": 1
+            "type": "object",
+            "required": [
+                "file_key"
+            ],
+            "properties": {
+                "file_key": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "mime": {
+                    "type": "string"
+                },
+                "filename": {
+                    "type": "string"
+                }
+            },
+            "additionalProperties": false
         },
         "texts": {
             "type": "array",
@@ -417,16 +507,61 @@ const _slot_video_gen_text_outputs = {
             "type": "string"
         },
         "image_base64": {
-            "type": "string",
-            "minLength": 1
+            "type": "object",
+            "required": [
+                "file_key"
+            ],
+            "properties": {
+                "file_key": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "mime": {
+                    "type": "string"
+                },
+                "filename": {
+                    "type": "string"
+                }
+            },
+            "additionalProperties": false
         },
         "video_base64": {
-            "type": "string",
-            "minLength": 1
+            "type": "object",
+            "required": [
+                "file_key"
+            ],
+            "properties": {
+                "file_key": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "mime": {
+                    "type": "string"
+                },
+                "filename": {
+                    "type": "string"
+                }
+            },
+            "additionalProperties": false
         },
         "audio_base64": {
-            "type": "string",
-            "minLength": 1
+            "type": "object",
+            "required": [
+                "file_key"
+            ],
+            "properties": {
+                "file_key": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "mime": {
+                    "type": "string"
+                },
+                "filename": {
+                    "type": "string"
+                }
+            },
+            "additionalProperties": false
         },
         "texts": {
             "type": "array",
@@ -480,14 +615,25 @@ export type TranscribeInput = FromSchema<typeof _slot_transcribe_inputs>;
 const _slot_transcribe_outputs = {
     "type": "object",
     "required": [
-        "text"
+        "success"
     ],
     "properties": {
+        "success": {
+            "type": "boolean"
+        },
+        "error": {
+            "type": "string"
+        },
         "text": {
-            "type": "string",
-            "minLength": 1
+            "type": "string"
+        },
+        "result": {
+            "type": "string"
         },
         "language": {
+            "type": "string"
+        },
+        "file_key": {
             "type": "string"
         }
     },
@@ -543,16 +689,61 @@ const _slot_concat_videos_outputs = {
             "type": "string"
         },
         "image_base64": {
-            "type": "string",
-            "minLength": 1
+            "type": "object",
+            "required": [
+                "file_key"
+            ],
+            "properties": {
+                "file_key": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "mime": {
+                    "type": "string"
+                },
+                "filename": {
+                    "type": "string"
+                }
+            },
+            "additionalProperties": false
         },
         "video_base64": {
-            "type": "string",
-            "minLength": 1
+            "type": "object",
+            "required": [
+                "file_key"
+            ],
+            "properties": {
+                "file_key": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "mime": {
+                    "type": "string"
+                },
+                "filename": {
+                    "type": "string"
+                }
+            },
+            "additionalProperties": false
         },
         "audio_base64": {
-            "type": "string",
-            "minLength": 1
+            "type": "object",
+            "required": [
+                "file_key"
+            ],
+            "properties": {
+                "file_key": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "mime": {
+                    "type": "string"
+                },
+                "filename": {
+                    "type": "string"
+                }
+            },
+            "additionalProperties": false
         },
         "texts": {
             "type": "array",
@@ -605,16 +796,61 @@ const _slot_extract_audio_outputs = {
             "type": "string"
         },
         "image_base64": {
-            "type": "string",
-            "minLength": 1
+            "type": "object",
+            "required": [
+                "file_key"
+            ],
+            "properties": {
+                "file_key": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "mime": {
+                    "type": "string"
+                },
+                "filename": {
+                    "type": "string"
+                }
+            },
+            "additionalProperties": false
         },
         "video_base64": {
-            "type": "string",
-            "minLength": 1
+            "type": "object",
+            "required": [
+                "file_key"
+            ],
+            "properties": {
+                "file_key": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "mime": {
+                    "type": "string"
+                },
+                "filename": {
+                    "type": "string"
+                }
+            },
+            "additionalProperties": false
         },
         "audio_base64": {
-            "type": "string",
-            "minLength": 1
+            "type": "object",
+            "required": [
+                "file_key"
+            ],
+            "properties": {
+                "file_key": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "mime": {
+                    "type": "string"
+                },
+                "filename": {
+                    "type": "string"
+                }
+            },
+            "additionalProperties": false
         },
         "texts": {
             "type": "array",
@@ -667,16 +903,61 @@ const _slot_separate_video_audio_outputs = {
             "type": "string"
         },
         "image_base64": {
-            "type": "string",
-            "minLength": 1
+            "type": "object",
+            "required": [
+                "file_key"
+            ],
+            "properties": {
+                "file_key": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "mime": {
+                    "type": "string"
+                },
+                "filename": {
+                    "type": "string"
+                }
+            },
+            "additionalProperties": false
         },
         "video_base64": {
-            "type": "string",
-            "minLength": 1
+            "type": "object",
+            "required": [
+                "file_key"
+            ],
+            "properties": {
+                "file_key": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "mime": {
+                    "type": "string"
+                },
+                "filename": {
+                    "type": "string"
+                }
+            },
+            "additionalProperties": false
         },
         "audio_base64": {
-            "type": "string",
-            "minLength": 1
+            "type": "object",
+            "required": [
+                "file_key"
+            ],
+            "properties": {
+                "file_key": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "mime": {
+                    "type": "string"
+                },
+                "filename": {
+                    "type": "string"
+                }
+            },
+            "additionalProperties": false
         },
         "texts": {
             "type": "array",
@@ -736,16 +1017,61 @@ const _slot_merge_video_audio_outputs = {
             "type": "string"
         },
         "image_base64": {
-            "type": "string",
-            "minLength": 1
+            "type": "object",
+            "required": [
+                "file_key"
+            ],
+            "properties": {
+                "file_key": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "mime": {
+                    "type": "string"
+                },
+                "filename": {
+                    "type": "string"
+                }
+            },
+            "additionalProperties": false
         },
         "video_base64": {
-            "type": "string",
-            "minLength": 1
+            "type": "object",
+            "required": [
+                "file_key"
+            ],
+            "properties": {
+                "file_key": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "mime": {
+                    "type": "string"
+                },
+                "filename": {
+                    "type": "string"
+                }
+            },
+            "additionalProperties": false
         },
         "audio_base64": {
-            "type": "string",
-            "minLength": 1
+            "type": "object",
+            "required": [
+                "file_key"
+            ],
+            "properties": {
+                "file_key": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "mime": {
+                    "type": "string"
+                },
+                "filename": {
+                    "type": "string"
+                }
+            },
+            "additionalProperties": false
         },
         "texts": {
             "type": "array",
@@ -798,16 +1124,61 @@ const _slot_get_first_frame_outputs = {
             "type": "string"
         },
         "image_base64": {
-            "type": "string",
-            "minLength": 1
+            "type": "object",
+            "required": [
+                "file_key"
+            ],
+            "properties": {
+                "file_key": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "mime": {
+                    "type": "string"
+                },
+                "filename": {
+                    "type": "string"
+                }
+            },
+            "additionalProperties": false
         },
         "video_base64": {
-            "type": "string",
-            "minLength": 1
+            "type": "object",
+            "required": [
+                "file_key"
+            ],
+            "properties": {
+                "file_key": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "mime": {
+                    "type": "string"
+                },
+                "filename": {
+                    "type": "string"
+                }
+            },
+            "additionalProperties": false
         },
         "audio_base64": {
-            "type": "string",
-            "minLength": 1
+            "type": "object",
+            "required": [
+                "file_key"
+            ],
+            "properties": {
+                "file_key": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "mime": {
+                    "type": "string"
+                },
+                "filename": {
+                    "type": "string"
+                }
+            },
+            "additionalProperties": false
         },
         "texts": {
             "type": "array",
@@ -860,16 +1231,61 @@ const _slot_get_last_frame_outputs = {
             "type": "string"
         },
         "image_base64": {
-            "type": "string",
-            "minLength": 1
+            "type": "object",
+            "required": [
+                "file_key"
+            ],
+            "properties": {
+                "file_key": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "mime": {
+                    "type": "string"
+                },
+                "filename": {
+                    "type": "string"
+                }
+            },
+            "additionalProperties": false
         },
         "video_base64": {
-            "type": "string",
-            "minLength": 1
+            "type": "object",
+            "required": [
+                "file_key"
+            ],
+            "properties": {
+                "file_key": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "mime": {
+                    "type": "string"
+                },
+                "filename": {
+                    "type": "string"
+                }
+            },
+            "additionalProperties": false
         },
         "audio_base64": {
-            "type": "string",
-            "minLength": 1
+            "type": "object",
+            "required": [
+                "file_key"
+            ],
+            "properties": {
+                "file_key": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "mime": {
+                    "type": "string"
+                },
+                "filename": {
+                    "type": "string"
+                }
+            },
+            "additionalProperties": false
         },
         "texts": {
             "type": "array",
@@ -934,16 +1350,61 @@ const _slot_parse_document_outputs = {
             "type": "string"
         },
         "image_base64": {
-            "type": "string",
-            "minLength": 1
+            "type": "object",
+            "required": [
+                "file_key"
+            ],
+            "properties": {
+                "file_key": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "mime": {
+                    "type": "string"
+                },
+                "filename": {
+                    "type": "string"
+                }
+            },
+            "additionalProperties": false
         },
         "video_base64": {
-            "type": "string",
-            "minLength": 1
+            "type": "object",
+            "required": [
+                "file_key"
+            ],
+            "properties": {
+                "file_key": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "mime": {
+                    "type": "string"
+                },
+                "filename": {
+                    "type": "string"
+                }
+            },
+            "additionalProperties": false
         },
         "audio_base64": {
-            "type": "string",
-            "minLength": 1
+            "type": "object",
+            "required": [
+                "file_key"
+            ],
+            "properties": {
+                "file_key": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "mime": {
+                    "type": "string"
+                },
+                "filename": {
+                    "type": "string"
+                }
+            },
+            "additionalProperties": false
         },
         "texts": {
             "type": "array",
@@ -1016,16 +1477,83 @@ const _slot_split_video_outputs = {
             "type": "string"
         },
         "image_base64": {
-            "type": "string",
-            "minLength": 1
+            "type": "object",
+            "required": [
+                "file_key"
+            ],
+            "properties": {
+                "file_key": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "mime": {
+                    "type": "string"
+                },
+                "filename": {
+                    "type": "string"
+                }
+            },
+            "additionalProperties": false
         },
         "video_base64": {
-            "type": "string",
-            "minLength": 1
+            "type": "object",
+            "required": [
+                "file_key"
+            ],
+            "properties": {
+                "file_key": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "mime": {
+                    "type": "string"
+                },
+                "filename": {
+                    "type": "string"
+                }
+            },
+            "additionalProperties": false
         },
         "audio_base64": {
-            "type": "string",
-            "minLength": 1
+            "type": "object",
+            "required": [
+                "file_key"
+            ],
+            "properties": {
+                "file_key": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "mime": {
+                    "type": "string"
+                },
+                "filename": {
+                    "type": "string"
+                }
+            },
+            "additionalProperties": false
+        },
+        "video_parts": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "required": [
+                    "file_key"
+                ],
+                "properties": {
+                    "file_key": {
+                        "type": "string",
+                        "minLength": 1
+                    },
+                    "mime": {
+                        "type": "string"
+                    },
+                    "filename": {
+                        "type": "string"
+                    }
+                },
+                "additionalProperties": false
+            }
         },
         "texts": {
             "type": "array",
@@ -1071,16 +1599,61 @@ const _slot_link_outputs = {
             "type": "string"
         },
         "image_base64": {
-            "type": "string",
-            "minLength": 1
+            "type": "object",
+            "required": [
+                "file_key"
+            ],
+            "properties": {
+                "file_key": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "mime": {
+                    "type": "string"
+                },
+                "filename": {
+                    "type": "string"
+                }
+            },
+            "additionalProperties": false
         },
         "video_base64": {
-            "type": "string",
-            "minLength": 1
+            "type": "object",
+            "required": [
+                "file_key"
+            ],
+            "properties": {
+                "file_key": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "mime": {
+                    "type": "string"
+                },
+                "filename": {
+                    "type": "string"
+                }
+            },
+            "additionalProperties": false
         },
         "audio_base64": {
-            "type": "string",
-            "minLength": 1
+            "type": "object",
+            "required": [
+                "file_key"
+            ],
+            "properties": {
+                "file_key": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "mime": {
+                    "type": "string"
+                },
+                "filename": {
+                    "type": "string"
+                }
+            },
+            "additionalProperties": false
         },
         "texts": {
             "type": "array",
@@ -1187,16 +1760,61 @@ const _slot_gen_video_outputs = {
             "type": "string"
         },
         "image_base64": {
-            "type": "string",
-            "minLength": 1
+            "type": "object",
+            "required": [
+                "file_key"
+            ],
+            "properties": {
+                "file_key": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "mime": {
+                    "type": "string"
+                },
+                "filename": {
+                    "type": "string"
+                }
+            },
+            "additionalProperties": false
         },
         "video_base64": {
-            "type": "string",
-            "minLength": 1
+            "type": "object",
+            "required": [
+                "file_key"
+            ],
+            "properties": {
+                "file_key": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "mime": {
+                    "type": "string"
+                },
+                "filename": {
+                    "type": "string"
+                }
+            },
+            "additionalProperties": false
         },
         "audio_base64": {
-            "type": "string",
-            "minLength": 1
+            "type": "object",
+            "required": [
+                "file_key"
+            ],
+            "properties": {
+                "file_key": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "mime": {
+                    "type": "string"
+                },
+                "filename": {
+                    "type": "string"
+                }
+            },
+            "additionalProperties": false
         },
         "texts": {
             "type": "array",
@@ -1261,16 +1879,61 @@ const _slot_image_gen_outputs = {
             "type": "string"
         },
         "image_base64": {
-            "type": "string",
-            "minLength": 1
+            "type": "object",
+            "required": [
+                "file_key"
+            ],
+            "properties": {
+                "file_key": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "mime": {
+                    "type": "string"
+                },
+                "filename": {
+                    "type": "string"
+                }
+            },
+            "additionalProperties": false
         },
         "video_base64": {
-            "type": "string",
-            "minLength": 1
+            "type": "object",
+            "required": [
+                "file_key"
+            ],
+            "properties": {
+                "file_key": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "mime": {
+                    "type": "string"
+                },
+                "filename": {
+                    "type": "string"
+                }
+            },
+            "additionalProperties": false
         },
         "audio_base64": {
-            "type": "string",
-            "minLength": 1
+            "type": "object",
+            "required": [
+                "file_key"
+            ],
+            "properties": {
+                "file_key": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "mime": {
+                    "type": "string"
+                },
+                "filename": {
+                    "type": "string"
+                }
+            },
+            "additionalProperties": false
         },
         "texts": {
             "type": "array",
@@ -1323,16 +1986,61 @@ const _slot_gen_music_outputs = {
             "type": "string"
         },
         "image_base64": {
-            "type": "string",
-            "minLength": 1
+            "type": "object",
+            "required": [
+                "file_key"
+            ],
+            "properties": {
+                "file_key": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "mime": {
+                    "type": "string"
+                },
+                "filename": {
+                    "type": "string"
+                }
+            },
+            "additionalProperties": false
         },
         "video_base64": {
-            "type": "string",
-            "minLength": 1
+            "type": "object",
+            "required": [
+                "file_key"
+            ],
+            "properties": {
+                "file_key": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "mime": {
+                    "type": "string"
+                },
+                "filename": {
+                    "type": "string"
+                }
+            },
+            "additionalProperties": false
         },
         "audio_base64": {
-            "type": "string",
-            "minLength": 1
+            "type": "object",
+            "required": [
+                "file_key"
+            ],
+            "properties": {
+                "file_key": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "mime": {
+                    "type": "string"
+                },
+                "filename": {
+                    "type": "string"
+                }
+            },
+            "additionalProperties": false
         },
         "texts": {
             "type": "array",
@@ -1387,16 +2095,61 @@ const _slot_text_gen_speech_preset_outputs = {
             "type": "string"
         },
         "image_base64": {
-            "type": "string",
-            "minLength": 1
+            "type": "object",
+            "required": [
+                "file_key"
+            ],
+            "properties": {
+                "file_key": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "mime": {
+                    "type": "string"
+                },
+                "filename": {
+                    "type": "string"
+                }
+            },
+            "additionalProperties": false
         },
         "video_base64": {
-            "type": "string",
-            "minLength": 1
+            "type": "object",
+            "required": [
+                "file_key"
+            ],
+            "properties": {
+                "file_key": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "mime": {
+                    "type": "string"
+                },
+                "filename": {
+                    "type": "string"
+                }
+            },
+            "additionalProperties": false
         },
         "audio_base64": {
-            "type": "string",
-            "minLength": 1
+            "type": "object",
+            "required": [
+                "file_key"
+            ],
+            "properties": {
+                "file_key": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "mime": {
+                    "type": "string"
+                },
+                "filename": {
+                    "type": "string"
+                }
+            },
+            "additionalProperties": false
         },
         "texts": {
             "type": "array",
@@ -1504,16 +2257,61 @@ const _slot_image_gen_video_outputs = {
             "type": "string"
         },
         "image_base64": {
-            "type": "string",
-            "minLength": 1
+            "type": "object",
+            "required": [
+                "file_key"
+            ],
+            "properties": {
+                "file_key": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "mime": {
+                    "type": "string"
+                },
+                "filename": {
+                    "type": "string"
+                }
+            },
+            "additionalProperties": false
         },
         "video_base64": {
-            "type": "string",
-            "minLength": 1
+            "type": "object",
+            "required": [
+                "file_key"
+            ],
+            "properties": {
+                "file_key": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "mime": {
+                    "type": "string"
+                },
+                "filename": {
+                    "type": "string"
+                }
+            },
+            "additionalProperties": false
         },
         "audio_base64": {
-            "type": "string",
-            "minLength": 1
+            "type": "object",
+            "required": [
+                "file_key"
+            ],
+            "properties": {
+                "file_key": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "mime": {
+                    "type": "string"
+                },
+                "filename": {
+                    "type": "string"
+                }
+            },
+            "additionalProperties": false
         },
         "texts": {
             "type": "array",
@@ -1576,16 +2374,61 @@ const _slot_image_edit_outputs = {
             "type": "string"
         },
         "image_base64": {
-            "type": "string",
-            "minLength": 1
+            "type": "object",
+            "required": [
+                "file_key"
+            ],
+            "properties": {
+                "file_key": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "mime": {
+                    "type": "string"
+                },
+                "filename": {
+                    "type": "string"
+                }
+            },
+            "additionalProperties": false
         },
         "video_base64": {
-            "type": "string",
-            "minLength": 1
+            "type": "object",
+            "required": [
+                "file_key"
+            ],
+            "properties": {
+                "file_key": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "mime": {
+                    "type": "string"
+                },
+                "filename": {
+                    "type": "string"
+                }
+            },
+            "additionalProperties": false
         },
         "audio_base64": {
-            "type": "string",
-            "minLength": 1
+            "type": "object",
+            "required": [
+                "file_key"
+            ],
+            "properties": {
+                "file_key": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "mime": {
+                    "type": "string"
+                },
+                "filename": {
+                    "type": "string"
+                }
+            },
+            "additionalProperties": false
         },
         "texts": {
             "type": "array",
@@ -1659,16 +2502,61 @@ const _slot_image_upscale_outputs = {
             "type": "string"
         },
         "image_base64": {
-            "type": "string",
-            "minLength": 1
+            "type": "object",
+            "required": [
+                "file_key"
+            ],
+            "properties": {
+                "file_key": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "mime": {
+                    "type": "string"
+                },
+                "filename": {
+                    "type": "string"
+                }
+            },
+            "additionalProperties": false
         },
         "video_base64": {
-            "type": "string",
-            "minLength": 1
+            "type": "object",
+            "required": [
+                "file_key"
+            ],
+            "properties": {
+                "file_key": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "mime": {
+                    "type": "string"
+                },
+                "filename": {
+                    "type": "string"
+                }
+            },
+            "additionalProperties": false
         },
         "audio_base64": {
-            "type": "string",
-            "minLength": 1
+            "type": "object",
+            "required": [
+                "file_key"
+            ],
+            "properties": {
+                "file_key": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "mime": {
+                    "type": "string"
+                },
+                "filename": {
+                    "type": "string"
+                }
+            },
+            "additionalProperties": false
         },
         "texts": {
             "type": "array",
@@ -1742,16 +2630,61 @@ const _slot_video_upscale_outputs = {
             "type": "string"
         },
         "image_base64": {
-            "type": "string",
-            "minLength": 1
+            "type": "object",
+            "required": [
+                "file_key"
+            ],
+            "properties": {
+                "file_key": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "mime": {
+                    "type": "string"
+                },
+                "filename": {
+                    "type": "string"
+                }
+            },
+            "additionalProperties": false
         },
         "video_base64": {
-            "type": "string",
-            "minLength": 1
+            "type": "object",
+            "required": [
+                "file_key"
+            ],
+            "properties": {
+                "file_key": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "mime": {
+                    "type": "string"
+                },
+                "filename": {
+                    "type": "string"
+                }
+            },
+            "additionalProperties": false
         },
         "audio_base64": {
-            "type": "string",
-            "minLength": 1
+            "type": "object",
+            "required": [
+                "file_key"
+            ],
+            "properties": {
+                "file_key": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "mime": {
+                    "type": "string"
+                },
+                "filename": {
+                    "type": "string"
+                }
+            },
+            "additionalProperties": false
         },
         "texts": {
             "type": "array",
@@ -1801,16 +2734,61 @@ const _slot_image_describe_outputs = {
             "type": "string"
         },
         "image_base64": {
-            "type": "string",
-            "minLength": 1
+            "type": "object",
+            "required": [
+                "file_key"
+            ],
+            "properties": {
+                "file_key": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "mime": {
+                    "type": "string"
+                },
+                "filename": {
+                    "type": "string"
+                }
+            },
+            "additionalProperties": false
         },
         "video_base64": {
-            "type": "string",
-            "minLength": 1
+            "type": "object",
+            "required": [
+                "file_key"
+            ],
+            "properties": {
+                "file_key": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "mime": {
+                    "type": "string"
+                },
+                "filename": {
+                    "type": "string"
+                }
+            },
+            "additionalProperties": false
         },
         "audio_base64": {
-            "type": "string",
-            "minLength": 1
+            "type": "object",
+            "required": [
+                "file_key"
+            ],
+            "properties": {
+                "file_key": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "mime": {
+                    "type": "string"
+                },
+                "filename": {
+                    "type": "string"
+                }
+            },
+            "additionalProperties": false
         },
         "texts": {
             "type": "array",
@@ -1860,16 +2838,61 @@ const _slot_video_describe_outputs = {
             "type": "string"
         },
         "image_base64": {
-            "type": "string",
-            "minLength": 1
+            "type": "object",
+            "required": [
+                "file_key"
+            ],
+            "properties": {
+                "file_key": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "mime": {
+                    "type": "string"
+                },
+                "filename": {
+                    "type": "string"
+                }
+            },
+            "additionalProperties": false
         },
         "video_base64": {
-            "type": "string",
-            "minLength": 1
+            "type": "object",
+            "required": [
+                "file_key"
+            ],
+            "properties": {
+                "file_key": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "mime": {
+                    "type": "string"
+                },
+                "filename": {
+                    "type": "string"
+                }
+            },
+            "additionalProperties": false
         },
         "audio_base64": {
-            "type": "string",
-            "minLength": 1
+            "type": "object",
+            "required": [
+                "file_key"
+            ],
+            "properties": {
+                "file_key": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "mime": {
+                    "type": "string"
+                },
+                "filename": {
+                    "type": "string"
+                }
+            },
+            "additionalProperties": false
         },
         "texts": {
             "type": "array",
@@ -1923,16 +2946,61 @@ const _slot_audio_image_gen_video_outputs = {
             "type": "string"
         },
         "image_base64": {
-            "type": "string",
-            "minLength": 1
+            "type": "object",
+            "required": [
+                "file_key"
+            ],
+            "properties": {
+                "file_key": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "mime": {
+                    "type": "string"
+                },
+                "filename": {
+                    "type": "string"
+                }
+            },
+            "additionalProperties": false
         },
         "video_base64": {
-            "type": "string",
-            "minLength": 1
+            "type": "object",
+            "required": [
+                "file_key"
+            ],
+            "properties": {
+                "file_key": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "mime": {
+                    "type": "string"
+                },
+                "filename": {
+                    "type": "string"
+                }
+            },
+            "additionalProperties": false
         },
         "audio_base64": {
-            "type": "string",
-            "minLength": 1
+            "type": "object",
+            "required": [
+                "file_key"
+            ],
+            "properties": {
+                "file_key": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "mime": {
+                    "type": "string"
+                },
+                "filename": {
+                    "type": "string"
+                }
+            },
+            "additionalProperties": false
         },
         "texts": {
             "type": "array",
@@ -2040,16 +3108,61 @@ const _slot_speech_text_gen_video_outputs = {
             "type": "string"
         },
         "image_base64": {
-            "type": "string",
-            "minLength": 1
+            "type": "object",
+            "required": [
+                "file_key"
+            ],
+            "properties": {
+                "file_key": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "mime": {
+                    "type": "string"
+                },
+                "filename": {
+                    "type": "string"
+                }
+            },
+            "additionalProperties": false
         },
         "video_base64": {
-            "type": "string",
-            "minLength": 1
+            "type": "object",
+            "required": [
+                "file_key"
+            ],
+            "properties": {
+                "file_key": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "mime": {
+                    "type": "string"
+                },
+                "filename": {
+                    "type": "string"
+                }
+            },
+            "additionalProperties": false
         },
         "audio_base64": {
-            "type": "string",
-            "minLength": 1
+            "type": "object",
+            "required": [
+                "file_key"
+            ],
+            "properties": {
+                "file_key": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "mime": {
+                    "type": "string"
+                },
+                "filename": {
+                    "type": "string"
+                }
+            },
+            "additionalProperties": false
         },
         "texts": {
             "type": "array",
@@ -2108,16 +3221,61 @@ const _slot_speech_image_video_gen_video_outputs = {
             "type": "string"
         },
         "image_base64": {
-            "type": "string",
-            "minLength": 1
+            "type": "object",
+            "required": [
+                "file_key"
+            ],
+            "properties": {
+                "file_key": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "mime": {
+                    "type": "string"
+                },
+                "filename": {
+                    "type": "string"
+                }
+            },
+            "additionalProperties": false
         },
         "video_base64": {
-            "type": "string",
-            "minLength": 1
+            "type": "object",
+            "required": [
+                "file_key"
+            ],
+            "properties": {
+                "file_key": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "mime": {
+                    "type": "string"
+                },
+                "filename": {
+                    "type": "string"
+                }
+            },
+            "additionalProperties": false
         },
         "audio_base64": {
-            "type": "string",
-            "minLength": 1
+            "type": "object",
+            "required": [
+                "file_key"
+            ],
+            "properties": {
+                "file_key": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "mime": {
+                    "type": "string"
+                },
+                "filename": {
+                    "type": "string"
+                }
+            },
+            "additionalProperties": false
         },
         "texts": {
             "type": "array",
@@ -2171,16 +3329,61 @@ const _slot_video_image_gen_video_mix_outputs = {
             "type": "string"
         },
         "image_base64": {
-            "type": "string",
-            "minLength": 1
+            "type": "object",
+            "required": [
+                "file_key"
+            ],
+            "properties": {
+                "file_key": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "mime": {
+                    "type": "string"
+                },
+                "filename": {
+                    "type": "string"
+                }
+            },
+            "additionalProperties": false
         },
         "video_base64": {
-            "type": "string",
-            "minLength": 1
+            "type": "object",
+            "required": [
+                "file_key"
+            ],
+            "properties": {
+                "file_key": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "mime": {
+                    "type": "string"
+                },
+                "filename": {
+                    "type": "string"
+                }
+            },
+            "additionalProperties": false
         },
         "audio_base64": {
-            "type": "string",
-            "minLength": 1
+            "type": "object",
+            "required": [
+                "file_key"
+            ],
+            "properties": {
+                "file_key": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "mime": {
+                    "type": "string"
+                },
+                "filename": {
+                    "type": "string"
+                }
+            },
+            "additionalProperties": false
         },
         "texts": {
             "type": "array",
@@ -2234,16 +3437,61 @@ const _slot_video_image_gen_video_move_outputs = {
             "type": "string"
         },
         "image_base64": {
-            "type": "string",
-            "minLength": 1
+            "type": "object",
+            "required": [
+                "file_key"
+            ],
+            "properties": {
+                "file_key": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "mime": {
+                    "type": "string"
+                },
+                "filename": {
+                    "type": "string"
+                }
+            },
+            "additionalProperties": false
         },
         "video_base64": {
-            "type": "string",
-            "minLength": 1
+            "type": "object",
+            "required": [
+                "file_key"
+            ],
+            "properties": {
+                "file_key": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "mime": {
+                    "type": "string"
+                },
+                "filename": {
+                    "type": "string"
+                }
+            },
+            "additionalProperties": false
         },
         "audio_base64": {
-            "type": "string",
-            "minLength": 1
+            "type": "object",
+            "required": [
+                "file_key"
+            ],
+            "properties": {
+                "file_key": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "mime": {
+                    "type": "string"
+                },
+                "filename": {
+                    "type": "string"
+                }
+            },
+            "additionalProperties": false
         },
         "texts": {
             "type": "array",
@@ -2352,16 +3600,61 @@ const _slot_image_image_gen_video_outputs = {
             "type": "string"
         },
         "image_base64": {
-            "type": "string",
-            "minLength": 1
+            "type": "object",
+            "required": [
+                "file_key"
+            ],
+            "properties": {
+                "file_key": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "mime": {
+                    "type": "string"
+                },
+                "filename": {
+                    "type": "string"
+                }
+            },
+            "additionalProperties": false
         },
         "video_base64": {
-            "type": "string",
-            "minLength": 1
+            "type": "object",
+            "required": [
+                "file_key"
+            ],
+            "properties": {
+                "file_key": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "mime": {
+                    "type": "string"
+                },
+                "filename": {
+                    "type": "string"
+                }
+            },
+            "additionalProperties": false
         },
         "audio_base64": {
-            "type": "string",
-            "minLength": 1
+            "type": "object",
+            "required": [
+                "file_key"
+            ],
+            "properties": {
+                "file_key": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "mime": {
+                    "type": "string"
+                },
+                "filename": {
+                    "type": "string"
+                }
+            },
+            "additionalProperties": false
         },
         "texts": {
             "type": "array",
@@ -2468,16 +3761,61 @@ const _slot_text_gen_video_outputs = {
             "type": "string"
         },
         "image_base64": {
-            "type": "string",
-            "minLength": 1
+            "type": "object",
+            "required": [
+                "file_key"
+            ],
+            "properties": {
+                "file_key": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "mime": {
+                    "type": "string"
+                },
+                "filename": {
+                    "type": "string"
+                }
+            },
+            "additionalProperties": false
         },
         "video_base64": {
-            "type": "string",
-            "minLength": 1
+            "type": "object",
+            "required": [
+                "file_key"
+            ],
+            "properties": {
+                "file_key": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "mime": {
+                    "type": "string"
+                },
+                "filename": {
+                    "type": "string"
+                }
+            },
+            "additionalProperties": false
         },
         "audio_base64": {
-            "type": "string",
-            "minLength": 1
+            "type": "object",
+            "required": [
+                "file_key"
+            ],
+            "properties": {
+                "file_key": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "mime": {
+                    "type": "string"
+                },
+                "filename": {
+                    "type": "string"
+                }
+            },
+            "additionalProperties": false
         },
         "texts": {
             "type": "array",
@@ -2542,16 +3880,61 @@ const _slot_image_gen_model_outputs = {
             "type": "string"
         },
         "image_base64": {
-            "type": "string",
-            "minLength": 1
+            "type": "object",
+            "required": [
+                "file_key"
+            ],
+            "properties": {
+                "file_key": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "mime": {
+                    "type": "string"
+                },
+                "filename": {
+                    "type": "string"
+                }
+            },
+            "additionalProperties": false
         },
         "video_base64": {
-            "type": "string",
-            "minLength": 1
+            "type": "object",
+            "required": [
+                "file_key"
+            ],
+            "properties": {
+                "file_key": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "mime": {
+                    "type": "string"
+                },
+                "filename": {
+                    "type": "string"
+                }
+            },
+            "additionalProperties": false
         },
         "audio_base64": {
-            "type": "string",
-            "minLength": 1
+            "type": "object",
+            "required": [
+                "file_key"
+            ],
+            "properties": {
+                "file_key": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "mime": {
+                    "type": "string"
+                },
+                "filename": {
+                    "type": "string"
+                }
+            },
+            "additionalProperties": false
         },
         "texts": {
             "type": "array",
@@ -2602,16 +3985,61 @@ const _slot_speech_video_gen_video_outputs = {
             "type": "string"
         },
         "image_base64": {
-            "type": "string",
-            "minLength": 1
+            "type": "object",
+            "required": [
+                "file_key"
+            ],
+            "properties": {
+                "file_key": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "mime": {
+                    "type": "string"
+                },
+                "filename": {
+                    "type": "string"
+                }
+            },
+            "additionalProperties": false
         },
         "video_base64": {
-            "type": "string",
-            "minLength": 1
+            "type": "object",
+            "required": [
+                "file_key"
+            ],
+            "properties": {
+                "file_key": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "mime": {
+                    "type": "string"
+                },
+                "filename": {
+                    "type": "string"
+                }
+            },
+            "additionalProperties": false
         },
         "audio_base64": {
-            "type": "string",
-            "minLength": 1
+            "type": "object",
+            "required": [
+                "file_key"
+            ],
+            "properties": {
+                "file_key": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "mime": {
+                    "type": "string"
+                },
+                "filename": {
+                    "type": "string"
+                }
+            },
+            "additionalProperties": false
         },
         "texts": {
             "type": "array",
@@ -2678,16 +4106,61 @@ const _slot_text_gen_speech_clone_outputs = {
             "type": "string"
         },
         "image_base64": {
-            "type": "string",
-            "minLength": 1
+            "type": "object",
+            "required": [
+                "file_key"
+            ],
+            "properties": {
+                "file_key": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "mime": {
+                    "type": "string"
+                },
+                "filename": {
+                    "type": "string"
+                }
+            },
+            "additionalProperties": false
         },
         "video_base64": {
-            "type": "string",
-            "minLength": 1
+            "type": "object",
+            "required": [
+                "file_key"
+            ],
+            "properties": {
+                "file_key": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "mime": {
+                    "type": "string"
+                },
+                "filename": {
+                    "type": "string"
+                }
+            },
+            "additionalProperties": false
         },
         "audio_base64": {
-            "type": "string",
-            "minLength": 1
+            "type": "object",
+            "required": [
+                "file_key"
+            ],
+            "properties": {
+                "file_key": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "mime": {
+                    "type": "string"
+                },
+                "filename": {
+                    "type": "string"
+                }
+            },
+            "additionalProperties": false
         },
         "texts": {
             "type": "array",
@@ -2741,14 +4214,25 @@ export type TranscribeTimestampInput = FromSchema<typeof _slot_transcribe_timest
 const _slot_transcribe_timestamp_outputs = {
     "type": "object",
     "required": [
-        "text"
+        "success"
     ],
     "properties": {
+        "success": {
+            "type": "boolean"
+        },
+        "error": {
+            "type": "string"
+        },
         "text": {
-            "type": "string",
-            "minLength": 1
+            "type": "string"
+        },
+        "result": {
+            "type": "string"
         },
         "language": {
+            "type": "string"
+        },
+        "file_key": {
             "type": "string"
         },
         "time_stamps": {
@@ -2825,16 +4309,61 @@ const _slot_text_gen_speech_instruct_outputs = {
             "type": "string"
         },
         "image_base64": {
-            "type": "string",
-            "minLength": 1
+            "type": "object",
+            "required": [
+                "file_key"
+            ],
+            "properties": {
+                "file_key": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "mime": {
+                    "type": "string"
+                },
+                "filename": {
+                    "type": "string"
+                }
+            },
+            "additionalProperties": false
         },
         "video_base64": {
-            "type": "string",
-            "minLength": 1
+            "type": "object",
+            "required": [
+                "file_key"
+            ],
+            "properties": {
+                "file_key": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "mime": {
+                    "type": "string"
+                },
+                "filename": {
+                    "type": "string"
+                }
+            },
+            "additionalProperties": false
         },
         "audio_base64": {
-            "type": "string",
-            "minLength": 1
+            "type": "object",
+            "required": [
+                "file_key"
+            ],
+            "properties": {
+                "file_key": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "mime": {
+                    "type": "string"
+                },
+                "filename": {
+                    "type": "string"
+                }
+            },
+            "additionalProperties": false
         },
         "texts": {
             "type": "array",
@@ -2888,16 +4417,61 @@ const _slot_video_image_move_animal_outputs = {
             "type": "string"
         },
         "image_base64": {
-            "type": "string",
-            "minLength": 1
+            "type": "object",
+            "required": [
+                "file_key"
+            ],
+            "properties": {
+                "file_key": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "mime": {
+                    "type": "string"
+                },
+                "filename": {
+                    "type": "string"
+                }
+            },
+            "additionalProperties": false
         },
         "video_base64": {
-            "type": "string",
-            "minLength": 1
+            "type": "object",
+            "required": [
+                "file_key"
+            ],
+            "properties": {
+                "file_key": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "mime": {
+                    "type": "string"
+                },
+                "filename": {
+                    "type": "string"
+                }
+            },
+            "additionalProperties": false
         },
         "audio_base64": {
-            "type": "string",
-            "minLength": 1
+            "type": "object",
+            "required": [
+                "file_key"
+            ],
+            "properties": {
+                "file_key": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "mime": {
+                    "type": "string"
+                },
+                "filename": {
+                    "type": "string"
+                }
+            },
+            "additionalProperties": false
         },
         "texts": {
             "type": "array",
@@ -2951,16 +4525,61 @@ const _slot_wan_animate_mix_outputs = {
             "type": "string"
         },
         "image_base64": {
-            "type": "string",
-            "minLength": 1
+            "type": "object",
+            "required": [
+                "file_key"
+            ],
+            "properties": {
+                "file_key": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "mime": {
+                    "type": "string"
+                },
+                "filename": {
+                    "type": "string"
+                }
+            },
+            "additionalProperties": false
         },
         "video_base64": {
-            "type": "string",
-            "minLength": 1
+            "type": "object",
+            "required": [
+                "file_key"
+            ],
+            "properties": {
+                "file_key": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "mime": {
+                    "type": "string"
+                },
+                "filename": {
+                    "type": "string"
+                }
+            },
+            "additionalProperties": false
         },
         "audio_base64": {
-            "type": "string",
-            "minLength": 1
+            "type": "object",
+            "required": [
+                "file_key"
+            ],
+            "properties": {
+                "file_key": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "mime": {
+                    "type": "string"
+                },
+                "filename": {
+                    "type": "string"
+                }
+            },
+            "additionalProperties": false
         },
         "texts": {
             "type": "array",
@@ -3009,21 +4628,85 @@ const _slot_drop_video_outputs = {
             "type": "string"
         },
         "image_base64": {
-            "type": "string",
-            "minLength": 1
+            "type": "object",
+            "required": [
+                "file_key"
+            ],
+            "properties": {
+                "file_key": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "mime": {
+                    "type": "string"
+                },
+                "filename": {
+                    "type": "string"
+                }
+            },
+            "additionalProperties": false
         },
         "video_base64": {
-            "type": "string",
-            "minLength": 1
+            "type": "object",
+            "required": [
+                "file_key"
+            ],
+            "properties": {
+                "file_key": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "mime": {
+                    "type": "string"
+                },
+                "filename": {
+                    "type": "string"
+                }
+            },
+            "additionalProperties": false
         },
         "audio_base64": {
-            "type": "string",
-            "minLength": 1
+            "type": "object",
+            "required": [
+                "file_key"
+            ],
+            "properties": {
+                "file_key": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "mime": {
+                    "type": "string"
+                },
+                "filename": {
+                    "type": "string"
+                }
+            },
+            "additionalProperties": false
         },
         "texts": {
             "type": "array",
             "items": {
                 "type": "string"
+            }
+        },
+        "clips": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "required": [
+                    "keep",
+                    "fileKey"
+                ],
+                "properties": {
+                    "keep": {
+                        "type": "boolean"
+                    },
+                    "fileKey": {
+                        "type": "string"
+                    }
+                },
+                "additionalProperties": false
             }
         }
     },
@@ -3050,6 +4733,29 @@ const _slot_arrange_group_inputs = {
                 },
                 "additionalProperties": false
             }
+        },
+        "fileKeys": {
+            "type": "array",
+            "items": {
+                "type": "string"
+            }
+        },
+        "infos": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {},
+                "additionalProperties": true
+            }
+        },
+        "query": {
+            "type": "string"
+        },
+        "groupCount": {
+            "type": "integer"
+        },
+        "duplicatable": {
+            "type": "boolean"
         }
     },
     "additionalProperties": false
@@ -3074,21 +4780,75 @@ const _slot_arrange_group_outputs = {
             "type": "string"
         },
         "image_base64": {
-            "type": "string",
-            "minLength": 1
+            "type": "object",
+            "required": [
+                "file_key"
+            ],
+            "properties": {
+                "file_key": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "mime": {
+                    "type": "string"
+                },
+                "filename": {
+                    "type": "string"
+                }
+            },
+            "additionalProperties": false
         },
         "video_base64": {
-            "type": "string",
-            "minLength": 1
+            "type": "object",
+            "required": [
+                "file_key"
+            ],
+            "properties": {
+                "file_key": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "mime": {
+                    "type": "string"
+                },
+                "filename": {
+                    "type": "string"
+                }
+            },
+            "additionalProperties": false
         },
         "audio_base64": {
-            "type": "string",
-            "minLength": 1
+            "type": "object",
+            "required": [
+                "file_key"
+            ],
+            "properties": {
+                "file_key": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "mime": {
+                    "type": "string"
+                },
+                "filename": {
+                    "type": "string"
+                }
+            },
+            "additionalProperties": false
         },
         "texts": {
             "type": "array",
             "items": {
                 "type": "string"
+            }
+        },
+        "groups": {
+            "type": "array",
+            "items": {
+                "type": "array",
+                "items": {
+                    "type": "string"
+                }
             }
         }
     },
@@ -3098,138 +4858,138 @@ export type ArrangeGroupOutput = FromSchema<typeof _slot_arrange_group_outputs>;
 
 // --- NodeSlot union ---
 export type NodeSlot =
-	| "gen_text"
-	| "split_text"
-	| "combine_text"
-	| "image_fusion"
-	| "image_gen_text"
-	| "video_gen_text"
+	| "gen-text"
+	| "split-text"
+	| "combine-text"
+	| "image-fusion"
+	| "image-gen-text"
+	| "video-gen-text"
 	| "transcribe"
-	| "concat_videos"
-	| "extract_audio"
-	| "separate_video_audio"
-	| "merge_video_audio"
-	| "get_first_frame"
-	| "get_last_frame"
-	| "parse_document"
-	| "split_video"
+	| "concat-videos"
+	| "extract-audio"
+	| "separate-video-audio"
+	| "merge-video-audio"
+	| "get-first-frame"
+	| "get-last-frame"
+	| "parse-document"
+	| "split-video"
 	| "link"
-	| "gen_video"
-	| "image_gen"
-	| "gen_music"
-	| "text_gen_speech_preset"
-	| "image_gen_video"
-	| "image_edit"
-	| "image_upscale"
-	| "video_upscale"
-	| "image_describe"
-	| "video_describe"
-	| "audio_image_gen_video"
+	| "gen-video"
+	| "image-gen"
+	| "gen-music"
+	| "text-gen-speech-preset"
+	| "image-gen-video"
+	| "image-edit"
+	| "image-upscale"
+	| "video-upscale"
+	| "image-describe"
+	| "video-describe"
+	| "audio-image-gen-video"
 	| "speech-text-gen-video"
-	| "speech_image_video_gen_video"
+	| "speech-image-video-gen-video"
 	| "video-image-gen-video-mix"
 	| "video-image-gen-video-move"
 	| "image-image-gen-video"
-	| "text_gen_video"
-	| "image_gen_model"
-	| "speech_video_gen_video"
-	| "text_gen_speech_clone"
-	| "transcribe_timestamp"
-	| "text_gen_speech_instruct"
-	| "video_image_move_animal"
+	| "text-gen-video"
+	| "image-gen-model"
+	| "speech-video-gen-video"
+	| "text-gen-speech-clone"
+	| "transcribe-timestamp"
+	| "text-gen-speech-instruct"
+	| "video-image-move-animal"
 	| "wan-animate-mix"
-	| "drop_video"
-	| "arrange_group";
+	| "drop-video"
+	| "arrange-group";
 
 // --- Lookup maps ---
 export type SlotInputsMap = {
-	"gen_text": GenTextInput;
-	"split_text": SplitTextInput;
-	"combine_text": CombineTextInput;
-	"image_fusion": ImageFusionInput;
-	"image_gen_text": ImageGenTextInput;
-	"video_gen_text": VideoGenTextInput;
+	"gen-text": GenTextInput;
+	"split-text": SplitTextInput;
+	"combine-text": CombineTextInput;
+	"image-fusion": ImageFusionInput;
+	"image-gen-text": ImageGenTextInput;
+	"video-gen-text": VideoGenTextInput;
 	"transcribe": TranscribeInput;
-	"concat_videos": ConcatVideosInput;
-	"extract_audio": ExtractAudioInput;
-	"separate_video_audio": SeparateVideoAudioInput;
-	"merge_video_audio": MergeVideoAudioInput;
-	"get_first_frame": GetFirstFrameInput;
-	"get_last_frame": GetLastFrameInput;
-	"parse_document": ParseDocumentInput;
-	"split_video": SplitVideoInput;
+	"concat-videos": ConcatVideosInput;
+	"extract-audio": ExtractAudioInput;
+	"separate-video-audio": SeparateVideoAudioInput;
+	"merge-video-audio": MergeVideoAudioInput;
+	"get-first-frame": GetFirstFrameInput;
+	"get-last-frame": GetLastFrameInput;
+	"parse-document": ParseDocumentInput;
+	"split-video": SplitVideoInput;
 	"link": LinkInput;
-	"gen_video": GenVideoInput;
-	"image_gen": ImageGenInput;
-	"gen_music": GenMusicInput;
-	"text_gen_speech_preset": TextGenSpeechPresetInput;
-	"image_gen_video": ImageGenVideoInput;
-	"image_edit": ImageEditInput;
-	"image_upscale": ImageUpscaleInput;
-	"video_upscale": VideoUpscaleInput;
-	"image_describe": ImageDescribeInput;
-	"video_describe": VideoDescribeInput;
-	"audio_image_gen_video": AudioImageGenVideoInput;
+	"gen-video": GenVideoInput;
+	"image-gen": ImageGenInput;
+	"gen-music": GenMusicInput;
+	"text-gen-speech-preset": TextGenSpeechPresetInput;
+	"image-gen-video": ImageGenVideoInput;
+	"image-edit": ImageEditInput;
+	"image-upscale": ImageUpscaleInput;
+	"video-upscale": VideoUpscaleInput;
+	"image-describe": ImageDescribeInput;
+	"video-describe": VideoDescribeInput;
+	"audio-image-gen-video": AudioImageGenVideoInput;
 	"speech-text-gen-video": SpeechTextGenVideoInput;
-	"speech_image_video_gen_video": SpeechImageVideoGenVideoInput;
+	"speech-image-video-gen-video": SpeechImageVideoGenVideoInput;
 	"video-image-gen-video-mix": VideoImageGenVideoMixInput;
 	"video-image-gen-video-move": VideoImageGenVideoMoveInput;
 	"image-image-gen-video": ImageImageGenVideoInput;
-	"text_gen_video": TextGenVideoInput;
-	"image_gen_model": ImageGenModelInput;
-	"speech_video_gen_video": SpeechVideoGenVideoInput;
-	"text_gen_speech_clone": TextGenSpeechCloneInput;
-	"transcribe_timestamp": TranscribeTimestampInput;
-	"text_gen_speech_instruct": TextGenSpeechInstructInput;
-	"video_image_move_animal": VideoImageMoveAnimalInput;
+	"text-gen-video": TextGenVideoInput;
+	"image-gen-model": ImageGenModelInput;
+	"speech-video-gen-video": SpeechVideoGenVideoInput;
+	"text-gen-speech-clone": TextGenSpeechCloneInput;
+	"transcribe-timestamp": TranscribeTimestampInput;
+	"text-gen-speech-instruct": TextGenSpeechInstructInput;
+	"video-image-move-animal": VideoImageMoveAnimalInput;
 	"wan-animate-mix": WanAnimateMixInput;
-	"drop_video": DropVideoInput;
-	"arrange_group": ArrangeGroupInput;
+	"drop-video": DropVideoInput;
+	"arrange-group": ArrangeGroupInput;
 }
 
 export type SlotOutputsMap = {
-	"gen_text": GenTextOutput;
-	"split_text": SplitTextOutput;
-	"combine_text": CombineTextOutput;
-	"image_fusion": ImageFusionOutput;
-	"image_gen_text": ImageGenTextOutput;
-	"video_gen_text": VideoGenTextOutput;
+	"gen-text": GenTextOutput;
+	"split-text": SplitTextOutput;
+	"combine-text": CombineTextOutput;
+	"image-fusion": ImageFusionOutput;
+	"image-gen-text": ImageGenTextOutput;
+	"video-gen-text": VideoGenTextOutput;
 	"transcribe": TranscribeOutput;
-	"concat_videos": ConcatVideosOutput;
-	"extract_audio": ExtractAudioOutput;
-	"separate_video_audio": SeparateVideoAudioOutput;
-	"merge_video_audio": MergeVideoAudioOutput;
-	"get_first_frame": GetFirstFrameOutput;
-	"get_last_frame": GetLastFrameOutput;
-	"parse_document": ParseDocumentOutput;
-	"split_video": SplitVideoOutput;
+	"concat-videos": ConcatVideosOutput;
+	"extract-audio": ExtractAudioOutput;
+	"separate-video-audio": SeparateVideoAudioOutput;
+	"merge-video-audio": MergeVideoAudioOutput;
+	"get-first-frame": GetFirstFrameOutput;
+	"get-last-frame": GetLastFrameOutput;
+	"parse-document": ParseDocumentOutput;
+	"split-video": SplitVideoOutput;
 	"link": LinkOutput;
-	"gen_video": GenVideoOutput;
-	"image_gen": ImageGenOutput;
-	"gen_music": GenMusicOutput;
-	"text_gen_speech_preset": TextGenSpeechPresetOutput;
-	"image_gen_video": ImageGenVideoOutput;
-	"image_edit": ImageEditOutput;
-	"image_upscale": ImageUpscaleOutput;
-	"video_upscale": VideoUpscaleOutput;
-	"image_describe": ImageDescribeOutput;
-	"video_describe": VideoDescribeOutput;
-	"audio_image_gen_video": AudioImageGenVideoOutput;
+	"gen-video": GenVideoOutput;
+	"image-gen": ImageGenOutput;
+	"gen-music": GenMusicOutput;
+	"text-gen-speech-preset": TextGenSpeechPresetOutput;
+	"image-gen-video": ImageGenVideoOutput;
+	"image-edit": ImageEditOutput;
+	"image-upscale": ImageUpscaleOutput;
+	"video-upscale": VideoUpscaleOutput;
+	"image-describe": ImageDescribeOutput;
+	"video-describe": VideoDescribeOutput;
+	"audio-image-gen-video": AudioImageGenVideoOutput;
 	"speech-text-gen-video": SpeechTextGenVideoOutput;
-	"speech_image_video_gen_video": SpeechImageVideoGenVideoOutput;
+	"speech-image-video-gen-video": SpeechImageVideoGenVideoOutput;
 	"video-image-gen-video-mix": VideoImageGenVideoMixOutput;
 	"video-image-gen-video-move": VideoImageGenVideoMoveOutput;
 	"image-image-gen-video": ImageImageGenVideoOutput;
-	"text_gen_video": TextGenVideoOutput;
-	"image_gen_model": ImageGenModelOutput;
-	"speech_video_gen_video": SpeechVideoGenVideoOutput;
-	"text_gen_speech_clone": TextGenSpeechCloneOutput;
-	"transcribe_timestamp": TranscribeTimestampOutput;
-	"text_gen_speech_instruct": TextGenSpeechInstructOutput;
-	"video_image_move_animal": VideoImageMoveAnimalOutput;
+	"text-gen-video": TextGenVideoOutput;
+	"image-gen-model": ImageGenModelOutput;
+	"speech-video-gen-video": SpeechVideoGenVideoOutput;
+	"text-gen-speech-clone": TextGenSpeechCloneOutput;
+	"transcribe-timestamp": TranscribeTimestampOutput;
+	"text-gen-speech-instruct": TextGenSpeechInstructOutput;
+	"video-image-move-animal": VideoImageMoveAnimalOutput;
 	"wan-animate-mix": WanAnimateMixOutput;
-	"drop_video": DropVideoOutput;
-	"arrange_group": ArrangeGroupOutput;
+	"drop-video": DropVideoOutput;
+	"arrange-group": ArrangeGroupOutput;
 }
 
 export type SlotInput<S extends NodeSlot> = SlotInputsMap[S];
@@ -3261,11 +5021,30 @@ export const ABI_DEFINITIONS: Record<string, JSONSchema7> = {
 			}
 		},
 		"additionalProperties": false
+	},
+	"FileRef": {
+		"type": "object",
+		"required": [
+			"file_key"
+		],
+		"properties": {
+			"file_key": {
+				"type": "string",
+				"minLength": 1
+			},
+			"mime": {
+				"type": "string"
+			},
+			"filename": {
+				"type": "string"
+			}
+		},
+		"additionalProperties": false
 	}
 };
 
 export const ABI_NODES: Record<NodeSlot, AbiNodeSchemas> = {
-	"gen_text": {
+	"gen-text": {
 		"inputs": {
 			"type": "object",
 			"required": [
@@ -3310,7 +5089,7 @@ export const ABI_NODES: Record<NodeSlot, AbiNodeSchemas> = {
 			"additionalProperties": false
 		}
 	},
-	"split_text": {
+	"split-text": {
 		"inputs": {
 			"type": "object",
 			"required": [
@@ -3355,7 +5134,7 @@ export const ABI_NODES: Record<NodeSlot, AbiNodeSchemas> = {
 			"additionalProperties": false
 		}
 	},
-	"combine_text": {
+	"combine-text": {
 		"inputs": {
 			"type": "object",
 			"required": [
@@ -3403,7 +5182,7 @@ export const ABI_NODES: Record<NodeSlot, AbiNodeSchemas> = {
 			"additionalProperties": false
 		}
 	},
-	"image_fusion": {
+	"image-fusion": {
 		"inputs": {
 			"type": "object",
 			"required": [
@@ -3459,16 +5238,13 @@ export const ABI_NODES: Record<NodeSlot, AbiNodeSchemas> = {
 					"type": "string"
 				},
 				"image_base64": {
-					"type": "string",
-					"minLength": 1
+					"$ref": "#/$defs/FileRef"
 				},
 				"video_base64": {
-					"type": "string",
-					"minLength": 1
+					"$ref": "#/$defs/FileRef"
 				},
 				"audio_base64": {
-					"type": "string",
-					"minLength": 1
+					"$ref": "#/$defs/FileRef"
 				},
 				"texts": {
 					"type": "array",
@@ -3480,7 +5256,7 @@ export const ABI_NODES: Record<NodeSlot, AbiNodeSchemas> = {
 			"additionalProperties": false
 		}
 	},
-	"image_gen_text": {
+	"image-gen-text": {
 		"inputs": {
 			"type": "object",
 			"required": [
@@ -3552,16 +5328,13 @@ export const ABI_NODES: Record<NodeSlot, AbiNodeSchemas> = {
 					"type": "string"
 				},
 				"image_base64": {
-					"type": "string",
-					"minLength": 1
+					"$ref": "#/$defs/FileRef"
 				},
 				"video_base64": {
-					"type": "string",
-					"minLength": 1
+					"$ref": "#/$defs/FileRef"
 				},
 				"audio_base64": {
-					"type": "string",
-					"minLength": 1
+					"$ref": "#/$defs/FileRef"
 				},
 				"texts": {
 					"type": "array",
@@ -3573,7 +5346,7 @@ export const ABI_NODES: Record<NodeSlot, AbiNodeSchemas> = {
 			"additionalProperties": false
 		}
 	},
-	"video_gen_text": {
+	"video-gen-text": {
 		"inputs": {
 			"type": "object",
 			"required": [
@@ -3650,16 +5423,13 @@ export const ABI_NODES: Record<NodeSlot, AbiNodeSchemas> = {
 					"type": "string"
 				},
 				"image_base64": {
-					"type": "string",
-					"minLength": 1
+					"$ref": "#/$defs/FileRef"
 				},
 				"video_base64": {
-					"type": "string",
-					"minLength": 1
+					"$ref": "#/$defs/FileRef"
 				},
 				"audio_base64": {
-					"type": "string",
-					"minLength": 1
+					"$ref": "#/$defs/FileRef"
 				},
 				"texts": {
 					"type": "array",
@@ -3696,21 +5466,32 @@ export const ABI_NODES: Record<NodeSlot, AbiNodeSchemas> = {
 		"outputs": {
 			"type": "object",
 			"required": [
-				"text"
+				"success"
 			],
 			"properties": {
+				"success": {
+					"type": "boolean"
+				},
+				"error": {
+					"type": "string"
+				},
 				"text": {
-					"type": "string",
-					"minLength": 1
+					"type": "string"
+				},
+				"result": {
+					"type": "string"
 				},
 				"language": {
+					"type": "string"
+				},
+				"file_key": {
 					"type": "string"
 				}
 			},
 			"additionalProperties": false
 		}
 	},
-	"concat_videos": {
+	"concat-videos": {
 		"inputs": {
 			"type": "object",
 			"required": [
@@ -3758,16 +5539,13 @@ export const ABI_NODES: Record<NodeSlot, AbiNodeSchemas> = {
 					"type": "string"
 				},
 				"image_base64": {
-					"type": "string",
-					"minLength": 1
+					"$ref": "#/$defs/FileRef"
 				},
 				"video_base64": {
-					"type": "string",
-					"minLength": 1
+					"$ref": "#/$defs/FileRef"
 				},
 				"audio_base64": {
-					"type": "string",
-					"minLength": 1
+					"$ref": "#/$defs/FileRef"
 				},
 				"texts": {
 					"type": "array",
@@ -3779,7 +5557,7 @@ export const ABI_NODES: Record<NodeSlot, AbiNodeSchemas> = {
 			"additionalProperties": false
 		}
 	},
-	"extract_audio": {
+	"extract-audio": {
 		"inputs": {
 			"type": "object",
 			"required": [],
@@ -3819,16 +5597,13 @@ export const ABI_NODES: Record<NodeSlot, AbiNodeSchemas> = {
 					"type": "string"
 				},
 				"image_base64": {
-					"type": "string",
-					"minLength": 1
+					"$ref": "#/$defs/FileRef"
 				},
 				"video_base64": {
-					"type": "string",
-					"minLength": 1
+					"$ref": "#/$defs/FileRef"
 				},
 				"audio_base64": {
-					"type": "string",
-					"minLength": 1
+					"$ref": "#/$defs/FileRef"
 				},
 				"texts": {
 					"type": "array",
@@ -3840,7 +5615,7 @@ export const ABI_NODES: Record<NodeSlot, AbiNodeSchemas> = {
 			"additionalProperties": false
 		}
 	},
-	"separate_video_audio": {
+	"separate-video-audio": {
 		"inputs": {
 			"type": "object",
 			"required": [],
@@ -3880,16 +5655,13 @@ export const ABI_NODES: Record<NodeSlot, AbiNodeSchemas> = {
 					"type": "string"
 				},
 				"image_base64": {
-					"type": "string",
-					"minLength": 1
+					"$ref": "#/$defs/FileRef"
 				},
 				"video_base64": {
-					"type": "string",
-					"minLength": 1
+					"$ref": "#/$defs/FileRef"
 				},
 				"audio_base64": {
-					"type": "string",
-					"minLength": 1
+					"$ref": "#/$defs/FileRef"
 				},
 				"texts": {
 					"type": "array",
@@ -3901,7 +5673,7 @@ export const ABI_NODES: Record<NodeSlot, AbiNodeSchemas> = {
 			"additionalProperties": false
 		}
 	},
-	"merge_video_audio": {
+	"merge-video-audio": {
 		"inputs": {
 			"type": "object",
 			"required": [],
@@ -3948,16 +5720,13 @@ export const ABI_NODES: Record<NodeSlot, AbiNodeSchemas> = {
 					"type": "string"
 				},
 				"image_base64": {
-					"type": "string",
-					"minLength": 1
+					"$ref": "#/$defs/FileRef"
 				},
 				"video_base64": {
-					"type": "string",
-					"minLength": 1
+					"$ref": "#/$defs/FileRef"
 				},
 				"audio_base64": {
-					"type": "string",
-					"minLength": 1
+					"$ref": "#/$defs/FileRef"
 				},
 				"texts": {
 					"type": "array",
@@ -3969,7 +5738,7 @@ export const ABI_NODES: Record<NodeSlot, AbiNodeSchemas> = {
 			"additionalProperties": false
 		}
 	},
-	"get_first_frame": {
+	"get-first-frame": {
 		"inputs": {
 			"type": "object",
 			"required": [],
@@ -4009,16 +5778,13 @@ export const ABI_NODES: Record<NodeSlot, AbiNodeSchemas> = {
 					"type": "string"
 				},
 				"image_base64": {
-					"type": "string",
-					"minLength": 1
+					"$ref": "#/$defs/FileRef"
 				},
 				"video_base64": {
-					"type": "string",
-					"minLength": 1
+					"$ref": "#/$defs/FileRef"
 				},
 				"audio_base64": {
-					"type": "string",
-					"minLength": 1
+					"$ref": "#/$defs/FileRef"
 				},
 				"texts": {
 					"type": "array",
@@ -4030,7 +5796,7 @@ export const ABI_NODES: Record<NodeSlot, AbiNodeSchemas> = {
 			"additionalProperties": false
 		}
 	},
-	"get_last_frame": {
+	"get-last-frame": {
 		"inputs": {
 			"type": "object",
 			"required": [],
@@ -4070,16 +5836,13 @@ export const ABI_NODES: Record<NodeSlot, AbiNodeSchemas> = {
 					"type": "string"
 				},
 				"image_base64": {
-					"type": "string",
-					"minLength": 1
+					"$ref": "#/$defs/FileRef"
 				},
 				"video_base64": {
-					"type": "string",
-					"minLength": 1
+					"$ref": "#/$defs/FileRef"
 				},
 				"audio_base64": {
-					"type": "string",
-					"minLength": 1
+					"$ref": "#/$defs/FileRef"
 				},
 				"texts": {
 					"type": "array",
@@ -4091,7 +5854,7 @@ export const ABI_NODES: Record<NodeSlot, AbiNodeSchemas> = {
 			"additionalProperties": false
 		}
 	},
-	"parse_document": {
+	"parse-document": {
 		"inputs": {
 			"type": "object",
 			"required": [],
@@ -4127,16 +5890,13 @@ export const ABI_NODES: Record<NodeSlot, AbiNodeSchemas> = {
 					"type": "string"
 				},
 				"image_base64": {
-					"type": "string",
-					"minLength": 1
+					"$ref": "#/$defs/FileRef"
 				},
 				"video_base64": {
-					"type": "string",
-					"minLength": 1
+					"$ref": "#/$defs/FileRef"
 				},
 				"audio_base64": {
-					"type": "string",
-					"minLength": 1
+					"$ref": "#/$defs/FileRef"
 				},
 				"texts": {
 					"type": "array",
@@ -4148,7 +5908,7 @@ export const ABI_NODES: Record<NodeSlot, AbiNodeSchemas> = {
 			"additionalProperties": false
 		}
 	},
-	"split_video": {
+	"split-video": {
 		"inputs": {
 			"type": "object",
 			"required": [],
@@ -4192,16 +5952,19 @@ export const ABI_NODES: Record<NodeSlot, AbiNodeSchemas> = {
 					"type": "string"
 				},
 				"image_base64": {
-					"type": "string",
-					"minLength": 1
+					"$ref": "#/$defs/FileRef"
 				},
 				"video_base64": {
-					"type": "string",
-					"minLength": 1
+					"$ref": "#/$defs/FileRef"
 				},
 				"audio_base64": {
-					"type": "string",
-					"minLength": 1
+					"$ref": "#/$defs/FileRef"
+				},
+				"video_parts": {
+					"type": "array",
+					"items": {
+						"$ref": "#/$defs/FileRef"
+					}
 				},
 				"texts": {
 					"type": "array",
@@ -4246,16 +6009,13 @@ export const ABI_NODES: Record<NodeSlot, AbiNodeSchemas> = {
 					"type": "string"
 				},
 				"image_base64": {
-					"type": "string",
-					"minLength": 1
+					"$ref": "#/$defs/FileRef"
 				},
 				"video_base64": {
-					"type": "string",
-					"minLength": 1
+					"$ref": "#/$defs/FileRef"
 				},
 				"audio_base64": {
-					"type": "string",
-					"minLength": 1
+					"$ref": "#/$defs/FileRef"
 				},
 				"texts": {
 					"type": "array",
@@ -4267,7 +6027,7 @@ export const ABI_NODES: Record<NodeSlot, AbiNodeSchemas> = {
 			"additionalProperties": false
 		}
 	},
-	"gen_video": {
+	"gen-video": {
 		"inputs": {
 			"type": "object",
 			"required": [
@@ -4361,16 +6121,13 @@ export const ABI_NODES: Record<NodeSlot, AbiNodeSchemas> = {
 					"type": "string"
 				},
 				"image_base64": {
-					"type": "string",
-					"minLength": 1
+					"$ref": "#/$defs/FileRef"
 				},
 				"video_base64": {
-					"type": "string",
-					"minLength": 1
+					"$ref": "#/$defs/FileRef"
 				},
 				"audio_base64": {
-					"type": "string",
-					"minLength": 1
+					"$ref": "#/$defs/FileRef"
 				},
 				"texts": {
 					"type": "array",
@@ -4382,7 +6139,7 @@ export const ABI_NODES: Record<NodeSlot, AbiNodeSchemas> = {
 			"additionalProperties": false
 		}
 	},
-	"image_gen": {
+	"image-gen": {
 		"inputs": {
 			"type": "object",
 			"required": [],
@@ -4434,16 +6191,13 @@ export const ABI_NODES: Record<NodeSlot, AbiNodeSchemas> = {
 					"type": "string"
 				},
 				"image_base64": {
-					"type": "string",
-					"minLength": 1
+					"$ref": "#/$defs/FileRef"
 				},
 				"video_base64": {
-					"type": "string",
-					"minLength": 1
+					"$ref": "#/$defs/FileRef"
 				},
 				"audio_base64": {
-					"type": "string",
-					"minLength": 1
+					"$ref": "#/$defs/FileRef"
 				},
 				"texts": {
 					"type": "array",
@@ -4455,7 +6209,7 @@ export const ABI_NODES: Record<NodeSlot, AbiNodeSchemas> = {
 			"additionalProperties": false
 		}
 	},
-	"gen_music": {
+	"gen-music": {
 		"inputs": {
 			"type": "object",
 			"required": [],
@@ -4495,16 +6249,13 @@ export const ABI_NODES: Record<NodeSlot, AbiNodeSchemas> = {
 					"type": "string"
 				},
 				"image_base64": {
-					"type": "string",
-					"minLength": 1
+					"$ref": "#/$defs/FileRef"
 				},
 				"video_base64": {
-					"type": "string",
-					"minLength": 1
+					"$ref": "#/$defs/FileRef"
 				},
 				"audio_base64": {
-					"type": "string",
-					"minLength": 1
+					"$ref": "#/$defs/FileRef"
 				},
 				"texts": {
 					"type": "array",
@@ -4516,7 +6267,7 @@ export const ABI_NODES: Record<NodeSlot, AbiNodeSchemas> = {
 			"additionalProperties": false
 		}
 	},
-	"text_gen_speech_preset": {
+	"text-gen-speech-preset": {
 		"inputs": {
 			"type": "object",
 			"required": [
@@ -4558,16 +6309,13 @@ export const ABI_NODES: Record<NodeSlot, AbiNodeSchemas> = {
 					"type": "string"
 				},
 				"image_base64": {
-					"type": "string",
-					"minLength": 1
+					"$ref": "#/$defs/FileRef"
 				},
 				"video_base64": {
-					"type": "string",
-					"minLength": 1
+					"$ref": "#/$defs/FileRef"
 				},
 				"audio_base64": {
-					"type": "string",
-					"minLength": 1
+					"$ref": "#/$defs/FileRef"
 				},
 				"texts": {
 					"type": "array",
@@ -4579,7 +6327,7 @@ export const ABI_NODES: Record<NodeSlot, AbiNodeSchemas> = {
 			"additionalProperties": false
 		}
 	},
-	"image_gen_video": {
+	"image-gen-video": {
 		"inputs": {
 			"type": "object",
 			"required": [
@@ -4674,16 +6422,13 @@ export const ABI_NODES: Record<NodeSlot, AbiNodeSchemas> = {
 					"type": "string"
 				},
 				"image_base64": {
-					"type": "string",
-					"minLength": 1
+					"$ref": "#/$defs/FileRef"
 				},
 				"video_base64": {
-					"type": "string",
-					"minLength": 1
+					"$ref": "#/$defs/FileRef"
 				},
 				"audio_base64": {
-					"type": "string",
-					"minLength": 1
+					"$ref": "#/$defs/FileRef"
 				},
 				"texts": {
 					"type": "array",
@@ -4695,7 +6440,7 @@ export const ABI_NODES: Record<NodeSlot, AbiNodeSchemas> = {
 			"additionalProperties": false
 		}
 	},
-	"image_edit": {
+	"image-edit": {
 		"inputs": {
 			"type": "object",
 			"required": [
@@ -4745,16 +6490,13 @@ export const ABI_NODES: Record<NodeSlot, AbiNodeSchemas> = {
 					"type": "string"
 				},
 				"image_base64": {
-					"type": "string",
-					"minLength": 1
+					"$ref": "#/$defs/FileRef"
 				},
 				"video_base64": {
-					"type": "string",
-					"minLength": 1
+					"$ref": "#/$defs/FileRef"
 				},
 				"audio_base64": {
-					"type": "string",
-					"minLength": 1
+					"$ref": "#/$defs/FileRef"
 				},
 				"texts": {
 					"type": "array",
@@ -4766,7 +6508,7 @@ export const ABI_NODES: Record<NodeSlot, AbiNodeSchemas> = {
 			"additionalProperties": false
 		}
 	},
-	"image_upscale": {
+	"image-upscale": {
 		"inputs": {
 			"type": "object",
 			"required": [
@@ -4827,16 +6569,13 @@ export const ABI_NODES: Record<NodeSlot, AbiNodeSchemas> = {
 					"type": "string"
 				},
 				"image_base64": {
-					"type": "string",
-					"minLength": 1
+					"$ref": "#/$defs/FileRef"
 				},
 				"video_base64": {
-					"type": "string",
-					"minLength": 1
+					"$ref": "#/$defs/FileRef"
 				},
 				"audio_base64": {
-					"type": "string",
-					"minLength": 1
+					"$ref": "#/$defs/FileRef"
 				},
 				"texts": {
 					"type": "array",
@@ -4848,7 +6587,7 @@ export const ABI_NODES: Record<NodeSlot, AbiNodeSchemas> = {
 			"additionalProperties": false
 		}
 	},
-	"video_upscale": {
+	"video-upscale": {
 		"inputs": {
 			"type": "object",
 			"required": [
@@ -4909,16 +6648,13 @@ export const ABI_NODES: Record<NodeSlot, AbiNodeSchemas> = {
 					"type": "string"
 				},
 				"image_base64": {
-					"type": "string",
-					"minLength": 1
+					"$ref": "#/$defs/FileRef"
 				},
 				"video_base64": {
-					"type": "string",
-					"minLength": 1
+					"$ref": "#/$defs/FileRef"
 				},
 				"audio_base64": {
-					"type": "string",
-					"minLength": 1
+					"$ref": "#/$defs/FileRef"
 				},
 				"texts": {
 					"type": "array",
@@ -4930,7 +6666,7 @@ export const ABI_NODES: Record<NodeSlot, AbiNodeSchemas> = {
 			"additionalProperties": false
 		}
 	},
-	"image_describe": {
+	"image-describe": {
 		"inputs": {
 			"type": "object",
 			"required": [],
@@ -4967,16 +6703,13 @@ export const ABI_NODES: Record<NodeSlot, AbiNodeSchemas> = {
 					"type": "string"
 				},
 				"image_base64": {
-					"type": "string",
-					"minLength": 1
+					"$ref": "#/$defs/FileRef"
 				},
 				"video_base64": {
-					"type": "string",
-					"minLength": 1
+					"$ref": "#/$defs/FileRef"
 				},
 				"audio_base64": {
-					"type": "string",
-					"minLength": 1
+					"$ref": "#/$defs/FileRef"
 				},
 				"texts": {
 					"type": "array",
@@ -4988,7 +6721,7 @@ export const ABI_NODES: Record<NodeSlot, AbiNodeSchemas> = {
 			"additionalProperties": false
 		}
 	},
-	"video_describe": {
+	"video-describe": {
 		"inputs": {
 			"type": "object",
 			"required": [],
@@ -5025,16 +6758,13 @@ export const ABI_NODES: Record<NodeSlot, AbiNodeSchemas> = {
 					"type": "string"
 				},
 				"image_base64": {
-					"type": "string",
-					"minLength": 1
+					"$ref": "#/$defs/FileRef"
 				},
 				"video_base64": {
-					"type": "string",
-					"minLength": 1
+					"$ref": "#/$defs/FileRef"
 				},
 				"audio_base64": {
-					"type": "string",
-					"minLength": 1
+					"$ref": "#/$defs/FileRef"
 				},
 				"texts": {
 					"type": "array",
@@ -5046,7 +6776,7 @@ export const ABI_NODES: Record<NodeSlot, AbiNodeSchemas> = {
 			"additionalProperties": false
 		}
 	},
-	"audio_image_gen_video": {
+	"audio-image-gen-video": {
 		"inputs": {
 			"type": "object",
 			"required": [
@@ -5087,16 +6817,13 @@ export const ABI_NODES: Record<NodeSlot, AbiNodeSchemas> = {
 					"type": "string"
 				},
 				"image_base64": {
-					"type": "string",
-					"minLength": 1
+					"$ref": "#/$defs/FileRef"
 				},
 				"video_base64": {
-					"type": "string",
-					"minLength": 1
+					"$ref": "#/$defs/FileRef"
 				},
 				"audio_base64": {
-					"type": "string",
-					"minLength": 1
+					"$ref": "#/$defs/FileRef"
 				},
 				"texts": {
 					"type": "array",
@@ -5203,16 +6930,13 @@ export const ABI_NODES: Record<NodeSlot, AbiNodeSchemas> = {
 					"type": "string"
 				},
 				"image_base64": {
-					"type": "string",
-					"minLength": 1
+					"$ref": "#/$defs/FileRef"
 				},
 				"video_base64": {
-					"type": "string",
-					"minLength": 1
+					"$ref": "#/$defs/FileRef"
 				},
 				"audio_base64": {
-					"type": "string",
-					"minLength": 1
+					"$ref": "#/$defs/FileRef"
 				},
 				"texts": {
 					"type": "array",
@@ -5224,7 +6948,7 @@ export const ABI_NODES: Record<NodeSlot, AbiNodeSchemas> = {
 			"additionalProperties": false
 		}
 	},
-	"speech_image_video_gen_video": {
+	"speech-image-video-gen-video": {
 		"inputs": {
 			"type": "object",
 			"required": [
@@ -5270,16 +6994,13 @@ export const ABI_NODES: Record<NodeSlot, AbiNodeSchemas> = {
 					"type": "string"
 				},
 				"image_base64": {
-					"type": "string",
-					"minLength": 1
+					"$ref": "#/$defs/FileRef"
 				},
 				"video_base64": {
-					"type": "string",
-					"minLength": 1
+					"$ref": "#/$defs/FileRef"
 				},
 				"audio_base64": {
-					"type": "string",
-					"minLength": 1
+					"$ref": "#/$defs/FileRef"
 				},
 				"texts": {
 					"type": "array",
@@ -5332,16 +7053,13 @@ export const ABI_NODES: Record<NodeSlot, AbiNodeSchemas> = {
 					"type": "string"
 				},
 				"image_base64": {
-					"type": "string",
-					"minLength": 1
+					"$ref": "#/$defs/FileRef"
 				},
 				"video_base64": {
-					"type": "string",
-					"minLength": 1
+					"$ref": "#/$defs/FileRef"
 				},
 				"audio_base64": {
-					"type": "string",
-					"minLength": 1
+					"$ref": "#/$defs/FileRef"
 				},
 				"texts": {
 					"type": "array",
@@ -5394,16 +7112,13 @@ export const ABI_NODES: Record<NodeSlot, AbiNodeSchemas> = {
 					"type": "string"
 				},
 				"image_base64": {
-					"type": "string",
-					"minLength": 1
+					"$ref": "#/$defs/FileRef"
 				},
 				"video_base64": {
-					"type": "string",
-					"minLength": 1
+					"$ref": "#/$defs/FileRef"
 				},
 				"audio_base64": {
-					"type": "string",
-					"minLength": 1
+					"$ref": "#/$defs/FileRef"
 				},
 				"texts": {
 					"type": "array",
@@ -5511,16 +7226,13 @@ export const ABI_NODES: Record<NodeSlot, AbiNodeSchemas> = {
 					"type": "string"
 				},
 				"image_base64": {
-					"type": "string",
-					"minLength": 1
+					"$ref": "#/$defs/FileRef"
 				},
 				"video_base64": {
-					"type": "string",
-					"minLength": 1
+					"$ref": "#/$defs/FileRef"
 				},
 				"audio_base64": {
-					"type": "string",
-					"minLength": 1
+					"$ref": "#/$defs/FileRef"
 				},
 				"texts": {
 					"type": "array",
@@ -5532,7 +7244,7 @@ export const ABI_NODES: Record<NodeSlot, AbiNodeSchemas> = {
 			"additionalProperties": false
 		}
 	},
-	"text_gen_video": {
+	"text-gen-video": {
 		"inputs": {
 			"type": "object",
 			"required": [
@@ -5626,16 +7338,13 @@ export const ABI_NODES: Record<NodeSlot, AbiNodeSchemas> = {
 					"type": "string"
 				},
 				"image_base64": {
-					"type": "string",
-					"minLength": 1
+					"$ref": "#/$defs/FileRef"
 				},
 				"video_base64": {
-					"type": "string",
-					"minLength": 1
+					"$ref": "#/$defs/FileRef"
 				},
 				"audio_base64": {
-					"type": "string",
-					"minLength": 1
+					"$ref": "#/$defs/FileRef"
 				},
 				"texts": {
 					"type": "array",
@@ -5647,7 +7356,7 @@ export const ABI_NODES: Record<NodeSlot, AbiNodeSchemas> = {
 			"additionalProperties": false
 		}
 	},
-	"image_gen_model": {
+	"image-gen-model": {
 		"inputs": {
 			"type": "object",
 			"required": [],
@@ -5699,16 +7408,13 @@ export const ABI_NODES: Record<NodeSlot, AbiNodeSchemas> = {
 					"type": "string"
 				},
 				"image_base64": {
-					"type": "string",
-					"minLength": 1
+					"$ref": "#/$defs/FileRef"
 				},
 				"video_base64": {
-					"type": "string",
-					"minLength": 1
+					"$ref": "#/$defs/FileRef"
 				},
 				"audio_base64": {
-					"type": "string",
-					"minLength": 1
+					"$ref": "#/$defs/FileRef"
 				},
 				"texts": {
 					"type": "array",
@@ -5720,7 +7426,7 @@ export const ABI_NODES: Record<NodeSlot, AbiNodeSchemas> = {
 			"additionalProperties": false
 		}
 	},
-	"speech_video_gen_video": {
+	"speech-video-gen-video": {
 		"inputs": {
 			"type": "object",
 			"required": [
@@ -5758,16 +7464,13 @@ export const ABI_NODES: Record<NodeSlot, AbiNodeSchemas> = {
 					"type": "string"
 				},
 				"image_base64": {
-					"type": "string",
-					"minLength": 1
+					"$ref": "#/$defs/FileRef"
 				},
 				"video_base64": {
-					"type": "string",
-					"minLength": 1
+					"$ref": "#/$defs/FileRef"
 				},
 				"audio_base64": {
-					"type": "string",
-					"minLength": 1
+					"$ref": "#/$defs/FileRef"
 				},
 				"texts": {
 					"type": "array",
@@ -5779,7 +7482,7 @@ export const ABI_NODES: Record<NodeSlot, AbiNodeSchemas> = {
 			"additionalProperties": false
 		}
 	},
-	"text_gen_speech_clone": {
+	"text-gen-speech-clone": {
 		"inputs": {
 			"type": "object",
 			"required": [
@@ -5833,16 +7536,13 @@ export const ABI_NODES: Record<NodeSlot, AbiNodeSchemas> = {
 					"type": "string"
 				},
 				"image_base64": {
-					"type": "string",
-					"minLength": 1
+					"$ref": "#/$defs/FileRef"
 				},
 				"video_base64": {
-					"type": "string",
-					"minLength": 1
+					"$ref": "#/$defs/FileRef"
 				},
 				"audio_base64": {
-					"type": "string",
-					"minLength": 1
+					"$ref": "#/$defs/FileRef"
 				},
 				"texts": {
 					"type": "array",
@@ -5854,7 +7554,7 @@ export const ABI_NODES: Record<NodeSlot, AbiNodeSchemas> = {
 			"additionalProperties": false
 		}
 	},
-	"transcribe_timestamp": {
+	"transcribe-timestamp": {
 		"inputs": {
 			"type": "object",
 			"required": [
@@ -5879,14 +7579,25 @@ export const ABI_NODES: Record<NodeSlot, AbiNodeSchemas> = {
 		"outputs": {
 			"type": "object",
 			"required": [
-				"text"
+				"success"
 			],
 			"properties": {
+				"success": {
+					"type": "boolean"
+				},
+				"error": {
+					"type": "string"
+				},
 				"text": {
-					"type": "string",
-					"minLength": 1
+					"type": "string"
+				},
+				"result": {
+					"type": "string"
 				},
 				"language": {
+					"type": "string"
+				},
+				"file_key": {
 					"type": "string"
 				},
 				"time_stamps": {
@@ -5917,7 +7628,7 @@ export const ABI_NODES: Record<NodeSlot, AbiNodeSchemas> = {
 			"additionalProperties": false
 		}
 	},
-	"text_gen_speech_instruct": {
+	"text-gen-speech-instruct": {
 		"inputs": {
 			"type": "object",
 			"required": [
@@ -5962,16 +7673,13 @@ export const ABI_NODES: Record<NodeSlot, AbiNodeSchemas> = {
 					"type": "string"
 				},
 				"image_base64": {
-					"type": "string",
-					"minLength": 1
+					"$ref": "#/$defs/FileRef"
 				},
 				"video_base64": {
-					"type": "string",
-					"minLength": 1
+					"$ref": "#/$defs/FileRef"
 				},
 				"audio_base64": {
-					"type": "string",
-					"minLength": 1
+					"$ref": "#/$defs/FileRef"
 				},
 				"texts": {
 					"type": "array",
@@ -5983,7 +7691,7 @@ export const ABI_NODES: Record<NodeSlot, AbiNodeSchemas> = {
 			"additionalProperties": false
 		}
 	},
-	"video_image_move_animal": {
+	"video-image-move-animal": {
 		"inputs": {
 			"type": "object",
 			"required": [
@@ -6024,16 +7732,13 @@ export const ABI_NODES: Record<NodeSlot, AbiNodeSchemas> = {
 					"type": "string"
 				},
 				"image_base64": {
-					"type": "string",
-					"minLength": 1
+					"$ref": "#/$defs/FileRef"
 				},
 				"video_base64": {
-					"type": "string",
-					"minLength": 1
+					"$ref": "#/$defs/FileRef"
 				},
 				"audio_base64": {
-					"type": "string",
-					"minLength": 1
+					"$ref": "#/$defs/FileRef"
 				},
 				"texts": {
 					"type": "array",
@@ -6086,16 +7791,13 @@ export const ABI_NODES: Record<NodeSlot, AbiNodeSchemas> = {
 					"type": "string"
 				},
 				"image_base64": {
-					"type": "string",
-					"minLength": 1
+					"$ref": "#/$defs/FileRef"
 				},
 				"video_base64": {
-					"type": "string",
-					"minLength": 1
+					"$ref": "#/$defs/FileRef"
 				},
 				"audio_base64": {
-					"type": "string",
-					"minLength": 1
+					"$ref": "#/$defs/FileRef"
 				},
 				"texts": {
 					"type": "array",
@@ -6107,7 +7809,7 @@ export const ABI_NODES: Record<NodeSlot, AbiNodeSchemas> = {
 			"additionalProperties": false
 		}
 	},
-	"drop_video": {
+	"drop-video": {
 		"inputs": {
 			"type": "object",
 			"required": [],
@@ -6143,28 +7845,44 @@ export const ABI_NODES: Record<NodeSlot, AbiNodeSchemas> = {
 					"type": "string"
 				},
 				"image_base64": {
-					"type": "string",
-					"minLength": 1
+					"$ref": "#/$defs/FileRef"
 				},
 				"video_base64": {
-					"type": "string",
-					"minLength": 1
+					"$ref": "#/$defs/FileRef"
 				},
 				"audio_base64": {
-					"type": "string",
-					"minLength": 1
+					"$ref": "#/$defs/FileRef"
 				},
 				"texts": {
 					"type": "array",
 					"items": {
 						"type": "string"
 					}
+				},
+				"clips": {
+					"type": "array",
+					"items": {
+						"type": "object",
+						"required": [
+							"keep",
+							"fileKey"
+						],
+						"properties": {
+							"keep": {
+								"type": "boolean"
+							},
+							"fileKey": {
+								"type": "string"
+							}
+						},
+						"additionalProperties": false
+					}
 				}
 			},
 			"additionalProperties": false
 		}
 	},
-	"arrange_group": {
+	"arrange-group": {
 		"inputs": {
 			"type": "object",
 			"required": [],
@@ -6184,6 +7902,29 @@ export const ABI_NODES: Record<NodeSlot, AbiNodeSchemas> = {
 						},
 						"additionalProperties": false
 					}
+				},
+				"fileKeys": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				},
+				"infos": {
+					"type": "array",
+					"items": {
+						"type": "object",
+						"properties": {},
+						"additionalProperties": true
+					}
+				},
+				"query": {
+					"type": "string"
+				},
+				"groupCount": {
+					"type": "integer"
+				},
+				"duplicatable": {
+					"type": "boolean"
 				}
 			},
 			"additionalProperties": false
@@ -6207,21 +7948,27 @@ export const ABI_NODES: Record<NodeSlot, AbiNodeSchemas> = {
 					"type": "string"
 				},
 				"image_base64": {
-					"type": "string",
-					"minLength": 1
+					"$ref": "#/$defs/FileRef"
 				},
 				"video_base64": {
-					"type": "string",
-					"minLength": 1
+					"$ref": "#/$defs/FileRef"
 				},
 				"audio_base64": {
-					"type": "string",
-					"minLength": 1
+					"$ref": "#/$defs/FileRef"
 				},
 				"texts": {
 					"type": "array",
 					"items": {
 						"type": "string"
+					}
+				},
+				"groups": {
+					"type": "array",
+					"items": {
+						"type": "array",
+						"items": {
+							"type": "string"
+						}
 					}
 				}
 			},

@@ -1,3031 +1,3018 @@
 {
-  "version": 1,
-  "$defs": {
-    "Asset": {
-      "type": "object",
-      "required": [
-        "bytesBase64"
-      ],
-      "properties": {
-        "bytesBase64": {
-          "type": "string",
-          "minLength": 1
+    "version": 1,
+    "$defs": {
+        "Asset": {
+            "type": "object",
+            "required": [
+                "bytesBase64"
+            ],
+            "properties": {
+                "bytesBase64": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "filename": {
+                    "type": "string"
+                },
+                "mime": {
+                    "type": "string"
+                }
+            },
+            "additionalProperties": false
         },
-        "filename": {
-          "type": "string"
-        },
-        "mime": {
-          "type": "string"
+        "FileRef": {
+            "type": "object",
+            "required": [
+                "file_key"
+            ],
+            "properties": {
+                "file_key": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "mime": {
+                    "type": "string"
+                },
+                "filename": {
+                    "type": "string"
+                }
+            },
+            "additionalProperties": false
         }
-      },
-      "additionalProperties": false
-    }
-  },
-  "nodes": [
-    {
-      "nodeSlot": "gen_text",
-      "inputs": {
-        "type": "object",
-        "required": [
-          "text"
-        ],
-        "properties": {
-          "text": {
-            "type": "string",
-            "minLength": 1
-          },
-          "userPrompt": {
-            "type": "string"
-          },
-          "pluginId": {
-            "type": "string"
-          },
-          "nodeSlot": {
-            "type": "string"
-          }
-        },
-        "additionalProperties": false
-      },
-      "outputs": {
-        "type": "object",
-        "required": [
-          "success"
-        ],
-        "properties": {
-          "success": {
-            "type": "boolean"
-          },
-          "error": {
-            "type": "string"
-          },
-          "text": {
-            "type": "string"
-          },
-          "result": {
-            "type": "string"
-          }
-        },
-        "additionalProperties": false
-      }
     },
-    {
-      "nodeSlot": "split_text",
-      "inputs": {
-        "type": "object",
-        "required": [
-          "text"
-        ],
-        "properties": {
-          "text": {
-            "type": "string",
-            "minLength": 1
-          },
-          "userPrompt": {
-            "type": "string"
-          },
-          "pluginId": {
-            "type": "string"
-          },
-          "nodeSlot": {
-            "type": "string"
-          }
-        },
-        "additionalProperties": false
-      },
-      "outputs": {
-        "type": "object",
-        "required": [
-          "success"
-        ],
-        "properties": {
-          "success": {
-            "type": "boolean"
-          },
-          "error": {
-            "type": "string"
-          },
-          "text": {
-            "type": "string"
-          },
-          "result": {
-            "type": "string"
-          }
-        },
-        "additionalProperties": false
-      }
-    },
-    {
-      "nodeSlot": "combine_text",
-      "inputs": {
-        "type": "object",
-        "required": [
-          "texts"
-        ],
-        "properties": {
-          "texts": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "minLength": 1
-            }
-          },
-          "userPrompt": {
-            "type": "string"
-          },
-          "pluginId": {
-            "type": "string"
-          },
-          "nodeSlot": {
-            "type": "string"
-          }
-        },
-        "additionalProperties": false
-      },
-      "outputs": {
-        "type": "object",
-        "required": [
-          "success"
-        ],
-        "properties": {
-          "success": {
-            "type": "boolean"
-          },
-          "error": {
-            "type": "string"
-          },
-          "text": {
-            "type": "string"
-          },
-          "result": {
-            "type": "string"
-          }
-        },
-        "additionalProperties": false
-      }
-    },
-    {
-      "nodeSlot": "image_fusion",
-      "inputs": {
-        "type": "object",
-        "required": [
-          "text"
-        ],
-        "properties": {
-          "text": {
-            "type": "string",
-            "minLength": 1
-          },
-          "images": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "image_base64": {
-            "type": "string",
-            "minLength": 1
-          },
-          "image2_base64": {
-            "type": "string",
-            "minLength": 1
-          },
-          "seed": {
-            "type": "integer"
-          },
-          "width": {
-            "type": "integer"
-          },
-          "height": {
-            "type": "integer"
-          }
-        },
-        "additionalProperties": false
-      },
-      "outputs": {
-        "type": "object",
-        "required": [
-          "success"
-        ],
-        "properties": {
-          "success": {
-            "type": "boolean"
-          },
-          "error": {
-            "type": "string"
-          },
-          "text": {
-            "type": "string"
-          },
-          "thinking": {
-            "type": "string"
-          },
-          "image_base64": {
-            "type": "string",
-            "minLength": 1
-          },
-          "video_base64": {
-            "type": "string",
-            "minLength": 1
-          },
-          "audio_base64": {
-            "type": "string",
-            "minLength": 1
-          },
-          "texts": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          }
-        },
-        "additionalProperties": false
-      }
-    },
-    {
-      "nodeSlot": "image_gen_text",
-      "inputs": {
-        "type": "object",
-        "required": [
-          "text"
-        ],
-        "properties": {
-          "text": {
-            "type": "string"
-          },
-          "texts": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "system": {
-            "type": "string"
-          },
-          "max_new_tokens": {
-            "type": "integer"
-          },
-          "enable_thinking": {
-            "type": "boolean"
-          },
-          "temperature": {
-            "type": "number"
-          },
-          "top_p": {
-            "type": "number"
-          },
-          "top_k": {
-            "type": "integer"
-          },
-          "image_base64": {
-            "type": "string",
-            "minLength": 1
-          },
-          "images": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "image_base64s": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          }
-        },
-        "additionalProperties": false
-      },
-      "outputs": {
-        "type": "object",
-        "required": [
-          "success"
-        ],
-        "properties": {
-          "success": {
-            "type": "boolean"
-          },
-          "error": {
-            "type": "string"
-          },
-          "text": {
-            "type": "string"
-          },
-          "thinking": {
-            "type": "string"
-          },
-          "image_base64": {
-            "type": "string",
-            "minLength": 1
-          },
-          "video_base64": {
-            "type": "string",
-            "minLength": 1
-          },
-          "audio_base64": {
-            "type": "string",
-            "minLength": 1
-          },
-          "texts": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          }
-        },
-        "additionalProperties": false
-      }
-    },
-    {
-      "nodeSlot": "video_gen_text",
-      "inputs": {
-        "type": "object",
-        "required": [
-          "text",
-          "video_base64"
-        ],
-        "properties": {
-          "text": {
-            "type": "string"
-          },
-          "texts": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "system": {
-            "type": "string"
-          },
-          "max_new_tokens": {
-            "type": "integer"
-          },
-          "enable_thinking": {
-            "type": "boolean"
-          },
-          "temperature": {
-            "type": "number"
-          },
-          "top_p": {
-            "type": "number"
-          },
-          "top_k": {
-            "type": "integer"
-          },
-          "image_base64": {
-            "type": "string",
-            "minLength": 1
-          },
-          "images": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "image_base64s": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "video_base64": {
-            "type": "string",
-            "minLength": 1
-          }
-        },
-        "additionalProperties": false
-      },
-      "outputs": {
-        "type": "object",
-        "required": [
-          "success"
-        ],
-        "properties": {
-          "success": {
-            "type": "boolean"
-          },
-          "error": {
-            "type": "string"
-          },
-          "text": {
-            "type": "string"
-          },
-          "thinking": {
-            "type": "string"
-          },
-          "image_base64": {
-            "type": "string",
-            "minLength": 1
-          },
-          "video_base64": {
-            "type": "string",
-            "minLength": 1
-          },
-          "audio_base64": {
-            "type": "string",
-            "minLength": 1
-          },
-          "texts": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          }
-        },
-        "additionalProperties": false
-      }
-    },
-    {
-      "nodeSlot": "transcribe",
-      "inputs": {
-        "type": "object",
-        "required": [
-          "audio"
-        ],
-        "properties": {
-          "audio": {
-            "$ref": "#/$defs/Asset"
-          },
-          "context": {
-            "type": "string"
-          },
-          "language": {
-            "type": "string"
-          },
-          "max_new_tokens": {
-            "type": "number"
-          }
-        },
-        "additionalProperties": false
-      },
-      "outputs": {
-        "type": "object",
-        "required": [
-          "text"
-        ],
-        "properties": {
-          "text": {
-            "type": "string",
-            "minLength": 1
-          },
-          "language": {
-            "type": "string"
-          }
-        },
-        "additionalProperties": false
-      }
-    },
-    {
-      "nodeSlot": "concat_videos",
-      "inputs": {
-        "type": "object",
-        "required": [
-          "videos_bytes"
-        ],
-        "properties": {
-          "fileKeys": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "videos_bytes": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "minLength": 1
-            }
-          },
-          "filenames": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          }
-        },
-        "additionalProperties": false
-      },
-      "outputs": {
-        "type": "object",
-        "required": [
-          "success"
-        ],
-        "properties": {
-          "success": {
-            "type": "boolean"
-          },
-          "error": {
-            "type": "string"
-          },
-          "text": {
-            "type": "string"
-          },
-          "thinking": {
-            "type": "string"
-          },
-          "image_base64": {
-            "type": "string",
-            "minLength": 1
-          },
-          "video_base64": {
-            "type": "string",
-            "minLength": 1
-          },
-          "audio_base64": {
-            "type": "string",
-            "minLength": 1
-          },
-          "texts": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          }
-        },
-        "additionalProperties": false
-      }
-    },
-    {
-      "nodeSlot": "extract_audio",
-      "inputs": {
-        "type": "object",
-        "required": [],
-        "properties": {
-          "fileKey": {
-            "type": "string"
-          },
-          "videoKey": {
-            "type": "string"
-          },
-          "video_bytes": {
-            "type": "string",
-            "minLength": 1
-          },
-          "video_filename": {
-            "type": "string"
-          }
-        },
-        "additionalProperties": false
-      },
-      "outputs": {
-        "type": "object",
-        "required": [
-          "success"
-        ],
-        "properties": {
-          "success": {
-            "type": "boolean"
-          },
-          "error": {
-            "type": "string"
-          },
-          "text": {
-            "type": "string"
-          },
-          "thinking": {
-            "type": "string"
-          },
-          "image_base64": {
-            "type": "string",
-            "minLength": 1
-          },
-          "video_base64": {
-            "type": "string",
-            "minLength": 1
-          },
-          "audio_base64": {
-            "type": "string",
-            "minLength": 1
-          },
-          "texts": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          }
-        },
-        "additionalProperties": false
-      }
-    },
-    {
-      "nodeSlot": "separate_video_audio",
-      "inputs": {
-        "type": "object",
-        "required": [],
-        "properties": {
-          "fileKey": {
-            "type": "string"
-          },
-          "videoKey": {
-            "type": "string"
-          },
-          "video_bytes": {
-            "type": "string",
-            "minLength": 1
-          },
-          "video_filename": {
-            "type": "string"
-          }
-        },
-        "additionalProperties": false
-      },
-      "outputs": {
-        "type": "object",
-        "required": [
-          "success"
-        ],
-        "properties": {
-          "success": {
-            "type": "boolean"
-          },
-          "error": {
-            "type": "string"
-          },
-          "text": {
-            "type": "string"
-          },
-          "thinking": {
-            "type": "string"
-          },
-          "image_base64": {
-            "type": "string",
-            "minLength": 1
-          },
-          "video_base64": {
-            "type": "string",
-            "minLength": 1
-          },
-          "audio_base64": {
-            "type": "string",
-            "minLength": 1
-          },
-          "texts": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          }
-        },
-        "additionalProperties": false
-      }
-    },
-    {
-      "nodeSlot": "merge_video_audio",
-      "inputs": {
-        "type": "object",
-        "required": [],
-        "properties": {
-          "video_key": {
-            "type": "string"
-          },
-          "audio_key": {
-            "type": "string"
-          },
-          "video_bytes": {
-            "type": "string",
-            "minLength": 1
-          },
-          "audio_bytes": {
-            "type": "string",
-            "minLength": 1
-          },
-          "video_filename": {
-            "type": "string"
-          },
-          "audio_filename": {
-            "type": "string"
-          }
-        },
-        "additionalProperties": false
-      },
-      "outputs": {
-        "type": "object",
-        "required": [
-          "success"
-        ],
-        "properties": {
-          "success": {
-            "type": "boolean"
-          },
-          "error": {
-            "type": "string"
-          },
-          "text": {
-            "type": "string"
-          },
-          "thinking": {
-            "type": "string"
-          },
-          "image_base64": {
-            "type": "string",
-            "minLength": 1
-          },
-          "video_base64": {
-            "type": "string",
-            "minLength": 1
-          },
-          "audio_base64": {
-            "type": "string",
-            "minLength": 1
-          },
-          "texts": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          }
-        },
-        "additionalProperties": false
-      }
-    },
-    {
-      "nodeSlot": "get_first_frame",
-      "inputs": {
-        "type": "object",
-        "required": [],
-        "properties": {
-          "fileKey": {
-            "type": "string"
-          },
-          "videoKey": {
-            "type": "string"
-          },
-          "video_bytes": {
-            "type": "string",
-            "minLength": 1
-          },
-          "video_filename": {
-            "type": "string"
-          }
-        },
-        "additionalProperties": false
-      },
-      "outputs": {
-        "type": "object",
-        "required": [
-          "success"
-        ],
-        "properties": {
-          "success": {
-            "type": "boolean"
-          },
-          "error": {
-            "type": "string"
-          },
-          "text": {
-            "type": "string"
-          },
-          "thinking": {
-            "type": "string"
-          },
-          "image_base64": {
-            "type": "string",
-            "minLength": 1
-          },
-          "video_base64": {
-            "type": "string",
-            "minLength": 1
-          },
-          "audio_base64": {
-            "type": "string",
-            "minLength": 1
-          },
-          "texts": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          }
-        },
-        "additionalProperties": false
-      }
-    },
-    {
-      "nodeSlot": "get_last_frame",
-      "inputs": {
-        "type": "object",
-        "required": [],
-        "properties": {
-          "fileKey": {
-            "type": "string"
-          },
-          "videoKey": {
-            "type": "string"
-          },
-          "video_bytes": {
-            "type": "string",
-            "minLength": 1
-          },
-          "video_filename": {
-            "type": "string"
-          }
-        },
-        "additionalProperties": false
-      },
-      "outputs": {
-        "type": "object",
-        "required": [
-          "success"
-        ],
-        "properties": {
-          "success": {
-            "type": "boolean"
-          },
-          "error": {
-            "type": "string"
-          },
-          "text": {
-            "type": "string"
-          },
-          "thinking": {
-            "type": "string"
-          },
-          "image_base64": {
-            "type": "string",
-            "minLength": 1
-          },
-          "video_base64": {
-            "type": "string",
-            "minLength": 1
-          },
-          "audio_base64": {
-            "type": "string",
-            "minLength": 1
-          },
-          "texts": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          }
-        },
-        "additionalProperties": false
-      }
-    },
-    {
-      "nodeSlot": "parse_document",
-      "inputs": {
-        "type": "object",
-        "required": [],
-        "properties": {
-          "document": {
-            "$ref": "#/$defs/Asset"
-          },
-          "mime": {
-            "type": "string"
-          },
-          "filename": {
-            "type": "string"
-          }
-        },
-        "additionalProperties": false
-      },
-      "outputs": {
-        "type": "object",
-        "required": [
-          "success"
-        ],
-        "properties": {
-          "success": {
-            "type": "boolean"
-          },
-          "error": {
-            "type": "string"
-          },
-          "text": {
-            "type": "string"
-          },
-          "thinking": {
-            "type": "string"
-          },
-          "image_base64": {
-            "type": "string",
-            "minLength": 1
-          },
-          "video_base64": {
-            "type": "string",
-            "minLength": 1
-          },
-          "audio_base64": {
-            "type": "string",
-            "minLength": 1
-          },
-          "texts": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          }
-        },
-        "additionalProperties": false
-      }
-    },
-    {
-      "nodeSlot": "split_video",
-      "inputs": {
-        "type": "object",
-        "required": [],
-        "properties": {
-          "video": {
-            "$ref": "#/$defs/Asset"
-          },
-          "video_base64": {
-            "type": "string",
-            "minLength": 1
-          },
-          "video_bytes": {
-            "type": "string",
-            "minLength": 1
-          },
-          "fileKey": {
-            "type": "string"
-          },
-          "videoKey": {
-            "type": "string"
-          }
-        },
-        "additionalProperties": false
-      },
-      "outputs": {
-        "type": "object",
-        "required": [
-          "success"
-        ],
-        "properties": {
-          "success": {
-            "type": "boolean"
-          },
-          "error": {
-            "type": "string"
-          },
-          "text": {
-            "type": "string"
-          },
-          "thinking": {
-            "type": "string"
-          },
-          "image_base64": {
-            "type": "string",
-            "minLength": 1
-          },
-          "video_base64": {
-            "type": "string",
-            "minLength": 1
-          },
-          "audio_base64": {
-            "type": "string",
-            "minLength": 1
-          },
-          "texts": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          }
-        },
-        "additionalProperties": false
-      }
-    },
-    {
-      "nodeSlot": "link",
-      "inputs": {
-        "type": "object",
-        "required": [
-          "url"
-        ],
-        "properties": {
-          "url": {
-            "type": "string",
-            "minLength": 1
-          }
-        },
-        "additionalProperties": false
-      },
-      "outputs": {
-        "type": "object",
-        "required": [
-          "success"
-        ],
-        "properties": {
-          "success": {
-            "type": "boolean"
-          },
-          "error": {
-            "type": "string"
-          },
-          "text": {
-            "type": "string"
-          },
-          "thinking": {
-            "type": "string"
-          },
-          "image_base64": {
-            "type": "string",
-            "minLength": 1
-          },
-          "video_base64": {
-            "type": "string",
-            "minLength": 1
-          },
-          "audio_base64": {
-            "type": "string",
-            "minLength": 1
-          },
-          "texts": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          }
-        },
-        "additionalProperties": false
-      }
-    },
-    {
-      "nodeSlot": "gen_video",
-      "inputs": {
-        "type": "object",
-        "required": [
-          "text"
-        ],
-        "properties": {
-          "text": {
-            "type": "string"
-          },
-          "texts": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "seed": {
-            "type": "number"
-          },
-          "height": {
-            "type": "integer"
-          },
-          "width": {
-            "type": "integer"
-          },
-          "num_frames": {
-            "type": "integer"
-          },
-          "frame_rate": {
-            "type": "number"
-          },
-          "num_inference_steps": {
-            "type": "integer"
-          },
-          "enhance_prompt": {
-            "type": "boolean"
-          },
-          "negative_prompt": {
-            "type": "string"
-          },
-          "image_base64": {
-            "type": "string",
-            "minLength": 1
-          },
-          "image_frame_idx": {
-            "type": "integer"
-          },
-          "image_strength": {
-            "type": "number"
-          },
-          "end_image_base64": {
-            "type": "string",
-            "minLength": 1
-          },
-          "image2_base64": {
-            "type": "string",
-            "minLength": 1
-          },
-          "speech_base64": {
-            "type": "string",
-            "minLength": 1
-          },
-          "audio_base64": {
-            "type": "string",
-            "minLength": 1
-          },
-          "audio_max_duration": {
-            "type": "number"
-          },
-          "audio_start_time": {
-            "type": "number"
-          }
-        },
-        "additionalProperties": false
-      },
-      "outputs": {
-        "type": "object",
-        "required": [
-          "success"
-        ],
-        "properties": {
-          "success": {
-            "type": "boolean"
-          },
-          "error": {
-            "type": "string"
-          },
-          "text": {
-            "type": "string"
-          },
-          "thinking": {
-            "type": "string"
-          },
-          "image_base64": {
-            "type": "string",
-            "minLength": 1
-          },
-          "video_base64": {
-            "type": "string",
-            "minLength": 1
-          },
-          "audio_base64": {
-            "type": "string",
-            "minLength": 1
-          },
-          "texts": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          }
-        },
-        "additionalProperties": false
-      }
-    },
-    {
-      "nodeSlot": "image_gen",
-      "inputs": {
-        "type": "object",
-        "required": [],
-        "properties": {
-          "text": {
-            "type": "string",
-            "minLength": 1
-          },
-          "texts": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "width": {
-            "type": "integer"
-          },
-          "height": {
-            "type": "integer"
-          },
-          "num_inference_steps": {
-            "type": "integer"
-          },
-          "guidance_scale": {
-            "type": "number"
-          },
-          "seed": {
-            "type": "integer"
-          }
-        },
-        "additionalProperties": false
-      },
-      "outputs": {
-        "type": "object",
-        "required": [
-          "success"
-        ],
-        "properties": {
-          "success": {
-            "type": "boolean"
-          },
-          "error": {
-            "type": "string"
-          },
-          "text": {
-            "type": "string"
-          },
-          "thinking": {
-            "type": "string"
-          },
-          "image_base64": {
-            "type": "string",
-            "minLength": 1
-          },
-          "video_base64": {
-            "type": "string",
-            "minLength": 1
-          },
-          "audio_base64": {
-            "type": "string",
-            "minLength": 1
-          },
-          "texts": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          }
-        },
-        "additionalProperties": false
-      }
-    },
-    {
-      "nodeSlot": "gen_music",
-      "inputs": {
-        "type": "object",
-        "required": [],
-        "properties": {
-          "text": {
-            "type": "string",
-            "minLength": 1
-          },
-          "lyrics": {
-            "type": "string"
-          },
-          "duration": {
-            "type": "number"
-          },
-          "seed": {
-            "type": "integer"
-          }
-        },
-        "additionalProperties": false
-      },
-      "outputs": {
-        "type": "object",
-        "required": [
-          "success"
-        ],
-        "properties": {
-          "success": {
-            "type": "boolean"
-          },
-          "error": {
-            "type": "string"
-          },
-          "text": {
-            "type": "string"
-          },
-          "thinking": {
-            "type": "string"
-          },
-          "image_base64": {
-            "type": "string",
-            "minLength": 1
-          },
-          "video_base64": {
-            "type": "string",
-            "minLength": 1
-          },
-          "audio_base64": {
-            "type": "string",
-            "minLength": 1
-          },
-          "texts": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          }
-        },
-        "additionalProperties": false
-      }
-    },
-    {
-      "nodeSlot": "text_gen_speech_preset",
-      "inputs": {
-        "type": "object",
-        "required": [
-          "text"
-        ],
-        "properties": {
-          "text": {
-            "type": "string",
-            "minLength": 1
-          },
-          "language": {
-            "type": "string"
-          },
-          "instruct": {
-            "type": "string"
-          },
-          "max_new_tokens": {
-            "type": "integer"
-          }
-        },
-        "additionalProperties": false
-      },
-      "outputs": {
-        "type": "object",
-        "required": [
-          "success"
-        ],
-        "properties": {
-          "success": {
-            "type": "boolean"
-          },
-          "error": {
-            "type": "string"
-          },
-          "text": {
-            "type": "string"
-          },
-          "thinking": {
-            "type": "string"
-          },
-          "image_base64": {
-            "type": "string",
-            "minLength": 1
-          },
-          "video_base64": {
-            "type": "string",
-            "minLength": 1
-          },
-          "audio_base64": {
-            "type": "string",
-            "minLength": 1
-          },
-          "texts": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          }
-        },
-        "additionalProperties": false
-      }
-    },
-    {
-      "nodeSlot": "image_gen_video",
-      "inputs": {
-        "type": "object",
-        "required": [
-          "text",
-          "image_base64"
-        ],
-        "properties": {
-          "text": {
-            "type": "string"
-          },
-          "texts": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "seed": {
-            "type": "number"
-          },
-          "height": {
-            "type": "integer"
-          },
-          "width": {
-            "type": "integer"
-          },
-          "num_frames": {
-            "type": "integer"
-          },
-          "frame_rate": {
-            "type": "number"
-          },
-          "num_inference_steps": {
-            "type": "integer"
-          },
-          "enhance_prompt": {
-            "type": "boolean"
-          },
-          "negative_prompt": {
-            "type": "string"
-          },
-          "image_base64": {
-            "type": "string",
-            "minLength": 1
-          },
-          "image_frame_idx": {
-            "type": "integer"
-          },
-          "image_strength": {
-            "type": "number"
-          },
-          "end_image_base64": {
-            "type": "string",
-            "minLength": 1
-          },
-          "image2_base64": {
-            "type": "string",
-            "minLength": 1
-          },
-          "speech_base64": {
-            "type": "string",
-            "minLength": 1
-          },
-          "audio_base64": {
-            "type": "string",
-            "minLength": 1
-          },
-          "audio_max_duration": {
-            "type": "number"
-          },
-          "audio_start_time": {
-            "type": "number"
-          }
-        },
-        "additionalProperties": false
-      },
-      "outputs": {
-        "type": "object",
-        "required": [
-          "success"
-        ],
-        "properties": {
-          "success": {
-            "type": "boolean"
-          },
-          "error": {
-            "type": "string"
-          },
-          "text": {
-            "type": "string"
-          },
-          "thinking": {
-            "type": "string"
-          },
-          "image_base64": {
-            "type": "string",
-            "minLength": 1
-          },
-          "video_base64": {
-            "type": "string",
-            "minLength": 1
-          },
-          "audio_base64": {
-            "type": "string",
-            "minLength": 1
-          },
-          "texts": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          }
-        },
-        "additionalProperties": false
-      }
-    },
-    {
-      "nodeSlot": "image_edit",
-      "inputs": {
-        "type": "object",
-        "required": [
-          "text",
-          "image_base64"
-        ],
-        "properties": {
-          "text": {
-            "type": "string",
-            "minLength": 1
-          },
-          "image_base64": {
-            "type": "string",
-            "minLength": 1
-          },
-          "seed": {
-            "type": "integer"
-          },
-          "match_input_size": {
-            "type": "boolean"
-          },
-          "width": {
-            "type": "integer"
-          },
-          "height": {
-            "type": "integer"
-          }
-        },
-        "additionalProperties": false
-      },
-      "outputs": {
-        "type": "object",
-        "required": [
-          "success"
-        ],
-        "properties": {
-          "success": {
-            "type": "boolean"
-          },
-          "error": {
-            "type": "string"
-          },
-          "text": {
-            "type": "string"
-          },
-          "thinking": {
-            "type": "string"
-          },
-          "image_base64": {
-            "type": "string",
-            "minLength": 1
-          },
-          "video_base64": {
-            "type": "string",
-            "minLength": 1
-          },
-          "audio_base64": {
-            "type": "string",
-            "minLength": 1
-          },
-          "texts": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          }
-        },
-        "additionalProperties": false
-      }
-    },
-    {
-      "nodeSlot": "image_upscale",
-      "inputs": {
-        "type": "object",
-        "required": [
-          "image_base64"
-        ],
-        "properties": {
-          "image_base64": {
-            "type": "string",
-            "minLength": 1
-          },
-          "video_base64": {
-            "type": "string",
-            "minLength": 1
-          },
-          "resolution": {
-            "type": "string"
-          },
-          "seed": {
-            "type": "integer"
-          },
-          "dit_variant": {
-            "type": "string"
-          },
-          "color_correction": {
-            "type": "string"
-          },
-          "out_fps": {
-            "type": "number"
-          },
-          "batch_size": {
-            "type": "integer"
-          },
-          "uniform_batch_size": {
-            "type": "boolean"
-          },
-          "temporal_overlap": {
-            "type": "integer"
-          }
-        },
-        "additionalProperties": false
-      },
-      "outputs": {
-        "type": "object",
-        "required": [
-          "success"
-        ],
-        "properties": {
-          "success": {
-            "type": "boolean"
-          },
-          "error": {
-            "type": "string"
-          },
-          "text": {
-            "type": "string"
-          },
-          "thinking": {
-            "type": "string"
-          },
-          "image_base64": {
-            "type": "string",
-            "minLength": 1
-          },
-          "video_base64": {
-            "type": "string",
-            "minLength": 1
-          },
-          "audio_base64": {
-            "type": "string",
-            "minLength": 1
-          },
-          "texts": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          }
-        },
-        "additionalProperties": false
-      }
-    },
-    {
-      "nodeSlot": "video_upscale",
-      "inputs": {
-        "type": "object",
-        "required": [
-          "video_base64"
-        ],
-        "properties": {
-          "image_base64": {
-            "type": "string",
-            "minLength": 1
-          },
-          "video_base64": {
-            "type": "string",
-            "minLength": 1
-          },
-          "resolution": {
-            "type": "string"
-          },
-          "seed": {
-            "type": "integer"
-          },
-          "dit_variant": {
-            "type": "string"
-          },
-          "color_correction": {
-            "type": "string"
-          },
-          "out_fps": {
-            "type": "number"
-          },
-          "batch_size": {
-            "type": "integer"
-          },
-          "uniform_batch_size": {
-            "type": "boolean"
-          },
-          "temporal_overlap": {
-            "type": "integer"
-          }
-        },
-        "additionalProperties": false
-      },
-      "outputs": {
-        "type": "object",
-        "required": [
-          "success"
-        ],
-        "properties": {
-          "success": {
-            "type": "boolean"
-          },
-          "error": {
-            "type": "string"
-          },
-          "text": {
-            "type": "string"
-          },
-          "thinking": {
-            "type": "string"
-          },
-          "image_base64": {
-            "type": "string",
-            "minLength": 1
-          },
-          "video_base64": {
-            "type": "string",
-            "minLength": 1
-          },
-          "audio_base64": {
-            "type": "string",
-            "minLength": 1
-          },
-          "texts": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          }
-        },
-        "additionalProperties": false
-      }
-    },
-    {
-      "nodeSlot": "image_describe",
-      "inputs": {
-        "type": "object",
-        "required": [],
-        "properties": {
-          "image": {
-            "type": "string",
-            "minLength": 1
-          },
-          "text": {
-            "type": "string"
-          },
-          "userPrompt": {
-            "type": "string"
-          }
-        },
-        "additionalProperties": false
-      },
-      "outputs": {
-        "type": "object",
-        "required": [
-          "success"
-        ],
-        "properties": {
-          "success": {
-            "type": "boolean"
-          },
-          "error": {
-            "type": "string"
-          },
-          "text": {
-            "type": "string"
-          },
-          "thinking": {
-            "type": "string"
-          },
-          "image_base64": {
-            "type": "string",
-            "minLength": 1
-          },
-          "video_base64": {
-            "type": "string",
-            "minLength": 1
-          },
-          "audio_base64": {
-            "type": "string",
-            "minLength": 1
-          },
-          "texts": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          }
-        },
-        "additionalProperties": false
-      }
-    },
-    {
-      "nodeSlot": "video_describe",
-      "inputs": {
-        "type": "object",
-        "required": [],
-        "properties": {
-          "video": {
-            "type": "string",
-            "minLength": 1
-          },
-          "text": {
-            "type": "string"
-          },
-          "userPrompt": {
-            "type": "string"
-          }
-        },
-        "additionalProperties": false
-      },
-      "outputs": {
-        "type": "object",
-        "required": [
-          "success"
-        ],
-        "properties": {
-          "success": {
-            "type": "boolean"
-          },
-          "error": {
-            "type": "string"
-          },
-          "text": {
-            "type": "string"
-          },
-          "thinking": {
-            "type": "string"
-          },
-          "image_base64": {
-            "type": "string",
-            "minLength": 1
-          },
-          "video_base64": {
-            "type": "string",
-            "minLength": 1
-          },
-          "audio_base64": {
-            "type": "string",
-            "minLength": 1
-          },
-          "texts": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          }
-        },
-        "additionalProperties": false
-      }
-    },
-    {
-      "nodeSlot": "audio_image_gen_video",
-      "inputs": {
-        "type": "object",
-        "required": [
-          "image",
-          "audio"
-        ],
-        "properties": {
-          "image": {
-            "type": "string",
-            "minLength": 1
-          },
-          "audio": {
-            "type": "string",
-            "minLength": 1
-          },
-          "text": {
-            "type": "string"
-          }
-        },
-        "additionalProperties": false
-      },
-      "outputs": {
-        "type": "object",
-        "required": [
-          "success"
-        ],
-        "properties": {
-          "success": {
-            "type": "boolean"
-          },
-          "error": {
-            "type": "string"
-          },
-          "text": {
-            "type": "string"
-          },
-          "thinking": {
-            "type": "string"
-          },
-          "image_base64": {
-            "type": "string",
-            "minLength": 1
-          },
-          "video_base64": {
-            "type": "string",
-            "minLength": 1
-          },
-          "audio_base64": {
-            "type": "string",
-            "minLength": 1
-          },
-          "texts": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          }
-        },
-        "additionalProperties": false
-      }
-    },
-    {
-      "nodeSlot": "speech-text-gen-video",
-      "inputs": {
-        "type": "object",
-        "required": [
-          "text",
-          "audio_base64"
-        ],
-        "properties": {
-          "text": {
-            "type": "string"
-          },
-          "texts": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "seed": {
-            "type": "number"
-          },
-          "height": {
-            "type": "integer"
-          },
-          "width": {
-            "type": "integer"
-          },
-          "num_frames": {
-            "type": "integer"
-          },
-          "frame_rate": {
-            "type": "number"
-          },
-          "num_inference_steps": {
-            "type": "integer"
-          },
-          "enhance_prompt": {
-            "type": "boolean"
-          },
-          "negative_prompt": {
-            "type": "string"
-          },
-          "image_base64": {
-            "type": "string",
-            "minLength": 1
-          },
-          "image_frame_idx": {
-            "type": "integer"
-          },
-          "image_strength": {
-            "type": "number"
-          },
-          "end_image_base64": {
-            "type": "string",
-            "minLength": 1
-          },
-          "image2_base64": {
-            "type": "string",
-            "minLength": 1
-          },
-          "speech_base64": {
-            "type": "string",
-            "minLength": 1
-          },
-          "audio_base64": {
-            "type": "string",
-            "minLength": 1
-          },
-          "audio_max_duration": {
-            "type": "number"
-          },
-          "audio_start_time": {
-            "type": "number"
-          }
-        },
-        "additionalProperties": false
-      },
-      "outputs": {
-        "type": "object",
-        "required": [
-          "success"
-        ],
-        "properties": {
-          "success": {
-            "type": "boolean"
-          },
-          "error": {
-            "type": "string"
-          },
-          "text": {
-            "type": "string"
-          },
-          "thinking": {
-            "type": "string"
-          },
-          "image_base64": {
-            "type": "string",
-            "minLength": 1
-          },
-          "video_base64": {
-            "type": "string",
-            "minLength": 1
-          },
-          "audio_base64": {
-            "type": "string",
-            "minLength": 1
-          },
-          "texts": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          }
-        },
-        "additionalProperties": false
-      }
-    },
-    {
-      "nodeSlot": "speech_image_video_gen_video",
-      "inputs": {
-        "type": "object",
-        "required": [
-          "image",
-          "video",
-          "audio"
-        ],
-        "properties": {
-          "image": {
-            "type": "string",
-            "minLength": 1
-          },
-          "video": {
-            "type": "string",
-            "minLength": 1
-          },
-          "audio": {
-            "type": "string",
-            "minLength": 1
-          },
-          "text": {
-            "type": "string"
-          }
-        },
-        "additionalProperties": false
-      },
-      "outputs": {
-        "type": "object",
-        "required": [
-          "success"
-        ],
-        "properties": {
-          "success": {
-            "type": "boolean"
-          },
-          "error": {
-            "type": "string"
-          },
-          "text": {
-            "type": "string"
-          },
-          "thinking": {
-            "type": "string"
-          },
-          "image_base64": {
-            "type": "string",
-            "minLength": 1
-          },
-          "video_base64": {
-            "type": "string",
-            "minLength": 1
-          },
-          "audio_base64": {
-            "type": "string",
-            "minLength": 1
-          },
-          "texts": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          }
-        },
-        "additionalProperties": false
-      }
-    },
-    {
-      "nodeSlot": "video-image-gen-video-mix",
-      "inputs": {
-        "type": "object",
-        "required": [
-          "image",
-          "video"
-        ],
-        "properties": {
-          "image": {
-            "type": "string",
-            "minLength": 1
-          },
-          "video": {
-            "type": "string",
-            "minLength": 1
-          },
-          "text": {
-            "type": "string"
-          }
-        },
-        "additionalProperties": false
-      },
-      "outputs": {
-        "type": "object",
-        "required": [
-          "success"
-        ],
-        "properties": {
-          "success": {
-            "type": "boolean"
-          },
-          "error": {
-            "type": "string"
-          },
-          "text": {
-            "type": "string"
-          },
-          "thinking": {
-            "type": "string"
-          },
-          "image_base64": {
-            "type": "string",
-            "minLength": 1
-          },
-          "video_base64": {
-            "type": "string",
-            "minLength": 1
-          },
-          "audio_base64": {
-            "type": "string",
-            "minLength": 1
-          },
-          "texts": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          }
-        },
-        "additionalProperties": false
-      }
-    },
-    {
-      "nodeSlot": "video-image-gen-video-move",
-      "inputs": {
-        "type": "object",
-        "required": [
-          "image",
-          "video"
-        ],
-        "properties": {
-          "image": {
-            "type": "string",
-            "minLength": 1
-          },
-          "video": {
-            "type": "string",
-            "minLength": 1
-          },
-          "text": {
-            "type": "string"
-          }
-        },
-        "additionalProperties": false
-      },
-      "outputs": {
-        "type": "object",
-        "required": [
-          "success"
-        ],
-        "properties": {
-          "success": {
-            "type": "boolean"
-          },
-          "error": {
-            "type": "string"
-          },
-          "text": {
-            "type": "string"
-          },
-          "thinking": {
-            "type": "string"
-          },
-          "image_base64": {
-            "type": "string",
-            "minLength": 1
-          },
-          "video_base64": {
-            "type": "string",
-            "minLength": 1
-          },
-          "audio_base64": {
-            "type": "string",
-            "minLength": 1
-          },
-          "texts": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          }
-        },
-        "additionalProperties": false
-      }
-    },
-    {
-      "nodeSlot": "image-image-gen-video",
-      "inputs": {
-        "type": "object",
-        "required": [
-          "text",
-          "image_base64",
-          "end_image_base64"
-        ],
-        "properties": {
-          "text": {
-            "type": "string"
-          },
-          "texts": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "seed": {
-            "type": "number"
-          },
-          "height": {
-            "type": "integer"
-          },
-          "width": {
-            "type": "integer"
-          },
-          "num_frames": {
-            "type": "integer"
-          },
-          "frame_rate": {
-            "type": "number"
-          },
-          "num_inference_steps": {
-            "type": "integer"
-          },
-          "enhance_prompt": {
-            "type": "boolean"
-          },
-          "negative_prompt": {
-            "type": "string"
-          },
-          "image_base64": {
-            "type": "string",
-            "minLength": 1
-          },
-          "image_frame_idx": {
-            "type": "integer"
-          },
-          "image_strength": {
-            "type": "number"
-          },
-          "end_image_base64": {
-            "type": "string",
-            "minLength": 1
-          },
-          "image2_base64": {
-            "type": "string",
-            "minLength": 1
-          },
-          "speech_base64": {
-            "type": "string",
-            "minLength": 1
-          },
-          "audio_base64": {
-            "type": "string",
-            "minLength": 1
-          },
-          "audio_max_duration": {
-            "type": "number"
-          },
-          "audio_start_time": {
-            "type": "number"
-          }
-        },
-        "additionalProperties": false
-      },
-      "outputs": {
-        "type": "object",
-        "required": [
-          "success"
-        ],
-        "properties": {
-          "success": {
-            "type": "boolean"
-          },
-          "error": {
-            "type": "string"
-          },
-          "text": {
-            "type": "string"
-          },
-          "thinking": {
-            "type": "string"
-          },
-          "image_base64": {
-            "type": "string",
-            "minLength": 1
-          },
-          "video_base64": {
-            "type": "string",
-            "minLength": 1
-          },
-          "audio_base64": {
-            "type": "string",
-            "minLength": 1
-          },
-          "texts": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          }
-        },
-        "additionalProperties": false
-      }
-    },
-    {
-      "nodeSlot": "text_gen_video",
-      "inputs": {
-        "type": "object",
-        "required": [
-          "text"
-        ],
-        "properties": {
-          "text": {
-            "type": "string"
-          },
-          "texts": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "seed": {
-            "type": "number"
-          },
-          "height": {
-            "type": "integer"
-          },
-          "width": {
-            "type": "integer"
-          },
-          "num_frames": {
-            "type": "integer"
-          },
-          "frame_rate": {
-            "type": "number"
-          },
-          "num_inference_steps": {
-            "type": "integer"
-          },
-          "enhance_prompt": {
-            "type": "boolean"
-          },
-          "negative_prompt": {
-            "type": "string"
-          },
-          "image_base64": {
-            "type": "string",
-            "minLength": 1
-          },
-          "image_frame_idx": {
-            "type": "integer"
-          },
-          "image_strength": {
-            "type": "number"
-          },
-          "end_image_base64": {
-            "type": "string",
-            "minLength": 1
-          },
-          "image2_base64": {
-            "type": "string",
-            "minLength": 1
-          },
-          "speech_base64": {
-            "type": "string",
-            "minLength": 1
-          },
-          "audio_base64": {
-            "type": "string",
-            "minLength": 1
-          },
-          "audio_max_duration": {
-            "type": "number"
-          },
-          "audio_start_time": {
-            "type": "number"
-          }
-        },
-        "additionalProperties": false
-      },
-      "outputs": {
-        "type": "object",
-        "required": [
-          "success"
-        ],
-        "properties": {
-          "success": {
-            "type": "boolean"
-          },
-          "error": {
-            "type": "string"
-          },
-          "text": {
-            "type": "string"
-          },
-          "thinking": {
-            "type": "string"
-          },
-          "image_base64": {
-            "type": "string",
-            "minLength": 1
-          },
-          "video_base64": {
-            "type": "string",
-            "minLength": 1
-          },
-          "audio_base64": {
-            "type": "string",
-            "minLength": 1
-          },
-          "texts": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          }
-        },
-        "additionalProperties": false
-      }
-    },
-    {
-      "nodeSlot": "image_gen_model",
-      "inputs": {
-        "type": "object",
-        "required": [],
-        "properties": {
-          "text": {
-            "type": "string",
-            "minLength": 1
-          },
-          "texts": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "width": {
-            "type": "integer"
-          },
-          "height": {
-            "type": "integer"
-          },
-          "num_inference_steps": {
-            "type": "integer"
-          },
-          "guidance_scale": {
-            "type": "number"
-          },
-          "seed": {
-            "type": "integer"
-          }
-        },
-        "additionalProperties": false
-      },
-      "outputs": {
-        "type": "object",
-        "required": [
-          "success"
-        ],
-        "properties": {
-          "success": {
-            "type": "boolean"
-          },
-          "error": {
-            "type": "string"
-          },
-          "text": {
-            "type": "string"
-          },
-          "thinking": {
-            "type": "string"
-          },
-          "image_base64": {
-            "type": "string",
-            "minLength": 1
-          },
-          "video_base64": {
-            "type": "string",
-            "minLength": 1
-          },
-          "audio_base64": {
-            "type": "string",
-            "minLength": 1
-          },
-          "texts": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          }
-        },
-        "additionalProperties": false
-      }
-    },
-    {
-      "nodeSlot": "speech_video_gen_video",
-      "inputs": {
-        "type": "object",
-        "required": [
-          "video",
-          "audio"
-        ],
-        "properties": {
-          "video": {
-            "type": "string",
-            "minLength": 1
-          },
-          "audio": {
-            "type": "string",
-            "minLength": 1
-          }
-        },
-        "additionalProperties": false
-      },
-      "outputs": {
-        "type": "object",
-        "required": [
-          "success"
-        ],
-        "properties": {
-          "success": {
-            "type": "boolean"
-          },
-          "error": {
-            "type": "string"
-          },
-          "text": {
-            "type": "string"
-          },
-          "thinking": {
-            "type": "string"
-          },
-          "image_base64": {
-            "type": "string",
-            "minLength": 1
-          },
-          "video_base64": {
-            "type": "string",
-            "minLength": 1
-          },
-          "audio_base64": {
-            "type": "string",
-            "minLength": 1
-          },
-          "texts": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          }
-        },
-        "additionalProperties": false
-      }
-    },
-    {
-      "nodeSlot": "text_gen_speech_clone",
-      "inputs": {
-        "type": "object",
-        "required": [
-          "text",
-          "ref_audio_base64"
-        ],
-        "properties": {
-          "text": {
-            "type": "string",
-            "minLength": 1
-          },
-          "ref_audio_base64": {
-            "type": "string",
-            "minLength": 1
-          },
-          "audio_base64": {
-            "type": "string",
-            "minLength": 1
-          },
-          "language": {
-            "type": "string"
-          },
-          "ref_text": {
-            "type": "string"
-          },
-          "x_vector_only": {
-            "type": "boolean"
-          },
-          "max_new_tokens": {
-            "type": "integer"
-          }
-        },
-        "additionalProperties": false
-      },
-      "outputs": {
-        "type": "object",
-        "required": [
-          "success"
-        ],
-        "properties": {
-          "success": {
-            "type": "boolean"
-          },
-          "error": {
-            "type": "string"
-          },
-          "text": {
-            "type": "string"
-          },
-          "thinking": {
-            "type": "string"
-          },
-          "image_base64": {
-            "type": "string",
-            "minLength": 1
-          },
-          "video_base64": {
-            "type": "string",
-            "minLength": 1
-          },
-          "audio_base64": {
-            "type": "string",
-            "minLength": 1
-          },
-          "texts": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          }
-        },
-        "additionalProperties": false
-      }
-    },
-    {
-      "nodeSlot": "transcribe_timestamp",
-      "inputs": {
-        "type": "object",
-        "required": [
-          "audio"
-        ],
-        "properties": {
-          "audio": {
-            "$ref": "#/$defs/Asset"
-          },
-          "context": {
-            "type": "string"
-          },
-          "language": {
-            "type": "string"
-          },
-          "max_new_tokens": {
-            "type": "number"
-          }
-        },
-        "additionalProperties": false
-      },
-      "outputs": {
-        "type": "object",
-        "required": [
-          "text"
-        ],
-        "properties": {
-          "text": {
-            "type": "string",
-            "minLength": 1
-          },
-          "language": {
-            "type": "string"
-          },
-          "time_stamps": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "required": [
-                "text",
-                "start_time",
-                "end_time"
-              ],
-              "properties": {
-                "text": {
-                  "type": "string",
-                  "minLength": 1
+    "nodes": [
+        {
+            "nodeSlot": "gen-text",
+            "inputs": {
+                "type": "object",
+                "required": [
+                    "text"
+                ],
+                "properties": {
+                    "text": {
+                        "type": "string",
+                        "minLength": 1
+                    },
+                    "userPrompt": {
+                        "type": "string"
+                    },
+                    "pluginId": {
+                        "type": "string"
+                    },
+                    "nodeSlot": {
+                        "type": "string"
+                    }
                 },
-                "start_time": {
-                  "type": "number"
+                "additionalProperties": false
+            },
+            "outputs": {
+                "type": "object",
+                "required": [
+                    "success"
+                ],
+                "properties": {
+                    "success": {
+                        "type": "boolean"
+                    },
+                    "error": {
+                        "type": "string"
+                    },
+                    "text": {
+                        "type": "string"
+                    },
+                    "result": {
+                        "type": "string"
+                    }
                 },
-                "end_time": {
-                  "type": "number"
-                }
-              },
-              "additionalProperties": false
+                "additionalProperties": false
             }
-          }
         },
-        "additionalProperties": false
-      }
-    },
-    {
-      "nodeSlot": "text_gen_speech_instruct",
-      "inputs": {
-        "type": "object",
-        "required": [
-          "text"
-        ],
-        "properties": {
-          "text": {
-            "type": "string",
-            "minLength": 1
-          },
-          "language": {
-            "type": "string"
-          },
-          "speaker": {
-            "type": "string"
-          },
-          "instruct": {
-            "type": "string"
-          },
-          "max_new_tokens": {
-            "type": "integer"
-          }
-        },
-        "additionalProperties": false
-      },
-      "outputs": {
-        "type": "object",
-        "required": [
-          "success"
-        ],
-        "properties": {
-          "success": {
-            "type": "boolean"
-          },
-          "error": {
-            "type": "string"
-          },
-          "text": {
-            "type": "string"
-          },
-          "thinking": {
-            "type": "string"
-          },
-          "image_base64": {
-            "type": "string",
-            "minLength": 1
-          },
-          "video_base64": {
-            "type": "string",
-            "minLength": 1
-          },
-          "audio_base64": {
-            "type": "string",
-            "minLength": 1
-          },
-          "texts": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          }
-        },
-        "additionalProperties": false
-      }
-    },
-    {
-      "nodeSlot": "video_image_move_animal",
-      "inputs": {
-        "type": "object",
-        "required": [
-          "image",
-          "video"
-        ],
-        "properties": {
-          "image": {
-            "type": "string",
-            "minLength": 1
-          },
-          "video": {
-            "type": "string",
-            "minLength": 1
-          },
-          "text": {
-            "type": "string"
-          }
-        },
-        "additionalProperties": false
-      },
-      "outputs": {
-        "type": "object",
-        "required": [
-          "success"
-        ],
-        "properties": {
-          "success": {
-            "type": "boolean"
-          },
-          "error": {
-            "type": "string"
-          },
-          "text": {
-            "type": "string"
-          },
-          "thinking": {
-            "type": "string"
-          },
-          "image_base64": {
-            "type": "string",
-            "minLength": 1
-          },
-          "video_base64": {
-            "type": "string",
-            "minLength": 1
-          },
-          "audio_base64": {
-            "type": "string",
-            "minLength": 1
-          },
-          "texts": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          }
-        },
-        "additionalProperties": false
-      }
-    },
-    {
-      "nodeSlot": "wan-animate-mix",
-      "inputs": {
-        "type": "object",
-        "required": [
-          "image",
-          "video"
-        ],
-        "properties": {
-          "image": {
-            "type": "string",
-            "minLength": 1
-          },
-          "video": {
-            "type": "string",
-            "minLength": 1
-          },
-          "text": {
-            "type": "string"
-          }
-        },
-        "additionalProperties": false
-      },
-      "outputs": {
-        "type": "object",
-        "required": [
-          "success"
-        ],
-        "properties": {
-          "success": {
-            "type": "boolean"
-          },
-          "error": {
-            "type": "string"
-          },
-          "text": {
-            "type": "string"
-          },
-          "thinking": {
-            "type": "string"
-          },
-          "image_base64": {
-            "type": "string",
-            "minLength": 1
-          },
-          "video_base64": {
-            "type": "string",
-            "minLength": 1
-          },
-          "audio_base64": {
-            "type": "string",
-            "minLength": 1
-          },
-          "texts": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          }
-        },
-        "additionalProperties": false
-      }
-    },
-    {
-      "nodeSlot": "drop_video",
-      "inputs": {
-        "type": "object",
-        "required": [],
-        "properties": {
-          "fileKeys": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "query": {
-            "type": "string"
-          }
-        },
-        "additionalProperties": false
-      },
-      "outputs": {
-        "type": "object",
-        "required": [
-          "success"
-        ],
-        "properties": {
-          "success": {
-            "type": "boolean"
-          },
-          "error": {
-            "type": "string"
-          },
-          "text": {
-            "type": "string"
-          },
-          "thinking": {
-            "type": "string"
-          },
-          "image_base64": {
-            "type": "string",
-            "minLength": 1
-          },
-          "video_base64": {
-            "type": "string",
-            "minLength": 1
-          },
-          "audio_base64": {
-            "type": "string",
-            "minLength": 1
-          },
-          "texts": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          }
-        },
-        "additionalProperties": false
-      }
-    },
-    {
-      "nodeSlot": "arrange_group",
-      "inputs": {
-        "type": "object",
-        "required": [],
-        "properties": {
-          "items": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "required": [],
-              "properties": {
-                "text": {
-                  "type": "string"
+        {
+            "nodeSlot": "split-text",
+            "inputs": {
+                "type": "object",
+                "required": [
+                    "text"
+                ],
+                "properties": {
+                    "text": {
+                        "type": "string",
+                        "minLength": 1
+                    },
+                    "userPrompt": {
+                        "type": "string"
+                    },
+                    "pluginId": {
+                        "type": "string"
+                    },
+                    "nodeSlot": {
+                        "type": "string"
+                    }
                 },
-                "id": {
-                  "type": "string"
-                }
-              },
-              "additionalProperties": false
+                "additionalProperties": false
+            },
+            "outputs": {
+                "type": "object",
+                "required": [
+                    "success"
+                ],
+                "properties": {
+                    "success": {
+                        "type": "boolean"
+                    },
+                    "error": {
+                        "type": "string"
+                    },
+                    "text": {
+                        "type": "string"
+                    },
+                    "result": {
+                        "type": "string"
+                    }
+                },
+                "additionalProperties": false
             }
-          }
         },
-        "additionalProperties": false
-      },
-      "outputs": {
-        "type": "object",
-        "required": [
-          "success"
-        ],
-        "properties": {
-          "success": {
-            "type": "boolean"
-          },
-          "error": {
-            "type": "string"
-          },
-          "text": {
-            "type": "string"
-          },
-          "thinking": {
-            "type": "string"
-          },
-          "image_base64": {
-            "type": "string",
-            "minLength": 1
-          },
-          "video_base64": {
-            "type": "string",
-            "minLength": 1
-          },
-          "audio_base64": {
-            "type": "string",
-            "minLength": 1
-          },
-          "texts": {
-            "type": "array",
-            "items": {
-              "type": "string"
+        {
+            "nodeSlot": "combine-text",
+            "inputs": {
+                "type": "object",
+                "required": [
+                    "texts"
+                ],
+                "properties": {
+                    "texts": {
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "minLength": 1
+                        }
+                    },
+                    "userPrompt": {
+                        "type": "string"
+                    },
+                    "pluginId": {
+                        "type": "string"
+                    },
+                    "nodeSlot": {
+                        "type": "string"
+                    }
+                },
+                "additionalProperties": false
+            },
+            "outputs": {
+                "type": "object",
+                "required": [
+                    "success"
+                ],
+                "properties": {
+                    "success": {
+                        "type": "boolean"
+                    },
+                    "error": {
+                        "type": "string"
+                    },
+                    "text": {
+                        "type": "string"
+                    },
+                    "result": {
+                        "type": "string"
+                    }
+                },
+                "additionalProperties": false
             }
-          }
         },
-        "additionalProperties": false
-      }
-    }
-  ]
+        {
+            "nodeSlot": "image-fusion",
+            "inputs": {
+                "type": "object",
+                "required": [
+                    "text"
+                ],
+                "properties": {
+                    "text": {
+                        "type": "string",
+                        "minLength": 1
+                    },
+                    "images": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "image_base64": {
+                        "type": "string",
+                        "minLength": 1
+                    },
+                    "image2_base64": {
+                        "type": "string",
+                        "minLength": 1
+                    },
+                    "seed": {
+                        "type": "integer"
+                    },
+                    "width": {
+                        "type": "integer"
+                    },
+                    "height": {
+                        "type": "integer"
+                    }
+                },
+                "additionalProperties": false
+            },
+            "outputs": {
+                "type": "object",
+                "required": [
+                    "success"
+                ],
+                "properties": {
+                    "success": {
+                        "type": "boolean"
+                    },
+                    "error": {
+                        "type": "string"
+                    },
+                    "text": {
+                        "type": "string"
+                    },
+                    "thinking": {
+                        "type": "string"
+                    },
+                    "image_base64": {
+                        "$ref": "#/$defs/FileRef"
+                    },
+                    "video_base64": {
+                        "$ref": "#/$defs/FileRef"
+                    },
+                    "audio_base64": {
+                        "$ref": "#/$defs/FileRef"
+                    },
+                    "texts": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "additionalProperties": false
+            }
+        },
+        {
+            "nodeSlot": "image-gen-text",
+            "inputs": {
+                "type": "object",
+                "required": [
+                    "text"
+                ],
+                "properties": {
+                    "text": {
+                        "type": "string"
+                    },
+                    "texts": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "system": {
+                        "type": "string"
+                    },
+                    "max_new_tokens": {
+                        "type": "integer"
+                    },
+                    "enable_thinking": {
+                        "type": "boolean"
+                    },
+                    "temperature": {
+                        "type": "number"
+                    },
+                    "top_p": {
+                        "type": "number"
+                    },
+                    "top_k": {
+                        "type": "integer"
+                    },
+                    "image_base64": {
+                        "type": "string",
+                        "minLength": 1
+                    },
+                    "images": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "image_base64s": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "additionalProperties": false
+            },
+            "outputs": {
+                "type": "object",
+                "required": [
+                    "success"
+                ],
+                "properties": {
+                    "success": {
+                        "type": "boolean"
+                    },
+                    "error": {
+                        "type": "string"
+                    },
+                    "text": {
+                        "type": "string"
+                    },
+                    "thinking": {
+                        "type": "string"
+                    },
+                    "image_base64": {
+                        "$ref": "#/$defs/FileRef"
+                    },
+                    "video_base64": {
+                        "$ref": "#/$defs/FileRef"
+                    },
+                    "audio_base64": {
+                        "$ref": "#/$defs/FileRef"
+                    },
+                    "texts": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "additionalProperties": false
+            }
+        },
+        {
+            "nodeSlot": "video-gen-text",
+            "inputs": {
+                "type": "object",
+                "required": [
+                    "text",
+                    "video_base64"
+                ],
+                "properties": {
+                    "text": {
+                        "type": "string"
+                    },
+                    "texts": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "system": {
+                        "type": "string"
+                    },
+                    "max_new_tokens": {
+                        "type": "integer"
+                    },
+                    "enable_thinking": {
+                        "type": "boolean"
+                    },
+                    "temperature": {
+                        "type": "number"
+                    },
+                    "top_p": {
+                        "type": "number"
+                    },
+                    "top_k": {
+                        "type": "integer"
+                    },
+                    "image_base64": {
+                        "type": "string",
+                        "minLength": 1
+                    },
+                    "images": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "image_base64s": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "video_base64": {
+                        "type": "string",
+                        "minLength": 1
+                    }
+                },
+                "additionalProperties": false
+            },
+            "outputs": {
+                "type": "object",
+                "required": [
+                    "success"
+                ],
+                "properties": {
+                    "success": {
+                        "type": "boolean"
+                    },
+                    "error": {
+                        "type": "string"
+                    },
+                    "text": {
+                        "type": "string"
+                    },
+                    "thinking": {
+                        "type": "string"
+                    },
+                    "image_base64": {
+                        "$ref": "#/$defs/FileRef"
+                    },
+                    "video_base64": {
+                        "$ref": "#/$defs/FileRef"
+                    },
+                    "audio_base64": {
+                        "$ref": "#/$defs/FileRef"
+                    },
+                    "texts": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "additionalProperties": false
+            }
+        },
+        {
+            "nodeSlot": "transcribe",
+            "inputs": {
+                "type": "object",
+                "required": [
+                    "audio"
+                ],
+                "properties": {
+                    "audio": {
+                        "$ref": "#/$defs/Asset"
+                    },
+                    "context": {
+                        "type": "string"
+                    },
+                    "language": {
+                        "type": "string"
+                    },
+                    "max_new_tokens": {
+                        "type": "number"
+                    }
+                },
+                "additionalProperties": false
+            },
+            "outputs": {
+                "type": "object",
+                "required": [
+                    "success"
+                ],
+                "properties": {
+                    "success": {
+                        "type": "boolean"
+                    },
+                    "error": {
+                        "type": "string"
+                    },
+                    "text": {
+                        "type": "string"
+                    },
+                    "result": {
+                        "type": "string"
+                    },
+                    "language": {
+                        "type": "string"
+                    },
+                    "file_key": {
+                        "type": "string"
+                    }
+                },
+                "additionalProperties": false
+            }
+        },
+        {
+            "nodeSlot": "concat-videos",
+            "inputs": {
+                "type": "object",
+                "required": [
+                    "videos_bytes"
+                ],
+                "properties": {
+                    "fileKeys": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "videos_bytes": {
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "minLength": 1
+                        }
+                    },
+                    "filenames": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "additionalProperties": false
+            },
+            "outputs": {
+                "type": "object",
+                "required": [
+                    "success"
+                ],
+                "properties": {
+                    "success": {
+                        "type": "boolean"
+                    },
+                    "error": {
+                        "type": "string"
+                    },
+                    "text": {
+                        "type": "string"
+                    },
+                    "thinking": {
+                        "type": "string"
+                    },
+                    "image_base64": {
+                        "$ref": "#/$defs/FileRef"
+                    },
+                    "video_base64": {
+                        "$ref": "#/$defs/FileRef"
+                    },
+                    "audio_base64": {
+                        "$ref": "#/$defs/FileRef"
+                    },
+                    "texts": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "additionalProperties": false
+            }
+        },
+        {
+            "nodeSlot": "extract-audio",
+            "inputs": {
+                "type": "object",
+                "required": [],
+                "properties": {
+                    "fileKey": {
+                        "type": "string"
+                    },
+                    "videoKey": {
+                        "type": "string"
+                    },
+                    "video_bytes": {
+                        "type": "string",
+                        "minLength": 1
+                    },
+                    "video_filename": {
+                        "type": "string"
+                    }
+                },
+                "additionalProperties": false
+            },
+            "outputs": {
+                "type": "object",
+                "required": [
+                    "success"
+                ],
+                "properties": {
+                    "success": {
+                        "type": "boolean"
+                    },
+                    "error": {
+                        "type": "string"
+                    },
+                    "text": {
+                        "type": "string"
+                    },
+                    "thinking": {
+                        "type": "string"
+                    },
+                    "image_base64": {
+                        "$ref": "#/$defs/FileRef"
+                    },
+                    "video_base64": {
+                        "$ref": "#/$defs/FileRef"
+                    },
+                    "audio_base64": {
+                        "$ref": "#/$defs/FileRef"
+                    },
+                    "texts": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "additionalProperties": false
+            }
+        },
+        {
+            "nodeSlot": "separate-video-audio",
+            "inputs": {
+                "type": "object",
+                "required": [],
+                "properties": {
+                    "fileKey": {
+                        "type": "string"
+                    },
+                    "videoKey": {
+                        "type": "string"
+                    },
+                    "video_bytes": {
+                        "type": "string",
+                        "minLength": 1
+                    },
+                    "video_filename": {
+                        "type": "string"
+                    }
+                },
+                "additionalProperties": false
+            },
+            "outputs": {
+                "type": "object",
+                "required": [
+                    "success"
+                ],
+                "properties": {
+                    "success": {
+                        "type": "boolean"
+                    },
+                    "error": {
+                        "type": "string"
+                    },
+                    "text": {
+                        "type": "string"
+                    },
+                    "thinking": {
+                        "type": "string"
+                    },
+                    "image_base64": {
+                        "$ref": "#/$defs/FileRef"
+                    },
+                    "video_base64": {
+                        "$ref": "#/$defs/FileRef"
+                    },
+                    "audio_base64": {
+                        "$ref": "#/$defs/FileRef"
+                    },
+                    "texts": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "additionalProperties": false
+            }
+        },
+        {
+            "nodeSlot": "merge-video-audio",
+            "inputs": {
+                "type": "object",
+                "required": [],
+                "properties": {
+                    "video_key": {
+                        "type": "string"
+                    },
+                    "audio_key": {
+                        "type": "string"
+                    },
+                    "video_bytes": {
+                        "type": "string",
+                        "minLength": 1
+                    },
+                    "audio_bytes": {
+                        "type": "string",
+                        "minLength": 1
+                    },
+                    "video_filename": {
+                        "type": "string"
+                    },
+                    "audio_filename": {
+                        "type": "string"
+                    }
+                },
+                "additionalProperties": false
+            },
+            "outputs": {
+                "type": "object",
+                "required": [
+                    "success"
+                ],
+                "properties": {
+                    "success": {
+                        "type": "boolean"
+                    },
+                    "error": {
+                        "type": "string"
+                    },
+                    "text": {
+                        "type": "string"
+                    },
+                    "thinking": {
+                        "type": "string"
+                    },
+                    "image_base64": {
+                        "$ref": "#/$defs/FileRef"
+                    },
+                    "video_base64": {
+                        "$ref": "#/$defs/FileRef"
+                    },
+                    "audio_base64": {
+                        "$ref": "#/$defs/FileRef"
+                    },
+                    "texts": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "additionalProperties": false
+            }
+        },
+        {
+            "nodeSlot": "get-first-frame",
+            "inputs": {
+                "type": "object",
+                "required": [],
+                "properties": {
+                    "fileKey": {
+                        "type": "string"
+                    },
+                    "videoKey": {
+                        "type": "string"
+                    },
+                    "video_bytes": {
+                        "type": "string",
+                        "minLength": 1
+                    },
+                    "video_filename": {
+                        "type": "string"
+                    }
+                },
+                "additionalProperties": false
+            },
+            "outputs": {
+                "type": "object",
+                "required": [
+                    "success"
+                ],
+                "properties": {
+                    "success": {
+                        "type": "boolean"
+                    },
+                    "error": {
+                        "type": "string"
+                    },
+                    "text": {
+                        "type": "string"
+                    },
+                    "thinking": {
+                        "type": "string"
+                    },
+                    "image_base64": {
+                        "$ref": "#/$defs/FileRef"
+                    },
+                    "video_base64": {
+                        "$ref": "#/$defs/FileRef"
+                    },
+                    "audio_base64": {
+                        "$ref": "#/$defs/FileRef"
+                    },
+                    "texts": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "additionalProperties": false
+            }
+        },
+        {
+            "nodeSlot": "get-last-frame",
+            "inputs": {
+                "type": "object",
+                "required": [],
+                "properties": {
+                    "fileKey": {
+                        "type": "string"
+                    },
+                    "videoKey": {
+                        "type": "string"
+                    },
+                    "video_bytes": {
+                        "type": "string",
+                        "minLength": 1
+                    },
+                    "video_filename": {
+                        "type": "string"
+                    }
+                },
+                "additionalProperties": false
+            },
+            "outputs": {
+                "type": "object",
+                "required": [
+                    "success"
+                ],
+                "properties": {
+                    "success": {
+                        "type": "boolean"
+                    },
+                    "error": {
+                        "type": "string"
+                    },
+                    "text": {
+                        "type": "string"
+                    },
+                    "thinking": {
+                        "type": "string"
+                    },
+                    "image_base64": {
+                        "$ref": "#/$defs/FileRef"
+                    },
+                    "video_base64": {
+                        "$ref": "#/$defs/FileRef"
+                    },
+                    "audio_base64": {
+                        "$ref": "#/$defs/FileRef"
+                    },
+                    "texts": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "additionalProperties": false
+            }
+        },
+        {
+            "nodeSlot": "parse-document",
+            "inputs": {
+                "type": "object",
+                "required": [],
+                "properties": {
+                    "document": {
+                        "$ref": "#/$defs/Asset"
+                    },
+                    "mime": {
+                        "type": "string"
+                    },
+                    "filename": {
+                        "type": "string"
+                    }
+                },
+                "additionalProperties": false
+            },
+            "outputs": {
+                "type": "object",
+                "required": [
+                    "success"
+                ],
+                "properties": {
+                    "success": {
+                        "type": "boolean"
+                    },
+                    "error": {
+                        "type": "string"
+                    },
+                    "text": {
+                        "type": "string"
+                    },
+                    "thinking": {
+                        "type": "string"
+                    },
+                    "image_base64": {
+                        "$ref": "#/$defs/FileRef"
+                    },
+                    "video_base64": {
+                        "$ref": "#/$defs/FileRef"
+                    },
+                    "audio_base64": {
+                        "$ref": "#/$defs/FileRef"
+                    },
+                    "texts": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "additionalProperties": false
+            }
+        },
+        {
+            "nodeSlot": "split-video",
+            "inputs": {
+                "type": "object",
+                "required": [],
+                "properties": {
+                    "video": {
+                        "$ref": "#/$defs/Asset"
+                    },
+                    "video_base64": {
+                        "type": "string",
+                        "minLength": 1
+                    },
+                    "video_bytes": {
+                        "type": "string",
+                        "minLength": 1
+                    },
+                    "fileKey": {
+                        "type": "string"
+                    },
+                    "videoKey": {
+                        "type": "string"
+                    }
+                },
+                "additionalProperties": false
+            },
+            "outputs": {
+                "type": "object",
+                "required": [
+                    "success"
+                ],
+                "properties": {
+                    "success": {
+                        "type": "boolean"
+                    },
+                    "error": {
+                        "type": "string"
+                    },
+                    "text": {
+                        "type": "string"
+                    },
+                    "thinking": {
+                        "type": "string"
+                    },
+                    "image_base64": {
+                        "$ref": "#/$defs/FileRef"
+                    },
+                    "video_base64": {
+                        "$ref": "#/$defs/FileRef"
+                    },
+                    "audio_base64": {
+                        "$ref": "#/$defs/FileRef"
+                    },
+                    "video_parts": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/$defs/FileRef"
+                        }
+                    },
+                    "texts": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "additionalProperties": false
+            }
+        },
+        {
+            "nodeSlot": "link",
+            "inputs": {
+                "type": "object",
+                "required": [
+                    "url"
+                ],
+                "properties": {
+                    "url": {
+                        "type": "string",
+                        "minLength": 1
+                    }
+                },
+                "additionalProperties": false
+            },
+            "outputs": {
+                "type": "object",
+                "required": [
+                    "success"
+                ],
+                "properties": {
+                    "success": {
+                        "type": "boolean"
+                    },
+                    "error": {
+                        "type": "string"
+                    },
+                    "text": {
+                        "type": "string"
+                    },
+                    "thinking": {
+                        "type": "string"
+                    },
+                    "image_base64": {
+                        "$ref": "#/$defs/FileRef"
+                    },
+                    "video_base64": {
+                        "$ref": "#/$defs/FileRef"
+                    },
+                    "audio_base64": {
+                        "$ref": "#/$defs/FileRef"
+                    },
+                    "texts": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "additionalProperties": false
+            }
+        },
+        {
+            "nodeSlot": "gen-video",
+            "inputs": {
+                "type": "object",
+                "required": [
+                    "text"
+                ],
+                "properties": {
+                    "text": {
+                        "type": "string"
+                    },
+                    "texts": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "seed": {
+                        "type": "number"
+                    },
+                    "height": {
+                        "type": "integer"
+                    },
+                    "width": {
+                        "type": "integer"
+                    },
+                    "num_frames": {
+                        "type": "integer"
+                    },
+                    "frame_rate": {
+                        "type": "number"
+                    },
+                    "num_inference_steps": {
+                        "type": "integer"
+                    },
+                    "enhance_prompt": {
+                        "type": "boolean"
+                    },
+                    "negative_prompt": {
+                        "type": "string"
+                    },
+                    "image_base64": {
+                        "type": "string",
+                        "minLength": 1
+                    },
+                    "image_frame_idx": {
+                        "type": "integer"
+                    },
+                    "image_strength": {
+                        "type": "number"
+                    },
+                    "end_image_base64": {
+                        "type": "string",
+                        "minLength": 1
+                    },
+                    "image2_base64": {
+                        "type": "string",
+                        "minLength": 1
+                    },
+                    "speech_base64": {
+                        "type": "string",
+                        "minLength": 1
+                    },
+                    "audio_base64": {
+                        "type": "string",
+                        "minLength": 1
+                    },
+                    "audio_max_duration": {
+                        "type": "number"
+                    },
+                    "audio_start_time": {
+                        "type": "number"
+                    }
+                },
+                "additionalProperties": false
+            },
+            "outputs": {
+                "type": "object",
+                "required": [
+                    "success"
+                ],
+                "properties": {
+                    "success": {
+                        "type": "boolean"
+                    },
+                    "error": {
+                        "type": "string"
+                    },
+                    "text": {
+                        "type": "string"
+                    },
+                    "thinking": {
+                        "type": "string"
+                    },
+                    "image_base64": {
+                        "$ref": "#/$defs/FileRef"
+                    },
+                    "video_base64": {
+                        "$ref": "#/$defs/FileRef"
+                    },
+                    "audio_base64": {
+                        "$ref": "#/$defs/FileRef"
+                    },
+                    "texts": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "additionalProperties": false
+            }
+        },
+        {
+            "nodeSlot": "image-gen",
+            "inputs": {
+                "type": "object",
+                "required": [],
+                "properties": {
+                    "text": {
+                        "type": "string",
+                        "minLength": 1
+                    },
+                    "texts": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "width": {
+                        "type": "integer"
+                    },
+                    "height": {
+                        "type": "integer"
+                    },
+                    "num_inference_steps": {
+                        "type": "integer"
+                    },
+                    "guidance_scale": {
+                        "type": "number"
+                    },
+                    "seed": {
+                        "type": "integer"
+                    }
+                },
+                "additionalProperties": false
+            },
+            "outputs": {
+                "type": "object",
+                "required": [
+                    "success"
+                ],
+                "properties": {
+                    "success": {
+                        "type": "boolean"
+                    },
+                    "error": {
+                        "type": "string"
+                    },
+                    "text": {
+                        "type": "string"
+                    },
+                    "thinking": {
+                        "type": "string"
+                    },
+                    "image_base64": {
+                        "$ref": "#/$defs/FileRef"
+                    },
+                    "video_base64": {
+                        "$ref": "#/$defs/FileRef"
+                    },
+                    "audio_base64": {
+                        "$ref": "#/$defs/FileRef"
+                    },
+                    "texts": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "additionalProperties": false
+            }
+        },
+        {
+            "nodeSlot": "gen-music",
+            "inputs": {
+                "type": "object",
+                "required": [],
+                "properties": {
+                    "text": {
+                        "type": "string",
+                        "minLength": 1
+                    },
+                    "lyrics": {
+                        "type": "string"
+                    },
+                    "duration": {
+                        "type": "number"
+                    },
+                    "seed": {
+                        "type": "integer"
+                    }
+                },
+                "additionalProperties": false
+            },
+            "outputs": {
+                "type": "object",
+                "required": [
+                    "success"
+                ],
+                "properties": {
+                    "success": {
+                        "type": "boolean"
+                    },
+                    "error": {
+                        "type": "string"
+                    },
+                    "text": {
+                        "type": "string"
+                    },
+                    "thinking": {
+                        "type": "string"
+                    },
+                    "image_base64": {
+                        "$ref": "#/$defs/FileRef"
+                    },
+                    "video_base64": {
+                        "$ref": "#/$defs/FileRef"
+                    },
+                    "audio_base64": {
+                        "$ref": "#/$defs/FileRef"
+                    },
+                    "texts": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "additionalProperties": false
+            }
+        },
+        {
+            "nodeSlot": "text-gen-speech-preset",
+            "inputs": {
+                "type": "object",
+                "required": [
+                    "text"
+                ],
+                "properties": {
+                    "text": {
+                        "type": "string",
+                        "minLength": 1
+                    },
+                    "language": {
+                        "type": "string"
+                    },
+                    "instruct": {
+                        "type": "string"
+                    },
+                    "max_new_tokens": {
+                        "type": "integer"
+                    }
+                },
+                "additionalProperties": false
+            },
+            "outputs": {
+                "type": "object",
+                "required": [
+                    "success"
+                ],
+                "properties": {
+                    "success": {
+                        "type": "boolean"
+                    },
+                    "error": {
+                        "type": "string"
+                    },
+                    "text": {
+                        "type": "string"
+                    },
+                    "thinking": {
+                        "type": "string"
+                    },
+                    "image_base64": {
+                        "$ref": "#/$defs/FileRef"
+                    },
+                    "video_base64": {
+                        "$ref": "#/$defs/FileRef"
+                    },
+                    "audio_base64": {
+                        "$ref": "#/$defs/FileRef"
+                    },
+                    "texts": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "additionalProperties": false
+            }
+        },
+        {
+            "nodeSlot": "image-gen-video",
+            "inputs": {
+                "type": "object",
+                "required": [
+                    "text",
+                    "image_base64"
+                ],
+                "properties": {
+                    "text": {
+                        "type": "string"
+                    },
+                    "texts": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "seed": {
+                        "type": "number"
+                    },
+                    "height": {
+                        "type": "integer"
+                    },
+                    "width": {
+                        "type": "integer"
+                    },
+                    "num_frames": {
+                        "type": "integer"
+                    },
+                    "frame_rate": {
+                        "type": "number"
+                    },
+                    "num_inference_steps": {
+                        "type": "integer"
+                    },
+                    "enhance_prompt": {
+                        "type": "boolean"
+                    },
+                    "negative_prompt": {
+                        "type": "string"
+                    },
+                    "image_base64": {
+                        "type": "string",
+                        "minLength": 1
+                    },
+                    "image_frame_idx": {
+                        "type": "integer"
+                    },
+                    "image_strength": {
+                        "type": "number"
+                    },
+                    "end_image_base64": {
+                        "type": "string",
+                        "minLength": 1
+                    },
+                    "image2_base64": {
+                        "type": "string",
+                        "minLength": 1
+                    },
+                    "speech_base64": {
+                        "type": "string",
+                        "minLength": 1
+                    },
+                    "audio_base64": {
+                        "type": "string",
+                        "minLength": 1
+                    },
+                    "audio_max_duration": {
+                        "type": "number"
+                    },
+                    "audio_start_time": {
+                        "type": "number"
+                    }
+                },
+                "additionalProperties": false
+            },
+            "outputs": {
+                "type": "object",
+                "required": [
+                    "success"
+                ],
+                "properties": {
+                    "success": {
+                        "type": "boolean"
+                    },
+                    "error": {
+                        "type": "string"
+                    },
+                    "text": {
+                        "type": "string"
+                    },
+                    "thinking": {
+                        "type": "string"
+                    },
+                    "image_base64": {
+                        "$ref": "#/$defs/FileRef"
+                    },
+                    "video_base64": {
+                        "$ref": "#/$defs/FileRef"
+                    },
+                    "audio_base64": {
+                        "$ref": "#/$defs/FileRef"
+                    },
+                    "texts": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "additionalProperties": false
+            }
+        },
+        {
+            "nodeSlot": "image-edit",
+            "inputs": {
+                "type": "object",
+                "required": [
+                    "text",
+                    "image_base64"
+                ],
+                "properties": {
+                    "text": {
+                        "type": "string",
+                        "minLength": 1
+                    },
+                    "image_base64": {
+                        "type": "string",
+                        "minLength": 1
+                    },
+                    "seed": {
+                        "type": "integer"
+                    },
+                    "match_input_size": {
+                        "type": "boolean"
+                    },
+                    "width": {
+                        "type": "integer"
+                    },
+                    "height": {
+                        "type": "integer"
+                    }
+                },
+                "additionalProperties": false
+            },
+            "outputs": {
+                "type": "object",
+                "required": [
+                    "success"
+                ],
+                "properties": {
+                    "success": {
+                        "type": "boolean"
+                    },
+                    "error": {
+                        "type": "string"
+                    },
+                    "text": {
+                        "type": "string"
+                    },
+                    "thinking": {
+                        "type": "string"
+                    },
+                    "image_base64": {
+                        "$ref": "#/$defs/FileRef"
+                    },
+                    "video_base64": {
+                        "$ref": "#/$defs/FileRef"
+                    },
+                    "audio_base64": {
+                        "$ref": "#/$defs/FileRef"
+                    },
+                    "texts": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "additionalProperties": false
+            }
+        },
+        {
+            "nodeSlot": "image-upscale",
+            "inputs": {
+                "type": "object",
+                "required": [
+                    "image_base64"
+                ],
+                "properties": {
+                    "image_base64": {
+                        "type": "string",
+                        "minLength": 1
+                    },
+                    "video_base64": {
+                        "type": "string",
+                        "minLength": 1
+                    },
+                    "resolution": {
+                        "type": "string"
+                    },
+                    "seed": {
+                        "type": "integer"
+                    },
+                    "dit_variant": {
+                        "type": "string"
+                    },
+                    "color_correction": {
+                        "type": "string"
+                    },
+                    "out_fps": {
+                        "type": "number"
+                    },
+                    "batch_size": {
+                        "type": "integer"
+                    },
+                    "uniform_batch_size": {
+                        "type": "boolean"
+                    },
+                    "temporal_overlap": {
+                        "type": "integer"
+                    }
+                },
+                "additionalProperties": false
+            },
+            "outputs": {
+                "type": "object",
+                "required": [
+                    "success"
+                ],
+                "properties": {
+                    "success": {
+                        "type": "boolean"
+                    },
+                    "error": {
+                        "type": "string"
+                    },
+                    "text": {
+                        "type": "string"
+                    },
+                    "thinking": {
+                        "type": "string"
+                    },
+                    "image_base64": {
+                        "$ref": "#/$defs/FileRef"
+                    },
+                    "video_base64": {
+                        "$ref": "#/$defs/FileRef"
+                    },
+                    "audio_base64": {
+                        "$ref": "#/$defs/FileRef"
+                    },
+                    "texts": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "additionalProperties": false
+            }
+        },
+        {
+            "nodeSlot": "video-upscale",
+            "inputs": {
+                "type": "object",
+                "required": [
+                    "video_base64"
+                ],
+                "properties": {
+                    "image_base64": {
+                        "type": "string",
+                        "minLength": 1
+                    },
+                    "video_base64": {
+                        "type": "string",
+                        "minLength": 1
+                    },
+                    "resolution": {
+                        "type": "string"
+                    },
+                    "seed": {
+                        "type": "integer"
+                    },
+                    "dit_variant": {
+                        "type": "string"
+                    },
+                    "color_correction": {
+                        "type": "string"
+                    },
+                    "out_fps": {
+                        "type": "number"
+                    },
+                    "batch_size": {
+                        "type": "integer"
+                    },
+                    "uniform_batch_size": {
+                        "type": "boolean"
+                    },
+                    "temporal_overlap": {
+                        "type": "integer"
+                    }
+                },
+                "additionalProperties": false
+            },
+            "outputs": {
+                "type": "object",
+                "required": [
+                    "success"
+                ],
+                "properties": {
+                    "success": {
+                        "type": "boolean"
+                    },
+                    "error": {
+                        "type": "string"
+                    },
+                    "text": {
+                        "type": "string"
+                    },
+                    "thinking": {
+                        "type": "string"
+                    },
+                    "image_base64": {
+                        "$ref": "#/$defs/FileRef"
+                    },
+                    "video_base64": {
+                        "$ref": "#/$defs/FileRef"
+                    },
+                    "audio_base64": {
+                        "$ref": "#/$defs/FileRef"
+                    },
+                    "texts": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "additionalProperties": false
+            }
+        },
+        {
+            "nodeSlot": "image-describe",
+            "inputs": {
+                "type": "object",
+                "required": [],
+                "properties": {
+                    "image": {
+                        "type": "string",
+                        "minLength": 1
+                    },
+                    "text": {
+                        "type": "string"
+                    },
+                    "userPrompt": {
+                        "type": "string"
+                    }
+                },
+                "additionalProperties": false
+            },
+            "outputs": {
+                "type": "object",
+                "required": [
+                    "success"
+                ],
+                "properties": {
+                    "success": {
+                        "type": "boolean"
+                    },
+                    "error": {
+                        "type": "string"
+                    },
+                    "text": {
+                        "type": "string"
+                    },
+                    "thinking": {
+                        "type": "string"
+                    },
+                    "image_base64": {
+                        "$ref": "#/$defs/FileRef"
+                    },
+                    "video_base64": {
+                        "$ref": "#/$defs/FileRef"
+                    },
+                    "audio_base64": {
+                        "$ref": "#/$defs/FileRef"
+                    },
+                    "texts": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "additionalProperties": false
+            }
+        },
+        {
+            "nodeSlot": "video-describe",
+            "inputs": {
+                "type": "object",
+                "required": [],
+                "properties": {
+                    "video": {
+                        "type": "string",
+                        "minLength": 1
+                    },
+                    "text": {
+                        "type": "string"
+                    },
+                    "userPrompt": {
+                        "type": "string"
+                    }
+                },
+                "additionalProperties": false
+            },
+            "outputs": {
+                "type": "object",
+                "required": [
+                    "success"
+                ],
+                "properties": {
+                    "success": {
+                        "type": "boolean"
+                    },
+                    "error": {
+                        "type": "string"
+                    },
+                    "text": {
+                        "type": "string"
+                    },
+                    "thinking": {
+                        "type": "string"
+                    },
+                    "image_base64": {
+                        "$ref": "#/$defs/FileRef"
+                    },
+                    "video_base64": {
+                        "$ref": "#/$defs/FileRef"
+                    },
+                    "audio_base64": {
+                        "$ref": "#/$defs/FileRef"
+                    },
+                    "texts": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "additionalProperties": false
+            }
+        },
+        {
+            "nodeSlot": "audio-image-gen-video",
+            "inputs": {
+                "type": "object",
+                "required": [
+                    "image",
+                    "audio"
+                ],
+                "properties": {
+                    "image": {
+                        "type": "string",
+                        "minLength": 1
+                    },
+                    "audio": {
+                        "type": "string",
+                        "minLength": 1
+                    },
+                    "text": {
+                        "type": "string"
+                    }
+                },
+                "additionalProperties": false
+            },
+            "outputs": {
+                "type": "object",
+                "required": [
+                    "success"
+                ],
+                "properties": {
+                    "success": {
+                        "type": "boolean"
+                    },
+                    "error": {
+                        "type": "string"
+                    },
+                    "text": {
+                        "type": "string"
+                    },
+                    "thinking": {
+                        "type": "string"
+                    },
+                    "image_base64": {
+                        "$ref": "#/$defs/FileRef"
+                    },
+                    "video_base64": {
+                        "$ref": "#/$defs/FileRef"
+                    },
+                    "audio_base64": {
+                        "$ref": "#/$defs/FileRef"
+                    },
+                    "texts": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "additionalProperties": false
+            }
+        },
+        {
+            "nodeSlot": "speech-text-gen-video",
+            "inputs": {
+                "type": "object",
+                "required": [
+                    "text",
+                    "audio_base64"
+                ],
+                "properties": {
+                    "text": {
+                        "type": "string"
+                    },
+                    "texts": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "seed": {
+                        "type": "number"
+                    },
+                    "height": {
+                        "type": "integer"
+                    },
+                    "width": {
+                        "type": "integer"
+                    },
+                    "num_frames": {
+                        "type": "integer"
+                    },
+                    "frame_rate": {
+                        "type": "number"
+                    },
+                    "num_inference_steps": {
+                        "type": "integer"
+                    },
+                    "enhance_prompt": {
+                        "type": "boolean"
+                    },
+                    "negative_prompt": {
+                        "type": "string"
+                    },
+                    "image_base64": {
+                        "type": "string",
+                        "minLength": 1
+                    },
+                    "image_frame_idx": {
+                        "type": "integer"
+                    },
+                    "image_strength": {
+                        "type": "number"
+                    },
+                    "end_image_base64": {
+                        "type": "string",
+                        "minLength": 1
+                    },
+                    "image2_base64": {
+                        "type": "string",
+                        "minLength": 1
+                    },
+                    "speech_base64": {
+                        "type": "string",
+                        "minLength": 1
+                    },
+                    "audio_base64": {
+                        "type": "string",
+                        "minLength": 1
+                    },
+                    "audio_max_duration": {
+                        "type": "number"
+                    },
+                    "audio_start_time": {
+                        "type": "number"
+                    }
+                },
+                "additionalProperties": false
+            },
+            "outputs": {
+                "type": "object",
+                "required": [
+                    "success"
+                ],
+                "properties": {
+                    "success": {
+                        "type": "boolean"
+                    },
+                    "error": {
+                        "type": "string"
+                    },
+                    "text": {
+                        "type": "string"
+                    },
+                    "thinking": {
+                        "type": "string"
+                    },
+                    "image_base64": {
+                        "$ref": "#/$defs/FileRef"
+                    },
+                    "video_base64": {
+                        "$ref": "#/$defs/FileRef"
+                    },
+                    "audio_base64": {
+                        "$ref": "#/$defs/FileRef"
+                    },
+                    "texts": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "additionalProperties": false
+            }
+        },
+        {
+            "nodeSlot": "speech-image-video-gen-video",
+            "inputs": {
+                "type": "object",
+                "required": [
+                    "image",
+                    "video",
+                    "audio"
+                ],
+                "properties": {
+                    "image": {
+                        "type": "string",
+                        "minLength": 1
+                    },
+                    "video": {
+                        "type": "string",
+                        "minLength": 1
+                    },
+                    "audio": {
+                        "type": "string",
+                        "minLength": 1
+                    },
+                    "text": {
+                        "type": "string"
+                    }
+                },
+                "additionalProperties": false
+            },
+            "outputs": {
+                "type": "object",
+                "required": [
+                    "success"
+                ],
+                "properties": {
+                    "success": {
+                        "type": "boolean"
+                    },
+                    "error": {
+                        "type": "string"
+                    },
+                    "text": {
+                        "type": "string"
+                    },
+                    "thinking": {
+                        "type": "string"
+                    },
+                    "image_base64": {
+                        "$ref": "#/$defs/FileRef"
+                    },
+                    "video_base64": {
+                        "$ref": "#/$defs/FileRef"
+                    },
+                    "audio_base64": {
+                        "$ref": "#/$defs/FileRef"
+                    },
+                    "texts": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "additionalProperties": false
+            }
+        },
+        {
+            "nodeSlot": "video-image-gen-video-mix",
+            "inputs": {
+                "type": "object",
+                "required": [
+                    "image",
+                    "video"
+                ],
+                "properties": {
+                    "image": {
+                        "type": "string",
+                        "minLength": 1
+                    },
+                    "video": {
+                        "type": "string",
+                        "minLength": 1
+                    },
+                    "text": {
+                        "type": "string"
+                    }
+                },
+                "additionalProperties": false
+            },
+            "outputs": {
+                "type": "object",
+                "required": [
+                    "success"
+                ],
+                "properties": {
+                    "success": {
+                        "type": "boolean"
+                    },
+                    "error": {
+                        "type": "string"
+                    },
+                    "text": {
+                        "type": "string"
+                    },
+                    "thinking": {
+                        "type": "string"
+                    },
+                    "image_base64": {
+                        "$ref": "#/$defs/FileRef"
+                    },
+                    "video_base64": {
+                        "$ref": "#/$defs/FileRef"
+                    },
+                    "audio_base64": {
+                        "$ref": "#/$defs/FileRef"
+                    },
+                    "texts": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "additionalProperties": false
+            }
+        },
+        {
+            "nodeSlot": "video-image-gen-video-move",
+            "inputs": {
+                "type": "object",
+                "required": [
+                    "image",
+                    "video"
+                ],
+                "properties": {
+                    "image": {
+                        "type": "string",
+                        "minLength": 1
+                    },
+                    "video": {
+                        "type": "string",
+                        "minLength": 1
+                    },
+                    "text": {
+                        "type": "string"
+                    }
+                },
+                "additionalProperties": false
+            },
+            "outputs": {
+                "type": "object",
+                "required": [
+                    "success"
+                ],
+                "properties": {
+                    "success": {
+                        "type": "boolean"
+                    },
+                    "error": {
+                        "type": "string"
+                    },
+                    "text": {
+                        "type": "string"
+                    },
+                    "thinking": {
+                        "type": "string"
+                    },
+                    "image_base64": {
+                        "$ref": "#/$defs/FileRef"
+                    },
+                    "video_base64": {
+                        "$ref": "#/$defs/FileRef"
+                    },
+                    "audio_base64": {
+                        "$ref": "#/$defs/FileRef"
+                    },
+                    "texts": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "additionalProperties": false
+            }
+        },
+        {
+            "nodeSlot": "image-image-gen-video",
+            "inputs": {
+                "type": "object",
+                "required": [
+                    "text",
+                    "image_base64",
+                    "end_image_base64"
+                ],
+                "properties": {
+                    "text": {
+                        "type": "string"
+                    },
+                    "texts": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "seed": {
+                        "type": "number"
+                    },
+                    "height": {
+                        "type": "integer"
+                    },
+                    "width": {
+                        "type": "integer"
+                    },
+                    "num_frames": {
+                        "type": "integer"
+                    },
+                    "frame_rate": {
+                        "type": "number"
+                    },
+                    "num_inference_steps": {
+                        "type": "integer"
+                    },
+                    "enhance_prompt": {
+                        "type": "boolean"
+                    },
+                    "negative_prompt": {
+                        "type": "string"
+                    },
+                    "image_base64": {
+                        "type": "string",
+                        "minLength": 1
+                    },
+                    "image_frame_idx": {
+                        "type": "integer"
+                    },
+                    "image_strength": {
+                        "type": "number"
+                    },
+                    "end_image_base64": {
+                        "type": "string",
+                        "minLength": 1
+                    },
+                    "image2_base64": {
+                        "type": "string",
+                        "minLength": 1
+                    },
+                    "speech_base64": {
+                        "type": "string",
+                        "minLength": 1
+                    },
+                    "audio_base64": {
+                        "type": "string",
+                        "minLength": 1
+                    },
+                    "audio_max_duration": {
+                        "type": "number"
+                    },
+                    "audio_start_time": {
+                        "type": "number"
+                    }
+                },
+                "additionalProperties": false
+            },
+            "outputs": {
+                "type": "object",
+                "required": [
+                    "success"
+                ],
+                "properties": {
+                    "success": {
+                        "type": "boolean"
+                    },
+                    "error": {
+                        "type": "string"
+                    },
+                    "text": {
+                        "type": "string"
+                    },
+                    "thinking": {
+                        "type": "string"
+                    },
+                    "image_base64": {
+                        "$ref": "#/$defs/FileRef"
+                    },
+                    "video_base64": {
+                        "$ref": "#/$defs/FileRef"
+                    },
+                    "audio_base64": {
+                        "$ref": "#/$defs/FileRef"
+                    },
+                    "texts": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "additionalProperties": false
+            }
+        },
+        {
+            "nodeSlot": "text-gen-video",
+            "inputs": {
+                "type": "object",
+                "required": [
+                    "text"
+                ],
+                "properties": {
+                    "text": {
+                        "type": "string"
+                    },
+                    "texts": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "seed": {
+                        "type": "number"
+                    },
+                    "height": {
+                        "type": "integer"
+                    },
+                    "width": {
+                        "type": "integer"
+                    },
+                    "num_frames": {
+                        "type": "integer"
+                    },
+                    "frame_rate": {
+                        "type": "number"
+                    },
+                    "num_inference_steps": {
+                        "type": "integer"
+                    },
+                    "enhance_prompt": {
+                        "type": "boolean"
+                    },
+                    "negative_prompt": {
+                        "type": "string"
+                    },
+                    "image_base64": {
+                        "type": "string",
+                        "minLength": 1
+                    },
+                    "image_frame_idx": {
+                        "type": "integer"
+                    },
+                    "image_strength": {
+                        "type": "number"
+                    },
+                    "end_image_base64": {
+                        "type": "string",
+                        "minLength": 1
+                    },
+                    "image2_base64": {
+                        "type": "string",
+                        "minLength": 1
+                    },
+                    "speech_base64": {
+                        "type": "string",
+                        "minLength": 1
+                    },
+                    "audio_base64": {
+                        "type": "string",
+                        "minLength": 1
+                    },
+                    "audio_max_duration": {
+                        "type": "number"
+                    },
+                    "audio_start_time": {
+                        "type": "number"
+                    }
+                },
+                "additionalProperties": false
+            },
+            "outputs": {
+                "type": "object",
+                "required": [
+                    "success"
+                ],
+                "properties": {
+                    "success": {
+                        "type": "boolean"
+                    },
+                    "error": {
+                        "type": "string"
+                    },
+                    "text": {
+                        "type": "string"
+                    },
+                    "thinking": {
+                        "type": "string"
+                    },
+                    "image_base64": {
+                        "$ref": "#/$defs/FileRef"
+                    },
+                    "video_base64": {
+                        "$ref": "#/$defs/FileRef"
+                    },
+                    "audio_base64": {
+                        "$ref": "#/$defs/FileRef"
+                    },
+                    "texts": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "additionalProperties": false
+            }
+        },
+        {
+            "nodeSlot": "image-gen-model",
+            "inputs": {
+                "type": "object",
+                "required": [],
+                "properties": {
+                    "text": {
+                        "type": "string",
+                        "minLength": 1
+                    },
+                    "texts": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "width": {
+                        "type": "integer"
+                    },
+                    "height": {
+                        "type": "integer"
+                    },
+                    "num_inference_steps": {
+                        "type": "integer"
+                    },
+                    "guidance_scale": {
+                        "type": "number"
+                    },
+                    "seed": {
+                        "type": "integer"
+                    }
+                },
+                "additionalProperties": false
+            },
+            "outputs": {
+                "type": "object",
+                "required": [
+                    "success"
+                ],
+                "properties": {
+                    "success": {
+                        "type": "boolean"
+                    },
+                    "error": {
+                        "type": "string"
+                    },
+                    "text": {
+                        "type": "string"
+                    },
+                    "thinking": {
+                        "type": "string"
+                    },
+                    "image_base64": {
+                        "$ref": "#/$defs/FileRef"
+                    },
+                    "video_base64": {
+                        "$ref": "#/$defs/FileRef"
+                    },
+                    "audio_base64": {
+                        "$ref": "#/$defs/FileRef"
+                    },
+                    "texts": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "additionalProperties": false
+            }
+        },
+        {
+            "nodeSlot": "speech-video-gen-video",
+            "inputs": {
+                "type": "object",
+                "required": [
+                    "video",
+                    "audio"
+                ],
+                "properties": {
+                    "video": {
+                        "type": "string",
+                        "minLength": 1
+                    },
+                    "audio": {
+                        "type": "string",
+                        "minLength": 1
+                    }
+                },
+                "additionalProperties": false
+            },
+            "outputs": {
+                "type": "object",
+                "required": [
+                    "success"
+                ],
+                "properties": {
+                    "success": {
+                        "type": "boolean"
+                    },
+                    "error": {
+                        "type": "string"
+                    },
+                    "text": {
+                        "type": "string"
+                    },
+                    "thinking": {
+                        "type": "string"
+                    },
+                    "image_base64": {
+                        "$ref": "#/$defs/FileRef"
+                    },
+                    "video_base64": {
+                        "$ref": "#/$defs/FileRef"
+                    },
+                    "audio_base64": {
+                        "$ref": "#/$defs/FileRef"
+                    },
+                    "texts": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "additionalProperties": false
+            }
+        },
+        {
+            "nodeSlot": "text-gen-speech-clone",
+            "inputs": {
+                "type": "object",
+                "required": [
+                    "text",
+                    "ref_audio_base64"
+                ],
+                "properties": {
+                    "text": {
+                        "type": "string",
+                        "minLength": 1
+                    },
+                    "ref_audio_base64": {
+                        "type": "string",
+                        "minLength": 1
+                    },
+                    "audio_base64": {
+                        "type": "string",
+                        "minLength": 1
+                    },
+                    "language": {
+                        "type": "string"
+                    },
+                    "ref_text": {
+                        "type": "string"
+                    },
+                    "x_vector_only": {
+                        "type": "boolean"
+                    },
+                    "max_new_tokens": {
+                        "type": "integer"
+                    }
+                },
+                "additionalProperties": false
+            },
+            "outputs": {
+                "type": "object",
+                "required": [
+                    "success"
+                ],
+                "properties": {
+                    "success": {
+                        "type": "boolean"
+                    },
+                    "error": {
+                        "type": "string"
+                    },
+                    "text": {
+                        "type": "string"
+                    },
+                    "thinking": {
+                        "type": "string"
+                    },
+                    "image_base64": {
+                        "$ref": "#/$defs/FileRef"
+                    },
+                    "video_base64": {
+                        "$ref": "#/$defs/FileRef"
+                    },
+                    "audio_base64": {
+                        "$ref": "#/$defs/FileRef"
+                    },
+                    "texts": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "additionalProperties": false
+            }
+        },
+        {
+            "nodeSlot": "transcribe-timestamp",
+            "inputs": {
+                "type": "object",
+                "required": [
+                    "audio"
+                ],
+                "properties": {
+                    "audio": {
+                        "$ref": "#/$defs/Asset"
+                    },
+                    "context": {
+                        "type": "string"
+                    },
+                    "language": {
+                        "type": "string"
+                    },
+                    "max_new_tokens": {
+                        "type": "number"
+                    }
+                },
+                "additionalProperties": false
+            },
+            "outputs": {
+                "type": "object",
+                "required": [
+                    "success"
+                ],
+                "properties": {
+                    "success": {
+                        "type": "boolean"
+                    },
+                    "error": {
+                        "type": "string"
+                    },
+                    "text": {
+                        "type": "string"
+                    },
+                    "result": {
+                        "type": "string"
+                    },
+                    "language": {
+                        "type": "string"
+                    },
+                    "file_key": {
+                        "type": "string"
+                    },
+                    "time_stamps": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "required": [
+                                "text",
+                                "start_time",
+                                "end_time"
+                            ],
+                            "properties": {
+                                "text": {
+                                    "type": "string",
+                                    "minLength": 1
+                                },
+                                "start_time": {
+                                    "type": "number"
+                                },
+                                "end_time": {
+                                    "type": "number"
+                                }
+                            },
+                            "additionalProperties": false
+                        }
+                    }
+                },
+                "additionalProperties": false
+            }
+        },
+        {
+            "nodeSlot": "text-gen-speech-instruct",
+            "inputs": {
+                "type": "object",
+                "required": [
+                    "text"
+                ],
+                "properties": {
+                    "text": {
+                        "type": "string",
+                        "minLength": 1
+                    },
+                    "language": {
+                        "type": "string"
+                    },
+                    "speaker": {
+                        "type": "string"
+                    },
+                    "instruct": {
+                        "type": "string"
+                    },
+                    "max_new_tokens": {
+                        "type": "integer"
+                    }
+                },
+                "additionalProperties": false
+            },
+            "outputs": {
+                "type": "object",
+                "required": [
+                    "success"
+                ],
+                "properties": {
+                    "success": {
+                        "type": "boolean"
+                    },
+                    "error": {
+                        "type": "string"
+                    },
+                    "text": {
+                        "type": "string"
+                    },
+                    "thinking": {
+                        "type": "string"
+                    },
+                    "image_base64": {
+                        "$ref": "#/$defs/FileRef"
+                    },
+                    "video_base64": {
+                        "$ref": "#/$defs/FileRef"
+                    },
+                    "audio_base64": {
+                        "$ref": "#/$defs/FileRef"
+                    },
+                    "texts": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "additionalProperties": false
+            }
+        },
+        {
+            "nodeSlot": "video-image-move-animal",
+            "inputs": {
+                "type": "object",
+                "required": [
+                    "image",
+                    "video"
+                ],
+                "properties": {
+                    "image": {
+                        "type": "string",
+                        "minLength": 1
+                    },
+                    "video": {
+                        "type": "string",
+                        "minLength": 1
+                    },
+                    "text": {
+                        "type": "string"
+                    }
+                },
+                "additionalProperties": false
+            },
+            "outputs": {
+                "type": "object",
+                "required": [
+                    "success"
+                ],
+                "properties": {
+                    "success": {
+                        "type": "boolean"
+                    },
+                    "error": {
+                        "type": "string"
+                    },
+                    "text": {
+                        "type": "string"
+                    },
+                    "thinking": {
+                        "type": "string"
+                    },
+                    "image_base64": {
+                        "$ref": "#/$defs/FileRef"
+                    },
+                    "video_base64": {
+                        "$ref": "#/$defs/FileRef"
+                    },
+                    "audio_base64": {
+                        "$ref": "#/$defs/FileRef"
+                    },
+                    "texts": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "additionalProperties": false
+            }
+        },
+        {
+            "nodeSlot": "wan-animate-mix",
+            "inputs": {
+                "type": "object",
+                "required": [
+                    "image",
+                    "video"
+                ],
+                "properties": {
+                    "image": {
+                        "type": "string",
+                        "minLength": 1
+                    },
+                    "video": {
+                        "type": "string",
+                        "minLength": 1
+                    },
+                    "text": {
+                        "type": "string"
+                    }
+                },
+                "additionalProperties": false
+            },
+            "outputs": {
+                "type": "object",
+                "required": [
+                    "success"
+                ],
+                "properties": {
+                    "success": {
+                        "type": "boolean"
+                    },
+                    "error": {
+                        "type": "string"
+                    },
+                    "text": {
+                        "type": "string"
+                    },
+                    "thinking": {
+                        "type": "string"
+                    },
+                    "image_base64": {
+                        "$ref": "#/$defs/FileRef"
+                    },
+                    "video_base64": {
+                        "$ref": "#/$defs/FileRef"
+                    },
+                    "audio_base64": {
+                        "$ref": "#/$defs/FileRef"
+                    },
+                    "texts": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "additionalProperties": false
+            }
+        },
+        {
+            "nodeSlot": "drop-video",
+            "inputs": {
+                "type": "object",
+                "required": [],
+                "properties": {
+                    "fileKeys": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "query": {
+                        "type": "string"
+                    }
+                },
+                "additionalProperties": false
+            },
+            "outputs": {
+                "type": "object",
+                "required": [
+                    "success"
+                ],
+                "properties": {
+                    "success": {
+                        "type": "boolean"
+                    },
+                    "error": {
+                        "type": "string"
+                    },
+                    "text": {
+                        "type": "string"
+                    },
+                    "thinking": {
+                        "type": "string"
+                    },
+                    "image_base64": {
+                        "$ref": "#/$defs/FileRef"
+                    },
+                    "video_base64": {
+                        "$ref": "#/$defs/FileRef"
+                    },
+                    "audio_base64": {
+                        "$ref": "#/$defs/FileRef"
+                    },
+                    "texts": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "clips": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "required": [
+                                "keep",
+                                "fileKey"
+                            ],
+                            "properties": {
+                                "keep": {
+                                    "type": "boolean"
+                                },
+                                "fileKey": {
+                                    "type": "string"
+                                }
+                            },
+                            "additionalProperties": false
+                        }
+                    }
+                },
+                "additionalProperties": false
+            }
+        },
+        {
+            "nodeSlot": "arrange-group",
+            "inputs": {
+                "type": "object",
+                "required": [],
+                "properties": {
+                    "items": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "required": [],
+                            "properties": {
+                                "text": {
+                                    "type": "string"
+                                },
+                                "id": {
+                                    "type": "string"
+                                }
+                            },
+                            "additionalProperties": false
+                        }
+                    },
+                    "fileKeys": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "infos": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {},
+                            "additionalProperties": true
+                        }
+                    },
+                    "query": {
+                        "type": "string"
+                    },
+                    "groupCount": {
+                        "type": "integer"
+                    },
+                    "duplicatable": {
+                        "type": "boolean"
+                    }
+                },
+                "additionalProperties": false
+            },
+            "outputs": {
+                "type": "object",
+                "required": [
+                    "success"
+                ],
+                "properties": {
+                    "success": {
+                        "type": "boolean"
+                    },
+                    "error": {
+                        "type": "string"
+                    },
+                    "text": {
+                        "type": "string"
+                    },
+                    "thinking": {
+                        "type": "string"
+                    },
+                    "image_base64": {
+                        "$ref": "#/$defs/FileRef"
+                    },
+                    "video_base64": {
+                        "$ref": "#/$defs/FileRef"
+                    },
+                    "audio_base64": {
+                        "$ref": "#/$defs/FileRef"
+                    },
+                    "texts": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "groups": {
+                        "type": "array",
+                        "items": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                },
+                "additionalProperties": false
+            }
+        }
+    ]
 }

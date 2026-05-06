@@ -1,6 +1,8 @@
 import { z } from "zod";
 import tongflowAbi from "../../config/tongflow.abi.json";
 
+import { MIN_SUPPORTED_ABI_VERSION } from "@/lib/abi-version";
+
 const AbiNodeSchema = z.object({
     nodeSlot: z.string().min(1),
     inputs: z.unknown(),
@@ -8,7 +10,10 @@ const AbiNodeSchema = z.object({
 });
 
 const TongflowAbiFileSchema = z.object({
-    version: z.literal(1),
+    version: z
+        .number()
+        .int()
+        .min(MIN_SUPPORTED_ABI_VERSION),
     source: z.string().optional(),
     $defs: z.record(z.string(), z.unknown()).optional(),
     nodes: z.array(AbiNodeSchema),
@@ -29,3 +34,5 @@ export const TONGFLOW_ABI_NODES: readonly TongflowAbiNode[] = parsed.nodes;
 export function getAbiNodeBySlot(nodeSlot: string): TongflowAbiNode | undefined {
     return bySlot.get(nodeSlot);
 }
+
+export { MIN_SUPPORTED_ABI_VERSION };

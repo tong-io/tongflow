@@ -1,11 +1,12 @@
 import "server-only";
 
+import type { NodeSlot } from "@/generated/abi";
 import type { PluginExecRequest, PluginExecResult } from "./types";
 import { getPluginConfig } from "@/lib/plugins-registry.server";
 
-export async function executePlugin(
-    req: PluginExecRequest,
-): Promise<PluginExecResult> {
+export async function executePlugin<S extends NodeSlot = NodeSlot>(
+    req: PluginExecRequest<S>,
+): Promise<PluginExecResult<S>> {
     const cfg = getPluginConfig(req.pluginId);
     if (!cfg) throw new Error(`Unknown plugin: ${req.pluginId}`);
 

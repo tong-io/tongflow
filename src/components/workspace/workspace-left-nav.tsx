@@ -5,8 +5,9 @@
  * Contains: workflow list, task list, portfolio
  */
 
-import { useState, useEffect, useRef, useCallback } from "react";
-import { Zap, Loader2, Workflow, FolderOpen } from "lucide-react";
+import { FolderOpen, Loader2, Workflow, Zap } from "lucide-react";
+import { useTranslations } from "next-intl";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
     Sheet,
@@ -14,11 +15,11 @@ import {
     SheetHeader,
     SheetTitle,
 } from "@/components/ui/sheet";
-import { listTasks, type Task } from "@/lib/api/task";
 import { PortfolioDialog } from "@/components/workspace/portfolio-dialog";
 import { WorkflowDialog } from "@/components/workspace/workflow-dialog";
-import { useTranslations } from "next-intl";
+import { listTasks, type Task } from "@/lib/api/task";
 import { logger } from "@/lib/logger";
+import { formatStoredTaskErrorForDisplay } from "@/utils/task-error-format";
 
 export function WorkspaceLeftNav() {
     const t = useTranslations("Navigation");
@@ -201,7 +202,9 @@ export function WorkspaceLeftNav() {
                                             )}
                                         {task.error && (
                                             <div className="text-xs text-red-500 mt-1 line-clamp-2">
-                                                {task.error}
+                                                {formatStoredTaskErrorForDisplay(
+                                                    task.error,
+                                                )}
                                             </div>
                                         )}
                                         <div className="text-xs text-muted-foreground mt-1">

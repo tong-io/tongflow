@@ -4,11 +4,17 @@ import { type ChildProcess, spawn } from "node:child_process";
 import path, { delimiter } from "node:path";
 import { FunctionTimeoutError, ModalClient } from "modal";
 import { embedLocalUploadsForModal } from "@/lib/plugin-executor/embed-local-uploads-for-modal.server";
+import { convertAssetOutputsToFileRefs } from "@/lib/plugin-executor/convert-modal-output-fileref";
+import {
+    modalTerminateAfterTimeouts,
+    recordModalDeployCache,
+    shouldSkipModalDeploy,
+} from "@/lib/plugin-executor/modal-deploy-cache";
 import { getModalPluginConfig, getPluginFileAbsolutePath } from "@/lib/plugins-registry.server";
 import { requireModalTokenEnv, resolvePython } from "@/lib/modal-deploy-workers";
-import { saveFile } from "@/utils/file-utils";
 import { notifyTask } from "@/lib/task-emitter";
 import { TaskStatus } from "@/constants/task-status";
+import type { NodeSlot } from "@/generated/abi";
 import type { PluginExecRequest, PluginExecResult } from "../types";
 
 /** `modal run download` — must not hang forever if CLI or Hub stalls */
@@ -32,6 +38,36 @@ function parseEnvMs(raw: string | undefined, fallback: number): number {
     const n = Number(raw);
     return Number.isFinite(n) && n > 0 ? n : fallback;
 }
+
+/** Serialize deploy work per plugin (skip cache + modal deploy). */
+const modalDeployChains = new Map<string, Promise<void>>();
+
+function chainModalDeploy(
+    pluginId: string,
+    fn: () => Promise<void>,
+): Promise<void> {
+    const prev = modalDeployChains.get(pluginId) ?? Promise.resolve();
+    const next = prev.then(fn, () => undefined).finally(() => {
+        if (modalDeployChains.get(pluginId) === next) {
+            modalDeployChains.delete(pluginId);
+        }
+    });
+    modalDeployChains.set(pluginId, next);
+    return next;
+}
+
+async function runModalDeployPluginMaybeCached(
+    pluginId: string,
+    signal?: AbortSignal,
+): Promise<void> {
+    await chainModalDeploy(pluginId, async () => {
+        if (await shouldSkipModalDeploy(pluginId)) return;
+        await runModalDeployPlugin(pluginId, signal);
+        await recordModalDeployCache(pluginId);
+    });
+}
+
+let modalSdkTimeoutCancelStreak = 0;
 
 function tailText(buf: Buffer, maxChars: number): string {
     const s = buf.toString("utf8").trim();
@@ -59,25 +95,35 @@ type ModalFunctionCall = {
 /**
  * `call.get()` with no `timeoutMs` can poll the control plane forever when no
  * terminal output arrives (e.g. remote retry loops) — always pass a cap.
- * On abort or SDK get-timeout, `cancel(terminateContainers)` so Modal does not
- * keep runners alive while the client has already given up.
+ * User abort: soft cancel only. Repeated SDK timeouts: escalate `terminateContainers`.
  */
 async function getModalCallResult(
     call: ModalFunctionCall,
     signal: AbortSignal,
     timeoutMs: number,
 ): Promise<unknown> {
-    const terminate = () =>
-        void call.cancel({ terminateContainers: true }).catch(() => undefined);
+    const threshold = modalTerminateAfterTimeouts();
     try {
-        return await Promise.race([call.get({ timeoutMs }), abortPromise(signal)]);
+        const result = await Promise.race([
+            call.get({ timeoutMs }),
+            abortPromise(signal),
+        ]);
+        modalSdkTimeoutCancelStreak = 0;
+        return result;
     } catch (e) {
-        if (e instanceof Error) {
-            if (e.message === "Aborted") {
-                terminate();
-            } else if (e instanceof FunctionTimeoutError) {
-                terminate();
-            }
+        if (e instanceof Error && e.message === "Aborted") {
+            void call
+                .cancel({ terminateContainers: false })
+                .catch(() => undefined);
+            throw e;
+        }
+        if (e instanceof FunctionTimeoutError) {
+            modalSdkTimeoutCancelStreak += 1;
+            const hard = modalSdkTimeoutCancelStreak >= threshold;
+            void call
+                .cancel({ terminateContainers: hard })
+                .catch(() => undefined);
+            throw e;
         }
         throw e;
     }
@@ -266,109 +312,25 @@ function looksLikeModalMethodMissing(err: unknown): boolean {
     return lower.includes("not found") && lower.includes("method");
 }
 
-function bufferFromModalBytes(v: unknown): Buffer | null {
-    if (v == null) return null;
-    if (Buffer.isBuffer(v)) return v;
-    if (v instanceof Uint8Array) return Buffer.from(v);
-    if (typeof v === "string" && v.length > 0) {
-        // Modal / JSON may deliver raw base64 for byte fields
-        return Buffer.from(v, "base64");
-    }
-    return null;
-}
 
-async function persistBase64AssetIfPresent(
+function ensureModalObjectResult<S extends NodeSlot>(
     raw: unknown,
-    taskId: string,
-): Promise<PluginExecResult> {
+): PluginExecResult<S> {
     if (raw == null || typeof raw !== "object" || Array.isArray(raw)) {
         throw new Error("Plugin returned invalid result");
     }
-    const out = { ...(raw as Record<string, unknown>) };
-    if (out["success"] === false) return out as PluginExecResult;
-
-    /** e.g. separate_video_audio: [video bytes, audio bytes] — before single `output_bytes` */
-    const outputsRawFirst = out["outputs"];
-    if (Array.isArray(outputsRawFirst) && outputsRawFirst.length >= 2) {
-        const keys: string[] = [];
-        for (const item of outputsRawFirst) {
-            if (item == null || typeof item !== "object" || Array.isArray(item)) {
-                continue;
-            }
-            const rec = item as Record<string, unknown>;
-            const ob = bufferFromModalBytes(rec["output_bytes"]);
-            const extRaw = rec["output_ext"];
-            if (!ob || ob.length === 0) continue;
-            const ext =
-                typeof extRaw === "string" && extRaw.length > 0
-                    ? extRaw.replace(/^\./, "")
-                    : "bin";
-            keys.push(await saveFile(ob, ext, taskId));
-        }
-        if (keys.length >= 2) {
-            const next: Record<string, unknown> = {
-                ...out,
-                success: true,
-                video_file_key: keys[0],
-                audio_file_key: keys[1],
-                file_keys: keys,
-            };
-            delete next["outputs"];
-            return next as PluginExecResult;
-        }
-    }
-
-    /** Some plugins (e.g. ffmpeg) return { output_bytes, output_ext }. */
-    const outBytes = bufferFromModalBytes(out["output_bytes"]);
-    const outExtRaw = out["output_ext"];
-    if (outBytes && outBytes.length > 0) {
-        const ext =
-            typeof outExtRaw === "string" && outExtRaw.length > 0
-                ? outExtRaw.replace(/^\./, "")
-                : "bin";
-        const fileKey = await saveFile(outBytes, ext, taskId);
-        const next: Record<string, unknown> = {
-            ...out,
-            success: true,
-            file_key: fileKey,
-        };
-        delete next["output_bytes"];
-        delete next["output_ext"];
-        return next as PluginExecResult;
-    }
-
-    const pick = (
-        key: "image_base64" | "video_base64" | "audio_base64",
-        ext: "png" | "mp4" | "wav",
-    ): { key: string; ext: "png" | "mp4" | "wav"; b64: string } | null => {
-        const v = out[key];
-        if (typeof v !== "string" || v.length === 0) return null;
-        return { key, ext, b64: v };
-    };
-
-    const found =
-        pick("image_base64", "png") ??
-        pick("video_base64", "mp4") ??
-        pick("audio_base64", "wav");
-    if (!found) return out as PluginExecResult;
-
-    const buf = Buffer.from(found.b64, "base64");
-    const fileKey = await saveFile(buf, found.ext, taskId);
-    const next: Record<string, unknown> = {
-        ...out,
-        success: true,
-        file_key: fileKey,
-    };
-    delete next[found.key];
-    return next as PluginExecResult;
+    return raw as PluginExecResult<S>;
 }
 
-export async function execModalPlugin(
-    req: PluginExecRequest,
-): Promise<PluginExecResult> {
-    const input = await embedLocalUploadsForModal(req.input, {
-        nodeSlot: req.nodeSlot,
-    });
+export async function execModalPlugin<S extends NodeSlot>(
+    req: PluginExecRequest<S>,
+): Promise<PluginExecResult<S>> {
+    const input = await embedLocalUploadsForModal(
+        req.input as unknown as Record<string, unknown>,
+        {
+            nodeSlot: req.nodeSlot,
+        },
+    );
 
     const cfg = getModalPluginConfig(req.pluginId);
     if (!cfg) throw new Error(`Unknown plugin: ${req.pluginId}`);
@@ -391,10 +353,10 @@ export async function execModalPlugin(
     stage(`Modal: downloading (${req.pluginId})`);
     await runModalDownloadPlugin(req.pluginId, req.signal);
 
-    // In dev, always deploy to avoid stale Modal deployments during rapid iteration.
+    // Dev: deploy when repo fingerprint changed or working tree dirty (see modal-deploy-cache).
     if (process.env.NODE_ENV !== "production") {
         stage(`Modal: deploying (dev refresh) (${req.pluginId})`);
-        await runModalDeployPlugin(req.pluginId, req.signal);
+        await runModalDeployPluginMaybeCached(req.pluginId, req.signal);
     }
     try {
         stage(`Modal: checking deployment (${cfg.appName}/${clsName})`);
@@ -407,7 +369,7 @@ export async function execModalPlugin(
     } catch {
         // Previously unbounded — could wait forever if `modal deploy` never exited.
         stage(`Modal: deploying (${req.pluginId})`);
-        await runModalDeployPlugin(req.pluginId, req.signal);
+        await runModalDeployPluginMaybeCached(req.pluginId, req.signal);
     }
 
     const invoke = async () => {
@@ -437,13 +399,18 @@ export async function execModalPlugin(
         out = await invoke();
     } catch (e) {
         if (looksLikeModalMethodMissing(e)) {
-            await runModalDeployPlugin(req.pluginId, req.signal);
+            await runModalDeployPluginMaybeCached(req.pluginId, req.signal);
             out = await invoke();
         } else {
             throw e;
         }
     }
 
-    return await persistBase64AssetIfPresent(out, req.taskId);
+    const converted = await convertAssetOutputsToFileRefs(
+        req.nodeSlot,
+        out,
+        req.taskId,
+    );
+    return ensureModalObjectResult<S>(converted);
 }
 

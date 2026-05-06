@@ -127,6 +127,3 @@ export function useNodePluginIdsUnion(nodeSlots: string[]): string[] {
     }
     return dedupeIds(out);
 }
-
-/** @deprecated use useNodePluginIds */
-export const useNodePluginRepos = useNodePluginIds;

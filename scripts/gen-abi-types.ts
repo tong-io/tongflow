@@ -7,6 +7,8 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
+import { MIN_SUPPORTED_ABI_VERSION } from "../src/lib/abi-version";
+
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.join(__dirname, "..");
 const abiPath = path.join(repoRoot, "config", "tongflow.abi.json");
@@ -22,9 +24,13 @@ type AbiFile = {
 function readAbi(): AbiFile {
     const raw = fs.readFileSync(abiPath, "utf8");
     const data = JSON.parse(raw) as AbiFile;
-    if (data.version !== 1) {
+    if (
+        typeof data.version !== "number" ||
+        !Number.isInteger(data.version) ||
+        data.version < MIN_SUPPORTED_ABI_VERSION
+    ) {
         console.error(
-            `gen-abi-types: expected ABI version === 1, got ${JSON.stringify(data.version)}`,
+            `gen-abi-types: ABI version must be integer >= ${MIN_SUPPORTED_ABI_VERSION}, got ${JSON.stringify(data.version)}`,
         );
         process.exit(1);
     }

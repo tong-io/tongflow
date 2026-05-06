@@ -1,4 +1,4 @@
-import { type NodeProps } from "@xyflow/react";
+import type { TongflowPluginNodeProps } from "@/types/tongflow-flow";
 import { memo } from "react";
 import { Music as AudioIcon } from "lucide-react";
 
@@ -9,15 +9,6 @@ import {
     type GetPromptsContext,
 } from "@/utils/node-execution-config";
 import { useTranslations } from "next-intl";
-
-interface AudioGenTextSpeechRecognizeNodeProps extends NodeProps {
-    data: {
-        fileKeys?: string[];
-        /** Directory name under `plugins/` (from registry). */
-        pluginId?: string;
-        /** @deprecated */ pluginRepo?: string;
-    };
-}
 
 // Workflow execution config (static shape only; omit dynamic features)
 const baseWorkflowConfig = {
@@ -41,7 +32,10 @@ const baseWorkflowConfig = {
 const AudioGenTextSpeechRecognizeNode = ({
     selected,
     data,
-}: AudioGenTextSpeechRecognizeNodeProps) => {
+}: TongflowPluginNodeProps<
+    "transcribe",
+    "audioGenTextSpeechRecognizeNode"
+>) => {
     const t = useTranslations("Workspace.nodes");
     const { fileKeys = [] } = data;
 

@@ -1,4 +1,4 @@
-import { type NodeProps } from "@xyflow/react";
+import type { TongflowPluginNodeProps } from "@/types/tongflow-flow";
 import { memo } from "react";
 import { Video as VideoIcon } from "lucide-react";
 
@@ -9,14 +9,6 @@ import {
     type GetPromptsContext,
 } from "@/utils/node-execution-config";
 import { useTranslations } from "next-intl";
-
-interface VideoGenTextSpeechRecognizeNodeProps extends NodeProps {
-    data: {
-        fileKeys?: string[];
-        pluginId?: string;
-        /** @deprecated */ pluginRepo?: string;
-    };
-}
 
 // Workflow execution config (static shape only; omit dynamic features)
 const baseWorkflowConfig = {
@@ -40,7 +32,10 @@ const baseWorkflowConfig = {
 const VideoGenTextSpeechRecognizeNode = ({
     selected,
     data,
-}: VideoGenTextSpeechRecognizeNodeProps) => {
+}: TongflowPluginNodeProps<
+    "transcribe",
+    "videoGenTextSpeechRecognizeNode"
+>) => {
     const t = useTranslations("Workspace.nodes");
     const { fileKeys = [] } = data;
 

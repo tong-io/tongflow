@@ -1,4 +1,7 @@
-import type { Node } from "@xyflow/react";
+import type { Node, NodeProps } from "@xyflow/react";
+
+import type { AspectRatio } from "@/constants/media-options";
+import type { ParamMappingConfig } from "@/utils/node-execution-config";
 
 /* ========================================================================== */
 /* Base Type Definitions                                                       */
@@ -58,14 +61,47 @@ export interface DataNodeData extends Record<string, unknown> {
 /* BaseNode — Generic React Flow `data` shape (shared by plugin selector and execution) */
 /* ========================================================================== */
 
-/** Default `data` shape for nodes using BaseNode / plugin selector; concrete nodes can extend this interface */
+/**
+ * Shared React Flow `data` persisted on canvas nodes (media, composition, ABI workflow).
+ * Modal primitives, transfer/compose plugins, and `TongflowPluginNodeData` all use this spine
+ * so fields are readable without field-by-field `as` casts.
+ */
 export interface BaseNodeData extends Record<string, unknown> {
     feature?: string;
     prompt?: Record<string, unknown>;
     /** Currently selected plugin ID (registry `nodeSlot` → `pluginIds`) */
     pluginId?: string;
     pluginRepo?: string;
+
+    /** Composition linkage (`useNodesData`) */
+    ids?: string[];
+    texts?: string[];
+    fileKeys?: string[];
+
+    selectedAspectRatio?: AspectRatio;
+    selectedResolution?: unknown;
+    infos?: unknown[];
+
+    label?: string;
+    comment?: string;
+    locked?: boolean;
+
+    /** Model / single-file modalities */
+    fileName?: string;
+    fileKey?: string;
+
+    outputType?: OutputNodeType;
+    outputField?: "fileKeys" | "texts";
+
+    paramMappings?: Record<string, ParamMappingConfig>;
 }
+
+/**
+ * Typed `NodeProps` for any canvas node whose persisted `data` follows `BaseNodeData`.
+ */
+export type RfDataNodeProps<Type extends string = string> = NodeProps<
+    Node<BaseNodeData, Type>
+>;
 
 /* ========================================================================== */
 /* Legacy type definitions (kept for backward compatibility)                   */

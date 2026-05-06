@@ -1,15 +1,20 @@
-export type PluginExecRequest = {
+import type { NodeSlot, SlotInput, SlotOutput } from "@/generated/abi";
+
+export type PluginExecRequest<S extends NodeSlot = NodeSlot> = {
     pluginId: string;
-    nodeSlot: string;
-    /** Strong typed input object (validated by ABI on build-time + scan). */
-    input: Record<string, unknown>;
+    nodeSlot: S;
+    /** Strong typed input object (ABI compile-time + Phase 2.4 ajv at boundaries). */
+    input: SlotInput<S>;
     /** Task id for streaming notifyTask */
     taskId: string;
     /** Abort signal (cancellation) */
     signal: AbortSignal;
 };
 
-export type PluginExecResult = Record<string, unknown>;
+export type PluginExecResult<S extends NodeSlot = NodeSlot> = SlotOutput<S> & {
+    success: boolean;
+    file_key?: string;
+    error?: string;
+};
 
 export type PluginRunner = "modal" | "llm";
-

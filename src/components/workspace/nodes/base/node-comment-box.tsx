@@ -3,6 +3,7 @@ import { useNodeId, useReactFlow, useStore } from "@xyflow/react";
 import { X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useTranslations } from "next-intl";
+import { coerceBaseNodeData } from "@/utils/flow-node-data";
 
 export function NodeCommentBox() {
     const nodeId = useNodeId();
@@ -13,7 +14,7 @@ export function NodeCommentBox() {
         useCallback(
             (state) => {
                 const node = state.nodeLookup.get(nodeId ?? "");
-                return (node?.data as { comment?: string })?.comment;
+                return coerceBaseNodeData(node?.data).comment;
             },
             [nodeId],
         ),

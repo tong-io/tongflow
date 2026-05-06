@@ -1,4 +1,5 @@
-import { type NodeProps } from "@xyflow/react";
+
+import type { TongflowPluginNodeProps } from "@/types/tongflow-flow";
 import { memo } from "react";
 import { BaseNode } from "../base/base-node";
 import { Film } from "lucide-react";
@@ -8,11 +9,14 @@ import {
 } from "@/utils/node-execution-config";
 import { useTranslations } from "next-intl";
 
-const DEFAULT_FEATURE = "get_last_frame";
+const DEFAULT_FEATURE = "get-last-frame";
 
-const GetLastFrameNode = ({ selected, data }: NodeProps) => {
+const GetLastFrameNode = ({
+    selected,
+    data,
+}: TongflowPluginNodeProps<"get-last-frame", "getLastFrameNode">) => {
     const t = useTranslations("Workspace.nodes");
-    const { fileKeys } = data as { fileKeys: string[] };
+    const fileKeys = data.fileKeys;
 
     const workflowConfig = {
         feature: DEFAULT_FEATURE,

@@ -1,4 +1,3 @@
-import { type NodeProps } from "@xyflow/react";
 import type { ReactNode } from "react";
 import { useState, memo } from "react";
 import { Upload, Mic, Atom } from "lucide-react";
@@ -32,6 +31,9 @@ import {
     type GetPromptsContext,
 } from "@/utils/node-execution-config";
 import { useTranslations } from "next-intl";
+import type { RfDataNodeProps } from "@/types/nodes";
+
+type ConvertVoiceRfProps = RfDataNodeProps<"convertVoiceNode">;
 
 const DEFAULT_FEATURE = "convert_voice";
 
@@ -59,9 +61,9 @@ const workflowConfig = {
     },
 };
 
-const ConvertVoiceNode = ({ selected, data }: NodeProps) => {
+const ConvertVoiceNode = ({ selected, data }: ConvertVoiceRfProps) => {
     const t = useTranslations("Workspace.nodes");
-    const { fileKeys } = data as { fileKeys: string[] };
+    const fileKeys = data.fileKeys;
 
     // Use the new hook to manage state persistence
     const [state, setState] = useNodeState(

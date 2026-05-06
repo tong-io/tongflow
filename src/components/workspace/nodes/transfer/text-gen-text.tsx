@@ -1,7 +1,6 @@
 import {
     useNodeId,
     useNodesData,
-    type NodeProps,
 } from "@xyflow/react";
 import { useState, memo, useCallback, useRef, useEffect, useMemo } from "react";
 import { Brain, Maximize2, Wand2 } from "lucide-react";
@@ -42,8 +41,9 @@ import {
     usePluginsRegistryStore,
 } from "@/hooks/use-plugins-registry";
 import { pluginDisplayName } from "../base/node-plugin-id-select";
+import type { TongflowPluginNodeProps } from "@/types/tongflow-flow";
 
-const GEN_TEXT_FEATURES = ["gen_text"] as const;
+const GEN_TEXT_FEATURES = ["gen-text"] as const;
 
 // Reasoning box component
 const ReasoningBox = ({ content }: { content: string }) => {
@@ -81,11 +81,12 @@ const ReasoningBox = ({ content }: { content: string }) => {
 
 // Workflow execution config
 const workflowConfig = {
-    feature: "gen_text",
+    feature: "gen-text",
     outputType: "textNode",
     outputField: "texts" as const,
     supportsBatch: true,
     batchParam: "text",
+    abiProducerPropertyCandidates: ["text", "result", "texts"] as const,
     paramMappings: {
         text: {
             sources: [
@@ -100,13 +101,11 @@ const workflowConfig = {
     },
 };
 
-const GenTextNode = ({ selected, data }: NodeProps) => {
-    const { ids = [], texts: localTexts = [] } = data as {
-        ids?: string[];
-        texts?: string[];
-        pluginId?: string;
-        /** @deprecated */ pluginRepo?: string;
-    };
+const GenTextNode = ({
+    selected,
+    data,
+}: TongflowPluginNodeProps<"gen-text", "genTextNode">) => {
+    const { ids = [], texts: localTexts = [] } = data;
 
     const expands = useFlow((s) => s.expands);
     const updates = useFlow((s) => s.updates);
@@ -152,12 +151,10 @@ const GenTextNode = ({ selected, data }: NodeProps) => {
     const tBase = useTranslations("Workspace.nodes.base");
     const registry = usePluginsRegistryStore((s) => s.registry);
 
-    const nodeSlot = "gen_text";
+    const nodeSlot = "gen-text";
 
     const pluginOptions = useNodePluginIds(nodeSlot);
-    const pluginId = (
-        (data as any).pluginId ?? (data as any).pluginRepo ?? ""
-    ).trim();
+    const pluginId = (data.pluginId ?? data.pluginRepo ?? "").trim();
     /** BaseNode persists registry default; this mirrors nodePluginMap[slot][0] for first paint. */
     const effectivePluginId = (pluginId || pluginOptions[0] || "").trim();
     const modelSelectOptions = useMemo(() => {

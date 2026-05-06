@@ -5,8 +5,8 @@ import {
     useNodesData,
     useStore,
     type Edge,
-    type NodeProps,
 } from "@xyflow/react";
+import type { TongflowPluginNodeProps } from "@/types/tongflow-flow";
 import { memo, useMemo } from "react";
 import { Clock, Music, Tag } from "lucide-react";
 
@@ -31,8 +31,9 @@ import {
 } from "@/utils/node-execution-config";
 import { TEXT_GEN_MUSIC_HANDLES } from "@/utils/connection-rules";
 import { useTranslations } from "next-intl";
+import { coerceBaseNodeData } from "@/utils/flow-node-data";
 
-const DEFAULT_FEATURE = "gen_music";
+const DEFAULT_FEATURE = "gen-music";
 
 // Language options
 const LANGUAGE_OPTIONS = [
@@ -89,14 +90,8 @@ interface MusicNodeState {
     bpm: string;
 }
 
-interface TextGenMusicNodeProps extends NodeProps {
-    data: {
-        texts?: string[];
-        selectedDuration?: string;
-        lyrics?: string;
-    } & Partial<MusicNodeState>;
-}
-
+type TextGenMusicNodeProps =
+    TongflowPluginNodeProps<"gen-music", "textGenMusicNode">;
 // Workflow execution config
 const workflowConfig = {
     feature: DEFAULT_FEATURE,
@@ -127,8 +122,7 @@ const workflowConfig = {
 function firstTextFromTextNodeData(
     nodesData: Array<{ data?: unknown }> | null | undefined,
 ): string {
-    if (!nodesData?.[0]?.data) return "";
-    const texts = (nodesData[0].data as { texts?: string[] }).texts;
+    const texts = coerceBaseNodeData(nodesData?.[0]?.data).texts;
     return Array.isArray(texts) && texts[0] != null ? String(texts[0]) : "";
 }
 

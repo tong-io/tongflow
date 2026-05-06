@@ -1,8 +1,8 @@
 import {
     useNodeId,
     useNodesData,
-    type NodeProps,
 } from "@xyflow/react";
+import type { TongflowPluginNodeProps } from "@/types/tongflow-flow";
 import { useState, memo, useCallback, useRef, useEffect, useMemo } from "react";
 import { Brain, Wand2 } from "lucide-react";
 
@@ -64,7 +64,7 @@ const ReasoningBox = ({ content }: { content: string }) => {
 
 // Workflow execution config
 const workflowConfig = {
-    feature: "combine_text",
+    feature: "combine-text",
     outputType: "textNode",
     outputField: "texts" as const,
     supportsBatch: false,
@@ -79,13 +79,11 @@ const workflowConfig = {
     },
 };
 
-const TextsGenTextNode = ({ selected, data }: NodeProps) => {
-    const { ids = [], texts: localTexts = [] } = data as {
-        ids?: string[];
-        texts?: string[];
-        pluginId?: string;
-        /** @deprecated */ pluginRepo?: string;
-    };
+const TextsGenTextNode = ({
+    selected,
+    data,
+}: TongflowPluginNodeProps<"combine-text", "textsGenTextNode">) => {
+    const { ids = [], texts: localTexts = [] } = data;
 
     const expands = useFlow((s) => s.expands);
     const updates = useFlow((s) => s.updates);

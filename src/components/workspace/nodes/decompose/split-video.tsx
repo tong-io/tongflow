@@ -1,4 +1,5 @@
-import { useNodeId, type NodeProps } from "@xyflow/react";
+import { useNodeId } from "@xyflow/react";
+import type { TongflowPluginNodeProps } from "@/types/tongflow-flow";
 import { memo, useCallback } from "react";
 import { Atom } from "lucide-react";
 import { BaseNode } from "../base/base-node";
@@ -10,7 +11,7 @@ import {
 import useFlow from "@/hooks/use-flow";
 import { useTranslations } from "next-intl";
 
-const DEFAULT_FEATURE = "split_video";
+const DEFAULT_FEATURE = "split-video";
 
 // Workflow execution config
 const workflowConfig = {
@@ -30,27 +31,31 @@ const workflowConfig = {
     },
 };
 
-const SplitVideoNode = ({ selected, data }: NodeProps) => {
+const SplitVideoNode = ({
+    selected,
+    data,
+}: TongflowPluginNodeProps<"split-video", "splitVideoNode">) => {
     const t = useTranslations("Workspace.nodes");
-    const { fileKeys } = data as { fileKeys: string[] };
+    const fileKeys = data.fileKeys;
     const expands = useFlow((s) => s.expands);
 
     const id = useNodeId()!;
 
-    // Handle video chunk tasks exposing split_keys
     const handleTaskUpdate = useCallback(
         (task: any): boolean => {
             if (task?.status === "COMPLETED") {
                 const taskData = task?.data as any;
-                const { split_keys, original_key } = taskData;
-                let splitKeys: string[] = [];
-
-                if (split_keys && original_key) {
-                    const validKeys = split_keys.filter(
-                        (key: string) => !key.endsWith(original_key),
-                    );
-                    splitKeys = validKeys;
-                }
+                const parts = taskData?.video_parts as
+                    | Array<{ file_key?: string }>
+                    | undefined;
+                const splitKeys =
+                    parts
+                        ?.map((p) =>
+                            typeof p?.file_key === "string"
+                                ? p.file_key.trim()
+                                : "",
+                        )
+                        .filter((k) => k.length > 0) ?? [];
 
                 if (splitKeys.length > 0 && id) {
                     expands(id, [

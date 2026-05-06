@@ -1,4 +1,5 @@
-import { useNodeId, type NodeProps } from "@xyflow/react";
+import { useNodeId } from "@xyflow/react";
+import type { TongflowPluginNodeProps } from "@/types/tongflow-flow";
 import { memo, useCallback } from "react";
 import { FileText } from "lucide-react";
 
@@ -12,7 +13,7 @@ import {
 import { useTranslations } from "next-intl";
 import { logger } from "@/lib/logger";
 
-const DEFAULT_FEATURE = "parse_document";
+const DEFAULT_FEATURE = "parse-document";
 
 // Workflow execution config
 const workflowConfig = {
@@ -33,13 +34,10 @@ const workflowConfig = {
     },
 };
 
-interface FileGenTextNodeProps extends NodeProps {
-    data: {
-        fileKeys?: string[];
-    };
-}
-
-const FileGenTextNode = ({ selected, data }: FileGenTextNodeProps) => {
+const FileGenTextNode = ({
+    selected,
+    data,
+}: TongflowPluginNodeProps<"parse-document", "fileGenTextNode">) => {
     const t = useTranslations("Workspace.nodes");
     const { fileKeys = [] } = data;
 

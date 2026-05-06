@@ -3,9 +3,9 @@ import {
     type VoiceLanguage,
 } from "@/config/voice-options";
 
-export const TEXT_GEN_SPEECH_CLONE = "text_gen_speech_clone";
-export const TEXT_GEN_SPEECH_PRESET = "text_gen_speech_preset";
-export const TEXT_GEN_SPEECH_INSTRUCT = "text_gen_speech_instruct";
+export const TEXT_GEN_SPEECH_CLONE = "text-gen-speech-clone";
+export const TEXT_GEN_SPEECH_PRESET = "text-gen-speech-preset";
+export const TEXT_GEN_SPEECH_INSTRUCT = "text-gen-speech-instruct";
 
 export const VOICE_LANG_LABELS: Record<VoiceLanguage, string> = {
     zh: "中文",

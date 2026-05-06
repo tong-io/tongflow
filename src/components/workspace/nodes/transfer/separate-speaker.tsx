@@ -1,5 +1,8 @@
-import { useNodeId, type NodeProps } from "@xyflow/react";
+import { useNodeId } from "@xyflow/react";
 import { memo, useCallback } from "react";
+
+import type { RfDataNodeProps } from "@/types/nodes";
+
 import { BaseNode } from "../base/base-node";
 import useFlow from "@/hooks/use-flow";
 import { Atom } from "lucide-react";
@@ -8,6 +11,8 @@ import {
     type GetPromptsContext,
 } from "@/utils/node-execution-config";
 import { useTranslations } from "next-intl";
+
+type SeparateSpeakerRfProps = RfDataNodeProps<"separateSpeakerNode">;
 
 const DEFAULT_FEATURE = "separate_speaker";
 
@@ -30,11 +35,11 @@ const workflowConfig = {
     },
 };
 
-const SeparateSpeakerNode = ({ selected, data }: NodeProps) => {
+const SeparateSpeakerNode = ({ selected, data }: SeparateSpeakerRfProps) => {
     const t = useTranslations("Workspace.nodes");
     const updates = useFlow((s) => s.updates);
     const id = useNodeId()!;
-    const { fileKeys } = data as { fileKeys: string[] };
+    const fileKeys = data.fileKeys;
     const expands = useFlow((s) => s.expands);
 
     // Custom task updater — expands every auxiliary file artifact

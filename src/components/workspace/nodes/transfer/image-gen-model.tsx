@@ -1,4 +1,5 @@
-import { type NodeProps } from "@xyflow/react";
+
+import type { TongflowPluginNodeProps } from "@/types/tongflow-flow";
 import { memo } from "react";
 import { Box } from "lucide-react";
 
@@ -10,7 +11,7 @@ import {
 } from "@/utils/node-execution-config";
 import { useTranslations } from "next-intl";
 
-const DEFAULT_FEATURE = "image_gen_model";
+const DEFAULT_FEATURE = "image-gen-model";
 
 // Workflow execution config
 const workflowConfig = {
@@ -31,9 +32,12 @@ const workflowConfig = {
     },
 };
 
-const ImageGenModelNode = ({ selected, data }: NodeProps) => {
+const ImageGenModelNode = ({
+    selected,
+    data,
+}: TongflowPluginNodeProps<"image-gen-model", "imageGenModelNode">) => {
     const t = useTranslations("Workspace.nodes");
-    const { fileKeys = [] } = data as { fileKeys?: string[] };
+    const fileKeys = data.fileKeys ?? [];
 
     return (
         <BaseNode

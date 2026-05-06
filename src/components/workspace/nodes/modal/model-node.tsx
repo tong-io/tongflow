@@ -1,6 +1,5 @@
 "use client";
 
-import { type NodeProps } from "@xyflow/react";
 import { memo, useRef, useState, useEffect, useCallback } from "react";
 import { Box, Maximize2, X, Download, RotateCcw } from "lucide-react";
 import { createPortal } from "react-dom";
@@ -20,6 +19,10 @@ import { Button } from "@/components/ui/button";
 import { useFileAsyncLoader } from "@/hooks/use-file-async-loader";
 import { useTranslations } from "next-intl";
 import { logger } from "@/lib/logger";
+
+import type { RfDataNodeProps } from "@/types/nodes";
+
+type ModelNodeRfProps = RfDataNodeProps<"modelNode">;
 
 // Spark must stay dynamic (browser-only entry)
 // Spark WASM currently breaks Next build — disabled
@@ -1233,15 +1236,10 @@ async function loadPointCloud(
 }
 
 // Primary exported node surface
-const ModelNode = ({ selected, data }: NodeProps) => {
+const ModelNode = ({ selected, data }: ModelNodeRfProps) => {
     const t = useTranslations("Workspace.nodes.modal");
-    const { fileKeys, fileName } = (data as {
-        fileKeys?: string[];
-        fileName?: string;
-    }) || {
-        fileKeys: undefined,
-        fileName: undefined,
-    };
+    const fileKeys = data.fileKeys;
+    const fileName = data.fileName;
 
     const fileKey = fileKeys && fileKeys.length > 0 ? fileKeys[0] : undefined;
 
@@ -1379,11 +1377,11 @@ const ModelNode = ({ selected, data }: NodeProps) => {
 };
 
 // Custom comparator suppresses needless React.memo churn
-const areEqual = (prevProps: NodeProps, nextProps: NodeProps) => {
-    const prevFileKey = (prevProps.data as { fileKey?: string })?.fileKey;
-    const nextFileKey = (nextProps.data as { fileKey?: string })?.fileKey;
-    const prevFileName = (prevProps.data as { fileName?: string })?.fileName;
-    const nextFileName = (nextProps.data as { fileName?: string })?.fileName;
+const areEqual = (prevProps: ModelNodeRfProps, nextProps: ModelNodeRfProps) => {
+    const prevFileKey = prevProps.data.fileKey;
+    const nextFileKey = nextProps.data.fileKey;
+    const prevFileName = prevProps.data.fileName;
+    const nextFileName = nextProps.data.fileName;
 
     return (
         prevProps.selected === nextProps.selected &&

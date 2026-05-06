@@ -1,12 +1,10 @@
 /** Legacy *_pro features stored under eco/pro → the only GPU path retained now */
 const LEGACY_PRO_TO_DEFAULT: Record<string, string> = {
-    image_edit_pro: "image_edit",
-    image_gen_pro: "image_gen",
-    image_fusion_pro: "image_fusion",
-    image_gen_video_pro: "image_gen_video",
-    model_gen: "image_gen_model",
-    /** compose node previously used underscore form, inconsistent with the registry */
-    speech_text_gen_video: "speech-text-gen-video",
+    image_edit_pro: "image-edit",
+    image_gen_pro: "image-gen",
+    image_fusion_pro: "image-fusion",
+    image_gen_video_pro: "image-gen-video",
+    model_gen: "image-gen-model",
 };
 
 /**

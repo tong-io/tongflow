@@ -1,13 +1,17 @@
-import { type NodeProps } from "@xyflow/react";
 import { memo } from "react";
-import { BaseNode } from "../base/base-node";
+
+import type { RfDataNodeProps } from "@/types/nodes";
 import { Card } from "@/components/ui/card";
 import { Droplets } from "lucide-react";
+
+import { BaseNode } from "../base/base-node";
 import {
     upstreamParam,
     type GetPromptsContext,
 } from "@/utils/node-execution-config";
 import { useTranslations } from "next-intl";
+
+type RemoveWatermarkRfProps = RfDataNodeProps<"removeWatermarkNode">;
 
 const DEFAULT_FEATURE = "remove_watermark";
 
@@ -30,9 +34,9 @@ const workflowConfig = {
     },
 };
 
-const RemoveWatermarkNode = ({ selected, data }: NodeProps) => {
+const RemoveWatermarkNode = ({ selected, data }: RemoveWatermarkRfProps) => {
     const t = useTranslations("Workspace.nodes");
-    const { fileKeys } = data as { fileKeys: string[] };
+    const fileKeys = data.fileKeys;
 
     return (
         <BaseNode

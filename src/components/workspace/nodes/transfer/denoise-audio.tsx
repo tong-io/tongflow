@@ -1,5 +1,6 @@
-import { type NodeProps } from "@xyflow/react";
 import { memo } from "react";
+
+import type { RfDataNodeProps } from "@/types/nodes";
 import { Atom } from "lucide-react";
 import { BaseNode } from "../base/base-node";
 import {
@@ -7,6 +8,8 @@ import {
     type GetPromptsContext,
 } from "@/utils/node-execution-config";
 import { useTranslations } from "next-intl";
+
+type DenoiseAudioRfProps = RfDataNodeProps<"denoiseAudioSubtitleNode">;
 
 const DEFAULT_FEATURE = "denoise_audio";
 
@@ -29,10 +32,10 @@ const workflowConfig = {
     },
 };
 
-const DenoiseAudioNode = ({ selected, data }: NodeProps) => {
+const DenoiseAudioNode = ({ selected, data }: DenoiseAudioRfProps) => {
     const t = useTranslations("Workspace.nodes");
     // fileKeys from data are used to determine whether the button is clickable (UI display)
-    const { fileKeys } = data as { fileKeys: string[] };
+    const fileKeys = data.fileKeys;
 
     return (
         <BaseNode
@@ -57,7 +60,7 @@ const DenoiseAudioNode = ({ selected, data }: NodeProps) => {
                             ? upstreamKeys
                             : fileKeys;
                     return (
-                        keys?.map((fileKey) => ({
+                        keys?.map((fileKey: string) => ({
                             fileKey: fileKey,
                         })) || []
                     );

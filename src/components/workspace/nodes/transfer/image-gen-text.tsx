@@ -1,4 +1,5 @@
-import { type NodeProps } from "@xyflow/react";
+
+import type { TongflowPluginNodeProps } from "@/types/tongflow-flow";
 import { memo } from "react";
 import { Image as ImageIcon, MessageSquare } from "lucide-react";
 
@@ -14,7 +15,7 @@ import {
 } from "@/utils/node-execution-config";
 import { useTranslations } from "next-intl";
 
-const DEFAULT_FEATURE = "image_gen_text";
+const DEFAULT_FEATURE = "image-gen-text";
 
 // Workflow execution config
 const workflowConfig = {
@@ -38,9 +39,12 @@ const workflowConfig = {
     },
 };
 
-const ImageGenTextNode = ({ selected, data }: NodeProps) => {
+const ImageGenTextNode = ({
+    selected,
+    data,
+}: TongflowPluginNodeProps<"image-gen-text", "imageGenTextNode">) => {
     const t = useTranslations("Workspace.nodes");
-    const { fileKeys = [] } = data as { fileKeys?: string[] };
+    const fileKeys = data.fileKeys ?? [];
 
     const [state, setState] = useNodeState({ query: "" }, data);
     const { query } = state;

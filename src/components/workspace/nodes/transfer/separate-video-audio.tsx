@@ -1,4 +1,5 @@
-import { useNodeId, type NodeProps } from "@xyflow/react";
+import { useNodeId } from "@xyflow/react";
+import type { TongflowPluginNodeProps } from "@/types/tongflow-flow";
 import { memo, useCallback } from "react";
 import { BaseNode } from "../base/base-node";
 import { Atom } from "lucide-react";
@@ -10,7 +11,7 @@ import { useTranslations } from "next-intl";
 import useFlow from "@/hooks/use-flow";
 import { normalizeTaskPayloadData } from "@/utils/task-payload";
 
-const DEFAULT_FEATURE = "separate_video_audio";
+const DEFAULT_FEATURE = "separate-video-audio";
 
 const workflowConfig = {
     feature: DEFAULT_FEATURE,
@@ -28,11 +29,14 @@ const workflowConfig = {
     },
 };
 
-const SeparateVideoAudioNode = ({ selected, data }: NodeProps) => {
+const SeparateVideoAudioNode = ({
+    selected,
+    data,
+}: TongflowPluginNodeProps<"separate-video-audio", "separateVideoAudioNode">) => {
     const t = useTranslations("Workspace.nodes");
     const id = useNodeId()!;
     const expands = useFlow((s) => s.expands);
-    const { fileKeys } = data as { fileKeys: string[] };
+    const fileKeys = data.fileKeys;
 
     const onTaskUpdate = useCallback(
         (task: any) => {
