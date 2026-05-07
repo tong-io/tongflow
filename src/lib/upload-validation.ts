@@ -93,14 +93,9 @@ export interface FileValidationResult extends ValidationResult {
 
 /**
  * Validate whether the file meets upload limits
- *
- * @param file File to validate
- * @param _tier User tier (deprecated; kept for parameter compatibility)
- * @returns Validation result
  */
 export async function validateFile(
     file: File,
-    _tier?: string,
 ): Promise<FileValidationResult> {
     // Unified 50MB file size limit
     const MAX_FILE_SIZE = 50 * 1024 * 1024;
@@ -151,13 +146,11 @@ export async function validateFile(
 
 export class UploadValidationError extends Error {
     code = "UPLOAD_VALIDATION_ERROR";
-    requiredTier?: string;
     maxAllowed?: number;
     fileInfo?: FileValidationResult["fileInfo"];
 
     constructor(result: FileValidationResult) {
         super(result.message || "文件不符合上传要求");
-        this.requiredTier = result.requiredTier;
         this.maxAllowed = result.maxAllowed;
         this.fileInfo = result.fileInfo;
     }

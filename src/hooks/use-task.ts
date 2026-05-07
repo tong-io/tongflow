@@ -452,6 +452,25 @@ export function useTaskSubscription(
                         if (options?.onTaskUpdate) {
                             options.onTaskUpdate(internalTask);
                         }
+
+                        // Terminal status: tear down the stream and disable
+                        // reconnect. The wait endpoint closes the connection
+                        // on terminal state, and a reconnect without
+                        // `reconnect=true` re-executes the task — that is
+                        // exactly the unwanted "auto retry" behavior.
+                        if (isTerminalStatus(message.status)) {
+                            isSubscribed = false;
+                            if (reconnectTimeoutRef.current) {
+                                clearTimeout(reconnectTimeoutRef.current);
+                                reconnectTimeoutRef.current = null;
+                            }
+                            eventSource.close();
+                            eventSourceRef.current = null;
+                            setStatus("disconnected");
+                            if (options?.onStatusChange) {
+                                options.onStatusChange("disconnected");
+                            }
+                        }
                     } catch (error) {
                         logger.error(
                             "[SSE] Error parsing message:",
@@ -730,15 +749,6 @@ export function useBatchTaskManager(
                                         );
                                         batchCancelTimeoutRef.current = null;
                                     }
-                                    es.close();
-                                    eventSourcesRef.current.delete(tid);
-                                    activeConnectionsRef.current.delete(tid);
-                                    if (
-                                        activeConnectionsRef.current.size === 0
-                                    ) {
-                                        setIsLoading(false);
-                                        setCurrentBatchTaskIds(new Set());
-                                    }
                                 }
 
                                 if (isTerminalStatus(message.status)) {
@@ -752,6 +762,33 @@ export function useBatchTaskManager(
                                             err,
                                         );
                                     });
+
+                                    // Stop reconnect loop and close stream so
+                                    // the server doesn't re-execute the task
+                                    // on the next reconnect attempt.
+                                    const pending =
+                                        reconnectTimeoutsRef.current.get(tid);
+                                    if (pending != null) {
+                                        clearTimeout(pending);
+                                        reconnectTimeoutsRef.current.delete(
+                                            tid,
+                                        );
+                                    }
+                                    reconnectAttemptsRef.current.set(
+                                        tid,
+                                        Number.POSITIVE_INFINITY,
+                                    );
+                                    es.close();
+                                    eventSourcesRef.current.delete(tid);
+                                    activeConnectionsRef.current.delete(tid);
+                                    if (
+                                        activeConnectionsRef.current.size === 0
+                                    ) {
+                                        setIsLoading(false);
+                                        if (taskStatus === "CANCELLED") {
+                                            setCurrentBatchTaskIds(new Set());
+                                        }
+                                    }
                                 }
 
                                 if (options?.onTaskUpdate) {

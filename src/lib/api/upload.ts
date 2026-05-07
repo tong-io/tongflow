@@ -14,17 +14,6 @@ export interface PresignedUrlResponse {
     fileKey: string;
     url: string;
     expiresIn: number;
-    maxFileSize: number;
-    tier: string;
-}
-
-export class AuthenticationError extends Error {
-    public readonly status: number;
-    constructor(message: string, status: number = 401) {
-        super(message);
-        this.name = "AuthenticationError";
-        this.status = status;
-    }
 }
 
 export { UploadValidationError, type FileValidationResult };
@@ -35,10 +24,9 @@ export { UploadValidationError, type FileValidationResult };
  */
 export async function getPresignedUploadUrl(
     file: File,
-    tier: string = "free",
 ): Promise<PresignedUrlResponse> {
     // Client-side pre-validation
-    const validation = await validateFile(file, tier);
+    const validation = await validateFile(file);
     if (!validation.allowed) {
         throw new UploadValidationError(validation);
     }
@@ -56,14 +44,5 @@ export async function getPresignedUploadUrl(
         fileKey: data.fileKey,
         url: data.url,
         expiresIn: 0,
-        maxFileSize: 100 * 1024 * 1024, // 100MB
-        tier: "free",
     };
-}
-
-export async function validateUploadFile(
-    file: File,
-    tier: string,
-): Promise<FileValidationResult> {
-    return validateFile(file, tier);
 }

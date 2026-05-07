@@ -119,19 +119,7 @@ export const SpeakerVoiceRecorder = ({
             });
 
             const { getPresignedUploadUrl } = await import("@/lib/api/upload");
-            const { uploadUrl, fileKey } = await getPresignedUploadUrl(file);
-
-            const uploadResponse = await fetch(uploadUrl, {
-                method: "PUT",
-                body: file,
-                headers: {
-                    "Content-Type": file.type,
-                },
-            });
-
-            if (!uploadResponse.ok) {
-                throw new Error("Upload failed");
-            }
+            const { fileKey } = await getPresignedUploadUrl(file);
 
             onChange(fileKey);
             setOpen(false);

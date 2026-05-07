@@ -20,9 +20,7 @@ interface ModeSwitchProps {
 }
 
 /**
- * Mode switch component
- * Creation mode / Execution mode
- * Available to all users (credit top-up system, no tier restrictions)
+ * Switch between create and execute modes
  */
 export function ModeSwitch({ onChange }: ModeSwitchProps) {
     const t = useTranslations("Workspace.modeSwitch");

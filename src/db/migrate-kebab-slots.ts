@@ -1,13 +1,17 @@
 import type Database from "better-sqlite3";
 
 import { canonicalizeNodeSlot } from "@/lib/legacy-slot-map";
-import { tableExists } from "./migrate-local-schema";
 
-/**
- * Shares SQLite `user_version` with migrate-local-schema.ts:
- * v1 = legacy column cleanup; v2 = canonical kebab nodeSlot strings in persisted JSON.
- */
 export const KEBAB_SLOT_DATA_VERSION = 2;
+
+function tableExists(db: Database.Database, name: string): boolean {
+    const row = db
+        .prepare(
+            "SELECT name FROM sqlite_master WHERE type='table' AND name=?",
+        )
+        .get(name) as { name: string } | undefined;
+    return !!row;
+}
 
 function migrateCanvasNodes(nodes: unknown): boolean {
     if (!Array.isArray(nodes)) return false;

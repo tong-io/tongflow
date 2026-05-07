@@ -2,69 +2,10 @@ import "server-only";
 
 import { spawn } from "node:child_process";
 import { delimiter, join } from "node:path";
-import { notifyTask } from "@/lib/task-emitter";
-import { TaskStatus } from "@/constants/task-status";
 import type { NodeSlot } from "@/generated/abi";
 import type { PluginExecRequest, PluginExecResult } from "../types";
 import { getLlmPluginConfig } from "@/lib/plugins-registry.server";
 import { resolvePythonLite } from "@/lib/python-lite";
-
-type LlmNdjsonEvent =
-    | { type: "reasoning"; content: string }
-    | { type: "answer"; content: string }
-    | { type: "completed"; result: string }
-    | { type: "error"; message: string };
-
-function parseNdjsonLine(line: string): LlmNdjsonEvent | null {
-    const trimmed = line.trim();
-    if (!trimmed) return null;
-    let obj: unknown;
-    try {
-        obj = JSON.parse(trimmed) as unknown;
-    } catch {
-        return null;
-    }
-    if (!obj || typeof obj !== "object") return null;
-    const rec = obj as Record<string, unknown>;
-    const type = rec.type;
-    if (type === "reasoning" && typeof rec.content === "string") {
-        return { type: "reasoning", content: rec.content };
-    }
-    if (type === "answer" && typeof rec.content === "string") {
-        return { type: "answer", content: rec.content };
-    }
-    if (type === "completed" && typeof rec.result === "string") {
-        return { type: "completed", result: rec.result };
-    }
-    if (type === "error" && typeof rec.message === "string") {
-        return { type: "error", message: rec.message };
-    }
-    return null;
-}
-
-function llmSlotOutputFromCompleted<S extends NodeSlot>(
-    nodeSlot: S,
-    resultStr: string,
-): PluginExecResult<S> {
-    if (nodeSlot === "drop-video" || nodeSlot === "arrange-group") {
-        try {
-            const raw = JSON.parse(resultStr) as Record<string, unknown>;
-            return {
-                ...raw,
-                success: raw.success !== false,
-            } as PluginExecResult<S>;
-        } catch {
-            throw new Error(
-                `Expected JSON object string in completed.result for ${nodeSlot}`,
-            );
-        }
-    }
-    return {
-        success: true,
-        result: resultStr,
-        text: resultStr,
-    } as PluginExecResult<S>;
-}
 
 function normalizePromptForNodeSlot(
     nodeSlot: string,
@@ -84,6 +25,20 @@ function normalizePromptForNodeSlot(
         };
     }
     return input;
+}
+
+function tryParseAbiOutput(stdout: string): Record<string, unknown> | null {
+    const trimmed = stdout.trim();
+    if (!trimmed) return null;
+    try {
+        const parsed = JSON.parse(trimmed) as unknown;
+        if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
+            return parsed as Record<string, unknown>;
+        }
+    } catch {
+        // fall through
+    }
+    return null;
 }
 
 export async function execLlmPlugin<S extends NodeSlot>(
@@ -133,8 +88,6 @@ export async function execLlmPlugin<S extends NodeSlot>(
         });
 
         let stdoutBuf = "";
-        let lastResult: string | null = null;
-        let sawCompleted = false;
         let stderrText = "";
 
         const fail = (err: unknown) => {
@@ -161,80 +114,30 @@ export async function execLlmPlugin<S extends NodeSlot>(
 
         child.stdout?.on("data", (b: Buffer) => {
             stdoutBuf += String(b);
-            for (;;) {
-                const idx = stdoutBuf.indexOf("\n");
-                if (idx < 0) break;
-                const line = stdoutBuf.slice(0, idx);
-                stdoutBuf = stdoutBuf.slice(idx + 1);
-                const evt = parseNdjsonLine(line);
-                if (!evt) continue;
-                if (evt.type === "reasoning") {
-                    notifyTask(req.taskId, TaskStatus.RUNNING, {
-                        type: "reasoning",
-                        content: evt.content,
-                    });
-                } else if (evt.type === "answer") {
-                    notifyTask(req.taskId, TaskStatus.RUNNING, {
-                        type: "answer",
-                        content: evt.content,
-                    });
-                } else if (evt.type === "completed") {
-                    sawCompleted = true;
-                    lastResult = evt.result;
-                    let data: Record<string, unknown> = {
-                        result: evt.result,
-                        mode: "stream",
-                    };
-                    if (
-                        req.nodeSlot === "drop-video" ||
-                        req.nodeSlot === "arrange-group"
-                    ) {
-                        try {
-                            const parsed = JSON.parse(evt.result) as Record<
-                                string,
-                                unknown
-                            >;
-                            data = { ...parsed, mode: "stream" };
-                        } catch {
-                            /* keep minimal payload */
-                        }
-                    }
-                    notifyTask(req.taskId, TaskStatus.COMPLETED, data);
-                } else if (evt.type === "error") {
-                    notifyTask(req.taskId, TaskStatus.FAILED, {
-                        message: evt.message,
-                    });
-                    fail(new Error(evt.message));
-                    return;
-                }
-            }
         });
 
         child.stderr?.on("data", (b: Buffer) => {
-            const t = String(b);
-            stderrText += t;
+            stderrText += String(b);
         });
 
         child.on("error", (e) => fail(e));
 
         child.on("exit", (code) => {
-            if (code === 0) {
-                if (sawCompleted && lastResult != null) {
-                    resolve(llmSlotOutputFromCompleted(req.nodeSlot, lastResult));
-                } else {
-                    reject(
-                        new Error(
-                            "LLM plugin exited without completed event.",
-                        ),
-                    );
-                }
+            const parsed = tryParseAbiOutput(stdoutBuf);
+
+            if (parsed) {
+                // Plugin spoke ABI — propagate verbatim (including success=false).
+                // task-runner emits the COMPLETED/FAILED SSE based on parsed.success.
+                resolve(parsed as unknown as PluginExecResult<S>);
                 return;
             }
-            reject(
-                new Error(
-                    `LLM plugin failed (exit=${code}). ${stderrText.trim()}`,
-                ),
-            );
+
+            // No JSON on stdout: hard runner failure (crash, exit before write, ...).
+            const errMsg =
+                code === 0
+                    ? `LLM plugin produced non-JSON stdout: ${stdoutBuf.slice(0, 200)}`
+                    : `LLM plugin failed (exit=${code}). ${stderrText.trim()}`;
+            reject(new Error(errMsg));
         });
 
         try {
@@ -245,4 +148,3 @@ export async function execLlmPlugin<S extends NodeSlot>(
         }
     });
 }
-

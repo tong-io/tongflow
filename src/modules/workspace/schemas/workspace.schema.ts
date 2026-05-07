@@ -35,7 +35,6 @@ export const tasks = sqliteTable(
         progress: integer("progress").default(0).notNull(),
         result: text("result"), // JSON string
         error: text("error"),
-        chargedAmount: integer("charged_amount").default(0),
         createdAt: integer("created_at", { mode: "timestamp" })
             .defaultNow()
             .notNull(),

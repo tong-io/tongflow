@@ -392,8 +392,6 @@ export default function SmartIsland() {
                         .catch(() => ({}))) as {
                         code?: string;
                         error?: string;
-                        requiredTier?: string;
-                        userTier?: string;
                     };
 
                     throw new Error(
@@ -690,7 +688,6 @@ export default function SmartIsland() {
                                 eventSource.close();
                                 setEventSourceRef(null);
                                 setCurrentTaskId(null);
-                                // Refresh balance (workflow completion deducts credits)
                                 break;
 
                             // Workflow cancelled
@@ -722,7 +719,6 @@ export default function SmartIsland() {
                                     executorRef.stop();
                                     setExecutorRef(null);
                                 }
-                                // Refresh balance (workflow cancellation refunds credits)
                                 break;
 
                             // Workflow failed
@@ -743,7 +739,6 @@ export default function SmartIsland() {
                                 eventSource.close();
                                 setEventSourceRef(null);
                                 setCurrentTaskId(null);
-                                // Refresh balance (workflow failure refunds credits)
                                 break;
 
                             default:

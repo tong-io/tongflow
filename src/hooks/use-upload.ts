@@ -27,7 +27,6 @@ export interface UseUploadOptions {
     onSuccess?: (response: UploadResponse) => void;
     onError?: (error: Error) => void;
     onProgress?: (progress: number) => void;
-    tier?: string;
 }
 
 export interface UseMultipleUploadOptions {
@@ -35,7 +34,6 @@ export interface UseMultipleUploadOptions {
     onError?: (error: Error) => void;
     onProgress?: (progress: number) => void;
     onFileComplete?: (response: UploadResponse, index: number) => void;
-    tier?: string;
 }
 
 // -------------------- Single-file upload hook --------------------
@@ -59,7 +57,7 @@ export function useUpload(options?: UseUploadOptions) {
 
             try {
                 setState((prev) => ({ ...prev, progress: 30 }));
-                const data = await getPresignedUploadUrl(file, options?.tier);
+                const data = await getPresignedUploadUrl(file);
                 setState((prev) => ({ ...prev, progress: 100 }));
 
                 const response: UploadResponse = {
@@ -134,10 +132,7 @@ export function useMultipleUpload(options?: UseMultipleUploadOptions) {
 
                 for (const file of files) {
                     try {
-                        const data = await getPresignedUploadUrl(
-                            file,
-                            options?.tier,
-                        );
+                        const data = await getPresignedUploadUrl(file);
                         const response: UploadResponse = {
                             url: data.url,
                             key: data.fileKey,
