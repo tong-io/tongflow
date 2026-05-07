@@ -1,9 +1,9 @@
-import { type NextRequest } from "next/server";
-import { onTaskEvent, isTaskRunning, type TaskEvent } from "@/lib/task-emitter";
-import { executeTask } from "@/lib/task-runner";
+import type { NextRequest } from "next/server";
 import { isTerminalStatus } from "@/constants/task-status";
 import { jsonStringifyForSse } from "@/lib/json-sse";
 import { logger } from "@/lib/logger";
+import { isTaskRunning, onTaskEvent, type TaskEvent } from "@/lib/task-emitter";
+import { executeTask } from "@/lib/task-runner";
 
 /**
  * GET /api/task/wait?taskId=xxx&reconnect=false
@@ -24,7 +24,9 @@ export async function GET(request: NextRequest) {
 
     // Reconnect mode: check whether the task is still running
     if (reconnect && !isTaskRunning(taskId)) {
-        return new Response("Task does not exist or has already completed", { status: 404 });
+        return new Response("Task does not exist or has already completed", {
+            status: 404,
+        });
     }
 
     const encoder = new TextEncoder();

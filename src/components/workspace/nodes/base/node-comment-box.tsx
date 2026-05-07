@@ -1,8 +1,8 @@
-import { useState, useEffect, useCallback } from "react";
 import { useNodeId, useReactFlow, useStore } from "@xyflow/react";
 import { X } from "lucide-react";
-import { cn } from "@/lib/utils";
 import { useTranslations } from "next-intl";
+import { useCallback, useEffect, useState } from "react";
+import { cn } from "@/lib/utils";
 import { coerceBaseNodeData } from "@/utils/flow-node-data";
 
 export function NodeCommentBox() {

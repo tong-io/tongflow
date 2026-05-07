@@ -1,8 +1,8 @@
 import "server-only";
 
 import type { NodeSlot } from "@/generated/abi";
-import type { PluginExecRequest, PluginExecResult } from "./types";
 import { getPluginConfig } from "@/lib/plugins-registry.server";
+import type { PluginExecRequest, PluginExecResult } from "./types";
 
 export async function executePlugin<S extends NodeSlot = NodeSlot>(
     req: PluginExecRequest<S>,
@@ -23,4 +23,3 @@ export async function executePlugin<S extends NodeSlot = NodeSlot>(
     // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
     throw new Error(`Unsupported runner: ${(cfg as any).runner}`);
 }
-

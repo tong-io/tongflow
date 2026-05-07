@@ -1,1 +1,5 @@
-export { workflows, tasks, materials } from "@/modules/workspace/schemas/workspace.schema";
+export {
+    materials,
+    tasks,
+    workflows,
+} from "@/modules/workspace/schemas/workspace.schema";

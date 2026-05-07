@@ -3,9 +3,9 @@
  * Uploads files directly to local server
  */
 
-import { useState, useCallback } from "react";
-import { getPresignedUploadUrl, UploadValidationError } from "@/lib/api/upload";
+import { useCallback, useState } from "react";
 import toast from "react-hot-toast";
+import { getPresignedUploadUrl, UploadValidationError } from "@/lib/api/upload";
 import { logger } from "@/lib/logger";
 
 // -------------------- Type definitions --------------------

@@ -6,75 +6,62 @@
  * All animations have been removed (following tongflow conventions)
  */
 
-import { useState, useCallback, useEffect, useRef } from "react";
 import { useReactFlow } from "@xyflow/react";
-import type { FlowState, PossibleNode } from "@/hooks/use-flow";
-import { useFlow } from "@/hooks/use-flow";
-import { useShallow } from "zustand/react/shallow";
-import { useTranslations } from "next-intl";
-import { cn } from "@/lib/utils";
-import { getTaskStopUrl, getTaskWaitUrl } from "@/lib/task-api-url";
-import { logger } from "@/lib/logger";
 import {
-    Play,
-    Square,
-    Loader2,
-    Type,
-    Image,
-    Music,
-    Video,
     Box,
-    Link,
     FileText,
+    Image,
+    Link,
+    Loader2,
+    Music,
+    Play,
+    Type,
+    Video,
 } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
+import { useCallback, useEffect, useState } from "react";
+import toast from "react-hot-toast";
+import { useShallow } from "zustand/react/shallow";
+import { Button } from "@/components/ui/button";
+import {
+    Dialog,
+    DialogClose,
+    DialogContent,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import {
     Tooltip,
     TooltipContent,
     TooltipTrigger,
 } from "@/components/ui/tooltip";
 import {
-    AlertDialog,
-    AlertDialogAction,
-    AlertDialogCancel,
-    AlertDialogContent,
-    AlertDialogDescription,
-    AlertDialogFooter,
-    AlertDialogHeader,
-    AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+    emitSSEConnected,
+    emitSSETaskMessage,
+} from "@/components/workspace/task-progress-toast";
 import {
-    Dialog,
-    DialogContent,
-    DialogHeader,
-    DialogTitle,
-    DialogFooter,
-    DialogClose,
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { saveWorkflow } from "@/lib/api/workspace";
-import { exportWorkflow } from "@/utils/workflow-exporter";
-import { saveFromTask } from "@/lib/api/material";
-import toast from "react-hot-toast";
-import { useRouter } from "next/navigation";
-import { useTaskStore } from "@/hooks/use-task";
-import {
-    WorkflowParser,
-    WorkflowExecutor,
-    type NodeExecutionInfo,
-} from "@/utils/workflow-parser";
-import {
+    NodeStatus,
     TaskStatus,
     WorkflowStatus,
-    NodeStatus,
-    isTerminalStatus,
 } from "@/constants/task-status";
-import {
-    emitSSETaskMessage,
-    emitSSEConnected,
-} from "@/components/workspace/task-progress-toast";
+import type { FlowState, PossibleNode } from "@/hooks/use-flow";
+import { useFlow } from "@/hooks/use-flow";
+import { useTaskStore } from "@/hooks/use-task";
+import { saveFromTask } from "@/lib/api/material";
+import { saveWorkflow } from "@/lib/api/workspace";
+import { logger } from "@/lib/logger";
+import { getTaskStopUrl, getTaskWaitUrl } from "@/lib/task-api-url";
+import { cn } from "@/lib/utils";
+import { exportWorkflow } from "@/utils/workflow-exporter";
+import type {
+    NodeExecutionInfo,
+    WorkflowExecutor,
+} from "@/utils/workflow-parser";
 
 const selector = (state: FlowState) => ({
     nodes: state.nodes,
@@ -95,56 +82,6 @@ const selector = (state: FlowState) => ({
     setWorkflowDescription: state.setWorkflowDescription,
 });
 
-// Button ID definitions
-type ButtonActionId =
-    // Combo Actions
-    | "merge-group"
-    | "concat-video"
-    | "image-fusion"
-    | "first-last-frame-video"
-    | "text-to-speech-clone"
-    | "text-to-speech-preset"
-    | "text-to-speech-instruct"
-    | "motion-control"
-    | "video-transfer"
-    | "character-replace"
-    | "merge-video-audio"
-    | "lip-sync"
-    | "generate-video"
-    | "image-edit"
-    | "clone-voice"
-    // Node Actions
-    | "split"
-    | "generate-audio-clone"
-    | "generate-audio-preset"
-    | "generate-audio-instruct"
-    | "generate-text"
-    | "generate-image"
-    | "generate-music"
-    | "generate-3d"
-    | "generate-video-node"
-    | "desc-video"
-    | "speech-recognize"
-    | "upscale-video"
-    | "extract-audio"
-    | "split-video"
-    | "first-frame"
-    | "last-frame"
-    | "video-filter"
-    | "arrange-node"
-    | "desc-image"
-    | "image-refine"
-    | "image-angles"
-    | "image-segment"
-    | "image-upscale"
-    | "voice-to-text"
-    | "separate-audio"
-    | "separate-speaker"
-    | "denoise-audio"
-    | "convert-voice"
-    | "parse-doc"
-    | "desc-model";
-
 // Button configuration type
 interface ButtonConfig {
     text: string;
@@ -161,7 +98,9 @@ const ActionContainer = ({ children }: { children: React.ReactNode }) => (
 );
 
 // Divider component
-const Divider = () => <div className="h-5 w-px bg-gray-200 dark:bg-gray-700" />;
+const _Divider = () => (
+    <div className="h-5 w-px bg-gray-200 dark:bg-gray-700" />
+);
 
 // Text button component (no animation)
 const TextButton = ({
@@ -259,7 +198,7 @@ export default function SmartIsland() {
 
     const t = useTranslations("Workspace.smartIsland");
     const tIndex = useTranslations("Index");
-    const router = useRouter();
+    const _router = useRouter();
     const { screenToFlowPosition } = useReactFlow();
 
     const addNodeAtViewportCenter = useCallback(
@@ -294,7 +233,7 @@ export default function SmartIsland() {
     const setNodeExecutionStatus = useTaskStore(
         (state) => state.setNodeExecutionStatus,
     );
-    const setCurrentExecutionLevel = useTaskStore(
+    const _setCurrentExecutionLevel = useTaskStore(
         (state) => state.setCurrentExecutionLevel,
     );
     const clearNodeExecutionStatus = useTaskStore(
@@ -313,7 +252,7 @@ export default function SmartIsland() {
     const isRunning = workflowExecutionStatus === "running";
 
     // Execute a single node
-    const executeNode = useCallback(
+    const _executeNode = useCallback(
         async (
             nodeId: string,
             nodeInfo: NodeExecutionInfo,
@@ -847,7 +786,9 @@ export default function SmartIsland() {
 
     // Stop execution
     const handleStop = useCallback(async () => {
-        logger.debug("[SmartIsland] Stop button clicked - stopping workflow execution");
+        logger.debug(
+            "[SmartIsland] Stop button clicked - stopping workflow execution",
+        );
 
         const taskIdToCancel = currentTaskId;
 
@@ -1003,14 +944,14 @@ export default function SmartIsland() {
                                 compose({
                                     type: "videoNode",
                                     data: {
-                                        fileKeys: Array.from(comboSelectedIds)
-                                            .map((id) => {
-                                                const node = nodes.find(
-                                                    (n) => n.id === id,
-                                                );
-                                                return node?.data.fileKeys;
-                                            })
-                                            .flat(),
+                                        fileKeys: Array.from(
+                                            comboSelectedIds,
+                                        ).flatMap((id) => {
+                                            const node = nodes.find(
+                                                (n) => n.id === id,
+                                            );
+                                            return node?.data.fileKeys;
+                                        }),
                                     },
                                 }),
                         },
@@ -1044,14 +985,14 @@ export default function SmartIsland() {
                         compose({
                             type: "imageNode",
                             data: {
-                                fileKeys: Array.from(comboSelectedIds)
-                                    .map((id) => {
+                                fileKeys: Array.from(comboSelectedIds).flatMap(
+                                    (id) => {
                                         const node = nodes.find(
                                             (n) => n.id === id,
                                         );
                                         return node?.data.fileKeys;
-                                    })
-                                    .flat(),
+                                    },
+                                ),
                             },
                         }),
                 },
@@ -1105,14 +1046,14 @@ export default function SmartIsland() {
                                 compose({
                                     type: "textNode",
                                     data: {
-                                        texts: Array.from(comboSelectedIds)
-                                            .map((id) => {
-                                                const node = nodes.find(
-                                                    (n) => n.id === id,
-                                                );
-                                                return node?.data.texts;
-                                            })
-                                            .flat(),
+                                        texts: Array.from(
+                                            comboSelectedIds,
+                                        ).flatMap((id) => {
+                                            const node = nodes.find(
+                                                (n) => n.id === id,
+                                            );
+                                            return node?.data.texts;
+                                        }),
                                     },
                                 }),
                         },
@@ -1190,14 +1131,14 @@ export default function SmartIsland() {
                                 compose({
                                     type: "audioNode",
                                     data: {
-                                        fileKeys: Array.from(comboSelectedIds)
-                                            .map((id) => {
-                                                const node = nodes.find(
-                                                    (n) => n.id === id,
-                                                );
-                                                return node?.data.fileKeys;
-                                            })
-                                            .flat(),
+                                        fileKeys: Array.from(
+                                            comboSelectedIds,
+                                        ).flatMap((id) => {
+                                            const node = nodes.find(
+                                                (n) => n.id === id,
+                                            );
+                                            return node?.data.fileKeys;
+                                        }),
                                     },
                                 }),
                         },
@@ -1448,32 +1389,6 @@ export default function SmartIsland() {
                 />
             );
         }
-        // Image + video + audio
-        else if (
-            counts.imageNode === 1 &&
-            counts.videoNode === 1 &&
-            counts.audioNode === 1
-        ) {
-            return (
-                <ActionItem
-                    buttons={[
-                        {
-                            text: t("generateVideo"),
-                            onClick: () =>
-                                compose({
-                                    type: "speechImageVideoGenVideoNode",
-                                    data: {
-                                        ids: Array.from(comboSelectedIds).map(
-                                            (id) => id,
-                                        ),
-                                    },
-                                }),
-                        },
-                    ]}
-                />
-            );
-        }
-
         return null;
     };
 
@@ -1637,7 +1552,7 @@ export default function SmartIsland() {
                     />
                 );
 
-            case "audioNode":
+            case "audioNode": {
                 // If this is an audio group, add the split action
                 const audioGroupButtons =
                     (data as any).fileKeys?.length > 1
@@ -1736,8 +1651,9 @@ export default function SmartIsland() {
                         ]}
                     />
                 );
+            }
 
-            case "videoNode":
+            case "videoNode": {
                 // If this is a video group, add extra actions
                 const groupButtons =
                     (data as any).fileKeys?.length > 1
@@ -1886,8 +1802,9 @@ export default function SmartIsland() {
                         ]}
                     />
                 );
+            }
 
-            case "imageNode":
+            case "imageNode": {
                 // If this is an image group, add the split action
                 const imageGroupButtons =
                     (data as any).fileKeys?.length > 1
@@ -1976,6 +1893,7 @@ export default function SmartIsland() {
                         ]}
                     />
                 );
+            }
 
             case "fileNode":
                 // File node actions
@@ -2203,7 +2121,9 @@ export default function SmartIsland() {
                             icon={Box}
                             tooltip={t("tooltip3D")}
                             onClick={() =>
-                                addNodeAtViewportCenter({ type: "addModelNode" })
+                                addNodeAtViewportCenter({
+                                    type: "addModelNode",
+                                })
                             }
                         />
                         <IconButton
@@ -2217,7 +2137,9 @@ export default function SmartIsland() {
                             icon={Image}
                             tooltip={t("tooltipImage")}
                             onClick={() =>
-                                addNodeAtViewportCenter({ type: "addImageNode" })
+                                addNodeAtViewportCenter({
+                                    type: "addImageNode",
+                                })
                             }
                         />
                         <IconButton
@@ -2231,14 +2153,18 @@ export default function SmartIsland() {
                             icon={Video}
                             tooltip={t("tooltipVideo")}
                             onClick={() =>
-                                addNodeAtViewportCenter({ type: "addVideoNode" })
+                                addNodeAtViewportCenter({
+                                    type: "addVideoNode",
+                                })
                             }
                         />
                         <IconButton
                             icon={Music}
                             tooltip={t("tooltipAudio")}
                             onClick={() =>
-                                addNodeAtViewportCenter({ type: "addAudioNode" })
+                                addNodeAtViewportCenter({
+                                    type: "addAudioNode",
+                                })
                             }
                         />
                         <IconButton
@@ -2278,7 +2204,9 @@ export default function SmartIsland() {
                             icon={Box}
                             tooltip={t("tooltip3D")}
                             onClick={() =>
-                                addNodeAtViewportCenter({ type: "addModelNode" })
+                                addNodeAtViewportCenter({
+                                    type: "addModelNode",
+                                })
                             }
                         />
                         <IconButton
@@ -2292,7 +2220,9 @@ export default function SmartIsland() {
                             icon={Image}
                             tooltip={t("tooltipImage")}
                             onClick={() =>
-                                addNodeAtViewportCenter({ type: "addImageNode" })
+                                addNodeAtViewportCenter({
+                                    type: "addImageNode",
+                                })
                             }
                         />
                         <IconButton
@@ -2306,14 +2236,18 @@ export default function SmartIsland() {
                             icon={Video}
                             tooltip={t("tooltipVideo")}
                             onClick={() =>
-                                addNodeAtViewportCenter({ type: "addVideoNode" })
+                                addNodeAtViewportCenter({
+                                    type: "addVideoNode",
+                                })
                             }
                         />
                         <IconButton
                             icon={Music}
                             tooltip={t("tooltipAudio")}
                             onClick={() =>
-                                addNodeAtViewportCenter({ type: "addAudioNode" })
+                                addNodeAtViewportCenter({
+                                    type: "addAudioNode",
+                                })
                             }
                         />
                         <IconButton

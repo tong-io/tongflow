@@ -6,9 +6,9 @@
 import { useEffect } from "react";
 import { create } from "zustand";
 import {
-    listFeatures,
     type Feature,
     type FeatureRegistryAliasesPayload,
+    listFeatures,
 } from "@/lib/api/feature";
 
 // -------------------- Zustand Store --------------------
@@ -30,7 +30,7 @@ interface FeaturesState {
 // Request deduplication
 let fetchPromise: Promise<void> | null = null;
 
-export const useFeaturesStore = create<FeaturesState>((set, get) => ({
+export const useFeaturesStore = create<FeaturesState>((_set, get) => ({
     features: [],
     aliases: emptyAliases,
     isLoaded: false,

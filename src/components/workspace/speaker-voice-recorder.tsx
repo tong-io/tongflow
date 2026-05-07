@@ -1,19 +1,19 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import type { ReactNode } from "react";
-import { useState, useRef } from "react";
+import { useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
     Dialog,
-    DialogTrigger,
+    DialogClose,
     DialogContent,
-    DialogHeader,
-    DialogTitle,
     DialogDescription,
     DialogFooter,
-    DialogClose,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
 } from "@/components/ui/dialog";
-import { useTranslations } from "next-intl";
 import { logger } from "@/lib/logger";
 
 export const SpeakerVoiceRecorder = ({

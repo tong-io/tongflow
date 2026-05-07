@@ -5,8 +5,6 @@
  * It supports multiple 3D file formats, including Gaussian splat formats.
  */
 
-import Model3DNode from "@/components/workspace/nodes/modal/model-node";
-
 /**
  * Node data structure
  *

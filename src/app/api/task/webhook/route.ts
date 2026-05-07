@@ -6,12 +6,12 @@
  * Idempotent handling: update task status + save materials
  */
 
-import { NextRequest, NextResponse } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
+import { logger } from "@/lib/logger";
 import {
     handleTaskCompletion,
     type TaskCompletionData,
 } from "@/services/task-completion";
-import { logger } from "@/lib/logger";
 
 // Webhook Token validation
 const WEBHOOK_TOKEN = process.env.TASK_WEBHOOK_TOKEN;

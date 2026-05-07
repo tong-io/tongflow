@@ -1,14 +1,13 @@
-import type { TongflowPluginNodeProps } from "@/types/tongflow-flow";
-import { useCallback, useMemo, memo } from "react";
 import { Link as LinkIcon, Plus, Trash } from "lucide-react";
-
-import { BaseNode } from "../base/base-node";
-import { configParam } from "@/utils/node-execution-config";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Card } from "@/components/ui/card";
-import { useNodeState } from "@/hooks/use-node-data";
 import { useTranslations } from "next-intl";
+import { memo, useCallback, useMemo } from "react";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { useNodeState } from "@/hooks/use-node-data";
+import type { TongflowPluginNodeProps } from "@/types/tongflow-flow";
+import { configParam } from "@/utils/node-execution-config";
+import { BaseNode } from "../base/base-node";
 
 // Workflow execution config: Modal cpu/crawl4ai, converts webpage to Markdown and expands into text nodes
 const workflowConfig = {
@@ -153,7 +152,6 @@ const AddLinkNode = ({
                     </Button>
                 </div>
             </div>
-
         </BaseNode>
     );
 };

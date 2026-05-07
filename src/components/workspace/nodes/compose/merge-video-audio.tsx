@@ -1,13 +1,10 @@
 import { useNodesData } from "@xyflow/react";
-import type { TongflowPluginNodeProps } from "@/types/tongflow-flow";
-import { memo } from "react";
 import { Atom } from "lucide-react";
-import { BaseNode } from "../base/base-node";
-import {
-    upstreamParam,
-    type GetPromptsContext,
-} from "@/utils/node-execution-config";
 import { useTranslations } from "next-intl";
+import { memo } from "react";
+import type { TongflowPluginNodeProps } from "@/types/tongflow-flow";
+import { upstreamParam } from "@/utils/node-execution-config";
+import { BaseNode } from "../base/base-node";
 
 const DEFAULT_FEATURE = "merge-video-audio";
 
@@ -58,8 +55,7 @@ const MergeVideoAudioNode = ({
                           }))
                         : [],
             }}
-        >
-        </BaseNode>
+        ></BaseNode>
     );
 };
 

@@ -1,7 +1,7 @@
 "use client";
 
-import * as React from "react";
 import { Masonry } from "masonic";
+import * as React from "react";
 
 /**
  * Render function type for the waterfall component

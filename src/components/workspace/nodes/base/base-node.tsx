@@ -1,10 +1,8 @@
+import { Handle, Position, useNodeId, useStore } from "@xyflow/react";
+import { Wand2 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import type { HTMLAttributes, ReactNode } from "react";
 import { forwardRef } from "react";
-import { Wand2 } from "lucide-react";
-import { Handle, Position, useNodeId, useStore } from "@xyflow/react";
-
-import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
 import {
     AlertDialog,
     AlertDialogAction,
@@ -15,9 +13,15 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { Button } from "@/components/ui/button";
+import { isModalNode } from "@/constants/modal-nodes";
 import useFlow from "@/hooks/use-flow";
 import { useNodeExecution } from "@/hooks/use-node-execution";
+import { cn } from "@/lib/utils";
+import type { BaseNodeData } from "@/types/nodes";
 import type { NodeExecutionConfig } from "@/utils/node-execution-config";
+import { NodeComboButton } from "./node-combo-button";
+import { NodeCommentBox } from "./node-comment-box";
 import {
     NodeHeader,
     NodeHeaderActions,
@@ -26,12 +30,7 @@ import {
     NodeHeaderTitle,
 } from "./node-header";
 import { NodeLoadingOverlay } from "./node-loading-overlay";
-import { NodeCommentBox } from "./node-comment-box";
-import { NodeComboButton } from "./node-combo-button";
 import { NodePluginIdSelect } from "./node-plugin-id-select";
-import { useTranslations } from "next-intl";
-import { isModalNode } from "@/constants/modal-nodes";
-import type { BaseNodeData } from "@/types/nodes";
 
 /* ------------------------------------------------------------------ */
 /* Types                                                               */
@@ -108,9 +107,7 @@ export const BaseNode = forwardRef<HTMLDivElement, BaseNodeProps>(
                             </AlertDialogDescription>
                         </AlertDialogHeader>
                         <AlertDialogFooter>
-                            <AlertDialogCancel>
-                                {t("cancel")}
-                            </AlertDialogCancel>
+                            <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
                             <AlertDialogAction>
                                 {t("confirm")}
                             </AlertDialogAction>

@@ -1,30 +1,26 @@
-import { memo, useState } from "react";
 import {
-    File as FileIcon,
-    FileText,
-    FileSpreadsheet,
-    Presentation,
-    FileCode,
     FileArchive,
-    Download,
+    FileCode,
+    File as FileIcon,
+    FileSpreadsheet,
+    FileText,
+    Presentation,
 } from "lucide-react";
-
+import { useTranslations } from "next-intl";
+import { memo } from "react";
+import { DropdownMenuLabel } from "@/components/ui/dropdown-menu";
+import { useFileAsyncLoader } from "@/hooks/use-file-async-loader";
+import { logger } from "@/lib/logger";
+import type { RfDataNodeProps } from "@/types/nodes";
 import { BaseNode } from "../base/base-node";
 import {
     NodeHeader,
     NodeHeaderActions,
+    NodeHeaderComboAction,
     NodeHeaderIcon,
     NodeHeaderMenuAction,
     NodeHeaderTitle,
-    NodeHeaderComboAction,
 } from "../base/node-header";
-import { DropdownMenuLabel } from "@/components/ui/dropdown-menu";
-import { Button } from "@/components/ui/button";
-import { useFileAsyncLoader } from "@/hooks/use-file-async-loader";
-import { useTranslations } from "next-intl";
-import { logger } from "@/lib/logger";
-
-import type { RfDataNodeProps } from "@/types/nodes";
 
 type FileNodeRfProps = RfDataNodeProps<"fileNode">;
 
@@ -73,7 +69,7 @@ const isOfficeFile = (fileKey: string): boolean => {
 
 // Get the file open URL
 const getFileOpenUrl = (fileUrl: string, fileKey: string): string => {
-    const ext = fileKey.split(".").pop()?.toLowerCase() || "";
+    const _ext = fileKey.split(".").pop()?.toLowerCase() || "";
 
     if (isOfficeFile(fileKey)) {
         // Preview using Office 365 Web Apps
@@ -232,7 +228,6 @@ const FileNode = ({ selected, data }: FileNodeRfProps) => {
                     </div>
                 )}
             </div>
-
         </BaseNode>
     );
 };

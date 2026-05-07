@@ -4,9 +4,10 @@
  * Workspace top-right corner: theme toggle, language selector, community links
  */
 
-import { useEffect, useState } from "react";
+import { Globe, Moon, Sun } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
     DropdownMenu,
@@ -19,7 +20,6 @@ import {
     TooltipContent,
     TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { Globe, Moon, Sun } from "lucide-react";
 
 const LOCALE_OPTIONS = [
     { code: "zh", label: "中文" },
@@ -56,8 +56,7 @@ function ThemeToggleButton() {
     }, []);
 
     const toggle = () => {
-        const nextDark =
-            !document.documentElement.classList.contains("dark");
+        const nextDark = !document.documentElement.classList.contains("dark");
         if (nextDark) {
             document.documentElement.classList.add("dark");
             localStorage.setItem("theme", "dark");
@@ -100,6 +99,7 @@ function LocaleMenu() {
 
     const setLocale = (next: string) => {
         if (next === locale) return;
+        // biome-ignore lint/suspicious/noDocumentCookie: Cookie Store API not available in all target browsers
         document.cookie = `NEXT_LOCALE=${next};path=/;max-age=31536000;SameSite=Lax`;
         router.refresh();
     };

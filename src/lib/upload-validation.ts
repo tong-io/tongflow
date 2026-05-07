@@ -4,9 +4,9 @@
  * Validate file size before upload
  */
 
-import { type ValidationResult } from "@/lib/upload-limits";
+import type { ValidationResult } from "@/lib/upload-limits";
 
-export { type ValidationResult } from "@/lib/upload-limits";
+export type { ValidationResult } from "@/lib/upload-limits";
 
 // ============================================================================
 // File metadata reading

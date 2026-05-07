@@ -39,7 +39,8 @@ export const usePluginsRegistryStore = create<PluginsRegistryState>(() => ({
 
 async function loadRegistry(): Promise<void> {
     const state = usePluginsRegistryStore.getState();
-    if (state.isLoaded || fetchPromise) return fetchPromise ?? Promise.resolve();
+    if (state.isLoaded || fetchPromise)
+        return fetchPromise ?? Promise.resolve();
 
     usePluginsRegistryStore.setState({ isLoading: true });
 

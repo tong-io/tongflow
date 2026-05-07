@@ -1,18 +1,16 @@
 import { useNodeId } from "@xyflow/react";
-import { memo, useCallback } from "react";
-
-import type { RfDataNodeProps } from "@/types/nodes";
-
-import { BaseNode } from "../base/base-node";
-import useFlow from "@/hooks/use-flow";
 import { Atom } from "lucide-react";
-import {
-    upstreamParam,
-    configParam,
-    staticParam,
-    type GetPromptsContext,
-} from "@/utils/node-execution-config";
 import { useTranslations } from "next-intl";
+import { memo, useCallback } from "react";
+import useFlow from "@/hooks/use-flow";
+import type { RfDataNodeProps } from "@/types/nodes";
+import {
+    configParam,
+    type GetPromptsContext,
+    staticParam,
+    upstreamParam,
+} from "@/utils/node-execution-config";
+import { BaseNode } from "../base/base-node";
 
 type SeparateAudioTrackRfProps = RfDataNodeProps<"separateAudioTrackNode">;
 
@@ -45,8 +43,8 @@ const SeparateAudioTrackNode = ({
     data,
 }: SeparateAudioTrackRfProps) => {
     const t = useTranslations("Workspace.nodes");
-    const updates = useFlow((s) => s.updates);
-    const id = useNodeId()!;
+    const _updates = useFlow((s) => s.updates);
+    const _id = useNodeId()!;
     const fileKeys = data.fileKeys;
     const expands = useFlow((s) => s.expands);
 

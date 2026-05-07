@@ -8,19 +8,19 @@
  * 3. Continue receiving task progress and update the UI
  */
 
-import { useEffect, useCallback, useRef } from "react";
-import { useTaskStore } from "./use-task";
+import { useCallback, useEffect, useRef } from "react";
 import {
-    emitSSETaskMessage,
     emitSSEConnected,
+    emitSSETaskMessage,
 } from "@/components/workspace/task-progress-toast";
 import {
+    NodeStatus,
     TaskStatus,
     WorkflowStatus,
-    NodeStatus,
 } from "@/constants/task-status";
-import { getTaskWaitUrl } from "@/lib/task-api-url";
 import { logger } from "@/lib/logger";
+import { getTaskWaitUrl } from "@/lib/task-api-url";
+import { useTaskStore } from "./use-task";
 
 interface UseWorkflowRecoveryOptions {
     /** Node status update callback */
@@ -206,10 +206,7 @@ export function useWorkflowRecovery(options: UseWorkflowRecoveryOptions = {}) {
             };
 
             eventSource.onerror = (error) => {
-                logger.error(
-                    "[WorkflowRecovery] SSE connection error:",
-                    error,
-                );
+                logger.error("[WorkflowRecovery] SSE connection error:", error);
                 // Connection failed; the task may already be complete
                 setWorkflowExecutionStatus("idle");
                 cleanup();

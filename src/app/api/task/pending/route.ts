@@ -3,10 +3,10 @@
  * Latest pending workflow task (local single-user)
  */
 
+import { and, desc, eq, inArray } from "drizzle-orm";
 import { NextResponse } from "next/server";
 import { getDb } from "@/db";
 import { tasks } from "@/db/schema";
-import { eq, and, inArray, desc } from "drizzle-orm";
 import { logger } from "@/lib/logger";
 
 export async function GET() {

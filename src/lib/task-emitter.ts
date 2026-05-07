@@ -6,7 +6,7 @@
  */
 
 import { EventEmitter } from "node:events";
-import { type SSEStatusType, isTerminalStatus } from "@/constants/task-status";
+import type { SSEStatusType } from "@/constants/task-status";
 
 // ==================== Types ====================
 

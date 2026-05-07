@@ -15,8 +15,7 @@ export const getFileUrl = (fileKey: string | undefined | null): string => {
         return fileKey;
     }
 
-    const baseUrl =
-        process.env.NEXT_PUBLIC_FILE_BASE_URL || "/api/uploads";
+    const baseUrl = process.env.NEXT_PUBLIC_FILE_BASE_URL || "/api/uploads";
 
     const cleanBaseUrl = baseUrl.endsWith("/") ? baseUrl.slice(0, -1) : baseUrl;
     const cleanFileKey = fileKey.startsWith("/") ? fileKey.slice(1) : fileKey;
@@ -44,4 +43,3 @@ export const getMaterialFileUrls = (material: {
     const fileKeys = content.fileKeys || [];
     return fileKeys.map((key) => getFileUrl(key));
 };
-

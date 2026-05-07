@@ -1,20 +1,20 @@
 import { useNodesData } from "@xyflow/react";
-import type { TongflowPluginNodeProps } from "@/types/tongflow-flow";
+import { Sparkles, Video } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { memo, useMemo } from "react";
-import { Video, Sparkles } from "lucide-react";
-import { BaseNode } from "../base/base-node";
-import {
-    upstreamParam,
-    configParam,
-    type GetPromptsContext,
-} from "@/utils/node-execution-config";
-import { useNodeState } from "@/hooks/use-node-data";
 import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import { NodeTextarea } from "../base/node-textarea";
-import { MediaThumbnail } from "../base/media-thumbnail";
+import { useNodeState } from "@/hooks/use-node-data";
 import { getFileUrl } from "@/lib/file-url";
-import { useTranslations } from "next-intl";
+import type { TongflowPluginNodeProps } from "@/types/tongflow-flow";
+import {
+    configParam,
+    type GetPromptsContext,
+    upstreamParam,
+} from "@/utils/node-execution-config";
+import { BaseNode } from "../base/base-node";
+import { MediaThumbnail } from "../base/media-thumbnail";
+import { NodeTextarea } from "../base/node-textarea";
 
 // Workflow execution config
 const workflowConfig = {
@@ -44,7 +44,10 @@ const workflowConfig = {
 const SpeechImageVideoGenVideoNode = ({
     selected,
     data,
-}: TongflowPluginNodeProps<"speech-image-video-gen-video", "speechImageVideoGenVideoNode">) => {
+}: TongflowPluginNodeProps<
+    "speech-image-video-gen-video",
+    "speechImageVideoGenVideoNode"
+>) => {
     const t = useTranslations("Workspace.nodes");
     const ids = data.ids ?? [];
     const fromNodes = useNodesData(ids);
@@ -108,13 +111,7 @@ const SpeechImageVideoGenVideoNode = ({
                             : [];
                     },
                 }),
-                [
-                    imageFileKey,
-                    videoFileKey,
-                    audioFileKey,
-                    videoPrompt,
-                    t,
-                ],
+                [imageFileKey, videoFileKey, audioFileKey, videoPrompt, t],
             )}
         >
             <div className="p-4 space-y-4">
@@ -168,7 +165,6 @@ const SpeechImageVideoGenVideoNode = ({
                     rows={4}
                 />
             </div>
-
         </BaseNode>
     );
 };

@@ -10,6 +10,6 @@ export function jsonStringifyForSse(value: unknown): string {
         // BMP code units only; CJK and most UI copy live here. Astral
         // characters in payloads are left as UTF-8 (rare in status strings).
         /[\u0080-\uFFFF]/g,
-        (ch) => "\\u" + ch.charCodeAt(0).toString(16).padStart(4, "0"),
+        (ch) => `\\u${ch.charCodeAt(0).toString(16).padStart(4, "0")}`,
     );
 }

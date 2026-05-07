@@ -1,5 +1,5 @@
-import { useLayoutEffect, useCallback } from "react";
 import { useNodeId, useReactFlow } from "@xyflow/react";
+import { useCallback, useLayoutEffect } from "react";
 import {
     useNodePluginIds,
     usePluginsRegistry,
@@ -86,10 +86,7 @@ export function useNodePluginResolver(feature: string | undefined) {
                 }
                 if (typeof rec.pluginId === "string" && rec.pluginId.trim())
                     return o;
-                if (
-                    typeof rec.pluginRepo === "string" &&
-                    rec.pluginRepo.trim()
-                )
+                if (typeof rec.pluginRepo === "string" && rec.pluginRepo.trim())
                     return o;
                 return {
                     ...rec,

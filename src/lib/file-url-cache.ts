@@ -34,4 +34,3 @@ export function getGlobalFileCache(): FileUrlCache {
     }
     return globalCache;
 }
-

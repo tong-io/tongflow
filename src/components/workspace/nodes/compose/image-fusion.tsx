@@ -1,33 +1,29 @@
 import { useNodeId, useNodesData } from "@xyflow/react";
-import type { TongflowPluginNodeProps } from "@/types/tongflow-flow";
-import { memo, useRef, useMemo, useCallback } from "react";
-import {
-    Combine,
-    Sparkles,
-    Maximize2,
-} from "lucide-react";
-import { BaseNode } from "../base/base-node";
-import { AspectRatioPicker } from "../base/aspect-ratio-picker";
-import {
-    IMAGE_ASPECT_RATIOS,
-    type AspectRatio,
-} from "@/constants/media-options";
-import {
-    upstreamParam,
-    configParam,
-    type GetPromptsContext,
-} from "@/utils/node-execution-config";
-import { useNodeState } from "@/hooks/use-node-data";
-import useFlow from "@/hooks/use-flow";
+import { Combine, Maximize2, Sparkles } from "lucide-react";
+import { useTranslations } from "next-intl";
+import { memo, useCallback, useMemo, useRef } from "react";
+import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import { Button } from "@/components/ui/button";
-import { NodeTextarea } from "../base/node-textarea";
+import {
+    type AspectRatio,
+    IMAGE_ASPECT_RATIOS,
+} from "@/constants/media-options";
+import useFlow from "@/hooks/use-flow";
+import { useNodeState } from "@/hooks/use-node-data";
 import { getFileUrl } from "@/lib/file-url";
 import { cn } from "@/lib/utils";
-import { useTranslations } from "next-intl";
-import { MediaThumbnail } from "../base/media-thumbnail";
+import type { TongflowPluginNodeProps } from "@/types/tongflow-flow";
 import { coerceBaseNodeData } from "@/utils/flow-node-data";
+import {
+    configParam,
+    type GetPromptsContext,
+    upstreamParam,
+} from "@/utils/node-execution-config";
+import { AspectRatioPicker } from "../base/aspect-ratio-picker";
+import { BaseNode } from "../base/base-node";
+import { MediaThumbnail } from "../base/media-thumbnail";
+import { NodeTextarea } from "../base/node-textarea";
 
 const resolutions = [
     { value: "512", key: "res512", label: "512" },
@@ -37,7 +33,6 @@ const resolutions = [
 ];
 
 const DEFAULT_FEATURE = "image-fusion";
-
 
 // Workflow execution config
 const workflowConfig = {
@@ -187,7 +182,9 @@ const ImageFusionNode = ({
                         ? upstreamImages
                         : allImages.flat();
                     if (!imageKeys || imageKeys.length < 2) return [];
-                    const fileKeys = imageKeys.map((key: string) => getFileUrl(key));
+                    const fileKeys = imageKeys.map((key: string) =>
+                        getFileUrl(key),
+                    );
 
                     // Prefer the latest text data from upstream nodes
                     const ctxUpstreamTexts = ctx?.getAllUpstreamData(
@@ -328,7 +325,6 @@ const ImageFusionNode = ({
                     </Card>
                 )}
             </div>
-
         </BaseNode>
     );
 };

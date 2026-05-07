@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import { Toaster } from "react-hot-toast";
+import { ProprietaryAppShell } from "@openflow/proprietary";
 import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getMessages } from "next-intl/server";
-import { ProprietaryAppShell } from "@openflow/proprietary";
+import { Toaster } from "react-hot-toast";
 import { ErrorBoundary } from "@/components/ui/error-boundary";
 
 const geistSans = Geist({
@@ -50,6 +50,7 @@ export default async function RootLayout({
     return (
         <html lang={locale} suppressHydrationWarning>
             <head>
+                {/* biome-ignore lint/security/noDangerouslySetInnerHtml: intentional inline theme script to avoid FOUC */}
                 <script dangerouslySetInnerHTML={{ __html: themeScript }} />
             </head>
             <body

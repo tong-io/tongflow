@@ -4,7 +4,9 @@ import { normalizeLegacyPluginId } from "@/lib/legacy-plugin-id-map";
 /**
  * Resolve plugin id from nested `routing.pluginId` or legacy flat `prompt.pluginId`.
  */
-export function resolveRoutingPluginId(params: Record<string, unknown>): string {
+export function resolveRoutingPluginId(
+    params: Record<string, unknown>,
+): string {
     const r = params.routing;
     if (r && typeof r === "object" && !Array.isArray(r)) {
         const pid = (r as Record<string, unknown>).pluginId;

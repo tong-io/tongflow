@@ -33,4 +33,3 @@ export async function getFeatureByName(name: string): Promise<Feature | null> {
         null
     );
 }
-

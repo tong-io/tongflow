@@ -1,13 +1,13 @@
-import type { TongflowPluginNodeProps } from "@/types/tongflow-flow";
-import { memo } from "react";
 import { Atom } from "lucide-react";
-import { BaseNode } from "../base/base-node";
+import { useTranslations } from "next-intl";
+import { memo } from "react";
+import type { TongflowPluginNodeProps } from "@/types/tongflow-flow";
 import {
-    upstreamParam,
     configParam,
     type GetPromptsContext,
+    upstreamParam,
 } from "@/utils/node-execution-config";
-import { useTranslations } from "next-intl";
+import { BaseNode } from "../base/base-node";
 
 const DEFAULT_FEATURE = "split-video";
 
@@ -62,8 +62,7 @@ const SplitVideoNode = ({
                         : [];
                 },
             }}
-        >
-        </BaseNode>
+        ></BaseNode>
     );
 };
 

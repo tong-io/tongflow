@@ -1,16 +1,16 @@
 import { useNodesData } from "@xyflow/react";
-import type { TongflowPluginNodeProps } from "@/types/tongflow-flow";
-import { memo, useMemo } from "react";
 import { Video } from "lucide-react";
-import { BaseNode } from "../base/base-node";
-import {
-    upstreamParam,
-    type GetPromptsContext,
-} from "@/utils/node-execution-config";
+import { useTranslations } from "next-intl";
+import { memo, useMemo } from "react";
 import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { getFileUrl } from "@/lib/file-url";
-import { useTranslations } from "next-intl";
+import type { TongflowPluginNodeProps } from "@/types/tongflow-flow";
+import {
+    type GetPromptsContext,
+    upstreamParam,
+} from "@/utils/node-execution-config";
+import { BaseNode } from "../base/base-node";
 import { MediaThumbnail } from "../base/media-thumbnail";
 
 // Workflow execution config
@@ -34,7 +34,10 @@ const workflowConfig = {
 const SpeechVideoGenVideoNode = ({
     selected,
     data,
-}: TongflowPluginNodeProps<"speech-video-gen-video", "speechVideoGenVideoNode">) => {
+}: TongflowPluginNodeProps<
+    "speech-video-gen-video",
+    "speechVideoGenVideoNode"
+>) => {
     const t = useTranslations("Workspace.nodes");
     const ids = data.ids ?? [];
     const fromNodes = useNodesData(ids);
@@ -115,7 +118,6 @@ const SpeechVideoGenVideoNode = ({
                     </div>
                 </Card>
             </div>
-
         </BaseNode>
     );
 };

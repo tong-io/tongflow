@@ -1,16 +1,16 @@
+import { spawn } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
-import { spawn } from "node:child_process";
-import {
-    getModalPluginConfig,
-    getPluginFileAbsolutePath,
-    loadPluginsRegistry,
-} from "@/lib/plugins-registry.server";
 import {
     modalPluginPythonEnv,
     requireModalTokenEnv,
     resolvePython,
 } from "@/lib/modal-deploy-workers";
+import {
+    getModalPluginConfig,
+    getPluginFileAbsolutePath,
+    loadPluginsRegistry,
+} from "@/lib/plugins-registry.server";
 
 /**
  * We intentionally do NOT cache download state locally.
@@ -24,9 +24,7 @@ export async function runModalDownload(
     requireModalTokenEnv();
     const reg = loadPluginsRegistry();
 
-    const targets = opts.pluginId
-        ? [opts.pluginId]
-        : Object.keys(reg.plugins);
+    const targets = opts.pluginId ? [opts.pluginId] : Object.keys(reg.plugins);
     if (targets.length === 0) {
         throw new Error("No plugin ids found to download.");
     }

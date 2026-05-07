@@ -1,15 +1,15 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
-import { Loader2, CheckCircle2, XCircle, Square } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { CheckCircle2, Loader2, Square, XCircle } from "lucide-react";
+import { useTranslations } from "next-intl";
+import { useEffect, useRef, useState } from "react";
 import {
+    NodeStatus,
     TaskStatus,
     WorkflowStatus,
-    NodeStatus,
 } from "@/constants/task-status";
-import { useTranslations } from "next-intl";
 import { logger } from "@/lib/logger";
+import { cn } from "@/lib/utils";
 
 interface NodeInfo {
     id: string;

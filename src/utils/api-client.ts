@@ -1,17 +1,6 @@
 import toast from "react-hot-toast";
 
 /**
- * API response type
- */
-interface ApiResponse<T = unknown> {
-    success?: boolean;
-    error?: string;
-    message?: string;
-    data?: T;
-    [key: string]: unknown;
-}
-
-/**
  * Request configuration options
  */
 interface FetchOptions extends Omit<RequestInit, "body"> {
@@ -169,9 +158,7 @@ export async function apiClient<T = unknown>(
             // Handle authentication errors: 401 (unauthenticated) and 403 (forbidden)
             if (response.status === 401 || response.status === 403) {
                 const authErrorMsg =
-                    response.status === 401
-                        ? "未授权访问"
-                        : "拒绝访问";
+                    response.status === 401 ? "未授权访问" : "拒绝访问";
                 if (showErrorToast) {
                     toast.error(authErrorMsg);
                     errorToastShown = true;

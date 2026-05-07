@@ -1,20 +1,20 @@
 import { useNodesData } from "@xyflow/react";
-import type { TongflowPluginNodeProps } from "@/types/tongflow-flow";
+import { FileText, Sparkles, Video } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { memo } from "react";
-import { Video, Sparkles, FileText } from "lucide-react";
-import { BaseNode } from "../base/base-node";
-import {
-    upstreamParam,
-    configParam,
-    type GetPromptsContext,
-} from "@/utils/node-execution-config";
-import { useNodeState } from "@/hooks/use-node-data";
 import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import { NodeTextarea } from "../base/node-textarea";
-import { MediaThumbnail } from "../base/media-thumbnail";
+import { useNodeState } from "@/hooks/use-node-data";
 import { getFileUrl } from "@/lib/file-url";
-import { useTranslations } from "next-intl";
+import type { TongflowPluginNodeProps } from "@/types/tongflow-flow";
+import {
+    configParam,
+    type GetPromptsContext,
+    upstreamParam,
+} from "@/utils/node-execution-config";
+import { BaseNode } from "../base/base-node";
+import { MediaThumbnail } from "../base/media-thumbnail";
+import { NodeTextarea } from "../base/node-textarea";
 
 // Text preview component
 const TextPreview = memo(
@@ -78,7 +78,10 @@ const workflowConfig = {
 const SpeechTextGenVideoNode = ({
     selected,
     data,
-}: TongflowPluginNodeProps<"speech-text-gen-video", "speechTextGenVideoNode">) => {
+}: TongflowPluginNodeProps<
+    "speech-text-gen-video",
+    "speechTextGenVideoNode"
+>) => {
     const t = useTranslations("Workspace.nodes");
     const ids = data.ids ?? [];
     const fromNodes = useNodesData(ids);
@@ -177,7 +180,6 @@ const SpeechTextGenVideoNode = ({
                     />
                 )}
             </div>
-
         </BaseNode>
     );
 };

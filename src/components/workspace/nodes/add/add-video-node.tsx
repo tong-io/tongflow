@@ -1,15 +1,16 @@
-import React, { useState, useCallback, memo } from "react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Video, Upload, Camera, Library } from "lucide-react";
-import { useNodeId, type NodeProps } from "@xyflow/react";
-import useFlow from "@/hooks/use-flow";
-import { Button } from "@/components/ui/button";
-import { BaseNode } from "../base/base-node";
-import { useMultipleUpload, useUpload } from "@/hooks/use-upload";
-import { LibInput } from "../../share/lib-input";
-import { VideoRecorder } from "@/components/ui/video-recorder";
+import { type NodeProps, useNodeId } from "@xyflow/react";
+import { Library, Upload, Video } from "lucide-react";
 import { useTranslations } from "next-intl";
+import type React from "react";
+import { memo, useCallback, useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { VideoRecorder } from "@/components/ui/video-recorder";
+import useFlow from "@/hooks/use-flow";
+import { useMultipleUpload, useUpload } from "@/hooks/use-upload";
 import { logger } from "@/lib/logger";
+import { LibInput } from "../../share/lib-input";
+import { BaseNode } from "../base/base-node";
 
 // File upload component
 const UploadTab = () => {
@@ -229,7 +230,7 @@ export const AddVideoNode: React.FC<NodeProps> = ({ selected, data }) => {
     const t = useTranslations("Workspace.nodes.add");
     const id = useNodeId();
     const updates = useFlow((s) => s.updates);
-    const activeTab = (data as any)?.activeTab || "upload";
+    const _activeTab = (data as any)?.activeTab || "upload";
 
     logger.debug("AddVideoNode data:", data);
 
@@ -309,7 +310,6 @@ export const AddVideoNode: React.FC<NodeProps> = ({ selected, data }) => {
                     </div>
                 </Tabs>
             </div>
-
         </BaseNode>
     );
 };

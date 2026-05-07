@@ -3,23 +3,23 @@
  * Uses SSE (Server-Sent Events) for realtime task updates.
  */
 
-import { create } from "zustand";
-import { useState, useCallback, useEffect, useRef } from "react";
-import { createTask as apiCreateTask, updateTaskStatus } from "@/lib/api/task";
+import { useCallback, useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
+import { create } from "zustand";
 import {
-    type SSEStatusType,
-    TaskStatus,
-    mapSSEStatusToTaskStatus,
-    isTerminalStatus,
-} from "@/constants/task-status";
-import {
-    emitSSETaskMessage,
     emitSSEConnected,
+    emitSSETaskMessage,
     type SSEMessage,
 } from "@/components/workspace/task-progress-toast";
-import { getTaskStopUrl, getTaskWaitUrl } from "@/lib/task-api-url";
+import {
+    isTerminalStatus,
+    mapSSEStatusToTaskStatus,
+    type SSEStatusType,
+    TaskStatus,
+} from "@/constants/task-status";
+import { createTask as apiCreateTask, updateTaskStatus } from "@/lib/api/task";
 import { logger } from "@/lib/logger";
+import { getTaskStopUrl, getTaskWaitUrl } from "@/lib/task-api-url";
 
 // SSE message shape for the `/api/task/wait` stream
 interface SSETaskMessage {
@@ -506,7 +506,7 @@ export function useTaskSubscription(
                         // Backoff: 2s, 4s, 8s, 16s, capped at 30s
                         const delay = Math.min(
                             baseRetryDelay *
-                                Math.pow(2, reconnectAttemptsRef.current - 1),
+                                2 ** (reconnectAttemptsRef.current - 1),
                             SSE_MAX_RETRY_DELAY,
                         );
                         logger.debug(
@@ -524,9 +524,7 @@ export function useTaskSubscription(
                             }
                         }, delay);
                     } else {
-                        logger.error(
-                            "[SSE] Max reconnection attempts reached",
-                        );
+                        logger.error("[SSE] Max reconnection attempts reached");
                         setStatus("error");
                         if (options?.onStatusChange) {
                             options.onStatusChange("error");
@@ -828,7 +826,7 @@ export function useBatchTaskManager(
                                 reconnectAttemptsRef.current.set(tid, attempts);
                                 const delay = Math.min(
                                     SSE_DEFAULT_RETRY_DELAY *
-                                        Math.pow(2, attempts - 1),
+                                        2 ** (attempts - 1),
                                     SSE_MAX_RETRY_DELAY,
                                 );
                                 logger.debug(
@@ -847,9 +845,7 @@ export function useBatchTaskManager(
                                     `[SSE Batch] Max reconnection attempts reached for task ${tid}`,
                                 );
                                 activeConnectionsRef.current.delete(tid);
-                                if (
-                                    activeConnectionsRef.current.size === 0
-                                ) {
+                                if (activeConnectionsRef.current.size === 0) {
                                     setIsLoading(false);
                                 }
                                 if (options?.onError) {

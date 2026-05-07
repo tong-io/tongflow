@@ -1,25 +1,22 @@
-import {
-    useNodesData,
-} from "@xyflow/react";
-import type { RfDataNodeProps } from "@/types/nodes";
+import { useNodesData } from "@xyflow/react";
+import { Atom, Music, Type } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { memo, useMemo } from "react";
-import { Atom, Type, Music } from "lucide-react";
-import { getFileUrl } from "@/lib/file-url";
-
-import { BaseNode } from "../base/base-node";
 import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import {
     Select,
-    SelectTrigger,
     SelectContent,
     SelectItem,
+    SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
 import { useNodeState } from "@/hooks/use-node-data";
-import { upstreamParam, configParam } from "@/utils/node-execution-config";
-import { useTranslations } from "next-intl";
+import { getFileUrl } from "@/lib/file-url";
+import type { RfDataNodeProps } from "@/types/nodes";
 import { coerceBaseNodeData } from "@/utils/flow-node-data";
+import { configParam, upstreamParam } from "@/utils/node-execution-config";
+import { BaseNode } from "../base/base-node";
 
 const DEFAULT_FEATURE = "text-audio-gen-speech";
 
@@ -347,7 +344,8 @@ const TextAudioGenSpeechNode = ({
                         <Select
                             value={emotion || "none"}
                             onValueChange={(value) => {
-                                const nextEmotion = value === "none" ? "" : value;
+                                const nextEmotion =
+                                    value === "none" ? "" : value;
                                 setState({
                                     emotion: nextEmotion,
                                     style: "",
@@ -424,7 +422,6 @@ const TextAudioGenSpeechNode = ({
                     </div>
                 </Card>
             </div>
-
         </BaseNode>
     );
 };

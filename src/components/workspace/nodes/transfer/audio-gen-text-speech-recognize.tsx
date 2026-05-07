@@ -1,14 +1,13 @@
-import type { TongflowPluginNodeProps } from "@/types/tongflow-flow";
-import { memo } from "react";
 import { Music as AudioIcon } from "lucide-react";
-
-import { BaseNode } from "../base/base-node";
-import { getFileUrl } from "@/lib/file-url";
-import {
-    upstreamParam,
-    type GetPromptsContext,
-} from "@/utils/node-execution-config";
 import { useTranslations } from "next-intl";
+import { memo } from "react";
+import { getFileUrl } from "@/lib/file-url";
+import type { TongflowPluginNodeProps } from "@/types/tongflow-flow";
+import {
+    type GetPromptsContext,
+    upstreamParam,
+} from "@/utils/node-execution-config";
+import { BaseNode } from "../base/base-node";
 
 // Workflow execution config (static shape only; omit dynamic features)
 const baseWorkflowConfig = {

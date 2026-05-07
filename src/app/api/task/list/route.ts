@@ -1,7 +1,7 @@
-import { NextRequest, NextResponse } from "next/server";
+import { desc } from "drizzle-orm";
+import { type NextRequest, NextResponse } from "next/server";
 import { getDb } from "@/db";
 import { tasks } from "@/db/schema";
-import { desc } from "drizzle-orm";
 import { logger } from "@/lib/logger";
 import { safeJsonParse } from "@/utils/json-utils";
 
@@ -10,9 +10,13 @@ import { safeJsonParse } from "@/utils/json-utils";
  */
 export async function GET(request: NextRequest) {
     try {
-        const page = parseInt(request.nextUrl.searchParams.get("page") || "1");
+        const page = parseInt(
+            request.nextUrl.searchParams.get("page") || "1",
+            10,
+        );
         const pageSize = parseInt(
             request.nextUrl.searchParams.get("pageSize") || "20",
+            10,
         );
         const offset = (page - 1) * pageSize;
 

@@ -1,15 +1,15 @@
-import type { TongflowPluginNodeProps } from "@/types/tongflow-flow";
-import { memo } from "react";
 import { Atom } from "lucide-react";
-import { BaseNode } from "../base/base-node";
+import { useTranslations } from "next-intl";
+import { memo } from "react";
+import { useNodeState } from "@/hooks/use-node-data";
+import type { TongflowPluginNodeProps } from "@/types/tongflow-flow";
 import {
-    upstreamParam,
     configParam,
     type GetPromptsContext,
+    upstreamParam,
 } from "@/utils/node-execution-config";
-import { useNodeState } from "@/hooks/use-node-data";
+import { BaseNode } from "../base/base-node";
 import { NodeTextarea } from "../base/node-textarea";
-import { useTranslations } from "next-intl";
 
 const DEFAULT_FEATURE = "drop-video";
 
@@ -35,7 +35,7 @@ const DropVideoNode = ({
     data,
 }: TongflowPluginNodeProps<"drop-video", "dropVideoNode">) => {
     const t = useTranslations("Workspace.nodes.batch");
-    const tNodes = useTranslations("Workspace.nodes");
+    const _tNodes = useTranslations("Workspace.nodes");
     const fileKeys = data.fileKeys;
 
     // Use the new hook to manage state persistence

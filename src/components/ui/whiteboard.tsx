@@ -1,11 +1,7 @@
 "use client";
 
-import React, {
-    useRef,
-    useImperativeHandle,
-    forwardRef,
-    useEffect,
-} from "react";
+import type React from "react";
+import { forwardRef, useEffect, useImperativeHandle, useRef } from "react";
 
 export interface WhiteBoardRef {
     clear: () => void;

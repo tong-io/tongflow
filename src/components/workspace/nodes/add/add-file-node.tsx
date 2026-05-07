@@ -1,22 +1,16 @@
-import { useNodeId, type NodeProps } from "@xyflow/react";
-import { useState, memo, useCallback } from "react";
-import { FileText, Upload, Library } from "lucide-react";
-
-import { BaseNode } from "../base/base-node";
-import {
-    DropdownMenuItem,
-    DropdownMenuLabel,
-    DropdownMenuSeparator,
-} from "@/components/ui/dropdown-menu";
+import { type NodeProps, useNodeId } from "@xyflow/react";
+import { FileText, Library, Upload } from "lucide-react";
+import { useTranslations } from "next-intl";
+import { memo, useCallback, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import useFlow from "@/hooks/use-flow";
 import { useMultipleUpload } from "@/hooks/use-upload";
-import { LibInput } from "../../share/lib-input";
-import { cn } from "@/lib/utils";
-import { useTranslations } from "next-intl";
 import { logger } from "@/lib/logger";
+import { cn } from "@/lib/utils";
+import { LibInput } from "../../share/lib-input";
+import { BaseNode } from "../base/base-node";
 
 // Upload component
 const UploadTab = () => {
@@ -182,7 +176,6 @@ const AddFileNode = ({ selected, data }: NodeProps) => {
                     </div>
                 </Tabs>
             </div>
-
         </BaseNode>
     );
 };

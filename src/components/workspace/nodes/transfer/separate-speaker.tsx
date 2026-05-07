@@ -1,14 +1,12 @@
-import { memo } from "react";
-
-import type { RfDataNodeProps } from "@/types/nodes";
-
-import { BaseNode } from "../base/base-node";
 import { Atom } from "lucide-react";
-import {
-    upstreamParam,
-    type GetPromptsContext,
-} from "@/utils/node-execution-config";
 import { useTranslations } from "next-intl";
+import { memo } from "react";
+import type { RfDataNodeProps } from "@/types/nodes";
+import {
+    type GetPromptsContext,
+    upstreamParam,
+} from "@/utils/node-execution-config";
+import { BaseNode } from "../base/base-node";
 
 type SeparateSpeakerRfProps = RfDataNodeProps<"separateSpeakerNode">;
 

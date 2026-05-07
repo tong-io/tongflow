@@ -1,19 +1,17 @@
-
-import type { TongflowPluginNodeProps } from "@/types/tongflow-flow";
+import { MessageSquare, Video as VideoIcon } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { memo } from "react";
-import { Video as VideoIcon, MessageSquare } from "lucide-react";
-
-import { BaseNode } from "../base/base-node";
-import { NodeTextarea } from "../base/node-textarea";
 import { useNodeState } from "@/hooks/use-node-data";
 import { getFileUrl } from "@/lib/file-url";
+import type { TongflowPluginNodeProps } from "@/types/tongflow-flow";
 import {
-    upstreamParam,
     configParam,
-    staticParam,
     type GetPromptsContext,
+    staticParam,
+    upstreamParam,
 } from "@/utils/node-execution-config";
-import { useTranslations } from "next-intl";
+import { BaseNode } from "../base/base-node";
+import { NodeTextarea } from "../base/node-textarea";
 
 const DEFAULT_FEATURE = "video-gen-text";
 

@@ -1,30 +1,28 @@
-import {
-    useNodeId,
-    useNodesData,
-    useStore,
-} from "@xyflow/react";
-import type { TongflowPluginNodeProps } from "@/types/tongflow-flow";
 import type { Edge } from "@xyflow/react";
-import { memo, useMemo } from "react";
+import { useNodeId, useNodesData, useStore } from "@xyflow/react";
 import { Atom } from "lucide-react";
-
-import { BaseNode } from "../base/base-node";
-import { AspectRatioPicker } from "../base/aspect-ratio-picker";
-import { DurationPicker } from "../base/duration-picker";
-import { useNodeState } from "@/hooks/use-node-data";
+import { useTranslations } from "next-intl";
+import { memo, useMemo } from "react";
 import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import { NodeTextarea } from "../base/node-textarea";
-import { getFileUrl } from "@/lib/file-url";
 import {
-    upstreamParam,
-    configParam,
-    staticParam,
-    type GetPromptsContext,
-} from "@/utils/node-execution-config";
-import { VIDEO_ASPECT_RATIOS, VIDEO_DURATIONS } from "@/constants/media-options";
-import { useTranslations } from "next-intl";
+    VIDEO_ASPECT_RATIOS,
+    VIDEO_DURATIONS,
+} from "@/constants/media-options";
+import { useNodeState } from "@/hooks/use-node-data";
+import { getFileUrl } from "@/lib/file-url";
+import type { TongflowPluginNodeProps } from "@/types/tongflow-flow";
 import { coerceBaseNodeData } from "@/utils/flow-node-data";
+import {
+    configParam,
+    type GetPromptsContext,
+    staticParam,
+    upstreamParam,
+} from "@/utils/node-execution-config";
+import { AspectRatioPicker } from "../base/aspect-ratio-picker";
+import { BaseNode } from "../base/base-node";
+import { DurationPicker } from "../base/duration-picker";
+import { NodeTextarea } from "../base/node-textarea";
 
 // Workflow execution config (BaseNode wires this automatically)
 const workflowConfig = {
@@ -103,60 +101,48 @@ const ImageGenVideoNode = ({
     const hasCompositeText = upstreamTexts && upstreamTexts.length > 0;
 
     // Detect whether upstream imageNode and textNode connections exist (including composition mode)
-    const { hasUpstreamImage, hasUpstreamText, upstreamImageHasData } =
-        useMemo(() => {
-            // Composition mode already has data
-            if (ids.length > 0) {
-                return {
-                    hasUpstreamImage: !!imageNode,
-                    hasUpstreamText: hasCompositeText,
-                    upstreamImageHasData: fileKeys.length > 0,
-                };
-            }
-
-            if (!nodeId)
-                return {
-                    hasUpstreamImage: false,
-                    hasUpstreamText: false,
-                    upstreamImageHasData: false,
-                };
-
-            const incomingEdges = edges.filter(
-                (edge) => edge.target === nodeId,
-            );
-            let hasImage = false;
-            let hasText = false;
-            let imageHasData = false;
-
-            for (const edge of incomingEdges) {
-                const sourceNode = nodeLookup.get(edge.source);
-                if (sourceNode?.type === "imageNode") {
-                    hasImage = true;
-                    const nodeKeys = coerceBaseNodeData(sourceNode.data)
-                        .fileKeys;
-                    if (nodeKeys?.length) {
-                        imageHasData = true;
-                    }
-                }
-                if (sourceNode?.type === "textNode") {
-                    hasText = true;
-                }
-            }
-
+    const { hasUpstreamText, upstreamImageHasData } = useMemo(() => {
+        // Composition mode already has data
+        if (ids.length > 0) {
             return {
-                hasUpstreamImage: hasImage,
-                hasUpstreamText: hasText,
-                upstreamImageHasData: imageHasData,
+                hasUpstreamImage: !!imageNode,
+                hasUpstreamText: hasCompositeText,
+                upstreamImageHasData: fileKeys.length > 0,
             };
-        }, [
-            nodeId,
-            nodeLookup,
-            edges,
-            ids,
-            imageNode,
-            hasCompositeText,
-            fileKeys,
-        ]);
+        }
+
+        if (!nodeId)
+            return {
+                hasUpstreamImage: false,
+                hasUpstreamText: false,
+                upstreamImageHasData: false,
+            };
+
+        const incomingEdges = edges.filter((edge) => edge.target === nodeId);
+        let hasImage = false;
+        let hasText = false;
+        let imageHasData = false;
+
+        for (const edge of incomingEdges) {
+            const sourceNode = nodeLookup.get(edge.source);
+            if (sourceNode?.type === "imageNode") {
+                hasImage = true;
+                const nodeKeys = coerceBaseNodeData(sourceNode.data).fileKeys;
+                if (nodeKeys?.length) {
+                    imageHasData = true;
+                }
+            }
+            if (sourceNode?.type === "textNode") {
+                hasText = true;
+            }
+        }
+
+        return {
+            hasUpstreamImage: hasImage,
+            hasUpstreamText: hasText,
+            upstreamImageHasData: imageHasData,
+        };
+    }, [nodeId, nodeLookup, edges, ids, imageNode, hasCompositeText, fileKeys]);
 
     // Use the hook to manage state persistence
     const [state, setState] = useNodeState(
@@ -254,7 +240,9 @@ const ImageGenVideoNode = ({
                 <AspectRatioPicker
                     ratios={VIDEO_ASPECT_RATIOS}
                     value={selectedAspectRatio}
-                    onChange={(ratio) => setState({ selectedAspectRatio: ratio })}
+                    onChange={(ratio) =>
+                        setState({ selectedAspectRatio: ratio })
+                    }
                     showSize
                 />
 

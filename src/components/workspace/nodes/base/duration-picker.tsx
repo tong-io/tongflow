@@ -3,8 +3,8 @@ import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import { cn } from "@/lib/utils";
 import type { Duration } from "@/constants/media-options";
+import { cn } from "@/lib/utils";
 
 interface DurationPickerProps {
     durations: Duration[];

@@ -4,8 +4,7 @@
  * Prefer over raw `console.*` in app code.
  */
 const isVerbose =
-    typeof process !== "undefined" &&
-    process.env.NODE_ENV === "development";
+    typeof process !== "undefined" && process.env.NODE_ENV === "development";
 
 export const logger = {
     debug: (...args: unknown[]) => {

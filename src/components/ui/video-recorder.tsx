@@ -1,10 +1,10 @@
 "use client";
 
 import { Camera, Circle, Square } from "lucide-react";
-import { useEffect, useRef, useState, useCallback } from "react";
-import { Button } from "./button";
-import { cn } from "@/lib/utils";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { logger } from "@/lib/logger";
+import { cn } from "@/lib/utils";
+import { Button } from "./button";
 
 interface VideoRecorderProps {
     onRecord: (blobUrl?: string) => void;

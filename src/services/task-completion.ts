@@ -2,9 +2,9 @@
  * Idempotent task completion and material save (webhook + frontend)
  */
 
-import { getDb } from "@/db";
-import { tasks, materials, workflows } from "@/db/schema";
 import { eq } from "drizzle-orm";
+import { getDb } from "@/db";
+import { materials, tasks, workflows } from "@/db/schema";
 import { logger } from "@/lib/logger";
 
 type MaterialType = "image" | "video" | "audio" | "text" | "file" | "model";

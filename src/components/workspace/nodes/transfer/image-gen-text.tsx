@@ -1,19 +1,17 @@
-
-import type { TongflowPluginNodeProps } from "@/types/tongflow-flow";
-import { memo } from "react";
 import { Image as ImageIcon, MessageSquare } from "lucide-react";
-
-import { BaseNode } from "../base/base-node";
-import { NodeTextarea } from "../base/node-textarea";
+import { useTranslations } from "next-intl";
+import { memo } from "react";
 import { useNodeState } from "@/hooks/use-node-data";
 import { getFileUrl } from "@/lib/file-url";
+import type { TongflowPluginNodeProps } from "@/types/tongflow-flow";
 import {
-    upstreamParam,
     configParam,
-    staticParam,
     type GetPromptsContext,
+    staticParam,
+    upstreamParam,
 } from "@/utils/node-execution-config";
-import { useTranslations } from "next-intl";
+import { BaseNode } from "../base/base-node";
+import { NodeTextarea } from "../base/node-textarea";
 
 const DEFAULT_FEATURE = "image-gen-text";
 
@@ -72,9 +70,7 @@ const ImageGenTextNode = ({
                             : fileKeys;
                     return keys.map((fileKey) => ({
                         image: getFileUrl(fileKey),
-                        ...(query?.trim()
-                            ? { text: query.trim() }
-                            : {}),
+                        ...(query?.trim() ? { text: query.trim() } : {}),
                     }));
                 },
             }}

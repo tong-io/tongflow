@@ -5,51 +5,54 @@
  * ReactFlow canvas managing nodes and edges
  */
 
-import type { Connection, Edge, Node, IsValidConnection } from "@xyflow/react";
+import type { Connection, Edge, IsValidConnection, Node } from "@xyflow/react";
 import {
-    ReactFlow,
-    Controls,
     Background,
+    Controls,
     Panel,
-    useReactFlow,
+    ReactFlow,
     ReactFlowProvider,
+    useReactFlow,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
+import { useLocale, useTranslations } from "next-intl";
+import { useCallback, useEffect, useState } from "react";
 import { useShallow } from "zustand/react/shallow";
+import { usePreloadFeatures } from "@/hooks/use-features";
 import type { FlowState } from "@/hooks/use-flow";
 import { useFlow } from "@/hooks/use-flow";
-import { EDGE_TYPES, NODE_TYPES } from "./types";
-import { useEffect, useState, useCallback } from "react";
-import { useTranslations, useLocale } from "next-intl";
-import { isValidFlowConnection } from "@/utils/connection-rules";
-import { usePreloadFeatures } from "@/hooks/use-features";
 import { useWorkflowRecovery } from "@/hooks/use-workflow-recovery";
-import SmartIsland from "./smart-island";
-import { ModeSwitch } from "./mode-switch";
-import { WorkflowTitleMenu } from "./workflow-title-menu";
-import { TaskProgressToast } from "./task-progress-toast";
-import { WorkspaceNav } from "./workspace-nav";
-import { WorkspaceLeftNav } from "./workspace-left-nav";
 import { logger } from "@/lib/logger";
+import { isValidFlowConnection } from "@/utils/connection-rules";
+import { ModeSwitch } from "./mode-switch";
+import SmartIsland from "./smart-island";
+import { TaskProgressToast } from "./task-progress-toast";
+import { EDGE_TYPES, NODE_TYPES } from "./types";
+import { WorkflowTitleMenu } from "./workflow-title-menu";
+import { WorkspaceLeftNav } from "./workspace-left-nav";
+import { WorkspaceNav } from "./workspace-nav";
 
 // Selector for performance optimization - select data only, not functions
 const selector = (state: FlowState) => ({
     nodes: state.nodes,
     edges: state.edges,
-    workflowName: state.workflowName,
 });
 
 /**
  * Workspace inner component
  * Must be used inside a ReactFlowProvider
  */
-function WorkspaceInner({ user }: { user?: { id: string; email: string } }) {
+function WorkspaceInner({
+    user: _user,
+}: {
+    user?: { id: string; email: string };
+}) {
     const tIndex = useTranslations("Index");
     const locale = useLocale();
     const [colorMode, setColorMode] = useState<"light" | "dark">("light");
 
     // Separate data and functions to avoid re-renders caused by function reference changes
-    const { nodes, edges, workflowName } = useFlow(useShallow(selector));
+    const { nodes, edges } = useFlow(useShallow(selector));
 
     // Get functions directly from the store (function references never change)
     const onNodesChange = useFlow.getState().onNodesChange;

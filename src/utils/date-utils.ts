@@ -36,7 +36,7 @@ export function toSafeDate(
     // String type
     if (typeof value === "string") {
         const date = new Date(value);
-        if (!isNaN(date.getTime())) {
+        if (!Number.isNaN(date.getTime())) {
             return toSafeDate(date); // Recursively check the result
         }
         return new Date();

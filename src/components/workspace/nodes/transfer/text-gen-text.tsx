@@ -1,30 +1,27 @@
-import {
-    useNodesData,
-} from "@xyflow/react";
-import { useState, memo, useMemo } from "react";
+import { useNodesData } from "@xyflow/react";
 import { Maximize2, Wand2 } from "lucide-react";
-
-import { BaseNode } from "../base/base-node";
-import { Card } from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
+import { useTranslations } from "next-intl";
+import { memo, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 import {
     Dialog,
     DialogContent,
+    DialogFooter,
     DialogHeader,
     DialogTitle,
-    DialogFooter,
 } from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { useNodeState } from "@/hooks/use-node-data";
+import type { TongflowPluginNodeProps } from "@/types/tongflow-flow";
 import {
-    upstreamParam,
     configParam,
     type GetPromptsContext,
+    upstreamParam,
 } from "@/utils/node-execution-config";
-import { useNodeState } from "@/hooks/use-node-data";
+import { BaseNode } from "../base/base-node";
 import { NodeTextarea } from "../base/node-textarea";
-import { useTranslations } from "next-intl";
-import type { TongflowPluginNodeProps } from "@/types/tongflow-flow";
 
 // Workflow execution config
 const workflowConfig = {

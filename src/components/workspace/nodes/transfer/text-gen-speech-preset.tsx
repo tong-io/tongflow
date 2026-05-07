@@ -1,10 +1,10 @@
-import type { TongflowPluginNodeProps } from "@/types/tongflow-flow";
 import { Atom } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { memo, useCallback, useMemo } from "react";
 import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { useNodeState } from "@/hooks/use-node-data";
+import type { TongflowPluginNodeProps } from "@/types/tongflow-flow";
 import {
     configParam,
     type GetPromptsContext,
@@ -23,7 +23,10 @@ import {
 const TextGenSpeechPresetNode = ({
     selected,
     data,
-}: TongflowPluginNodeProps<"text-gen-speech-preset", "textGenSpeechPresetNode">) => {
+}: TongflowPluginNodeProps<
+    "text-gen-speech-preset",
+    "textGenSpeechPresetNode"
+>) => {
     const t = useTranslations("Workspace.nodes");
     const texts = data.texts ?? [];
 

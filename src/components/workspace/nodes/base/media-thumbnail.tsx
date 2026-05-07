@@ -10,7 +10,13 @@ interface MediaThumbnailProps {
 }
 
 export const MediaThumbnail = memo(
-    ({ fileKey, label, type, loadingText = "...", onClick }: MediaThumbnailProps) => {
+    ({
+        fileKey,
+        label,
+        type,
+        loadingText = "...",
+        onClick,
+    }: MediaThumbnailProps) => {
         const { url } = useFileAsyncLoader(fileKey, { priority: "high" });
 
         const colorMap = {

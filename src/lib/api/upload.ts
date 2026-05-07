@@ -2,12 +2,13 @@
  * File upload API - simplified for open-source version.
  * Uploads directly to local server storage.
  */
-import { apiClient } from "@/utils/api-client";
+
 import {
-    validateFile,
-    UploadValidationError,
     type FileValidationResult,
+    UploadValidationError,
+    validateFile,
 } from "@/lib/upload-validation";
+import { apiClient } from "@/utils/api-client";
 
 export interface PresignedUrlResponse {
     uploadUrl: string;

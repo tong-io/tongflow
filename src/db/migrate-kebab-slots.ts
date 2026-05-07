@@ -157,8 +157,7 @@ export function runKebabSlotDataMigration(db: Database.Database): void {
         }
 
         const flowChanged = flow !== w.flow;
-        const exeChanged =
-            (executable ?? null) !== (w.executable ?? null);
+        const exeChanged = (executable ?? null) !== (w.executable ?? null);
         if (!flowChanged && !exeChanged) continue;
 
         if (flowChanged && exeChanged) {

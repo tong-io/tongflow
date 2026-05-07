@@ -1,22 +1,17 @@
-import {
-    useNodeId,
-    useNodesData,
-    type NodeProps,
-} from "@xyflow/react";
+import { type NodeProps, useNodeId, useNodesData } from "@xyflow/react";
+import { Edit3, Library, Lock, Type, Unlock } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { memo, useCallback, useMemo } from "react";
-import { Type, Edit3, Library, Lock, Unlock } from "lucide-react";
-import type { AddTextNodeData, AddTextNode } from "@/types/nodes";
-
-import { BaseNode } from "../base/base-node";
 import { Button } from "@/components/ui/button";
-import { NodeTextarea } from "../base/node-textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import useFlow from "@/hooks/use-flow";
 import { useNodeState } from "@/hooks/use-node-data";
-import { LibInput } from "../../share/lib-input";
 import { useTaskStore } from "@/hooks/use-task";
+import type { AddTextNodeData } from "@/types/nodes";
+import { LibInput } from "../../share/lib-input";
+import { BaseNode } from "../base/base-node";
 import { NodeHeaderAction } from "../base/node-header";
-import { useTranslations } from "next-intl";
+import { NodeTextarea } from "../base/node-textarea";
 
 const ManualInputTab = ({
     data,
@@ -117,12 +112,7 @@ const manualWorkflowConfig = {
 const AddTextNode: React.FC<NodeProps> = ({ selected, data }) => {
     const id = useNodeId();
     const nodeData = data as AddTextNodeData;
-    const {
-        taskId = "",
-        query = "",
-        activeTab = "manual",
-        locked = false,
-    } = nodeData;
+    const { activeTab = "manual", locked = false } = nodeData;
     const updates = useFlow((s) => s.updates);
 
     const workspaceMode = useTaskStore((state) => state.workspaceMode);
@@ -240,7 +230,6 @@ const AddTextNode: React.FC<NodeProps> = ({ selected, data }) => {
                     </div>
                 </Tabs>
             </div>
-
         </BaseNode>
     );
 };

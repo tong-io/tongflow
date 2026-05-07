@@ -1,7 +1,7 @@
-import { NextRequest, NextResponse } from "next/server";
+import { and, desc, eq, inArray } from "drizzle-orm";
+import { type NextRequest, NextResponse } from "next/server";
 import { getDb } from "@/db";
-import { workflows, tasks, materials } from "@/db/schema";
-import { eq, and, inArray, desc } from "drizzle-orm";
+import { materials, tasks, workflows } from "@/db/schema";
 import { logger } from "@/lib/logger";
 import { safeJsonParse } from "@/utils/json-utils";
 
@@ -16,7 +16,7 @@ export async function GET(
         const { id } = await params;
         const workflowId = parseInt(id, 10);
 
-        if (isNaN(workflowId)) {
+        if (Number.isNaN(workflowId)) {
             return NextResponse.json(
                 { error: "Invalid workflow ID" },
                 { status: 400 },
