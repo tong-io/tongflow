@@ -1,6 +1,5 @@
-import { useNodeId } from "@xyflow/react";
 import type { TongflowPluginNodeProps } from "@/types/tongflow-flow";
-import { memo, useCallback } from "react";
+import { memo } from "react";
 import { Atom } from "lucide-react";
 import { BaseNode } from "../base/base-node";
 import {
@@ -9,7 +8,6 @@ import {
     type GetPromptsContext,
 } from "@/utils/node-execution-config";
 import { useNodeState } from "@/hooks/use-node-data";
-import useFlow from "@/hooks/use-flow";
 import { NodeTextarea } from "../base/node-textarea";
 import { useTranslations } from "next-intl";
 
@@ -39,9 +37,6 @@ const DropVideoNode = ({
     const t = useTranslations("Workspace.nodes.batch");
     const tNodes = useTranslations("Workspace.nodes");
     const fileKeys = data.fileKeys;
-    const expands = useFlow((s) => s.expands);
-
-    const id = useNodeId()!;
 
     // Use the new hook to manage state persistence
     const [state, setState] = useNodeState(
@@ -51,32 +46,6 @@ const DropVideoNode = ({
         data,
     );
     const { query } = state;
-
-    // Handle task updates (filtering returns an array with keep markers)
-    const handleTaskUpdate = useCallback(
-        (task: any): boolean => {
-            if (task?.status === "COMPLETED") {
-                const clips = task?.data?.clips as
-                    | { keep: boolean; fileKey: string }[]
-                    | undefined;
-                const filteredData = clips ?? [];
-                const videoFileKeys = filteredData
-                    .filter((item) => item?.keep)
-                    .map((item) => item.fileKey);
-                if (videoFileKeys.length > 0 && id) {
-                    expands(id, [
-                        {
-                            type: "videoNode",
-                            data: { fileKeys: videoFileKeys },
-                        },
-                    ]);
-                }
-                return true;
-            }
-            return false;
-        },
-        [id, expands],
-    );
 
     return (
         <BaseNode
@@ -105,7 +74,6 @@ const DropVideoNode = ({
                           ]
                         : [];
                 },
-                onTaskUpdate: handleTaskUpdate,
             }}
         >
             <div className="p-4 space-y-4">

@@ -38,6 +38,63 @@
                 }
             },
             "additionalProperties": false
+        },
+        "VideoRef": {
+            "type": "object",
+            "required": [
+                "file_key"
+            ],
+            "properties": {
+                "file_key": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "mime": {
+                    "type": "string"
+                },
+                "filename": {
+                    "type": "string"
+                }
+            },
+            "additionalProperties": false
+        },
+        "AudioRef": {
+            "type": "object",
+            "required": [
+                "file_key"
+            ],
+            "properties": {
+                "file_key": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "mime": {
+                    "type": "string"
+                },
+                "filename": {
+                    "type": "string"
+                }
+            },
+            "additionalProperties": false
+        },
+        "ImageRef": {
+            "type": "object",
+            "required": [
+                "file_key"
+            ],
+            "properties": {
+                "file_key": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "mime": {
+                    "type": "string"
+                },
+                "filename": {
+                    "type": "string"
+                }
+            },
+            "additionalProperties": false
         }
     },
     "nodes": [
@@ -128,6 +185,13 @@
                     },
                     "result": {
                         "type": "string"
+                    },
+                    "texts": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "x-expand-each": true
                     }
                 },
                 "additionalProperties": false
@@ -661,20 +725,11 @@
                     "thinking": {
                         "type": "string"
                     },
-                    "image_base64": {
-                        "$ref": "#/$defs/FileRef"
+                    "video_file_key": {
+                        "$ref": "#/$defs/VideoRef"
                     },
-                    "video_base64": {
-                        "$ref": "#/$defs/FileRef"
-                    },
-                    "audio_base64": {
-                        "$ref": "#/$defs/FileRef"
-                    },
-                    "texts": {
-                        "type": "array",
-                        "items": {
-                            "type": "string"
-                        }
+                    "audio_file_key": {
+                        "$ref": "#/$defs/AudioRef"
                     }
                 },
                 "additionalProperties": false
@@ -963,25 +1018,10 @@
                     "thinking": {
                         "type": "string"
                     },
-                    "image_base64": {
-                        "$ref": "#/$defs/FileRef"
-                    },
-                    "video_base64": {
-                        "$ref": "#/$defs/FileRef"
-                    },
-                    "audio_base64": {
-                        "$ref": "#/$defs/FileRef"
-                    },
                     "video_parts": {
                         "type": "array",
                         "items": {
-                            "$ref": "#/$defs/FileRef"
-                        }
-                    },
-                    "texts": {
-                        "type": "array",
-                        "items": {
-                            "type": "string"
+                            "$ref": "#/$defs/VideoRef"
                         }
                     }
                 },
@@ -2900,20 +2940,7 @@
                     "clips": {
                         "type": "array",
                         "items": {
-                            "type": "object",
-                            "required": [
-                                "keep",
-                                "fileKey"
-                            ],
-                            "properties": {
-                                "keep": {
-                                    "type": "boolean"
-                                },
-                                "fileKey": {
-                                    "type": "string"
-                                }
-                            },
-                            "additionalProperties": false
+                            "$ref": "#/$defs/VideoRef"
                         }
                     }
                 },
@@ -3006,9 +3033,76 @@
                         "items": {
                             "type": "array",
                             "items": {
-                                "type": "string"
+                                "$ref": "#/$defs/VideoRef"
                             }
-                        }
+                        },
+                        "x-expand-each": true
+                    }
+                },
+                "additionalProperties": false
+            }
+        },
+        {
+            "nodeSlot": "separate_speaker",
+            "inputs": {
+                "type": "object",
+                "required": [],
+                "properties": {
+                    "fileKey": {
+                        "type": "string"
+                    }
+                },
+                "additionalProperties": false
+            },
+            "outputs": {
+                "type": "object",
+                "required": [
+                    "success"
+                ],
+                "properties": {
+                    "success": {
+                        "type": "boolean"
+                    },
+                    "error": {
+                        "type": "string"
+                    },
+                    "outputKeys": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/$defs/AudioRef"
+                        },
+                        "x-expand-each": true
+                    }
+                },
+                "additionalProperties": false
+            }
+        },
+        {
+            "nodeSlot": "separate_audio_track",
+            "inputs": {
+                "type": "object",
+                "required": [],
+                "properties": {
+                    "fileKey": {
+                        "type": "string"
+                    }
+                },
+                "additionalProperties": false
+            },
+            "outputs": {
+                "type": "object",
+                "required": [
+                    "success"
+                ],
+                "properties": {
+                    "success": {
+                        "type": "boolean"
+                    },
+                    "error": {
+                        "type": "string"
+                    },
+                    "file_key": {
+                        "$ref": "#/$defs/AudioRef"
                     }
                 },
                 "additionalProperties": false

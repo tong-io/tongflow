@@ -1,10 +1,8 @@
-import { useNodeId } from "@xyflow/react";
-import { memo, useCallback } from "react";
+import { memo } from "react";
 
 import type { RfDataNodeProps } from "@/types/nodes";
 
 import { BaseNode } from "../base/base-node";
-import useFlow from "@/hooks/use-flow";
 import { Atom } from "lucide-react";
 import {
     upstreamParam,
@@ -37,32 +35,7 @@ const workflowConfig = {
 
 const SeparateSpeakerNode = ({ selected, data }: SeparateSpeakerRfProps) => {
     const t = useTranslations("Workspace.nodes");
-    const updates = useFlow((s) => s.updates);
-    const id = useNodeId()!;
     const fileKeys = data.fileKeys;
-    const expands = useFlow((s) => s.expands);
-
-    // Custom task updater — expands every auxiliary file artifact
-    const handleTaskUpdate = useCallback(
-        (task: any) => {
-            if (task?.status === "COMPLETED") {
-                const outputKeys = task?.data?.outputKeys as string[];
-                if (outputKeys && outputKeys.length > 0) {
-                    outputKeys.forEach((fileKey) =>
-                        expands("", [
-                            {
-                                type: "audioNode",
-                                data: { fileKeys: [fileKey] },
-                            },
-                        ]),
-                    );
-                }
-                return true;
-            }
-            return false;
-        },
-        [expands],
-    );
 
     return (
         <BaseNode
@@ -90,7 +63,6 @@ const SeparateSpeakerNode = ({ selected, data }: SeparateSpeakerRfProps) => {
                         })) || []
                     );
                 },
-                onTaskUpdate: handleTaskUpdate,
             }}
         />
     );

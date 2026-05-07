@@ -1,6 +1,5 @@
-import { useNodeId } from "@xyflow/react";
 import type { TongflowPluginNodeProps } from "@/types/tongflow-flow";
-import { memo, useCallback } from "react";
+import { memo } from "react";
 import { Atom } from "lucide-react";
 import { BaseNode } from "../base/base-node";
 import {
@@ -8,7 +7,6 @@ import {
     configParam,
     type GetPromptsContext,
 } from "@/utils/node-execution-config";
-import useFlow from "@/hooks/use-flow";
 import { useTranslations } from "next-intl";
 
 const DEFAULT_FEATURE = "split-video";
@@ -37,37 +35,6 @@ const SplitVideoNode = ({
 }: TongflowPluginNodeProps<"split-video", "splitVideoNode">) => {
     const t = useTranslations("Workspace.nodes");
     const fileKeys = data.fileKeys;
-    const expands = useFlow((s) => s.expands);
-
-    const id = useNodeId()!;
-
-    const handleTaskUpdate = useCallback(
-        (task: any): boolean => {
-            if (task?.status === "COMPLETED") {
-                const taskData = task?.data as any;
-                const parts = taskData?.video_parts as
-                    | Array<{ file_key?: string }>
-                    | undefined;
-                const splitKeys =
-                    parts
-                        ?.map((p) =>
-                            typeof p?.file_key === "string"
-                                ? p.file_key.trim()
-                                : "",
-                        )
-                        .filter((k) => k.length > 0) ?? [];
-
-                if (splitKeys.length > 0 && id) {
-                    expands(id, [
-                        { type: "videoNode", data: { fileKeys: splitKeys } },
-                    ]);
-                }
-                return true;
-            }
-            return false;
-        },
-        [id, expands],
-    );
 
     return (
         <BaseNode
@@ -94,7 +61,6 @@ const SplitVideoNode = ({
                           }))
                         : [];
                 },
-                onTaskUpdate: handleTaskUpdate,
             }}
         >
         </BaseNode>

@@ -1,9 +1,8 @@
 import {
-    useNodeId,
     useNodesData,
 } from "@xyflow/react";
-import { useState, memo, useCallback, useRef, useEffect, useMemo } from "react";
-import { Brain, Maximize2, Wand2 } from "lucide-react";
+import { useState, memo, useMemo } from "react";
+import { Maximize2, Wand2 } from "lucide-react";
 
 import { BaseNode } from "../base/base-node";
 import { Card } from "@/components/ui/card";
@@ -22,7 +21,6 @@ import {
     configParam,
     type GetPromptsContext,
 } from "@/utils/node-execution-config";
-import useFlow from "@/hooks/use-flow";
 import { useNodeState } from "@/hooks/use-node-data";
 import { NodeTextarea } from "../base/node-textarea";
 import { useTranslations } from "next-intl";
@@ -50,57 +48,16 @@ const workflowConfig = {
     },
 };
 
-// Reasoning box component
-const ReasoningBox = ({ content }: { content: string }) => {
-    const tBase = useTranslations("Workspace.nodes.base");
-    const scrollRef = useRef<HTMLDivElement>(null);
-
-    useEffect(() => {
-        if (scrollRef.current) {
-            scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-        }
-    }, [content]);
-
-    return (
-        <div className="w-full h-full bg-blue-50 border border-blue-200 rounded-lg p-4 flex flex-col">
-            <div className="flex items-center justify-between mb-3 flex-shrink-0">
-                <div className="flex items-center gap-2">
-                    <Brain className="h-4 w-4 text-blue-600" />
-                    <h3 className="text-sm font-semibold text-blue-900">
-                        {tBase("thinkingProcess")}
-                    </h3>
-                </div>
-            </div>
-            <div
-                ref={scrollRef}
-                className="flex-1 overflow-y-auto [&::-webkit-scrollbar]:hidden"
-                style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
-            >
-                <p className="text-xs text-blue-700 leading-relaxed whitespace-pre-wrap break-words">
-                    {content}
-                </p>
-            </div>
-        </div>
-    );
-};
-
 const GenTextNode = ({
     selected,
     data,
 }: TongflowPluginNodeProps<"gen-text", "genTextNode">) => {
     const { ids = [], texts: localTexts = [] } = data;
 
-    const expands = useFlow((s) => s.expands);
-    const updates = useFlow((s) => s.updates);
-    const id = useNodeId()!;
-
     // If ids are present, get data from associated nodes (composition mode)
-    // In composition mode, there may be multiple textNodes: one for input text and one for the prompt
     const fromNodes = useNodesData(ids);
     const textNodes = fromNodes.filter((node) => node.type === "textNode");
 
-    // Get text data from the composite node
-    // Use the first textNode as input text and the second one, if present, as the prompt
     const texts: string[] = useMemo(() => {
         if (textNodes.length > 0) {
             return (textNodes[0].data as any)?.texts || [];
@@ -108,7 +65,6 @@ const GenTextNode = ({
         return localTexts;
     }, [textNodes, localTexts]);
 
-    // If there is a second textNode, use it as the upstream prompt
     const upstreamPrompt: string = useMemo(() => {
         if (textNodes.length > 1) {
             const prompts = (textNodes[1].data as any)?.texts || [];
@@ -117,10 +73,8 @@ const GenTextNode = ({
         return "";
     }, [textNodes]);
 
-    // Determine whether there is an upstream prompt
     const hasUpstreamPrompt = !!upstreamPrompt;
 
-    // Use the hook to manage the user-entered prompt (the LLM plugin decides whether to use geminiModel/openaiModel)
     const [state, setState] = useNodeState(
         {
             userPrompt: "",
@@ -133,80 +87,10 @@ const GenTextNode = ({
 
     const nodeSlot = "gen-text";
 
-    // Get the prompt that will actually be used
     const effectivePrompt = hasUpstreamPrompt ? upstreamPrompt : userPrompt;
 
-    // Fullscreen editing modal state
     const [isFullscreenOpen, setIsFullscreenOpen] = useState(false);
     const [fullscreenValue, setFullscreenValue] = useState("");
-
-    // Streaming output state
-    const [reasoningContent, setReasoningContent] = useState<string>("");
-    const [showReasoningBox, setShowReasoningBox] = useState(false);
-    const [_answerContent, setAnswerContent] = useState<string>("");
-    const answerNodeIdRef = useRef<string | null>(null);
-
-    // Custom task updater — handles streaming deltas
-    const handleTaskUpdate = useCallback(
-        (task: any): boolean => {
-            // Handle task completion/failure - reset state
-            if (task?.status === "COMPLETED" || task?.status === "FAILED") {
-                setTimeout(() => {
-                    setReasoningContent("");
-                    setAnswerContent("");
-                    setShowReasoningBox(false);
-                    answerNodeIdRef.current = null;
-                }, 500);
-                // Return true to indicate it was handled and the default node creation logic is not needed
-                return true;
-            }
-
-            // Check streaming data
-            if (task?.data?.content) {
-                if (task?.data?.type === "reasoning") {
-                    setReasoningContent((prev) =>
-                        prev
-                            ? `${prev}${task.data.content}`
-                            : task.data.content,
-                    );
-                    setShowReasoningBox(true);
-                    return true;
-                }
-
-                if (task?.data?.type === "answer") {
-                    setShowReasoningBox(false);
-                    setAnswerContent((prev) => {
-                        const newContent = prev
-                            ? `${prev}${task.data.content}`
-                            : task.data.content;
-
-                        // Create or update the output node
-                        if (!answerNodeIdRef.current && id) {
-                            const nodeIds = expands(id, [
-                                {
-                                    type: "textNode",
-                                    data: { texts: [newContent] },
-                                },
-                            ]);
-                            if (nodeIds?.length > 0) {
-                                answerNodeIdRef.current = nodeIds[0];
-                            }
-                        } else if (answerNodeIdRef.current) {
-                            updates(answerNodeIdRef.current, {
-                                texts: [newContent],
-                            });
-                        }
-
-                        return newContent;
-                    });
-                    return true;
-                }
-            }
-
-            return false;
-        },
-        [id, expands, updates],
-    );
 
     return (
         <>
@@ -248,19 +132,10 @@ const GenTextNode = ({
                             text: `${text}\n\n${effectivePrompt}`,
                         }));
                     },
-                    onTaskUpdate: handleTaskUpdate,
                 }}
-                overlay={
-                    showReasoningBox ? (
-                        <div className="w-full h-full pointer-events-auto">
-                            <ReasoningBox content={reasoningContent} />
-                        </div>
-                    ) : null
-                }
             >
                 <div className="p-4 space-y-4">
                     <div className="space-y-2">
-                        {/* If there is an upstream prompt, show a preview */}
                         {hasUpstreamPrompt ? (
                             <Card className="p-3 bg-muted/50">
                                 <div className="space-y-2">
