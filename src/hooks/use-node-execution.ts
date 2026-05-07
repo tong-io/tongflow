@@ -16,7 +16,12 @@ import {
 import {
     normalizeTaskPayloadData,
     pickMarkdownFromPayload,
+    applyResolvedOutputRoutes,
 } from "@/utils/task-payload";
+import {
+    getAbiNodeBySlot,
+    resolveAbiOutputMappings,
+} from "@/lib/tongflow-abi";
 import { getValueByPath } from "@/utils/path-utils";
 import { useNodePluginResolver } from "./use-node-plugin-resolver";
 import { logger } from "@/lib/logger";
@@ -145,6 +150,23 @@ export function useNodeExecution({
             }
 
             if (task?.status === "COMPLETED") {
+                const payload =
+                    normalizeTaskPayloadData(task?.data) ??
+                    (task?.data as Record<string, unknown> | undefined);
+
+                // ABI convention-driven multi-output routing
+                const abiNode = feature
+                    ? getAbiNodeBySlot(feature)
+                    : undefined;
+                const routes = abiNode
+                    ? resolveAbiOutputMappings(abiNode)
+                    : [];
+                if (routes.length > 0) {
+                    applyResolvedOutputRoutes(nodeId, payload, routes, expands);
+                    return;
+                }
+
+                // Single-output fallback
                 const outputNodeType = outputType as
                     | OutputNodeType
                     | undefined;
@@ -153,10 +175,6 @@ export function useNodeExecution({
                     | "texts"
                     | undefined;
                 if (!outputNodeType || !outputDataField) return;
-
-                const payload =
-                    normalizeTaskPayloadData(task?.data) ??
-                    (task?.data as Record<string, unknown> | undefined);
 
                 const fileKey = payload?.file_key as string | undefined;
                 const text = payload?.text as string | undefined;

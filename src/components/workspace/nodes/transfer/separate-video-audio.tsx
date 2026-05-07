@@ -1,6 +1,5 @@
-import { useNodeId } from "@xyflow/react";
 import type { TongflowPluginNodeProps } from "@/types/tongflow-flow";
-import { memo, useCallback } from "react";
+import { memo } from "react";
 import { BaseNode } from "../base/base-node";
 import { Atom } from "lucide-react";
 import {
@@ -8,8 +7,6 @@ import {
     type GetPromptsContext,
 } from "@/utils/node-execution-config";
 import { useTranslations } from "next-intl";
-import useFlow from "@/hooks/use-flow";
-import { normalizeTaskPayloadData } from "@/utils/task-payload";
 
 const DEFAULT_FEATURE = "separate-video-audio";
 
@@ -34,28 +31,7 @@ const SeparateVideoAudioNode = ({
     data,
 }: TongflowPluginNodeProps<"separate-video-audio", "separateVideoAudioNode">) => {
     const t = useTranslations("Workspace.nodes");
-    const id = useNodeId()!;
-    const expands = useFlow((s) => s.expands);
     const fileKeys = data.fileKeys;
-
-    const onTaskUpdate = useCallback(
-        (task: any) => {
-            if (task?.status !== "COMPLETED") return false;
-            const payload =
-                normalizeTaskPayloadData(task?.data) ??
-                (task?.data as Record<string, unknown> | undefined);
-            if (!payload) return false;
-            const vk = payload["video_file_key"];
-            const ak = payload["audio_file_key"];
-            if (typeof vk !== "string" || typeof ak !== "string") return false;
-            expands(id, [
-                { type: "videoNode", data: { fileKeys: [vk] } },
-                { type: "audioNode", data: { fileKeys: [ak] } },
-            ]);
-            return true;
-        },
-        [expands, id],
-    );
 
     return (
         <BaseNode
@@ -83,7 +59,6 @@ const SeparateVideoAudioNode = ({
                         })) || []
                     );
                 },
-                onTaskUpdate,
             }}
         />
     );

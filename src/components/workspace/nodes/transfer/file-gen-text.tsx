@@ -1,17 +1,13 @@
-import { useNodeId } from "@xyflow/react";
 import type { TongflowPluginNodeProps } from "@/types/tongflow-flow";
-import { memo, useCallback } from "react";
+import { memo } from "react";
 import { FileText } from "lucide-react";
 
 import { BaseNode } from "../base/base-node";
-import useFlow from "@/hooks/use-flow";
-import { getFileUrl } from "@/lib/file-url";
 import {
     upstreamParam,
     type GetPromptsContext,
 } from "@/utils/node-execution-config";
 import { useTranslations } from "next-intl";
-import { logger } from "@/lib/logger";
 
 const DEFAULT_FEATURE = "parse-document";
 
@@ -41,45 +37,6 @@ const FileGenTextNode = ({
     const t = useTranslations("Workspace.nodes");
     const { fileKeys = [] } = data;
 
-    const nodeId = useNodeId();
-    const expands = useFlow((s) => s.expands);
-
-    // Custom task updater — awaits Markdown payloads before spawning text nodes
-    const handleTaskUpdate = useCallback(
-        async (task: any) => {
-            if (task?.status === "COMPLETED") {
-                const r2_key = task?.data?.r2_key;
-                if (r2_key && nodeId) {
-                    try {
-                        const response = await fetch(getFileUrl(r2_key));
-                        if (!response.ok) {
-                            throw new Error(
-                                `Failed to fetch markdown: ${response.statusText}`,
-                            );
-                        }
-                        const markdownContent = await response.text();
-
-                        // Expand markdown content as a text node
-                        expands(nodeId, [
-                            {
-                                type: "textNode",
-                                data: { texts: [markdownContent] },
-                            },
-                        ]);
-                    } catch (error) {
-                        logger.error(
-                            "Failed to fetch markdown content:",
-                            error,
-                        );
-                    }
-                }
-                return true; // Already handled; skip the default logic
-            }
-            return false;
-        },
-        [expands, nodeId],
-    );
-
     return (
         <BaseNode
             selected={selected}
@@ -104,7 +61,6 @@ const FileGenTextNode = ({
                         source: fileKey,
                     }));
                 },
-                onTaskUpdate: handleTaskUpdate,
             }}
         >
         </BaseNode>

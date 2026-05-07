@@ -1,9 +1,8 @@
 import {
-    useNodeId,
     useNodesData,
 } from "@xyflow/react";
 import type { TongflowPluginNodeProps } from "@/types/tongflow-flow";
-import { memo, useCallback, useMemo } from "react";
+import { memo, useMemo } from "react";
 import { Scissors } from "lucide-react";
 import { BaseNode } from "../base/base-node";
 import {
@@ -11,7 +10,6 @@ import {
     configParam,
     type GetPromptsContext,
 } from "@/utils/node-execution-config";
-import useFlow from "@/hooks/use-flow";
 import { useNodeState } from "@/hooks/use-node-data";
 import { NodeTextarea } from "../base/node-textarea";
 import { useTranslations } from "next-intl";
@@ -48,9 +46,6 @@ const SplitTextNode = ({
     const ids = data.ids ?? [];
     const localTexts = data.texts ?? [];
 
-    const expands = useFlow((s) => s.expands);
-    const id = useNodeId()!;
-
     // Pull prompts from predecessors
     const fromNodes = useNodesData(ids);
     const textNodes = fromNodes.filter((node) => node.type === "textNode");
@@ -65,29 +60,6 @@ const SplitTextNode = ({
     // Optional split instructions from user land
     const [state, setState] = useNodeState({ userPrompt: "" }, data);
     const { userPrompt } = state;
-
-    // Handle splitter tasks returning text arrays
-    const handleTaskUpdate = useCallback(
-        (task: any): boolean => {
-            if (task?.status === "COMPLETED") {
-                const taskData = task?.data as any;
-                const splitTexts: string[] = taskData?.texts || [];
-
-                if (splitTexts.length > 0 && id) {
-                    expands(
-                        id,
-                        splitTexts.map((text) => ({
-                            type: "textNode",
-                            data: { texts: [text] },
-                        })),
-                    );
-                }
-                return true;
-            }
-            return false;
-        },
-        [id, expands],
-    );
 
     return (
         <BaseNode
@@ -117,7 +89,6 @@ const SplitTextNode = ({
                           ]
                         : [];
                 },
-                onTaskUpdate: handleTaskUpdate,
             }}
         >
             <div className="p-4 space-y-4">

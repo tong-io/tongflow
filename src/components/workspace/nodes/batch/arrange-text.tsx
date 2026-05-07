@@ -1,6 +1,5 @@
-import { useNodeId } from "@xyflow/react";
 import type { TongflowPluginNodeProps } from "@/types/tongflow-flow";
-import { memo, useCallback } from "react";
+import { memo } from "react";
 import { Atom } from "lucide-react";
 import { BaseNode } from "../base/base-node";
 import {
@@ -9,8 +8,6 @@ import {
     type GetPromptsContext,
 } from "@/utils/node-execution-config";
 import { useNodeState } from "@/hooks/use-node-data";
-import { useNodeTaskUpdate } from "@/hooks/use-task";
-import useFlow from "@/hooks/use-flow";
 import { Card } from "@/components/ui/card";
 import { NodeTextarea } from "../base/node-textarea";
 import { Input } from "@/components/ui/input";
@@ -53,9 +50,6 @@ const ArrangeTextNode = ({
     const tNodes = useTranslations("Workspace.nodes");
     const fileKeys = data.fileKeys ?? [];
     const infos = data.infos ?? [];
-    const expands = useFlow((s) => s.expands);
-
-    const id = useNodeId()!;
 
     // Use the new hook to manage state persistence
     const [state, setState] = useNodeState(
@@ -67,31 +61,6 @@ const ArrangeTextNode = ({
         data,
     );
     const { query, groupCount, duplicatable } = state;
-
-    // Handle task updates (permutation returns multiple groups)
-    const handleTaskUpdate = useCallback(
-        (task: any): boolean => {
-            if (task?.status === "COMPLETED") {
-                const groups = task?.data?.groups as string[][] | undefined;
-                if (groups && groups.length > 0 && id) {
-                    groups.forEach((group) => {
-                        expands(id, [
-                            {
-                                type: "videoNode",
-                                data: { fileKeys: [...group] },
-                            },
-                        ]);
-                    });
-                }
-                return true; // Already handled; skip the default logic
-            }
-            return false;
-        },
-        [id, expands],
-    );
-
-    // Subscribe to this node's task updates via useNodeTaskUpdate
-    useNodeTaskUpdate(id || "", handleTaskUpdate);
 
     return (
         <BaseNode
@@ -128,7 +97,6 @@ const ArrangeTextNode = ({
                           ]
                         : [];
                 },
-                onTaskUpdate: handleTaskUpdate,
             }}
         >
             <Card
