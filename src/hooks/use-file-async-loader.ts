@@ -188,14 +188,6 @@ export function useFileUrl(fileKey: string | null | undefined) {
 }
 
 export function useFileLoaderStats() {
-    const [stats, setStats] = useState(() => getGlobalFileQueue().getStats());
-    const queue = getGlobalFileQueue();
-
-    useEffect(() => {
-        const updateStats = () => setStats(queue.getStats());
-        queue.setChangeCallback(updateStats);
-        return () => {};
-    }, [queue]);
-
+    const [stats] = useState(() => getGlobalFileQueue().getStats());
     return stats;
 }

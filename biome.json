@@ -6,7 +6,15 @@
         "useIgnoreFile": false
     },
     "files": {
-        "ignoreUnknown": false
+        "ignoreUnknown": false,
+        "includes": [
+            "**",
+            "!.next",
+            "!out",
+            "!build",
+            "!node_modules",
+            "!.venv"
+        ]
     },
     "formatter": {
         "enabled": true,
