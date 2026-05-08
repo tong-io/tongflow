@@ -1,15 +1,13 @@
-import { memo } from "react";
-
-import type { RfDataNodeProps } from "@/types/nodes";
-import { Card } from "@/components/ui/card";
 import { Droplets } from "lucide-react";
-
-import { BaseNode } from "../base/base-node";
-import {
-    upstreamParam,
-    type GetPromptsContext,
-} from "@/utils/node-execution-config";
 import { useTranslations } from "next-intl";
+import { memo } from "react";
+import { Card } from "@/components/ui/card";
+import type { RfDataNodeProps } from "@/types/nodes";
+import {
+    type GetPromptsContext,
+    upstreamParam,
+} from "@/utils/node-execution-config";
+import { BaseNode } from "../base/base-node";
 
 type RemoveWatermarkRfProps = RfDataNodeProps<"removeWatermarkNode">;
 

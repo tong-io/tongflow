@@ -1,13 +1,12 @@
-
-import type { TongflowPluginNodeProps } from "@/types/tongflow-flow";
-import { memo } from "react";
-import { BaseNode } from "../base/base-node";
 import { Film } from "lucide-react";
-import {
-    upstreamParam,
-    type GetPromptsContext,
-} from "@/utils/node-execution-config";
 import { useTranslations } from "next-intl";
+import { memo } from "react";
+import type { TongflowPluginNodeProps } from "@/types/tongflow-flow";
+import {
+    type GetPromptsContext,
+    upstreamParam,
+} from "@/utils/node-execution-config";
+import { BaseNode } from "../base/base-node";
 
 const DEFAULT_FEATURE = "get-last-frame";
 

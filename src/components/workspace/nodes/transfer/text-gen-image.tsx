@@ -1,19 +1,19 @@
 import { useNodeId } from "@xyflow/react";
-import type { TongflowPluginNodeProps } from "@/types/tongflow-flow";
 import { Atom } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { memo, useCallback } from "react";
+import {
+    type AspectRatio,
+    IMAGE_ASPECT_RATIOS,
+} from "@/constants/media-options";
 import useFlow from "@/hooks/use-flow";
+import type { TongflowPluginNodeProps } from "@/types/tongflow-flow";
 import {
     configParam,
     type GetPromptsContext,
     staticParam,
     upstreamParam,
 } from "@/utils/node-execution-config";
-import {
-    IMAGE_ASPECT_RATIOS,
-    type AspectRatio,
-} from "@/constants/media-options";
 import { AspectRatioPicker } from "../base/aspect-ratio-picker";
 import { BaseNode } from "../base/base-node";
 
@@ -49,8 +49,10 @@ const workflowConfig = {
     },
 };
 
-type TextGenImageNodeProps =
-    TongflowPluginNodeProps<"image-gen", "textGenImageNode">;
+type TextGenImageNodeProps = TongflowPluginNodeProps<
+    "image-gen",
+    "textGenImageNode"
+>;
 
 const TextGenImageNode = ({ selected, data }: TextGenImageNodeProps) => {
     const t = useTranslations("Workspace.nodes");

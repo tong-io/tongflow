@@ -3,7 +3,7 @@
  * Parses ReactFlow-format workflow JSON and generates an execution order plan
  */
 
-import type { Node, Edge } from "@xyflow/react";
+import type { Edge, Node } from "@xyflow/react";
 import { logger } from "@/lib/logger";
 
 // Workflow JSON format interface
@@ -335,7 +335,9 @@ export class WorkflowParser {
 
         for (let i = 0; i < plan.levels.length; i++) {
             const level = plan.levels[i];
-            lines.push(`Level ${i + 1} (${level.length} nodes can execute in parallel):`);
+            lines.push(
+                `Level ${i + 1} (${level.length} nodes can execute in parallel):`,
+            );
             for (const nodeId of level) {
                 const info = plan.nodeInfoMap.get(nodeId);
                 if (info) {

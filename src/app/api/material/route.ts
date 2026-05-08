@@ -1,7 +1,7 @@
-import { NextRequest, NextResponse } from "next/server";
+import { and, desc, eq } from "drizzle-orm";
+import { type NextRequest, NextResponse } from "next/server";
 import { getDb } from "@/db";
 import { materials } from "@/db/schema";
-import { eq, and, desc } from "drizzle-orm";
 import { logger } from "@/lib/logger";
 import { safeJsonParse } from "@/utils/json-utils";
 
@@ -41,10 +41,7 @@ export async function GET(request: NextRequest) {
                 .select()
                 .from(materials)
                 .where(
-                    and(
-                        eq(materials.deleted, false),
-                        eq(materials.type, type),
-                    ),
+                    and(eq(materials.deleted, false), eq(materials.type, type)),
                 );
         }
 

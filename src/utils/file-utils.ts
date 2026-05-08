@@ -4,7 +4,7 @@
  * Replaces R2 by saving files to the local data/uploads/ directory.
  */
 
-import { writeFile, mkdir, readFile } from "node:fs/promises";
+import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { nanoid } from "nanoid";
 
@@ -14,9 +14,14 @@ const UPLOADS_DIR = path.resolve(process.cwd(), "data", "uploads");
  * Read a file under `data/uploads/` by its fileKey (same as in {@link getFileUrl}).
  * Rejects path traversal.
  */
-export async function readUploadFileByFileKey(fileKey: string): Promise<Buffer> {
+export async function readUploadFileByFileKey(
+    fileKey: string,
+): Promise<Buffer> {
     const normalized = fileKey.replace(/^\/+/, "").replace(/\\/g, "/");
-    const resolved = path.resolve(UPLOADS_DIR, ...normalized.split("/").filter(Boolean));
+    const resolved = path.resolve(
+        UPLOADS_DIR,
+        ...normalized.split("/").filter(Boolean),
+    );
     if (!resolved.startsWith(UPLOADS_DIR)) {
         throw new Error("Invalid file key");
     }

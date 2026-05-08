@@ -1,15 +1,12 @@
 import { useNodesData } from "@xyflow/react";
-import type { TongflowPluginNodeProps } from "@/types/tongflow-flow";
-import { memo, useState, useEffect, useRef } from "react";
 import { Video } from "lucide-react";
-import { BaseNode } from "../base/base-node";
-import {
-    upstreamParam,
-    type GetPromptsContext,
-} from "@/utils/node-execution-config";
+import { useTranslations } from "next-intl";
+import { memo, useEffect, useRef, useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import { useTranslations } from "next-intl";
+import type { TongflowPluginNodeProps } from "@/types/tongflow-flow";
+import { upstreamParam } from "@/utils/node-execution-config";
+import { BaseNode } from "../base/base-node";
 import { MediaThumbnail } from "../base/media-thumbnail";
 
 // Workflow execution config
@@ -133,7 +130,6 @@ const ConcatVideoNode = ({
                     </div>
                 </Card>
             </div>
-
         </BaseNode>
     );
 };

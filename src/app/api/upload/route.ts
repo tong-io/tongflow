@@ -4,10 +4,10 @@
  * Saves files to data/uploads/ directory.
  */
 
-import { NextRequest, NextResponse } from "next/server";
-import { writeFile, mkdir } from "node:fs/promises";
+import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { nanoid } from "nanoid";
+import { type NextRequest, NextResponse } from "next/server";
 import { logger } from "@/lib/logger";
 
 const UPLOAD_DIR = path.resolve(process.cwd(), "data", "uploads");

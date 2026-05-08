@@ -1,16 +1,17 @@
-import React, { useState, memo, useCallback } from "react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Upload, Library, Box } from "lucide-react";
-import { useNodeId, type NodeProps } from "@xyflow/react";
-import useFlow from "@/hooks/use-flow";
+import { type NodeProps, useNodeId } from "@xyflow/react";
+import { Box, Library, Upload } from "lucide-react";
+import { useTranslations } from "next-intl";
+import type React from "react";
+import { memo, useCallback, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { BaseNode } from "../base/base-node";
-import { useMultipleUpload } from "@/hooks/use-upload";
-import { LibInput } from "../../share/lib-input";
 import { Progress } from "@/components/ui/progress";
-import { useTranslations } from "next-intl";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import useFlow from "@/hooks/use-flow";
+import { useMultipleUpload } from "@/hooks/use-upload";
 import { logger } from "@/lib/logger";
+import { LibInput } from "../../share/lib-input";
+import { BaseNode } from "../base/base-node";
 
 // Portfolio tab
 const LibraryTab = () => {
@@ -152,7 +153,7 @@ export const AddModelNode: React.FC<NodeProps> = ({ selected, data }) => {
     const t = useTranslations("Workspace.nodes.add");
     const id = useNodeId();
     const updates = useFlow((s) => s.updates);
-    const activeTab = (data as any)?.activeTab || "upload";
+    const _activeTab = (data as any)?.activeTab || "upload";
 
     // Save state when switching tabs
     const handleTabChange = (value: string) => {
@@ -224,7 +225,6 @@ export const AddModelNode: React.FC<NodeProps> = ({ selected, data }) => {
                     </div>
                 </Tabs>
             </div>
-
         </BaseNode>
     );
 };

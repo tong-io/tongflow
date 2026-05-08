@@ -1,19 +1,16 @@
-import {
-    useNodesData,
-} from "@xyflow/react";
-import type { TongflowPluginNodeProps } from "@/types/tongflow-flow";
-import { memo, useMemo } from "react";
+import { useNodesData } from "@xyflow/react";
 import { Wand2 } from "lucide-react";
-
-import { BaseNode } from "../base/base-node";
+import { useTranslations } from "next-intl";
+import { memo, useMemo } from "react";
+import { useNodeState } from "@/hooks/use-node-data";
+import type { TongflowPluginNodeProps } from "@/types/tongflow-flow";
 import {
-    upstreamParam,
     configParam,
     type GetPromptsContext,
+    upstreamParam,
 } from "@/utils/node-execution-config";
-import { useNodeState } from "@/hooks/use-node-data";
+import { BaseNode } from "../base/base-node";
 import { NodeTextarea } from "../base/node-textarea";
-import { useTranslations } from "next-intl";
 
 // Workflow execution config
 const workflowConfig = {

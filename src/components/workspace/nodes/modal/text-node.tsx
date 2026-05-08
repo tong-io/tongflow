@@ -1,23 +1,21 @@
-import { useReactFlow, useNodeId } from "@xyflow/react";
-import { memo, useState, useEffect } from "react";
+import { useNodeId, useReactFlow } from "@xyflow/react";
 import { FileText, Maximize2, X } from "lucide-react";
+import { useTranslations } from "next-intl";
+import { memo, useEffect, useState } from "react";
 import { createPortal } from "react-dom";
-
+import { Button } from "@/components/ui/button";
+import { DropdownMenuLabel } from "@/components/ui/dropdown-menu";
+import { logger } from "@/lib/logger";
 import type { RfDataNodeProps } from "@/types/nodes";
-
 import { BaseNode } from "../base/base-node";
 import {
     NodeHeader,
     NodeHeaderActions,
+    NodeHeaderComboAction,
     NodeHeaderIcon,
     NodeHeaderMenuAction,
     NodeHeaderTitle,
-    NodeHeaderComboAction,
 } from "../base/node-header";
-import { DropdownMenuLabel } from "@/components/ui/dropdown-menu";
-import { Button } from "@/components/ui/button";
-import { useTranslations } from "next-intl";
-import { logger } from "@/lib/logger";
 
 type TextNodeRfProps = RfDataNodeProps<"textNode">;
 
@@ -196,7 +194,6 @@ const TextNode = ({ selected, data }: TextNodeRfProps) => {
                         </div>
                     </div>
                 )}
-
             </BaseNode>
 
             {/* Full screen modal - rendered outside BaseNode */}

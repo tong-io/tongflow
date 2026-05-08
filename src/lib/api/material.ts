@@ -2,8 +2,8 @@
  * Material API client — local library
  */
 
-import { apiPost, apiGet, apiDelete, apiPatch } from "@/utils/api-client";
 import { logger } from "@/lib/logger";
+import { apiDelete, apiGet, apiPatch, apiPost } from "@/utils/api-client";
 
 export type MaterialType =
     | "image"

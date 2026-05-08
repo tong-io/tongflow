@@ -16,15 +16,9 @@ export default getRequestConfig(async () => {
             const headersList = await headers();
             const acceptLanguage = headersList.get("accept-language");
             // Simple check: if explicit 'en' or 'ja' preference is stronger or first
-            if (
-                acceptLanguage &&
-                acceptLanguage.toLowerCase().startsWith("en")
-            ) {
+            if (acceptLanguage?.toLowerCase().startsWith("en")) {
                 locale = "en";
-            } else if (
-                acceptLanguage &&
-                acceptLanguage.toLowerCase().startsWith("ja")
-            ) {
+            } else if (acceptLanguage?.toLowerCase().startsWith("ja")) {
                 locale = "ja";
             }
         } catch (e) {

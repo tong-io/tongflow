@@ -1,18 +1,18 @@
-import type { TongflowPluginNodeProps } from "@/types/tongflow-flow";
-import { memo } from "react";
 import { Atom } from "lucide-react";
-import { BaseNode } from "../base/base-node";
-import {
-    upstreamParam,
-    configParam,
-    type GetPromptsContext,
-} from "@/utils/node-execution-config";
-import { useNodeState } from "@/hooks/use-node-data";
+import { useTranslations } from "next-intl";
+import { memo } from "react";
 import { Card } from "@/components/ui/card";
-import { NodeTextarea } from "../base/node-textarea";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useTranslations } from "next-intl";
+import { useNodeState } from "@/hooks/use-node-data";
+import type { TongflowPluginNodeProps } from "@/types/tongflow-flow";
+import {
+    configParam,
+    type GetPromptsContext,
+    upstreamParam,
+} from "@/utils/node-execution-config";
+import { BaseNode } from "../base/base-node";
+import { NodeTextarea } from "../base/node-textarea";
 
 const DEFAULT_FEATURE = "arrange-group";
 
@@ -47,7 +47,7 @@ const ArrangeTextNode = ({
     data,
 }: TongflowPluginNodeProps<"arrange-group", "arrangeNode">) => {
     const t = useTranslations("Workspace.nodes.batch");
-    const tNodes = useTranslations("Workspace.nodes");
+    const _tNodes = useTranslations("Workspace.nodes");
     const fileKeys = data.fileKeys ?? [];
     const infos = data.infos ?? [];
 

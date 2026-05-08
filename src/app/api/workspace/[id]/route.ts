@@ -1,8 +1,8 @@
-import { NextRequest, NextResponse } from "next/server";
+import type { Edge, Node } from "@xyflow/react";
+import { and, eq } from "drizzle-orm";
+import { type NextRequest, NextResponse } from "next/server";
 import { getDb } from "@/db";
 import { workflows } from "@/db/schema";
-import { eq, and } from "drizzle-orm";
-import type { Node, Edge } from "@xyflow/react";
 import { logger } from "@/lib/logger";
 
 type Params = Promise<{ id: string }>;
@@ -10,7 +10,7 @@ type Params = Promise<{ id: string }>;
 /**
  * GET /api/workspace/[id]
  */
-export async function GET(request: NextRequest, context: { params: Params }) {
+export async function GET(_request: NextRequest, context: { params: Params }) {
     try {
         const { id } = await context.params;
         const workflowId = Number.parseInt(id, 10);
@@ -27,10 +27,7 @@ export async function GET(request: NextRequest, context: { params: Params }) {
             .select()
             .from(workflows)
             .where(
-                and(
-                    eq(workflows.id, workflowId),
-                    eq(workflows.deleted, false),
-                ),
+                and(eq(workflows.id, workflowId), eq(workflows.deleted, false)),
             )
             .limit(1);
 
@@ -101,10 +98,7 @@ export async function PUT(request: NextRequest, context: { params: Params }) {
             .update(workflows)
             .set(updateData)
             .where(
-                and(
-                    eq(workflows.id, workflowId),
-                    eq(workflows.deleted, false),
-                ),
+                and(eq(workflows.id, workflowId), eq(workflows.deleted, false)),
             )
             .returning({ id: workflows.id });
 
@@ -130,7 +124,7 @@ export async function PUT(request: NextRequest, context: { params: Params }) {
  * DELETE /api/workspace/[id]
  */
 export async function DELETE(
-    request: NextRequest,
+    _request: NextRequest,
     context: { params: Params },
 ) {
     try {

@@ -70,7 +70,10 @@ async function embedVideoBytesFromFileKeyFields(
         if (!fk) continue;
         const buf = await readUploadFileByFileKey(fk);
         out["video_bytes"] = buf.toString("base64");
-        if (typeof out["video_filename"] !== "string" || !out["video_filename"]) {
+        if (
+            typeof out["video_filename"] !== "string" ||
+            !out["video_filename"]
+        ) {
             out["video_filename"] = path.basename(fk);
         }
         return;
@@ -92,14 +95,20 @@ async function embedMergeKeysFromLocalUploads(
     if (out["video_bytes"] == null) {
         const vbuf = await readUploadFileByFileKey(vfk);
         out["video_bytes"] = vbuf.toString("base64");
-        if (typeof out["video_filename"] !== "string" || !out["video_filename"]) {
+        if (
+            typeof out["video_filename"] !== "string" ||
+            !out["video_filename"]
+        ) {
             out["video_filename"] = path.basename(vfk);
         }
     }
     if (out["audio_bytes"] == null) {
         const abuf = await readUploadFileByFileKey(afk);
         out["audio_bytes"] = abuf.toString("base64");
-        if (typeof out["audio_filename"] !== "string" || !out["audio_filename"]) {
+        if (
+            typeof out["audio_filename"] !== "string" ||
+            !out["audio_filename"]
+        ) {
             out["audio_filename"] = path.basename(afk);
         }
     }

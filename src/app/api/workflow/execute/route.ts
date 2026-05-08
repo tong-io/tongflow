@@ -3,14 +3,14 @@
  * Create a workflow execution task
  */
 
-import { NextRequest, NextResponse } from "next/server";
-import type { ExecutableWorkflow } from "@/utils/executable-workflow";
+import { eq, inArray, sql } from "drizzle-orm";
 import { nanoid } from "nanoid";
+import { type NextRequest, NextResponse } from "next/server";
 import { getDb } from "@/db";
 import { tasks, workflows } from "@/db/schema";
-import { eq, inArray, sql } from "drizzle-orm";
 import { getFeatureByName } from "@/lib/feature-registry.server";
 import { logger } from "@/lib/logger";
+import type { ExecutableWorkflow } from "@/utils/executable-workflow";
 
 const DEFAULT_CONCURRENT_TASKS = 3;
 
@@ -96,7 +96,7 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        logger.debug("\n" + "=".repeat(60));
+        logger.debug(`\n${"=".repeat(60)}`);
         logger.debug("[API /api/workflow/execute] Creating workflow task");
         logger.debug(`WorkflowId: ${body.workflowId}`);
         logger.debug(`Workflow: ${workflow.name || workflowRecord.name}`);
@@ -108,7 +108,7 @@ export async function POST(request: NextRequest) {
             `ExecutableNodes: ${workflow.executableNodes?.length || 0}`,
             workflow.executableNodes?.map((n) => `${n.id}(${n.feature})`),
         );
-        logger.debug("=".repeat(60) + "\n");
+        logger.debug(`${"=".repeat(60)}\n`);
 
         const featureMap: Record<string, { type: string; function: string }> =
             {};

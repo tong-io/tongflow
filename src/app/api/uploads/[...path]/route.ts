@@ -3,9 +3,9 @@
  * Serve uploaded files from local storage.
  */
 
-import { NextRequest, NextResponse } from "next/server";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
+import { type NextRequest, NextResponse } from "next/server";
 
 const UPLOAD_DIR = path.resolve(process.cwd(), "data", "uploads");
 
@@ -55,7 +55,7 @@ export async function GET(
                 "Cache-Control": "public, max-age=31536000, immutable",
             },
         });
-    } catch (error) {
+    } catch (_error) {
         return NextResponse.json({ error: "File not found" }, { status: 404 });
     }
 }

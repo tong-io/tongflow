@@ -16,7 +16,9 @@ export const workflows = sqliteTable(
             .defaultNow()
             .$onUpdate(() => new Date())
             .notNull(),
-        deleted: integer("deleted", { mode: "boolean" }).default(false).notNull(),
+        deleted: integer("deleted", { mode: "boolean" })
+            .default(false)
+            .notNull(),
     },
     (t) => [index("workflows_deleted_idx").on(t.deleted)],
 );
@@ -64,7 +66,9 @@ export const materials = sqliteTable(
         isFavorite: integer("is_favorite", { mode: "boolean" })
             .default(false)
             .notNull(),
-        isCover: integer("is_cover", { mode: "boolean" }).default(false).notNull(),
+        isCover: integer("is_cover", { mode: "boolean" })
+            .default(false)
+            .notNull(),
         createdAt: integer("created_at", { mode: "timestamp" })
             .defaultNow()
             .notNull(),
@@ -72,7 +76,9 @@ export const materials = sqliteTable(
             .defaultNow()
             .$onUpdate(() => new Date())
             .notNull(),
-        deleted: integer("deleted", { mode: "boolean" }).default(false).notNull(),
+        deleted: integer("deleted", { mode: "boolean" })
+            .default(false)
+            .notNull(),
     },
     (t) => [
         index("materials_deleted_idx").on(t.deleted),

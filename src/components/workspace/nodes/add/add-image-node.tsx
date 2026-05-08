@@ -1,30 +1,30 @@
-import React, { useState, useRef, memo, useCallback } from "react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { type NodeProps, useNodeId } from "@xyflow/react";
 import {
-    Image as ImageIcon,
-    Upload,
-    Pencil,
-    Library,
     Camera,
+    Image as ImageIcon,
+    Library,
+    Pencil,
+    Upload,
 } from "lucide-react";
-import { useNodeId, type NodeProps } from "@xyflow/react";
-import useFlow from "@/hooks/use-flow";
+import { useTranslations } from "next-intl";
+import React, { memo, useCallback, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { BaseNode } from "../base/base-node";
 import {
     Dialog,
     DialogContent,
     DialogDescription,
+    DialogFooter,
     DialogHeader,
     DialogTitle,
-    DialogFooter,
 } from "@/components/ui/dialog";
-import { useMultipleUpload, useUpload } from "@/hooks/use-upload";
-import { LibInput } from "../../share/lib-input";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { WhiteBoard, type WhiteBoardRef } from "@/components/ui/whiteboard";
-import { cn } from "@/lib/utils";
+import useFlow from "@/hooks/use-flow";
+import { useMultipleUpload, useUpload } from "@/hooks/use-upload";
 import { logger } from "@/lib/logger";
-import { useTranslations } from "next-intl";
+import { cn } from "@/lib/utils";
+import { LibInput } from "../../share/lib-input";
+import { BaseNode } from "../base/base-node";
 
 // File upload component
 const UploadTab = () => {
@@ -402,7 +402,7 @@ export const AddImageNode: React.FC<NodeProps> = ({ selected, data }) => {
     const t = useTranslations("Workspace.nodes.add");
     const id = useNodeId();
     const updates = useFlow((s) => s.updates);
-    const activeTab = (data as any)?.activeTab || "upload";
+    const _activeTab = (data as any)?.activeTab || "upload";
     logger.debug("AddImageNode");
 
     // Save state on tab change
@@ -509,7 +509,6 @@ export const AddImageNode: React.FC<NodeProps> = ({ selected, data }) => {
                     </div>
                 </Tabs>
             </div>
-
         </BaseNode>
     );
 };

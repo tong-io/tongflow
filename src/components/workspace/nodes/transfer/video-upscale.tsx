@@ -1,22 +1,20 @@
 "use client";
 
-
-import type { TongflowPluginNodeProps } from "@/types/tongflow-flow";
-import { memo, useEffect } from "react";
-import { Sparkles, Maximize2 } from "lucide-react";
-
-import { BaseNode } from "../base/base-node";
-import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
-import { cn } from "@/lib/utils";
-import { getFileUrl } from "@/lib/file-url";
-import { useNodeState } from "@/hooks/use-node-data";
-import {
-    upstreamParam,
-    type GetPromptsContext,
-} from "@/utils/node-execution-config";
+import { Maximize2, Sparkles } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { memo, useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+import { useNodeState } from "@/hooks/use-node-data";
+import { getFileUrl } from "@/lib/file-url";
+import { cn } from "@/lib/utils";
+import type { TongflowPluginNodeProps } from "@/types/tongflow-flow";
+import {
+    type GetPromptsContext,
+    upstreamParam,
+} from "@/utils/node-execution-config";
+import { BaseNode } from "../base/base-node";
 
 const DEFAULT_FEATURE = "video-upscale";
 
@@ -108,12 +106,12 @@ const VideoUpscaleNode = ({
                         <Button
                             key={tier.value}
                             variant={
-                                resolution === tier.value ? "default" : "outline"
+                                resolution === tier.value
+                                    ? "default"
+                                    : "outline"
                             }
                             size="sm"
-                            onClick={() =>
-                                setState({ resolution: tier.value })
-                            }
+                            onClick={() => setState({ resolution: tier.value })}
                             className={cn(
                                 "h-auto py-2 px-1 flex flex-col gap-0.5 text-xs",
                                 resolution === tier.value

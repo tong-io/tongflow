@@ -24,12 +24,10 @@ import {
     validateSlotOutput,
     workflowTaskFailureEnvelope,
 } from "@/lib/abi-schema-validate";
-import { logger } from "@/lib/logger";
 import { canonicalizeNodeSlot } from "@/lib/legacy-slot-map";
+import { logger } from "@/lib/logger";
 import { executePlugin } from "@/lib/plugin-executor/execute";
-import {
-    resolveRoutingPluginId,
-} from "@/lib/task-prompt-routing";
+import { resolveRoutingPluginId } from "@/lib/task-prompt-routing";
 import { notifyTask, registerTask, removeTask } from "./task-emitter";
 
 export function isNodeSlot(s: string): s is NodeSlot {

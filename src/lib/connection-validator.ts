@@ -7,12 +7,12 @@ import type { Connection, Node as FlowNode } from "@xyflow/react";
 import type { JSONSchema7 } from "json-schema";
 
 import { ABI_DEFINITIONS, ABI_NODES, type NodeSlot } from "@/generated/abi";
+import { DATA_NODE_TYPES } from "@/utils/executable-workflow";
 import {
     getEffectiveNodeConfig,
     getEffectiveOutputType,
     normalizeFlowTargetHandle,
 } from "@/utils/flow-connection-shared";
-import { DATA_NODE_TYPES } from "@/utils/executable-workflow";
 import {
     getNodeExecutionConfig,
     type NodeExecutionConfig,
@@ -253,9 +253,10 @@ function pickProducerFieldSchema(
 
 function getAbiInputProperties(slot: NodeSlot): Record<string, JSONSchema7> {
     const inputs = resolveRefs(ABI_NODES[slot].inputs as JSONSchema7);
-    return (
-        (inputs.properties as Record<string, JSONSchema7>) ?? {}
-    ) as Record<string, JSONSchema7>;
+    return ((inputs.properties as Record<string, JSONSchema7>) ?? {}) as Record<
+        string,
+        JSONSchema7
+    >;
 }
 
 function consumerFieldSchema(
@@ -275,7 +276,9 @@ function upstreamSourceMatchesHandle(
     const declaredDefined =
         declaredRaw !== undefined && declaredRaw !== null && declaredRaw !== "";
     if (declaredDefined)
-        return normalizeFlowTargetHandle(declaredRaw as string | null) === actual;
+        return (
+            normalizeFlowTargetHandle(declaredRaw as string | null) === actual
+        );
     return actual === "a";
 }
 
@@ -287,11 +290,15 @@ function collectCandidateParamKeys(
 ): string[] | undefined {
     if (!cfg?.paramMappings || !sourceOutType) return undefined;
 
-    const inputPropSet = new Set(Object.keys(getAbiInputProperties(targetSlot)));
+    const inputPropSet = new Set(
+        Object.keys(getAbiInputProperties(targetSlot)),
+    );
     const out: string[] = [];
 
-    outer: for (const [paramKey, mapping] of Object.entries(cfg.paramMappings)) {
-        if (!inputPropSet.has(paramKey)) continue outer;
+    outer: for (const [paramKey, mapping] of Object.entries(
+        cfg.paramMappings,
+    )) {
+        if (!inputPropSet.has(paramKey)) continue;
         for (const src of mapping.sources ?? []) {
             if (src.type !== "upstream") continue;
             if (src.upstreamType !== sourceOutType) continue;
@@ -359,7 +366,8 @@ export function tryAbiCompatibility(
     if (!paramKeys || paramKeys.length === 0) return undefined;
 
     const sourceCfg =
-        getNodeExecutionConfig(srcRf) ?? getEffectiveNodeConfig(srcRf, sourceData);
+        getNodeExecutionConfig(srcRf) ??
+        getEffectiveNodeConfig(srcRf, sourceData);
 
     const producerNarrow = pickProducerFieldSchema(
         ABI_NODES[sourceSlot].outputs as JSONSchema7,

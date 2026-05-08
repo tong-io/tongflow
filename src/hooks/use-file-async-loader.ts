@@ -4,10 +4,10 @@
  * Integrates cache and queue, provides local file async loading hooks.
  */
 
-import { useEffect, useState, useRef } from "react";
-import { getGlobalFileCache } from "@/lib/file-url-cache";
+import { useEffect, useRef, useState } from "react";
 import { getGlobalFileQueue, type LoadPriority } from "@/lib/file-loader-queue";
 import { getFileUrl } from "@/lib/file-url";
+import { getGlobalFileCache } from "@/lib/file-url-cache";
 
 export interface UseFileAsyncLoaderOptions {
     priority?: LoadPriority;
@@ -41,6 +41,7 @@ export function useFileAsyncLoader(
             return;
         }
 
+        // biome-ignore lint/correctness/useHookAtTopLevel: useFileUrl is a utility function, not a React hook
         const fileUrl = useFileUrl(fileKey);
 
         if (taskIdRef.current) queue.cancel(taskIdRef.current);
@@ -115,6 +116,7 @@ export function useFileAsyncLoaderBatch(
                 newUrls.set(fileKey, cachedUrl);
                 loadedCount += 1;
             } else {
+                // biome-ignore lint/correctness/useHookAtTopLevel: useFileUrl is a utility function, not a React hook
                 const fileUrl = useFileUrl(fileKey);
 
                 const taskId = `batch-loader-${fileKey}-${Date.now()}-${Math.random()}`;
@@ -160,7 +162,8 @@ export function useFileAsyncLoaderBatch(
         }
 
         return () => {
-            for (const taskId of taskIdsRef.current.values()) queue.cancel(taskId);
+            for (const taskId of taskIdsRef.current.values())
+                queue.cancel(taskId);
             taskIdsRef.current.clear();
         };
     }, [fileKeys.length, priority, cache, queue, onProgress]);
@@ -196,4 +199,3 @@ export function useFileLoaderStats() {
 
     return stats;
 }
-

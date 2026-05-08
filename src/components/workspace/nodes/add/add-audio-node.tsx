@@ -1,16 +1,17 @@
-import React, { useState, memo, useCallback } from "react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Music, Upload, Mic, Library } from "lucide-react";
-import { useNodeId, type NodeProps } from "@xyflow/react";
-import useFlow from "@/hooks/use-flow";
-import { Button } from "@/components/ui/button";
-import { BaseNode } from "../base/base-node";
-import { useMultipleUpload, useUpload } from "@/hooks/use-upload";
-import { LibInput } from "../../share/lib-input";
-import { AudioRecorderWithVisualizer } from "@/components/ui/audio-recorder";
-import { TooltipProvider } from "@/components/ui/tooltip";
+import { type NodeProps, useNodeId } from "@xyflow/react";
+import { Library, Mic, Music, Upload } from "lucide-react";
 import { useTranslations } from "next-intl";
+import type React from "react";
+import { memo, useCallback, useState } from "react";
+import { AudioRecorderWithVisualizer } from "@/components/ui/audio-recorder";
+import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import useFlow from "@/hooks/use-flow";
+import { useMultipleUpload, useUpload } from "@/hooks/use-upload";
 import { logger } from "@/lib/logger";
+import { LibInput } from "../../share/lib-input";
+import { BaseNode } from "../base/base-node";
 
 // Recording component
 const RecordTab = () => {
@@ -205,7 +206,7 @@ export const AddAudioNode: React.FC<NodeProps> = ({ selected, data }) => {
     const t = useTranslations("Workspace.nodes.add");
     const id = useNodeId();
     const updates = useFlow((s) => s.updates);
-    const activeTab = (data as any)?.activeTab || "upload";
+    const _activeTab = (data as any)?.activeTab || "upload";
 
     // Save state on tab change
     const handleTabChange = (value: string) => {
@@ -283,7 +284,6 @@ export const AddAudioNode: React.FC<NodeProps> = ({ selected, data }) => {
                     </div>
                 </Tabs>
             </div>
-
         </BaseNode>
     );
 };

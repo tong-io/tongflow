@@ -1,30 +1,26 @@
-import { useEffect, useState, useCallback, useRef } from "react";
 import { useNodeId, useReactFlow, useStore, useStoreApi } from "@xyflow/react";
-
+import { useCallback, useEffect, useRef, useState } from "react";
+import useFlow from "@/hooks/use-flow";
 import {
-    useTaskStore,
     useBatchTaskManager,
     useNodeTaskUpdate,
+    useTaskStore,
 } from "@/hooks/use-task";
-import useFlow from "@/hooks/use-flow";
+import { logger } from "@/lib/logger";
+import { getAbiNodeBySlot, resolveAbiOutputMappings } from "@/lib/tongflow-abi";
 import type { BaseNodeData, OutputNodeType } from "@/types/nodes";
 import {
-    registerNodeExecutionConfig,
-    type NodeExecutionConfig,
     type GetPromptsContext,
+    type NodeExecutionConfig,
+    registerNodeExecutionConfig,
 } from "@/utils/node-execution-config";
+import { getValueByPath } from "@/utils/path-utils";
 import {
+    applyResolvedOutputRoutes,
     normalizeTaskPayloadData,
     pickMarkdownFromPayload,
-    applyResolvedOutputRoutes,
 } from "@/utils/task-payload";
-import {
-    getAbiNodeBySlot,
-    resolveAbiOutputMappings,
-} from "@/lib/tongflow-abi";
-import { getValueByPath } from "@/utils/path-utils";
 import { useNodePluginResolver } from "./use-node-plugin-resolver";
-import { logger } from "@/lib/logger";
 
 /* ------------------------------------------------------------------ */
 /* Pure helpers (no hooks)                                             */
@@ -128,8 +124,7 @@ export function useNodeExecution({
     );
 
     const expands = useFlow((s) => s.expands);
-    const { isLoading: taskLoading, createBatchTasks } =
-        useBatchTaskManager();
+    const { isLoading: taskLoading, createBatchTasks } = useBatchTaskManager();
 
     const loading = taskLoading || nodeExecutionStatus === "running";
 
@@ -155,21 +150,15 @@ export function useNodeExecution({
                     (task?.data as Record<string, unknown> | undefined);
 
                 // ABI convention-driven multi-output routing
-                const abiNode = feature
-                    ? getAbiNodeBySlot(feature)
-                    : undefined;
-                const routes = abiNode
-                    ? resolveAbiOutputMappings(abiNode)
-                    : [];
+                const abiNode = feature ? getAbiNodeBySlot(feature) : undefined;
+                const routes = abiNode ? resolveAbiOutputMappings(abiNode) : [];
                 if (routes.length > 0) {
                     applyResolvedOutputRoutes(nodeId, payload, routes, expands);
                     return;
                 }
 
                 // Single-output fallback
-                const outputNodeType = outputType as
-                    | OutputNodeType
-                    | undefined;
+                const outputNodeType = outputType as OutputNodeType | undefined;
                 const outputDataField = outputField as
                     | "fileKeys"
                     | "texts"

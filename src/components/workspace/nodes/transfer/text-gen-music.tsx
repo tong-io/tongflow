@@ -1,22 +1,17 @@
 import {
+    type Edge,
     Handle,
     Position,
     useNodeId,
     useNodesData,
     useStore,
-    type Edge,
 } from "@xyflow/react";
-import type { TongflowPluginNodeProps } from "@/types/tongflow-flow";
-import { memo, useMemo } from "react";
 import { Clock, Music, Tag } from "lucide-react";
-
-import { BaseNode } from "../base/base-node";
-import { useNodeState } from "@/hooks/use-node-data";
+import { useTranslations } from "next-intl";
+import { memo, useMemo } from "react";
 import { Card } from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Slider } from "@/components/ui/slider";
+import { Label } from "@/components/ui/label";
 import {
     Select,
     SelectContent,
@@ -24,14 +19,18 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
+import { Slider } from "@/components/ui/slider";
+import { Textarea } from "@/components/ui/textarea";
+import { useNodeState } from "@/hooks/use-node-data";
+import type { TongflowPluginNodeProps } from "@/types/tongflow-flow";
+import { TEXT_GEN_MUSIC_HANDLES } from "@/utils/connection-rules";
+import { coerceBaseNodeData } from "@/utils/flow-node-data";
 import {
-    upstreamParam,
     configParam,
     type GetPromptsContext,
+    upstreamParam,
 } from "@/utils/node-execution-config";
-import { TEXT_GEN_MUSIC_HANDLES } from "@/utils/connection-rules";
-import { useTranslations } from "next-intl";
-import { coerceBaseNodeData } from "@/utils/flow-node-data";
+import { BaseNode } from "../base/base-node";
 
 const DEFAULT_FEATURE = "gen-music";
 
@@ -90,8 +89,10 @@ interface MusicNodeState {
     bpm: string;
 }
 
-type TextGenMusicNodeProps =
-    TongflowPluginNodeProps<"gen-music", "textGenMusicNode">;
+type TextGenMusicNodeProps = TongflowPluginNodeProps<
+    "gen-music",
+    "textGenMusicNode"
+>;
 // Workflow execution config
 const workflowConfig = {
     feature: DEFAULT_FEATURE,

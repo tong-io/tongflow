@@ -1,29 +1,29 @@
 "use client";
 
-import * as React from "react";
+import type { LucideIcon } from "lucide-react";
+import { Maximize2, Mic, MicOff } from "lucide-react";
+import { useTranslations } from "next-intl";
+import type * as React from "react";
 import {
     forwardRef,
-    useState,
-    useEffect,
-    useRef,
     useCallback,
+    useEffect,
     useMemo,
+    useRef,
+    useState,
 } from "react";
-import { Card } from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 import {
     Dialog,
     DialogContent,
+    DialogFooter,
     DialogHeader,
     DialogTitle,
-    DialogFooter,
 } from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
-import { Mic, MicOff, Maximize2 } from "lucide-react";
-import type { LucideIcon } from "lucide-react";
-import { useTranslations } from "next-intl";
 
 // Web Speech API shims
 interface SpeechRecognitionEvent extends Event {
@@ -285,12 +285,12 @@ const NodeTextarea = forwardRef<HTMLTextAreaElement, NodeTextareaProps>(
             recognition.interimResults = true;
             recognition.lang = voiceLang;
 
-            let initFinalTranscript = "";
+            let _initFinalTranscript = "";
 
             recognition.onstart = () => {
                 setIsListening(true);
                 setInterimText("");
-                initFinalTranscript = "";
+                _initFinalTranscript = "";
             };
 
             recognition.onresult = (event: SpeechRecognitionEvent) => {
@@ -431,7 +431,7 @@ const NodeTextarea = forwardRef<HTMLTextAreaElement, NodeTextareaProps>(
         );
 
         const handleInlineBlur = useCallback(
-            (e: React.FocusEvent<HTMLTextAreaElement>) => {
+            (_e: React.FocusEvent<HTMLTextAreaElement>) => {
                 if (localValue !== value) {
                     isTypingRef.current = false;
                     onChange?.(localValue);

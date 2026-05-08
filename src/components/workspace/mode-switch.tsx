@@ -1,19 +1,19 @@
 "use client";
 
+import { Play, Sparkles } from "lucide-react";
+import { useTranslations } from "next-intl";
+import { useEffect, useState } from "react";
 import { Switch } from "@/components/ui/switch";
 import {
     Tooltip,
     TooltipContent,
     TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { Sparkles, Play } from "lucide-react";
-import { useEffect, useState } from "react";
 import {
     useTaskStore,
-    type WorkspaceMode,
     WORKSPACE_MODE_KEY,
+    type WorkspaceMode,
 } from "@/hooks/use-task";
-import { useTranslations } from "next-intl";
 
 interface ModeSwitchProps {
     onChange?: (mode: WorkspaceMode) => void;

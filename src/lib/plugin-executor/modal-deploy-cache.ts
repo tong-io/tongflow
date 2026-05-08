@@ -5,7 +5,10 @@ import fs from "node:fs";
 import path from "node:path";
 import { promisify } from "node:util";
 
-import { getModalPluginConfig, getPluginFileAbsolutePath } from "@/lib/plugins-registry.server";
+import {
+    getModalPluginConfig,
+    getPluginFileAbsolutePath,
+} from "@/lib/plugins-registry.server";
 
 const execFileAsync = promisify(execFile);
 
@@ -102,11 +105,15 @@ async function gitRevParseHead(cwd: string): Promise<string | null> {
 /** Empty string = clean tree; `null` = git failed */
 async function gitStatusPorcelain(cwd: string): Promise<string | null> {
     try {
-        const { stdout } = await execFileAsync("git", ["status", "--porcelain"], {
-            cwd,
-            timeout: GIT_TIMEOUT_MS,
-            maxBuffer: 1024 * 1024,
-        });
+        const { stdout } = await execFileAsync(
+            "git",
+            ["status", "--porcelain"],
+            {
+                cwd,
+                timeout: GIT_TIMEOUT_MS,
+                maxBuffer: 1024 * 1024,
+            },
+        );
         return String(stdout);
     } catch {
         return null;
@@ -125,8 +132,7 @@ export async function readModalDeployFingerprint(
     if (!deployFile) return null;
 
     const pluginRoot =
-        findGitRoot(path.dirname(deployFile)) ??
-        findGitRoot(process.cwd());
+        findGitRoot(path.dirname(deployFile)) ?? findGitRoot(process.cwd());
     if (!pluginRoot) return null;
 
     const headSha = await gitRevParseHead(pluginRoot);
@@ -139,7 +145,9 @@ export async function readModalDeployFingerprint(
     return { headSha, dirty };
 }
 
-export async function shouldSkipModalDeploy(pluginId: string): Promise<boolean> {
+export async function shouldSkipModalDeploy(
+    pluginId: string,
+): Promise<boolean> {
     if (process.env.MODAL_FORCE_REDEPLOY === "1") return false;
 
     const fp = await readModalDeployFingerprint(pluginId);

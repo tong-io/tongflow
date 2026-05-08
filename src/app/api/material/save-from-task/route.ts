@@ -3,15 +3,15 @@
  * Frontend backup: task completion + material save (idempotent)
  */
 
-import { NextRequest, NextResponse } from "next/server";
+import { eq } from "drizzle-orm";
+import { type NextRequest, NextResponse } from "next/server";
 import { getDb } from "@/db";
 import { tasks } from "@/db/schema";
-import { eq } from "drizzle-orm";
+import { logger } from "@/lib/logger";
 import {
     handleTaskCompletion,
     type TaskCompletionData,
 } from "@/services/task-completion";
-import { logger } from "@/lib/logger";
 
 interface SaveFromTaskRequest {
     taskId: string;

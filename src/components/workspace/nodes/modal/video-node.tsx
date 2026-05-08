@@ -1,31 +1,29 @@
-import { memo, useRef, useState, useEffect } from "react";
-import { Video as VideoIcon, Maximize2, X, Download } from "lucide-react";
+import { Download, Maximize2, Video as VideoIcon, X } from "lucide-react";
+import { useTranslations } from "next-intl";
+import { memo, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-
-import type { RfDataNodeProps } from "@/types/nodes";
-
-import { BaseNode } from "../base/base-node";
-import {
-    NodeHeader,
-    NodeHeaderActions,
-    NodeHeaderIcon,
-    NodeHeaderMenuAction,
-    NodeHeaderTitle,
-    NodeHeaderComboAction,
-} from "../base/node-header";
+import { Button } from "@/components/ui/button";
 import {
     DropdownMenuItem,
     DropdownMenuLabel,
     DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
-import { Button } from "@/components/ui/button";
 import { Waterfall } from "@/components/ui/waterfall";
 import {
     useFileAsyncLoader,
     useFileAsyncLoaderBatch,
 } from "@/hooks/use-file-async-loader";
-import { useTranslations } from "next-intl";
 import { logger } from "@/lib/logger";
+import type { RfDataNodeProps } from "@/types/nodes";
+import { BaseNode } from "../base/base-node";
+import {
+    NodeHeader,
+    NodeHeaderActions,
+    NodeHeaderComboAction,
+    NodeHeaderIcon,
+    NodeHeaderMenuAction,
+    NodeHeaderTitle,
+} from "../base/node-header";
 
 import { proportionalMediaNodeWidthPx } from "./media-node-max-width";
 
@@ -481,7 +479,6 @@ const VideoNode = ({ selected, data }: VideoNodeRfProps) => {
                         </div>
                     </div>
                 )}
-
             </BaseNode>
 
             {/* Full screen modals - rendered outside BaseNode */}

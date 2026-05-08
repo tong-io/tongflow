@@ -7,13 +7,13 @@ import {
     extractAbiBusinessInput,
     validateSlotInput,
 } from "@/lib/abi-schema-validate";
+import { canonicalizeNodeSlot } from "@/lib/legacy-slot-map";
 import { logger } from "@/lib/logger";
 import {
     buildPersistedTaskPrompt,
     resolveRoutingPluginId,
 } from "@/lib/task-prompt-routing";
 import { getAbiNodeBySlot } from "@/lib/tongflow-abi";
-import { canonicalizeNodeSlot } from "@/lib/legacy-slot-map";
 
 function isAbiNodeSlot(s: string): s is NodeSlot {
     return Object.hasOwn(ABI_NODES, s);
@@ -31,8 +31,13 @@ export async function POST(request: NextRequest) {
             workflowId?: number;
             routing?: { pluginId?: string };
         };
-        const { feature, prompt, nodeId, workflowId, routing: bodyRouting } =
-            body;
+        const {
+            feature,
+            prompt,
+            nodeId,
+            workflowId,
+            routing: bodyRouting,
+        } = body;
 
         if (!feature || typeof feature !== "string") {
             return NextResponse.json(

@@ -1,12 +1,12 @@
-import type { TongflowPluginNodeProps } from "@/types/tongflow-flow";
-import { memo } from "react";
-import { BaseNode } from "../base/base-node";
 import { Atom } from "lucide-react";
-import {
-    upstreamParam,
-    type GetPromptsContext,
-} from "@/utils/node-execution-config";
 import { useTranslations } from "next-intl";
+import { memo } from "react";
+import type { TongflowPluginNodeProps } from "@/types/tongflow-flow";
+import {
+    type GetPromptsContext,
+    upstreamParam,
+} from "@/utils/node-execution-config";
+import { BaseNode } from "../base/base-node";
 
 const DEFAULT_FEATURE = "separate-video-audio";
 
@@ -29,7 +29,10 @@ const workflowConfig = {
 const SeparateVideoAudioNode = ({
     selected,
     data,
-}: TongflowPluginNodeProps<"separate-video-audio", "separateVideoAudioNode">) => {
+}: TongflowPluginNodeProps<
+    "separate-video-audio",
+    "separateVideoAudioNode"
+>) => {
     const t = useTranslations("Workspace.nodes");
     const fileKeys = data.fileKeys;
 

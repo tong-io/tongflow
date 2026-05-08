@@ -5,17 +5,17 @@
 import type { Connection, Edge, Node } from "@xyflow/react";
 import { tryAbiCompatibility } from "@/lib/connection-validator";
 import { DATA_NODE_TYPES } from "./executable-workflow";
-import type { NodeExecutionConfig } from "./node-execution-config";
 import {
     getEffectiveNodeConfig,
     getEffectiveOutputType,
     normalizeFlowTargetHandle,
 } from "./flow-connection-shared";
+import type { NodeExecutionConfig } from "./node-execution-config";
 
 export {
     ADD_NODE_OUTPUT_TYPE,
-    getEffectiveOutputType,
     getEffectiveNodeConfig,
+    getEffectiveOutputType,
     normalizeFlowTargetHandle,
 } from "./flow-connection-shared";
 

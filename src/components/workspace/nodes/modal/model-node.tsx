@@ -1,43 +1,41 @@
 "use client";
 
-import { memo, useRef, useState, useEffect, useCallback } from "react";
-import { Box, Maximize2, X, Download, RotateCcw } from "lucide-react";
+import { Box, Download, Maximize2, RotateCcw, X } from "lucide-react";
+import { useTranslations } from "next-intl";
+import { memo, useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import * as THREE from "three";
-
+import { Button } from "@/components/ui/button";
+import { DropdownMenuLabel } from "@/components/ui/dropdown-menu";
+import { useFileAsyncLoader } from "@/hooks/use-file-async-loader";
+import { logger } from "@/lib/logger";
+import type { RfDataNodeProps } from "@/types/nodes";
 import { BaseNode } from "../base/base-node";
 import {
     NodeHeader,
     NodeHeaderActions,
+    NodeHeaderComboAction,
     NodeHeaderIcon,
     NodeHeaderMenuAction,
     NodeHeaderTitle,
-    NodeHeaderComboAction,
 } from "../base/node-header";
-import { DropdownMenuLabel } from "@/components/ui/dropdown-menu";
-import { Button } from "@/components/ui/button";
-import { useFileAsyncLoader } from "@/hooks/use-file-async-loader";
-import { useTranslations } from "next-intl";
-import { logger } from "@/lib/logger";
-
-import type { RfDataNodeProps } from "@/types/nodes";
 
 type ModelNodeRfProps = RfDataNodeProps<"modelNode">;
 
 // Spark must stay dynamic (browser-only entry)
 // Spark WASM currently breaks Next build — disabled
 // Production can load Spark via CDN chunk
-let SplatMesh: any = null;
+const _SplatMesh: any = null;
 
 // Spark bootstrap — disabled for now
-async function initSparkIfNeeded() {
+async function _initSparkIfNeeded() {
     // Spark WASM module disabled due to Next.js webpack compatibility issues
     // Prefer CDN bundle in production
     logger.debug("Gaussian Splatting support requires separate CDN loading");
 }
 
 // Frame camera to bound the mesh
-const fitCameraToSelection = (
+const _fitCameraToSelection = (
     camera: THREE.PerspectiveCamera,
     controls: any,
     selection: THREE.Object3D,
@@ -207,7 +205,7 @@ const FullScreen3DModal = ({
                 let isDragging = false;
                 let previousMousePosition = { x: 0, y: 0 };
                 const rotation = { x: 0, y: 0 };
-                let targetRotation = { x: 0, y: 0 };
+                const targetRotation = { x: 0, y: 0 };
 
                 // Pointer listeners
                 const pointerdownHandler = (e: any) => {
@@ -304,8 +302,6 @@ const FullScreen3DModal = ({
                         await loadSTL(url, scene, modelRef);
                     } else if (extension === ".dae") {
                         await loadDAE(url, scene, modelRef);
-                    } else if (extension === ".ply") {
-                        await loadPLY(url, scene, modelRef);
                     } else if (extension === ".usdz" || extension === ".usd") {
                         await loadUSDZ(url, scene, modelRef);
                     } else if (
@@ -425,7 +421,9 @@ const FullScreen3DModal = ({
 
         // Kick off preview + stash disposer promise
         let cleanup: (() => void) | undefined;
-        init().then((c) => (cleanup = c));
+        init().then((c) => {
+            cleanup = c;
+        });
 
         return () => {
             if (cleanup) cleanup();
@@ -441,7 +439,7 @@ const FullScreen3DModal = ({
             // setupScene may sync/async return disposer handles
             // Normalize cleanup whether sync or awaited
             const start = async () => {
-                // @ts-ignore
+                // @ts-expect-error
                 cleanup = await setupScene();
             };
             start();
@@ -640,7 +638,7 @@ const MiniModelPreview = ({
                 let isDragging = false;
                 let previousMousePosition = { x: 0, y: 0 };
                 const rotation = { x: 0, y: 0 };
-                let targetRotation = { x: 0, y: 0 };
+                const targetRotation = { x: 0, y: 0 };
 
                 // Event Handlers
                 const onPointerDown = (e: PointerEvent) => {
@@ -891,7 +889,7 @@ async function loadOBJ(
 
 // Loader: Gaussian splat payload
 async function loadSplat(
-    url: string,
+    _url: string,
     scene: THREE.Scene,
     modelRef: React.MutableRefObject<THREE.Object3D | null>,
 ): Promise<void> {
@@ -1096,7 +1094,7 @@ async function loadSTEP(
         const text = await response.text();
 
         // Best-effort ASCII STEP to placeholder mesh
-        const lines = text.split("\n");
+        const _lines = text.split("\n");
 
         // Stub mesh so UI still renders
         const geometry = new THREE.BoxGeometry(1, 1, 1);
@@ -1105,7 +1103,7 @@ async function loadSTEP(
 
         scene.add(mesh);
         modelRef.current = mesh;
-    } catch (err) {
+    } catch (_err) {
         throw new Error(
             "STEP format requires a specialized viewer. Please convert to GLTF or OBJ format.",
         );
@@ -1121,7 +1119,7 @@ async function loadIGES(
     try {
         // IGES needs CAD libs — fallback to OBJ importer
         const response = await fetch(url);
-        const text = await response.text();
+        const _text = await response.text();
 
         // Stub mesh so UI still renders
         const geometry = new THREE.BoxGeometry(1, 1, 1);
@@ -1130,7 +1128,7 @@ async function loadIGES(
 
         scene.add(mesh);
         modelRef.current = mesh;
-    } catch (err) {
+    } catch (_err) {
         throw new Error(
             "IGES format requires a specialized viewer. Please convert to GLTF or OBJ format.",
         );
@@ -1171,68 +1169,61 @@ async function loadVTP(
 async function loadPointCloud(
     url: string,
     scene: THREE.Scene,
-    extension: string,
+    _extension: string,
     modelRef: React.MutableRefObject<THREE.Object3D | null>,
 ): Promise<void> {
-    return new Promise(async (resolve, reject) => {
-        try {
-            const response = await fetch(url);
-            const text = await response.text();
-            const lines = text
-                .split("\n")
-                .filter((line: string) => line.trim().length > 0);
+    const response = await fetch(url);
+    const text = await response.text();
+    const lines = text
+        .split("\n")
+        .filter((line: string) => line.trim().length > 0);
 
-            const positions: number[] = [];
-            const colors: number[] = [];
+    const positions: number[] = [];
+    const colors: number[] = [];
 
-            // Parse whitespace-delimited cloud rows
-            lines.forEach((line: string) => {
-                const parts = line.trim().split(/\s+/);
+    // Parse whitespace-delimited cloud rows
+    lines.forEach((line: string) => {
+        const parts = line.trim().split(/\s+/);
 
-                if (parts.length >= 3) {
-                    // First triplet encodes XYZ
-                    positions.push(
-                        parseFloat(parts[0]),
-                        parseFloat(parts[1]),
-                        parseFloat(parts[2]),
-                    );
-
-                    // Optional RGB/A columns after xyz
-                    if (parts.length >= 6) {
-                        colors.push(
-                            parseFloat(parts[3]) / 255,
-                            parseFloat(parts[4]) / 255,
-                            parseFloat(parts[5]) / 255,
-                        );
-                    } else {
-                        colors.push(0.5, 0.5, 0.5);
-                    }
-                }
-            });
-
-            const geometry = new THREE.BufferGeometry();
-            geometry.setAttribute(
-                "position",
-                new THREE.BufferAttribute(new Float32Array(positions), 3),
-            );
-            geometry.setAttribute(
-                "color",
-                new THREE.BufferAttribute(new Float32Array(colors), 3),
+        if (parts.length >= 3) {
+            // First triplet encodes XYZ
+            positions.push(
+                parseFloat(parts[0]),
+                parseFloat(parts[1]),
+                parseFloat(parts[2]),
             );
 
-            const material = new THREE.PointsMaterial({
-                size: 0.1,
-                vertexColors: true,
-            });
-
-            const points = new THREE.Points(geometry, material);
-            scene.add(points);
-            modelRef.current = points;
-            resolve();
-        } catch (err) {
-            reject(err);
+            // Optional RGB/A columns after xyz
+            if (parts.length >= 6) {
+                colors.push(
+                    parseFloat(parts[3]) / 255,
+                    parseFloat(parts[4]) / 255,
+                    parseFloat(parts[5]) / 255,
+                );
+            } else {
+                colors.push(0.5, 0.5, 0.5);
+            }
         }
     });
+
+    const geometry = new THREE.BufferGeometry();
+    geometry.setAttribute(
+        "position",
+        new THREE.BufferAttribute(new Float32Array(positions), 3),
+    );
+    geometry.setAttribute(
+        "color",
+        new THREE.BufferAttribute(new Float32Array(colors), 3),
+    );
+
+    const material = new THREE.PointsMaterial({
+        size: 0.1,
+        vertexColors: true,
+    });
+
+    const points = new THREE.Points(geometry, material);
+    scene.add(points);
+    modelRef.current = points;
 }
 
 // Primary exported node surface
@@ -1248,7 +1239,7 @@ const ModelNode = ({ selected, data }: ModelNodeRfProps) => {
 
     // Derive MIME/ext from persisted fileKey tails
     const fileExtension = fileKey
-        ? "." + fileKey.split(".").pop()?.toLowerCase() || ".glb"
+        ? `.${fileKey.split(".").pop()?.toLowerCase()}` || ".glb"
         : ".glb";
     const isSupported = [
         ".glb",
@@ -1361,7 +1352,6 @@ const ModelNode = ({ selected, data }: ModelNodeRfProps) => {
                         </div>
                     )}
                 </div>
-
             </BaseNode>
 
             {/* Full screen modal */}

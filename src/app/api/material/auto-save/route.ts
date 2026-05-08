@@ -3,10 +3,10 @@
  * Saves task outputs (webhook-authenticated internal API)
  */
 
-import { NextRequest, NextResponse } from "next/server";
+import { eq } from "drizzle-orm";
+import { type NextRequest, NextResponse } from "next/server";
 import { getDb } from "@/db";
 import { materials, tasks, workflows } from "@/db/schema";
-import { eq } from "drizzle-orm";
 import { logger } from "@/lib/logger";
 
 const WEBHOOK_TOKEN = process.env.TASK_WEBHOOK_TOKEN;

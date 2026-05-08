@@ -2,10 +2,10 @@
  * Local Next.js server: run `modal setup` (writes ~/.modal.toml).
  */
 
+import { spawn } from "node:child_process";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import { spawn } from "node:child_process";
 import { resolvePython } from "@/lib/modal-deploy-workers";
 
 export function modalTomlPath(): string {
@@ -28,7 +28,9 @@ let setupRunning = false;
 
 export async function runModalSetup(
     opts: { profile?: string | null },
-    emit: (e: ModalSetupStreamEvent | { type: "error"; message: string }) => void,
+    emit: (
+        e: ModalSetupStreamEvent | { type: "error"; message: string },
+    ) => void,
 ): Promise<void> {
     if (setupRunning) {
         emit({ type: "error", message: "Modal setup is already running" });
@@ -82,7 +84,10 @@ export async function runModalSetup(
             child.on("error", (e) => reject(e));
             child.on("exit", (code) => {
                 if (code === 0) resolve();
-                else reject(new Error(`modal setup failed (${code ?? "unknown"})`));
+                else
+                    reject(
+                        new Error(`modal setup failed (${code ?? "unknown"})`),
+                    );
             });
         });
 

@@ -3,18 +3,24 @@ import "server-only";
 import { type ChildProcess, spawn } from "node:child_process";
 import path, { delimiter } from "node:path";
 import { FunctionTimeoutError, ModalClient } from "modal";
-import { embedLocalUploadsForModal } from "@/lib/plugin-executor/embed-local-uploads-for-modal.server";
+import { TaskStatus } from "@/constants/task-status";
+import type { NodeSlot } from "@/generated/abi";
+import {
+    requireModalTokenEnv,
+    resolvePython,
+} from "@/lib/modal-deploy-workers";
 import { convertAssetOutputsToFileRefs } from "@/lib/plugin-executor/convert-modal-output-fileref";
+import { embedLocalUploadsForModal } from "@/lib/plugin-executor/embed-local-uploads-for-modal.server";
 import {
     modalTerminateAfterTimeouts,
     recordModalDeployCache,
     shouldSkipModalDeploy,
 } from "@/lib/plugin-executor/modal-deploy-cache";
-import { getModalPluginConfig, getPluginFileAbsolutePath } from "@/lib/plugins-registry.server";
-import { requireModalTokenEnv, resolvePython } from "@/lib/modal-deploy-workers";
+import {
+    getModalPluginConfig,
+    getPluginFileAbsolutePath,
+} from "@/lib/plugins-registry.server";
 import { notifyTask } from "@/lib/task-emitter";
-import { TaskStatus } from "@/constants/task-status";
-import type { NodeSlot } from "@/generated/abi";
 import type { PluginExecRequest, PluginExecResult } from "../types";
 
 /** `modal run download` — must not hang forever if CLI or Hub stalls */
@@ -47,11 +53,13 @@ function chainModalDeploy(
     fn: () => Promise<void>,
 ): Promise<void> {
     const prev = modalDeployChains.get(pluginId) ?? Promise.resolve();
-    const next = prev.then(fn, () => undefined).finally(() => {
-        if (modalDeployChains.get(pluginId) === next) {
-            modalDeployChains.delete(pluginId);
-        }
-    });
+    const next = prev
+        .then(fn, () => undefined)
+        .finally(() => {
+            if (modalDeployChains.get(pluginId) === next) {
+                modalDeployChains.delete(pluginId);
+            }
+        });
     modalDeployChains.set(pluginId, next);
     return next;
 }
@@ -79,11 +87,9 @@ function tailText(buf: Buffer, maxChars: number): string {
 function abortPromise(signal: AbortSignal): Promise<never> {
     if (signal.aborted) return Promise.reject(new Error("Aborted"));
     return new Promise((_, reject) => {
-        signal.addEventListener(
-            "abort",
-            () => reject(new Error("Aborted")),
-            { once: true },
-        );
+        signal.addEventListener("abort", () => reject(new Error("Aborted")), {
+            once: true,
+        });
     });
 }
 
@@ -262,7 +268,8 @@ async function runModalDeployPlugin(
     const cfg = getModalPluginConfig(pluginId);
     if (!cfg) throw new Error(`Unknown plugin: ${pluginId}`);
     const deployFile = getPluginFileAbsolutePath(pluginId, cfg.deployFile);
-    if (!deployFile) throw new Error(`Missing deploy file for plugin: ${pluginId}`);
+    if (!deployFile)
+        throw new Error(`Missing deploy file for plugin: ${pluginId}`);
     const python = await resolvePython();
     await runModalCli(
         "modal deploy",
@@ -285,7 +292,8 @@ async function runModalDownloadPlugin(
     const cfg = getModalPluginConfig(pluginId);
     if (!cfg) throw new Error(`Unknown plugin: ${pluginId}`);
     const downloadFile = getPluginFileAbsolutePath(pluginId, cfg.downloadFile);
-    if (!downloadFile) throw new Error(`Missing download file for plugin: ${pluginId}`);
+    if (!downloadFile)
+        throw new Error(`Missing download file for plugin: ${pluginId}`);
     const python = await resolvePython();
     await runModalCli(
         "modal run download",
@@ -302,16 +310,11 @@ async function runModalDownloadPlugin(
 
 function looksLikeModalMethodMissing(err: unknown): boolean {
     const m =
-        err instanceof Error
-            ? err.message
-            : typeof err === "string"
-              ? err
-              : "";
+        err instanceof Error ? err.message : typeof err === "string" ? err : "";
     if (!m) return false;
     const lower = m.toLowerCase();
     return lower.includes("not found") && lower.includes("method");
 }
-
 
 function ensureModalObjectResult<S extends NodeSlot>(
     raw: unknown,
@@ -362,7 +365,10 @@ export async function execModalPlugin<S extends NodeSlot>(
         stage(`Modal: checking deployment (${cfg.appName}/${clsName})`);
         const client = new ModalClient();
         await withTimeout(
-            Promise.race([client.cls.fromName(cfg.appName, clsName), abortPromise(req.signal)]),
+            Promise.race([
+                client.cls.fromName(cfg.appName, clsName),
+                abortPromise(req.signal),
+            ]),
             60 * 1000,
             "modal cls.fromName",
         );
@@ -376,7 +382,10 @@ export async function execModalPlugin<S extends NodeSlot>(
         stage(`Modal: invoking ${methodName}()`);
         const client = new ModalClient();
         const cls = await withTimeout(
-            Promise.race([client.cls.fromName(cfg.appName, clsName), abortPromise(req.signal)]),
+            Promise.race([
+                client.cls.fromName(cfg.appName, clsName),
+                abortPromise(req.signal),
+            ]),
             60 * 1000,
             "modal cls.fromName (invoke)",
         );
@@ -391,7 +400,11 @@ export async function execModalPlugin<S extends NodeSlot>(
             60 * 1000,
             "modal method.spawn",
         );
-        return await getModalCallResult(call, req.signal, MODAL_CALL_GET_TIMEOUT_MS);
+        return await getModalCallResult(
+            call,
+            req.signal,
+            MODAL_CALL_GET_TIMEOUT_MS,
+        );
     };
 
     let out: unknown;
@@ -413,4 +426,3 @@ export async function execModalPlugin<S extends NodeSlot>(
     );
     return ensureModalObjectResult<S>(converted);
 }
-

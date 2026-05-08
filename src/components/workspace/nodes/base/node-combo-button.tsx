@@ -1,18 +1,16 @@
 import { useNodeId, useStore } from "@xyflow/react";
 import { CheckCircle, Circle } from "lucide-react";
-import { cn } from "@/lib/utils";
-import useFlow from "@/hooks/use-flow";
-import { isModalNode } from "@/constants/modal-nodes";
 import { useTranslations } from "next-intl";
+import { isModalNode } from "@/constants/modal-nodes";
+import useFlow from "@/hooks/use-flow";
+import { cn } from "@/lib/utils";
 
 export function NodeComboButton() {
     const nodeId = useNodeId();
     const t = useTranslations("Workspace.nodes.base");
 
     const comboMode = useFlow((s) => s.comboMode);
-    const isInCombo = useFlow((s) =>
-        nodeId ? s.isInCombo(nodeId) : false,
-    );
+    const isInCombo = useFlow((s) => (nodeId ? s.isInCombo(nodeId) : false));
     const toggleCombo = useFlow((s) => s.toggleCombo);
 
     const nodeType = useStore((state) => {

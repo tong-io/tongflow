@@ -1,10 +1,10 @@
 "use client";
-import React, { useEffect, useMemo, useRef, useState } from "react";
-import { Tooltip, TooltipContent, TooltipTrigger } from "./tooltip";
-import { Button } from "./button";
 import { Mic, StopCircle, Trash } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { logger } from "@/lib/logger";
+import { cn } from "@/lib/utils";
+import { Button } from "./button";
+import { Tooltip, TooltipContent, TooltipTrigger } from "./tooltip";
 
 interface Props {
     className?: string;
@@ -29,12 +29,12 @@ const padWithLeadingZeros = (num: number, length: number): string => {
 
 export const AudioRecorderWithVisualizer = ({
     className,
-    timerClassName,
+    timerClassName: _timerClassName,
     onRecord,
 }: Props) => {
     // States
     const [isRecording, setIsRecording] = useState<boolean>(false);
-    const [isRecordingFinished, setIsRecordingFinished] =
+    const [_isRecordingFinished, setIsRecordingFinished] =
         useState<boolean>(false);
     const [timer, setTimer] = useState<number>(0);
     const [currentRecord, setCurrentRecord] = useState<Record>({
@@ -48,15 +48,15 @@ export const AudioRecorderWithVisualizer = ({
     const seconds = timer % 60;
 
     // Split the hours, minutes, and seconds into individual digits
-    const [hourLeft, hourRight] = useMemo(
+    const [_hourLeft, _hourRight] = useMemo(
         () => padWithLeadingZeros(hours, 2).split(""),
         [hours],
     );
-    const [minuteLeft, minuteRight] = useMemo(
+    const [_minuteLeft, _minuteRight] = useMemo(
         () => padWithLeadingZeros(minutes, 2).split(""),
         [minutes],
     );
-    const [secondLeft, secondRight] = useMemo(
+    const [_secondLeft, _secondRight] = useMemo(
         () => padWithLeadingZeros(seconds, 2).split(""),
         [seconds],
     );
@@ -82,7 +82,7 @@ export const AudioRecorderWithVisualizer = ({
           : "audio/wav";
 
     function startRecording() {
-        if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+        if (navigator.mediaDevices?.getUserMedia) {
             navigator.mediaDevices
                 .getUserMedia({
                     audio: true,
@@ -221,8 +221,7 @@ export const AudioRecorderWithVisualizer = ({
             const numBars = Math.floor(WIDTH / (barWidth + spacing));
 
             for (let i = 0; i < numBars; i++) {
-                const barHeight =
-                    Math.pow(dataArray[i] / 128.0, 8) * maxBarHeight;
+                const barHeight = (dataArray[i] / 128.0) ** 8 * maxBarHeight;
                 const x = (barWidth + spacing) * i;
                 const y = HEIGHT / 2 - barHeight / 2;
                 canvasCtx.fillRect(x, y, barWidth, barHeight);

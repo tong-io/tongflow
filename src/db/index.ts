@@ -1,10 +1,10 @@
-import Database from "better-sqlite3";
-import { drizzle } from "drizzle-orm/better-sqlite3";
-import type { BetterSQLite3Database } from "drizzle-orm/better-sqlite3";
-import * as schema from "./schema";
-import path from "node:path";
 import { mkdirSync } from "node:fs";
+import path from "node:path";
+import Database from "better-sqlite3";
+import type { BetterSQLite3Database } from "drizzle-orm/better-sqlite3";
+import { drizzle } from "drizzle-orm/better-sqlite3";
 import { runKebabSlotDataMigration } from "./migrate-kebab-slots";
+import * as schema from "./schema";
 
 let db: BetterSQLite3Database<typeof schema> | null = null;
 

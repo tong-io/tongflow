@@ -1,7 +1,7 @@
-import { NextRequest, NextResponse } from "next/server";
+import { and, eq } from "drizzle-orm";
+import { type NextRequest, NextResponse } from "next/server";
 import { getDb } from "@/db";
 import { materials, tasks, workflows } from "@/db/schema";
-import { eq, and } from "drizzle-orm";
 import { logger } from "@/lib/logger";
 
 /**
@@ -9,14 +9,14 @@ import { logger } from "@/lib/logger";
  * Trace workflow linked to a material (local)
  */
 export async function GET(
-    request: NextRequest,
+    _request: NextRequest,
     { params }: { params: Promise<{ id: string }> },
 ) {
     try {
         const { id } = await params;
         const materialId = parseInt(id, 10);
 
-        if (isNaN(materialId)) {
+        if (Number.isNaN(materialId)) {
             return NextResponse.json(
                 { error: "Invalid material ID" },
                 { status: 400 },

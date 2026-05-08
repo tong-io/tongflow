@@ -3,7 +3,7 @@
  * Used to export workflow JSON that can be independently executed by the backend
  */
 
-import type { Node, Edge } from "@xyflow/react";
+import type { Edge, Node } from "@xyflow/react";
 
 /* ========================================================================== */
 /* Type definitions                                                             */

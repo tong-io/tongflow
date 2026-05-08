@@ -112,7 +112,11 @@ async function normalizeFileRefValue(
                     ? extFromFilename(rec.filename)
                     : null) ??
                 "bin";
-            const file_key = await saveFile(buf, ext.replace(/^\./, ""), taskId);
+            const file_key = await saveFile(
+                buf,
+                ext.replace(/^\./, ""),
+                taskId,
+            );
             const next: Record<string, unknown> = { file_key };
             if (typeof rec.mime === "string") next.mime = rec.mime;
             if (typeof rec.filename === "string") next.filename = rec.filename;

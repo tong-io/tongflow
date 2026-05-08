@@ -1,27 +1,24 @@
-import {
-    useNodeId,
-    useNodesData,
-} from "@xyflow/react";
-import type { TongflowPluginNodeProps } from "@/types/tongflow-flow";
-import { memo, useCallback, useMemo } from "react";
+import { useNodeId, useNodesData } from "@xyflow/react";
 import { Atom, Wand2 } from "lucide-react";
-import { BaseNode } from "../base/base-node";
-import { useNodeState } from "@/hooks/use-node-data";
-import useFlow from "@/hooks/use-flow";
+import { useTranslations } from "next-intl";
+import { memo, useMemo } from "react";
 import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import { NodeTextarea } from "../base/node-textarea";
-import { MediaThumbnail } from "../base/media-thumbnail";
+import useFlow from "@/hooks/use-flow";
+import { useNodeState } from "@/hooks/use-node-data";
 import { getFileUrl } from "@/lib/file-url";
+import type { TongflowPluginNodeProps } from "@/types/tongflow-flow";
+import { coerceBaseNodeData } from "@/utils/flow-node-data";
 import {
-    upstreamParam,
     configParam,
     type GetPromptsContext,
+    upstreamParam,
 } from "@/utils/node-execution-config";
-import { useTranslations } from "next-intl";
-import { coerceBaseNodeData } from "@/utils/flow-node-data";
+import { BaseNode } from "../base/base-node";
+import { MediaThumbnail } from "../base/media-thumbnail";
+import { NodeTextarea } from "../base/node-textarea";
 
-const DEFAULT_FEATURE = "speech-text-gen-video";
+const _DEFAULT_FEATURE = "speech-text-gen-video";
 
 const SpeechGenVideoNode = ({
     selected,
@@ -30,8 +27,8 @@ const SpeechGenVideoNode = ({
     const t = useTranslations("Workspace.nodes");
     const ids = data.ids ?? [];
     const localFileKeys = data.fileKeys ?? [];
-    const expands = useFlow((s) => s.expands);
-    const id = useNodeId()!;
+    const _expands = useFlow((s) => s.expands);
+    const _id = useNodeId()!;
 
     // If ids are present, get data from associated nodes (composition mode)
     const fromNodes = useNodesData(ids);

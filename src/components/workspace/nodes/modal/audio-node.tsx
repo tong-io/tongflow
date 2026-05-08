@@ -1,33 +1,30 @@
 import { useNodeId } from "@xyflow/react";
-import { memo, useState, useEffect, useRef } from "react";
-import { Music, Trash, Maximize2, X, Download } from "lucide-react";
+import { Download, Maximize2, Music, X } from "lucide-react";
+import { useTranslations } from "next-intl";
+import { memo, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-
-import type { RfDataNodeProps } from "@/types/nodes";
-
-import { BaseNode } from "../base/base-node";
-import {
-    NodeHeader,
-    NodeHeaderActions,
-    NodeHeaderIcon,
-    NodeHeaderMenuAction,
-    NodeHeaderTitle,
-    NodeHeaderComboAction,
-} from "../base/node-header";
+import { Button } from "@/components/ui/button";
 import {
     DropdownMenuItem,
     DropdownMenuLabel,
     DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
-import { Button } from "@/components/ui/button";
 import { Waterfall } from "@/components/ui/waterfall";
-import useFlow from "@/hooks/use-flow";
 import {
     useFileAsyncLoader,
     useFileAsyncLoaderBatch,
 } from "@/hooks/use-file-async-loader";
 import { logger } from "@/lib/logger";
-import { useTranslations } from "next-intl";
+import type { RfDataNodeProps } from "@/types/nodes";
+import { BaseNode } from "../base/base-node";
+import {
+    NodeHeader,
+    NodeHeaderActions,
+    NodeHeaderComboAction,
+    NodeHeaderIcon,
+    NodeHeaderMenuAction,
+    NodeHeaderTitle,
+} from "../base/node-header";
 
 type AudioNodeRfProps = RfDataNodeProps<"audioNode">;
 
@@ -187,8 +184,7 @@ const FullScreenWaterfallAudioModal = ({
 const AudioNode = ({ selected, data }: AudioNodeRfProps) => {
     const t = useTranslations("Workspace.nodes.modal");
     const keys: string[] = data.fileKeys ?? [];
-    const { removeNode } = useFlow();
-    const id = useNodeId();
+    const _id = useNodeId();
     const [isFullScreen, setIsFullScreen] = useState(false);
     const [isWaterfallFullScreen, setIsWaterfallFullScreen] = useState(false);
 
@@ -373,7 +369,6 @@ const AudioNode = ({ selected, data }: AudioNodeRfProps) => {
                         </div>
                     </div>
                 )}
-
             </BaseNode>
 
             {/* Full screen modals - rendered outside BaseNode */}

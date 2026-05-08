@@ -1,27 +1,25 @@
-import { memo, useState, useEffect } from "react";
 import { Image as ImageIcon, Maximize2, X } from "lucide-react";
+import { useTranslations } from "next-intl";
+import { memo, useEffect, useState } from "react";
 import { createPortal } from "react-dom";
-
-import type { RfDataNodeProps } from "@/types/nodes";
-
-import { BaseNode } from "../base/base-node";
-import {
-    NodeHeader,
-    NodeHeaderActions,
-    NodeHeaderIcon,
-    NodeHeaderMenuAction,
-    NodeHeaderTitle,
-    NodeHeaderComboAction,
-} from "../base/node-header";
-import { DropdownMenuLabel } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
+import { DropdownMenuLabel } from "@/components/ui/dropdown-menu";
 import { Waterfall } from "@/components/ui/waterfall";
 import {
     useFileAsyncLoader,
     useFileAsyncLoaderBatch,
 } from "@/hooks/use-file-async-loader";
-import { useTranslations } from "next-intl";
 import { logger } from "@/lib/logger";
+import type { RfDataNodeProps } from "@/types/nodes";
+import { BaseNode } from "../base/base-node";
+import {
+    NodeHeader,
+    NodeHeaderActions,
+    NodeHeaderComboAction,
+    NodeHeaderIcon,
+    NodeHeaderMenuAction,
+    NodeHeaderTitle,
+} from "../base/node-header";
 
 import { proportionalMediaNodeWidthPx } from "./media-node-max-width";
 
@@ -340,7 +338,6 @@ const ImageNode = ({ selected, data }: ImageNodeRfProps) => {
                         </div>
                     </div>
                 )}
-
             </BaseNode>
 
             {/* Full screen modals - rendered outside BaseNode */}
@@ -361,10 +358,7 @@ const ImageNode = ({ selected, data }: ImageNodeRfProps) => {
 };
 
 // Custom comparison function to prevent unnecessary re-renders
-const areEqual = (
-    prevProps: ImageNodeRfProps,
-    nextProps: ImageNodeRfProps,
-) => {
+const areEqual = (prevProps: ImageNodeRfProps, nextProps: ImageNodeRfProps) => {
     const prevFileKeys = prevProps.data.fileKeys || [];
     const nextFileKeys = nextProps.data.fileKeys || [];
 

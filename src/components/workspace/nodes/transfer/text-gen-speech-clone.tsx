@@ -1,4 +1,3 @@
-import type { TongflowPluginNodeProps } from "@/types/tongflow-flow";
 import { Atom, Ear, Mic, Upload } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { memo, useCallback, useMemo, useRef } from "react";
@@ -20,6 +19,7 @@ import {
 import { useNodeState } from "@/hooks/use-node-data";
 import { getFileUrl } from "@/lib/file-url";
 import { logger } from "@/lib/logger";
+import type { TongflowPluginNodeProps } from "@/types/tongflow-flow";
 import {
     configParam,
     type GetPromptsContext,
@@ -36,7 +36,10 @@ import {
 const TextGenSpeechCloneNode = ({
     selected,
     data,
-}: TongflowPluginNodeProps<"text-gen-speech-clone", "textGenSpeechCloneNode">) => {
+}: TongflowPluginNodeProps<
+    "text-gen-speech-clone",
+    "textGenSpeechCloneNode"
+>) => {
     const t = useTranslations("Workspace.nodes");
     const locale = useLocale();
     const texts = data.texts ?? [];

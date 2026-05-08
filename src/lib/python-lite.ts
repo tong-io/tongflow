@@ -18,8 +18,8 @@ function canRunPython(cmd: string): boolean {
  * Minimal python resolver for plugins (does NOT require `modal`).
  */
 export async function resolvePythonLite(): Promise<string> {
-    const explicit = [process.env.PYTHON?.trim()].filter(
-        (x): x is string => Boolean(x),
+    const explicit = [process.env.PYTHON?.trim()].filter((x): x is string =>
+        Boolean(x),
     );
     for (const cmd of explicit) {
         if (canRunPython(cmd)) return cmd;
@@ -27,8 +27,5 @@ export async function resolvePythonLite(): Promise<string> {
     for (const cmd of ["python3", "python"]) {
         if (canRunPython(cmd)) return cmd;
     }
-    throw new Error(
-        "Could not run python. Set PYTHON or install python3.",
-    );
+    throw new Error("Could not run python. Set PYTHON or install python3.");
 }
-

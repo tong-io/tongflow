@@ -3,8 +3,8 @@
  * Every node component should export its own execution configuration
  */
 
-import type { ParamSource } from "./executable-workflow";
 import { logger } from "@/lib/logger";
+import type { ParamSource } from "./executable-workflow";
 
 /**
  * Parameter mapping definition (simplified version for self-contained node configuration)
@@ -123,7 +123,9 @@ export interface NodeExecutionConfig {
      * If provided, it is called on every task update (including streaming, completed, and failed)
      * Returning true indicates the event was handled; default logic will not run
      */
-    onTaskUpdate?: (task: any) => boolean | void | Promise<boolean | void>;
+    onTaskUpdate?: (
+        task: any,
+    ) => boolean | undefined | Promise<boolean | undefined>;
     /** Output type (corresponds to the data node type) */
     outputType?: string;
     /** Output field */

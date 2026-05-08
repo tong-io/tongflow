@@ -1,41 +1,39 @@
 "use client";
 
-import { formatDate } from "@/utils/date-utils";
-
-import { useState, useEffect, useCallback, useRef } from "react";
+import {
+    Box,
+    Download,
+    File,
+    FileText,
+    FolderOpen,
+    Heart,
+    Image,
+    Loader2,
+    Music,
+    RefreshCw,
+    Star,
+    Video,
+} from "lucide-react";
+import { useTranslations } from "next-intl";
+import { useCallback, useEffect, useRef, useState } from "react";
+import toast from "react-hot-toast";
+import { Button } from "@/components/ui/button";
 import {
     Dialog,
     DialogContent,
-    DialogHeader,
     DialogTitle,
     DialogTrigger,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
 import { Waterfall } from "@/components/ui/waterfall";
 import {
     listMaterials,
-    toggleFavorite,
     type Material,
     type MaterialType,
+    toggleFavorite,
 } from "@/lib/api/material";
-import { logger } from "@/lib/logger";
 import { getFileUrl } from "@/lib/file-url";
-import {
-    FolderOpen,
-    Image,
-    Video,
-    Music,
-    FileText,
-    File,
-    Box,
-    Loader2,
-    RefreshCw,
-    Heart,
-    Star,
-    Download,
-} from "lucide-react";
-import toast from "react-hot-toast";
-import { useTranslations } from "next-intl";
+import { logger } from "@/lib/logger";
+import { formatDate } from "@/utils/date-utils";
 
 const TYPE_ICONS: Record<MaterialType, React.ReactNode> = {
     image: <Image className="size-4" />,
@@ -228,8 +226,6 @@ function MaterialCard({
                         )}
                     </div>
                 );
-
-            case "file":
             default:
                 return (
                     <div className="aspect-square bg-muted rounded-t-lg flex items-center justify-center">

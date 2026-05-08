@@ -1,27 +1,26 @@
 "use client";
 
-import {
-    useNodeId,
-    useStore,
-} from "@xyflow/react";
-import type { TongflowPluginNodeProps } from "@/types/tongflow-flow";
 import type { Edge } from "@xyflow/react";
-import { memo, useMemo } from "react";
+import { useNodeId, useStore } from "@xyflow/react";
 import { Atom } from "lucide-react";
-
-import { BaseNode } from "../base/base-node";
+import { useTranslations } from "next-intl";
+import { memo, useMemo } from "react";
+import {
+    VIDEO_ASPECT_RATIOS,
+    VIDEO_DURATIONS,
+} from "@/constants/media-options";
+import { useNodeState } from "@/hooks/use-node-data";
+import type { TongflowPluginNodeProps } from "@/types/tongflow-flow";
+import {
+    configParam,
+    type GetPromptsContext,
+    staticParam,
+    upstreamParam,
+} from "@/utils/node-execution-config";
 import { AspectRatioPicker } from "../base/aspect-ratio-picker";
+import { BaseNode } from "../base/base-node";
 import { DurationPicker } from "../base/duration-picker";
 import { NodeTextarea } from "../base/node-textarea";
-import { useNodeState } from "@/hooks/use-node-data";
-import {
-    upstreamParam,
-    configParam,
-    staticParam,
-    type GetPromptsContext,
-} from "@/utils/node-execution-config";
-import { VIDEO_ASPECT_RATIOS, VIDEO_DURATIONS } from "@/constants/media-options";
-import { useTranslations } from "next-intl";
 
 // Workflow execution config (BaseNode wires this automatically)
 const workflowConfig = {
@@ -140,7 +139,9 @@ const TextGenVideoNode = ({
                 <AspectRatioPicker
                     ratios={VIDEO_ASPECT_RATIOS}
                     value={selectedAspectRatio}
-                    onChange={(ratio) => setState({ selectedAspectRatio: ratio })}
+                    onChange={(ratio) =>
+                        setState({ selectedAspectRatio: ratio })
+                    }
                     showSize
                 />
 

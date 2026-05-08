@@ -18,8 +18,6 @@ export interface LoadTask {
 }
 
 class FileLoaderQueue {
-    private changeCallback: (() => void) | null = null;
-
     enqueue(task: LoadTask): void {
         task.onSuccess(task.url);
     }
@@ -54,4 +52,3 @@ export function getGlobalFileQueue(): FileLoaderQueue {
     }
     return globalQueue;
 }
-

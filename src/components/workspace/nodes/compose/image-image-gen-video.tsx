@@ -1,24 +1,27 @@
 import { useNodeId, useNodesData } from "@xyflow/react";
-import type { TongflowPluginNodeProps } from "@/types/tongflow-flow";
+import { Sparkles, Video } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { memo, useMemo } from "react";
-import { Video, Sparkles } from "lucide-react";
-import { BaseNode } from "../base/base-node";
-import { AspectRatioPicker } from "../base/aspect-ratio-picker";
-import { DurationPicker } from "../base/duration-picker";
-import {
-    upstreamParam,
-    configParam,
-    staticParam,
-} from "@/utils/node-execution-config";
-import { useNodeState } from "@/hooks/use-node-data";
 import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import { NodeTextarea } from "../base/node-textarea";
-import { MediaThumbnail } from "../base/media-thumbnail";
-import { getFileUrl } from "@/lib/file-url";
-import { VIDEO_ASPECT_RATIOS, VIDEO_DURATIONS } from "@/constants/media-options";
-import { useTranslations } from "next-intl";
+import {
+    VIDEO_ASPECT_RATIOS,
+    VIDEO_DURATIONS,
+} from "@/constants/media-options";
 import useFlow from "@/hooks/use-flow";
+import { useNodeState } from "@/hooks/use-node-data";
+import { getFileUrl } from "@/lib/file-url";
+import type { TongflowPluginNodeProps } from "@/types/tongflow-flow";
+import {
+    configParam,
+    staticParam,
+    upstreamParam,
+} from "@/utils/node-execution-config";
+import { AspectRatioPicker } from "../base/aspect-ratio-picker";
+import { BaseNode } from "../base/base-node";
+import { DurationPicker } from "../base/duration-picker";
+import { MediaThumbnail } from "../base/media-thumbnail";
+import { NodeTextarea } from "../base/node-textarea";
 
 const DEFAULT_FEATURE = "image-image-gen-video";
 
@@ -68,10 +71,13 @@ const workflowConfig = {
 const ImageImageGenVideoNode = ({
     selected,
     data,
-}: TongflowPluginNodeProps<"image-image-gen-video", "imageImageGenVideoNode">) => {
+}: TongflowPluginNodeProps<
+    "image-image-gen-video",
+    "imageImageGenVideoNode"
+>) => {
     const t = useTranslations("Workspace.nodes");
-    const updates = useFlow((s) => s.updates);
-    const id = useNodeId()!;
+    const _updates = useFlow((s) => s.updates);
+    const _id = useNodeId()!;
     const ids = data.ids ?? [];
     const fromNodes = useNodesData(ids);
 
@@ -106,7 +112,8 @@ const ImageImageGenVideoNode = ({
                         firstImageFileKey && secondImageFileKey
                             ? [
                                   {
-                                      start_image: getFileUrl(firstImageFileKey),
+                                      start_image:
+                                          getFileUrl(firstImageFileKey),
                                       end_image: getFileUrl(secondImageFileKey),
                                       text: videoPrompt,
                                       width: selectedAspectRatio.width,
@@ -161,7 +168,9 @@ const ImageImageGenVideoNode = ({
                 <AspectRatioPicker
                     ratios={VIDEO_ASPECT_RATIOS}
                     value={selectedAspectRatio}
-                    onChange={(ratio) => setState({ selectedAspectRatio: ratio })}
+                    onChange={(ratio) =>
+                        setState({ selectedAspectRatio: ratio })
+                    }
                     showSize
                 />
 
@@ -180,7 +189,6 @@ const ImageImageGenVideoNode = ({
                     rows={4}
                 />
             </div>
-
         </BaseNode>
     );
 };

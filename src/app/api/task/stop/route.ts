@@ -1,9 +1,9 @@
-import { NextRequest, NextResponse } from "next/server";
-import { abortTask, notifyTask } from "@/lib/task-emitter";
+import { eq } from "drizzle-orm";
+import { type NextRequest, NextResponse } from "next/server";
 import { TaskStatus } from "@/constants/task-status";
 import { getDb, tasks } from "@/db";
-import { eq } from "drizzle-orm";
 import { logger } from "@/lib/logger";
+import { abortTask, notifyTask } from "@/lib/task-emitter";
 
 /**
  * POST /api/task/stop

@@ -1,24 +1,31 @@
-import type { HTMLAttributes, ReactNode } from "react";
-import { forwardRef, useCallback, useState, useEffect, useMemo } from "react";
-import { useNodeId, useReactFlow, useStore } from "@xyflow/react";
+import { Slot } from "@radix-ui/react-slot";
 import type { Edge } from "@xyflow/react";
+import { useNodeId, useReactFlow, useStore } from "@xyflow/react";
 import {
+    CheckCircle,
+    Circle,
+    Eye,
+    Layers,
+    Lock,
+    MenuIcon,
+    MessageSquare,
+    Play,
     Trash,
     Trash2,
-    MenuIcon,
-    Play,
-    Plus,
-    CheckCircle,
-    Eye,
-    MessageSquare,
-    Lock,
     Unlock,
-    Layers,
-    Circle,
 } from "lucide-react";
-
-import { Slot } from "@radix-ui/react-slot";
-import { cn } from "@/lib/utils";
+import { useTranslations } from "next-intl";
+import type { HTMLAttributes, ReactNode } from "react";
+import { forwardRef, useCallback, useMemo, useState } from "react";
+import {
+    AlertDialog,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import {
     DropdownMenu,
@@ -27,17 +34,8 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {
-    AlertDialog,
-    AlertDialogContent,
-    AlertDialogHeader,
-    AlertDialogFooter,
-    AlertDialogTitle,
-    AlertDialogDescription,
-    AlertDialogCancel,
-} from "@/components/ui/alert-dialog";
 import useFlow from "@/hooks/use-flow";
-import { useTranslations } from "next-intl";
+import { cn } from "@/lib/utils";
 import { coerceBaseNodeData } from "@/utils/flow-node-data";
 
 /**

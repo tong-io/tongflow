@@ -1,22 +1,21 @@
 import { useNodesData } from "@xyflow/react";
-import type { TongflowPluginNodeProps } from "@/types/tongflow-flow";
+import { Atom, Sparkles } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { memo, useMemo } from "react";
-import { Sparkles, Atom } from "lucide-react";
-
-import { BaseNode } from "../base/base-node";
-import { useNodeState } from "@/hooks/use-node-data";
-import { NodeTextarea } from "../base/node-textarea";
-import { getFileUrl } from "@/lib/file-url";
-import {
-    upstreamParam,
-    configParam,
-    staticParam,
-    type GetPromptsContext,
-} from "@/utils/node-execution-config";
 import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import { useTranslations } from "next-intl";
+import { useNodeState } from "@/hooks/use-node-data";
+import { getFileUrl } from "@/lib/file-url";
+import type { TongflowPluginNodeProps } from "@/types/tongflow-flow";
 import { coerceBaseNodeData } from "@/utils/flow-node-data";
+import {
+    configParam,
+    type GetPromptsContext,
+    staticParam,
+    upstreamParam,
+} from "@/utils/node-execution-config";
+import { BaseNode } from "../base/base-node";
+import { NodeTextarea } from "../base/node-textarea";
 
 // Workflow execution config
 const workflowConfig = {

@@ -1,7 +1,6 @@
 import { z } from "zod";
-import tongflowAbi from "../../config/tongflow.abi.json";
-
 import { MIN_SUPPORTED_ABI_VERSION } from "@/lib/abi-version";
+import tongflowAbi from "../../config/tongflow.abi.json";
 
 const AbiNodeSchema = z.object({
     nodeSlot: z.string().min(1),
@@ -10,10 +9,7 @@ const AbiNodeSchema = z.object({
 });
 
 const TongflowAbiFileSchema = z.object({
-    version: z
-        .number()
-        .int()
-        .min(MIN_SUPPORTED_ABI_VERSION),
+    version: z.number().int().min(MIN_SUPPORTED_ABI_VERSION),
     source: z.string().optional(),
     $defs: z.record(z.string(), z.unknown()).optional(),
     nodes: z.array(AbiNodeSchema),
@@ -52,7 +48,9 @@ export function resolveAbiOutputMappings(
     const outputs = node.outputs as JsonSchema | undefined;
     if (!outputs || typeof outputs !== "object") return [];
 
-    const properties = outputs.properties as Record<string, JsonSchema> | undefined;
+    const properties = outputs.properties as
+        | Record<string, JsonSchema>
+        | undefined;
     if (!properties) return [];
 
     const routes: ResolvedOutputRoute[] = [];
@@ -147,7 +145,9 @@ for (const n of parsed.nodes) {
 export const TONGFLOW_ABI_VERSION = parsed.version;
 export const TONGFLOW_ABI_NODES: readonly TongflowAbiNode[] = parsed.nodes;
 
-export function getAbiNodeBySlot(nodeSlot: string): TongflowAbiNode | undefined {
+export function getAbiNodeBySlot(
+    nodeSlot: string,
+): TongflowAbiNode | undefined {
     return bySlot.get(nodeSlot);
 }
 

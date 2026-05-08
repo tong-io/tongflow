@@ -2,7 +2,7 @@
  * Task API client
  */
 
-import { apiPost, apiGet } from "@/utils/api-client";
+import { apiGet, apiPost } from "@/utils/api-client";
 
 export interface Task {
     id: string;

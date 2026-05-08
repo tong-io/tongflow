@@ -1,7 +1,10 @@
 "use client";
 
 import { useNodeId } from "@xyflow/react";
+import { useTranslations } from "next-intl";
 import { useMemo } from "react";
+import { Card } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
 import useFlow from "@/hooks/use-flow";
 import {
     useNodePluginIds,
@@ -10,9 +13,6 @@ import {
 } from "@/hooks/use-plugins-registry";
 import type { BaseNodeData } from "@/types/nodes";
 import { NodePluginSelect } from "./node-plugin-select";
-import { Card } from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
-import { useTranslations } from "next-intl";
 
 export function pluginDisplayName(pluginId: string): string {
     const parts = pluginId.split("-").filter(Boolean);

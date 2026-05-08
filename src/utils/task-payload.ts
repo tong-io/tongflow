@@ -1,5 +1,5 @@
-import type { ResolvedOutputRoute } from "@/lib/tongflow-abi";
 import type { PossibleNode } from "@/hooks/use-flow";
+import type { ResolvedOutputRoute } from "@/lib/tongflow-abi";
 
 type ExpandsFn = (nodeId: string | null, nodes: PossibleNode[]) => string[];
 
@@ -24,9 +24,9 @@ export function applyResolvedOutputRoutes(
                             typeof item === "object" &&
                             item !== null
                                 ? String(
-                                      (
-                                          item as Record<string, unknown>
-                                      )[route.itemValuePath],
+                                      (item as Record<string, unknown>)[
+                                          route.itemValuePath
+                                      ],
                                   )
                                 : String(item),
                         )

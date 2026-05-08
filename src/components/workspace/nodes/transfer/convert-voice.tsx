@@ -1,37 +1,36 @@
+import { Atom, Mic, Upload } from "lucide-react";
+import { useTranslations } from "next-intl";
 import type { ReactNode } from "react";
-import { useState, memo } from "react";
-import { Upload, Mic, Atom } from "lucide-react";
-
-import { BaseNode } from "../base/base-node";
-import { useNodeState } from "@/hooks/use-node-data";
+import { memo, useState } from "react";
+import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import {
-    Select,
-    SelectTrigger,
-    SelectContent,
-    SelectItem,
-    SelectValue,
-} from "@/components/ui/select";
-import { Button } from "@/components/ui/button";
-import { logger } from "@/lib/logger";
-import {
     Dialog,
-    DialogTrigger,
+    DialogClose,
     DialogContent,
-    DialogHeader,
-    DialogTitle,
     DialogDescription,
     DialogFooter,
-    DialogClose,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
 } from "@/components/ui/dialog";
 import {
-    upstreamParam,
-    configParam,
-    staticParam,
-    type GetPromptsContext,
-} from "@/utils/node-execution-config";
-import { useTranslations } from "next-intl";
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
+import { useNodeState } from "@/hooks/use-node-data";
+import { logger } from "@/lib/logger";
 import type { RfDataNodeProps } from "@/types/nodes";
+import {
+    configParam,
+    type GetPromptsContext,
+    staticParam,
+    upstreamParam,
+} from "@/utils/node-execution-config";
+import { BaseNode } from "../base/base-node";
 
 type ConvertVoiceRfProps = RfDataNodeProps<"convertVoiceNode">;
 
@@ -186,13 +185,13 @@ export default memo(ConvertVoiceNode);
 
 const SpeakerVoiceUploader = ({
     trigger,
-    onChange,
+    onChange: _onChange,
 }: {
     trigger: ReactNode;
     onChange: (key: string) => void;
 }) => {
-    const [uploaded, setUploaded] = useState<boolean>(false);
-    const [progress, setProgress] = useState<number>(0);
+    const [_uploaded, setUploaded] = useState<boolean>(false);
+    const [_progress, _setProgress] = useState<number>(0);
 
     const doUpload = async (files: File[]) => {
         // Upload logic is temporarily simplified
@@ -223,13 +222,13 @@ const SpeakerVoiceUploader = ({
 
 export const SpeakerVoiceRecorder = ({
     trigger,
-    onChange,
+    onChange: _onChange,
 }: {
     trigger: ReactNode;
     onChange: (key: string) => void;
 }) => {
     const t = useTranslations("Workspace.nodes.convertVoice");
-    const [file, setFile] = useState<File>();
+    const [file, _setFile] = useState<File>();
 
     const onFinish = async () => {
         if (!file) return;

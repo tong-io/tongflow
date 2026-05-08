@@ -1,32 +1,32 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef, memo } from "react";
+import type { Edge, Node } from "@xyflow/react";
+import {
+    Box,
+    Download,
+    File as FileIcon,
+    Image,
+    Loader2,
+    Play,
+    RefreshCw,
+    Video,
+    Workflow as WorkflowIcon,
+} from "lucide-react";
+import { useTranslations } from "next-intl";
+import { memo, useCallback, useEffect, useRef, useState } from "react";
+import toast from "react-hot-toast";
+import { Button } from "@/components/ui/button";
 import {
     Dialog,
     DialogContent,
     DialogTitle,
     DialogTrigger,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
 import { Waterfall } from "@/components/ui/waterfall";
+import { useFlow } from "@/hooks/use-flow";
 import { listWorkflows, type Workflow } from "@/lib/api/workspace";
 import { getFileUrl } from "@/lib/file-url";
-import {
-    Workflow as WorkflowIcon,
-    Download,
-    Loader2,
-    RefreshCw,
-    Image,
-    Video,
-    Box,
-    Play,
-    File as FileIcon,
-} from "lucide-react";
-import toast from "react-hot-toast";
 import { logger } from "@/lib/logger";
-import { useFlow } from "@/hooks/use-flow";
-import type { Node, Edge } from "@xyflow/react";
-import { useTranslations } from "next-intl";
 import { formatDate } from "@/utils/date-utils";
 
 function inferMediaType(
@@ -260,28 +260,31 @@ export function WorkflowDialog({ trigger }: WorkflowDialogProps) {
         }
     }, [open, fetchWorkflows]);
 
-    const handleLoad = useCallback((workflow: Workflow) => {
-        try {
-            const flowData = JSON.parse(workflow.flow) as {
-                nodes: Node[];
-                edges: Edge[];
-            };
+    const handleLoad = useCallback(
+        (workflow: Workflow) => {
+            try {
+                const flowData = JSON.parse(workflow.flow) as {
+                    nodes: Node[];
+                    edges: Edge[];
+                };
 
-            useFlow.getState().setNodes(flowData.nodes);
-            useFlow.getState().setEdges(flowData.edges);
-            useFlow.getState().setWorkflowName(workflow.name);
-            useFlow
-                .getState()
-                .setWorkflowDescription(workflow.description || "");
-            useFlow.getState().setWorkflowId(workflow.id);
-            setOpen(false);
+                useFlow.getState().setNodes(flowData.nodes);
+                useFlow.getState().setEdges(flowData.edges);
+                useFlow.getState().setWorkflowName(workflow.name);
+                useFlow
+                    .getState()
+                    .setWorkflowDescription(workflow.description || "");
+                useFlow.getState().setWorkflowId(workflow.id);
+                setOpen(false);
 
-            toast.success(t("loadSuccess"));
-        } catch (error) {
-            logger.error("加载工作流失败:", error);
-            toast.error(t("loadFailed"));
-        }
-    }, [t]);
+                toast.success(t("loadSuccess"));
+            } catch (error) {
+                logger.error("加载工作流失败:", error);
+                toast.error(t("loadFailed"));
+            }
+        },
+        [t],
+    );
 
     const renderWorkflowCard = useCallback(
         (props: { index: number; data: Workflow; width: number }) => (

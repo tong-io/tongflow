@@ -3,25 +3,24 @@
  * Converts a ReactFlow workflow to an executable workflow JSON
  */
 
-import type { Node, Edge } from "@xyflow/react";
+import type { Edge, Node } from "@xyflow/react";
+import { logger } from "@/lib/logger";
+import { migrateWorkflowNodes } from "@/utils/migrate-workflow-nodes";
 import {
-    type ExecutableWorkflow,
-    type ExecutableNode,
+    DATA_NODE_TYPES,
     type DataNode,
+    type ExecutableNode,
+    type ExecutableWorkflow,
+    type ParamMapping,
     type WorkflowInput,
     type WorkflowOutput,
-    type ParamMapping,
-    type ParamSource,
-    DATA_NODE_TYPES,
 } from "./executable-workflow";
 import {
     getNodeExecutionConfig,
     type NodeExecutionConfig,
     type ParamMappingConfig,
 } from "./node-execution-config";
-import { migrateWorkflowNodes } from "@/utils/migrate-workflow-nodes";
 import { WorkflowParser } from "./workflow-parser";
-import { logger } from "@/lib/logger";
 
 /**
  * Build a NodeExecutionConfig from node.data
@@ -147,7 +146,7 @@ function getUpstreamNodeData(
 /**
  * Get an upstream node from the ids array by node type
  */
-function getUpstreamNodeByType(
+function _getUpstreamNodeByType(
     ids: string[],
     targetType: string,
     nodes: Node[],
@@ -207,7 +206,7 @@ export class WorkflowExporter {
                 if (!node) continue;
 
                 const nodeType = node.type ?? "unknown";
-                const nodeData = (node.data as Record<string, unknown>) ?? {};
+                const _nodeData = (node.data as Record<string, unknown>) ?? {};
 
                 // Process data node
                 if (isDataNode(nodeType)) {
@@ -264,7 +263,7 @@ export class WorkflowExporter {
                 // Output of executable nodes
                 const nodeData = (node.data as Record<string, unknown>) ?? {};
                 const mapping = getEffectiveNodeConfig(nodeType, nodeData);
-                if (mapping && mapping.outputType) {
+                if (mapping?.outputType) {
                     outputs.push({
                         name: `output_${nodeId.substring(0, 8)}`,
                         type: mapping.outputType.replace(
