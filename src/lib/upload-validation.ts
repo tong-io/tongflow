@@ -94,9 +94,7 @@ export interface FileValidationResult extends ValidationResult {
 /**
  * Validate whether the file meets upload limits
  */
-export async function validateFile(
-    file: File,
-): Promise<FileValidationResult> {
+export async function validateFile(file: File): Promise<FileValidationResult> {
     // Unified 50MB file size limit
     const MAX_FILE_SIZE = 50 * 1024 * 1024;
 

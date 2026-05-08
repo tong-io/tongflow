@@ -6,9 +6,7 @@ export const KEBAB_SLOT_DATA_VERSION = 2;
 
 function tableExists(db: Database.Database, name: string): boolean {
     const row = db
-        .prepare(
-            "SELECT name FROM sqlite_master WHERE type='table' AND name=?",
-        )
+        .prepare("SELECT name FROM sqlite_master WHERE type='table' AND name=?")
         .get(name) as { name: string } | undefined;
     return !!row;
 }
