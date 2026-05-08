@@ -18,6 +18,8 @@ export interface LoadTask {
 }
 
 class FileLoaderQueue {
+    private changeCallback?: () => void;
+
     enqueue(task: LoadTask): void {
         task.onSuccess(task.url);
     }

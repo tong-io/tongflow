@@ -219,12 +219,14 @@ function generateTs(abi: AbiFile): string {
     lines.push(
         "// Pass as root `$defs` (or AJV equivalently); merge with `{ ...inputsSchema }` when validating",
     );
+    // Use `as` casts (not type annotations) so JSON Schema extension keywords
+    // like `x-expand-each` don't trip TS excess-property checks on the literals.
     lines.push(
-        `export const ABI_DEFINITIONS: Record<string, JSONSchema7> = ${defsJson};`,
+        `export const ABI_DEFINITIONS = ${defsJson} as unknown as Record<string, JSONSchema7>;`,
     );
     lines.push("");
     lines.push(
-        `export const ABI_NODES: Record<NodeSlot, AbiNodeSchemas> = ${JSON.stringify(abiRuntime, null, "\t")};`,
+        `export const ABI_NODES = ${JSON.stringify(abiRuntime, null, "\t")} as unknown as Record<NodeSlot, AbiNodeSchemas>;`,
     );
 
     return `${lines.join("\n")}\n`;

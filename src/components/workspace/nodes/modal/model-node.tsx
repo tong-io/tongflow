@@ -439,7 +439,6 @@ const FullScreen3DModal = ({
             // setupScene may sync/async return disposer handles
             // Normalize cleanup whether sync or awaited
             const start = async () => {
-                // @ts-expect-error
                 cleanup = await setupScene();
             };
             start();
