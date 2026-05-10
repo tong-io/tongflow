@@ -10,7 +10,7 @@ import {
 describe("abi-schema-validate — input", () => {
     it("fails when business field type is wrong (gen_text text)", () => {
         const business = extractAbiBusinessInput({
-            pluginId: "tongflow-llm-gemini-text",
+            pluginId: "tongflow-llm-gemini",
             nodeSlot: "gen-text",
             text: 123,
         });

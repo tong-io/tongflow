@@ -86,7 +86,6 @@ pnpm dev
 - `GEMINI_API_KEY` 或 `GOOGLE_API_KEY`：模型选择 Gemini 时的**生成文本**及其他 Gemini 多模态处理
 - `OPENAI_API_KEY`（可选：`OPENAI_CHAT_MODEL`）：模型选择 OpenAI 时的**生成文本**；默认模型为 `gpt-4o-mini`
 - `DEEPSEEK_API_KEY`：仅用于直接调用 DeepSeek API 的功能（如批量排列/分组文本），非主文本生成下拉
-- `NEXT_PUBLIC_TASK_API_URL`：可选；将任务等待/停止指向外部任务服务
 - `NEXT_PUBLIC_FILE_BASE_URL`：可选；文件存储的 Base URL
 
 授权 Modal（Token 写入 `~/.modal.toml`）：
@@ -215,7 +214,7 @@ pnpm modal:setup
 
 ## 扩展 AI 能力
 
-功能元数据（模型插槽、处理路由键、耗时提示）集中在 [`config/features.default.json`](config/features.default.json)。覆盖方式、校验（`pnpm validate-features`）以及与任务处理器和节点白名单的关系，请参阅 [docs/feature-registry.md](docs/feature-registry.md)。私有部署的可选后构建客户端混淆方案，请参阅 [docs/closed-source-build.md](docs/closed-source-build.md)。可选的闭源钩子位于工作区包 [`@openflow/proprietary`](packages/proprietary/)，详见 [docs/proprietary-package.md](docs/proprietary-package.md)。
+功能元数据（模型插槽、处理路由键、耗时提示）集中在 [`config/features.default.json`](config/features.default.json)。覆盖方式、校验（`pnpm validate-features`）以及与任务处理器和节点白名单的关系，请参阅 [docs/feature-registry.md](docs/feature-registry.md)。
 
 ## Star 历史
 

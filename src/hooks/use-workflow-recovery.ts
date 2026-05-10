@@ -132,7 +132,6 @@ export function useWorkflowRecovery(options: UseWorkflowRecoveryOptions = {}) {
 
                 case WorkflowStatus.WORKFLOW_COMPLETED:
                 case TaskStatus.COMPLETED:
-                case "FINISHED":
                     logger.debug("[WorkflowRecovery] ✅ Workflow completed");
                     setWorkflowExecutionStatus("completed");
                     cleanup();
@@ -150,7 +149,6 @@ export function useWorkflowRecovery(options: UseWorkflowRecoveryOptions = {}) {
 
                 case WorkflowStatus.WORKFLOW_FAILED:
                 case TaskStatus.FAILED:
-                case "ERROR":
                     logger.debug(
                         "[WorkflowRecovery] ❌ Workflow failed:",
                         message.data?.error,

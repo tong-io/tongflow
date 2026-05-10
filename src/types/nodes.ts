@@ -103,14 +103,6 @@ export type RfDataNodeProps<Type extends string = string> = NodeProps<
     Node<BaseNodeData, Type>
 >;
 
-/* ========================================================================== */
-/* Legacy type definitions (kept for backward compatibility)                   */
-/* ========================================================================== */
-
-export interface TextNodeData extends Record<string, unknown> {
-    texts: string[];
-}
-
 export interface AddTextNodeData extends Record<string, unknown> {
     taskId?: string;
     query?: string;
@@ -118,23 +110,3 @@ export interface AddTextNodeData extends Record<string, unknown> {
     texts?: string[];
     locked?: boolean;
 }
-
-export interface GenTextNodeData extends Record<string, unknown> {
-    prompt?: string;
-    texts?: string[];
-}
-
-export interface BatchTask {
-    feature: string;
-    prompt: {
-        text: string;
-    };
-    nodeId: string;
-    data?: {
-        text?: string;
-    };
-}
-
-export type AddTextNode = Node<AddTextNodeData>;
-export type TextNode = Node<TextNodeData>;
-export type GenTextNode = Node<GenTextNodeData>;

@@ -7,7 +7,6 @@ import {
     extractAbiBusinessInput,
     validateSlotInput,
 } from "@/lib/abi-schema-validate";
-import { canonicalizeNodeSlot } from "@/lib/legacy-slot-map";
 import { logger } from "@/lib/logger";
 import {
     buildPersistedTaskPrompt,
@@ -60,7 +59,7 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        const normalizedFeature = canonicalizeNodeSlot(feature.trim());
+        const normalizedFeature = feature.trim();
         const abiNode = getAbiNodeBySlot(normalizedFeature);
         if (!abiNode) {
             return NextResponse.json(

@@ -151,7 +151,6 @@ tongflow/
 │   ├── generated/        # Auto-generated code (ABI types via pnpm gen:abi)
 │   └── services/         # Server-side service layer
 ├── config/               # Feature registry JSON and ABI definition
-├── packages/             # Workspace packages (@openflow/proprietary)
 ├── scripts/              # Build, codegen, and publish scripts
 └── docs/                 # Documentation
 ```

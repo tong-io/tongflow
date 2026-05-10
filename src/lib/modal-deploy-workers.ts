@@ -67,7 +67,7 @@ export async function resolvePython(): Promise<string> {
 }
 
 export function modalPluginPythonEnv(): NodeJS.ProcessEnv {
-    const sdk = path.join(process.cwd(), "plugins", "tongflow");
+    const sdk = path.join(process.cwd(), "sdk");
     const pythonPath = [sdk, process.env.PYTHONPATH?.trim()].filter(Boolean);
     return {
         ...process.env,

@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import { ProprietaryAppShell } from "@openflow/proprietary";
 import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getMessages } from "next-intl/server";
 import { Toaster } from "react-hot-toast";
@@ -57,12 +56,10 @@ export default async function RootLayout({
                 className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen`}
             >
                 <NextIntlClientProvider messages={messages}>
-                    <ProprietaryAppShell>
-                        <ErrorBoundary>
-                            <main>{children}</main>
-                        </ErrorBoundary>
-                        <Toaster position="top-center" />
-                    </ProprietaryAppShell>
+                    <ErrorBoundary>
+                        <main>{children}</main>
+                    </ErrorBoundary>
+                    <Toaster position="top-center" />
                 </NextIntlClientProvider>
             </body>
         </html>

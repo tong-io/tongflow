@@ -14,7 +14,9 @@ import { embedLocalUploadsForModal } from "@/lib/plugin-executor/embed-local-upl
 import {
     modalTerminateAfterTimeouts,
     recordModalDeployCache,
+    recordModalDownloadCache,
     shouldSkipModalDeploy,
+    shouldSkipModalDownload,
 } from "@/lib/plugin-executor/modal-deploy-cache";
 import {
     getModalPluginConfig,
@@ -73,6 +75,15 @@ async function runModalDeployPluginMaybeCached(
         await runModalDeployPlugin(pluginId, signal);
         await recordModalDeployCache(pluginId);
     });
+}
+
+async function runModalDownloadPluginMaybeCached(
+    pluginId: string,
+    signal?: AbortSignal,
+): Promise<void> {
+    if (await shouldSkipModalDownload(pluginId)) return;
+    await runModalDownloadPlugin(pluginId, signal);
+    await recordModalDownloadCache(pluginId);
 }
 
 let modalSdkTimeoutCancelStreak = 0;
@@ -249,7 +260,7 @@ function runModalCli(
 }
 
 function pythonEnvWithTongflow(): NodeJS.ProcessEnv {
-    const tongflowSdkDir = path.join(process.cwd(), "plugins", "tongflow");
+    const tongflowSdkDir = path.join(process.cwd(), "sdk");
     const pythonPathParts = [
         tongflowSdkDir,
         process.env.PYTHONPATH?.trim(),
@@ -354,7 +365,7 @@ export async function execModalPlugin<S extends NodeSlot>(
     // Ensure weights + deployment are ready (idempotent in plugins).
     // Subprocess has its own wall-clock cap + SIGKILL; pass signal for user cancel.
     stage(`Modal: downloading (${req.pluginId})`);
-    await runModalDownloadPlugin(req.pluginId, req.signal);
+    await runModalDownloadPluginMaybeCached(req.pluginId, req.signal);
 
     // Dev: deploy when repo fingerprint changed or working tree dirty (see modal-deploy-cache).
     if (process.env.NODE_ENV !== "production") {

@@ -21,12 +21,6 @@ data/
 
 # runtime-generated artifacts (build-time from ABI / plugin scan)
 .tongflow/
-.openflow/
-
-# local plugins are managed as separate repos
-plugins/tongflow/
-plugins/tongflow-llm-*/
-plugins/tongflow-modal-*/
 
 # local feature registry overrides (see docs/feature-registry.md)
 .tongflow/features.local.json
@@ -39,10 +33,7 @@ next-env.d.ts
 # local Python venv (optional, e.g. pip install modal)
 .venv/
 
-# removed Electron / old desktop tooling — ignore if folders still exist locally
-wheelhouse/
-dist-electron/
-release/
-electron-out/
+# PyPI publish helper venv (scripts/publish-tongflow-pypi.sh)
+sdk/.venv-pypi/
 
 plugins/

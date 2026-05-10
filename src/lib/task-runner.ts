@@ -24,7 +24,6 @@ import {
     validateSlotOutput,
     workflowTaskFailureEnvelope,
 } from "@/lib/abi-schema-validate";
-import { canonicalizeNodeSlot } from "@/lib/legacy-slot-map";
 import { logger } from "@/lib/logger";
 import { executePlugin } from "@/lib/plugin-executor/execute";
 import { resolveRoutingPluginId } from "@/lib/task-prompt-routing";
@@ -69,7 +68,7 @@ export async function loadTaskData(taskId: string): Promise<TaskData | null> {
     const rawSlot =
         (typeof prompt.nodeSlot === "string" && prompt.nodeSlot.trim()) ||
         (typeof task.feature === "string" ? task.feature.trim() : "");
-    const nodeSlot = rawSlot ? canonicalizeNodeSlot(rawSlot) : "";
+    const nodeSlot = rawSlot;
 
     if (!pluginId) return null;
     if (!nodeSlot) return null;
@@ -273,11 +272,10 @@ export async function executeWorkflowTask(
             params: Record<string, unknown>,
         ): Promise<Record<string, unknown>> {
             const pluginId = resolveRoutingPluginId(params);
-            const rawSlot =
+            const nodeSlot =
                 typeof params.nodeSlot === "string" && params.nodeSlot.trim()
                     ? params.nodeSlot.trim()
                     : feature.trim();
-            const nodeSlot = canonicalizeNodeSlot(rawSlot);
 
             if (!pluginId) {
                 throw new Error(

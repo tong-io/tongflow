@@ -70,9 +70,6 @@ export const TERMINAL_STATUSES = new Set([
     WorkflowStatus.WORKFLOW_COMPLETED,
     WorkflowStatus.WORKFLOW_FAILED,
     WorkflowStatus.WORKFLOW_CANCELLED,
-    // Compatibility with legacy statuses
-    "FINISHED",
-    "ERROR",
 ]);
 
 /**
@@ -82,8 +79,6 @@ export const RUNNING_STATUSES = new Set([
     TaskStatus.RUNNING,
     NodeStatus.NODE_STARTED,
     NodeStatus.NODE_RUNNING,
-    // Compatibility with legacy statuses
-    "PROCESSING",
 ]);
 
 // ==================== Status predicate functions ====================
@@ -92,14 +87,14 @@ export const RUNNING_STATUSES = new Set([
  * Check whether the status is a terminal status
  */
 export function isTerminalStatus(status: string): boolean {
-    return TERMINAL_STATUSES.has(status as SSEStatusType);
+    return (TERMINAL_STATUSES as ReadonlySet<string>).has(status);
 }
 
 /**
  * Check whether the status is a running status
  */
 export function isRunningStatus(status: string): boolean {
-    return RUNNING_STATUSES.has(status as SSEStatusType);
+    return (RUNNING_STATUSES as ReadonlySet<string>).has(status);
 }
 
 // ==================== Status mapping (SSE -> internal status) ====================
@@ -118,13 +113,11 @@ export function mapSSEStatusToTaskStatus(
         case TaskStatus.RUNNING:
         case NodeStatus.NODE_STARTED:
         case NodeStatus.NODE_RUNNING:
-        case "PROCESSING": // Compatibility with legacy statuses
             return "PROCESSING";
 
         case TaskStatus.COMPLETED:
         case WorkflowStatus.WORKFLOW_COMPLETED:
         case NodeStatus.NODE_COMPLETED:
-        case "FINISHED": // Compatibility with legacy statuses
             return "COMPLETED";
 
         case TaskStatus.CANCELLED:
@@ -134,7 +127,6 @@ export function mapSSEStatusToTaskStatus(
         case TaskStatus.FAILED:
         case WorkflowStatus.WORKFLOW_FAILED:
         case NodeStatus.NODE_FAILED:
-        case "ERROR": // Compatibility with legacy statuses
             return "FAILED";
 
         default:

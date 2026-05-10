@@ -62,7 +62,7 @@ export async function execLlmPlugin<S extends NodeSlot>(
     const pluginDir = join(process.cwd(), cfg.localSubdir);
     const entry = cfg.entryFile || "entry.py";
     const python = await resolvePythonLite();
-    const tongflowSdkDir = join(process.cwd(), "plugins", "tongflow");
+    const tongflowSdkDir = join(process.cwd(), "sdk");
     const pythonPathParts = [
         tongflowSdkDir,
         process.env.PYTHONPATH?.trim(),

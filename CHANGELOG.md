@@ -22,7 +22,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Chinese README (`README_ZH.md`).
 
 ### Removed
-- Electron desktop app, electron-builder packaging, and related CI workflows; use Docker or `pnpm dev` for the web app.
+- Nothing yet.
 
 ### Changed
 - Nothing yet.
@@ -34,7 +34,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - Initial public release of TongFlow: multi-modal AIGC studio (Next.js + ReactFlow workspace).
-- Web app, Docker Compose path, and Electron desktop builds.
+- Web app and Docker Compose path.
 - Modal-based plugin workers, feature registry, and multilingual UI (EN / ZH / JA).
 
 [Unreleased]: https://github.com/tong-io/tongflow/compare/v0.1.0...HEAD

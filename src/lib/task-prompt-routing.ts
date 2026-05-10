@@ -1,8 +1,7 @@
 import { extractAbiBusinessInput } from "@/lib/abi-schema-validate";
-import { normalizeLegacyPluginId } from "@/lib/legacy-plugin-id-map";
 
 /**
- * Resolve plugin id from nested `routing.pluginId` or legacy flat `prompt.pluginId`.
+ * Resolve plugin id from nested `routing.pluginId` or flat `prompt.pluginId`.
  */
 export function resolveRoutingPluginId(
     params: Record<string, unknown>,
@@ -11,12 +10,12 @@ export function resolveRoutingPluginId(
     if (r && typeof r === "object" && !Array.isArray(r)) {
         const pid = (r as Record<string, unknown>).pluginId;
         if (typeof pid === "string" && pid.trim()) {
-            return normalizeLegacyPluginId(pid.trim());
+            return pid.trim();
         }
     }
     const flat = params.pluginId;
     if (typeof flat === "string" && flat.trim()) {
-        return normalizeLegacyPluginId(flat.trim());
+        return flat.trim();
     }
     return "";
 }

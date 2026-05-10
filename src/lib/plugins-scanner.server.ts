@@ -14,7 +14,7 @@ function pickPython(): string {
 }
 
 function scannerEnv(): NodeJS.ProcessEnv {
-    const sdk = join(process.cwd(), "plugins", "tongflow");
+    const sdk = join(process.cwd(), "sdk");
     const pythonPath = [sdk, process.env.PYTHONPATH?.trim()].filter(
         (x): x is string => Boolean(x),
     );

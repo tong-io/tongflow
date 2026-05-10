@@ -92,7 +92,6 @@ Common variables:
 - `GEMINI_API_KEY` or `GOOGLE_API_KEY`: **Generate text** when the model slot is Gemini, and other Gemini text/multimodal handlers
 - `OPENAI_API_KEY` (optional `OPENAI_CHAT_MODEL`): **Generate text** when the model slot is OpenAI; default chat model is `gpt-4o-mini` if unset
 - `DEEPSEEK_API_KEY`: only needed for features that still call the DeepSeek API directly (for example batch arrange / grouping text), not for the main text-generation dropdown
-- `NEXT_PUBLIC_TASK_API_URL`: optional; point task wait/stop at an external task service
 - `NEXT_PUBLIC_FILE_BASE_URL`: optional; base URL for file storage
 
 To authorize Modal (writes tokens to `~/.modal.toml`):
@@ -222,7 +221,7 @@ This project is licensed under **AGPL-3.0**.
 
 ## Extending AI capabilities
 
-Feature metadata (model slots, handler routing keys, processing time hints) lives in [`config/features.default.json`](config/features.default.json). See [docs/feature-registry.md](docs/feature-registry.md) for overrides, validation (`pnpm validate-features`), and how this relates to task handlers and node allowlists. For optional post-build client obfuscation on private deployments, see [docs/closed-source-build.md](docs/closed-source-build.md). Optional closed-source hooks live in the workspace package [`@openflow/proprietary`](packages/proprietary/) — see [docs/proprietary-package.md](docs/proprietary-package.md).
+Feature metadata (model slots, handler routing keys, processing time hints) lives in [`config/features.default.json`](config/features.default.json). See [docs/feature-registry.md](docs/feature-registry.md) for overrides, validation (`pnpm validate-features`), and how this relates to task handlers and node allowlists.
 
 ## Star History
 

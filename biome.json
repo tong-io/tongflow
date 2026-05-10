@@ -13,7 +13,9 @@
             "!out",
             "!build",
             "!node_modules",
-            "!.venv"
+            "!.venv",
+            "!**/.venv",
+            "!**/.venv-*"
         ]
     },
     "formatter": {

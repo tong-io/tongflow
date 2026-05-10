@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
-# Build plugins/tongflow and upload sdist + wheel to PyPI (or TestPyPI).
+# Build sdk/ and upload sdist + wheel to PyPI (or TestPyPI).
 #
 # Usage (PyPI):
+#   Add to repo-root `.env` (see `.env.example`): TWINE_USERNAME=__token__, TWINE_PASSWORD=pypi-...
+#   Or export in the shell:
 #   export TWINE_USERNAME=__token__
 #   export TWINE_PASSWORD=pypi-xxxxxxxx
 #   pnpm tongflow:publish
@@ -11,35 +13,75 @@
 #   export TWINE_PASSWORD=pypi-xxxxxxxx   # TestPyPI token
 #   TONGFLOW_UPLOAD_TESTPYPI=1 pnpm tongflow:publish
 #
-# Requires: Python 3 with pip; script installs `build` and `twine` if missing (user venv recommended).
+# Requires: Python >= 3.10 (prefers Homebrew python3.12; avoids Xcode python3.9 + PEP 668 issues).
+# Uses sdk/.venv-pypi for build tools (created automatically).
 
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-PKG="${ROOT}/plugins/tongflow"
+PKG="${ROOT}/sdk"
 
 if [[ ! -f "${PKG}/pyproject.toml" ]]; then
   echo "Expected ${PKG}/pyproject.toml" >&2
   exit 1
 fi
 
+# Optional: PyPI API token from repo-root `.env` (gitignored; create from https://pypi.org/manage/account/token/).
+if [[ -f "${ROOT}/.env" ]]; then
+  set -a
+  # shellcheck disable=SC1091
+  source "${ROOT}/.env"
+  set +a
+fi
+
+# Prefer explicit PYTHON, then common Homebrew paths, then PATH (python3.12 before python3).
+pick_python() {
+  local c
+  if [[ -n "${PYTHON:-}" && -x "${PYTHON}" ]]; then
+    echo "${PYTHON}"
+    return 0
+  fi
+  for c in /opt/homebrew/bin/python3.12 /opt/homebrew/bin/python3.13 \
+           /usr/local/bin/python3.12 "$(command -v python3.12)" "$(command -v python3)"; do
+    if [[ -n "${c}" && -x "${c}" ]]; then
+      echo "${c}"
+      return 0
+    fi
+  done
+  return 1
+}
+
+BASE_PY="$(pick_python)" || {
+  echo "No usable Python 3 interpreter found. Install Python 3.10+ or set PYTHON=/path/to/python3." >&2
+  exit 1
+}
+
+VENV="${PKG}/.venv-pypi"
+if [[ ! -x "${VENV}/bin/python" ]]; then
+  "${BASE_PY}" -m venv "${VENV}"
+fi
+
+PIP="${VENV}/bin/pip"
+PYTHON_BIN="${VENV}/bin/python"
+
 cd "${PKG}"
-rm -rf dist build
-rm -rf ./*.egg-info 2>/dev/null || true
+rm -rf dist build tongflow.egg-info 2>/dev/null || true
 
-python3 -m pip install -q --upgrade pip
-python3 -m pip install -q build twine
+"${PIP}" install -q --upgrade pip build twine
 
-python3 -m build
-python3 -m twine check dist/*
+"${PYTHON_BIN}" -m build
+"${PYTHON_BIN}" -m twine check dist/*
 
 if [[ -z "${TWINE_PASSWORD:-}" ]]; then
   echo "" >&2
-  echo "Missing TWINE_PASSWORD. For non-interactive upload set:" >&2
-  echo "  export TWINE_USERNAME=__token__" >&2
-  echo "  export TWINE_PASSWORD=pypi-...   # from https://pypi.org/manage/account/token/" >&2
+  echo "Built sdk/dist OK; skipping PyPI upload (TWINE_PASSWORD not set)." >&2
+  echo "To upload, add to repo-root .env or export:" >&2
+  echo "  TWINE_USERNAME=__token__" >&2
+  echo "  TWINE_PASSWORD=pypi-...   # https://pypi.org/manage/account/token/" >&2
   echo "Then re-run: pnpm tongflow:publish" >&2
-  exit 1
+  VER="$(grep -E '^version[[:space:]]*=' pyproject.toml | head -1 | sed -E 's/^version[[:space:]]*=[[:space:]]*\"([^\"]+)\".*/\1/')"
+  echo "Local install: ${PYTHON_BIN} -m pip install \"dist/tongflow-${VER}-py3-none-any.whl\"" >&2
+  exit 0
 fi
 
 if [[ -z "${TWINE_USERNAME:-}" ]]; then
@@ -48,10 +90,10 @@ fi
 
 if [[ "${TONGFLOW_UPLOAD_TESTPYPI:-}" == "1" ]]; then
   echo "Uploading to TestPyPI..."
-  python3 -m twine upload --repository testpypi dist/*
+  "${PYTHON_BIN}" -m twine upload --repository testpypi dist/*
 else
   echo "Uploading to PyPI..."
-  python3 -m twine upload dist/*
+  "${PYTHON_BIN}" -m twine upload dist/*
 fi
 
 VER="$(grep -E '^version[[:space:]]*=' pyproject.toml | head -1 | sed -E 's/^version[[:space:]]*=[[:space:]]*\"([^\"]+)\".*/\1/')"

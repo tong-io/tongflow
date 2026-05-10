@@ -1,6 +1,6 @@
 /**
  * CI helper: run bundled tongflow scanner; fail if it reports plugin scan errors.
- * Requires Python deps (`pip install -e plugins/tongflow` or equivalent).
+ * Requires Python deps (`pip install -e ./sdk` or equivalent).
  */
 
 import { execFileSync } from "node:child_process";
@@ -22,11 +22,11 @@ function main(): void {
         return;
     }
 
-    const sdk = join(process.cwd(), "plugins", "tongflow");
+    const sdk = join(process.cwd(), "sdk");
     const sdkMain = join(sdk, "tongflow", "__main__.py");
     if (!existsSync(sdkMain)) {
         console.log(
-            "[verify-plugins-scan] No vendored tongflow SDK under plugins/tongflow — skipping.",
+            "[verify-plugins-scan] No vendored tongflow SDK under sdk/ — skipping.",
         );
         return;
     }

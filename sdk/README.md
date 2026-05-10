@@ -16,7 +16,7 @@ from tongflow.node_slots import NodeSlots
 from tongflow import current_app
 ```
 
-In this monorepo, Modal `impl.py` / stub `deploy.py` images pin **`tongflow==0.0.1`** (PyPI). Bump the version string in those files when you publish a new release.
+In this monorepo, Modal `impl.py` / stub `deploy.py` images pin **`tongflow==0.0.2`** (PyPI). Bump the version string in those files when you publish a new release.
 
 ## Plugin identity
 
@@ -33,7 +33,7 @@ For every plugin repository, these names must be identical:
 Use `tongflow-modal-<semantic-name>` for Modal plugins and
 `tongflow-llm-<semantic-name>` for LLM plugins, such as
 `tongflow-modal-docling`, `tongflow-modal-qwen3asr`, or
-`tongflow-llm-openai-text`. Do not encode hardware details in the name, such as
+`tongflow-llm-openai`. Do not encode hardware details in the name, such as
 `gpu` or `cpu`.
 
 Runner detection is prefix-based and validated against the entry files:
@@ -68,4 +68,4 @@ This runs [`scripts/publish-tongflow-pypi.sh`](../../scripts/publish-tongflow-py
 
 TestPyPI: `TONGFLOW_UPLOAD_TESTPYPI=1 pnpm tongflow:publish` (use a [TestPyPI token](https://test.pypi.org/manage/account/token/)).
 
-Manual equivalent from `plugins/tongflow`: `python -m pip install build twine && python -m build && python -m twine upload dist/*`
+Manual equivalent from `sdk/`: `python -m pip install build twine && python -m build && python -m twine upload dist/*`

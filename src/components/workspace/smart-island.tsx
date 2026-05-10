@@ -378,7 +378,6 @@ export default function SmartIsland() {
                         switch (message.status) {
                             // Workflow started
                             case WorkflowStatus.WORKFLOW_STARTED:
-                            case "WORKFLOW_START": // Legacy status compat
                                 logger.debug(
                                     "[SmartIsland] Workflow started:",
                                     message.data?.totalNodes,
@@ -389,7 +388,6 @@ export default function SmartIsland() {
                             // Node started / running
                             case NodeStatus.NODE_STARTED:
                             case NodeStatus.NODE_RUNNING:
-                            case "NODE_START": // Legacy status compat
                                 if (message.nodeId) {
                                     logger.debug(
                                         "[SmartIsland] Node started:",
@@ -414,7 +412,6 @@ export default function SmartIsland() {
 
                             // Node completed
                             case NodeStatus.NODE_COMPLETED:
-                            case "NODE_COMPLETE": // Legacy status compat
                                 if (message.nodeId) {
                                     logger.debug(
                                         "[SmartIsland] Node completed:",
@@ -597,7 +594,6 @@ export default function SmartIsland() {
                             // Workflow completed
                             case WorkflowStatus.WORKFLOW_COMPLETED:
                             case TaskStatus.COMPLETED:
-                            case "FINISHED": // Legacy status compat
                                 logger.debug(
                                     "[SmartIsland] ✅ Workflow completed successfully!",
                                 );
@@ -663,7 +659,6 @@ export default function SmartIsland() {
                             // Workflow failed
                             case WorkflowStatus.WORKFLOW_FAILED:
                             case TaskStatus.FAILED:
-                            case "ERROR": // Legacy status compat
                                 logger.debug(
                                     "[SmartIsland] ❌ Workflow failed:",
                                     message.data?.error,

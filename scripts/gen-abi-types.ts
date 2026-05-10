@@ -3,6 +3,7 @@
  * Run via: pnpm gen:abi
  */
 
+import { spawnSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -237,7 +238,15 @@ try {
     const ts = generateTs(abi);
     fs.mkdirSync(outDir, { recursive: true });
     fs.writeFileSync(outPath, ts, "utf8");
-    console.log(`Wrote ${path.relative(repoRoot, outPath)}`);
+    const rel = path.relative(repoRoot, outPath);
+    const fmt = spawnSync("npx", ["biome", "check", "--write", rel], {
+        cwd: repoRoot,
+        stdio: "inherit",
+    });
+    if (fmt.status !== 0) {
+        throw new Error(`biome check --write failed for ${rel}`);
+    }
+    console.log(`Wrote ${rel}`);
 } catch (e) {
     console.error("gen-abi-types failed:", e);
     process.exit(1);
