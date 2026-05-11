@@ -7,7 +7,6 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { useNodeState } from "@/hooks/use-node-data";
-import { getFileUrl } from "@/lib/file-url";
 import { cn } from "@/lib/utils";
 import type { TongflowPluginNodeProps } from "@/types/tongflow-flow";
 import {
@@ -38,11 +37,7 @@ const workflowConfig = {
     batchParam: "image",
     paramMappings: {
         image: {
-            sources: [
-                upstreamParam("imageNode", "fileKeys[0]", {
-                    needsUrlTransform: true,
-                }),
-            ],
+            sources: [upstreamParam("imageNode", "fileKeys[0]")],
             required: true,
         },
     },
@@ -82,7 +77,7 @@ const ImageGenImageUpscaleNode = ({
                             ? upstreamKeys
                             : fileKeys;
                     return keys.map((fileKey) => ({
-                        image: getFileUrl(fileKey),
+                        image: fileKey,
                         resolution,
                     }));
                 },

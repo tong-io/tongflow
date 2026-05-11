@@ -7,7 +7,6 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { useNodeState } from "@/hooks/use-node-data";
-import { getFileUrl } from "@/lib/file-url";
 import { cn } from "@/lib/utils";
 import type { TongflowPluginNodeProps } from "@/types/tongflow-flow";
 import {
@@ -38,9 +37,7 @@ const workflowConfig = {
     paramMappings: {
         video: {
             sources: [
-                upstreamParam("videoNode", "fileKeys[0]", {
-                    needsUrlTransform: true,
-                }),
+                upstreamParam("videoNode", "fileKeys[0]"),
             ],
             required: true,
         },
@@ -90,7 +87,7 @@ const VideoUpscaleNode = ({
                             ? upstreamKeys
                             : fileKeys;
                     return keys.map((fileKey) => ({
-                        video: getFileUrl(fileKey),
+                        video: fileKey,
                         resolution,
                     }));
                 },

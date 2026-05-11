@@ -26,6 +26,7 @@ import {
 } from "@/lib/abi-schema-validate";
 import { logger } from "@/lib/logger";
 import { executePlugin } from "@/lib/plugin-executor/execute";
+import { prepareAssetInput } from "@/lib/plugin-executor/prepare-asset-input.server";
 import { resolveRoutingPluginId } from "@/lib/task-prompt-routing";
 import { notifyTask, registerTask, removeTask } from "./task-emitter";
 
@@ -124,10 +125,37 @@ export async function executeTask(taskId: string): Promise<void> {
         );
 
         // Hard requirement: pluginId + nodeSlot must exist (platform-agnostic core).
+        // Resolve `$ref: Asset` fields (fileKey/URL/dataURL → inline bytes), then
+        // validate ABI input against the resolved payload.
+        const businessInput = await prepareAssetInput(
+            taskData.nodeSlot,
+            extractAbiBusinessInput(taskData.prompt),
+        );
+        const inputCheck = validateSlotInput(taskData.nodeSlot, businessInput);
+        if (!inputCheck.ok) {
+            const persisted = serializeTaskErrorForDb(
+                standaloneAbiValidationEnvelope(inputCheck.failure),
+            );
+            notifyTask(
+                taskId,
+                TaskStatus.FAILED,
+                {
+                    message: "输入参数不符合 ABI 校验",
+                    error: inputCheck.failure.errorsText,
+                    ajvErrors: inputCheck.failure.ajvErrors,
+                },
+                taskData.nodeId,
+            );
+            await db
+                .update(tasks)
+                .set({ status: "failed", error: persisted })
+                .where(eq(tasks.id, taskId));
+            return;
+        }
         const result = await executePlugin({
             pluginId: taskData.pluginId,
             nodeSlot: taskData.nodeSlot,
-            input: extractAbiBusinessInput(taskData.prompt) as never,
+            input: businessInput as never,
             taskId,
             signal: controller.signal,
         });
@@ -289,7 +317,10 @@ export async function executeWorkflowTask(
                 );
             }
 
-            const businessInput = extractAbiBusinessInput(params);
+            const businessInput = await prepareAssetInput(
+                nodeSlot,
+                extractAbiBusinessInput(params),
+            );
             const inputCheck = validateSlotInput(nodeSlot, businessInput);
             if (!inputCheck.ok) {
                 throw new AbiValidationError(

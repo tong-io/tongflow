@@ -678,9 +678,6 @@ export class WorkflowExporter {
                                 source: "upstream",
                                 nodeIds: matchingNodes.map((n) => n.id),
                                 field: sourceConfig.upstreamField,
-                                transform: sourceConfig.needsUrlTransform
-                                    ? "getFileUrl"
-                                    : undefined,
                             };
                         }
 
@@ -728,9 +725,6 @@ export class WorkflowExporter {
                             source: "upstream",
                             nodeId: upstreamNode.id,
                             field: sourceConfig.upstreamField,
-                            transform: sourceConfig.needsUrlTransform
-                                ? "getFileUrl"
-                                : undefined,
                             arrayIndex,
                             edgeTargetHandle: sourceConfig.targetHandle,
                         };

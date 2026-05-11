@@ -12,7 +12,7 @@ export async function getDb() {
         const dbDir = path.resolve(process.cwd(), "data");
         mkdirSync(dbDir, { recursive: true });
 
-        const dbPath = path.join(dbDir, "openflow.db");
+        const dbPath = path.join(dbDir, "tongflow.db");
         const sqlite = new Database(dbPath);
         sqlite.pragma("journal_mode = WAL");
         db = drizzle(sqlite, { schema });

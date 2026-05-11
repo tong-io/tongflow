@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="docs/assets/logo.png" alt="TongFlow" width="320" />
+  <img src="public/logo.svg" alt="TongFlow" width="320" />
 
   <h1>A Multi-Modal AIGC Studio</h1>
   <p>
@@ -43,7 +43,7 @@ With TongFlow, you can expand your imagination and stretch your ideas with gener
 
 ## Run locally (quickstart)
 
-This is a **local-first** app: workflows and materials live in SQLite (`data/openflow.db`) and uploads on disk (`data/uploads/`). There is no hosted TongFlow account, login, or central file CDN.
+This is a **local-first** app: workflows and materials live in SQLite (`data/tongflow.db`) and uploads on disk (`data/uploads/`). There is no hosted TongFlow account, login, or central file CDN.
 
 AI inference uses **external APIs you configure**: [Modal](https://modal.com) for most transform plugins (Modal offers a **$30/month FREE** quota for cloud GPU/CPU such as **H100**), plus LLM vendors (OpenRouter, Gemini, OpenAI, etc.) where nodes need them. Set tokens in `.env` and run `pnpm modal:setup` when using Modal (see **Environment variables** below).
 
@@ -59,13 +59,13 @@ docker compose up --build
 
 Open `http://localhost:3000` (lands on `/workspace`).
 
-> Data persists in Docker volumes (SQLite at `data/openflow.db` plus uploads).
+> Data persists in Docker volumes (SQLite at `data/tongflow.db` plus uploads).
 
 **Pre-built image (GHCR):** CI publishes [`ghcr.io/tong-io/tongflow`](https://github.com/tong-io/tongflow/pkgs/container/tongflow) on pushes to `main` (tags `latest` and `main`) and on version tags `v*` (e.g. `v0.1.0` → `0.1.0`). Pull and run:
 
 ```bash
 docker pull ghcr.io/tong-io/tongflow:latest
-docker run --rm -p 3000:3000 --env-file .env -v openflow_data:/app/data ghcr.io/tong-io/tongflow:latest
+docker run --rm -p 3000:3000 --env-file .env -v tongflow_data:/app/data ghcr.io/tong-io/tongflow:latest
 ```
 
 For private repositories you may need `docker login ghcr.io` with a token that has the `read:packages` scope.

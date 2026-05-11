@@ -17,9 +17,7 @@ const workflowConfig = {
     paramMappings: {
         video: {
             sources: [
-                upstreamParam("videoNode", "fileKeys[0]", {
-                    needsUrlTransform: true,
-                }),
+                upstreamParam("videoNode", "fileKeys[0]"),
             ],
             required: true,
         },
@@ -58,7 +56,7 @@ const SeparateVideoAudioNode = ({
                             : fileKeys;
                     return (
                         keys?.map((fileKey) => ({
-                            fileKey: fileKey,
+                            video: fileKey,
                         })) || []
                     );
                 },

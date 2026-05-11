@@ -22,9 +22,9 @@ const GetFirstFrameNode = ({
         outputType: "imageNode",
         outputField: "fileKeys" as const,
         supportsBatch: true,
-        batchParam: "videoKey",
+        batchParam: "video",
         paramMappings: {
-            videoKey: {
+            video: {
                 sources: [upstreamParam("videoNode", "fileKeys")],
                 required: true,
             },

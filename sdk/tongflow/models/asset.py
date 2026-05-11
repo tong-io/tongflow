@@ -13,3 +13,21 @@ class FileRef(TypedDict, total=False):
     file_key: Required[str]
     mime: str
     filename: str
+
+
+class ImageRef(TypedDict, total=False):
+    file_key: Required[str]
+    mime: str
+    filename: str
+
+
+class VideoRef(TypedDict, total=False):
+    file_key: Required[str]
+    mime: str
+    filename: str
+
+
+class AudioRef(TypedDict, total=False):
+    file_key: Required[str]
+    mime: str
+    filename: str

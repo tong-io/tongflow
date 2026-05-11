@@ -2,7 +2,6 @@ import { Image as ImageIcon, MessageSquare } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { memo } from "react";
 import { useNodeState } from "@/hooks/use-node-data";
-import { getFileUrl } from "@/lib/file-url";
 import type { TongflowPluginNodeProps } from "@/types/tongflow-flow";
 import {
     configParam,
@@ -24,11 +23,7 @@ const workflowConfig = {
     batchParam: "image",
     paramMappings: {
         image: {
-            sources: [
-                upstreamParam("imageNode", "fileKeys[0]", {
-                    needsUrlTransform: true,
-                }),
-            ],
+            sources: [upstreamParam("imageNode", "fileKeys[0]")],
             required: true,
         },
         text: {
@@ -68,9 +63,10 @@ const ImageGenTextNode = ({
                         upstreamKeys && upstreamKeys.length > 0
                             ? upstreamKeys
                             : fileKeys;
+                    const text = query?.trim() ?? "";
                     return keys.map((fileKey) => ({
-                        image: getFileUrl(fileKey),
-                        ...(query?.trim() ? { text: query.trim() } : {}),
+                        image: fileKey,
+                        text,
                     }));
                 },
             }}

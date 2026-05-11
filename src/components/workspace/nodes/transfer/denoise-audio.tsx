@@ -22,9 +22,7 @@ const workflowConfig = {
     paramMappings: {
         audio: {
             sources: [
-                upstreamParam("audioNode", "fileKeys[0]", {
-                    needsUrlTransform: true,
-                }),
+                upstreamParam("audioNode", "fileKeys[0]"),
             ],
             required: true,
         },

@@ -169,19 +169,39 @@ const _slot_image_fusion_inputs = {
             type: "string",
             minLength: 1,
         },
-        images: {
-            type: "array",
-            items: {
-                type: "string",
+        image: {
+            type: "object",
+            required: ["bytesBase64"],
+            properties: {
+                bytesBase64: {
+                    type: "string",
+                    minLength: 1,
+                },
+                filename: {
+                    type: "string",
+                },
+                mime: {
+                    type: "string",
+                },
             },
+            additionalProperties: false,
         },
-        image_base64: {
-            type: "string",
-            minLength: 1,
-        },
-        image2_base64: {
-            type: "string",
-            minLength: 1,
+        image2: {
+            type: "object",
+            required: ["bytesBase64"],
+            properties: {
+                bytesBase64: {
+                    type: "string",
+                    minLength: 1,
+                },
+                filename: {
+                    type: "string",
+                },
+                mime: {
+                    type: "string",
+                },
+            },
+            additionalProperties: false,
         },
         seed: {
             type: "integer",
@@ -191,6 +211,26 @@ const _slot_image_fusion_inputs = {
         },
         height: {
             type: "integer",
+        },
+        images: {
+            type: "array",
+            items: {
+                type: "object",
+                required: ["bytesBase64"],
+                properties: {
+                    bytesBase64: {
+                        type: "string",
+                        minLength: 1,
+                    },
+                    filename: {
+                        type: "string",
+                    },
+                    mime: {
+                        type: "string",
+                    },
+                },
+                additionalProperties: false,
+            },
         },
     },
     additionalProperties: false,
@@ -212,7 +252,7 @@ const _slot_image_fusion_outputs = {
         thinking: {
             type: "string",
         },
-        image_base64: {
+        image: {
             type: "object",
             required: ["file_key"],
             properties: {
@@ -229,7 +269,7 @@ const _slot_image_fusion_outputs = {
             },
             additionalProperties: false,
         },
-        video_base64: {
+        video: {
             type: "object",
             required: ["file_key"],
             properties: {
@@ -246,7 +286,7 @@ const _slot_image_fusion_outputs = {
             },
             additionalProperties: false,
         },
-        audio_base64: {
+        audio: {
             type: "object",
             required: ["file_key"],
             properties: {
@@ -305,20 +345,41 @@ const _slot_image_gen_text_inputs = {
         top_k: {
             type: "integer",
         },
-        image_base64: {
-            type: "string",
-            minLength: 1,
+        image: {
+            type: "object",
+            required: ["bytesBase64"],
+            properties: {
+                bytesBase64: {
+                    type: "string",
+                    minLength: 1,
+                },
+                filename: {
+                    type: "string",
+                },
+                mime: {
+                    type: "string",
+                },
+            },
+            additionalProperties: false,
         },
         images: {
             type: "array",
             items: {
-                type: "string",
-            },
-        },
-        image_base64s: {
-            type: "array",
-            items: {
-                type: "string",
+                type: "object",
+                required: ["bytesBase64"],
+                properties: {
+                    bytesBase64: {
+                        type: "string",
+                        minLength: 1,
+                    },
+                    filename: {
+                        type: "string",
+                    },
+                    mime: {
+                        type: "string",
+                    },
+                },
+                additionalProperties: false,
             },
         },
     },
@@ -341,7 +402,7 @@ const _slot_image_gen_text_outputs = {
         thinking: {
             type: "string",
         },
-        image_base64: {
+        image: {
             type: "object",
             required: ["file_key"],
             properties: {
@@ -358,7 +419,7 @@ const _slot_image_gen_text_outputs = {
             },
             additionalProperties: false,
         },
-        video_base64: {
+        video: {
             type: "object",
             required: ["file_key"],
             properties: {
@@ -375,7 +436,7 @@ const _slot_image_gen_text_outputs = {
             },
             additionalProperties: false,
         },
-        audio_base64: {
+        audio: {
             type: "object",
             required: ["file_key"],
             properties: {
@@ -407,7 +468,7 @@ export type ImageGenTextOutput = FromSchema<
 
 const _slot_video_gen_text_inputs = {
     type: "object",
-    required: ["text", "video_base64"],
+    required: ["text", "video"],
     properties: {
         text: {
             type: "string",
@@ -436,25 +497,59 @@ const _slot_video_gen_text_inputs = {
         top_k: {
             type: "integer",
         },
-        image_base64: {
-            type: "string",
-            minLength: 1,
+        image: {
+            type: "object",
+            required: ["bytesBase64"],
+            properties: {
+                bytesBase64: {
+                    type: "string",
+                    minLength: 1,
+                },
+                filename: {
+                    type: "string",
+                },
+                mime: {
+                    type: "string",
+                },
+            },
+            additionalProperties: false,
         },
         images: {
             type: "array",
             items: {
-                type: "string",
+                type: "object",
+                required: ["bytesBase64"],
+                properties: {
+                    bytesBase64: {
+                        type: "string",
+                        minLength: 1,
+                    },
+                    filename: {
+                        type: "string",
+                    },
+                    mime: {
+                        type: "string",
+                    },
+                },
+                additionalProperties: false,
             },
         },
-        image_base64s: {
-            type: "array",
-            items: {
-                type: "string",
+        video: {
+            type: "object",
+            required: ["bytesBase64"],
+            properties: {
+                bytesBase64: {
+                    type: "string",
+                    minLength: 1,
+                },
+                filename: {
+                    type: "string",
+                },
+                mime: {
+                    type: "string",
+                },
             },
-        },
-        video_base64: {
-            type: "string",
-            minLength: 1,
+            additionalProperties: false,
         },
     },
     additionalProperties: false,
@@ -476,7 +571,7 @@ const _slot_video_gen_text_outputs = {
         thinking: {
             type: "string",
         },
-        image_base64: {
+        image: {
             type: "object",
             required: ["file_key"],
             properties: {
@@ -493,7 +588,7 @@ const _slot_video_gen_text_outputs = {
             },
             additionalProperties: false,
         },
-        video_base64: {
+        video: {
             type: "object",
             required: ["file_key"],
             properties: {
@@ -510,7 +605,7 @@ const _slot_video_gen_text_outputs = {
             },
             additionalProperties: false,
         },
-        audio_base64: {
+        audio: {
             type: "object",
             required: ["file_key"],
             properties: {
@@ -544,6 +639,15 @@ const _slot_transcribe_inputs = {
     type: "object",
     required: ["audio"],
     properties: {
+        context: {
+            type: "string",
+        },
+        language: {
+            type: "string",
+        },
+        max_new_tokens: {
+            type: "number",
+        },
         audio: {
             type: "object",
             required: ["bytesBase64"],
@@ -560,15 +664,6 @@ const _slot_transcribe_inputs = {
                 },
             },
             additionalProperties: false,
-        },
-        context: {
-            type: "string",
-        },
-        language: {
-            type: "string",
-        },
-        max_new_tokens: {
-            type: "number",
         },
     },
     additionalProperties: false,
@@ -603,25 +698,26 @@ export type TranscribeOutput = FromSchema<typeof _slot_transcribe_outputs>;
 
 const _slot_concat_videos_inputs = {
     type: "object",
-    required: ["videos_bytes"],
+    required: ["videos"],
     properties: {
-        fileKeys: {
+        videos: {
             type: "array",
             items: {
-                type: "string",
-            },
-        },
-        videos_bytes: {
-            type: "array",
-            items: {
-                type: "string",
-                minLength: 1,
-            },
-        },
-        filenames: {
-            type: "array",
-            items: {
-                type: "string",
+                type: "object",
+                required: ["bytesBase64"],
+                properties: {
+                    bytesBase64: {
+                        type: "string",
+                        minLength: 1,
+                    },
+                    filename: {
+                        type: "string",
+                    },
+                    mime: {
+                        type: "string",
+                    },
+                },
+                additionalProperties: false,
             },
         },
     },
@@ -644,7 +740,7 @@ const _slot_concat_videos_outputs = {
         thinking: {
             type: "string",
         },
-        image_base64: {
+        image: {
             type: "object",
             required: ["file_key"],
             properties: {
@@ -661,7 +757,7 @@ const _slot_concat_videos_outputs = {
             },
             additionalProperties: false,
         },
-        video_base64: {
+        video: {
             type: "object",
             required: ["file_key"],
             properties: {
@@ -678,7 +774,7 @@ const _slot_concat_videos_outputs = {
             },
             additionalProperties: false,
         },
-        audio_base64: {
+        audio: {
             type: "object",
             required: ["file_key"],
             properties: {
@@ -708,20 +804,24 @@ export type ConcatVideosOutput = FromSchema<typeof _slot_concat_videos_outputs>;
 
 const _slot_extract_audio_inputs = {
     type: "object",
-    required: [],
+    required: ["video"],
     properties: {
-        fileKey: {
-            type: "string",
-        },
-        videoKey: {
-            type: "string",
-        },
-        video_bytes: {
-            type: "string",
-            minLength: 1,
-        },
-        video_filename: {
-            type: "string",
+        video: {
+            type: "object",
+            required: ["bytesBase64"],
+            properties: {
+                bytesBase64: {
+                    type: "string",
+                    minLength: 1,
+                },
+                filename: {
+                    type: "string",
+                },
+                mime: {
+                    type: "string",
+                },
+            },
+            additionalProperties: false,
         },
     },
     additionalProperties: false,
@@ -743,7 +843,7 @@ const _slot_extract_audio_outputs = {
         thinking: {
             type: "string",
         },
-        image_base64: {
+        image: {
             type: "object",
             required: ["file_key"],
             properties: {
@@ -760,7 +860,7 @@ const _slot_extract_audio_outputs = {
             },
             additionalProperties: false,
         },
-        video_base64: {
+        video: {
             type: "object",
             required: ["file_key"],
             properties: {
@@ -777,7 +877,7 @@ const _slot_extract_audio_outputs = {
             },
             additionalProperties: false,
         },
-        audio_base64: {
+        audio: {
             type: "object",
             required: ["file_key"],
             properties: {
@@ -807,20 +907,24 @@ export type ExtractAudioOutput = FromSchema<typeof _slot_extract_audio_outputs>;
 
 const _slot_separate_video_audio_inputs = {
     type: "object",
-    required: [],
+    required: ["video"],
     properties: {
-        fileKey: {
-            type: "string",
-        },
-        videoKey: {
-            type: "string",
-        },
-        video_bytes: {
-            type: "string",
-            minLength: 1,
-        },
-        video_filename: {
-            type: "string",
+        video: {
+            type: "object",
+            required: ["bytesBase64"],
+            properties: {
+                bytesBase64: {
+                    type: "string",
+                    minLength: 1,
+                },
+                filename: {
+                    type: "string",
+                },
+                mime: {
+                    type: "string",
+                },
+            },
+            additionalProperties: false,
         },
     },
     additionalProperties: false,
@@ -844,7 +948,7 @@ const _slot_separate_video_audio_outputs = {
         thinking: {
             type: "string",
         },
-        video_file_key: {
+        video: {
             type: "object",
             required: ["file_key"],
             properties: {
@@ -861,7 +965,7 @@ const _slot_separate_video_audio_outputs = {
             },
             additionalProperties: false,
         },
-        audio_file_key: {
+        audio: {
             type: "object",
             required: ["file_key"],
             properties: {
@@ -887,27 +991,41 @@ export type SeparateVideoAudioOutput = FromSchema<
 
 const _slot_merge_video_audio_inputs = {
     type: "object",
-    required: [],
+    required: ["video", "audio"],
     properties: {
-        video_key: {
-            type: "string",
+        video: {
+            type: "object",
+            required: ["bytesBase64"],
+            properties: {
+                bytesBase64: {
+                    type: "string",
+                    minLength: 1,
+                },
+                filename: {
+                    type: "string",
+                },
+                mime: {
+                    type: "string",
+                },
+            },
+            additionalProperties: false,
         },
-        audio_key: {
-            type: "string",
-        },
-        video_bytes: {
-            type: "string",
-            minLength: 1,
-        },
-        audio_bytes: {
-            type: "string",
-            minLength: 1,
-        },
-        video_filename: {
-            type: "string",
-        },
-        audio_filename: {
-            type: "string",
+        audio: {
+            type: "object",
+            required: ["bytesBase64"],
+            properties: {
+                bytesBase64: {
+                    type: "string",
+                    minLength: 1,
+                },
+                filename: {
+                    type: "string",
+                },
+                mime: {
+                    type: "string",
+                },
+            },
+            additionalProperties: false,
         },
     },
     additionalProperties: false,
@@ -931,7 +1049,7 @@ const _slot_merge_video_audio_outputs = {
         thinking: {
             type: "string",
         },
-        image_base64: {
+        image: {
             type: "object",
             required: ["file_key"],
             properties: {
@@ -948,7 +1066,7 @@ const _slot_merge_video_audio_outputs = {
             },
             additionalProperties: false,
         },
-        video_base64: {
+        video: {
             type: "object",
             required: ["file_key"],
             properties: {
@@ -965,7 +1083,7 @@ const _slot_merge_video_audio_outputs = {
             },
             additionalProperties: false,
         },
-        audio_base64: {
+        audio: {
             type: "object",
             required: ["file_key"],
             properties: {
@@ -997,20 +1115,24 @@ export type MergeVideoAudioOutput = FromSchema<
 
 const _slot_get_first_frame_inputs = {
     type: "object",
-    required: [],
+    required: ["video"],
     properties: {
-        fileKey: {
-            type: "string",
-        },
-        videoKey: {
-            type: "string",
-        },
-        video_bytes: {
-            type: "string",
-            minLength: 1,
-        },
-        video_filename: {
-            type: "string",
+        video: {
+            type: "object",
+            required: ["bytesBase64"],
+            properties: {
+                bytesBase64: {
+                    type: "string",
+                    minLength: 1,
+                },
+                filename: {
+                    type: "string",
+                },
+                mime: {
+                    type: "string",
+                },
+            },
+            additionalProperties: false,
         },
     },
     additionalProperties: false,
@@ -1034,7 +1156,7 @@ const _slot_get_first_frame_outputs = {
         thinking: {
             type: "string",
         },
-        image_base64: {
+        image: {
             type: "object",
             required: ["file_key"],
             properties: {
@@ -1051,7 +1173,7 @@ const _slot_get_first_frame_outputs = {
             },
             additionalProperties: false,
         },
-        video_base64: {
+        video: {
             type: "object",
             required: ["file_key"],
             properties: {
@@ -1068,7 +1190,7 @@ const _slot_get_first_frame_outputs = {
             },
             additionalProperties: false,
         },
-        audio_base64: {
+        audio: {
             type: "object",
             required: ["file_key"],
             properties: {
@@ -1100,20 +1222,24 @@ export type GetFirstFrameOutput = FromSchema<
 
 const _slot_get_last_frame_inputs = {
     type: "object",
-    required: [],
+    required: ["video"],
     properties: {
-        fileKey: {
-            type: "string",
-        },
-        videoKey: {
-            type: "string",
-        },
-        video_bytes: {
-            type: "string",
-            minLength: 1,
-        },
-        video_filename: {
-            type: "string",
+        video: {
+            type: "object",
+            required: ["bytesBase64"],
+            properties: {
+                bytesBase64: {
+                    type: "string",
+                    minLength: 1,
+                },
+                filename: {
+                    type: "string",
+                },
+                mime: {
+                    type: "string",
+                },
+            },
+            additionalProperties: false,
         },
     },
     additionalProperties: false,
@@ -1135,7 +1261,7 @@ const _slot_get_last_frame_outputs = {
         thinking: {
             type: "string",
         },
-        image_base64: {
+        image: {
             type: "object",
             required: ["file_key"],
             properties: {
@@ -1152,7 +1278,7 @@ const _slot_get_last_frame_outputs = {
             },
             additionalProperties: false,
         },
-        video_base64: {
+        video: {
             type: "object",
             required: ["file_key"],
             properties: {
@@ -1169,7 +1295,7 @@ const _slot_get_last_frame_outputs = {
             },
             additionalProperties: false,
         },
-        audio_base64: {
+        audio: {
             type: "object",
             required: ["file_key"],
             properties: {
@@ -1201,7 +1327,7 @@ export type GetLastFrameOutput = FromSchema<
 
 const _slot_parse_document_inputs = {
     type: "object",
-    required: [],
+    required: ["document"],
     properties: {
         document: {
             type: "object",
@@ -1219,12 +1345,6 @@ const _slot_parse_document_inputs = {
                 },
             },
             additionalProperties: false,
-        },
-        mime: {
-            type: "string",
-        },
-        filename: {
-            type: "string",
         },
     },
     additionalProperties: false,
@@ -1246,7 +1366,7 @@ const _slot_parse_document_outputs = {
         thinking: {
             type: "string",
         },
-        image_base64: {
+        image: {
             type: "object",
             required: ["file_key"],
             properties: {
@@ -1263,7 +1383,7 @@ const _slot_parse_document_outputs = {
             },
             additionalProperties: false,
         },
-        video_base64: {
+        video: {
             type: "object",
             required: ["file_key"],
             properties: {
@@ -1280,7 +1400,7 @@ const _slot_parse_document_outputs = {
             },
             additionalProperties: false,
         },
-        audio_base64: {
+        audio: {
             type: "object",
             required: ["file_key"],
             properties: {
@@ -1312,7 +1432,7 @@ export type ParseDocumentOutput = FromSchema<
 
 const _slot_split_video_inputs = {
     type: "object",
-    required: [],
+    required: ["video"],
     properties: {
         video: {
             type: "object",
@@ -1330,20 +1450,6 @@ const _slot_split_video_inputs = {
                 },
             },
             additionalProperties: false,
-        },
-        video_base64: {
-            type: "string",
-            minLength: 1,
-        },
-        video_bytes: {
-            type: "string",
-            minLength: 1,
-        },
-        fileKey: {
-            type: "string",
-        },
-        videoKey: {
-            type: "string",
         },
     },
     additionalProperties: false,
@@ -1418,7 +1524,7 @@ const _slot_link_outputs = {
         thinking: {
             type: "string",
         },
-        image_base64: {
+        image: {
             type: "object",
             required: ["file_key"],
             properties: {
@@ -1435,7 +1541,7 @@ const _slot_link_outputs = {
             },
             additionalProperties: false,
         },
-        video_base64: {
+        video: {
             type: "object",
             required: ["file_key"],
             properties: {
@@ -1452,7 +1558,7 @@ const _slot_link_outputs = {
             },
             additionalProperties: false,
         },
-        audio_base64: {
+        audio: {
             type: "object",
             required: ["file_key"],
             properties: {
@@ -1517,9 +1623,22 @@ const _slot_gen_video_inputs = {
         negative_prompt: {
             type: "string",
         },
-        image_base64: {
-            type: "string",
-            minLength: 1,
+        image: {
+            type: "object",
+            required: ["bytesBase64"],
+            properties: {
+                bytesBase64: {
+                    type: "string",
+                    minLength: 1,
+                },
+                filename: {
+                    type: "string",
+                },
+                mime: {
+                    type: "string",
+                },
+            },
+            additionalProperties: false,
         },
         image_frame_idx: {
             type: "integer",
@@ -1527,21 +1646,73 @@ const _slot_gen_video_inputs = {
         image_strength: {
             type: "number",
         },
-        end_image_base64: {
-            type: "string",
-            minLength: 1,
+        end_image: {
+            type: "object",
+            required: ["bytesBase64"],
+            properties: {
+                bytesBase64: {
+                    type: "string",
+                    minLength: 1,
+                },
+                filename: {
+                    type: "string",
+                },
+                mime: {
+                    type: "string",
+                },
+            },
+            additionalProperties: false,
         },
-        image2_base64: {
-            type: "string",
-            minLength: 1,
+        image2: {
+            type: "object",
+            required: ["bytesBase64"],
+            properties: {
+                bytesBase64: {
+                    type: "string",
+                    minLength: 1,
+                },
+                filename: {
+                    type: "string",
+                },
+                mime: {
+                    type: "string",
+                },
+            },
+            additionalProperties: false,
         },
-        speech_base64: {
-            type: "string",
-            minLength: 1,
+        speech: {
+            type: "object",
+            required: ["bytesBase64"],
+            properties: {
+                bytesBase64: {
+                    type: "string",
+                    minLength: 1,
+                },
+                filename: {
+                    type: "string",
+                },
+                mime: {
+                    type: "string",
+                },
+            },
+            additionalProperties: false,
         },
-        audio_base64: {
-            type: "string",
-            minLength: 1,
+        audio: {
+            type: "object",
+            required: ["bytesBase64"],
+            properties: {
+                bytesBase64: {
+                    type: "string",
+                    minLength: 1,
+                },
+                filename: {
+                    type: "string",
+                },
+                mime: {
+                    type: "string",
+                },
+            },
+            additionalProperties: false,
         },
         audio_max_duration: {
             type: "number",
@@ -1569,7 +1740,7 @@ const _slot_gen_video_outputs = {
         thinking: {
             type: "string",
         },
-        image_base64: {
+        image: {
             type: "object",
             required: ["file_key"],
             properties: {
@@ -1586,7 +1757,7 @@ const _slot_gen_video_outputs = {
             },
             additionalProperties: false,
         },
-        video_base64: {
+        video: {
             type: "object",
             required: ["file_key"],
             properties: {
@@ -1603,7 +1774,7 @@ const _slot_gen_video_outputs = {
             },
             additionalProperties: false,
         },
-        audio_base64: {
+        audio: {
             type: "object",
             required: ["file_key"],
             properties: {
@@ -1680,7 +1851,7 @@ const _slot_image_gen_outputs = {
         thinking: {
             type: "string",
         },
-        image_base64: {
+        image: {
             type: "object",
             required: ["file_key"],
             properties: {
@@ -1697,7 +1868,7 @@ const _slot_image_gen_outputs = {
             },
             additionalProperties: false,
         },
-        video_base64: {
+        video: {
             type: "object",
             required: ["file_key"],
             properties: {
@@ -1714,7 +1885,7 @@ const _slot_image_gen_outputs = {
             },
             additionalProperties: false,
         },
-        audio_base64: {
+        audio: {
             type: "object",
             required: ["file_key"],
             properties: {
@@ -1779,7 +1950,7 @@ const _slot_gen_music_outputs = {
         thinking: {
             type: "string",
         },
-        image_base64: {
+        image: {
             type: "object",
             required: ["file_key"],
             properties: {
@@ -1796,7 +1967,7 @@ const _slot_gen_music_outputs = {
             },
             additionalProperties: false,
         },
-        video_base64: {
+        video: {
             type: "object",
             required: ["file_key"],
             properties: {
@@ -1813,7 +1984,7 @@ const _slot_gen_music_outputs = {
             },
             additionalProperties: false,
         },
-        audio_base64: {
+        audio: {
             type: "object",
             required: ["file_key"],
             properties: {
@@ -1880,7 +2051,7 @@ const _slot_text_gen_speech_preset_outputs = {
         thinking: {
             type: "string",
         },
-        image_base64: {
+        image: {
             type: "object",
             required: ["file_key"],
             properties: {
@@ -1897,7 +2068,7 @@ const _slot_text_gen_speech_preset_outputs = {
             },
             additionalProperties: false,
         },
-        video_base64: {
+        video: {
             type: "object",
             required: ["file_key"],
             properties: {
@@ -1914,7 +2085,7 @@ const _slot_text_gen_speech_preset_outputs = {
             },
             additionalProperties: false,
         },
-        audio_base64: {
+        audio: {
             type: "object",
             required: ["file_key"],
             properties: {
@@ -1946,7 +2117,7 @@ export type TextGenSpeechPresetOutput = FromSchema<
 
 const _slot_image_gen_video_inputs = {
     type: "object",
-    required: ["text", "image_base64"],
+    required: ["text", "image"],
     properties: {
         text: {
             type: "string",
@@ -1981,9 +2152,22 @@ const _slot_image_gen_video_inputs = {
         negative_prompt: {
             type: "string",
         },
-        image_base64: {
-            type: "string",
-            minLength: 1,
+        image: {
+            type: "object",
+            required: ["bytesBase64"],
+            properties: {
+                bytesBase64: {
+                    type: "string",
+                    minLength: 1,
+                },
+                filename: {
+                    type: "string",
+                },
+                mime: {
+                    type: "string",
+                },
+            },
+            additionalProperties: false,
         },
         image_frame_idx: {
             type: "integer",
@@ -1991,21 +2175,73 @@ const _slot_image_gen_video_inputs = {
         image_strength: {
             type: "number",
         },
-        end_image_base64: {
-            type: "string",
-            minLength: 1,
+        end_image: {
+            type: "object",
+            required: ["bytesBase64"],
+            properties: {
+                bytesBase64: {
+                    type: "string",
+                    minLength: 1,
+                },
+                filename: {
+                    type: "string",
+                },
+                mime: {
+                    type: "string",
+                },
+            },
+            additionalProperties: false,
         },
-        image2_base64: {
-            type: "string",
-            minLength: 1,
+        image2: {
+            type: "object",
+            required: ["bytesBase64"],
+            properties: {
+                bytesBase64: {
+                    type: "string",
+                    minLength: 1,
+                },
+                filename: {
+                    type: "string",
+                },
+                mime: {
+                    type: "string",
+                },
+            },
+            additionalProperties: false,
         },
-        speech_base64: {
-            type: "string",
-            minLength: 1,
+        speech: {
+            type: "object",
+            required: ["bytesBase64"],
+            properties: {
+                bytesBase64: {
+                    type: "string",
+                    minLength: 1,
+                },
+                filename: {
+                    type: "string",
+                },
+                mime: {
+                    type: "string",
+                },
+            },
+            additionalProperties: false,
         },
-        audio_base64: {
-            type: "string",
-            minLength: 1,
+        audio: {
+            type: "object",
+            required: ["bytesBase64"],
+            properties: {
+                bytesBase64: {
+                    type: "string",
+                    minLength: 1,
+                },
+                filename: {
+                    type: "string",
+                },
+                mime: {
+                    type: "string",
+                },
+            },
+            additionalProperties: false,
         },
         audio_max_duration: {
             type: "number",
@@ -2035,7 +2271,7 @@ const _slot_image_gen_video_outputs = {
         thinking: {
             type: "string",
         },
-        image_base64: {
+        image: {
             type: "object",
             required: ["file_key"],
             properties: {
@@ -2052,7 +2288,7 @@ const _slot_image_gen_video_outputs = {
             },
             additionalProperties: false,
         },
-        video_base64: {
+        video: {
             type: "object",
             required: ["file_key"],
             properties: {
@@ -2069,7 +2305,7 @@ const _slot_image_gen_video_outputs = {
             },
             additionalProperties: false,
         },
-        audio_base64: {
+        audio: {
             type: "object",
             required: ["file_key"],
             properties: {
@@ -2101,15 +2337,28 @@ export type ImageGenVideoOutput = FromSchema<
 
 const _slot_image_edit_inputs = {
     type: "object",
-    required: ["text", "image_base64"],
+    required: ["text", "image"],
     properties: {
         text: {
             type: "string",
             minLength: 1,
         },
-        image_base64: {
-            type: "string",
-            minLength: 1,
+        image: {
+            type: "object",
+            required: ["bytesBase64"],
+            properties: {
+                bytesBase64: {
+                    type: "string",
+                    minLength: 1,
+                },
+                filename: {
+                    type: "string",
+                },
+                mime: {
+                    type: "string",
+                },
+            },
+            additionalProperties: false,
         },
         seed: {
             type: "integer",
@@ -2143,7 +2392,7 @@ const _slot_image_edit_outputs = {
         thinking: {
             type: "string",
         },
-        image_base64: {
+        image: {
             type: "object",
             required: ["file_key"],
             properties: {
@@ -2160,7 +2409,7 @@ const _slot_image_edit_outputs = {
             },
             additionalProperties: false,
         },
-        video_base64: {
+        video: {
             type: "object",
             required: ["file_key"],
             properties: {
@@ -2177,7 +2426,7 @@ const _slot_image_edit_outputs = {
             },
             additionalProperties: false,
         },
-        audio_base64: {
+        audio: {
             type: "object",
             required: ["file_key"],
             properties: {
@@ -2207,15 +2456,41 @@ export type ImageEditOutput = FromSchema<typeof _slot_image_edit_outputs>;
 
 const _slot_image_upscale_inputs = {
     type: "object",
-    required: ["image_base64"],
+    required: ["image"],
     properties: {
-        image_base64: {
-            type: "string",
-            minLength: 1,
+        image: {
+            type: "object",
+            required: ["bytesBase64"],
+            properties: {
+                bytesBase64: {
+                    type: "string",
+                    minLength: 1,
+                },
+                filename: {
+                    type: "string",
+                },
+                mime: {
+                    type: "string",
+                },
+            },
+            additionalProperties: false,
         },
-        video_base64: {
-            type: "string",
-            minLength: 1,
+        video: {
+            type: "object",
+            required: ["bytesBase64"],
+            properties: {
+                bytesBase64: {
+                    type: "string",
+                    minLength: 1,
+                },
+                filename: {
+                    type: "string",
+                },
+                mime: {
+                    type: "string",
+                },
+            },
+            additionalProperties: false,
         },
         resolution: {
             type: "string",
@@ -2261,7 +2536,7 @@ const _slot_image_upscale_outputs = {
         thinking: {
             type: "string",
         },
-        image_base64: {
+        image: {
             type: "object",
             required: ["file_key"],
             properties: {
@@ -2278,7 +2553,7 @@ const _slot_image_upscale_outputs = {
             },
             additionalProperties: false,
         },
-        video_base64: {
+        video: {
             type: "object",
             required: ["file_key"],
             properties: {
@@ -2295,7 +2570,7 @@ const _slot_image_upscale_outputs = {
             },
             additionalProperties: false,
         },
-        audio_base64: {
+        audio: {
             type: "object",
             required: ["file_key"],
             properties: {
@@ -2325,15 +2600,41 @@ export type ImageUpscaleOutput = FromSchema<typeof _slot_image_upscale_outputs>;
 
 const _slot_video_upscale_inputs = {
     type: "object",
-    required: ["video_base64"],
+    required: ["video"],
     properties: {
-        image_base64: {
-            type: "string",
-            minLength: 1,
+        image: {
+            type: "object",
+            required: ["bytesBase64"],
+            properties: {
+                bytesBase64: {
+                    type: "string",
+                    minLength: 1,
+                },
+                filename: {
+                    type: "string",
+                },
+                mime: {
+                    type: "string",
+                },
+            },
+            additionalProperties: false,
         },
-        video_base64: {
-            type: "string",
-            minLength: 1,
+        video: {
+            type: "object",
+            required: ["bytesBase64"],
+            properties: {
+                bytesBase64: {
+                    type: "string",
+                    minLength: 1,
+                },
+                filename: {
+                    type: "string",
+                },
+                mime: {
+                    type: "string",
+                },
+            },
+            additionalProperties: false,
         },
         resolution: {
             type: "string",
@@ -2379,7 +2680,7 @@ const _slot_video_upscale_outputs = {
         thinking: {
             type: "string",
         },
-        image_base64: {
+        image: {
             type: "object",
             required: ["file_key"],
             properties: {
@@ -2396,7 +2697,7 @@ const _slot_video_upscale_outputs = {
             },
             additionalProperties: false,
         },
-        video_base64: {
+        video: {
             type: "object",
             required: ["file_key"],
             properties: {
@@ -2413,7 +2714,7 @@ const _slot_video_upscale_outputs = {
             },
             additionalProperties: false,
         },
-        audio_base64: {
+        audio: {
             type: "object",
             required: ["file_key"],
             properties: {
@@ -2443,17 +2744,30 @@ export type VideoUpscaleOutput = FromSchema<typeof _slot_video_upscale_outputs>;
 
 const _slot_image_describe_inputs = {
     type: "object",
-    required: [],
+    required: ["image"],
     properties: {
-        image: {
-            type: "string",
-            minLength: 1,
-        },
         text: {
             type: "string",
         },
         userPrompt: {
             type: "string",
+        },
+        image: {
+            type: "object",
+            required: ["bytesBase64"],
+            properties: {
+                bytesBase64: {
+                    type: "string",
+                    minLength: 1,
+                },
+                filename: {
+                    type: "string",
+                },
+                mime: {
+                    type: "string",
+                },
+            },
+            additionalProperties: false,
         },
     },
     additionalProperties: false,
@@ -2475,7 +2789,7 @@ const _slot_image_describe_outputs = {
         thinking: {
             type: "string",
         },
-        image_base64: {
+        image: {
             type: "object",
             required: ["file_key"],
             properties: {
@@ -2492,7 +2806,7 @@ const _slot_image_describe_outputs = {
             },
             additionalProperties: false,
         },
-        video_base64: {
+        video: {
             type: "object",
             required: ["file_key"],
             properties: {
@@ -2509,7 +2823,7 @@ const _slot_image_describe_outputs = {
             },
             additionalProperties: false,
         },
-        audio_base64: {
+        audio: {
             type: "object",
             required: ["file_key"],
             properties: {
@@ -2541,17 +2855,30 @@ export type ImageDescribeOutput = FromSchema<
 
 const _slot_video_describe_inputs = {
     type: "object",
-    required: [],
+    required: ["video"],
     properties: {
-        video: {
-            type: "string",
-            minLength: 1,
-        },
         text: {
             type: "string",
         },
         userPrompt: {
             type: "string",
+        },
+        video: {
+            type: "object",
+            required: ["bytesBase64"],
+            properties: {
+                bytesBase64: {
+                    type: "string",
+                    minLength: 1,
+                },
+                filename: {
+                    type: "string",
+                },
+                mime: {
+                    type: "string",
+                },
+            },
+            additionalProperties: false,
         },
     },
     additionalProperties: false,
@@ -2573,7 +2900,7 @@ const _slot_video_describe_outputs = {
         thinking: {
             type: "string",
         },
-        image_base64: {
+        image: {
             type: "object",
             required: ["file_key"],
             properties: {
@@ -2590,7 +2917,7 @@ const _slot_video_describe_outputs = {
             },
             additionalProperties: false,
         },
-        video_base64: {
+        video: {
             type: "object",
             required: ["file_key"],
             properties: {
@@ -2607,7 +2934,7 @@ const _slot_video_describe_outputs = {
             },
             additionalProperties: false,
         },
-        audio_base64: {
+        audio: {
             type: "object",
             required: ["file_key"],
             properties: {
@@ -2641,16 +2968,42 @@ const _slot_audio_image_gen_video_inputs = {
     type: "object",
     required: ["image", "audio"],
     properties: {
-        image: {
-            type: "string",
-            minLength: 1,
-        },
-        audio: {
-            type: "string",
-            minLength: 1,
-        },
         text: {
             type: "string",
+        },
+        image: {
+            type: "object",
+            required: ["bytesBase64"],
+            properties: {
+                bytesBase64: {
+                    type: "string",
+                    minLength: 1,
+                },
+                filename: {
+                    type: "string",
+                },
+                mime: {
+                    type: "string",
+                },
+            },
+            additionalProperties: false,
+        },
+        audio: {
+            type: "object",
+            required: ["bytesBase64"],
+            properties: {
+                bytesBase64: {
+                    type: "string",
+                    minLength: 1,
+                },
+                filename: {
+                    type: "string",
+                },
+                mime: {
+                    type: "string",
+                },
+            },
+            additionalProperties: false,
         },
     },
     additionalProperties: false,
@@ -2674,7 +3027,7 @@ const _slot_audio_image_gen_video_outputs = {
         thinking: {
             type: "string",
         },
-        image_base64: {
+        image: {
             type: "object",
             required: ["file_key"],
             properties: {
@@ -2691,7 +3044,7 @@ const _slot_audio_image_gen_video_outputs = {
             },
             additionalProperties: false,
         },
-        video_base64: {
+        video: {
             type: "object",
             required: ["file_key"],
             properties: {
@@ -2708,7 +3061,7 @@ const _slot_audio_image_gen_video_outputs = {
             },
             additionalProperties: false,
         },
-        audio_base64: {
+        audio: {
             type: "object",
             required: ["file_key"],
             properties: {
@@ -2740,7 +3093,7 @@ export type AudioImageGenVideoOutput = FromSchema<
 
 const _slot_speech_text_gen_video_inputs = {
     type: "object",
-    required: ["text", "audio_base64"],
+    required: ["text", "audio"],
     properties: {
         text: {
             type: "string",
@@ -2775,9 +3128,22 @@ const _slot_speech_text_gen_video_inputs = {
         negative_prompt: {
             type: "string",
         },
-        image_base64: {
-            type: "string",
-            minLength: 1,
+        image: {
+            type: "object",
+            required: ["bytesBase64"],
+            properties: {
+                bytesBase64: {
+                    type: "string",
+                    minLength: 1,
+                },
+                filename: {
+                    type: "string",
+                },
+                mime: {
+                    type: "string",
+                },
+            },
+            additionalProperties: false,
         },
         image_frame_idx: {
             type: "integer",
@@ -2785,21 +3151,73 @@ const _slot_speech_text_gen_video_inputs = {
         image_strength: {
             type: "number",
         },
-        end_image_base64: {
-            type: "string",
-            minLength: 1,
+        end_image: {
+            type: "object",
+            required: ["bytesBase64"],
+            properties: {
+                bytesBase64: {
+                    type: "string",
+                    minLength: 1,
+                },
+                filename: {
+                    type: "string",
+                },
+                mime: {
+                    type: "string",
+                },
+            },
+            additionalProperties: false,
         },
-        image2_base64: {
-            type: "string",
-            minLength: 1,
+        image2: {
+            type: "object",
+            required: ["bytesBase64"],
+            properties: {
+                bytesBase64: {
+                    type: "string",
+                    minLength: 1,
+                },
+                filename: {
+                    type: "string",
+                },
+                mime: {
+                    type: "string",
+                },
+            },
+            additionalProperties: false,
         },
-        speech_base64: {
-            type: "string",
-            minLength: 1,
+        speech: {
+            type: "object",
+            required: ["bytesBase64"],
+            properties: {
+                bytesBase64: {
+                    type: "string",
+                    minLength: 1,
+                },
+                filename: {
+                    type: "string",
+                },
+                mime: {
+                    type: "string",
+                },
+            },
+            additionalProperties: false,
         },
-        audio_base64: {
-            type: "string",
-            minLength: 1,
+        audio: {
+            type: "object",
+            required: ["bytesBase64"],
+            properties: {
+                bytesBase64: {
+                    type: "string",
+                    minLength: 1,
+                },
+                filename: {
+                    type: "string",
+                },
+                mime: {
+                    type: "string",
+                },
+            },
+            additionalProperties: false,
         },
         audio_max_duration: {
             type: "number",
@@ -2829,7 +3247,7 @@ const _slot_speech_text_gen_video_outputs = {
         thinking: {
             type: "string",
         },
-        image_base64: {
+        image: {
             type: "object",
             required: ["file_key"],
             properties: {
@@ -2846,7 +3264,7 @@ const _slot_speech_text_gen_video_outputs = {
             },
             additionalProperties: false,
         },
-        video_base64: {
+        video: {
             type: "object",
             required: ["file_key"],
             properties: {
@@ -2863,7 +3281,7 @@ const _slot_speech_text_gen_video_outputs = {
             },
             additionalProperties: false,
         },
-        audio_base64: {
+        audio: {
             type: "object",
             required: ["file_key"],
             properties: {
@@ -2897,20 +3315,59 @@ const _slot_speech_image_video_gen_video_inputs = {
     type: "object",
     required: ["image", "video", "audio"],
     properties: {
-        image: {
-            type: "string",
-            minLength: 1,
-        },
-        video: {
-            type: "string",
-            minLength: 1,
-        },
-        audio: {
-            type: "string",
-            minLength: 1,
-        },
         text: {
             type: "string",
+        },
+        image: {
+            type: "object",
+            required: ["bytesBase64"],
+            properties: {
+                bytesBase64: {
+                    type: "string",
+                    minLength: 1,
+                },
+                filename: {
+                    type: "string",
+                },
+                mime: {
+                    type: "string",
+                },
+            },
+            additionalProperties: false,
+        },
+        video: {
+            type: "object",
+            required: ["bytesBase64"],
+            properties: {
+                bytesBase64: {
+                    type: "string",
+                    minLength: 1,
+                },
+                filename: {
+                    type: "string",
+                },
+                mime: {
+                    type: "string",
+                },
+            },
+            additionalProperties: false,
+        },
+        audio: {
+            type: "object",
+            required: ["bytesBase64"],
+            properties: {
+                bytesBase64: {
+                    type: "string",
+                    minLength: 1,
+                },
+                filename: {
+                    type: "string",
+                },
+                mime: {
+                    type: "string",
+                },
+            },
+            additionalProperties: false,
         },
     },
     additionalProperties: false,
@@ -2934,7 +3391,7 @@ const _slot_speech_image_video_gen_video_outputs = {
         thinking: {
             type: "string",
         },
-        image_base64: {
+        image: {
             type: "object",
             required: ["file_key"],
             properties: {
@@ -2951,7 +3408,7 @@ const _slot_speech_image_video_gen_video_outputs = {
             },
             additionalProperties: false,
         },
-        video_base64: {
+        video: {
             type: "object",
             required: ["file_key"],
             properties: {
@@ -2968,7 +3425,7 @@ const _slot_speech_image_video_gen_video_outputs = {
             },
             additionalProperties: false,
         },
-        audio_base64: {
+        audio: {
             type: "object",
             required: ["file_key"],
             properties: {
@@ -3002,16 +3459,42 @@ const _slot_video_image_gen_video_mix_inputs = {
     type: "object",
     required: ["image", "video"],
     properties: {
-        image: {
-            type: "string",
-            minLength: 1,
-        },
-        video: {
-            type: "string",
-            minLength: 1,
-        },
         text: {
             type: "string",
+        },
+        image: {
+            type: "object",
+            required: ["bytesBase64"],
+            properties: {
+                bytesBase64: {
+                    type: "string",
+                    minLength: 1,
+                },
+                filename: {
+                    type: "string",
+                },
+                mime: {
+                    type: "string",
+                },
+            },
+            additionalProperties: false,
+        },
+        video: {
+            type: "object",
+            required: ["bytesBase64"],
+            properties: {
+                bytesBase64: {
+                    type: "string",
+                    minLength: 1,
+                },
+                filename: {
+                    type: "string",
+                },
+                mime: {
+                    type: "string",
+                },
+            },
+            additionalProperties: false,
         },
     },
     additionalProperties: false,
@@ -3035,7 +3518,7 @@ const _slot_video_image_gen_video_mix_outputs = {
         thinking: {
             type: "string",
         },
-        image_base64: {
+        image: {
             type: "object",
             required: ["file_key"],
             properties: {
@@ -3052,7 +3535,7 @@ const _slot_video_image_gen_video_mix_outputs = {
             },
             additionalProperties: false,
         },
-        video_base64: {
+        video: {
             type: "object",
             required: ["file_key"],
             properties: {
@@ -3069,7 +3552,7 @@ const _slot_video_image_gen_video_mix_outputs = {
             },
             additionalProperties: false,
         },
-        audio_base64: {
+        audio: {
             type: "object",
             required: ["file_key"],
             properties: {
@@ -3103,16 +3586,42 @@ const _slot_video_image_gen_video_move_inputs = {
     type: "object",
     required: ["image", "video"],
     properties: {
-        image: {
-            type: "string",
-            minLength: 1,
-        },
-        video: {
-            type: "string",
-            minLength: 1,
-        },
         text: {
             type: "string",
+        },
+        image: {
+            type: "object",
+            required: ["bytesBase64"],
+            properties: {
+                bytesBase64: {
+                    type: "string",
+                    minLength: 1,
+                },
+                filename: {
+                    type: "string",
+                },
+                mime: {
+                    type: "string",
+                },
+            },
+            additionalProperties: false,
+        },
+        video: {
+            type: "object",
+            required: ["bytesBase64"],
+            properties: {
+                bytesBase64: {
+                    type: "string",
+                    minLength: 1,
+                },
+                filename: {
+                    type: "string",
+                },
+                mime: {
+                    type: "string",
+                },
+            },
+            additionalProperties: false,
         },
     },
     additionalProperties: false,
@@ -3136,7 +3645,7 @@ const _slot_video_image_gen_video_move_outputs = {
         thinking: {
             type: "string",
         },
-        image_base64: {
+        image: {
             type: "object",
             required: ["file_key"],
             properties: {
@@ -3153,7 +3662,7 @@ const _slot_video_image_gen_video_move_outputs = {
             },
             additionalProperties: false,
         },
-        video_base64: {
+        video: {
             type: "object",
             required: ["file_key"],
             properties: {
@@ -3170,7 +3679,7 @@ const _slot_video_image_gen_video_move_outputs = {
             },
             additionalProperties: false,
         },
-        audio_base64: {
+        audio: {
             type: "object",
             required: ["file_key"],
             properties: {
@@ -3202,7 +3711,7 @@ export type VideoImageGenVideoMoveOutput = FromSchema<
 
 const _slot_image_image_gen_video_inputs = {
     type: "object",
-    required: ["text", "image_base64", "end_image_base64"],
+    required: ["text", "image", "end_image"],
     properties: {
         text: {
             type: "string",
@@ -3237,9 +3746,22 @@ const _slot_image_image_gen_video_inputs = {
         negative_prompt: {
             type: "string",
         },
-        image_base64: {
-            type: "string",
-            minLength: 1,
+        image: {
+            type: "object",
+            required: ["bytesBase64"],
+            properties: {
+                bytesBase64: {
+                    type: "string",
+                    minLength: 1,
+                },
+                filename: {
+                    type: "string",
+                },
+                mime: {
+                    type: "string",
+                },
+            },
+            additionalProperties: false,
         },
         image_frame_idx: {
             type: "integer",
@@ -3247,21 +3769,73 @@ const _slot_image_image_gen_video_inputs = {
         image_strength: {
             type: "number",
         },
-        end_image_base64: {
-            type: "string",
-            minLength: 1,
+        end_image: {
+            type: "object",
+            required: ["bytesBase64"],
+            properties: {
+                bytesBase64: {
+                    type: "string",
+                    minLength: 1,
+                },
+                filename: {
+                    type: "string",
+                },
+                mime: {
+                    type: "string",
+                },
+            },
+            additionalProperties: false,
         },
-        image2_base64: {
-            type: "string",
-            minLength: 1,
+        image2: {
+            type: "object",
+            required: ["bytesBase64"],
+            properties: {
+                bytesBase64: {
+                    type: "string",
+                    minLength: 1,
+                },
+                filename: {
+                    type: "string",
+                },
+                mime: {
+                    type: "string",
+                },
+            },
+            additionalProperties: false,
         },
-        speech_base64: {
-            type: "string",
-            minLength: 1,
+        speech: {
+            type: "object",
+            required: ["bytesBase64"],
+            properties: {
+                bytesBase64: {
+                    type: "string",
+                    minLength: 1,
+                },
+                filename: {
+                    type: "string",
+                },
+                mime: {
+                    type: "string",
+                },
+            },
+            additionalProperties: false,
         },
-        audio_base64: {
-            type: "string",
-            minLength: 1,
+        audio: {
+            type: "object",
+            required: ["bytesBase64"],
+            properties: {
+                bytesBase64: {
+                    type: "string",
+                    minLength: 1,
+                },
+                filename: {
+                    type: "string",
+                },
+                mime: {
+                    type: "string",
+                },
+            },
+            additionalProperties: false,
         },
         audio_max_duration: {
             type: "number",
@@ -3291,7 +3865,7 @@ const _slot_image_image_gen_video_outputs = {
         thinking: {
             type: "string",
         },
-        image_base64: {
+        image: {
             type: "object",
             required: ["file_key"],
             properties: {
@@ -3308,7 +3882,7 @@ const _slot_image_image_gen_video_outputs = {
             },
             additionalProperties: false,
         },
-        video_base64: {
+        video: {
             type: "object",
             required: ["file_key"],
             properties: {
@@ -3325,7 +3899,7 @@ const _slot_image_image_gen_video_outputs = {
             },
             additionalProperties: false,
         },
-        audio_base64: {
+        audio: {
             type: "object",
             required: ["file_key"],
             properties: {
@@ -3392,9 +3966,22 @@ const _slot_text_gen_video_inputs = {
         negative_prompt: {
             type: "string",
         },
-        image_base64: {
-            type: "string",
-            minLength: 1,
+        image: {
+            type: "object",
+            required: ["bytesBase64"],
+            properties: {
+                bytesBase64: {
+                    type: "string",
+                    minLength: 1,
+                },
+                filename: {
+                    type: "string",
+                },
+                mime: {
+                    type: "string",
+                },
+            },
+            additionalProperties: false,
         },
         image_frame_idx: {
             type: "integer",
@@ -3402,21 +3989,73 @@ const _slot_text_gen_video_inputs = {
         image_strength: {
             type: "number",
         },
-        end_image_base64: {
-            type: "string",
-            minLength: 1,
+        end_image: {
+            type: "object",
+            required: ["bytesBase64"],
+            properties: {
+                bytesBase64: {
+                    type: "string",
+                    minLength: 1,
+                },
+                filename: {
+                    type: "string",
+                },
+                mime: {
+                    type: "string",
+                },
+            },
+            additionalProperties: false,
         },
-        image2_base64: {
-            type: "string",
-            minLength: 1,
+        image2: {
+            type: "object",
+            required: ["bytesBase64"],
+            properties: {
+                bytesBase64: {
+                    type: "string",
+                    minLength: 1,
+                },
+                filename: {
+                    type: "string",
+                },
+                mime: {
+                    type: "string",
+                },
+            },
+            additionalProperties: false,
         },
-        speech_base64: {
-            type: "string",
-            minLength: 1,
+        speech: {
+            type: "object",
+            required: ["bytesBase64"],
+            properties: {
+                bytesBase64: {
+                    type: "string",
+                    minLength: 1,
+                },
+                filename: {
+                    type: "string",
+                },
+                mime: {
+                    type: "string",
+                },
+            },
+            additionalProperties: false,
         },
-        audio_base64: {
-            type: "string",
-            minLength: 1,
+        audio: {
+            type: "object",
+            required: ["bytesBase64"],
+            properties: {
+                bytesBase64: {
+                    type: "string",
+                    minLength: 1,
+                },
+                filename: {
+                    type: "string",
+                },
+                mime: {
+                    type: "string",
+                },
+            },
+            additionalProperties: false,
         },
         audio_max_duration: {
             type: "number",
@@ -3444,7 +4083,7 @@ const _slot_text_gen_video_outputs = {
         thinking: {
             type: "string",
         },
-        image_base64: {
+        image: {
             type: "object",
             required: ["file_key"],
             properties: {
@@ -3461,7 +4100,7 @@ const _slot_text_gen_video_outputs = {
             },
             additionalProperties: false,
         },
-        video_base64: {
+        video: {
             type: "object",
             required: ["file_key"],
             properties: {
@@ -3478,7 +4117,7 @@ const _slot_text_gen_video_outputs = {
             },
             additionalProperties: false,
         },
-        audio_base64: {
+        audio: {
             type: "object",
             required: ["file_key"],
             properties: {
@@ -3510,7 +4149,7 @@ export type TextGenVideoOutput = FromSchema<
 
 const _slot_image_gen_model_inputs = {
     type: "object",
-    required: [],
+    required: ["image"],
     properties: {
         text: {
             type: "string",
@@ -3537,6 +4176,23 @@ const _slot_image_gen_model_inputs = {
         seed: {
             type: "integer",
         },
+        image: {
+            type: "object",
+            required: ["bytesBase64"],
+            properties: {
+                bytesBase64: {
+                    type: "string",
+                    minLength: 1,
+                },
+                filename: {
+                    type: "string",
+                },
+                mime: {
+                    type: "string",
+                },
+            },
+            additionalProperties: false,
+        },
     },
     additionalProperties: false,
 } as const;
@@ -3559,7 +4215,7 @@ const _slot_image_gen_model_outputs = {
         thinking: {
             type: "string",
         },
-        image_base64: {
+        image: {
             type: "object",
             required: ["file_key"],
             properties: {
@@ -3576,7 +4232,7 @@ const _slot_image_gen_model_outputs = {
             },
             additionalProperties: false,
         },
-        video_base64: {
+        video: {
             type: "object",
             required: ["file_key"],
             properties: {
@@ -3593,7 +4249,7 @@ const _slot_image_gen_model_outputs = {
             },
             additionalProperties: false,
         },
-        audio_base64: {
+        audio: {
             type: "object",
             required: ["file_key"],
             properties: {
@@ -3628,12 +4284,38 @@ const _slot_speech_video_gen_video_inputs = {
     required: ["video", "audio"],
     properties: {
         video: {
-            type: "string",
-            minLength: 1,
+            type: "object",
+            required: ["bytesBase64"],
+            properties: {
+                bytesBase64: {
+                    type: "string",
+                    minLength: 1,
+                },
+                filename: {
+                    type: "string",
+                },
+                mime: {
+                    type: "string",
+                },
+            },
+            additionalProperties: false,
         },
         audio: {
-            type: "string",
-            minLength: 1,
+            type: "object",
+            required: ["bytesBase64"],
+            properties: {
+                bytesBase64: {
+                    type: "string",
+                    minLength: 1,
+                },
+                filename: {
+                    type: "string",
+                },
+                mime: {
+                    type: "string",
+                },
+            },
+            additionalProperties: false,
         },
     },
     additionalProperties: false,
@@ -3657,7 +4339,7 @@ const _slot_speech_video_gen_video_outputs = {
         thinking: {
             type: "string",
         },
-        image_base64: {
+        image: {
             type: "object",
             required: ["file_key"],
             properties: {
@@ -3674,7 +4356,7 @@ const _slot_speech_video_gen_video_outputs = {
             },
             additionalProperties: false,
         },
-        video_base64: {
+        video: {
             type: "object",
             required: ["file_key"],
             properties: {
@@ -3691,7 +4373,7 @@ const _slot_speech_video_gen_video_outputs = {
             },
             additionalProperties: false,
         },
-        audio_base64: {
+        audio: {
             type: "object",
             required: ["file_key"],
             properties: {
@@ -3723,19 +4405,45 @@ export type SpeechVideoGenVideoOutput = FromSchema<
 
 const _slot_text_gen_speech_clone_inputs = {
     type: "object",
-    required: ["text", "ref_audio_base64"],
+    required: ["text", "ref_audio"],
     properties: {
         text: {
             type: "string",
             minLength: 1,
         },
-        ref_audio_base64: {
-            type: "string",
-            minLength: 1,
+        ref_audio: {
+            type: "object",
+            required: ["bytesBase64"],
+            properties: {
+                bytesBase64: {
+                    type: "string",
+                    minLength: 1,
+                },
+                filename: {
+                    type: "string",
+                },
+                mime: {
+                    type: "string",
+                },
+            },
+            additionalProperties: false,
         },
-        audio_base64: {
-            type: "string",
-            minLength: 1,
+        audio: {
+            type: "object",
+            required: ["bytesBase64"],
+            properties: {
+                bytesBase64: {
+                    type: "string",
+                    minLength: 1,
+                },
+                filename: {
+                    type: "string",
+                },
+                mime: {
+                    type: "string",
+                },
+            },
+            additionalProperties: false,
         },
         language: {
             type: "string",
@@ -3771,7 +4479,7 @@ const _slot_text_gen_speech_clone_outputs = {
         thinking: {
             type: "string",
         },
-        image_base64: {
+        image: {
             type: "object",
             required: ["file_key"],
             properties: {
@@ -3788,7 +4496,7 @@ const _slot_text_gen_speech_clone_outputs = {
             },
             additionalProperties: false,
         },
-        video_base64: {
+        video: {
             type: "object",
             required: ["file_key"],
             properties: {
@@ -3805,7 +4513,7 @@ const _slot_text_gen_speech_clone_outputs = {
             },
             additionalProperties: false,
         },
-        audio_base64: {
+        audio: {
             type: "object",
             required: ["file_key"],
             properties: {
@@ -3839,6 +4547,15 @@ const _slot_transcribe_timestamp_inputs = {
     type: "object",
     required: ["audio"],
     properties: {
+        context: {
+            type: "string",
+        },
+        language: {
+            type: "string",
+        },
+        max_new_tokens: {
+            type: "number",
+        },
         audio: {
             type: "object",
             required: ["bytesBase64"],
@@ -3855,15 +4572,6 @@ const _slot_transcribe_timestamp_inputs = {
                 },
             },
             additionalProperties: false,
-        },
-        context: {
-            type: "string",
-        },
-        language: {
-            type: "string",
-        },
-        max_new_tokens: {
-            type: "number",
         },
     },
     additionalProperties: false,
@@ -3962,7 +4670,7 @@ const _slot_text_gen_speech_instruct_outputs = {
         thinking: {
             type: "string",
         },
-        image_base64: {
+        image: {
             type: "object",
             required: ["file_key"],
             properties: {
@@ -3979,7 +4687,7 @@ const _slot_text_gen_speech_instruct_outputs = {
             },
             additionalProperties: false,
         },
-        video_base64: {
+        video: {
             type: "object",
             required: ["file_key"],
             properties: {
@@ -3996,7 +4704,7 @@ const _slot_text_gen_speech_instruct_outputs = {
             },
             additionalProperties: false,
         },
-        audio_base64: {
+        audio: {
             type: "object",
             required: ["file_key"],
             properties: {
@@ -4030,16 +4738,42 @@ const _slot_video_image_move_animal_inputs = {
     type: "object",
     required: ["image", "video"],
     properties: {
-        image: {
-            type: "string",
-            minLength: 1,
-        },
-        video: {
-            type: "string",
-            minLength: 1,
-        },
         text: {
             type: "string",
+        },
+        image: {
+            type: "object",
+            required: ["bytesBase64"],
+            properties: {
+                bytesBase64: {
+                    type: "string",
+                    minLength: 1,
+                },
+                filename: {
+                    type: "string",
+                },
+                mime: {
+                    type: "string",
+                },
+            },
+            additionalProperties: false,
+        },
+        video: {
+            type: "object",
+            required: ["bytesBase64"],
+            properties: {
+                bytesBase64: {
+                    type: "string",
+                    minLength: 1,
+                },
+                filename: {
+                    type: "string",
+                },
+                mime: {
+                    type: "string",
+                },
+            },
+            additionalProperties: false,
         },
     },
     additionalProperties: false,
@@ -4063,7 +4797,7 @@ const _slot_video_image_move_animal_outputs = {
         thinking: {
             type: "string",
         },
-        image_base64: {
+        image: {
             type: "object",
             required: ["file_key"],
             properties: {
@@ -4080,7 +4814,7 @@ const _slot_video_image_move_animal_outputs = {
             },
             additionalProperties: false,
         },
-        video_base64: {
+        video: {
             type: "object",
             required: ["file_key"],
             properties: {
@@ -4097,7 +4831,7 @@ const _slot_video_image_move_animal_outputs = {
             },
             additionalProperties: false,
         },
-        audio_base64: {
+        audio: {
             type: "object",
             required: ["file_key"],
             properties: {
@@ -4131,16 +4865,42 @@ const _slot_wan_animate_mix_inputs = {
     type: "object",
     required: ["image", "video"],
     properties: {
-        image: {
-            type: "string",
-            minLength: 1,
-        },
-        video: {
-            type: "string",
-            minLength: 1,
-        },
         text: {
             type: "string",
+        },
+        image: {
+            type: "object",
+            required: ["bytesBase64"],
+            properties: {
+                bytesBase64: {
+                    type: "string",
+                    minLength: 1,
+                },
+                filename: {
+                    type: "string",
+                },
+                mime: {
+                    type: "string",
+                },
+            },
+            additionalProperties: false,
+        },
+        video: {
+            type: "object",
+            required: ["bytesBase64"],
+            properties: {
+                bytesBase64: {
+                    type: "string",
+                    minLength: 1,
+                },
+                filename: {
+                    type: "string",
+                },
+                mime: {
+                    type: "string",
+                },
+            },
+            additionalProperties: false,
         },
     },
     additionalProperties: false,
@@ -4164,7 +4924,7 @@ const _slot_wan_animate_mix_outputs = {
         thinking: {
             type: "string",
         },
-        image_base64: {
+        image: {
             type: "object",
             required: ["file_key"],
             properties: {
@@ -4181,7 +4941,7 @@ const _slot_wan_animate_mix_outputs = {
             },
             additionalProperties: false,
         },
-        video_base64: {
+        video: {
             type: "object",
             required: ["file_key"],
             properties: {
@@ -4198,7 +4958,7 @@ const _slot_wan_animate_mix_outputs = {
             },
             additionalProperties: false,
         },
-        audio_base64: {
+        audio: {
             type: "object",
             required: ["file_key"],
             properties: {
@@ -4230,16 +4990,30 @@ export type WanAnimateMixOutput = FromSchema<
 
 const _slot_drop_video_inputs = {
     type: "object",
-    required: [],
+    required: ["videos"],
     properties: {
-        fileKeys: {
-            type: "array",
-            items: {
-                type: "string",
-            },
-        },
         query: {
             type: "string",
+        },
+        videos: {
+            type: "array",
+            items: {
+                type: "object",
+                required: ["bytesBase64"],
+                properties: {
+                    bytesBase64: {
+                        type: "string",
+                        minLength: 1,
+                    },
+                    filename: {
+                        type: "string",
+                    },
+                    mime: {
+                        type: "string",
+                    },
+                },
+                additionalProperties: false,
+            },
         },
     },
     additionalProperties: false,
@@ -4261,7 +5035,7 @@ const _slot_drop_video_outputs = {
         thinking: {
             type: "string",
         },
-        image_base64: {
+        image: {
             type: "object",
             required: ["file_key"],
             properties: {
@@ -4278,7 +5052,7 @@ const _slot_drop_video_outputs = {
             },
             additionalProperties: false,
         },
-        video_base64: {
+        video: {
             type: "object",
             required: ["file_key"],
             properties: {
@@ -4295,7 +5069,7 @@ const _slot_drop_video_outputs = {
             },
             additionalProperties: false,
         },
-        audio_base64: {
+        audio: {
             type: "object",
             required: ["file_key"],
             properties: {
@@ -4363,12 +5137,6 @@ const _slot_arrange_group_inputs = {
                 additionalProperties: false,
             },
         },
-        fileKeys: {
-            type: "array",
-            items: {
-                type: "string",
-            },
-        },
         infos: {
             type: "array",
             items: {
@@ -4385,6 +5153,26 @@ const _slot_arrange_group_inputs = {
         },
         duplicatable: {
             type: "boolean",
+        },
+        images: {
+            type: "array",
+            items: {
+                type: "object",
+                required: ["bytesBase64"],
+                properties: {
+                    bytesBase64: {
+                        type: "string",
+                        minLength: 1,
+                    },
+                    filename: {
+                        type: "string",
+                    },
+                    mime: {
+                        type: "string",
+                    },
+                },
+                additionalProperties: false,
+            },
         },
     },
     additionalProperties: false,
@@ -4406,7 +5194,7 @@ const _slot_arrange_group_outputs = {
         thinking: {
             type: "string",
         },
-        image_base64: {
+        image: {
             type: "object",
             required: ["file_key"],
             properties: {
@@ -4423,7 +5211,7 @@ const _slot_arrange_group_outputs = {
             },
             additionalProperties: false,
         },
-        video_base64: {
+        video: {
             type: "object",
             required: ["file_key"],
             properties: {
@@ -4440,7 +5228,7 @@ const _slot_arrange_group_outputs = {
             },
             additionalProperties: false,
         },
-        audio_base64: {
+        audio: {
             type: "object",
             required: ["file_key"],
             properties: {
@@ -4494,10 +5282,24 @@ export type ArrangeGroupOutput = FromSchema<typeof _slot_arrange_group_outputs>;
 
 const _slot_separate_speaker_inputs = {
     type: "object",
-    required: [],
+    required: ["audio"],
     properties: {
-        fileKey: {
-            type: "string",
+        audio: {
+            type: "object",
+            required: ["bytesBase64"],
+            properties: {
+                bytesBase64: {
+                    type: "string",
+                    minLength: 1,
+                },
+                filename: {
+                    type: "string",
+                },
+                mime: {
+                    type: "string",
+                },
+            },
+            additionalProperties: false,
         },
     },
     additionalProperties: false,
@@ -4545,10 +5347,24 @@ export type SeparateSpeakerOutput = FromSchema<
 
 const _slot_separate_audio_track_inputs = {
     type: "object",
-    required: [],
+    required: ["audio"],
     properties: {
-        fileKey: {
-            type: "string",
+        audio: {
+            type: "object",
+            required: ["bytesBase64"],
+            properties: {
+                bytesBase64: {
+                    type: "string",
+                    minLength: 1,
+                },
+                filename: {
+                    type: "string",
+                },
+                mime: {
+                    type: "string",
+                },
+            },
+            additionalProperties: false,
         },
     },
     additionalProperties: false,
@@ -4973,19 +5789,11 @@ export const ABI_NODES = {
                     type: "string",
                     minLength: 1,
                 },
-                images: {
-                    type: "array",
-                    items: {
-                        type: "string",
-                    },
+                image: {
+                    $ref: "#/$defs/Asset",
                 },
-                image_base64: {
-                    type: "string",
-                    minLength: 1,
-                },
-                image2_base64: {
-                    type: "string",
-                    minLength: 1,
+                image2: {
+                    $ref: "#/$defs/Asset",
                 },
                 seed: {
                     type: "integer",
@@ -4995,6 +5803,12 @@ export const ABI_NODES = {
                 },
                 height: {
                     type: "integer",
+                },
+                images: {
+                    type: "array",
+                    items: {
+                        $ref: "#/$defs/Asset",
+                    },
                 },
             },
             additionalProperties: false,
@@ -5015,14 +5829,14 @@ export const ABI_NODES = {
                 thinking: {
                     type: "string",
                 },
-                image_base64: {
-                    $ref: "#/$defs/FileRef",
+                image: {
+                    $ref: "#/$defs/ImageRef",
                 },
-                video_base64: {
-                    $ref: "#/$defs/FileRef",
+                video: {
+                    $ref: "#/$defs/VideoRef",
                 },
-                audio_base64: {
-                    $ref: "#/$defs/FileRef",
+                audio: {
+                    $ref: "#/$defs/AudioRef",
                 },
                 texts: {
                     type: "array",
@@ -5066,20 +5880,13 @@ export const ABI_NODES = {
                 top_k: {
                     type: "integer",
                 },
-                image_base64: {
-                    type: "string",
-                    minLength: 1,
+                image: {
+                    $ref: "#/$defs/Asset",
                 },
                 images: {
                     type: "array",
                     items: {
-                        type: "string",
-                    },
-                },
-                image_base64s: {
-                    type: "array",
-                    items: {
-                        type: "string",
+                        $ref: "#/$defs/Asset",
                     },
                 },
             },
@@ -5101,14 +5908,14 @@ export const ABI_NODES = {
                 thinking: {
                     type: "string",
                 },
-                image_base64: {
-                    $ref: "#/$defs/FileRef",
+                image: {
+                    $ref: "#/$defs/ImageRef",
                 },
-                video_base64: {
-                    $ref: "#/$defs/FileRef",
+                video: {
+                    $ref: "#/$defs/VideoRef",
                 },
-                audio_base64: {
-                    $ref: "#/$defs/FileRef",
+                audio: {
+                    $ref: "#/$defs/AudioRef",
                 },
                 texts: {
                     type: "array",
@@ -5123,7 +5930,7 @@ export const ABI_NODES = {
     "video-gen-text": {
         inputs: {
             type: "object",
-            required: ["text", "video_base64"],
+            required: ["text", "video"],
             properties: {
                 text: {
                     type: "string",
@@ -5152,25 +5959,17 @@ export const ABI_NODES = {
                 top_k: {
                     type: "integer",
                 },
-                image_base64: {
-                    type: "string",
-                    minLength: 1,
+                image: {
+                    $ref: "#/$defs/Asset",
                 },
                 images: {
                     type: "array",
                     items: {
-                        type: "string",
+                        $ref: "#/$defs/Asset",
                     },
                 },
-                image_base64s: {
-                    type: "array",
-                    items: {
-                        type: "string",
-                    },
-                },
-                video_base64: {
-                    type: "string",
-                    minLength: 1,
+                video: {
+                    $ref: "#/$defs/Asset",
                 },
             },
             additionalProperties: false,
@@ -5191,14 +5990,14 @@ export const ABI_NODES = {
                 thinking: {
                     type: "string",
                 },
-                image_base64: {
-                    $ref: "#/$defs/FileRef",
+                image: {
+                    $ref: "#/$defs/ImageRef",
                 },
-                video_base64: {
-                    $ref: "#/$defs/FileRef",
+                video: {
+                    $ref: "#/$defs/VideoRef",
                 },
-                audio_base64: {
-                    $ref: "#/$defs/FileRef",
+                audio: {
+                    $ref: "#/$defs/AudioRef",
                 },
                 texts: {
                     type: "array",
@@ -5215,9 +6014,6 @@ export const ABI_NODES = {
             type: "object",
             required: ["audio"],
             properties: {
-                audio: {
-                    $ref: "#/$defs/Asset",
-                },
                 context: {
                     type: "string",
                 },
@@ -5226,6 +6022,9 @@ export const ABI_NODES = {
                 },
                 max_new_tokens: {
                     type: "number",
+                },
+                audio: {
+                    $ref: "#/$defs/Asset",
                 },
             },
             additionalProperties: false,
@@ -5259,25 +6058,12 @@ export const ABI_NODES = {
     "concat-videos": {
         inputs: {
             type: "object",
-            required: ["videos_bytes"],
+            required: ["videos"],
             properties: {
-                fileKeys: {
+                videos: {
                     type: "array",
                     items: {
-                        type: "string",
-                    },
-                },
-                videos_bytes: {
-                    type: "array",
-                    items: {
-                        type: "string",
-                        minLength: 1,
-                    },
-                },
-                filenames: {
-                    type: "array",
-                    items: {
-                        type: "string",
+                        $ref: "#/$defs/Asset",
                     },
                 },
             },
@@ -5299,14 +6085,14 @@ export const ABI_NODES = {
                 thinking: {
                     type: "string",
                 },
-                image_base64: {
-                    $ref: "#/$defs/FileRef",
+                image: {
+                    $ref: "#/$defs/ImageRef",
                 },
-                video_base64: {
-                    $ref: "#/$defs/FileRef",
+                video: {
+                    $ref: "#/$defs/VideoRef",
                 },
-                audio_base64: {
-                    $ref: "#/$defs/FileRef",
+                audio: {
+                    $ref: "#/$defs/AudioRef",
                 },
                 texts: {
                     type: "array",
@@ -5321,20 +6107,10 @@ export const ABI_NODES = {
     "extract-audio": {
         inputs: {
             type: "object",
-            required: [],
+            required: ["video"],
             properties: {
-                fileKey: {
-                    type: "string",
-                },
-                videoKey: {
-                    type: "string",
-                },
-                video_bytes: {
-                    type: "string",
-                    minLength: 1,
-                },
-                video_filename: {
-                    type: "string",
+                video: {
+                    $ref: "#/$defs/Asset",
                 },
             },
             additionalProperties: false,
@@ -5355,14 +6131,14 @@ export const ABI_NODES = {
                 thinking: {
                     type: "string",
                 },
-                image_base64: {
-                    $ref: "#/$defs/FileRef",
+                image: {
+                    $ref: "#/$defs/ImageRef",
                 },
-                video_base64: {
-                    $ref: "#/$defs/FileRef",
+                video: {
+                    $ref: "#/$defs/VideoRef",
                 },
-                audio_base64: {
-                    $ref: "#/$defs/FileRef",
+                audio: {
+                    $ref: "#/$defs/AudioRef",
                 },
                 texts: {
                     type: "array",
@@ -5377,20 +6153,10 @@ export const ABI_NODES = {
     "separate-video-audio": {
         inputs: {
             type: "object",
-            required: [],
+            required: ["video"],
             properties: {
-                fileKey: {
-                    type: "string",
-                },
-                videoKey: {
-                    type: "string",
-                },
-                video_bytes: {
-                    type: "string",
-                    minLength: 1,
-                },
-                video_filename: {
-                    type: "string",
+                video: {
+                    $ref: "#/$defs/Asset",
                 },
             },
             additionalProperties: false,
@@ -5411,10 +6177,10 @@ export const ABI_NODES = {
                 thinking: {
                     type: "string",
                 },
-                video_file_key: {
+                video: {
                     $ref: "#/$defs/VideoRef",
                 },
-                audio_file_key: {
+                audio: {
                     $ref: "#/$defs/AudioRef",
                 },
             },
@@ -5424,27 +6190,13 @@ export const ABI_NODES = {
     "merge-video-audio": {
         inputs: {
             type: "object",
-            required: [],
+            required: ["video", "audio"],
             properties: {
-                video_key: {
-                    type: "string",
+                video: {
+                    $ref: "#/$defs/Asset",
                 },
-                audio_key: {
-                    type: "string",
-                },
-                video_bytes: {
-                    type: "string",
-                    minLength: 1,
-                },
-                audio_bytes: {
-                    type: "string",
-                    minLength: 1,
-                },
-                video_filename: {
-                    type: "string",
-                },
-                audio_filename: {
-                    type: "string",
+                audio: {
+                    $ref: "#/$defs/Asset",
                 },
             },
             additionalProperties: false,
@@ -5465,14 +6217,14 @@ export const ABI_NODES = {
                 thinking: {
                     type: "string",
                 },
-                image_base64: {
-                    $ref: "#/$defs/FileRef",
+                image: {
+                    $ref: "#/$defs/ImageRef",
                 },
-                video_base64: {
-                    $ref: "#/$defs/FileRef",
+                video: {
+                    $ref: "#/$defs/VideoRef",
                 },
-                audio_base64: {
-                    $ref: "#/$defs/FileRef",
+                audio: {
+                    $ref: "#/$defs/AudioRef",
                 },
                 texts: {
                     type: "array",
@@ -5487,20 +6239,10 @@ export const ABI_NODES = {
     "get-first-frame": {
         inputs: {
             type: "object",
-            required: [],
+            required: ["video"],
             properties: {
-                fileKey: {
-                    type: "string",
-                },
-                videoKey: {
-                    type: "string",
-                },
-                video_bytes: {
-                    type: "string",
-                    minLength: 1,
-                },
-                video_filename: {
-                    type: "string",
+                video: {
+                    $ref: "#/$defs/Asset",
                 },
             },
             additionalProperties: false,
@@ -5521,14 +6263,14 @@ export const ABI_NODES = {
                 thinking: {
                     type: "string",
                 },
-                image_base64: {
-                    $ref: "#/$defs/FileRef",
+                image: {
+                    $ref: "#/$defs/ImageRef",
                 },
-                video_base64: {
-                    $ref: "#/$defs/FileRef",
+                video: {
+                    $ref: "#/$defs/VideoRef",
                 },
-                audio_base64: {
-                    $ref: "#/$defs/FileRef",
+                audio: {
+                    $ref: "#/$defs/AudioRef",
                 },
                 texts: {
                     type: "array",
@@ -5543,20 +6285,10 @@ export const ABI_NODES = {
     "get-last-frame": {
         inputs: {
             type: "object",
-            required: [],
+            required: ["video"],
             properties: {
-                fileKey: {
-                    type: "string",
-                },
-                videoKey: {
-                    type: "string",
-                },
-                video_bytes: {
-                    type: "string",
-                    minLength: 1,
-                },
-                video_filename: {
-                    type: "string",
+                video: {
+                    $ref: "#/$defs/Asset",
                 },
             },
             additionalProperties: false,
@@ -5577,14 +6309,14 @@ export const ABI_NODES = {
                 thinking: {
                     type: "string",
                 },
-                image_base64: {
-                    $ref: "#/$defs/FileRef",
+                image: {
+                    $ref: "#/$defs/ImageRef",
                 },
-                video_base64: {
-                    $ref: "#/$defs/FileRef",
+                video: {
+                    $ref: "#/$defs/VideoRef",
                 },
-                audio_base64: {
-                    $ref: "#/$defs/FileRef",
+                audio: {
+                    $ref: "#/$defs/AudioRef",
                 },
                 texts: {
                     type: "array",
@@ -5599,16 +6331,10 @@ export const ABI_NODES = {
     "parse-document": {
         inputs: {
             type: "object",
-            required: [],
+            required: ["document"],
             properties: {
                 document: {
                     $ref: "#/$defs/Asset",
-                },
-                mime: {
-                    type: "string",
-                },
-                filename: {
-                    type: "string",
                 },
             },
             additionalProperties: false,
@@ -5629,14 +6355,14 @@ export const ABI_NODES = {
                 thinking: {
                     type: "string",
                 },
-                image_base64: {
-                    $ref: "#/$defs/FileRef",
+                image: {
+                    $ref: "#/$defs/ImageRef",
                 },
-                video_base64: {
-                    $ref: "#/$defs/FileRef",
+                video: {
+                    $ref: "#/$defs/VideoRef",
                 },
-                audio_base64: {
-                    $ref: "#/$defs/FileRef",
+                audio: {
+                    $ref: "#/$defs/AudioRef",
                 },
                 texts: {
                     type: "array",
@@ -5651,24 +6377,10 @@ export const ABI_NODES = {
     "split-video": {
         inputs: {
             type: "object",
-            required: [],
+            required: ["video"],
             properties: {
                 video: {
                     $ref: "#/$defs/Asset",
-                },
-                video_base64: {
-                    type: "string",
-                    minLength: 1,
-                },
-                video_bytes: {
-                    type: "string",
-                    minLength: 1,
-                },
-                fileKey: {
-                    type: "string",
-                },
-                videoKey: {
-                    type: "string",
                 },
             },
             additionalProperties: false,
@@ -5727,14 +6439,14 @@ export const ABI_NODES = {
                 thinking: {
                     type: "string",
                 },
-                image_base64: {
-                    $ref: "#/$defs/FileRef",
+                image: {
+                    $ref: "#/$defs/ImageRef",
                 },
-                video_base64: {
-                    $ref: "#/$defs/FileRef",
+                video: {
+                    $ref: "#/$defs/VideoRef",
                 },
-                audio_base64: {
-                    $ref: "#/$defs/FileRef",
+                audio: {
+                    $ref: "#/$defs/AudioRef",
                 },
                 texts: {
                     type: "array",
@@ -5784,9 +6496,8 @@ export const ABI_NODES = {
                 negative_prompt: {
                     type: "string",
                 },
-                image_base64: {
-                    type: "string",
-                    minLength: 1,
+                image: {
+                    $ref: "#/$defs/Asset",
                 },
                 image_frame_idx: {
                     type: "integer",
@@ -5794,21 +6505,17 @@ export const ABI_NODES = {
                 image_strength: {
                     type: "number",
                 },
-                end_image_base64: {
-                    type: "string",
-                    minLength: 1,
+                end_image: {
+                    $ref: "#/$defs/Asset",
                 },
-                image2_base64: {
-                    type: "string",
-                    minLength: 1,
+                image2: {
+                    $ref: "#/$defs/Asset",
                 },
-                speech_base64: {
-                    type: "string",
-                    minLength: 1,
+                speech: {
+                    $ref: "#/$defs/Asset",
                 },
-                audio_base64: {
-                    type: "string",
-                    minLength: 1,
+                audio: {
+                    $ref: "#/$defs/Asset",
                 },
                 audio_max_duration: {
                     type: "number",
@@ -5835,14 +6542,14 @@ export const ABI_NODES = {
                 thinking: {
                     type: "string",
                 },
-                image_base64: {
-                    $ref: "#/$defs/FileRef",
+                image: {
+                    $ref: "#/$defs/ImageRef",
                 },
-                video_base64: {
-                    $ref: "#/$defs/FileRef",
+                video: {
+                    $ref: "#/$defs/VideoRef",
                 },
-                audio_base64: {
-                    $ref: "#/$defs/FileRef",
+                audio: {
+                    $ref: "#/$defs/AudioRef",
                 },
                 texts: {
                     type: "array",
@@ -5903,14 +6610,14 @@ export const ABI_NODES = {
                 thinking: {
                     type: "string",
                 },
-                image_base64: {
-                    $ref: "#/$defs/FileRef",
+                image: {
+                    $ref: "#/$defs/ImageRef",
                 },
-                video_base64: {
-                    $ref: "#/$defs/FileRef",
+                video: {
+                    $ref: "#/$defs/VideoRef",
                 },
-                audio_base64: {
-                    $ref: "#/$defs/FileRef",
+                audio: {
+                    $ref: "#/$defs/AudioRef",
                 },
                 texts: {
                     type: "array",
@@ -5959,14 +6666,14 @@ export const ABI_NODES = {
                 thinking: {
                     type: "string",
                 },
-                image_base64: {
-                    $ref: "#/$defs/FileRef",
+                image: {
+                    $ref: "#/$defs/ImageRef",
                 },
-                video_base64: {
-                    $ref: "#/$defs/FileRef",
+                video: {
+                    $ref: "#/$defs/VideoRef",
                 },
-                audio_base64: {
-                    $ref: "#/$defs/FileRef",
+                audio: {
+                    $ref: "#/$defs/AudioRef",
                 },
                 texts: {
                     type: "array",
@@ -6015,14 +6722,14 @@ export const ABI_NODES = {
                 thinking: {
                     type: "string",
                 },
-                image_base64: {
-                    $ref: "#/$defs/FileRef",
+                image: {
+                    $ref: "#/$defs/ImageRef",
                 },
-                video_base64: {
-                    $ref: "#/$defs/FileRef",
+                video: {
+                    $ref: "#/$defs/VideoRef",
                 },
-                audio_base64: {
-                    $ref: "#/$defs/FileRef",
+                audio: {
+                    $ref: "#/$defs/AudioRef",
                 },
                 texts: {
                     type: "array",
@@ -6037,7 +6744,7 @@ export const ABI_NODES = {
     "image-gen-video": {
         inputs: {
             type: "object",
-            required: ["text", "image_base64"],
+            required: ["text", "image"],
             properties: {
                 text: {
                     type: "string",
@@ -6072,9 +6779,8 @@ export const ABI_NODES = {
                 negative_prompt: {
                     type: "string",
                 },
-                image_base64: {
-                    type: "string",
-                    minLength: 1,
+                image: {
+                    $ref: "#/$defs/Asset",
                 },
                 image_frame_idx: {
                     type: "integer",
@@ -6082,21 +6788,17 @@ export const ABI_NODES = {
                 image_strength: {
                     type: "number",
                 },
-                end_image_base64: {
-                    type: "string",
-                    minLength: 1,
+                end_image: {
+                    $ref: "#/$defs/Asset",
                 },
-                image2_base64: {
-                    type: "string",
-                    minLength: 1,
+                image2: {
+                    $ref: "#/$defs/Asset",
                 },
-                speech_base64: {
-                    type: "string",
-                    minLength: 1,
+                speech: {
+                    $ref: "#/$defs/Asset",
                 },
-                audio_base64: {
-                    type: "string",
-                    minLength: 1,
+                audio: {
+                    $ref: "#/$defs/Asset",
                 },
                 audio_max_duration: {
                     type: "number",
@@ -6123,14 +6825,14 @@ export const ABI_NODES = {
                 thinking: {
                     type: "string",
                 },
-                image_base64: {
-                    $ref: "#/$defs/FileRef",
+                image: {
+                    $ref: "#/$defs/ImageRef",
                 },
-                video_base64: {
-                    $ref: "#/$defs/FileRef",
+                video: {
+                    $ref: "#/$defs/VideoRef",
                 },
-                audio_base64: {
-                    $ref: "#/$defs/FileRef",
+                audio: {
+                    $ref: "#/$defs/AudioRef",
                 },
                 texts: {
                     type: "array",
@@ -6145,15 +6847,14 @@ export const ABI_NODES = {
     "image-edit": {
         inputs: {
             type: "object",
-            required: ["text", "image_base64"],
+            required: ["text", "image"],
             properties: {
                 text: {
                     type: "string",
                     minLength: 1,
                 },
-                image_base64: {
-                    type: "string",
-                    minLength: 1,
+                image: {
+                    $ref: "#/$defs/Asset",
                 },
                 seed: {
                     type: "integer",
@@ -6186,14 +6887,14 @@ export const ABI_NODES = {
                 thinking: {
                     type: "string",
                 },
-                image_base64: {
-                    $ref: "#/$defs/FileRef",
+                image: {
+                    $ref: "#/$defs/ImageRef",
                 },
-                video_base64: {
-                    $ref: "#/$defs/FileRef",
+                video: {
+                    $ref: "#/$defs/VideoRef",
                 },
-                audio_base64: {
-                    $ref: "#/$defs/FileRef",
+                audio: {
+                    $ref: "#/$defs/AudioRef",
                 },
                 texts: {
                     type: "array",
@@ -6208,15 +6909,13 @@ export const ABI_NODES = {
     "image-upscale": {
         inputs: {
             type: "object",
-            required: ["image_base64"],
+            required: ["image"],
             properties: {
-                image_base64: {
-                    type: "string",
-                    minLength: 1,
+                image: {
+                    $ref: "#/$defs/Asset",
                 },
-                video_base64: {
-                    type: "string",
-                    minLength: 1,
+                video: {
+                    $ref: "#/$defs/Asset",
                 },
                 resolution: {
                     type: "string",
@@ -6261,14 +6960,14 @@ export const ABI_NODES = {
                 thinking: {
                     type: "string",
                 },
-                image_base64: {
-                    $ref: "#/$defs/FileRef",
+                image: {
+                    $ref: "#/$defs/ImageRef",
                 },
-                video_base64: {
-                    $ref: "#/$defs/FileRef",
+                video: {
+                    $ref: "#/$defs/VideoRef",
                 },
-                audio_base64: {
-                    $ref: "#/$defs/FileRef",
+                audio: {
+                    $ref: "#/$defs/AudioRef",
                 },
                 texts: {
                     type: "array",
@@ -6283,15 +6982,13 @@ export const ABI_NODES = {
     "video-upscale": {
         inputs: {
             type: "object",
-            required: ["video_base64"],
+            required: ["video"],
             properties: {
-                image_base64: {
-                    type: "string",
-                    minLength: 1,
+                image: {
+                    $ref: "#/$defs/Asset",
                 },
-                video_base64: {
-                    type: "string",
-                    minLength: 1,
+                video: {
+                    $ref: "#/$defs/Asset",
                 },
                 resolution: {
                     type: "string",
@@ -6336,14 +7033,14 @@ export const ABI_NODES = {
                 thinking: {
                     type: "string",
                 },
-                image_base64: {
-                    $ref: "#/$defs/FileRef",
+                image: {
+                    $ref: "#/$defs/ImageRef",
                 },
-                video_base64: {
-                    $ref: "#/$defs/FileRef",
+                video: {
+                    $ref: "#/$defs/VideoRef",
                 },
-                audio_base64: {
-                    $ref: "#/$defs/FileRef",
+                audio: {
+                    $ref: "#/$defs/AudioRef",
                 },
                 texts: {
                     type: "array",
@@ -6358,17 +7055,16 @@ export const ABI_NODES = {
     "image-describe": {
         inputs: {
             type: "object",
-            required: [],
+            required: ["image"],
             properties: {
-                image: {
-                    type: "string",
-                    minLength: 1,
-                },
                 text: {
                     type: "string",
                 },
                 userPrompt: {
                     type: "string",
+                },
+                image: {
+                    $ref: "#/$defs/Asset",
                 },
             },
             additionalProperties: false,
@@ -6389,14 +7085,14 @@ export const ABI_NODES = {
                 thinking: {
                     type: "string",
                 },
-                image_base64: {
-                    $ref: "#/$defs/FileRef",
+                image: {
+                    $ref: "#/$defs/ImageRef",
                 },
-                video_base64: {
-                    $ref: "#/$defs/FileRef",
+                video: {
+                    $ref: "#/$defs/VideoRef",
                 },
-                audio_base64: {
-                    $ref: "#/$defs/FileRef",
+                audio: {
+                    $ref: "#/$defs/AudioRef",
                 },
                 texts: {
                     type: "array",
@@ -6411,17 +7107,16 @@ export const ABI_NODES = {
     "video-describe": {
         inputs: {
             type: "object",
-            required: [],
+            required: ["video"],
             properties: {
-                video: {
-                    type: "string",
-                    minLength: 1,
-                },
                 text: {
                     type: "string",
                 },
                 userPrompt: {
                     type: "string",
+                },
+                video: {
+                    $ref: "#/$defs/Asset",
                 },
             },
             additionalProperties: false,
@@ -6442,14 +7137,14 @@ export const ABI_NODES = {
                 thinking: {
                     type: "string",
                 },
-                image_base64: {
-                    $ref: "#/$defs/FileRef",
+                image: {
+                    $ref: "#/$defs/ImageRef",
                 },
-                video_base64: {
-                    $ref: "#/$defs/FileRef",
+                video: {
+                    $ref: "#/$defs/VideoRef",
                 },
-                audio_base64: {
-                    $ref: "#/$defs/FileRef",
+                audio: {
+                    $ref: "#/$defs/AudioRef",
                 },
                 texts: {
                     type: "array",
@@ -6466,16 +7161,14 @@ export const ABI_NODES = {
             type: "object",
             required: ["image", "audio"],
             properties: {
-                image: {
-                    type: "string",
-                    minLength: 1,
-                },
-                audio: {
-                    type: "string",
-                    minLength: 1,
-                },
                 text: {
                     type: "string",
+                },
+                image: {
+                    $ref: "#/$defs/Asset",
+                },
+                audio: {
+                    $ref: "#/$defs/Asset",
                 },
             },
             additionalProperties: false,
@@ -6496,14 +7189,14 @@ export const ABI_NODES = {
                 thinking: {
                     type: "string",
                 },
-                image_base64: {
-                    $ref: "#/$defs/FileRef",
+                image: {
+                    $ref: "#/$defs/ImageRef",
                 },
-                video_base64: {
-                    $ref: "#/$defs/FileRef",
+                video: {
+                    $ref: "#/$defs/VideoRef",
                 },
-                audio_base64: {
-                    $ref: "#/$defs/FileRef",
+                audio: {
+                    $ref: "#/$defs/AudioRef",
                 },
                 texts: {
                     type: "array",
@@ -6518,7 +7211,7 @@ export const ABI_NODES = {
     "speech-text-gen-video": {
         inputs: {
             type: "object",
-            required: ["text", "audio_base64"],
+            required: ["text", "audio"],
             properties: {
                 text: {
                     type: "string",
@@ -6553,9 +7246,8 @@ export const ABI_NODES = {
                 negative_prompt: {
                     type: "string",
                 },
-                image_base64: {
-                    type: "string",
-                    minLength: 1,
+                image: {
+                    $ref: "#/$defs/Asset",
                 },
                 image_frame_idx: {
                     type: "integer",
@@ -6563,21 +7255,17 @@ export const ABI_NODES = {
                 image_strength: {
                     type: "number",
                 },
-                end_image_base64: {
-                    type: "string",
-                    minLength: 1,
+                end_image: {
+                    $ref: "#/$defs/Asset",
                 },
-                image2_base64: {
-                    type: "string",
-                    minLength: 1,
+                image2: {
+                    $ref: "#/$defs/Asset",
                 },
-                speech_base64: {
-                    type: "string",
-                    minLength: 1,
+                speech: {
+                    $ref: "#/$defs/Asset",
                 },
-                audio_base64: {
-                    type: "string",
-                    minLength: 1,
+                audio: {
+                    $ref: "#/$defs/Asset",
                 },
                 audio_max_duration: {
                     type: "number",
@@ -6604,14 +7292,14 @@ export const ABI_NODES = {
                 thinking: {
                     type: "string",
                 },
-                image_base64: {
-                    $ref: "#/$defs/FileRef",
+                image: {
+                    $ref: "#/$defs/ImageRef",
                 },
-                video_base64: {
-                    $ref: "#/$defs/FileRef",
+                video: {
+                    $ref: "#/$defs/VideoRef",
                 },
-                audio_base64: {
-                    $ref: "#/$defs/FileRef",
+                audio: {
+                    $ref: "#/$defs/AudioRef",
                 },
                 texts: {
                     type: "array",
@@ -6628,20 +7316,17 @@ export const ABI_NODES = {
             type: "object",
             required: ["image", "video", "audio"],
             properties: {
-                image: {
-                    type: "string",
-                    minLength: 1,
-                },
-                video: {
-                    type: "string",
-                    minLength: 1,
-                },
-                audio: {
-                    type: "string",
-                    minLength: 1,
-                },
                 text: {
                     type: "string",
+                },
+                image: {
+                    $ref: "#/$defs/Asset",
+                },
+                video: {
+                    $ref: "#/$defs/Asset",
+                },
+                audio: {
+                    $ref: "#/$defs/Asset",
                 },
             },
             additionalProperties: false,
@@ -6662,14 +7347,14 @@ export const ABI_NODES = {
                 thinking: {
                     type: "string",
                 },
-                image_base64: {
-                    $ref: "#/$defs/FileRef",
+                image: {
+                    $ref: "#/$defs/ImageRef",
                 },
-                video_base64: {
-                    $ref: "#/$defs/FileRef",
+                video: {
+                    $ref: "#/$defs/VideoRef",
                 },
-                audio_base64: {
-                    $ref: "#/$defs/FileRef",
+                audio: {
+                    $ref: "#/$defs/AudioRef",
                 },
                 texts: {
                     type: "array",
@@ -6686,16 +7371,14 @@ export const ABI_NODES = {
             type: "object",
             required: ["image", "video"],
             properties: {
-                image: {
-                    type: "string",
-                    minLength: 1,
-                },
-                video: {
-                    type: "string",
-                    minLength: 1,
-                },
                 text: {
                     type: "string",
+                },
+                image: {
+                    $ref: "#/$defs/Asset",
+                },
+                video: {
+                    $ref: "#/$defs/Asset",
                 },
             },
             additionalProperties: false,
@@ -6716,14 +7399,14 @@ export const ABI_NODES = {
                 thinking: {
                     type: "string",
                 },
-                image_base64: {
-                    $ref: "#/$defs/FileRef",
+                image: {
+                    $ref: "#/$defs/ImageRef",
                 },
-                video_base64: {
-                    $ref: "#/$defs/FileRef",
+                video: {
+                    $ref: "#/$defs/VideoRef",
                 },
-                audio_base64: {
-                    $ref: "#/$defs/FileRef",
+                audio: {
+                    $ref: "#/$defs/AudioRef",
                 },
                 texts: {
                     type: "array",
@@ -6740,16 +7423,14 @@ export const ABI_NODES = {
             type: "object",
             required: ["image", "video"],
             properties: {
-                image: {
-                    type: "string",
-                    minLength: 1,
-                },
-                video: {
-                    type: "string",
-                    minLength: 1,
-                },
                 text: {
                     type: "string",
+                },
+                image: {
+                    $ref: "#/$defs/Asset",
+                },
+                video: {
+                    $ref: "#/$defs/Asset",
                 },
             },
             additionalProperties: false,
@@ -6770,14 +7451,14 @@ export const ABI_NODES = {
                 thinking: {
                     type: "string",
                 },
-                image_base64: {
-                    $ref: "#/$defs/FileRef",
+                image: {
+                    $ref: "#/$defs/ImageRef",
                 },
-                video_base64: {
-                    $ref: "#/$defs/FileRef",
+                video: {
+                    $ref: "#/$defs/VideoRef",
                 },
-                audio_base64: {
-                    $ref: "#/$defs/FileRef",
+                audio: {
+                    $ref: "#/$defs/AudioRef",
                 },
                 texts: {
                     type: "array",
@@ -6792,7 +7473,7 @@ export const ABI_NODES = {
     "image-image-gen-video": {
         inputs: {
             type: "object",
-            required: ["text", "image_base64", "end_image_base64"],
+            required: ["text", "image", "end_image"],
             properties: {
                 text: {
                     type: "string",
@@ -6827,9 +7508,8 @@ export const ABI_NODES = {
                 negative_prompt: {
                     type: "string",
                 },
-                image_base64: {
-                    type: "string",
-                    minLength: 1,
+                image: {
+                    $ref: "#/$defs/Asset",
                 },
                 image_frame_idx: {
                     type: "integer",
@@ -6837,21 +7517,17 @@ export const ABI_NODES = {
                 image_strength: {
                     type: "number",
                 },
-                end_image_base64: {
-                    type: "string",
-                    minLength: 1,
+                end_image: {
+                    $ref: "#/$defs/Asset",
                 },
-                image2_base64: {
-                    type: "string",
-                    minLength: 1,
+                image2: {
+                    $ref: "#/$defs/Asset",
                 },
-                speech_base64: {
-                    type: "string",
-                    minLength: 1,
+                speech: {
+                    $ref: "#/$defs/Asset",
                 },
-                audio_base64: {
-                    type: "string",
-                    minLength: 1,
+                audio: {
+                    $ref: "#/$defs/Asset",
                 },
                 audio_max_duration: {
                     type: "number",
@@ -6878,14 +7554,14 @@ export const ABI_NODES = {
                 thinking: {
                     type: "string",
                 },
-                image_base64: {
-                    $ref: "#/$defs/FileRef",
+                image: {
+                    $ref: "#/$defs/ImageRef",
                 },
-                video_base64: {
-                    $ref: "#/$defs/FileRef",
+                video: {
+                    $ref: "#/$defs/VideoRef",
                 },
-                audio_base64: {
-                    $ref: "#/$defs/FileRef",
+                audio: {
+                    $ref: "#/$defs/AudioRef",
                 },
                 texts: {
                     type: "array",
@@ -6935,9 +7611,8 @@ export const ABI_NODES = {
                 negative_prompt: {
                     type: "string",
                 },
-                image_base64: {
-                    type: "string",
-                    minLength: 1,
+                image: {
+                    $ref: "#/$defs/Asset",
                 },
                 image_frame_idx: {
                     type: "integer",
@@ -6945,21 +7620,17 @@ export const ABI_NODES = {
                 image_strength: {
                     type: "number",
                 },
-                end_image_base64: {
-                    type: "string",
-                    minLength: 1,
+                end_image: {
+                    $ref: "#/$defs/Asset",
                 },
-                image2_base64: {
-                    type: "string",
-                    minLength: 1,
+                image2: {
+                    $ref: "#/$defs/Asset",
                 },
-                speech_base64: {
-                    type: "string",
-                    minLength: 1,
+                speech: {
+                    $ref: "#/$defs/Asset",
                 },
-                audio_base64: {
-                    type: "string",
-                    minLength: 1,
+                audio: {
+                    $ref: "#/$defs/Asset",
                 },
                 audio_max_duration: {
                     type: "number",
@@ -6986,14 +7657,14 @@ export const ABI_NODES = {
                 thinking: {
                     type: "string",
                 },
-                image_base64: {
-                    $ref: "#/$defs/FileRef",
+                image: {
+                    $ref: "#/$defs/ImageRef",
                 },
-                video_base64: {
-                    $ref: "#/$defs/FileRef",
+                video: {
+                    $ref: "#/$defs/VideoRef",
                 },
-                audio_base64: {
-                    $ref: "#/$defs/FileRef",
+                audio: {
+                    $ref: "#/$defs/AudioRef",
                 },
                 texts: {
                     type: "array",
@@ -7008,7 +7679,7 @@ export const ABI_NODES = {
     "image-gen-model": {
         inputs: {
             type: "object",
-            required: [],
+            required: ["image"],
             properties: {
                 text: {
                     type: "string",
@@ -7035,6 +7706,9 @@ export const ABI_NODES = {
                 seed: {
                     type: "integer",
                 },
+                image: {
+                    $ref: "#/$defs/Asset",
+                },
             },
             additionalProperties: false,
         },
@@ -7054,14 +7728,14 @@ export const ABI_NODES = {
                 thinking: {
                     type: "string",
                 },
-                image_base64: {
-                    $ref: "#/$defs/FileRef",
+                image: {
+                    $ref: "#/$defs/ImageRef",
                 },
-                video_base64: {
-                    $ref: "#/$defs/FileRef",
+                video: {
+                    $ref: "#/$defs/VideoRef",
                 },
-                audio_base64: {
-                    $ref: "#/$defs/FileRef",
+                audio: {
+                    $ref: "#/$defs/AudioRef",
                 },
                 texts: {
                     type: "array",
@@ -7079,12 +7753,10 @@ export const ABI_NODES = {
             required: ["video", "audio"],
             properties: {
                 video: {
-                    type: "string",
-                    minLength: 1,
+                    $ref: "#/$defs/Asset",
                 },
                 audio: {
-                    type: "string",
-                    minLength: 1,
+                    $ref: "#/$defs/Asset",
                 },
             },
             additionalProperties: false,
@@ -7105,14 +7777,14 @@ export const ABI_NODES = {
                 thinking: {
                     type: "string",
                 },
-                image_base64: {
-                    $ref: "#/$defs/FileRef",
+                image: {
+                    $ref: "#/$defs/ImageRef",
                 },
-                video_base64: {
-                    $ref: "#/$defs/FileRef",
+                video: {
+                    $ref: "#/$defs/VideoRef",
                 },
-                audio_base64: {
-                    $ref: "#/$defs/FileRef",
+                audio: {
+                    $ref: "#/$defs/AudioRef",
                 },
                 texts: {
                     type: "array",
@@ -7127,19 +7799,17 @@ export const ABI_NODES = {
     "text-gen-speech-clone": {
         inputs: {
             type: "object",
-            required: ["text", "ref_audio_base64"],
+            required: ["text", "ref_audio"],
             properties: {
                 text: {
                     type: "string",
                     minLength: 1,
                 },
-                ref_audio_base64: {
-                    type: "string",
-                    minLength: 1,
+                ref_audio: {
+                    $ref: "#/$defs/Asset",
                 },
-                audio_base64: {
-                    type: "string",
-                    minLength: 1,
+                audio: {
+                    $ref: "#/$defs/Asset",
                 },
                 language: {
                     type: "string",
@@ -7172,14 +7842,14 @@ export const ABI_NODES = {
                 thinking: {
                     type: "string",
                 },
-                image_base64: {
-                    $ref: "#/$defs/FileRef",
+                image: {
+                    $ref: "#/$defs/ImageRef",
                 },
-                video_base64: {
-                    $ref: "#/$defs/FileRef",
+                video: {
+                    $ref: "#/$defs/VideoRef",
                 },
-                audio_base64: {
-                    $ref: "#/$defs/FileRef",
+                audio: {
+                    $ref: "#/$defs/AudioRef",
                 },
                 texts: {
                     type: "array",
@@ -7196,9 +7866,6 @@ export const ABI_NODES = {
             type: "object",
             required: ["audio"],
             properties: {
-                audio: {
-                    $ref: "#/$defs/Asset",
-                },
                 context: {
                     type: "string",
                 },
@@ -7207,6 +7874,9 @@ export const ABI_NODES = {
                 },
                 max_new_tokens: {
                     type: "number",
+                },
+                audio: {
+                    $ref: "#/$defs/Asset",
                 },
             },
             additionalProperties: false,
@@ -7297,14 +7967,14 @@ export const ABI_NODES = {
                 thinking: {
                     type: "string",
                 },
-                image_base64: {
-                    $ref: "#/$defs/FileRef",
+                image: {
+                    $ref: "#/$defs/ImageRef",
                 },
-                video_base64: {
-                    $ref: "#/$defs/FileRef",
+                video: {
+                    $ref: "#/$defs/VideoRef",
                 },
-                audio_base64: {
-                    $ref: "#/$defs/FileRef",
+                audio: {
+                    $ref: "#/$defs/AudioRef",
                 },
                 texts: {
                     type: "array",
@@ -7321,16 +7991,14 @@ export const ABI_NODES = {
             type: "object",
             required: ["image", "video"],
             properties: {
-                image: {
-                    type: "string",
-                    minLength: 1,
-                },
-                video: {
-                    type: "string",
-                    minLength: 1,
-                },
                 text: {
                     type: "string",
+                },
+                image: {
+                    $ref: "#/$defs/Asset",
+                },
+                video: {
+                    $ref: "#/$defs/Asset",
                 },
             },
             additionalProperties: false,
@@ -7351,14 +8019,14 @@ export const ABI_NODES = {
                 thinking: {
                     type: "string",
                 },
-                image_base64: {
-                    $ref: "#/$defs/FileRef",
+                image: {
+                    $ref: "#/$defs/ImageRef",
                 },
-                video_base64: {
-                    $ref: "#/$defs/FileRef",
+                video: {
+                    $ref: "#/$defs/VideoRef",
                 },
-                audio_base64: {
-                    $ref: "#/$defs/FileRef",
+                audio: {
+                    $ref: "#/$defs/AudioRef",
                 },
                 texts: {
                     type: "array",
@@ -7375,16 +8043,14 @@ export const ABI_NODES = {
             type: "object",
             required: ["image", "video"],
             properties: {
-                image: {
-                    type: "string",
-                    minLength: 1,
-                },
-                video: {
-                    type: "string",
-                    minLength: 1,
-                },
                 text: {
                     type: "string",
+                },
+                image: {
+                    $ref: "#/$defs/Asset",
+                },
+                video: {
+                    $ref: "#/$defs/Asset",
                 },
             },
             additionalProperties: false,
@@ -7405,14 +8071,14 @@ export const ABI_NODES = {
                 thinking: {
                     type: "string",
                 },
-                image_base64: {
-                    $ref: "#/$defs/FileRef",
+                image: {
+                    $ref: "#/$defs/ImageRef",
                 },
-                video_base64: {
-                    $ref: "#/$defs/FileRef",
+                video: {
+                    $ref: "#/$defs/VideoRef",
                 },
-                audio_base64: {
-                    $ref: "#/$defs/FileRef",
+                audio: {
+                    $ref: "#/$defs/AudioRef",
                 },
                 texts: {
                     type: "array",
@@ -7427,16 +8093,16 @@ export const ABI_NODES = {
     "drop-video": {
         inputs: {
             type: "object",
-            required: [],
+            required: ["videos"],
             properties: {
-                fileKeys: {
-                    type: "array",
-                    items: {
-                        type: "string",
-                    },
-                },
                 query: {
                     type: "string",
+                },
+                videos: {
+                    type: "array",
+                    items: {
+                        $ref: "#/$defs/Asset",
+                    },
                 },
             },
             additionalProperties: false,
@@ -7457,14 +8123,14 @@ export const ABI_NODES = {
                 thinking: {
                     type: "string",
                 },
-                image_base64: {
-                    $ref: "#/$defs/FileRef",
+                image: {
+                    $ref: "#/$defs/ImageRef",
                 },
-                video_base64: {
-                    $ref: "#/$defs/FileRef",
+                video: {
+                    $ref: "#/$defs/VideoRef",
                 },
-                audio_base64: {
-                    $ref: "#/$defs/FileRef",
+                audio: {
+                    $ref: "#/$defs/AudioRef",
                 },
                 texts: {
                     type: "array",
@@ -7503,12 +8169,6 @@ export const ABI_NODES = {
                         additionalProperties: false,
                     },
                 },
-                fileKeys: {
-                    type: "array",
-                    items: {
-                        type: "string",
-                    },
-                },
                 infos: {
                     type: "array",
                     items: {
@@ -7525,6 +8185,12 @@ export const ABI_NODES = {
                 },
                 duplicatable: {
                     type: "boolean",
+                },
+                images: {
+                    type: "array",
+                    items: {
+                        $ref: "#/$defs/Asset",
+                    },
                 },
             },
             additionalProperties: false,
@@ -7545,14 +8211,14 @@ export const ABI_NODES = {
                 thinking: {
                     type: "string",
                 },
-                image_base64: {
-                    $ref: "#/$defs/FileRef",
+                image: {
+                    $ref: "#/$defs/ImageRef",
                 },
-                video_base64: {
-                    $ref: "#/$defs/FileRef",
+                video: {
+                    $ref: "#/$defs/VideoRef",
                 },
-                audio_base64: {
-                    $ref: "#/$defs/FileRef",
+                audio: {
+                    $ref: "#/$defs/AudioRef",
                 },
                 texts: {
                     type: "array",
@@ -7577,10 +8243,10 @@ export const ABI_NODES = {
     separate_speaker: {
         inputs: {
             type: "object",
-            required: [],
+            required: ["audio"],
             properties: {
-                fileKey: {
-                    type: "string",
+                audio: {
+                    $ref: "#/$defs/Asset",
                 },
             },
             additionalProperties: false,
@@ -7609,10 +8275,10 @@ export const ABI_NODES = {
     separate_audio_track: {
         inputs: {
             type: "object",
-            required: [],
+            required: ["audio"],
             properties: {
-                fileKey: {
-                    type: "string",
+                audio: {
+                    $ref: "#/$defs/Asset",
                 },
             },
             additionalProperties: false,

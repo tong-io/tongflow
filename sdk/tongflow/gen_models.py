@@ -67,6 +67,12 @@ def _type_expr(
             return "Asset"
         if ref == "#/$defs/FileRef":
             return "FileRef"
+        if ref == "#/$defs/ImageRef":
+            return "ImageRef"
+        if ref == "#/$defs/VideoRef":
+            return "VideoRef"
+        if ref == "#/$defs/AudioRef":
+            return "AudioRef"
         raise ValueError(f"Unsupported $ref: {ref}")
 
     t = prop.get("type")
@@ -145,6 +151,18 @@ def write_models(out_dir: Path, nodes: list[dict[str, Any]], defs: dict[str, Any
         "class FileRef(TypedDict, total=False):\n"
         "    file_key: Required[str]\n"
         "    mime: str\n"
+        "    filename: str\n\n\n"
+        "class ImageRef(TypedDict, total=False):\n"
+        "    file_key: Required[str]\n"
+        "    mime: str\n"
+        "    filename: str\n\n\n"
+        "class VideoRef(TypedDict, total=False):\n"
+        "    file_key: Required[str]\n"
+        "    mime: str\n"
+        "    filename: str\n\n\n"
+        "class AudioRef(TypedDict, total=False):\n"
+        "    file_key: Required[str]\n"
+        "    mime: str\n"
         "    filename: str\n"
     )
     (out_dir / "asset.py").write_text(asset_py, encoding="utf-8")
@@ -182,7 +200,7 @@ def write_models(out_dir: Path, nodes: list[dict[str, Any]], defs: dict[str, Any
         lines: list[str] = [
             "from __future__ import annotations\n",
             "from typing import Required, TypedDict\n",
-            "from .asset import Asset, FileRef\n",
+            "from .asset import Asset, AudioRef, FileRef, ImageRef, VideoRef\n",
             "",
         ]
 

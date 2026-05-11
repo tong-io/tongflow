@@ -20,8 +20,6 @@ export interface ParamSourceConfig {
     configPath?: string;
     /** Input name (when type is "input") */
     inputName?: string;
-    /** Whether URL transformation is needed */
-    needsUrlTransform?: boolean;
     /** Whether to collect data from all matching upstream nodes (used for Compose nodes) */
     collectAll?: boolean;
     /** Handle id on the target node (matches incoming edge targetHandle for multi-slot same-type inputs) */
@@ -221,7 +219,6 @@ export function upstreamParam(
     upstreamType: string,
     upstreamField: string,
     options?: {
-        needsUrlTransform?: boolean;
         collectAll?: boolean;
         targetHandle?: string;
     },
@@ -230,7 +227,6 @@ export function upstreamParam(
         type: "upstream",
         upstreamType,
         upstreamField,
-        needsUrlTransform: options?.needsUrlTransform,
         collectAll: options?.collectAll,
         targetHandle: options?.targetHandle,
     };

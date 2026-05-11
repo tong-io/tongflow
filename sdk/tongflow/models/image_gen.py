@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Required, TypedDict
 
-from .asset import Asset, FileRef
+from .asset import Asset, AudioRef, FileRef, ImageRef, VideoRef
 
 
 class ImageGenInput(TypedDict, total=False):
@@ -15,12 +15,12 @@ class ImageGenInput(TypedDict, total=False):
     width: int
 
 class ImageGenOutput(TypedDict, total=False):
-    audio_base64: FileRef
+    audio: AudioRef
     error: str
-    image_base64: FileRef
+    image: ImageRef
     success: Required[bool]
     text: str
     texts: list[str]
     thinking: str
-    video_base64: FileRef
+    video: VideoRef
 

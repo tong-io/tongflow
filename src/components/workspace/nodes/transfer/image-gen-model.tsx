@@ -1,7 +1,6 @@
 import { Box } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { memo } from "react";
-import { getFileUrl } from "@/lib/file-url";
 import type { TongflowPluginNodeProps } from "@/types/tongflow-flow";
 import {
     type GetPromptsContext,
@@ -20,11 +19,7 @@ const workflowConfig = {
     batchParam: "image",
     paramMappings: {
         image: {
-            sources: [
-                upstreamParam("imageNode", "fileKeys[0]", {
-                    needsUrlTransform: true,
-                }),
-            ],
+            sources: [upstreamParam("imageNode", "fileKeys[0]")],
             required: true,
         },
     },
@@ -59,7 +54,7 @@ const ImageGenModelNode = ({
                             ? upstreamKeys
                             : fileKeys;
                     return keys.map((fileKey) => ({
-                        image: getFileUrl(fileKey),
+                        image: fileKey,
                     }));
                 },
             }}

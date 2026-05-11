@@ -1,7 +1,6 @@
 import { Music as AudioIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { memo } from "react";
-import { getFileUrl } from "@/lib/file-url";
 import type { TongflowPluginNodeProps } from "@/types/tongflow-flow";
 import {
     type GetPromptsContext,
@@ -19,9 +18,7 @@ const baseWorkflowConfig = {
     paramMappings: {
         audio: {
             sources: [
-                upstreamParam("audioNode", "fileKeys[0]", {
-                    needsUrlTransform: true,
-                }),
+                upstreamParam("audioNode", "fileKeys[0]"),
             ],
             required: true,
         },
@@ -59,7 +56,7 @@ const AudioGenTextSpeechRecognizeNode = ({
                             ? upstreamKeys
                             : fileKeys;
                     return keys.map((fileKey) => ({
-                        audio: getFileUrl(fileKey),
+                        audio: fileKey,
                     }));
                 },
             }}

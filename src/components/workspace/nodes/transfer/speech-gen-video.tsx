@@ -6,7 +6,6 @@ import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import useFlow from "@/hooks/use-flow";
 import { useNodeState } from "@/hooks/use-node-data";
-import { getFileUrl } from "@/lib/file-url";
 import type { TongflowPluginNodeProps } from "@/types/tongflow-flow";
 import { coerceBaseNodeData } from "@/utils/flow-node-data";
 import {
@@ -73,9 +72,7 @@ const SpeechGenVideoNode = ({
         paramMappings: {
             audio: {
                 sources: [
-                    upstreamParam("videoNode", "fileKeys[0]", {
-                        needsUrlTransform: true,
-                    }),
+                    upstreamParam("videoNode", "fileKeys[0]"),
                 ],
                 required: true,
             },
@@ -122,7 +119,7 @@ const SpeechGenVideoNode = ({
                     return [
                         {
                             text,
-                            audio: getFileUrl(keys[0]),
+                            audio: keys[0],
                         },
                     ];
                 },

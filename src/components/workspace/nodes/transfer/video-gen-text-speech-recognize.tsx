@@ -1,7 +1,6 @@
 import { Video as VideoIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { memo } from "react";
-import { getFileUrl } from "@/lib/file-url";
 import type { TongflowPluginNodeProps } from "@/types/tongflow-flow";
 import {
     type GetPromptsContext,
@@ -19,9 +18,7 @@ const baseWorkflowConfig = {
     paramMappings: {
         video: {
             sources: [
-                upstreamParam("videoNode", "fileKeys[0]", {
-                    needsUrlTransform: true,
-                }),
+                upstreamParam("videoNode", "fileKeys[0]"),
             ],
             required: true,
         },
@@ -59,7 +56,7 @@ const VideoGenTextSpeechRecognizeNode = ({
                             ? upstreamKeys
                             : fileKeys;
                     return keys.map((fileKey) => ({
-                        video: getFileUrl(fileKey),
+                        video: fileKey,
                     }));
                 },
             }}

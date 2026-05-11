@@ -10,7 +10,6 @@ import {
     VIDEO_DURATIONS,
 } from "@/constants/media-options";
 import { useNodeState } from "@/hooks/use-node-data";
-import { getFileUrl } from "@/lib/file-url";
 import type { TongflowPluginNodeProps } from "@/types/tongflow-flow";
 import { coerceBaseNodeData } from "@/utils/flow-node-data";
 import {
@@ -33,11 +32,7 @@ const workflowConfig = {
     batchParam: "image",
     paramMappings: {
         image: {
-            sources: [
-                upstreamParam("imageNode", "fileKeys[0]", {
-                    needsUrlTransform: true,
-                }),
-            ],
+            sources: [upstreamParam("imageNode", "fileKeys[0]")],
             required: true,
         },
         text: {
@@ -58,9 +53,6 @@ const workflowConfig = {
                 configParam("selectedAspectRatio.height"),
                 staticParam(576),
             ],
-        },
-        duration: {
-            sources: [configParam("duration"), staticParam("5")],
         },
     },
 };
@@ -180,12 +172,10 @@ const ImageGenVideoNode = ({
                         upstreamKeys && upstreamKeys.length > 0
                             ? upstreamKeys
                             : fileKeys;
-                    // Get text from the upstream text node and prefer it when available
                     const ctxUpstreamTexts = ctx?.getAllUpstreamData(
                         "textNode",
                         "texts",
                     ) as string[] | undefined;
-                    // Priority ladder: wired ctx upstream, combo payloads, finally local drafts
                     const text =
                         ctxUpstreamTexts && ctxUpstreamTexts.length > 0
                             ? ctxUpstreamTexts[0]
@@ -193,11 +183,10 @@ const ImageGenVideoNode = ({
                               ? upstreamTexts[0]
                               : query;
                     return keys.map((fileKey) => ({
-                        image: getFileUrl(fileKey),
-                        text: text,
+                        image: fileKey,
+                        text,
                         width: selectedAspectRatio.width,
                         height: selectedAspectRatio.height,
-                        duration: duration,
                     }));
                 },
             }}

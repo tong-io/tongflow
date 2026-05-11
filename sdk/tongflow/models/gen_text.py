@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Required, TypedDict
 
-from .asset import Asset, FileRef
+from .asset import Asset, AudioRef, FileRef, ImageRef, VideoRef
 
 
 class GenTextInput(TypedDict, total=False):

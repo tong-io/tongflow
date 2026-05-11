@@ -17,11 +17,13 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-    title: "OpenFlow",
+    title: "TongFlow",
     description:
         "Open-source AI workflow editor — drag and drop to create AI workflows with an infinite canvas.",
     icons: {
-        icon: "/favicon.png",
+        icon: "/logo_icon.svg",
+        shortcut: "/logo_icon.svg",
+        apple: "/apple-touch-icon.png",
     },
 };
 

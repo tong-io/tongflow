@@ -239,9 +239,16 @@ try {
     fs.mkdirSync(outDir, { recursive: true });
     fs.writeFileSync(outPath, ts, "utf8");
     const rel = path.relative(repoRoot, outPath);
-    const fmt = spawnSync("npx", ["biome", "check", "--write", rel], {
+    const biomeBin = path.join(
+        repoRoot,
+        "node_modules",
+        ".bin",
+        process.platform === "win32" ? "biome.cmd" : "biome",
+    );
+    const fmt = spawnSync(biomeBin, ["check", "--write", rel], {
         cwd: repoRoot,
         stdio: "inherit",
+        shell: process.platform === "win32",
     });
     if (fmt.status !== 0) {
         throw new Error(`biome check --write failed for ${rel}`);

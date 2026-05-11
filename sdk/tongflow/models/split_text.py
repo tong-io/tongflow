@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Required, TypedDict
 
-from .asset import Asset, FileRef
+from .asset import Asset, AudioRef, FileRef, ImageRef, VideoRef
 
 
 class SplitTextInput(TypedDict, total=False):
@@ -16,4 +16,5 @@ class SplitTextOutput(TypedDict, total=False):
     result: str
     success: Required[bool]
     text: str
+    texts: list[str]
 

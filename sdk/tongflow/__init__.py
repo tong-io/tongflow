@@ -1,7 +1,7 @@
-"""Tongflow: Openflow plugin convention + deploy scan (no per-repo JSON)."""
+"""Tongflow plugin convention + deploy scan (no per-repo JSON)."""
 
 from .modal_app import current_app
 
-__version__ = "0.0.2"
+__version__ = "0.0.4"
 
 __all__ = ["current_app"]

@@ -3,14 +3,17 @@ import type { JSONSchema7 } from "json-schema";
 import { ABI_NODES, type NodeSlot } from "@/generated/abi";
 import { saveFile } from "@/utils/file-utils";
 
-const FILE_REF_REF = "#/$defs/FileRef";
+const FILE_REF_REFS = new Set([
+    "#/$defs/FileRef",
+    "#/$defs/ImageRef",
+    "#/$defs/VideoRef",
+    "#/$defs/AudioRef",
+]);
 
 function schemaIsFileRef(schema: unknown): boolean {
-    return (
-        typeof schema === "object" &&
-        schema !== null &&
-        (schema as JSONSchema7).$ref === FILE_REF_REF
-    );
+    if (typeof schema !== "object" || schema === null) return false;
+    const ref = (schema as JSONSchema7).$ref;
+    return typeof ref === "string" && FILE_REF_REFS.has(ref);
 }
 
 function mimeToExt(mime: string): string | null {

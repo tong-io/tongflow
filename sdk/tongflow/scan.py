@@ -320,7 +320,7 @@ def _iso_now() -> str:
 
 def main() -> int:
     ap = argparse.ArgumentParser(
-        description="Scan Openflow local plugins/ and print registry JSON (stdout).",
+        description="Scan Tongflow local plugins/ and print registry JSON (stdout).",
     )
     ap.add_argument(
         "--root",

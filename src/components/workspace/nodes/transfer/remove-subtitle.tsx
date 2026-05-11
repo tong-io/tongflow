@@ -17,9 +17,9 @@ const workflowConfig = {
     outputType: "videoNode",
     outputField: "fileKeys" as const,
     supportsBatch: true,
-    batchParam: "fileKey",
+    batchParam: "video",
     paramMappings: {
-        fileKey: {
+        video: {
             sources: [upstreamParam("videoNode", "fileKeys")],
             required: true,
         },

@@ -1,5 +1,5 @@
 {
-    "name": "openflow",
+    "name": "tongflow",
     "version": "0.1.0",
     "description": "A multi-modal AIGC studio for building generative AI workflows",
     "author": "tong-io",
@@ -37,8 +37,8 @@
         "db:generate": "drizzle-kit generate",
         "db:push": "drizzle-kit push",
         "db:studio": "drizzle-kit studio",
-        "lint": "npx biome format --write",
-        "lint:check": "npx biome check --error-on-warnings .",
+        "lint": "pnpm exec biome format --write",
+        "lint:check": "pnpm exec biome check --error-on-warnings .",
         "typecheck": "tsc --noEmit",
         "gen:abi": "tsx scripts/gen-abi-types.ts",
         "abi:generate": "node scripts/generate-tongflow-abi.mjs",

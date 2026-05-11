@@ -16,14 +16,10 @@ const workflowConfig = {
     outputType: "textNode",
     outputField: "texts" as const,
     supportsBatch: true,
-    batchParam: "file",
+    batchParam: "document",
     paramMappings: {
-        file: {
-            sources: [
-                upstreamParam("fileNode", "fileKeys[0]", {
-                    needsUrlTransform: true,
-                }),
-            ],
+        document: {
+            sources: [upstreamParam("fileNode", "fileKeys[0]")],
             required: true,
         },
     },

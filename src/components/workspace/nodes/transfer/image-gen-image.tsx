@@ -5,7 +5,6 @@ import { memo, useMemo } from "react";
 import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { useNodeState } from "@/hooks/use-node-data";
-import { getFileUrl } from "@/lib/file-url";
 import type { TongflowPluginNodeProps } from "@/types/tongflow-flow";
 import { coerceBaseNodeData } from "@/utils/flow-node-data";
 import {
@@ -26,11 +25,7 @@ const workflowConfig = {
     batchParam: "image",
     paramMappings: {
         image: {
-            sources: [
-                upstreamParam("imageNode", "fileKeys[0]", {
-                    needsUrlTransform: true,
-                }),
-            ],
+            sources: [upstreamParam("imageNode", "fileKeys[0]")],
             required: true,
         },
         text: {
@@ -92,7 +87,6 @@ const ImageGenImageNode = ({
                 executeDisabled: !fileKeys?.length,
                 // Fetch data from upstream nodes at execution time
                 getPrompts: (ctx?: GetPromptsContext) => {
-                    // Prefer the latest image data from upstream nodes
                     const upstreamKeys = ctx?.getAllUpstreamData(
                         "imageNode",
                         "fileKeys",
@@ -102,7 +96,6 @@ const ImageGenImageNode = ({
                             ? upstreamKeys
                             : fileKeys;
 
-                    // Prefer the latest text data from upstream nodes
                     const upstreamTextData = ctx?.getAllUpstreamData(
                         "textNode",
                         "texts",
@@ -113,7 +106,7 @@ const ImageGenImageNode = ({
                             : effectiveEditText;
 
                     return keys.map((fileKey) => ({
-                        image: getFileUrl(fileKey),
+                        image: fileKey,
                         text,
                     }));
                 },

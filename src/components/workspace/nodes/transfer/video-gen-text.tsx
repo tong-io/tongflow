@@ -2,7 +2,6 @@ import { MessageSquare, Video as VideoIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { memo } from "react";
 import { useNodeState } from "@/hooks/use-node-data";
-import { getFileUrl } from "@/lib/file-url";
 import type { TongflowPluginNodeProps } from "@/types/tongflow-flow";
 import {
     configParam,
@@ -25,9 +24,7 @@ const workflowConfig = {
     paramMappings: {
         video: {
             sources: [
-                upstreamParam("videoNode", "fileKeys[0]", {
-                    needsUrlTransform: true,
-                }),
+                upstreamParam("videoNode", "fileKeys[0]"),
             ],
             required: true,
         },
@@ -69,7 +66,7 @@ const VideoGenTextNode = ({
                             ? upstreamKeys
                             : fileKeys;
                     return keys.map((fileKey) => ({
-                        video: getFileUrl(fileKey),
+                        video: fileKey,
                         ...(customPrompt ? { text: customPrompt } : {}),
                     }));
                 },

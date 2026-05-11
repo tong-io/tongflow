@@ -10,7 +10,6 @@ import {
 } from "@/constants/media-options";
 import useFlow from "@/hooks/use-flow";
 import { useNodeState } from "@/hooks/use-node-data";
-import { getFileUrl } from "@/lib/file-url";
 import type { TongflowPluginNodeProps } from "@/types/tongflow-flow";
 import {
     configParam,
@@ -31,19 +30,15 @@ const workflowConfig = {
     outputField: "fileKeys" as const,
     supportsBatch: false,
     paramMappings: {
-        start_image: {
+        image: {
             sources: [
-                upstreamParam("imageNode", "fileKeys[0]", {
-                    needsUrlTransform: true,
-                }),
+                upstreamParam("imageNode", "fileKeys[0]"),
             ],
             required: true,
         },
         end_image: {
             sources: [
-                upstreamParam("imageNode", "fileKeys[0]", {
-                    needsUrlTransform: true,
-                }),
+                upstreamParam("imageNode", "fileKeys[0]"),
             ],
             required: true,
         },
@@ -112,9 +107,8 @@ const ImageImageGenVideoNode = ({
                         firstImageFileKey && secondImageFileKey
                             ? [
                                   {
-                                      start_image:
-                                          getFileUrl(firstImageFileKey),
-                                      end_image: getFileUrl(secondImageFileKey),
+                                      image: firstImageFileKey,
+                                      end_image: secondImageFileKey,
                                       text: videoPrompt,
                                       width: selectedAspectRatio.width,
                                       height: selectedAspectRatio.height,

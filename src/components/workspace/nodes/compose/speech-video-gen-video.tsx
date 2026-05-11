@@ -4,7 +4,6 @@ import { useTranslations } from "next-intl";
 import { memo, useMemo } from "react";
 import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import { getFileUrl } from "@/lib/file-url";
 import type { TongflowPluginNodeProps } from "@/types/tongflow-flow";
 import {
     type GetPromptsContext,
@@ -75,8 +74,8 @@ const SpeechVideoGenVideoNode = ({
                         return finalVideo && finalAudio
                             ? [
                                   {
-                                      video: getFileUrl(finalVideo),
-                                      audio: getFileUrl(finalAudio),
+                                      video: finalVideo,
+                                      audio: finalAudio,
                                   },
                               ]
                             : [];

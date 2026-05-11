@@ -10,7 +10,6 @@ import {
     resolvePython,
 } from "@/lib/modal-deploy-workers";
 import { convertAssetOutputsToFileRefs } from "@/lib/plugin-executor/convert-modal-output-fileref";
-import { embedLocalUploadsForModal } from "@/lib/plugin-executor/embed-local-uploads-for-modal.server";
 import {
     modalTerminateAfterTimeouts,
     recordModalDeployCache,
@@ -166,7 +165,7 @@ async function withTimeout<T>(
 
 /**
  * Run `modal` CLI via subprocess with a **hard** wall-clock limit: on timeout or
- * `AbortSignal`, the child is SIGKILL'd so Openflow cannot wait forever while
+ * `AbortSignal`, the child is SIGKILL'd so Tongflow cannot wait forever while
  * Modal / the CLI hangs or restart-loops.
  */
 function runModalCli(
@@ -339,12 +338,9 @@ function ensureModalObjectResult<S extends NodeSlot>(
 export async function execModalPlugin<S extends NodeSlot>(
     req: PluginExecRequest<S>,
 ): Promise<PluginExecResult<S>> {
-    const input = await embedLocalUploadsForModal(
-        req.input as unknown as Record<string, unknown>,
-        {
-            nodeSlot: req.nodeSlot,
-        },
-    );
+    // Asset bytes are already inlined upstream by `prepareAssetInput` in
+    // `task-runner`; the modal runner just forwards the ABI-shaped payload.
+    const input = req.input as unknown as Record<string, unknown>;
 
     const cfg = getModalPluginConfig(req.pluginId);
     if (!cfg) throw new Error(`Unknown plugin: ${req.pluginId}`);

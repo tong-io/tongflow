@@ -5,7 +5,6 @@ import { memo, useMemo } from "react";
 import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { useNodeState } from "@/hooks/use-node-data";
-import { getFileUrl } from "@/lib/file-url";
 import type { TongflowPluginNodeProps } from "@/types/tongflow-flow";
 import {
     configParam,
@@ -90,8 +89,8 @@ const VideoImageGenVideoMixNode = ({
                         return finalImage && finalVideo
                             ? [
                                   {
-                                      image: getFileUrl(finalImage),
-                                      video: getFileUrl(finalVideo),
+                                      image: finalImage,
+                                      video: finalVideo,
                                       text: videoPrompt,
                                   },
                               ]

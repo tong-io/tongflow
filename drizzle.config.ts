@@ -5,6 +5,6 @@ export default defineConfig({
     out: "./src/drizzle",
     dialect: "sqlite",
     dbCredentials: {
-        url: "./data/openflow.db",
+        url: "./data/tongflow.db",
     },
 });

@@ -3,10 +3,6 @@ import { type NextRequest, NextResponse } from "next/server";
 import { getDb } from "@/db";
 import { tasks } from "@/db/schema";
 import { ABI_NODES, type NodeSlot } from "@/generated/abi";
-import {
-    extractAbiBusinessInput,
-    validateSlotInput,
-} from "@/lib/abi-schema-validate";
 import { logger } from "@/lib/logger";
 import {
     buildPersistedTaskPrompt,
@@ -100,18 +96,9 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        const businessInput = extractAbiBusinessInput(mergedPrompt);
-        const inputCheck = validateSlotInput(canonicalFeature, businessInput);
-        if (!inputCheck.ok) {
-            return NextResponse.json(
-                {
-                    error: "输入参数不符合该节点 ABI 校验",
-                    details: inputCheck.failure.errorsText,
-                    ajvErrors: inputCheck.failure.ajvErrors,
-                },
-                { status: 400 },
-            );
-        }
+        // ABI input validation runs in `task-runner` after `prepareAssetInput`
+        // materializes Asset bytes; the persisted prompt stores the slim form
+        // (fileKey strings) to keep the DB row small.
 
         const db = await getDb();
 

@@ -5,13 +5,11 @@ from typing import Required, TypedDict
 from .asset import Asset, AudioRef, FileRef, ImageRef, VideoRef
 
 
-class SplitVideoInput(TypedDict, total=False):
-    video: Required[Asset]
+class SeparateAudioTrackInput(TypedDict, total=False):
+    audio: Required[Asset]
 
-class SplitVideoOutput(TypedDict, total=False):
+class SeparateAudioTrackOutput(TypedDict, total=False):
     error: str
+    file_key: AudioRef
     success: Required[bool]
-    text: str
-    thinking: str
-    video_parts: list[VideoRef]
 

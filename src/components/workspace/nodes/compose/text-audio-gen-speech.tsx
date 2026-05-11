@@ -12,7 +12,6 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 import { useNodeState } from "@/hooks/use-node-data";
-import { getFileUrl } from "@/lib/file-url";
 import type { RfDataNodeProps } from "@/types/nodes";
 import { coerceBaseNodeData } from "@/utils/flow-node-data";
 import { configParam, upstreamParam } from "@/utils/node-execution-config";
@@ -280,7 +279,7 @@ const TextAudioGenSpeechNode = ({
                     getPrompts: () =>
                         texts && texts.length > 0 && audioFileKey
                             ? texts.map((text) => ({
-                                  audio: getFileUrl(audioFileKey),
+                                  audio: audioFileKey,
                                   text: text,
                                   emotion: emotion || undefined,
                                   style: style || undefined,

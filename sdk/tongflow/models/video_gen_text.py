@@ -2,14 +2,13 @@ from __future__ import annotations
 
 from typing import Required, TypedDict
 
-from .asset import Asset, FileRef
+from .asset import Asset, AudioRef, FileRef, ImageRef, VideoRef
 
 
 class VideoGenTextInput(TypedDict, total=False):
     enable_thinking: bool
-    image_base64: str
-    image_base64s: list[str]
-    images: list[str]
+    image: Asset
+    images: list[Asset]
     max_new_tokens: int
     system: str
     temperature: float
@@ -17,15 +16,15 @@ class VideoGenTextInput(TypedDict, total=False):
     texts: list[str]
     top_k: int
     top_p: float
-    video_base64: Required[str]
+    video: Required[Asset]
 
 class VideoGenTextOutput(TypedDict, total=False):
-    audio_base64: FileRef
+    audio: AudioRef
     error: str
-    image_base64: FileRef
+    image: ImageRef
     success: Required[bool]
     text: str
     texts: list[str]
     thinking: str
-    video_base64: FileRef
+    video: VideoRef
 

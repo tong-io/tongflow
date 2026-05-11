@@ -1,7 +1,7 @@
 import Workspace from "@/components/workspace/workspace";
 
 export const metadata = {
-    title: "Workspace - OpenFlow",
+    title: "Workspace - TongFlow",
     description: "Visual workflow editor",
 };
 

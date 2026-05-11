@@ -123,15 +123,12 @@ const TextGenSpeechCloneNode = ({
 
                     const slot = TEXT_GEN_SPEECH_CLONE;
                     return (
-                        inputTexts?.map((text) => {
-                            const ref = getFileUrl(voice);
-                            return {
-                                text,
-                                nodeSlot: slot,
-                                audio: ref,
-                                ref_audio: ref,
-                            };
-                        }) || []
+                        inputTexts?.map((text) => ({
+                            text,
+                            nodeSlot: slot,
+                            audio: voice,
+                            ref_audio: voice,
+                        })) || []
                     );
                 },
             }}

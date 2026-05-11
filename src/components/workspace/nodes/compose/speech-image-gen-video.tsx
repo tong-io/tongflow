@@ -5,7 +5,6 @@ import { memo, useMemo } from "react";
 import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { useNodeState } from "@/hooks/use-node-data";
-import { getFileUrl } from "@/lib/file-url";
 import type { TongflowPluginNodeProps } from "@/types/tongflow-flow";
 import { configParam, upstreamParam } from "@/utils/node-execution-config";
 import { BaseNode } from "../base/base-node";
@@ -76,8 +75,8 @@ const SpeechImageGenVideoNode = ({
                         imageFileKey && audioFileKey
                             ? [
                                   {
-                                      image: getFileUrl(imageFileKey),
-                                      audio: getFileUrl(audioFileKey),
+                                      image: imageFileKey,
+                                      audio: audioFileKey,
                                       text: videoPrompt,
                                   },
                               ]

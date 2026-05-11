@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="docs/assets/logo.png" alt="TongFlow" width="320" />
+  <img src="public/logo.svg" alt="TongFlow" width="320" />
 
   <h1>多模态 AIGC 创作工作室</h1>
   <p>
@@ -37,7 +37,7 @@
 
 ## 快速开始（本地运行）
 
-这是一款**本地优先**的应用：工作流与素材存储在 SQLite（`data/openflow.db`），上传文件保存在磁盘（`data/uploads/`）。无需 TongFlow 账号、登录或中心化文件 CDN。
+这是一款**本地优先**的应用：工作流与素材存储在 SQLite（`data/tongflow.db`），上传文件保存在磁盘（`data/uploads/`）。无需 TongFlow 账号、登录或中心化文件 CDN。
 
 AI 推理使用**你配置的外部 API**：大多数转换插件使用 [Modal](https://modal.com)（Modal 提供 **每月 $30 免费额度**，可用于 H100 等云端 GPU/CPU），LLM 节点使用 OpenRouter、Gemini、OpenAI 等供应商。请在 `.env` 中配置 API Key，使用 Modal 时运行 `pnpm modal:setup`（详见下方**环境变量**）。
 
@@ -53,13 +53,13 @@ docker compose up --build
 
 打开 `http://localhost:3000`（进入 `/workspace`）。
 
-> 数据持久化在 Docker Volume（SQLite 位于 `data/openflow.db`，含上传文件）。
+> 数据持久化在 Docker Volume（SQLite 位于 `data/tongflow.db`，含上传文件）。
 
 **预构建镜像（GHCR）：** CI 在 `main` 分支推送时自动发布 [`ghcr.io/tong-io/tongflow`](https://github.com/tong-io/tongflow/pkgs/container/tongflow)（标签 `latest` 和 `main`），版本标签 `v*` 也同步发布（如 `v0.1.0` → `0.1.0`）。拉取并运行：
 
 ```bash
 docker pull ghcr.io/tong-io/tongflow:latest
-docker run --rm -p 3000:3000 --env-file .env -v openflow_data:/app/data ghcr.io/tong-io/tongflow:latest
+docker run --rm -p 3000:3000 --env-file .env -v tongflow_data:/app/data ghcr.io/tong-io/tongflow:latest
 ```
 
 私有仓库可能需要先 `docker login ghcr.io`（Token 需有 `read:packages` 权限）。

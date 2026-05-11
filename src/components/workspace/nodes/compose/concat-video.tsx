@@ -84,7 +84,7 @@ const ConcatVideoNode = ({
                     orderedFileKeys.length > 0
                         ? [
                               {
-                                  fileKeys: orderedFileKeys,
+                                  videos: orderedFileKeys,
                               },
                           ]
                         : [],

@@ -11,8 +11,8 @@ services:
     env_file:
       - .env
     volumes:
-      - openflow_data:/app/data
+      - tongflow_data:/app/data
     restart: unless-stopped
 
 volumes:
-  openflow_data:
+  tongflow_data:

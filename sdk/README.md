@@ -56,7 +56,7 @@ Do not reintroduce JSON configuration files.
 
 ## Build and publish (maintainers)
 
-From the **Openflow repo root**:
+From the **Tongflow repo root**:
 
 ```bash
 export TWINE_USERNAME=__token__

@@ -14,11 +14,11 @@ const workflowConfig = {
     outputType: "videoNode",
     outputField: "fileKeys" as const,
     paramMappings: {
-        video_key: {
+        video: {
             sources: [upstreamParam("videoNode", "fileKeys")],
             required: true,
         },
-        audio_key: {
+        audio: {
             sources: [upstreamParam("audioNode", "fileKeys")],
             required: true,
         },
@@ -50,8 +50,8 @@ const MergeVideoAudioNode = ({
                 getPrompts: () =>
                     audios && videos
                         ? videos.map((video, index) => ({
-                              audio_key: audios[index],
-                              video_key: video,
+                              video: video,
+                              audio: audios[index],
                           }))
                         : [],
             }}

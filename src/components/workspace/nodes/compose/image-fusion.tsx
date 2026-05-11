@@ -11,7 +11,6 @@ import {
 } from "@/constants/media-options";
 import useFlow from "@/hooks/use-flow";
 import { useNodeState } from "@/hooks/use-node-data";
-import { getFileUrl } from "@/lib/file-url";
 import { cn } from "@/lib/utils";
 import type { TongflowPluginNodeProps } from "@/types/tongflow-flow";
 import { coerceBaseNodeData } from "@/utils/flow-node-data";
@@ -45,7 +44,6 @@ const workflowConfig = {
         fileKeys: {
             sources: [
                 upstreamParam("imageNode", "fileKeys", {
-                    needsUrlTransform: true,
                     collectAll: true,
                 }),
             ],
@@ -177,16 +175,11 @@ const ImageFusionNode = ({
                         "imageNode",
                         "fileKeys",
                     ) as string[];
-                    // Use upstream data if available (flat array of keys), else flatten allImages
                     const imageKeys = upstreamImages?.length
                         ? upstreamImages
                         : allImages.flat();
                     if (!imageKeys || imageKeys.length < 2) return [];
-                    const fileKeys = imageKeys.map((key: string) =>
-                        getFileUrl(key),
-                    );
 
-                    // Prefer the latest text data from upstream nodes
                     const ctxUpstreamTexts = ctx?.getAllUpstreamData(
                         "textNode",
                         "texts",
@@ -198,12 +191,10 @@ const ImageFusionNode = ({
 
                     return [
                         {
-                            fileKeys: fileKeys,
+                            images: imageKeys,
                             text,
                             width: currentRatio.width,
                             height: currentRatio.height,
-                            aspectRatio: currentRatio.value,
-                            resolution: currentResolution.value,
                         },
                     ];
                 },

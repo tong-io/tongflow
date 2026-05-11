@@ -2,37 +2,37 @@ from __future__ import annotations
 
 from typing import Required, TypedDict
 
-from .asset import Asset, FileRef
+from .asset import Asset, AudioRef, FileRef, ImageRef, VideoRef
 
 
 class TextGenVideoInput(TypedDict, total=False):
-    audio_base64: str
+    audio: Asset
     audio_max_duration: float
     audio_start_time: float
-    end_image_base64: str
+    end_image: Asset
     enhance_prompt: bool
     frame_rate: float
     height: int
-    image2_base64: str
-    image_base64: str
+    image: Asset
+    image2: Asset
     image_frame_idx: int
     image_strength: float
     negative_prompt: str
     num_frames: int
     num_inference_steps: int
     seed: float
-    speech_base64: str
+    speech: Asset
     text: Required[str]
     texts: list[str]
     width: int
 
 class TextGenVideoOutput(TypedDict, total=False):
-    audio_base64: FileRef
+    audio: AudioRef
     error: str
-    image_base64: FileRef
+    image: ImageRef
     success: Required[bool]
     text: str
     texts: list[str]
     thinking: str
-    video_base64: FileRef
+    video: VideoRef
 

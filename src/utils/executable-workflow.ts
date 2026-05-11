@@ -40,8 +40,6 @@ export interface ParamMapping {
     isArray?: boolean;
     /** Array index (if a specific element of the array is needed) */
     arrayIndex?: number;
-    /** Transform function name (optional, e.g. "getFileUrl") */
-    transform?: string;
     /** Incoming edge target handle (corresponds to canvas edge.targetHandle in multi-slot scenarios) */
     edgeTargetHandle?: string;
 }
