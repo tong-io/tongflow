@@ -2117,8 +2117,11 @@ export type TextGenSpeechPresetOutput = FromSchema<
 
 const _slot_image_gen_video_inputs = {
     type: "object",
-    required: ["text", "image"],
+    required: ["text", "image", "duration"],
     properties: {
+        duration: {
+            type: "number",
+        },
         text: {
             type: "string",
         },
@@ -6744,8 +6747,11 @@ export const ABI_NODES = {
     "image-gen-video": {
         inputs: {
             type: "object",
-            required: ["text", "image"],
+            required: ["text", "image", "duration"],
             properties: {
+                duration: {
+                    type: "number",
+                },
                 text: {
                     type: "string",
                 },

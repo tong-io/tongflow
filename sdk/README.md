@@ -16,7 +16,7 @@ from tongflow.node_slots import NodeSlots
 from tongflow import current_app
 ```
 
-In this monorepo, Modal `impl.py` / stub `deploy.py` images pin **`tongflow==0.0.2`** (PyPI). Bump the version string in those files when you publish a new release.
+In this monorepo, Modal `impl.py` / stub `deploy.py` images pin **`tongflow==0.0.5`** (PyPI). Bump the version string in those files when you publish a new release.
 
 ## Plugin identity
 

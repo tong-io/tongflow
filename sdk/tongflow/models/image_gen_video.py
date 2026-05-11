@@ -9,6 +9,7 @@ class ImageGenVideoInput(TypedDict, total=False):
     audio: Asset
     audio_max_duration: float
     audio_start_time: float
+    duration: Required[float]
     end_image: Asset
     enhance_prompt: bool
     frame_rate: float

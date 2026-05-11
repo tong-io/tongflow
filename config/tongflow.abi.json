@@ -1296,9 +1296,13 @@
                 "type": "object",
                 "required": [
                     "text",
-                    "image"
+                    "image",
+                    "duration"
                 ],
                 "properties": {
+                    "duration": {
+                        "type": "number"
+                    },
                     "text": {
                         "type": "string"
                     },

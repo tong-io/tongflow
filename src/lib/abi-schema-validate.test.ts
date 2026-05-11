@@ -43,6 +43,29 @@ describe("abi-schema-validate — input", () => {
         const r = validateSlotInput("transcribe", business);
         expect(r.ok).toBe(true);
     });
+
+    it("image-gen-video requires numeric duration (seconds)", () => {
+        const ok = extractAbiBusinessInput({
+            pluginId: "tongflow-modal-ltx",
+            nodeSlot: "image-gen-video",
+            text: "move",
+            image: { bytesBase64: "dGVzdA==" },
+            duration: 5,
+            width: 1024,
+            height: 576,
+        });
+        expect(validateSlotInput("image-gen-video", ok).ok).toBe(true);
+
+        const missing = extractAbiBusinessInput({
+            pluginId: "tongflow-modal-ltx",
+            nodeSlot: "image-gen-video",
+            text: "move",
+            image: { bytesBase64: "dGVzdA==" },
+            width: 1024,
+            height: 576,
+        });
+        expect(validateSlotInput("image-gen-video", missing).ok).toBe(false);
+    });
 });
 
 describe("abi-schema-validate — output", () => {

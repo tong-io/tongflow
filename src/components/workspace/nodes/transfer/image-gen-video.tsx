@@ -54,6 +54,9 @@ const workflowConfig = {
                 staticParam(576),
             ],
         },
+        duration: {
+            sources: [configParam("duration"), staticParam(5)],
+        },
     },
 };
 
@@ -141,11 +144,18 @@ const ImageGenVideoNode = ({
         {
             query: "",
             selectedAspectRatio: VIDEO_ASPECT_RATIOS[0],
-            duration: "5",
+            duration: 5,
         },
         data,
     );
     const { query, selectedAspectRatio, duration } = state;
+    const durationSeconds = useMemo(() => {
+        const n =
+            typeof duration === "number" && !Number.isNaN(duration)
+                ? duration
+                : Number.parseFloat(String(duration));
+        return Number.isFinite(n) && n > 0 ? n : 5;
+    }, [duration]);
     const t = useTranslations("Workspace.nodes");
     const tActions = useTranslations("Workspace.nodes.actions");
 
@@ -187,6 +197,7 @@ const ImageGenVideoNode = ({
                         text,
                         width: selectedAspectRatio.width,
                         height: selectedAspectRatio.height,
+                        duration: durationSeconds,
                     }));
                 },
             }}
@@ -237,8 +248,8 @@ const ImageGenVideoNode = ({
 
                 <DurationPicker
                     durations={VIDEO_DURATIONS}
-                    value={duration}
-                    onChange={(dur) => setState({ duration: dur })}
+                    value={String(durationSeconds)}
+                    onChange={(dur) => setState({ duration: Number(dur) })}
                 />
             </div>
         </BaseNode>
