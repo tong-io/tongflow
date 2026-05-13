@@ -3,6 +3,7 @@
  */
 
 import { apiDelete, apiGet, apiPost, apiPut } from "@/utils/api-client";
+import type { ExecutableWorkflow } from "@/lib/workflow/executable-workflow";
 import type { Material } from "./material";
 
 export interface Workflow {
@@ -22,7 +23,7 @@ export interface SaveWorkflowRequest {
     name: string;
     description?: string;
     flow: Record<string, unknown>;
-    executable?: Record<string, unknown>;
+    executable?: ExecutableWorkflow;
 }
 
 export interface SaveWorkflowResponse {

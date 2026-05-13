@@ -20,6 +20,7 @@ import {
 } from "@/constants/task-status";
 import { logger } from "@/lib/logger";
 import { getTaskWaitUrl } from "@/lib/task/api-url";
+import type { SSEMessage, SSEStatus } from "@/types/sse";
 import { useTaskStore } from "./use-task";
 
 interface UseWorkflowRecoveryOptions {
@@ -82,9 +83,9 @@ export function useWorkflowRecovery(options: UseWorkflowRecoveryOptions = {}) {
         (
             taskId: string,
             message: {
-                status: string;
+                status: SSEStatus;
                 nodeId?: string;
-                data?: Record<string, unknown>;
+                data?: SSEMessage["data"];
             },
         ) => {
             logger.debug("[WorkflowRecovery] SSE message:", message);
@@ -92,9 +93,9 @@ export function useWorkflowRecovery(options: UseWorkflowRecoveryOptions = {}) {
             // Bubble SSE deltas into floating progress toast
             emitSSETaskMessage({
                 id: taskId,
-                status: message.status as any,
+                status: message.status,
                 nodeId: message.nodeId || null,
-                data: message.data as any,
+                data: message.data,
             });
 
             switch (message.status) {
@@ -114,11 +115,12 @@ export function useWorkflowRecovery(options: UseWorkflowRecoveryOptions = {}) {
                     if (message.nodeId) {
                         setNodeExecutionStatus(message.nodeId, "completed");
                         onNodeStatusChange?.(message.nodeId, "completed");
-                        const output = message.data?.output as
-                            | { fileKeys?: string[]; texts?: string[] }
-                            | undefined;
+                        const output = message.data?.output;
                         if (output) {
-                            onNodeDataUpdate?.(message.nodeId, output);
+                            onNodeDataUpdate?.(message.nodeId, {
+                                fileKeys: output.fileKeys,
+                                texts: output.texts,
+                            });
                         }
                     }
                     break;
@@ -155,7 +157,7 @@ export function useWorkflowRecovery(options: UseWorkflowRecoveryOptions = {}) {
                     );
                     setWorkflowExecutionStatus("failed");
                     cleanup();
-                    onWorkflowFailed?.(message.data?.error as string);
+                    onWorkflowFailed?.(message.data?.error);
                     break;
             }
         },
@@ -193,8 +195,12 @@ export function useWorkflowRecovery(options: UseWorkflowRecoveryOptions = {}) {
 
             eventSource.onmessage = (event) => {
                 try {
-                    const message = JSON.parse(event.data);
-                    handleSSEMessage(taskId, message);
+                    const message = JSON.parse(event.data) as SSEMessage;
+                    handleSSEMessage(taskId, {
+                        status: message.status,
+                        nodeId: message.nodeId ?? undefined,
+                        data: message.data,
+                    });
                 } catch (e) {
                     logger.error(
                         "[WorkflowRecovery] Failed to parse SSE message:",

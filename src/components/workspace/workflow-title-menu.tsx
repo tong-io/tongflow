@@ -26,6 +26,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import type { FlowState } from "@/hooks/use-flow";
 import { useFlow } from "@/hooks/use-flow";
 import {
     type SaveWorkflowRequest,
@@ -45,7 +46,7 @@ function safeWorkflowFileName(name: string): string {
     return s || "workflow";
 }
 
-const selector = (state: any) => ({
+const selector = (state: FlowState) => ({
     nodes: state.nodes,
     edges: state.edges,
     workflowName: state.workflowName,
@@ -134,7 +135,7 @@ export function WorkflowTitleMenu() {
                 name: tempName,
                 description: tempDescription,
                 flow: { nodes, edges },
-                executable: executable as unknown as Record<string, unknown>,
+                executable,
             };
 
             if (workflowId && !isSaveAsMode) {

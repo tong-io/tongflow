@@ -23,11 +23,10 @@ function isAbiNodeSlot(slot: string): slot is NodeSlot {
 }
 
 function resolveRefs(schema: JSONSchema7 | undefined, depth = 0): JSONSchema7 {
-    const s =
-        typeof schema === "object" && schema !== null
-            ? ({ ...schema } as JSONSchema7)
-            : (schema as unknown as JSONSchema7);
-    if (!s || depth > 48) return s ?? {};
+    if (depth > 48 || typeof schema !== "object" || schema === null) {
+        return schema ?? {};
+    }
+    const s: JSONSchema7 = { ...schema };
     if (!s.$ref || typeof s.$ref !== "string") return s;
     const ref = s.$ref;
     if (!ref.startsWith("#/$defs/")) return s;

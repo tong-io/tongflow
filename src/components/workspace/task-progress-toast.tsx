@@ -10,36 +10,11 @@ import {
 } from "@/constants/task-status";
 import { logger } from "@/lib/logger";
 import { cn } from "@/lib/utils";
+import type { SSEMessage, SSENodeInfo } from "@/types/sse";
 
-interface NodeInfo {
-    id: string;
-    label: string;
-    feature: string;
-}
+export type { SSEMessage } from "@/types/sse";
 
-/** SSE payload used by TaskProgressToast / `emitSSETaskMessage` */
-export interface SSEMessage {
-    id: string;
-    /** Status string for the task / workflow / node (see task-status.ts) */
-    status: string;
-    nodeId: string | null;
-    data?: {
-        totalNodes?: number;
-        levels?: number;
-        nodes?: NodeInfo[];
-        level?: number;
-        feature?: string;
-        label?: string;
-        output?: Record<string, unknown>;
-        duration?: number;
-        totalDuration?: number;
-        message?: string;
-        code?: number;
-        error?: string;
-        status?: string;
-        file_key?: string;
-    };
-}
+type NodeInfo = SSENodeInfo;
 
 interface NodeProgress {
     nodeId: string;

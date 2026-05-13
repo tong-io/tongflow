@@ -392,12 +392,16 @@ export const useFlow = create<FlowState>((set, get) => ({
                     height: node.measured?.height ?? 100,
                 };
             })
-            .filter(Boolean) as unknown as Array<{
-            x: number;
-            y: number;
-            width: number;
-            height: number;
-        }>;
+            .filter(
+                (
+                    pos,
+                ): pos is {
+                    x: number;
+                    y: number;
+                    width: number;
+                    height: number;
+                } => pos !== null,
+            );
 
         // Right edge uses center.x + half width (origin [0.5, 0.5])
         const rightmostX = Math.max(

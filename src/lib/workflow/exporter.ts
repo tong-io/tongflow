@@ -105,16 +105,17 @@ function getUpstreamNodeData(
     edgeTargetHandle?: string;
 }[] {
     const incomingEdges = edges.filter((e) => e.target === nodeId);
-    return incomingEdges
-        .map((edge) => {
-            const node = nodes.find((n) => n.id === edge.source);
-            return {
-                node: node!,
+    return incomingEdges.flatMap((edge) => {
+        const node = nodes.find((n) => n.id === edge.source);
+        if (!node) return [];
+        return [
+            {
+                node,
                 edgeSourceHandle: edge.sourceHandle ?? undefined,
                 edgeTargetHandle: edge.targetHandle ?? undefined,
-            };
-        })
-        .filter((item) => item.node);
+            },
+        ];
+    });
 }
 
 /**
