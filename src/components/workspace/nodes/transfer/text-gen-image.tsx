@@ -1,53 +1,16 @@
-import { useNodeId } from "@xyflow/react";
 import { Atom } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { memo, useCallback } from "react";
+
 import {
     type AspectRatio,
     IMAGE_ASPECT_RATIOS,
 } from "@/constants/media-options";
-import useFlow from "@/hooks/use-flow";
+import { useAbiForm } from "@/hooks/use-abi-form";
+import { batchOn } from "@/lib/abi/sources";
 import type { TongflowPluginNodeProps } from "@/types/tongflow-flow";
-import {
-    configParam,
-    type GetPromptsContext,
-    staticParam,
-    upstreamParam,
-} from "@/utils/node-execution-config";
+import { AbiNodeShell } from "../base/abi-node-shell";
 import { AspectRatioPicker } from "../base/aspect-ratio-picker";
-import { BaseNode } from "../base/base-node";
-
-// Default prompt parameters
-const defaultPrompt = {
-    width: 1024,
-    height: 1024,
-};
-
-// Workflow execution config
-const workflowConfig = {
-    feature: "image-gen",
-    outputType: "imageNode",
-    outputField: "fileKeys" as const,
-    paramMappings: {
-        // Note: the text parameter is read from the upstream textNode first to ensure dynamically generated text is used
-        text: {
-            sources: [upstreamParam("textNode", "texts[0]")],
-            required: true,
-        },
-        width: {
-            sources: [
-                configParam("selectedAspectRatio.width"),
-                staticParam(1024),
-            ],
-        },
-        height: {
-            sources: [
-                configParam("selectedAspectRatio.height"),
-                staticParam(1024),
-            ],
-        },
-    },
-};
 
 type TextGenImageNodeProps = TongflowPluginNodeProps<
     "image-gen",
@@ -57,60 +20,36 @@ type TextGenImageNodeProps = TongflowPluginNodeProps<
 const TextGenImageNode = ({ selected, data }: TextGenImageNodeProps) => {
     const t = useTranslations("Workspace.nodes");
     const { texts = [] } = data;
-    const selectedAspectRatio = data.selectedAspectRatio as
-        | AspectRatio
-        | undefined;
-    const prompt = { ...defaultPrompt, ...(data.prompt ?? {}) };
-    const id = useNodeId()!;
-    const updates = useFlow((s) => s.updates);
+    const form = useAbiForm("image-gen");
 
-    // Select aspect ratio
+    const width = (form.state.width as number | undefined) ?? 1024;
+    const height = (form.state.height as number | undefined) ?? 1024;
+    const currentRatio =
+        IMAGE_ASPECT_RATIOS.find(
+            (r) => r.width === width && r.height === height,
+        ) ?? IMAGE_ASPECT_RATIOS[0];
+
     const handleSelectRatio = useCallback(
         (ratio: AspectRatio) => {
-            updates(id, {
-                ...data,
-                prompt: { ...prompt, width: ratio.width, height: ratio.height },
-                selectedAspectRatio: ratio,
-            });
+            form.patch({ width: ratio.width, height: ratio.height });
         },
-        [id, data, prompt, updates],
+        [form],
     );
 
-    // Currently selected aspect ratio (matched from width/height in prompt)
-    const currentRatio =
-        selectedAspectRatio ??
-        IMAGE_ASPECT_RATIOS.find(
-            (r) => r.width === prompt.width && r.height === prompt.height,
-        ) ??
-        IMAGE_ASPECT_RATIOS[0];
-
     return (
-        <BaseNode
+        <AbiNodeShell
+            feature="image-gen"
+            sourceSpec={{
+                text: batchOn({ nodeType: "textNode", path: "texts" }),
+            }}
+            form={form}
             selected={selected}
             className="min-w-[480px]"
             data={data}
-            workflowConfig={{
-                ...workflowConfig,
-                title: t("titles.textGenImage"),
-                icon: <Atom className="h-5 w-5" />,
-                executeLabel: t("actions.generateImage"),
-                executeDisabled: !texts?.length,
-                getPrompts: (ctx?: GetPromptsContext) => {
-                    const upstreamTexts = ctx?.getAllUpstreamData(
-                        "textNode",
-                        "texts",
-                    ) as string[] | undefined;
-                    const inputTexts =
-                        upstreamTexts && upstreamTexts.length > 0
-                            ? upstreamTexts
-                            : texts;
-                    return inputTexts.map((text) => ({
-                        text,
-                        width: prompt.width,
-                        height: prompt.height,
-                    }));
-                },
-            }}
+            title={t("titles.textGenImage")}
+            icon={<Atom className="h-5 w-5" />}
+            executeLabel={t("actions.generateImage")}
+            executeDisabled={!texts?.length}
         >
             <div className="p-4 space-y-4">
                 <AspectRatioPicker
@@ -120,7 +59,7 @@ const TextGenImageNode = ({ selected, data }: TextGenImageNodeProps) => {
                     showSize
                 />
             </div>
-        </BaseNode>
+        </AbiNodeShell>
     );
 };
 

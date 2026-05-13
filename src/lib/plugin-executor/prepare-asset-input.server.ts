@@ -132,9 +132,7 @@ export async function prepareAssetInput<S extends NodeSlot>(
             const arr = out[key];
             if (!Array.isArray(arr)) continue;
             out[key] = await Promise.all(
-                arr.map((item, i) =>
-                    resolveSingleAsset(item, `${key}[${i}]`),
-                ),
+                arr.map((item, i) => resolveSingleAsset(item, `${key}[${i}]`)),
             );
         }
     }

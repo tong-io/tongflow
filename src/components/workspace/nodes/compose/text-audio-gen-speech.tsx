@@ -1,213 +1,16 @@
-import { useNodesData } from "@xyflow/react";
 import { Atom, Music, Type } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { memo, useMemo } from "react";
+import { memo } from "react";
+
 import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from "@/components/ui/select";
-import { useNodeState } from "@/hooks/use-node-data";
+import { useAbiForm } from "@/hooks/use-abi-form";
+import { batchOn } from "@/lib/abi/sources";
 import type { RfDataNodeProps } from "@/types/nodes";
-import { coerceBaseNodeData } from "@/utils/flow-node-data";
-import { configParam, upstreamParam } from "@/utils/node-execution-config";
-import { BaseNode } from "../base/base-node";
 
-const DEFAULT_FEATURE = "text-audio-gen-speech";
-
-// Emotion/style options (use "none" instead of an empty string because the Select component does not support empty values)
-const emotionOptions = [
-    { label: "无", value: "none" },
-    { label: "开心", value: "happy", desc: "Expressing happiness" },
-    { label: "生气", value: "angry", desc: "Expressing anger" },
-    { label: "伤心", value: "sad", desc: "Expressing sadness" },
-    { label: "恐惧", value: "fear", desc: "Expressing fear" },
-    { label: "惊讶", value: "surprised", desc: "Expressing surprise" },
-    { label: "困惑", value: "confusion", desc: "Expressing confusion" },
-    {
-        label: "共情",
-        value: "empathy",
-        desc: "Expressing empathy and understanding",
-    },
-    { label: "尴尬", value: "embarrass", desc: "Expressing embarrassment" },
-    {
-        label: "兴奋",
-        value: "excited",
-        desc: "Expressing excitement and enthusiasm",
-    },
-    {
-        label: "氮丧",
-        value: "depressed",
-        desc: "Expressing a depressed or discouraged mood",
-    },
-    {
-        label: "敬佩",
-        value: "admiration",
-        desc: "Expressing admiration or respect",
-    },
-    {
-        label: "冷淡",
-        value: "coldness",
-        desc: "Expressing coldness and indifference",
-    },
-];
-
-// Style options (use "none" instead of an empty string)
-const styleOptions = [
-    { label: "无", value: "none" },
-    {
-        label: "严肃",
-        value: "serious",
-        desc: "Speaking in a serious or solemn manner",
-    },
-    {
-        label: "傲慢",
-        value: "arrogant",
-        desc: "Speaking in an arrogant manner",
-    },
-    { label: "童声", value: "child", desc: "Speaking in a childlike manner" },
-    {
-        label: "老年",
-        value: "older",
-        desc: "Speaking in an elderly-sounding manner",
-    },
-    {
-        label: "少女",
-        value: "girl",
-        desc: "Speaking in a light, youthful feminine manner",
-    },
-    {
-        label: "纯真",
-        value: "pure",
-        desc: "Speaking in a pure, innocent manner",
-    },
-    {
-        label: "御姐",
-        value: "sister",
-        desc: "Speaking in a mature, confident feminine manner",
-    },
-    {
-        label: "甜美",
-        value: "sweet",
-        desc: "Speaking in a sweet, lovely manner",
-    },
-    {
-        label: "夸张",
-        value: "exaggerated",
-        desc: "Speaking in an exaggerated, dramatic manner",
-    },
-    {
-        label: "空灵",
-        value: "ethereal",
-        desc: "Speaking in a soft, airy, dreamy manner",
-    },
-    {
-        label: "耳语",
-        value: "whisper",
-        desc: "Speaking in a whispering, very soft manner",
-    },
-    {
-        label: "豪爽",
-        value: "generous",
-        desc: "Speaking in a hearty, outgoing, and straight-talking manner",
-    },
-    {
-        label: "朗诵",
-        value: "recite",
-        desc: "Speaking in a clear, well-paced, poetry-reading manner",
-    },
-    {
-        label: "撒娇",
-        value: "act_coy",
-        desc: "Speaking in a sweet, playful, and endearing manner",
-    },
-    {
-        label: "温暖",
-        value: "warm",
-        desc: "Speaking in a warm, friendly manner",
-    },
-    { label: "害羞", value: "shy", desc: "Speaking in a shy, timid manner" },
-    {
-        label: "安慰",
-        value: "comfort",
-        desc: "Speaking in a comforting, reassuring manner",
-    },
-    {
-        label: "权威",
-        value: "authority",
-        desc: "Speaking in an authoritative, commanding manner",
-    },
-    {
-        label: "闲聊",
-        value: "chat",
-        desc: "Speaking in a casual, conversational manner",
-    },
-    {
-        label: "电台",
-        value: "radio",
-        desc: "Speaking in a radio-broadcast manner",
-    },
-    {
-        label: "深情",
-        value: "soulful",
-        desc: "Speaking in a heartfelt, deeply emotional manner",
-    },
-    {
-        label: "温柔",
-        value: "gentle",
-        desc: "Speaking in a gentle, soft manner",
-    },
-    {
-        label: "故事",
-        value: "story",
-        desc: "Speaking in a narrative, audiobook-style manner",
-    },
-    {
-        label: "生动",
-        value: "vivid",
-        desc: "Speaking in a lively, expressive manner",
-    },
-    {
-        label: "主持",
-        value: "program",
-        desc: "Speaking in a show-host/presenter manner",
-    },
-    {
-        label: "新闻",
-        value: "news",
-        desc: "Speaking in a news broadcasting manner",
-    },
-    {
-        label: "广告",
-        value: "advertising",
-        desc: "Speaking in a polished, high-end commercial voiceover manner",
-    },
-    {
-        label: "咆哮",
-        value: "roar",
-        desc: "Speaking in a loud, deep, roaring manner",
-    },
-    { label: "低语", value: "murmur", desc: "Speaking in a quiet, low manner" },
-    {
-        label: "呐喊",
-        value: "shout",
-        desc: "Speaking in a loud, sharp, shouting manner",
-    },
-    {
-        label: "低沉",
-        value: "deeply",
-        desc: "Speaking in a deep and low-pitched tone",
-    },
-    {
-        label: "高亢",
-        value: "loudly",
-        desc: "Speaking in a loud and high-pitched tone",
-    },
-];
+import { AbiNodeShell } from "../base/abi-node-shell";
+import { EmotionSelect } from "../base/emotion-select";
+import { StyleSelect } from "../base/style-select";
 
 type TextAudioGenSpeechRfProps = RfDataNodeProps<"textAudioGenSpeechNode">;
 
@@ -216,90 +19,34 @@ const TextAudioGenSpeechNode = ({
     data,
 }: TextAudioGenSpeechRfProps) => {
     const t = useTranslations("Workspace.nodes");
-    const ids: string[] = [...(data.ids ?? [])];
-    const fromNodes = useNodesData(ids);
-    // Get upstream text data
-    const textNode = fromNodes.find((node) => node.type === "textNode");
-    const texts = coerceBaseNodeData(textNode?.data).texts;
+    const form = useAbiForm("text-audio-gen-speech");
 
-    // Get upstream audio data as the reference
-    const audio = fromNodes.find((node) => node.type === "audioNode");
-    const audioFileKey = coerceBaseNodeData(audio?.data).fileKeys?.[0];
-
-    // Use the new hook to manage state persistence
-    const [state, setState] = useNodeState(
-        {
-            emotion: "",
-            style: "",
-        },
-        data,
-    );
-    const { emotion, style } = state;
-
-    // Workflow execution config
-    const workflowConfig = {
-        feature: DEFAULT_FEATURE,
-        label: "文本音频生成语音",
-        outputType: "audioNode",
-        outputField: "fileKeys" as const,
-        supportsBatch: true,
-        batchParam: "text",
-        paramMappings: {
-            text: {
-                sources: [upstreamParam("textNode", "texts")],
-                required: true,
-            },
-            audio: {
-                sources: [upstreamParam("audioNode", "fileKeys[0]")],
-                required: true,
-            },
-            emotion: {
-                sources: [configParam("emotion", "")],
-                required: false,
-            },
-            style: {
-                sources: [configParam("style", "")],
-                required: false,
-            },
-        },
-    };
+    const emotion = form.state.emotion as string | undefined;
+    const style = form.state.style as string | undefined;
 
     return (
-        <BaseNode
+        <AbiNodeShell
+            feature="text-audio-gen-speech"
+            sourceSpec={{
+                text: batchOn({ nodeType: "textNode", path: "texts" }),
+            }}
+            form={form}
             selected={selected}
             className="min-w-[480px]"
             data={data}
-            workflowConfig={useMemo(
-                () => ({
-                    ...workflowConfig,
-                    title: t("titles.textAudioGenSpeech"),
-                    icon: <Atom className="h-5 w-5" />,
-                    executeLabel: t("actions.generateSpeech"),
-                    executeDisabled: !texts?.length || !audioFileKey,
-                    getPrompts: () =>
-                        texts && texts.length > 0 && audioFileKey
-                            ? texts.map((text) => ({
-                                  audio: audioFileKey,
-                                  text: text,
-                                  emotion: emotion || undefined,
-                                  style: style || undefined,
-                              }))
-                            : [],
-                }),
-                [audioFileKey, texts, emotion, style, t],
-            )}
+            title={t("titles.textAudioGenSpeech")}
+            icon={<Atom className="h-5 w-5" />}
+            executeLabel={t("actions.generateSpeech")}
         >
             <div className="p-4 space-y-4">
-                {/* Media display area */}
                 <Card className="p-3">
                     <div className="space-y-2">
                         <Label className="text-sm font-medium text-muted-foreground">
                             {t("compose.inputData")}
                         </Label>
                         <div className="flex gap-4">
-                            {/* Text icon */}
                             <div className="flex flex-col items-center gap-1.5">
-                                <div className="relative w-16 h-16 rounded-md border-2 border-gray-300 overflow-hidden bg-gray-100 transition-colors">
+                                <div className="relative w-16 h-16 rounded-md border-2 border-gray-300 overflow-hidden bg-gray-100">
                                     <div className="flex items-center justify-center h-full w-full bg-green-50">
                                         <Type className="w-6 h-6 text-green-600" />
                                     </div>
@@ -308,9 +55,8 @@ const TextAudioGenSpeechNode = ({
                                     {t("compose.text")}
                                 </div>
                             </div>
-                            {/* Audio icon */}
                             <div className="flex flex-col items-center gap-1.5">
-                                <div className="relative w-16 h-16 rounded-md border-2 border-gray-300 overflow-hidden bg-gray-100 transition-colors">
+                                <div className="relative w-16 h-16 rounded-md border-2 border-gray-300 overflow-hidden bg-gray-100">
                                     <div className="flex items-center justify-center h-full w-full bg-blue-50">
                                         <Music className="w-6 h-6 text-blue-600" />
                                     </div>
@@ -320,11 +66,6 @@ const TextAudioGenSpeechNode = ({
                                 </div>
                             </div>
                         </div>
-                        {(!texts?.length || !audioFileKey) && (
-                            <p className="text-xs text-red-500">
-                                {t("compose.connectTextAudioNode")}
-                            </p>
-                        )}
                     </div>
                 </Card>
 
@@ -332,7 +73,6 @@ const TextAudioGenSpeechNode = ({
                     className="p-3 nodrag"
                     onPointerDown={(e) => e.stopPropagation()}
                 >
-                    {/* Emotion selector */}
                     <div className="mb-4 flex items-center gap-3">
                         <label
                             htmlFor="emotion-select"
@@ -340,43 +80,13 @@ const TextAudioGenSpeechNode = ({
                         >
                             {t("compose.emotion")}
                         </label>
-                        <Select
-                            value={emotion || "none"}
-                            onValueChange={(value) => {
-                                const nextEmotion =
-                                    value === "none" ? "" : value;
-                                setState({
-                                    emotion: nextEmotion,
-                                    style: "",
-                                });
-                            }}
-                        >
-                            <SelectTrigger
-                                id="emotion-select"
-                                className="w-full h-9"
-                            >
-                                <SelectValue
-                                    placeholder={t("compose.selectEmotion")}
-                                />
-                            </SelectTrigger>
-                            <SelectContent>
-                                {emotionOptions.map((opt) => (
-                                    <SelectItem
-                                        key={opt.value}
-                                        value={opt.value}
-                                    >
-                                        <span>{opt.label}</span>
-                                        {opt.desc && (
-                                            <span className="ml-2 text-xs text-muted-foreground">
-                                                {opt.desc}
-                                            </span>
-                                        )}
-                                    </SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
+                        <EmotionSelect
+                            value={emotion}
+                            onChange={(v) =>
+                                form.patch({ emotion: v, style: undefined })
+                            }
+                        />
                     </div>
-                    {/* Style selector */}
                     <div className="flex items-center gap-3">
                         <label
                             htmlFor="style-select"
@@ -384,47 +94,17 @@ const TextAudioGenSpeechNode = ({
                         >
                             {t("compose.style")}
                         </label>
-                        <Select
-                            value={style || "none"}
-                            onValueChange={(value) => {
-                                const nextStyle = value === "none" ? "" : value;
-                                setState({
-                                    style: nextStyle,
-                                    emotion: "",
-                                });
-                            }}
-                        >
-                            <SelectTrigger
-                                id="style-select"
-                                className="w-full h-9"
-                            >
-                                <SelectValue
-                                    placeholder={t("compose.selectStyle")}
-                                />
-                            </SelectTrigger>
-                            <SelectContent>
-                                {styleOptions.map((opt) => (
-                                    <SelectItem
-                                        key={opt.value}
-                                        value={opt.value}
-                                    >
-                                        <span>{opt.label}</span>
-                                        {opt.desc && (
-                                            <span className="ml-2 text-xs text-muted-foreground">
-                                                {opt.desc}
-                                            </span>
-                                        )}
-                                    </SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
+                        <StyleSelect
+                            value={style}
+                            onChange={(v) =>
+                                form.patch({ style: v, emotion: undefined })
+                            }
+                        />
                     </div>
                 </Card>
             </div>
-        </BaseNode>
+        </AbiNodeShell>
     );
 };
-
-TextAudioGenSpeechNode.displayName = "TextAudioGenSpeechNode";
 
 export default memo(TextAudioGenSpeechNode);

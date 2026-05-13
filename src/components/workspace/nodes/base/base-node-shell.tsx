@@ -1,8 +1,15 @@
-import { Handle, Position, useNodeId, useStore } from "@xyflow/react";
+/**
+ * Pure UI shell for canvas nodes (headers, plugin picker, execute affordances,
+ * loading overlay, comments). Execution wiring lives in `AbiNodeShell` or callers
+ * that pass explicit props.
+ */
+
+import { useNodeId, useStore } from "@xyflow/react";
 import { Wand2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import type { HTMLAttributes, ReactNode } from "react";
 import { forwardRef } from "react";
+
 import {
     AlertDialog,
     AlertDialogAction,
@@ -16,10 +23,9 @@ import {
 import { Button } from "@/components/ui/button";
 import { isModalNode } from "@/constants/modal-nodes";
 import useFlow from "@/hooks/use-flow";
-import { useNodeExecution } from "@/hooks/use-node-execution";
 import { cn } from "@/lib/utils";
 import type { BaseNodeData } from "@/types/nodes";
-import type { NodeExecutionConfig } from "@/utils/node-execution-config";
+
 import { NodeComboButton } from "./node-combo-button";
 import { NodeCommentBox } from "./node-comment-box";
 import {
@@ -33,32 +39,72 @@ import { NodeLoadingOverlay } from "./node-loading-overlay";
 import { NodePluginIdSelect } from "./node-plugin-id-select";
 
 /* ------------------------------------------------------------------ */
-/* Types                                                               */
+/* Props                                                               */
 /* ------------------------------------------------------------------ */
 
-export type BaseNodeProps = HTMLAttributes<HTMLDivElement> & {
+export type BaseNodeShellProps = HTMLAttributes<HTMLDivElement> & {
     selected?: boolean;
     count?: number;
     data?: BaseNodeData;
-    workflowConfig?: Omit<NodeExecutionConfig, "nodeType">;
     children?: ReactNode;
     overlay?: ReactNode;
+
+    // ----- Header / chrome -----
+    title?: string;
+    icon?: ReactNode;
+    headerActions?: ReactNode;
+
+    // ----- Execute state -----
+    loading?: boolean;
+    elapsedSeconds?: number;
+    /** When true, hides the execute button (already in execute mode). */
+    isExecuteMode?: boolean;
+    /**
+     * When set, the shell renders the execute button at the bottom and
+     * wires it to this callback. If omitted, no execute button is rendered.
+     */
+    onExecute?: () => void;
+    executeLabel?: string;
+    executeIcon?: ReactNode;
+    executeDisabled?: boolean;
+    /** Treated as input node — execute button stays visible in execute mode. */
+    isInputNode?: boolean;
+
+    // ----- Plugin selector -----
+    feature?: string;
+    showPluginSelect?: boolean;
+    missingPluginOpen?: boolean;
+    setMissingPluginOpen?: (open: boolean) => void;
 };
 
 /* ------------------------------------------------------------------ */
 /* Component                                                           */
 /* ------------------------------------------------------------------ */
 
-export const BaseNode = forwardRef<HTMLDivElement, BaseNodeProps>(
+export const BaseNodeShell = forwardRef<HTMLDivElement, BaseNodeShellProps>(
     (
         {
             className,
             selected,
             count,
             data,
-            workflowConfig,
             children,
             overlay,
+            title,
+            icon,
+            headerActions,
+            loading = false,
+            elapsedSeconds = 0,
+            isExecuteMode = false,
+            onExecute,
+            executeLabel,
+            executeIcon,
+            executeDisabled,
+            isInputNode,
+            feature,
+            showPluginSelect = true,
+            missingPluginOpen = false,
+            setMissingPluginOpen,
             ...props
         },
         ref,
@@ -75,47 +121,40 @@ export const BaseNode = forwardRef<HTMLDivElement, BaseNodeProps>(
             return node?.type;
         });
 
-        const {
-            loading,
-            elapsedSeconds,
-            executeNew,
-            isExecuteMode,
-            feature,
-            missingPluginOpen,
-            setMissingPluginOpen,
-        } = useNodeExecution({ workflowConfig, data });
-
-        const autoHandles = workflowConfig?.handles !== false;
-        const autoPluginSelect =
-            workflowConfig?.showPluginSelect !== false && !!feature;
+        const renderPluginSelect = showPluginSelect && !!feature;
+        const renderExecuteButton =
+            !!onExecute && (!isExecuteMode || !!isInputNode);
 
         return (
             <div className="relative">
                 {/* Missing plugin alert */}
-                <AlertDialog
-                    open={missingPluginOpen}
-                    onOpenChange={setMissingPluginOpen}
-                >
-                    <AlertDialogContent>
-                        <AlertDialogHeader>
-                            <AlertDialogTitle>
-                                Missing Implementation
-                            </AlertDialogTitle>
-                            <AlertDialogDescription>
-                                Please select a plugin implementation in this
-                                node before running.
-                            </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                            <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
-                            <AlertDialogAction>
-                                {t("confirm")}
-                            </AlertDialogAction>
-                        </AlertDialogFooter>
-                    </AlertDialogContent>
-                </AlertDialog>
+                {setMissingPluginOpen && (
+                    <AlertDialog
+                        open={missingPluginOpen}
+                        onOpenChange={setMissingPluginOpen}
+                    >
+                        <AlertDialogContent>
+                            <AlertDialogHeader>
+                                <AlertDialogTitle>
+                                    Missing Implementation
+                                </AlertDialogTitle>
+                                <AlertDialogDescription>
+                                    Please select a plugin implementation in
+                                    this node before running.
+                                </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                                <AlertDialogCancel>
+                                    {t("cancel")}
+                                </AlertDialogCancel>
+                                <AlertDialogAction>
+                                    {t("confirm")}
+                                </AlertDialogAction>
+                            </AlertDialogFooter>
+                        </AlertDialogContent>
+                    </AlertDialog>
+                )}
 
-                {/* Comment box above the node */}
                 <NodeCommentBox />
 
                 <div className="relative">
@@ -175,18 +214,16 @@ export const BaseNode = forwardRef<HTMLDivElement, BaseNodeProps>(
                         )}
 
                         {/* Header */}
-                        {workflowConfig?.title && (
+                        {title && (
                             <NodeHeader>
-                                {workflowConfig.icon && (
-                                    <NodeHeaderIcon>
-                                        {workflowConfig.icon}
-                                    </NodeHeaderIcon>
+                                {icon && (
+                                    <NodeHeaderIcon>{icon}</NodeHeaderIcon>
                                 )}
                                 <NodeHeaderTitle className="flex items-center gap-2">
-                                    {workflowConfig.title}
+                                    {title}
                                 </NodeHeaderTitle>
                                 <NodeHeaderActions>
-                                    {workflowConfig.headerActions}
+                                    {headerActions}
                                     <NodeHeaderMenuAction
                                         label={t("moreActions")}
                                     />
@@ -195,15 +232,11 @@ export const BaseNode = forwardRef<HTMLDivElement, BaseNodeProps>(
                         )}
 
                         {/* Auto plugin select */}
-                        {autoPluginSelect && (
+                        {renderPluginSelect && (
                             <div className="p-4 pb-0">
                                 <NodePluginIdSelect
                                     nodeSlot={feature}
-                                    data={
-                                        data ?? {
-                                            feature,
-                                        }
-                                    }
+                                    data={data ?? { feature }}
                                 />
                             </div>
                         )}
@@ -212,53 +245,30 @@ export const BaseNode = forwardRef<HTMLDivElement, BaseNodeProps>(
                         <div className="relative z-0">{children}</div>
 
                         {/* Execute button */}
-                        {workflowConfig?.getPrompts &&
-                            (!isExecuteMode || workflowConfig?.isInputNode) && (
-                                <div className="p-4 pt-0">
-                                    <Button
-                                        onClick={executeNew}
-                                        disabled={
-                                            workflowConfig.executeDisabled ||
-                                            loading
-                                        }
-                                        className="w-full h-10"
-                                    >
-                                        <div className="flex items-center justify-center gap-2">
-                                            {workflowConfig.executeIcon ?? (
-                                                <Wand2 className="h-4 w-4" />
-                                            )}
-                                            <span>
-                                                {workflowConfig.executeLabel ??
-                                                    t("execute")}
-                                            </span>
-                                        </div>
-                                    </Button>
-                                </div>
-                            )}
+                        {renderExecuteButton && (
+                            <div className="p-4 pt-0">
+                                <Button
+                                    onClick={onExecute}
+                                    disabled={!!executeDisabled || loading}
+                                    className="w-full h-10"
+                                >
+                                    <div className="flex items-center justify-center gap-2">
+                                        {executeIcon ?? (
+                                            <Wand2 className="h-4 w-4" />
+                                        )}
+                                        <span>
+                                            {executeLabel ?? t("execute")}
+                                        </span>
+                                    </div>
+                                </Button>
+                            </div>
+                        )}
 
                         {/* Overlay */}
                         {overlay && (
                             <div className="absolute inset-0 z-[60]">
                                 {overlay}
                             </div>
-                        )}
-
-                        {/* Auto handles */}
-                        {autoHandles && (
-                            <>
-                                <Handle
-                                    type="target"
-                                    position={Position.Left}
-                                    id="a"
-                                    isConnectable={true}
-                                />
-                                <Handle
-                                    type="source"
-                                    position={Position.Right}
-                                    id="b"
-                                    isConnectable={true}
-                                />
-                            </>
                         )}
 
                         {/* Combo mode selection button */}
@@ -270,4 +280,4 @@ export const BaseNode = forwardRef<HTMLDivElement, BaseNodeProps>(
     },
 );
 
-BaseNode.displayName = "BaseNode";
+BaseNodeShell.displayName = "BaseNodeShell";

@@ -1,29 +1,12 @@
 import { Video as VideoIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { memo } from "react";
-import type { TongflowPluginNodeProps } from "@/types/tongflow-flow";
-import {
-    type GetPromptsContext,
-    upstreamParam,
-} from "@/utils/node-execution-config";
-import { BaseNode } from "../base/base-node";
 
-// Workflow execution config (static shape only; omit dynamic features)
-const baseWorkflowConfig = {
-    feature: "transcribe",
-    outputType: "textNode",
-    outputField: "texts" as const,
-    supportsBatch: true,
-    batchParam: "video",
-    paramMappings: {
-        video: {
-            sources: [
-                upstreamParam("videoNode", "fileKeys[0]"),
-            ],
-            required: true,
-        },
-    },
-};
+import { useAbiForm } from "@/hooks/use-abi-form";
+import { batchOn } from "@/lib/abi/sources";
+import type { TongflowPluginNodeProps } from "@/types/tongflow-flow";
+
+import { AbiNodeShell } from "../base/abi-node-shell";
 
 const VideoGenTextSpeechRecognizeNode = ({
     selected,
@@ -33,33 +16,22 @@ const VideoGenTextSpeechRecognizeNode = ({
     "videoGenTextSpeechRecognizeNode"
 >) => {
     const t = useTranslations("Workspace.nodes");
+    const form = useAbiForm("transcribe");
     const { fileKeys = [] } = data;
 
     return (
-        <BaseNode
+        <AbiNodeShell
+            feature="transcribe"
+            // This variant feeds the ABI `audio` field from a videoNode upstream.
+            sourceSpec={{ audio: batchOn({ nodeType: "videoNode" }) }}
+            form={form}
             selected={selected}
             className="min-w-[480px]"
             data={data}
-            workflowConfig={{
-                ...baseWorkflowConfig,
-                title: t("titles.speechRecognize"),
-                icon: <VideoIcon className="h-5 w-5" />,
-                executeLabel: t("actions.describeVideo"),
-                executeDisabled: !fileKeys?.length,
-                getPrompts: (ctx?: GetPromptsContext) => {
-                    const upstreamKeys = ctx?.getAllUpstreamData(
-                        "videoNode",
-                        "fileKeys",
-                    ) as string[] | undefined;
-                    const keys =
-                        upstreamKeys && upstreamKeys.length > 0
-                            ? upstreamKeys
-                            : fileKeys;
-                    return keys.map((fileKey) => ({
-                        video: fileKey,
-                    }));
-                },
-            }}
+            title={t("titles.speechRecognize")}
+            icon={<VideoIcon className="h-5 w-5" />}
+            executeLabel={t("actions.describeVideo")}
+            executeDisabled={!fileKeys?.length}
         />
     );
 };

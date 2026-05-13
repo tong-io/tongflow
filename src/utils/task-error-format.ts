@@ -1,6 +1,6 @@
 import type { SerializedTaskError } from "@/lib/abi-schema-validate";
 
-/** Human line from persisted `tasks.error` JSON (`SerializedTaskError`) or fallback for legacy plaintext. */
+/** Human line from persisted `tasks.error` JSON (`SerializedTaskError`); returns the raw string on parse failure. */
 export function formatStoredTaskErrorForDisplay(
     raw: string | null | undefined,
 ): string {
@@ -12,7 +12,7 @@ export function formatStoredTaskErrorForDisplay(
             return o.message.trim();
         }
     } catch {
-        /* Legacy non-JSON rows (plain text — before envelope). */
+        /* Malformed write — best-effort display below. */
     }
 
     return raw;

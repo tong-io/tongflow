@@ -1,39 +1,13 @@
-import { useNodesData } from "@xyflow/react";
 import { Scissors } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { memo, useMemo } from "react";
-import { useNodeState } from "@/hooks/use-node-data";
+import { memo } from "react";
+
+import { useAbiForm } from "@/hooks/use-abi-form";
+import { handle } from "@/lib/abi/sources";
 import type { TongflowPluginNodeProps } from "@/types/tongflow-flow";
-import { coerceBaseNodeData } from "@/utils/flow-node-data";
-import {
-    configParam,
-    type GetPromptsContext,
-    upstreamParam,
-} from "@/utils/node-execution-config";
-import { BaseNode } from "../base/base-node";
+
+import { AbiNodeShell } from "../base/abi-node-shell";
 import { NodeTextarea } from "../base/node-textarea";
-
-const DEFAULT_FEATURE = "split-text";
-
-// Workflow execution config
-const workflowConfig = {
-    feature: DEFAULT_FEATURE,
-    outputType: "textNode",
-    outputField: "texts" as const,
-    supportsBatch: false,
-    paramMappings: {
-        text: {
-            sources: [
-                upstreamParam("textNode", "texts[0]"),
-                configParam("texts[0]"),
-            ],
-            required: true,
-        },
-        userPrompt: {
-            sources: [configParam("userPrompt")],
-        },
-    },
-};
 
 const SplitTextNode = ({
     selected,
@@ -41,64 +15,32 @@ const SplitTextNode = ({
 }: TongflowPluginNodeProps<"split-text", "splitTextNode">) => {
     const t = useTranslations("Workspace.nodes");
     const tBase = useTranslations("Workspace.nodes.base");
-    const ids = data.ids ?? [];
-    const localTexts = data.texts ?? [];
-
-    // Pull prompts from predecessors
-    const fromNodes = useNodesData(ids);
-    const textNodes = fromNodes.filter((node) => node.type === "textNode");
-
-    const texts: string[] = useMemo(() => {
-        if (textNodes.length > 0) {
-            return coerceBaseNodeData(textNodes[0].data).texts || [];
-        }
-        return localTexts;
-    }, [textNodes, localTexts]);
-
-    // Optional split instructions from user land
-    const [state, setState] = useNodeState({ userPrompt: "" }, data);
-    const { userPrompt } = state;
+    const form = useAbiForm("split-text", {
+        text: handle({ nodeType: "textNode", path: "texts[0]" }),
+    });
 
     return (
-        <BaseNode
+        <AbiNodeShell
+            feature="split-text"
+            sourceSpec={{
+                text: handle({ nodeType: "textNode", path: "texts[0]" }),
+            }}
+            form={form}
             selected={selected}
             data={data}
-            workflowConfig={{
-                ...workflowConfig,
-                title: t("titles.splitText"),
-                icon: <Scissors className="h-5 w-5" />,
-                executeLabel: tBase("execute"),
-                executeDisabled: !texts?.length,
-                getPrompts: (ctx?: GetPromptsContext) => {
-                    const upstreamTexts = ctx?.getAllUpstreamData(
-                        "textNode",
-                        "texts",
-                    ) as string[] | undefined;
-                    const inputTexts =
-                        upstreamTexts && upstreamTexts.length > 0
-                            ? upstreamTexts
-                            : texts;
-                    return inputTexts?.length
-                        ? [
-                              {
-                                  text: inputTexts.join("\n"),
-                                  userPrompt,
-                              },
-                          ]
-                        : [];
-                },
-            }}
+            title={t("titles.splitText")}
+            icon={<Scissors className="h-5 w-5" />}
+            executeLabel={tBase("execute")}
         >
             <div className="p-4 space-y-4">
                 <NodeTextarea
                     rows={3}
                     placeholder={t("common.enterInstructions")}
-                    value={userPrompt}
-                    onChange={(value) => setState({ userPrompt: value })}
+                    {...form.bind("userPrompt")}
                     className="min-h-[80px]"
                 />
             </div>
-        </BaseNode>
+        </AbiNodeShell>
     );
 };
 

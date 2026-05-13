@@ -1,3 +1,4 @@
+import { Handle, Position } from "@xyflow/react";
 import { Image as ImageIcon, Maximize2, X } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { memo, useEffect, useState } from "react";
@@ -11,7 +12,7 @@ import {
 } from "@/hooks/use-file-async-loader";
 import { logger } from "@/lib/logger";
 import type { RfDataNodeProps } from "@/types/nodes";
-import { BaseNode } from "../base/base-node";
+import { BaseNodeShell } from "../base/base-node-shell";
 import {
     NodeHeader,
     NodeHeaderActions,
@@ -217,7 +218,7 @@ const ImageNode = ({ selected, data }: ImageNodeRfProps) => {
 
     return (
         <>
-            <BaseNode
+            <BaseNodeShell
                 selected={selected}
                 count={count}
                 className={
@@ -229,6 +230,16 @@ const ImageNode = ({ selected, data }: ImageNodeRfProps) => {
                         : undefined
                 }
             >
+                <Handle
+                    type="target"
+                    position={Position.Left}
+                    id="in:imageNode"
+                />
+                <Handle
+                    type="source"
+                    position={Position.Right}
+                    id="out:imageNode"
+                />
                 <NodeHeader>
                     <NodeHeaderIcon>
                         <ImageIcon />
@@ -338,9 +349,9 @@ const ImageNode = ({ selected, data }: ImageNodeRfProps) => {
                         </div>
                     </div>
                 )}
-            </BaseNode>
+            </BaseNodeShell>
 
-            {/* Full screen modals - rendered outside BaseNode */}
+            {/* Full screen modals - rendered outside BaseNodeShell */}
             {isFullScreen && isSingle && keys[0] && (
                 <FullScreenImageModal
                     fileKey={keys[0]}

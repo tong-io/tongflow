@@ -2,6 +2,7 @@ import { useNodesData } from "@xyflow/react";
 import { Maximize2, Wand2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { memo, useMemo, useState } from "react";
+
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import {
@@ -13,48 +14,26 @@ import {
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { useNodeState } from "@/hooks/use-node-data";
+import { useAbiForm } from "@/hooks/use-abi-form";
+import { batchOn } from "@/lib/abi/sources";
 import type { TongflowPluginNodeProps } from "@/types/tongflow-flow";
-import {
-    configParam,
-    type GetPromptsContext,
-    upstreamParam,
-} from "@/utils/node-execution-config";
-import { BaseNode } from "../base/base-node";
-import { NodeTextarea } from "../base/node-textarea";
 
-// Workflow execution config
-const workflowConfig = {
-    feature: "gen-text",
-    outputType: "textNode",
-    outputField: "texts" as const,
-    supportsBatch: true,
-    batchParam: "text",
-    abiProducerPropertyCandidates: ["text", "result", "texts"] as const,
-    paramMappings: {
-        text: {
-            sources: [
-                upstreamParam("textNode", "texts[0]"),
-                configParam("texts[0]"),
-            ],
-            required: true,
-        },
-        userPrompt: {
-            sources: [configParam("userPrompt")],
-        },
-    },
-};
+import { AbiNodeShell } from "../base/abi-node-shell";
+import { NodeTextarea } from "../base/node-textarea";
 
 const GenTextNode = ({
     selected,
     data,
 }: TongflowPluginNodeProps<"gen-text", "genTextNode">) => {
+    const t = useTranslations("Workspace.nodes");
+    const tBase = useTranslations("Workspace.nodes.base");
+    const form = useAbiForm("gen-text");
+
     const { ids = [], texts: localTexts = [] } = data;
 
-    // If ids are present, get data from associated nodes (composition mode)
+    // Composition mode: pull texts from associated nodes.
     const fromNodes = useNodesData(ids);
     const textNodes = fromNodes.filter((node) => node.type === "textNode");
-
     const texts: string[] = useMemo(() => {
         if (textNodes.length > 0) {
             return (textNodes[0].data as any)?.texts || [];
@@ -69,21 +48,9 @@ const GenTextNode = ({
         }
         return "";
     }, [textNodes]);
-
     const hasUpstreamPrompt = !!upstreamPrompt;
 
-    const [state, setState] = useNodeState(
-        {
-            userPrompt: "",
-        },
-        data,
-    );
-    const { userPrompt } = state;
-    const t = useTranslations("Workspace.nodes");
-    const tBase = useTranslations("Workspace.nodes.base");
-
-    const nodeSlot = "gen-text";
-
+    const userPrompt = (form.state.userPrompt as string | undefined) ?? "";
     const effectivePrompt = hasUpstreamPrompt ? upstreamPrompt : userPrompt;
 
     const [isFullscreenOpen, setIsFullscreenOpen] = useState(false);
@@ -91,16 +58,21 @@ const GenTextNode = ({
 
     return (
         <>
-            <BaseNode
+            <AbiNodeShell
+                feature="gen-text"
+                sourceSpec={{
+                    text: batchOn({ nodeType: "textNode", path: "texts" }),
+                }}
+                form={form}
                 selected={selected}
                 className="min-w-[480px]"
                 data={data}
-                workflowConfig={{
-                    ...workflowConfig,
-                    feature: nodeSlot,
-                    title: t("titles.textGenText"),
-                    icon: <Wand2 className="h-5 w-5" />,
-                    headerActions: !hasUpstreamPrompt ? (
+                title={t("titles.textGenText")}
+                icon={<Wand2 className="h-5 w-5" />}
+                executeLabel={tBase("execute")}
+                executeDisabled={!effectivePrompt.trim() || !texts?.length}
+                headerActions={
+                    !hasUpstreamPrompt ? (
                         <Button
                             size="sm"
                             variant="ghost"
@@ -113,23 +85,8 @@ const GenTextNode = ({
                         >
                             <Maximize2 className="h-4 w-4" />
                         </Button>
-                    ) : undefined,
-                    executeLabel: tBase("execute"),
-                    executeDisabled: !effectivePrompt.trim() || !texts?.length,
-                    getPrompts: (ctx?: GetPromptsContext) => {
-                        const ctxUpstreamTexts = ctx?.getAllUpstreamData(
-                            "textNode",
-                            "texts",
-                        ) as string[] | undefined;
-                        const inputTexts =
-                            ctxUpstreamTexts && ctxUpstreamTexts.length > 0
-                                ? ctxUpstreamTexts
-                                : texts;
-                        return inputTexts.map((text) => ({
-                            text: `${text}\n\n${effectivePrompt}`,
-                        }));
-                    },
-                }}
+                    ) : undefined
+                }
             >
                 <div className="p-4 space-y-4">
                     <div className="space-y-2">
@@ -149,19 +106,15 @@ const GenTextNode = ({
                             <NodeTextarea
                                 rows={6}
                                 placeholder={t("common.enterInstructions")}
-                                value={userPrompt}
-                                onChange={(value) =>
-                                    setState({ userPrompt: value })
-                                }
+                                {...form.bind("userPrompt")}
                                 className="min-h-[120px] max-h-[200px] overflow-y-auto"
                                 enableFullscreen={false}
                             />
                         )}
                     </div>
                 </div>
-            </BaseNode>
+            </AbiNodeShell>
 
-            {/* Fullscreen editing dialog */}
             <Dialog
                 open={isFullscreenOpen}
                 onOpenChange={(open: boolean) => {
@@ -196,7 +149,7 @@ const GenTextNode = ({
                         </Button>
                         <Button
                             onClick={() => {
-                                setState({ userPrompt: fullscreenValue });
+                                form.set("userPrompt", fullscreenValue);
                                 setIsFullscreenOpen(false);
                             }}
                         >

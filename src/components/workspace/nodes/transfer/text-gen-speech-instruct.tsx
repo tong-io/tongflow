@@ -1,18 +1,14 @@
 import { Atom } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { memo } from "react";
+
 import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import { useNodeState } from "@/hooks/use-node-data";
+import { useAbiForm } from "@/hooks/use-abi-form";
+import { batchOn } from "@/lib/abi/sources";
 import type { TongflowPluginNodeProps } from "@/types/tongflow-flow";
-import {
-    configParam,
-    type GetPromptsContext,
-    upstreamParam,
-} from "@/utils/node-execution-config";
-import { BaseNode } from "../base/base-node";
 
-import { TEXT_GEN_SPEECH_INSTRUCT } from "./text-gen-speech-shared";
+import { AbiNodeShell } from "../base/abi-node-shell";
 
 const TextGenSpeechInstructNode = ({
     selected,
@@ -22,66 +18,23 @@ const TextGenSpeechInstructNode = ({
     "textGenSpeechInstructNode"
 >) => {
     const t = useTranslations("Workspace.nodes");
+    const form = useAbiForm("text-gen-speech-instruct");
     const texts = data.texts ?? [];
 
-    const [state, setState] = useNodeState(
-        {
-            description: "",
-        },
-        data,
-    );
-    const { description } = state;
-
-    const workflowConfig = {
-        feature: TEXT_GEN_SPEECH_INSTRUCT,
-        outputType: "audioNode",
-        outputField: "fileKeys" as const,
-        supportsBatch: true,
-        batchParam: "text",
-        paramMappings: {
-            text: {
-                sources: [upstreamParam("textNode", "texts")],
-                required: true,
-            },
-            description: {
-                sources: [configParam("description", "")],
-                required: false,
-            },
-        },
-    };
-
     return (
-        <BaseNode
+        <AbiNodeShell
+            feature="text-gen-speech-instruct"
+            sourceSpec={{
+                text: batchOn({ nodeType: "textNode", path: "texts" }),
+            }}
+            form={form}
             selected={selected}
             className="min-w-[480px]"
             data={data}
-            workflowConfig={{
-                ...workflowConfig,
-                title: t("titles.textGenSpeechInstruct"),
-                icon: <Atom className="h-5 w-5" />,
-                executeLabel: t("actions.generateSpeech"),
-                executeDisabled: !texts?.length,
-                getPrompts: (ctx?: GetPromptsContext) => {
-                    const upstreamTexts = ctx?.getAllUpstreamData(
-                        "textNode",
-                        "texts",
-                    ) as string[] | undefined;
-                    const inputTexts =
-                        upstreamTexts && upstreamTexts.length > 0
-                            ? upstreamTexts
-                            : texts;
-
-                    const slot = TEXT_GEN_SPEECH_INSTRUCT;
-                    return (
-                        inputTexts?.map((text) => ({
-                            text,
-                            nodeSlot: slot,
-                            instruct: description || undefined,
-                            description: description || undefined,
-                        })) || []
-                    );
-                },
-            }}
+            title={t("titles.textGenSpeechInstruct")}
+            icon={<Atom className="h-5 w-5" />}
+            executeLabel={t("actions.generateSpeech")}
+            executeDisabled={!texts?.length}
         >
             <Card
                 className="p-5 nodrag"
@@ -89,19 +42,16 @@ const TextGenSpeechInstructNode = ({
             >
                 <div className="mb-4">
                     <label
-                        htmlFor="description-input-instruct"
+                        htmlFor="instruct-input"
                         className="text-sm text-muted-foreground block mb-2"
                     >
                         {t("common.voiceDescription")}：
                     </label>
                     <textarea
-                        id="description-input-instruct"
+                        id="instruct-input"
                         className="w-full h-24 p-2 text-sm rounded-md border border-input bg-background resize-none focus:outline-none focus:ring-2 focus:ring-ring"
                         placeholder={t("common.voiceDescriptionPlaceholder")}
-                        value={description}
-                        onChange={(e) =>
-                            setState({ description: e.target.value })
-                        }
+                        {...form.register("instruct")}
                     />
                 </div>
                 {texts && texts.length > 0 && (
@@ -122,7 +72,7 @@ const TextGenSpeechInstructNode = ({
                     </div>
                 )}
             </Card>
-        </BaseNode>
+        </AbiNodeShell>
     );
 };
 

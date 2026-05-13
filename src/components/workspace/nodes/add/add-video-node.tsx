@@ -1,8 +1,8 @@
-import { type NodeProps, useNodeId } from "@xyflow/react";
+import { Handle, type NodeProps, Position, useNodeId } from "@xyflow/react";
 import { Library, Upload, Video } from "lucide-react";
 import { useTranslations } from "next-intl";
 import type React from "react";
-import { memo, useCallback, useState } from "react";
+import { memo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { VideoRecorder } from "@/components/ui/video-recorder";
@@ -10,7 +10,7 @@ import useFlow from "@/hooks/use-flow";
 import { useMultipleUpload, useUpload } from "@/hooks/use-upload";
 import { logger } from "@/lib/logger";
 import { LibInput } from "../../share/lib-input";
-import { BaseNode } from "../base/base-node";
+import { BaseNodeShell } from "../base/base-node-shell";
 
 // File upload component
 const UploadTab = () => {
@@ -241,23 +241,21 @@ export const AddVideoNode: React.FC<NodeProps> = ({ selected, data }) => {
         }
     };
 
-    // Get base config
-    const getWorkflowConfig = useCallback(() => {
-        return {
-            feature: "",
-            title: t("addVideo"),
-            icon: <Video className="h-5 w-5" />,
-            isInputNode: true,
-        };
-    }, [t]);
-
     return (
-        <BaseNode
+        <BaseNodeShell
             selected={selected}
             className="min-w-[480px]"
             data={data}
-            workflowConfig={getWorkflowConfig()}
+            title={t("addVideo")}
+            icon={<Video className="h-5 w-5" />}
+            isInputNode
+            showPluginSelect={false}
         >
+            <Handle
+                type="source"
+                position={Position.Right}
+                id="out:videoNode"
+            />
             <div className="p-4 space-y-2">
                 <Tabs
                     defaultValue={(data as any)?.activeTab || "upload"}
@@ -310,7 +308,7 @@ export const AddVideoNode: React.FC<NodeProps> = ({ selected, data }) => {
                     </div>
                 </Tabs>
             </div>
-        </BaseNode>
+        </BaseNodeShell>
     );
 };
 

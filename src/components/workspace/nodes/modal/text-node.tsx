@@ -1,4 +1,4 @@
-import { useNodeId, useReactFlow } from "@xyflow/react";
+import { Handle, Position, useNodeId, useReactFlow } from "@xyflow/react";
 import { FileText, Maximize2, X } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { memo, useEffect, useState } from "react";
@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { DropdownMenuLabel } from "@/components/ui/dropdown-menu";
 import { logger } from "@/lib/logger";
 import type { RfDataNodeProps } from "@/types/nodes";
-import { BaseNode } from "../base/base-node";
+import { BaseNodeShell } from "../base/base-node-shell";
 import {
     NodeHeader,
     NodeHeaderActions,
@@ -107,7 +107,17 @@ const TextNode = ({ selected, data }: TextNodeRfProps) => {
 
     return (
         <>
-            <BaseNode selected={selected} count={count}>
+            <BaseNodeShell selected={selected} count={count}>
+                <Handle
+                    type="target"
+                    position={Position.Left}
+                    id="in:textNode"
+                />
+                <Handle
+                    type="source"
+                    position={Position.Right}
+                    id="out:textNode"
+                />
                 <NodeHeader>
                     <NodeHeaderIcon>
                         <FileText />
@@ -194,9 +204,9 @@ const TextNode = ({ selected, data }: TextNodeRfProps) => {
                         </div>
                     </div>
                 )}
-            </BaseNode>
+            </BaseNodeShell>
 
-            {/* Full screen modal - rendered outside BaseNode */}
+            {/* Full screen modal - rendered outside BaseNodeShell */}
             {isFullScreen && isSingle && (
                 <FullScreenTextModal
                     text={textList[0]}

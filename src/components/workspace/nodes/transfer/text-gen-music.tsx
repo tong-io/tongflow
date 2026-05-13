@@ -1,14 +1,7 @@
-import {
-    type Edge,
-    Handle,
-    Position,
-    useNodeId,
-    useNodesData,
-    useStore,
-} from "@xyflow/react";
 import { Clock, Music, Tag } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { memo, useMemo } from "react";
+import { memo } from "react";
+
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -21,20 +14,12 @@ import {
 } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
 import { Textarea } from "@/components/ui/textarea";
-import { useNodeState } from "@/hooks/use-node-data";
+import { useAbiForm } from "@/hooks/use-abi-form";
+import { handle } from "@/lib/abi/sources";
 import type { TongflowPluginNodeProps } from "@/types/tongflow-flow";
-import { TEXT_GEN_MUSIC_HANDLES } from "@/utils/connection-rules";
-import { coerceBaseNodeData } from "@/utils/flow-node-data";
-import {
-    configParam,
-    type GetPromptsContext,
-    upstreamParam,
-} from "@/utils/node-execution-config";
-import { BaseNode } from "../base/base-node";
 
-const DEFAULT_FEATURE = "gen-music";
+import { AbiNodeShell } from "../base/abi-node-shell";
 
-// Language options
 const LANGUAGE_OPTIONS = [
     { value: "zh", label: "中文" },
     { value: "en", label: "English" },
@@ -45,7 +30,6 @@ const LANGUAGE_OPTIONS = [
     { value: "es", label: "Español" },
 ];
 
-// BPM options
 const BPM_OPTIONS = [
     { value: "auto", label: "Auto" },
     { value: "60", label: "60" },
@@ -60,7 +44,6 @@ const BPM_OPTIONS = [
     { value: "180", label: "180" },
 ];
 
-// Mode options
 const KEYSCALE_OPTIONS = [
     "C major",
     "C minor",
@@ -78,256 +61,51 @@ const KEYSCALE_OPTIONS = [
     "B minor",
 ];
 
-interface MusicNodeState {
-    songTitle: string;
-    tags: string;
-    /** Local lyrics when in:lyric is not connected */
-    lyrics: string;
-    selectedDuration: string;
-    language: string;
-    keyscale: string;
-    bpm: string;
-}
-
 type TextGenMusicNodeProps = TongflowPluginNodeProps<
     "gen-music",
     "textGenMusicNode"
 >;
-// Workflow execution config
-const workflowConfig = {
-    feature: DEFAULT_FEATURE,
-    outputType: "audioNode",
-    outputField: "fileKeys" as const,
-    paramMappings: {
-        prompt: {
-            sources: [configParam("prompt")],
-        },
-        styleTags: {
-            sources: [
-                upstreamParam("textNode", "texts[0]", {
-                    targetHandle: TEXT_GEN_MUSIC_HANDLES.style,
-                }),
-                configParam("tags"),
-            ],
-        },
-        lyricsFromUpstream: {
-            sources: [
-                upstreamParam("textNode", "texts[0]", {
-                    targetHandle: TEXT_GEN_MUSIC_HANDLES.lyric,
-                }),
-            ],
-        },
-    },
-};
-
-function firstTextFromTextNodeData(
-    nodesData: Array<{ data?: unknown }> | null | undefined,
-): string {
-    const texts = coerceBaseNodeData(nodesData?.[0]?.data).texts;
-    return Array.isArray(texts) && texts[0] != null ? String(texts[0]) : "";
-}
-
-/**
- * Parse incoming style/lyrics edges directly from edges (including loose edges with an empty targetHandle).
- * Explicit in:style / in:lyric takes priority; remaining loose edges fill style first, then lyrics, in order,
- * so the style is not lost when a no-handle style edge is added after lyrics are already connected.
- */
-function resolveMusicIncomingEdges(
-    edges: Edge[],
-    nodeId: string,
-    nodeLookup: Map<string, { type?: string | null }>,
-): { styleSourceId: string | null; lyricSourceId: string | null } {
-    const incoming = edges.filter((e) => {
-        if (e.target !== nodeId) return false;
-        const src = nodeLookup.get(e.source);
-        return src?.type === "textNode";
-    });
-
-    let styleEdge: Edge | undefined;
-    let lyricEdge: Edge | undefined;
-    const loose: Edge[] = [];
-
-    for (const e of incoming) {
-        const th = e.targetHandle;
-        if (th === TEXT_GEN_MUSIC_HANDLES.style) {
-            styleEdge = e;
-        } else if (th === TEXT_GEN_MUSIC_HANDLES.lyric) {
-            lyricEdge = e;
-        } else if (th == null || th === "") {
-            loose.push(e);
-        }
-    }
-
-    // Backfill loose edges sequentially (style-null + lyric handle is common)
-    const unassigned = [...loose];
-    if (!styleEdge && unassigned.length >= 1) {
-        styleEdge = unassigned.shift();
-    }
-    if (!lyricEdge && unassigned.length >= 1) {
-        lyricEdge = unassigned.shift();
-    }
-
-    return {
-        styleSourceId: styleEdge?.source ?? null,
-        lyricSourceId: lyricEdge?.source ?? null,
-    };
-}
-
-function useMusicUpstreamResolved(nodeId: string | null) {
-    const edges = useStore((s) => s.edges) as Edge[];
-    const nodeLookup = useStore((s) => s.nodeLookup);
-
-    const { styleSourceId, lyricSourceId } = useMemo(
-        () => resolveMusicIncomingEdges(edges, nodeId ?? "", nodeLookup),
-        [edges, nodeId, nodeLookup],
-    );
-
-    const styleDataIds = useMemo(
-        () => (styleSourceId ? [styleSourceId] : []),
-        [styleSourceId],
-    );
-    const lyricDataIds = useMemo(
-        () => (lyricSourceId ? [lyricSourceId] : []),
-        [lyricSourceId],
-    );
-
-    const styleNodesData = useNodesData(styleDataIds);
-    const lyricNodesData = useNodesData(lyricDataIds);
-
-    const styleText = firstTextFromTextNodeData(styleNodesData);
-    const lyricText = firstTextFromTextNodeData(lyricNodesData);
-
-    return {
-        styleSourceId,
-        lyricSourceId,
-        styleText,
-        lyricText,
-        hasStyleUpstream: styleSourceId != null,
-        hasLyricUpstream: lyricSourceId != null,
-    };
-}
 
 const TextGenMusicNode = ({ selected, data }: TextGenMusicNodeProps) => {
     const t = useTranslations("Workspace.nodes");
-    const { texts = [] } = data;
-    const nodeId = useNodeId();
+    const form = useAbiForm("gen-music", {
+        // Both `tags` and `lyrics` are scalar strings that may be fed from
+        // upstream textNodes via the auto-rendered `in:tags` / `in:lyrics`
+        // handles. AbiHandles renders one handle per ABI input, so the user
+        // connects each upstream textNode to the handle they want to fill.
+        tags: handle({ nodeType: "textNode", path: "texts[0]" }),
+        lyrics: handle({ nodeType: "textNode", path: "texts[0]" }),
+    });
 
-    const { styleText, lyricText, hasStyleUpstream, hasLyricUpstream } =
-        useMusicUpstreamResolved(nodeId ?? null);
-
-    const styleConnected = hasStyleUpstream;
-    const lyricConnected = hasLyricUpstream;
-
-    const [state, setState] = useNodeState<MusicNodeState>(
-        {
-            songTitle: "",
-            tags: "",
-            lyrics: "",
-            selectedDuration: "30",
-            language: "zh",
-            keyscale: "C major",
-            bpm: "auto",
-        },
-        data,
-    );
-
-    const {
-        songTitle,
-        tags,
-        lyrics,
-        selectedDuration,
-        language,
-        keyscale,
-        bpm,
-    } = state;
+    const songTitle = (form.state.songTitle as string | undefined) ?? "";
+    const tags = (form.state.tags as string | undefined) ?? "";
+    const lyrics = (form.state.lyrics as string | undefined) ?? "";
+    const language = (form.state.language as string | undefined) ?? "zh";
+    const keyscale = (form.state.keyscale as string | undefined) ?? "C major";
+    const bpm = form.state.bpm == null ? "auto" : String(form.state.bpm);
+    const duration = (form.state.duration as number | undefined) ?? 30;
 
     const canExecute =
         !!songTitle.trim() ||
         !!tags.trim() ||
         !!lyrics.trim() ||
-        !!(texts[0] && String(texts[0]).trim()) ||
-        styleConnected ||
-        lyricConnected;
+        !!(data.texts?.[0] && String(data.texts[0]).trim());
 
     return (
-        <BaseNode
+        <AbiNodeShell
+            feature="gen-music"
+            sourceSpec={{
+                tags: handle({ nodeType: "textNode", path: "texts[0]" }),
+                lyrics: handle({ nodeType: "textNode", path: "texts[0]" }),
+            }}
+            form={form}
             selected={selected}
             className="min-w-[520px]"
             data={data}
-            workflowConfig={{
-                ...workflowConfig,
-                handles: false,
-                title: t("titles.textGenMusic"),
-                icon: <Music className="h-5 w-5" />,
-                executeLabel: t("actions.generateMusic"),
-                executeDisabled: !canExecute,
-                getPrompts: (ctx?: GetPromptsContext) => {
-                    const upstreamTexts = ctx?.getAllUpstreamData(
-                        "textNode",
-                        "texts",
-                    ) as string[] | undefined;
-                    const inputTexts =
-                        upstreamTexts && upstreamTexts.length > 0
-                            ? upstreamTexts
-                            : texts;
-
-                    const localTags = tags.trim();
-                    const effectiveTags = hasStyleUpstream
-                        ? String(styleText).trim()
-                        : localTags;
-
-                    const baseParams = {
-                        tags: effectiveTags,
-                        ...(bpm && bpm !== "auto" ? { bpm: Number(bpm) } : {}),
-                        duration: Number(selectedDuration),
-                        language,
-                        keyscale,
-                    };
-
-                    const instrumentalLyrics =
-                        songTitle.trim() || "[Instrumental]";
-
-                    if (hasStyleUpstream && hasLyricUpstream) {
-                        return [
-                            {
-                                ...baseParams,
-                                tags: String(styleText).trim(),
-                                lyrics: String(lyricText).trim(),
-                            },
-                        ];
-                    }
-
-                    if (hasStyleUpstream && !hasLyricUpstream) {
-                        return [
-                            {
-                                ...baseParams,
-                                tags: String(styleText).trim(),
-                                lyrics: instrumentalLyrics,
-                            },
-                        ];
-                    }
-
-                    if (!hasStyleUpstream && hasLyricUpstream) {
-                        return [
-                            {
-                                ...baseParams,
-                                lyrics: String(lyricText).trim(),
-                            },
-                        ];
-                    }
-
-                    const manualLyrics =
-                        lyrics.trim() ||
-                        (texts[0] ? String(texts[0]).trim() : "");
-                    if (manualLyrics) {
-                        return [{ ...baseParams, lyrics: manualLyrics }];
-                    }
-                    return inputTexts.map((text) => ({
-                        ...baseParams,
-                        lyrics: text,
-                    }));
-                },
-            }}
+            title={t("titles.textGenMusic")}
+            icon={<Music className="h-5 w-5" />}
+            executeLabel={t("actions.generateMusic")}
+            executeDisabled={!canExecute}
         >
             <div className="p-4 space-y-4">
                 <Card className="p-3">
@@ -336,34 +114,16 @@ const TextGenMusicNode = ({ selected, data }: TextGenMusicNodeProps) => {
                             <Tag className="h-4 w-4" />
                             {t("music.styleSettings")}
                         </Label>
-                        {styleConnected && (
-                            <span className="text-[10px] text-muted-foreground shrink-0">
-                                {t("music.fromUpstreamReadonly")}
-                            </span>
-                        )}
                     </div>
-                    {styleConnected ? (
-                        <Textarea
-                            readOnly
-                            value={styleText}
-                            placeholder="—"
-                            className="min-h-[72px] resize-none text-xs bg-muted/50 cursor-default border-dashed"
-                        />
-                    ) : (
-                        <>
-                            <Input
-                                placeholder={t("music.tagsPlaceholder")}
-                                value={tags}
-                                onChange={(e) =>
-                                    setState({ tags: e.target.value })
-                                }
-                                className="h-8 text-xs"
-                            />
-                            <p className="text-xs text-muted-foreground mt-1.5">
-                                {t("music.tagsHint")}
-                            </p>
-                        </>
-                    )}
+                    <Input
+                        placeholder={t("music.tagsPlaceholder")}
+                        value={tags}
+                        onChange={(e) => form.set("tags", e.target.value)}
+                        className="h-8 text-xs"
+                    />
+                    <p className="text-xs text-muted-foreground mt-1.5">
+                        {t("music.tagsHint")}
+                    </p>
                 </Card>
 
                 <Card className="p-3">
@@ -371,29 +131,13 @@ const TextGenMusicNode = ({ selected, data }: TextGenMusicNodeProps) => {
                         <Label className="text-sm font-medium text-muted-foreground">
                             {t("music.inputLyrics")}
                         </Label>
-                        {lyricConnected && (
-                            <span className="text-[10px] text-muted-foreground shrink-0">
-                                {t("music.fromUpstreamReadonly")}
-                            </span>
-                        )}
                     </div>
-                    {lyricConnected ? (
-                        <Textarea
-                            readOnly
-                            value={lyricText}
-                            placeholder="—"
-                            className="min-h-[120px] resize-none text-xs bg-muted/50 cursor-default border-dashed"
-                        />
-                    ) : (
-                        <Textarea
-                            placeholder={t("music.lyricsPlaceholder")}
-                            value={lyrics}
-                            onChange={(e) =>
-                                setState({ lyrics: e.target.value })
-                            }
-                            className="min-h-[120px] resize-none text-xs"
-                        />
-                    )}
+                    <Textarea
+                        placeholder={t("music.lyricsPlaceholder")}
+                        value={lyrics}
+                        onChange={(e) => form.set("lyrics", e.target.value)}
+                        className="min-h-[120px] resize-none text-xs"
+                    />
                 </Card>
 
                 <Card className="p-3">
@@ -404,7 +148,7 @@ const TextGenMusicNode = ({ selected, data }: TextGenMusicNodeProps) => {
                             </Label>
                             <Select
                                 value={language}
-                                onValueChange={(v) => setState({ language: v })}
+                                onValueChange={(v) => form.set("language", v)}
                             >
                                 <SelectTrigger className="h-8 text-xs">
                                     <SelectValue />
@@ -428,7 +172,7 @@ const TextGenMusicNode = ({ selected, data }: TextGenMusicNodeProps) => {
                             </Label>
                             <Select
                                 value={keyscale}
-                                onValueChange={(v) => setState({ keyscale: v })}
+                                onValueChange={(v) => form.set("keyscale", v)}
                             >
                                 <SelectTrigger className="h-8 text-xs">
                                     <SelectValue />
@@ -452,7 +196,12 @@ const TextGenMusicNode = ({ selected, data }: TextGenMusicNodeProps) => {
                             </Label>
                             <Select
                                 value={bpm}
-                                onValueChange={(v) => setState({ bpm: v })}
+                                onValueChange={(v) =>
+                                    form.set(
+                                        "bpm",
+                                        v === "auto" ? undefined : Number(v),
+                                    )
+                                }
                             >
                                 <SelectTrigger className="h-8 text-xs">
                                     <SelectValue placeholder="Auto" />
@@ -482,9 +231,7 @@ const TextGenMusicNode = ({ selected, data }: TextGenMusicNodeProps) => {
                             placeholder={t("music.songTitlePlaceholder")}
                             value={songTitle}
                             onChange={(e) =>
-                                setState({
-                                    songTitle: e.target.value,
-                                })
+                                form.set("songTitle", e.target.value)
                             }
                             className="h-8 text-xs"
                         />
@@ -499,24 +246,23 @@ const TextGenMusicNode = ({ selected, data }: TextGenMusicNodeProps) => {
                                 {t("music.audioDuration")}
                             </Label>
                             <span className="text-xs font-medium">
-                                {Number(selectedDuration) >= 60
-                                    ? `${Math.floor(Number(selectedDuration) / 60)}:${String(Number(selectedDuration) % 60).padStart(2, "0")}`
-                                    : `${selectedDuration}s`}
+                                {duration >= 60
+                                    ? `${Math.floor(duration / 60)}:${String(duration % 60).padStart(2, "0")}`
+                                    : `${duration}s`}
                             </span>
                         </div>
                         <Slider
-                            value={[Number(selectedDuration)]}
+                            value={[duration]}
                             onValueChange={([v]) => {
                                 const snapPoint = Math.round(v / 30) * 30;
                                 const snapped =
                                     Math.abs(v - snapPoint) <= 5
                                         ? snapPoint
                                         : v;
-                                setState({
-                                    selectedDuration: String(
-                                        Math.max(30, Math.min(240, snapped)),
-                                    ),
-                                });
+                                form.set(
+                                    "duration",
+                                    Math.max(30, Math.min(240, snapped)),
+                                );
                             }}
                             min={30}
                             max={240}
@@ -536,44 +282,7 @@ const TextGenMusicNode = ({ selected, data }: TextGenMusicNodeProps) => {
                     </div>
                 </Card>
             </div>
-
-            <div className="pointer-events-none absolute left-1 top-0 z-[1] h-full w-14">
-                <span
-                    className="absolute text-[10px] text-muted-foreground whitespace-nowrap"
-                    style={{ top: "28%", transform: "translateY(-50%)" }}
-                >
-                    {t("music.handleStyle")}
-                </span>
-                <span
-                    className="absolute text-[10px] text-muted-foreground whitespace-nowrap"
-                    style={{ top: "52%", transform: "translateY(-50%)" }}
-                >
-                    {t("music.handleLyric")}
-                </span>
-            </div>
-            <Handle
-                type="target"
-                position={Position.Left}
-                id={TEXT_GEN_MUSIC_HANDLES.style}
-                isConnectable={true}
-                className="!z-[30]"
-                style={{ top: "28%" }}
-            />
-            <Handle
-                type="target"
-                position={Position.Left}
-                id={TEXT_GEN_MUSIC_HANDLES.lyric}
-                isConnectable={true}
-                className="!z-[30]"
-                style={{ top: "52%" }}
-            />
-            <Handle
-                type="source"
-                position={Position.Right}
-                id="b"
-                isConnectable={true}
-            />
-        </BaseNode>
+        </AbiNodeShell>
     );
 };
 

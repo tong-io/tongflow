@@ -1,3 +1,4 @@
+import { Handle, Position } from "@xyflow/react";
 import { Download, Maximize2, Video as VideoIcon, X } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { memo, useEffect, useRef, useState } from "react";
@@ -15,7 +16,7 @@ import {
 } from "@/hooks/use-file-async-loader";
 import { logger } from "@/lib/logger";
 import type { RfDataNodeProps } from "@/types/nodes";
-import { BaseNode } from "../base/base-node";
+import { BaseNodeShell } from "../base/base-node-shell";
 import {
     NodeHeader,
     NodeHeaderActions,
@@ -303,7 +304,7 @@ const VideoNode = ({ selected, data }: VideoNodeRfProps) => {
 
     return (
         <>
-            <BaseNode
+            <BaseNodeShell
                 selected={selected}
                 count={count}
                 className={
@@ -315,6 +316,16 @@ const VideoNode = ({ selected, data }: VideoNodeRfProps) => {
                         : undefined
                 }
             >
+                <Handle
+                    type="target"
+                    position={Position.Left}
+                    id="in:videoNode"
+                />
+                <Handle
+                    type="source"
+                    position={Position.Right}
+                    id="out:videoNode"
+                />
                 <NodeHeader>
                     <NodeHeaderIcon>
                         <VideoIcon />
@@ -479,9 +490,9 @@ const VideoNode = ({ selected, data }: VideoNodeRfProps) => {
                         </div>
                     </div>
                 )}
-            </BaseNode>
+            </BaseNodeShell>
 
-            {/* Full screen modals - rendered outside BaseNode */}
+            {/* Full screen modals - rendered outside BaseNodeShell */}
             {isFullScreen && isSingle && keys[0] && (
                 <FullScreenVideoModal
                     fileKey={keys[0]}

@@ -1,7 +1,6 @@
 import type { Node, NodeProps } from "@xyflow/react";
 
 import type { AspectRatio } from "@/constants/media-options";
-import type { ParamMappingConfig } from "@/utils/node-execution-config";
 
 /* ========================================================================== */
 /* Base Type Definitions                                                       */
@@ -71,7 +70,6 @@ export interface BaseNodeData extends Record<string, unknown> {
     prompt?: Record<string, unknown>;
     /** Currently selected plugin ID (registry `nodeSlot` → `pluginIds`) */
     pluginId?: string;
-    pluginRepo?: string;
 
     /** Composition linkage (`useNodesData`) */
     ids?: string[];
@@ -92,8 +90,6 @@ export interface BaseNodeData extends Record<string, unknown> {
 
     outputType?: OutputNodeType;
     outputField?: "fileKeys" | "texts";
-
-    paramMappings?: Record<string, ParamMappingConfig>;
 }
 
 /**

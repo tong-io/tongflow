@@ -1,4 +1,10 @@
-import { type NodeProps, useNodeId, useNodesData } from "@xyflow/react";
+import {
+    Handle,
+    type NodeProps,
+    Position,
+    useNodeId,
+    useNodesData,
+} from "@xyflow/react";
 import { Edit3, Library, Lock, Type, Unlock } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { memo, useCallback, useMemo } from "react";
@@ -9,7 +15,7 @@ import { useNodeState } from "@/hooks/use-node-data";
 import { useTaskStore } from "@/hooks/use-task";
 import type { AddTextNodeData } from "@/types/nodes";
 import { LibInput } from "../../share/lib-input";
-import { BaseNode } from "../base/base-node";
+import { BaseNodeShell } from "../base/base-node-shell";
 import { NodeHeaderAction } from "../base/node-header";
 import { NodeTextarea } from "../base/node-textarea";
 
@@ -99,16 +105,6 @@ const LibraryTab = ({ locked }: { locked?: boolean }) => {
     );
 };
 
-// Workflow config: manual typing mode (forward text without API)
-// Omit feature; backend reads rawConfig.manualValue verbatim
-const manualWorkflowConfig = {
-    feature: "",
-    outputType: "textNode",
-    outputField: "texts" as const,
-    supportsBatch: false,
-    paramMappings: {},
-};
-
 const AddTextNode: React.FC<NodeProps> = ({ selected, data }) => {
     const id = useNodeId();
     const nodeData = data as AddTextNodeData;
@@ -119,70 +115,43 @@ const AddTextNode: React.FC<NodeProps> = ({ selected, data }) => {
     const t = useTranslations("Workspace.nodes");
     const tBase = useTranslations("Workspace.nodes.base");
 
-    // Toggle lock state
     const handleToggleLock = useCallback(() => {
-        if (id) {
-            updates(id, { ...data, locked: !locked });
-        }
+        if (id) updates(id, { ...data, locked: !locked });
     }, [id, data, locked, updates]);
 
     const handleTabChange = (value: string) => {
-        // Locks block tab switches
         if (locked) return;
-        if (id) {
-            updates(id, { ...data, activeTab: value });
-        }
+        if (id) updates(id, { ...data, activeTab: value });
     };
 
-    // Build exec payload — manual omits feature
-    const dataWithFeature = useMemo(() => {
-        return data;
-    }, [data]);
-
-    // Central workflow executor config blob
-    const getWorkflowConfig = useCallback(() => {
-        // Lock control — create-mode only
-        const lockAction =
-            workspaceMode === "create" ? (
-                <NodeHeaderAction
-                    onClick={handleToggleLock}
-                    variant="ghost"
-                    label={locked ? tBase("unlock") : tBase("lock")}
-                    className={locked ? "text-amber-500" : ""}
-                >
-                    {locked ? (
-                        <Lock className="h-4 w-4 fill-current" />
-                    ) : (
-                        <Unlock className="h-4 w-4" />
-                    )}
-                </NodeHeaderAction>
-            ) : null;
-
-        if (activeTab === "manual") {
-            return {
-                ...manualWorkflowConfig,
-                title: t("titles.addText"),
-                icon: <Type className="h-5 w-5" />,
-                headerActions: lockAction,
-                isInputNode: true,
-            };
-        }
-        return {
-            feature: "",
-            title: t("titles.addText"),
-            icon: <Type className="h-5 w-5" />,
-            headerActions: lockAction,
-            isInputNode: true,
-        };
-    }, [activeTab, locked, handleToggleLock, workspaceMode]);
+    const lockAction =
+        workspaceMode === "create" ? (
+            <NodeHeaderAction
+                onClick={handleToggleLock}
+                variant="ghost"
+                label={locked ? tBase("unlock") : tBase("lock")}
+                className={locked ? "text-amber-500" : ""}
+            >
+                {locked ? (
+                    <Lock className="h-4 w-4 fill-current" />
+                ) : (
+                    <Unlock className="h-4 w-4" />
+                )}
+            </NodeHeaderAction>
+        ) : null;
 
     return (
-        <BaseNode
+        <BaseNodeShell
             selected={selected}
             className="min-w-[480px]"
-            data={dataWithFeature}
-            workflowConfig={getWorkflowConfig()}
+            data={data as AddTextNodeData}
+            title={t("titles.addText")}
+            icon={<Type className="h-5 w-5" />}
+            headerActions={lockAction}
+            isInputNode
+            showPluginSelect={false}
         >
+            <Handle type="source" position={Position.Right} id="out:textNode" />
             <div className="p-4 space-y-2">
                 <Tabs
                     value={activeTab}
@@ -230,7 +199,7 @@ const AddTextNode: React.FC<NodeProps> = ({ selected, data }) => {
                     </div>
                 </Tabs>
             </div>
-        </BaseNode>
+        </BaseNodeShell>
     );
 };
 

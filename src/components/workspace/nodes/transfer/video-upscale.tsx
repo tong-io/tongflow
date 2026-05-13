@@ -2,20 +2,17 @@
 
 import { Maximize2, Sparkles } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { memo, useEffect } from "react";
+import { memo } from "react";
+
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import { useNodeState } from "@/hooks/use-node-data";
+import { useAbiForm } from "@/hooks/use-abi-form";
+import { batchOn } from "@/lib/abi/sources";
 import { cn } from "@/lib/utils";
 import type { TongflowPluginNodeProps } from "@/types/tongflow-flow";
-import {
-    type GetPromptsContext,
-    upstreamParam,
-} from "@/utils/node-execution-config";
-import { BaseNode } from "../base/base-node";
 
-const DEFAULT_FEATURE = "video-upscale";
+import { AbiNodeShell } from "../base/abi-node-shell";
 
 type UpscaleTier = "1k" | "2k";
 
@@ -27,71 +24,31 @@ const UPSCALE_TIERS: {
     { value: "2k", labelKey: "upscaleTier2k" },
 ];
 
-// Workflow execution config
-const workflowConfig = {
-    feature: DEFAULT_FEATURE,
-    outputType: "videoNode",
-    outputField: "fileKeys" as const,
-    supportsBatch: true,
-    batchParam: "video",
-    paramMappings: {
-        video: {
-            sources: [
-                upstreamParam("videoNode", "fileKeys[0]"),
-            ],
-            required: true,
-        },
-    },
-};
-
 const VideoUpscaleNode = ({
     selected,
     data,
 }: TongflowPluginNodeProps<"video-upscale", "videoUpscaleNode">) => {
     const t = useTranslations("Workspace.nodes");
+    const form = useAbiForm("video-upscale");
     const fileKeys = data.fileKeys ?? [];
 
-    const [state, setState] = useNodeState<{ resolution: UpscaleTier | "4k" }>(
-        { resolution: "2k" },
-        data,
-    );
-    useEffect(() => {
-        if (state.resolution === "4k") {
-            setState({ resolution: "2k" });
-        }
-    }, [state.resolution, setState]);
-
-    const resolution: UpscaleTier =
-        state.resolution === "1k" || state.resolution === "2k"
-            ? state.resolution
+    const stateResolution = form.state.resolution as string | undefined;
+    const resolution =
+        stateResolution === "1k" || stateResolution === "2k"
+            ? stateResolution
             : "2k";
 
     return (
-        <BaseNode
+        <AbiNodeShell
+            feature="video-upscale"
+            sourceSpec={{ video: batchOn() }}
+            form={form}
             selected={selected}
             data={data}
-            workflowConfig={{
-                ...workflowConfig,
-                feature: DEFAULT_FEATURE,
-                title: t("titles.videoUpscale"),
-                icon: <Sparkles className="h-5 w-5" />,
-                executeLabel: t("actions.startUpscale"),
-                executeDisabled: !fileKeys?.length,
-                getPrompts: (ctx?: GetPromptsContext) => {
-                    const upstreamKeys = ctx?.getAllUpstreamData(
-                        "videoNode",
-                        "fileKeys",
-                    ) as string[] | undefined;
-                    const keys =
-                        upstreamKeys && upstreamKeys.length > 0
-                            ? upstreamKeys
-                            : fileKeys;
-                    return keys.map((fileKey) => ({
-                        video: fileKey,
-                        resolution,
-                    }));
-                },
-            }}
+            title={t("titles.videoUpscale")}
+            icon={<Sparkles className="h-5 w-5" />}
+            executeLabel={t("actions.startUpscale")}
+            executeDisabled={!fileKeys?.length}
         >
             <Card className="mx-4 mb-4 p-3 space-y-2">
                 <Label className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
@@ -108,7 +65,7 @@ const VideoUpscaleNode = ({
                                     : "outline"
                             }
                             size="sm"
-                            onClick={() => setState({ resolution: tier.value })}
+                            onClick={() => form.set("resolution", tier.value)}
                             className={cn(
                                 "h-auto py-2 px-1 flex flex-col gap-0.5 text-xs",
                                 resolution === tier.value
@@ -131,7 +88,7 @@ const VideoUpscaleNode = ({
                     </div>
                 )}
             </Card>
-        </BaseNode>
+        </AbiNodeShell>
     );
 };
 

@@ -203,15 +203,6 @@ const _slot_image_fusion_inputs = {
             },
             additionalProperties: false,
         },
-        seed: {
-            type: "integer",
-        },
-        width: {
-            type: "integer",
-        },
-        height: {
-            type: "integer",
-        },
         images: {
             type: "array",
             items: {
@@ -231,6 +222,15 @@ const _slot_image_fusion_inputs = {
                 },
                 additionalProperties: false,
             },
+        },
+        seed: {
+            type: "integer",
+        },
+        width: {
+            type: "integer",
+        },
+        height: {
+            type: "integer",
         },
     },
     additionalProperties: false,
@@ -1451,6 +1451,9 @@ const _slot_split_video_inputs = {
             },
             additionalProperties: false,
         },
+        threshold: {
+            type: "number",
+        },
     },
     additionalProperties: false,
 } as const;
@@ -1922,6 +1925,21 @@ const _slot_gen_music_inputs = {
             minLength: 1,
         },
         lyrics: {
+            type: "string",
+        },
+        tags: {
+            type: "string",
+        },
+        language: {
+            type: "string",
+        },
+        keyscale: {
+            type: "string",
+        },
+        bpm: {
+            type: "number",
+        },
+        songTitle: {
             type: "string",
         },
         duration: {
@@ -3725,6 +3743,9 @@ const _slot_image_image_gen_video_inputs = {
                 type: "string",
             },
         },
+        duration: {
+            type: "number",
+        },
         seed: {
             type: "number",
         },
@@ -3944,6 +3965,9 @@ const _slot_text_gen_video_inputs = {
             items: {
                 type: "string",
             },
+        },
+        duration: {
+            type: "string",
         },
         seed: {
             type: "number",
@@ -4218,7 +4242,7 @@ const _slot_image_gen_model_outputs = {
         thinking: {
             type: "string",
         },
-        image: {
+        model: {
             type: "object",
             required: ["file_key"],
             properties: {
@@ -4234,46 +4258,6 @@ const _slot_image_gen_model_outputs = {
                 },
             },
             additionalProperties: false,
-        },
-        video: {
-            type: "object",
-            required: ["file_key"],
-            properties: {
-                file_key: {
-                    type: "string",
-                    minLength: 1,
-                },
-                mime: {
-                    type: "string",
-                },
-                filename: {
-                    type: "string",
-                },
-            },
-            additionalProperties: false,
-        },
-        audio: {
-            type: "object",
-            required: ["file_key"],
-            properties: {
-                file_key: {
-                    type: "string",
-                    minLength: 1,
-                },
-                mime: {
-                    type: "string",
-                },
-                filename: {
-                    type: "string",
-                },
-            },
-            additionalProperties: false,
-        },
-        texts: {
-            type: "array",
-            items: {
-                type: "string",
-            },
         },
     },
     additionalProperties: false,
@@ -5177,6 +5161,26 @@ const _slot_arrange_group_inputs = {
                 additionalProperties: false,
             },
         },
+        fileKeys: {
+            type: "array",
+            items: {
+                type: "object",
+                required: ["bytesBase64"],
+                properties: {
+                    bytesBase64: {
+                        type: "string",
+                        minLength: 1,
+                    },
+                    filename: {
+                        type: "string",
+                    },
+                    mime: {
+                        type: "string",
+                    },
+                },
+                additionalProperties: false,
+            },
+        },
     },
     additionalProperties: false,
 } as const;
@@ -5409,6 +5413,316 @@ export type SeparateAudioTrackOutput = FromSchema<
     typeof _slot_separate_audio_track_outputs
 >;
 
+const _slot_denoise_audio_inputs = {
+    type: "object",
+    required: ["fileKey"],
+    properties: {
+        fileKey: {
+            type: "object",
+            required: ["bytesBase64"],
+            properties: {
+                bytesBase64: {
+                    type: "string",
+                    minLength: 1,
+                },
+                filename: {
+                    type: "string",
+                },
+                mime: {
+                    type: "string",
+                },
+            },
+            additionalProperties: false,
+        },
+    },
+    additionalProperties: false,
+} as const;
+export type DenoiseAudioInput = FromSchema<typeof _slot_denoise_audio_inputs>;
+const _slot_denoise_audio_outputs = {
+    type: "object",
+    required: ["success"],
+    properties: {
+        success: {
+            type: "boolean",
+        },
+        error: {
+            type: "string",
+        },
+        audio: {
+            type: "object",
+            required: ["file_key"],
+            properties: {
+                file_key: {
+                    type: "string",
+                    minLength: 1,
+                },
+                mime: {
+                    type: "string",
+                },
+                filename: {
+                    type: "string",
+                },
+            },
+            additionalProperties: false,
+        },
+    },
+    additionalProperties: false,
+} as const;
+export type DenoiseAudioOutput = FromSchema<typeof _slot_denoise_audio_outputs>;
+
+const _slot_convert_voice_inputs = {
+    type: "object",
+    required: ["sourceKey", "targetKey"],
+    properties: {
+        sourceKey: {
+            type: "object",
+            required: ["bytesBase64"],
+            properties: {
+                bytesBase64: {
+                    type: "string",
+                    minLength: 1,
+                },
+                filename: {
+                    type: "string",
+                },
+                mime: {
+                    type: "string",
+                },
+            },
+            additionalProperties: false,
+        },
+        targetKey: {
+            type: "string",
+        },
+    },
+    additionalProperties: false,
+} as const;
+export type ConvertVoiceInput = FromSchema<typeof _slot_convert_voice_inputs>;
+const _slot_convert_voice_outputs = {
+    type: "object",
+    required: ["success"],
+    properties: {
+        success: {
+            type: "boolean",
+        },
+        error: {
+            type: "string",
+        },
+        audio: {
+            type: "object",
+            required: ["file_key"],
+            properties: {
+                file_key: {
+                    type: "string",
+                    minLength: 1,
+                },
+                mime: {
+                    type: "string",
+                },
+                filename: {
+                    type: "string",
+                },
+            },
+            additionalProperties: false,
+        },
+    },
+    additionalProperties: false,
+} as const;
+export type ConvertVoiceOutput = FromSchema<typeof _slot_convert_voice_outputs>;
+
+const _slot_remove_watermark_inputs = {
+    type: "object",
+    required: ["fileKey"],
+    properties: {
+        fileKey: {
+            type: "object",
+            required: ["bytesBase64"],
+            properties: {
+                bytesBase64: {
+                    type: "string",
+                    minLength: 1,
+                },
+                filename: {
+                    type: "string",
+                },
+                mime: {
+                    type: "string",
+                },
+            },
+            additionalProperties: false,
+        },
+    },
+    additionalProperties: false,
+} as const;
+export type RemoveWatermarkInput = FromSchema<
+    typeof _slot_remove_watermark_inputs
+>;
+const _slot_remove_watermark_outputs = {
+    type: "object",
+    required: ["success"],
+    properties: {
+        success: {
+            type: "boolean",
+        },
+        error: {
+            type: "string",
+        },
+        video: {
+            type: "object",
+            required: ["file_key"],
+            properties: {
+                file_key: {
+                    type: "string",
+                    minLength: 1,
+                },
+                mime: {
+                    type: "string",
+                },
+                filename: {
+                    type: "string",
+                },
+            },
+            additionalProperties: false,
+        },
+    },
+    additionalProperties: false,
+} as const;
+export type RemoveWatermarkOutput = FromSchema<
+    typeof _slot_remove_watermark_outputs
+>;
+
+const _slot_subtitle_remove_inputs = {
+    type: "object",
+    required: ["fileKey"],
+    properties: {
+        fileKey: {
+            type: "object",
+            required: ["bytesBase64"],
+            properties: {
+                bytesBase64: {
+                    type: "string",
+                    minLength: 1,
+                },
+                filename: {
+                    type: "string",
+                },
+                mime: {
+                    type: "string",
+                },
+            },
+            additionalProperties: false,
+        },
+    },
+    additionalProperties: false,
+} as const;
+export type SubtitleRemoveInput = FromSchema<
+    typeof _slot_subtitle_remove_inputs
+>;
+const _slot_subtitle_remove_outputs = {
+    type: "object",
+    required: ["success"],
+    properties: {
+        success: {
+            type: "boolean",
+        },
+        error: {
+            type: "string",
+        },
+        video: {
+            type: "object",
+            required: ["file_key"],
+            properties: {
+                file_key: {
+                    type: "string",
+                    minLength: 1,
+                },
+                mime: {
+                    type: "string",
+                },
+                filename: {
+                    type: "string",
+                },
+            },
+            additionalProperties: false,
+        },
+    },
+    additionalProperties: false,
+} as const;
+export type SubtitleRemoveOutput = FromSchema<
+    typeof _slot_subtitle_remove_outputs
+>;
+
+const _slot_text_audio_gen_speech_inputs = {
+    type: "object",
+    required: ["text", "audio"],
+    properties: {
+        text: {
+            type: "string",
+            minLength: 1,
+        },
+        audio: {
+            type: "object",
+            required: ["bytesBase64"],
+            properties: {
+                bytesBase64: {
+                    type: "string",
+                    minLength: 1,
+                },
+                filename: {
+                    type: "string",
+                },
+                mime: {
+                    type: "string",
+                },
+            },
+            additionalProperties: false,
+        },
+        emotion: {
+            type: "string",
+        },
+        style: {
+            type: "string",
+        },
+    },
+    additionalProperties: false,
+} as const;
+export type TextAudioGenSpeechInput = FromSchema<
+    typeof _slot_text_audio_gen_speech_inputs
+>;
+const _slot_text_audio_gen_speech_outputs = {
+    type: "object",
+    required: ["success"],
+    properties: {
+        success: {
+            type: "boolean",
+        },
+        error: {
+            type: "string",
+        },
+        audio: {
+            type: "object",
+            required: ["file_key"],
+            properties: {
+                file_key: {
+                    type: "string",
+                    minLength: 1,
+                },
+                mime: {
+                    type: "string",
+                },
+                filename: {
+                    type: "string",
+                },
+            },
+            additionalProperties: false,
+        },
+    },
+    additionalProperties: false,
+} as const;
+export type TextAudioGenSpeechOutput = FromSchema<
+    typeof _slot_text_audio_gen_speech_outputs
+>;
+
 // --- NodeSlot union ---
 export type NodeSlot =
     | "gen-text"
@@ -5454,7 +5768,12 @@ export type NodeSlot =
     | "drop-video"
     | "arrange-group"
     | "separate_speaker"
-    | "separate_audio_track";
+    | "separate_audio_track"
+    | "denoise_audio"
+    | "convert_voice"
+    | "remove_watermark"
+    | "subtitle_remove"
+    | "text-audio-gen-speech";
 
 // --- Lookup maps ---
 export type SlotInputsMap = {
@@ -5502,6 +5821,11 @@ export type SlotInputsMap = {
     "arrange-group": ArrangeGroupInput;
     separate_speaker: SeparateSpeakerInput;
     separate_audio_track: SeparateAudioTrackInput;
+    denoise_audio: DenoiseAudioInput;
+    convert_voice: ConvertVoiceInput;
+    remove_watermark: RemoveWatermarkInput;
+    subtitle_remove: SubtitleRemoveInput;
+    "text-audio-gen-speech": TextAudioGenSpeechInput;
 };
 
 export type SlotOutputsMap = {
@@ -5549,6 +5873,11 @@ export type SlotOutputsMap = {
     "arrange-group": ArrangeGroupOutput;
     separate_speaker: SeparateSpeakerOutput;
     separate_audio_track: SeparateAudioTrackOutput;
+    denoise_audio: DenoiseAudioOutput;
+    convert_voice: ConvertVoiceOutput;
+    remove_watermark: RemoveWatermarkOutput;
+    subtitle_remove: SubtitleRemoveOutput;
+    "text-audio-gen-speech": TextAudioGenSpeechOutput;
 };
 
 export type SlotInput<S extends NodeSlot> = SlotInputsMap[S];
@@ -5631,6 +5960,23 @@ export const ABI_DEFINITIONS = {
         additionalProperties: false,
     },
     ImageRef: {
+        type: "object",
+        required: ["file_key"],
+        properties: {
+            file_key: {
+                type: "string",
+                minLength: 1,
+            },
+            mime: {
+                type: "string",
+            },
+            filename: {
+                type: "string",
+            },
+        },
+        additionalProperties: false,
+    },
+    ModelRef: {
         type: "object",
         required: ["file_key"],
         properties: {
@@ -5798,6 +6144,12 @@ export const ABI_NODES = {
                 image2: {
                     $ref: "#/$defs/Asset",
                 },
+                images: {
+                    type: "array",
+                    items: {
+                        $ref: "#/$defs/Asset",
+                    },
+                },
                 seed: {
                     type: "integer",
                 },
@@ -5806,12 +6158,6 @@ export const ABI_NODES = {
                 },
                 height: {
                     type: "integer",
-                },
-                images: {
-                    type: "array",
-                    items: {
-                        $ref: "#/$defs/Asset",
-                    },
                 },
             },
             additionalProperties: false,
@@ -6385,6 +6731,9 @@ export const ABI_NODES = {
                 video: {
                     $ref: "#/$defs/Asset",
                 },
+                threshold: {
+                    type: "number",
+                },
             },
             additionalProperties: false,
         },
@@ -6642,6 +6991,21 @@ export const ABI_NODES = {
                     minLength: 1,
                 },
                 lyrics: {
+                    type: "string",
+                },
+                tags: {
+                    type: "string",
+                },
+                language: {
+                    type: "string",
+                },
+                keyscale: {
+                    type: "string",
+                },
+                bpm: {
+                    type: "number",
+                },
+                songTitle: {
                     type: "string",
                 },
                 duration: {
@@ -7490,6 +7854,9 @@ export const ABI_NODES = {
                         type: "string",
                     },
                 },
+                duration: {
+                    type: "number",
+                },
                 seed: {
                     type: "number",
                 },
@@ -7592,6 +7959,9 @@ export const ABI_NODES = {
                     items: {
                         type: "string",
                     },
+                },
+                duration: {
+                    type: "string",
                 },
                 seed: {
                     type: "number",
@@ -7734,20 +8104,8 @@ export const ABI_NODES = {
                 thinking: {
                     type: "string",
                 },
-                image: {
-                    $ref: "#/$defs/ImageRef",
-                },
-                video: {
-                    $ref: "#/$defs/VideoRef",
-                },
-                audio: {
-                    $ref: "#/$defs/AudioRef",
-                },
-                texts: {
-                    type: "array",
-                    items: {
-                        type: "string",
-                    },
+                model: {
+                    $ref: "#/$defs/ModelRef",
                 },
             },
             additionalProperties: false,
@@ -8198,6 +8556,12 @@ export const ABI_NODES = {
                         $ref: "#/$defs/Asset",
                     },
                 },
+                fileKeys: {
+                    type: "array",
+                    items: {
+                        $ref: "#/$defs/Asset",
+                    },
+                },
             },
             additionalProperties: false,
         },
@@ -8300,6 +8664,159 @@ export const ABI_NODES = {
                     type: "string",
                 },
                 file_key: {
+                    $ref: "#/$defs/AudioRef",
+                },
+            },
+            additionalProperties: false,
+        },
+    },
+    denoise_audio: {
+        inputs: {
+            type: "object",
+            required: ["fileKey"],
+            properties: {
+                fileKey: {
+                    $ref: "#/$defs/Asset",
+                },
+            },
+            additionalProperties: false,
+        },
+        outputs: {
+            type: "object",
+            required: ["success"],
+            properties: {
+                success: {
+                    type: "boolean",
+                },
+                error: {
+                    type: "string",
+                },
+                audio: {
+                    $ref: "#/$defs/AudioRef",
+                },
+            },
+            additionalProperties: false,
+        },
+    },
+    convert_voice: {
+        inputs: {
+            type: "object",
+            required: ["sourceKey", "targetKey"],
+            properties: {
+                sourceKey: {
+                    $ref: "#/$defs/Asset",
+                },
+                targetKey: {
+                    type: "string",
+                },
+            },
+            additionalProperties: false,
+        },
+        outputs: {
+            type: "object",
+            required: ["success"],
+            properties: {
+                success: {
+                    type: "boolean",
+                },
+                error: {
+                    type: "string",
+                },
+                audio: {
+                    $ref: "#/$defs/AudioRef",
+                },
+            },
+            additionalProperties: false,
+        },
+    },
+    remove_watermark: {
+        inputs: {
+            type: "object",
+            required: ["fileKey"],
+            properties: {
+                fileKey: {
+                    $ref: "#/$defs/Asset",
+                },
+            },
+            additionalProperties: false,
+        },
+        outputs: {
+            type: "object",
+            required: ["success"],
+            properties: {
+                success: {
+                    type: "boolean",
+                },
+                error: {
+                    type: "string",
+                },
+                video: {
+                    $ref: "#/$defs/VideoRef",
+                },
+            },
+            additionalProperties: false,
+        },
+    },
+    subtitle_remove: {
+        inputs: {
+            type: "object",
+            required: ["fileKey"],
+            properties: {
+                fileKey: {
+                    $ref: "#/$defs/Asset",
+                },
+            },
+            additionalProperties: false,
+        },
+        outputs: {
+            type: "object",
+            required: ["success"],
+            properties: {
+                success: {
+                    type: "boolean",
+                },
+                error: {
+                    type: "string",
+                },
+                video: {
+                    $ref: "#/$defs/VideoRef",
+                },
+            },
+            additionalProperties: false,
+        },
+    },
+    "text-audio-gen-speech": {
+        inputs: {
+            type: "object",
+            required: ["text", "audio"],
+            properties: {
+                text: {
+                    type: "string",
+                    minLength: 1,
+                },
+                audio: {
+                    $ref: "#/$defs/Asset",
+                },
+                emotion: {
+                    type: "string",
+                },
+                style: {
+                    type: "string",
+                },
+            },
+            additionalProperties: false,
+        },
+        outputs: {
+            type: "object",
+            required: ["success"],
+            properties: {
+                success: {
+                    type: "boolean",
+                },
+                error: {
+                    type: "string",
+                },
+                audio: {
                     $ref: "#/$defs/AudioRef",
                 },
             },

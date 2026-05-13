@@ -353,7 +353,7 @@ export async function executeWorkflowTask(
 
         // Execute nodes tier-by-tier
         const executionLevels: string[][] = workflow.executionLevels || [];
-        const dataNodes: Record<string, unknown>[] = workflow.dataNodes || [];
+        const dataNodes = (workflow.dataNodes ?? []) as DataNodeStub[];
         const nodeOutputs = new Map<string, Record<string, unknown>>();
         const workflowErrorSummaries: string[] = [];
         const workflowFailures: SerializedWorkflowFailure[] = [];
@@ -525,36 +525,104 @@ export async function executeWorkflowTask(
 // ==================== Utilities ====================
 
 /**
- * Resolve node parameters: get parameter values from upstream node outputs and workflow inputs
+ * Read a value out of a nested object via a path like `texts[0]` or `fileKeys`.
+ */
+function readByPath(obj: unknown, path: string): unknown {
+    if (obj === null || obj === undefined) return undefined;
+    const parts = path.split(".");
+    let cur: unknown = obj;
+    for (const part of parts) {
+        if (cur === null || cur === undefined) return undefined;
+        const arrayMatch = part.match(/^(\w+)\[(\d+)\]$/);
+        if (arrayMatch) {
+            const [, key, idx] = arrayMatch;
+            const arr = (cur as Record<string, unknown>)[key];
+            cur = Array.isArray(arr) ? arr[parseInt(idx, 10)] : undefined;
+        } else {
+            cur = (cur as Record<string, unknown>)[part];
+        }
+    }
+    return cur;
+}
+
+interface DataNodeStub {
+    id: string;
+    staticData?: { texts?: string[]; fileKeys?: string[] };
+    inputName?: string;
+}
+
+type FieldBinding =
+    | {
+          kind: "handle";
+          sources: { fromNodeId: string; fromField: string }[];
+          targetHandle: string;
+          collect?: true;
+      }
+    | { kind: "config"; value: unknown }
+    | { kind: "static"; value: unknown }
+    | { kind: "input"; inputName: string };
+
+/**
+ * Resolve a node's ABI input parameters from its `bindings` table, the live
+ * upstream outputs map, the workflow's data nodes (static / input payloads),
+ * and the workflow-level input map.
  */
 function resolveNodeParams(
     node: {
         id: string;
-        params?: Array<{
-            name: string;
-            mapping?: { sourceNodeId: string; sourceParam: string };
-            value?: unknown;
-        }>;
+        bindings?: Record<string, FieldBinding>;
     },
     nodeOutputs: Map<string, Record<string, unknown>>,
-    _dataNodes: Record<string, unknown>[],
-    _inputs: Record<string, unknown>,
+    dataNodes: DataNodeStub[],
+    inputs: Record<string, unknown>,
 ): Record<string, unknown> {
     const params: Record<string, unknown> = {};
+    if (!node.bindings) return params;
 
-    if (!node.params) return params;
+    const dataNodeMap = new Map(dataNodes.map((d) => [d.id, d]));
 
-    for (const param of node.params) {
-        if (param.mapping) {
-            // Pull values from ancestor node outputs
-            const sourceOutput = nodeOutputs.get(param.mapping.sourceNodeId);
-            if (sourceOutput) {
-                params[param.name] = sourceOutput[param.mapping.sourceParam];
+    const readSource = (fromNodeId: string, fromField: string): unknown => {
+        const live = nodeOutputs.get(fromNodeId);
+        if (live !== undefined) return readByPath(live, fromField);
+
+        const dn = dataNodeMap.get(fromNodeId);
+        if (!dn) return undefined;
+        if (dn.staticData) {
+            const fromStatic = readByPath(dn.staticData, fromField);
+            if (fromStatic !== undefined) return fromStatic;
+        }
+        if (dn.inputName && inputs[dn.inputName] !== undefined) {
+            return readByPath(inputs[dn.inputName], fromField);
+        }
+        return undefined;
+    };
+
+    for (const [field, binding] of Object.entries(node.bindings)) {
+        switch (binding.kind) {
+            case "handle": {
+                if (binding.collect) {
+                    params[field] = binding.sources
+                        .map((s) => readSource(s.fromNodeId, s.fromField))
+                        .filter((v) => v !== undefined);
+                } else {
+                    const first = binding.sources[0];
+                    if (first) {
+                        params[field] = readSource(
+                            first.fromNodeId,
+                            first.fromField,
+                        );
+                    }
+                }
+                break;
             }
-        } else if (param.value !== undefined) {
-            params[param.name] = param.value;
+            case "config":
+            case "static":
+                params[field] = binding.value;
+                break;
+            case "input":
+                params[field] = inputs[binding.inputName];
+                break;
         }
     }
-
     return params;
 }

@@ -7,17 +7,12 @@ import type { Connection, Node as FlowNode } from "@xyflow/react";
 import type { JSONSchema7 } from "json-schema";
 
 import { ABI_DEFINITIONS, ABI_NODES, type NodeSlot } from "@/generated/abi";
+import { getAbiNodeRegistration } from "@/lib/abi/node-registry";
 import { DATA_NODE_TYPES } from "@/utils/executable-workflow";
 import {
-    getEffectiveNodeConfig,
+    getEffectiveOutputField,
     getEffectiveOutputType,
-    normalizeFlowTargetHandle,
 } from "@/utils/flow-connection-shared";
-import {
-    getNodeExecutionConfig,
-    type NodeExecutionConfig,
-    type ParamSourceConfig,
-} from "@/utils/node-execution-config";
 
 type AtomicResult = "compatible" | "disjoint" | "unknown";
 
@@ -144,8 +139,8 @@ function schemasAtomicCompare(
     ) {
         /**
          * TODO: OR-aggregate branches (e.g. Asset unions) so ABI edge checks can still return
-         * compatible/disjoint when every branch agrees. Until then, tryAbiCompatibility falls back
-         * to legacy upstreamType rules via `undefined`.
+         * compatible/disjoint when every branch agrees. Until then, return "unknown" which lets
+         * `tryAbiCompatibility` defer to the coarser modality check in `connection-rules`.
          */
         return "unknown";
     }
@@ -267,57 +262,14 @@ function consumerFieldSchema(
     return props ? resolveRefs(props as JSONSchema7) : undefined;
 }
 
-function upstreamSourceMatchesHandle(
-    upstream: ParamSourceConfig,
-    connectionTargetHandle: string | null | undefined,
-): boolean {
-    const actual = normalizeFlowTargetHandle(connectionTargetHandle);
-    const declaredRaw = upstream.targetHandle;
-    const declaredDefined =
-        declaredRaw !== undefined && declaredRaw !== null && declaredRaw !== "";
-    if (declaredDefined)
-        return (
-            normalizeFlowTargetHandle(declaredRaw as string | null) === actual
-        );
-    return actual === "a";
-}
-
-function collectCandidateParamKeys(
-    cfg: NodeExecutionConfig | undefined,
-    targetSlot: NodeSlot,
-    connection: Pick<Connection, "targetHandle">,
-    sourceOutType: string | undefined,
-): string[] | undefined {
-    if (!cfg?.paramMappings || !sourceOutType) return undefined;
-
-    const inputPropSet = new Set(
-        Object.keys(getAbiInputProperties(targetSlot)),
-    );
-    const out: string[] = [];
-
-    outer: for (const [paramKey, mapping] of Object.entries(
-        cfg.paramMappings,
-    )) {
-        if (!inputPropSet.has(paramKey)) continue;
-        for (const src of mapping.sources ?? []) {
-            if (src.type !== "upstream") continue;
-            if (src.upstreamType !== sourceOutType) continue;
-            if (!upstreamSourceMatchesHandle(src, connection.targetHandle))
-                continue;
-            out.push(paramKey);
-            continue outer;
-        }
-    }
-
-    if (out.length === 0) return undefined;
-
-    return [...new Set(out)];
-}
-
-function aggregateAtomic(results: AtomicResult[]): boolean | undefined {
-    if (results.some((r) => r === "compatible")) return true;
-    if (results.every((r) => r === "disjoint")) return false;
-    return undefined;
+/** Extract the consumer ABI input field name from an `in:<field>` target handle. */
+function consumerFieldFromTargetHandle(
+    targetHandle: string | null | undefined,
+): string | undefined {
+    if (typeof targetHandle !== "string") return undefined;
+    if (!targetHandle.startsWith("in:")) return undefined;
+    const field = targetHandle.slice("in:".length).trim();
+    return field || undefined;
 }
 
 /**
@@ -325,8 +277,8 @@ function aggregateAtomic(results: AtomicResult[]): boolean | undefined {
  * refine connection validity structurally between narrowed producer output payload
  * and mapped consumer input slots.
  *
- * Anything outside strict ABI↔ABI or inconclusive pairwise checks returns `undefined`
- * — legacy coarse rules still apply downstream.
+ * Anything outside strict ABI↔ABI or inconclusive pairwise checks returns `undefined`,
+ * leaving the decision to the coarser modality check in `connection-rules`.
  */
 export function tryAbiCompatibility(
     connection: Connection,
@@ -340,51 +292,49 @@ export function tryAbiCompatibility(
     const tgtRf = targetNode.type ?? "";
     if (srcRf in DATA_NODE_TYPES || tgtRf in DATA_NODE_TYPES) return undefined;
 
-    const sourceData = (sourceNode.data ?? {}) as Record<string, unknown>;
-    const targetData = (targetNode.data ?? {}) as Record<string, unknown>;
-
-    const sf =
-        typeof sourceData.feature === "string" ? sourceData.feature.trim() : "";
-    const tf =
-        typeof targetData.feature === "string" ? targetData.feature.trim() : "";
-
-    const sourceSlot = sf && isAbiNodeSlot(sf) ? (sf as NodeSlot) : undefined;
-    const targetSlot = tf && isAbiNodeSlot(tf) ? (tf as NodeSlot) : undefined;
+    // Feature comes from the ABI registry (single source of truth), not node.data.
+    const srcReg = getAbiNodeRegistration(sourceNode.id);
+    const tgtReg = getAbiNodeRegistration(targetNode.id);
+    const sourceSlot =
+        srcReg && isAbiNodeSlot(srcReg.feature)
+            ? (srcReg.feature as NodeSlot)
+            : undefined;
+    const targetSlot =
+        tgtReg && isAbiNodeSlot(tgtReg.feature)
+            ? (tgtReg.feature as NodeSlot)
+            : undefined;
     if (!sourceSlot || !targetSlot) return undefined;
 
-    const sourceOutEff = getEffectiveOutputType(srcRf, sourceData);
+    const sourceOutEff = getEffectiveOutputType(
+        sourceNode.id,
+        srcRf,
+        connection.sourceHandle,
+    );
     if (!sourceOutEff) return undefined;
 
-    const targetCfg = getEffectiveNodeConfig(tgtRf, targetData);
-
-    const paramKeys = collectCandidateParamKeys(
-        targetCfg,
-        targetSlot,
-        connection,
-        sourceOutEff,
+    // Consumer field comes directly from the AbiHandles-rendered targetHandle `in:<field>`.
+    const consumerField = consumerFieldFromTargetHandle(
+        connection.targetHandle,
     );
-    if (!paramKeys || paramKeys.length === 0) return undefined;
+    if (!consumerField) return undefined;
+    if (!(consumerField in getAbiInputProperties(targetSlot))) return undefined;
 
-    const sourceCfg =
-        getNodeExecutionConfig(srcRf) ??
-        getEffectiveNodeConfig(srcRf, sourceData);
+    const outputField = getEffectiveOutputField(sourceNode.id);
 
     const producerNarrow = pickProducerFieldSchema(
         ABI_NODES[sourceSlot].outputs as JSONSchema7,
-        sourceCfg?.outputField as "texts" | "fileKeys" | undefined,
-        sourceCfg?.abiProducerPropertyCandidates,
+        outputField,
+        undefined,
     );
     if (!producerNarrow) return undefined;
 
-    const atomics: AtomicResult[] = [];
-    for (const pk of paramKeys) {
-        const consumerSch = consumerFieldSchema(targetSlot, pk);
-        if (!consumerSch) return undefined;
+    const consumerSch = consumerFieldSchema(targetSlot, consumerField);
+    if (!consumerSch) return undefined;
 
-        atomics.push(schemasAtomicCompare(producerNarrow, consumerSch, 0));
-    }
-
-    return aggregateAtomic(atomics);
+    const result = schemasAtomicCompare(producerNarrow, consumerSch, 0);
+    if (result === "compatible") return true;
+    if (result === "disjoint") return false;
+    return undefined;
 }
 
 export type AbiSchemaEdgeResult = AtomicResult;

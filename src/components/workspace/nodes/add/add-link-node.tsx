@@ -1,99 +1,65 @@
 import { Link as LinkIcon, Plus, Trash } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { memo, useCallback, useMemo } from "react";
+import { memo, useCallback, useState } from "react";
+
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { useNodeState } from "@/hooks/use-node-data";
+import { useAbiForm } from "@/hooks/use-abi-form";
 import type { TongflowPluginNodeProps } from "@/types/tongflow-flow";
-import { configParam } from "@/utils/node-execution-config";
-import { BaseNode } from "../base/base-node";
 
-// Workflow execution config: Modal cpu/crawl4ai, converts webpage to Markdown and expands into text nodes
-const workflowConfig = {
-    feature: "link",
-    outputType: "textNode",
-    outputField: "texts" as const,
-    supportsBatch: true,
-    batchParam: "url",
-    paramMappings: {
-        url: {
-            sources: [configParam("previews")],
-            required: true,
-        },
-    },
-};
+import { AbiNodeShell } from "../base/abi-node-shell";
 
 const AddLinkNode = ({
     selected,
     data,
 }: TongflowPluginNodeProps<"link", "addLinkNode">) => {
     const t = useTranslations("Workspace.nodes.add");
+    const form = useAbiForm("link");
 
-    // Use the new hook to manage state persistence
-    const [state, setState] = useNodeState<{
-        input: string;
-        previews: string[];
-    }>(
-        {
-            input: "",
-            previews: [],
-        },
-        data,
+    // Local list state (not part of the ABI input shape).
+    const [input, setInput] = useState("");
+    const [previews, setPreviews] = useState<string[]>(
+        () => (data as any).previews ?? [],
     );
-    const { input, previews } = state;
 
     const handleAdd = () => {
         if (!input.trim()) return;
         const urlMatch = input.trim().match(/https?:\/\/[^\s]+/);
         if (!urlMatch) return;
-
-        const url = urlMatch[0];
-        setState({
-            input: "",
-            previews: [...previews, url],
-        });
+        setPreviews((prev) => [...prev, urlMatch[0]]);
+        setInput("");
     };
 
     const handleRemovePreview = (index: number) => {
-        setState({
-            input: "",
-            previews: previews.filter((_, i) => i !== index),
-        });
+        setPreviews((prev) => prev.filter((_, i) => i !== index));
     };
 
-    // Augment data with feature for BaseNode
-    const dataWithFeature = useMemo(
-        () => ({
-            ...data,
-            feature: "link",
-        }),
-        [data],
+    // Local-array batch: emit one ABI prompt per stored URL, preserving any
+    // fields `buildPrompts` already merged (e.g. plugin routing).
+    const transformPrompts = useCallback(
+        (built: Record<string, unknown>[]) => {
+            const base = built[0] ?? {};
+            return previews.map((url) => ({ ...base, url }));
+        },
+        [previews],
     );
 
-    // Single source of workflow configuration
-    const getWorkflowConfig = useCallback(() => {
-        return {
-            ...workflowConfig,
-            title: t("addLink"),
-            icon: <LinkIcon className="h-5 w-5" />,
-            executeLabel: t("extractContent"),
-            executeDisabled: previews.length === 0,
-            getPrompts: () => previews.map((url) => ({ url })),
-            isInputNode: true,
-        };
-    }, [previews, t]);
-
     return (
-        <BaseNode
+        <AbiNodeShell
+            feature="link"
+            form={form}
             selected={selected}
             className="min-w-[480px]"
-            data={dataWithFeature}
-            workflowConfig={getWorkflowConfig()}
+            data={data}
+            title={t("addLink")}
+            icon={<LinkIcon className="h-5 w-5" />}
+            executeLabel={t("extractContent")}
+            executeDisabled={previews.length === 0}
+            isInputNode
+            transformPrompts={transformPrompts}
         >
-            {/* Body */}
             <div className="p-4 space-y-2">
-                {/* Preview card */}
                 {previews.length > 0 && (
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         {previews.map((preview, idx) => (
@@ -125,7 +91,6 @@ const AddLinkNode = ({
                     </div>
                 )}
 
-                {/* Input */}
                 <div
                     className="flex gap-2 items-center nodrag"
                     onPointerDown={(e) => e.stopPropagation()}
@@ -133,7 +98,7 @@ const AddLinkNode = ({
                     <Input
                         placeholder={t("linkPlaceholder")}
                         value={input}
-                        onChange={(e) => setState({ input: e.target.value })}
+                        onChange={(e) => setInput(e.target.value)}
                         className="flex-1 h-10"
                         onKeyDown={(e) => {
                             if (e.key === "Enter" && !e.shiftKey) {
@@ -152,7 +117,7 @@ const AddLinkNode = ({
                     </Button>
                 </div>
             </div>
-        </BaseNode>
+        </AbiNodeShell>
     );
 };
 

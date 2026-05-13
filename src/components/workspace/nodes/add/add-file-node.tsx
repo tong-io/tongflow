@@ -1,7 +1,7 @@
-import { type NodeProps, useNodeId } from "@xyflow/react";
+import { Handle, type NodeProps, Position, useNodeId } from "@xyflow/react";
 import { FileText, Library, Upload } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { memo, useCallback, useState } from "react";
+import { memo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -10,7 +10,7 @@ import { useMultipleUpload } from "@/hooks/use-upload";
 import { logger } from "@/lib/logger";
 import { cn } from "@/lib/utils";
 import { LibInput } from "../../share/lib-input";
-import { BaseNode } from "../base/base-node";
+import { BaseNodeShell } from "../base/base-node-shell";
 
 // Upload component
 const UploadTab = () => {
@@ -122,23 +122,17 @@ const AddFileNode = ({ selected, data }: NodeProps) => {
         }
     };
 
-    // Get base configuration
-    const getWorkflowConfig = useCallback(() => {
-        return {
-            feature: "",
-            title: t("addDocument"),
-            icon: <FileText className="h-5 w-5" />,
-            isInputNode: true,
-        };
-    }, [t]);
-
     return (
-        <BaseNode
+        <BaseNodeShell
             selected={selected}
             className="min-w-[360px]"
             data={data}
-            workflowConfig={getWorkflowConfig()}
+            title={t("addDocument")}
+            icon={<FileText className="h-5 w-5" />}
+            isInputNode
+            showPluginSelect={false}
         >
+            <Handle type="source" position={Position.Right} id="out:fileNode" />
             <div className="p-4 space-y-2">
                 <Tabs
                     value={activeTab}
@@ -176,7 +170,7 @@ const AddFileNode = ({ selected, data }: NodeProps) => {
                     </div>
                 </Tabs>
             </div>
-        </BaseNode>
+        </BaseNodeShell>
     );
 };
 

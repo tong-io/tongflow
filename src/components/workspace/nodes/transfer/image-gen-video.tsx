@@ -3,207 +3,100 @@ import { useNodeId, useNodesData, useStore } from "@xyflow/react";
 import { Atom } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { memo, useMemo } from "react";
+
 import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import {
+    type AspectRatio,
     VIDEO_ASPECT_RATIOS,
     VIDEO_DURATIONS,
 } from "@/constants/media-options";
-import { useNodeState } from "@/hooks/use-node-data";
+import { useAbiForm } from "@/hooks/use-abi-form";
+import { batchOn } from "@/lib/abi/sources";
 import type { TongflowPluginNodeProps } from "@/types/tongflow-flow";
 import { coerceBaseNodeData } from "@/utils/flow-node-data";
-import {
-    configParam,
-    type GetPromptsContext,
-    staticParam,
-    upstreamParam,
-} from "@/utils/node-execution-config";
+import { AbiNodeShell } from "../base/abi-node-shell";
 import { AspectRatioPicker } from "../base/aspect-ratio-picker";
-import { BaseNode } from "../base/base-node";
 import { DurationPicker } from "../base/duration-picker";
 import { NodeTextarea } from "../base/node-textarea";
-
-// Workflow execution config (BaseNode wires this automatically)
-const workflowConfig = {
-    feature: "image-gen-video",
-    outputType: "videoNode",
-    outputField: "fileKeys" as const,
-    supportsBatch: true,
-    batchParam: "image",
-    paramMappings: {
-        image: {
-            sources: [upstreamParam("imageNode", "fileKeys[0]")],
-            required: true,
-        },
-        text: {
-            sources: [
-                upstreamParam("textNode", "texts[0]"),
-                configParam("query"),
-                staticParam(""),
-            ],
-        },
-        width: {
-            sources: [
-                configParam("selectedAspectRatio.width"),
-                staticParam(1024),
-            ],
-        },
-        height: {
-            sources: [
-                configParam("selectedAspectRatio.height"),
-                staticParam(576),
-            ],
-        },
-        duration: {
-            sources: [configParam("duration"), staticParam(5)],
-        },
-    },
-};
 
 const ImageGenVideoNode = ({
     selected,
     data,
 }: TongflowPluginNodeProps<"image-gen-video", "imageGenVideoNode">) => {
+    const t = useTranslations("Workspace.nodes");
+    const tActions = useTranslations("Workspace.nodes.actions");
+    const form = useAbiForm("image-gen-video");
+
     const ids = data.ids ?? [];
     const localFileKeys = data.fileKeys ?? [];
     const nodeId = useNodeId();
-
-    // Get edge and node information to detect upstream connections
     const nodeLookup = useStore((state) => state.nodeLookup);
     const edges = useStore((state) => state.edges as Edge[]);
 
-    // If ids are present, get data from associated nodes (composition mode)
     const fromNodes = useNodesData(ids);
     const imageNode = fromNodes.find((node) => node.type === "imageNode");
     const textNode = fromNodes.find((node) => node.type === "textNode");
 
-    // Get fileKeys and texts from the composite node or directly from data
     const fileKeys: string[] = useMemo(() => {
-        if (imageNode) {
-            return coerceBaseNodeData(imageNode.data).fileKeys || [];
-        }
+        if (imageNode) return coerceBaseNodeData(imageNode.data).fileKeys || [];
         return localFileKeys;
     }, [imageNode, localFileKeys]);
 
     const upstreamTexts: string[] = useMemo(() => {
-        if (textNode) {
-            return coerceBaseNodeData(textNode.data).texts || [];
-        }
+        if (textNode) return coerceBaseNodeData(textNode.data).texts || [];
         return data.texts || [];
     }, [textNode, data]);
 
-    // Determine whether there is upstream text input in composition mode
     const hasCompositeText = upstreamTexts && upstreamTexts.length > 0;
 
-    // Detect whether upstream imageNode and textNode connections exist (including composition mode)
     const { hasUpstreamText, upstreamImageHasData } = useMemo(() => {
-        // Composition mode already has data
         if (ids.length > 0) {
             return {
-                hasUpstreamImage: !!imageNode,
                 hasUpstreamText: hasCompositeText,
                 upstreamImageHasData: fileKeys.length > 0,
             };
         }
-
         if (!nodeId)
-            return {
-                hasUpstreamImage: false,
-                hasUpstreamText: false,
-                upstreamImageHasData: false,
-            };
-
+            return { hasUpstreamText: false, upstreamImageHasData: false };
         const incomingEdges = edges.filter((edge) => edge.target === nodeId);
-        let hasImage = false;
         let hasText = false;
         let imageHasData = false;
-
         for (const edge of incomingEdges) {
             const sourceNode = nodeLookup.get(edge.source);
             if (sourceNode?.type === "imageNode") {
-                hasImage = true;
                 const nodeKeys = coerceBaseNodeData(sourceNode.data).fileKeys;
-                if (nodeKeys?.length) {
-                    imageHasData = true;
-                }
+                if (nodeKeys?.length) imageHasData = true;
             }
-            if (sourceNode?.type === "textNode") {
-                hasText = true;
-            }
+            if (sourceNode?.type === "textNode") hasText = true;
         }
+        return { hasUpstreamText: hasText, upstreamImageHasData: imageHasData };
+    }, [nodeId, nodeLookup, edges, ids, hasCompositeText, fileKeys]);
 
-        return {
-            hasUpstreamImage: hasImage,
-            hasUpstreamText: hasText,
-            upstreamImageHasData: imageHasData,
-        };
-    }, [nodeId, nodeLookup, edges, ids, imageNode, hasCompositeText, fileKeys]);
+    const width = (form.state.width as number | undefined) ?? 1024;
+    const height = (form.state.height as number | undefined) ?? 576;
+    const durationSeconds = (form.state.duration as number | undefined) ?? 5;
+    const currentRatio: AspectRatio =
+        VIDEO_ASPECT_RATIOS.find(
+            (r) => r.width === width && r.height === height,
+        ) ?? VIDEO_ASPECT_RATIOS[0];
 
-    // Use the hook to manage state persistence
-    const [state, setState] = useNodeState(
-        {
-            query: "",
-            selectedAspectRatio: VIDEO_ASPECT_RATIOS[0],
-            duration: 5,
-        },
-        data,
-    );
-    const { query, selectedAspectRatio, duration } = state;
-    const durationSeconds = useMemo(() => {
-        const n =
-            typeof duration === "number" && !Number.isNaN(duration)
-                ? duration
-                : Number.parseFloat(String(duration));
-        return Number.isFinite(n) && n > 0 ? n : 5;
-    }, [duration]);
-    const t = useTranslations("Workspace.nodes");
-    const tActions = useTranslations("Workspace.nodes.actions");
-
-    // Determine whether the button should be disabled: local image data exists or upstream image data exists
     const hasImageData = fileKeys?.length > 0 || upstreamImageHasData;
 
     return (
-        <BaseNode
+        <AbiNodeShell
+            feature="image-gen-video"
+            sourceSpec={{ image: batchOn() }}
+            form={form}
             selected={selected}
             className="min-w-[480px]"
             data={data}
-            workflowConfig={{
-                ...workflowConfig,
-                title: t("titles.imageGenVideo"),
-                icon: <Atom className="h-5 w-5" />,
-                executeLabel: tActions("generateVideo"),
-                executeDisabled: !hasImageData,
-                getPrompts: (ctx?: GetPromptsContext) => {
-                    const upstreamKeys = ctx?.getAllUpstreamData(
-                        "imageNode",
-                        "fileKeys",
-                    ) as string[] | undefined;
-                    const keys =
-                        upstreamKeys && upstreamKeys.length > 0
-                            ? upstreamKeys
-                            : fileKeys;
-                    const ctxUpstreamTexts = ctx?.getAllUpstreamData(
-                        "textNode",
-                        "texts",
-                    ) as string[] | undefined;
-                    const text =
-                        ctxUpstreamTexts && ctxUpstreamTexts.length > 0
-                            ? ctxUpstreamTexts[0]
-                            : hasCompositeText
-                              ? upstreamTexts[0]
-                              : query;
-                    return keys.map((fileKey) => ({
-                        image: fileKey,
-                        text,
-                        width: selectedAspectRatio.width,
-                        height: selectedAspectRatio.height,
-                        duration: durationSeconds,
-                    }));
-                },
-            }}
+            title={t("titles.imageGenVideo")}
+            icon={<Atom className="h-5 w-5" />}
+            executeLabel={tActions("generateVideo")}
+            executeDisabled={!hasImageData}
         >
             <div className="p-4 space-y-4">
-                {/* Video description input - show a preview when composition-mode upstream text exists */}
                 {hasCompositeText ? (
                     <Card className="p-3 bg-muted/50">
                         <div className="space-y-2">
@@ -231,17 +124,16 @@ const ImageGenVideoNode = ({
                                 ? t("common.fromUpstreamText")
                                 : t("common.descOptional")
                         }
-                        value={query}
-                        onChange={(value) => setState({ query: value })}
+                        {...form.bind("text")}
                         disabled={hasUpstreamText}
                     />
                 )}
 
                 <AspectRatioPicker
                     ratios={VIDEO_ASPECT_RATIOS}
-                    value={selectedAspectRatio}
+                    value={currentRatio}
                     onChange={(ratio) =>
-                        setState({ selectedAspectRatio: ratio })
+                        form.patch({ width: ratio.width, height: ratio.height })
                     }
                     showSize
                 />
@@ -249,10 +141,10 @@ const ImageGenVideoNode = ({
                 <DurationPicker
                     durations={VIDEO_DURATIONS}
                     value={String(durationSeconds)}
-                    onChange={(dur) => setState({ duration: Number(dur) })}
+                    onChange={(dur) => form.set("duration", Number(dur))}
                 />
             </div>
-        </BaseNode>
+        </AbiNodeShell>
     );
 };
 

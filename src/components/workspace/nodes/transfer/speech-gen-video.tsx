@@ -1,132 +1,61 @@
-import { useNodeId, useNodesData } from "@xyflow/react";
+import { useNodesData } from "@xyflow/react";
 import { Atom, Wand2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { memo, useMemo } from "react";
+
 import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import useFlow from "@/hooks/use-flow";
-import { useNodeState } from "@/hooks/use-node-data";
+import { useAbiForm } from "@/hooks/use-abi-form";
+import { handle } from "@/lib/abi/sources";
 import type { TongflowPluginNodeProps } from "@/types/tongflow-flow";
 import { coerceBaseNodeData } from "@/utils/flow-node-data";
-import {
-    configParam,
-    type GetPromptsContext,
-    upstreamParam,
-} from "@/utils/node-execution-config";
-import { BaseNode } from "../base/base-node";
+
+import { AbiNodeShell } from "../base/abi-node-shell";
 import { MediaThumbnail } from "../base/media-thumbnail";
 import { NodeTextarea } from "../base/node-textarea";
-
-const _DEFAULT_FEATURE = "speech-text-gen-video";
 
 const SpeechGenVideoNode = ({
     selected,
     data,
 }: TongflowPluginNodeProps<"speech-text-gen-video", "speechGenVideoNode">) => {
     const t = useTranslations("Workspace.nodes");
+    const form = useAbiForm("speech-text-gen-video");
     const ids = data.ids ?? [];
     const localFileKeys = data.fileKeys ?? [];
-    const _expands = useFlow((s) => s.expands);
-    const _id = useNodeId()!;
 
-    // If ids are present, get data from associated nodes (composition mode)
     const fromNodes = useNodesData(ids);
     const videoNode = fromNodes.find((node) => node.type === "videoNode");
     const textNode = fromNodes.find((node) => node.type === "textNode");
 
-    // Get fileKeys and texts from the composite node or directly from data
     const fileKeys: string[] = useMemo(() => {
-        if (videoNode) {
-            return coerceBaseNodeData(videoNode.data).fileKeys || [];
-        }
+        if (videoNode) return coerceBaseNodeData(videoNode.data).fileKeys || [];
         return localFileKeys;
     }, [videoNode, localFileKeys]);
 
     const upstreamTexts: string[] = useMemo(() => {
-        if (textNode) {
-            return coerceBaseNodeData(textNode.data).texts || [];
-        }
+        if (textNode) return coerceBaseNodeData(textNode.data).texts || [];
         return data.texts || [];
     }, [textNode, data]);
 
-    // Determine whether there is upstream text input
     const hasUpstreamTexts = upstreamTexts && upstreamTexts.length > 0;
-    // Get the prompt that will actually be used
-    const effectivePrompt = hasUpstreamTexts ? upstreamTexts[0] : "";
-
-    // Use the new hook to manage state persistence
-    const [state, setState] = useNodeState(
-        {
-            videoPrompt: "",
-        },
-        data,
-    );
-    const { videoPrompt } = state;
-
-    // No custom onTaskUpdate needed; BaseNode auto-expands `file_key` / `file_keys`.
-
-    const workflowConfig = {
-        feature: "speech-text-gen-video",
-        outputType: "videoNode",
-        outputField: "fileKeys" as const,
-        paramMappings: {
-            audio: {
-                sources: [
-                    upstreamParam("videoNode", "fileKeys[0]"),
-                ],
-                required: true,
-            },
-            text: {
-                sources: [configParam("videoPrompt", "")],
-            },
-        },
-    };
+    const videoPrompt = (form.state.text as string | undefined) ?? "";
 
     return (
-        <BaseNode
+        <AbiNodeShell
+            feature="speech-text-gen-video"
+            sourceSpec={{ audio: handle({ nodeType: "videoNode" }) }}
+            form={form}
             selected={selected}
             className="min-w-[480px]"
             data={data}
-            workflowConfig={{
-                ...workflowConfig,
-                title: t("titles.speechGenVideo"),
-                icon: <Atom className="h-5 w-5" />,
-                executeLabel: t("actions.generateAudio"),
-                executeDisabled:
-                    !(videoPrompt || hasUpstreamTexts) || !fileKeys?.length,
-                getPrompts: (ctx?: GetPromptsContext) => {
-                    const upstreamKeys = ctx?.getAllUpstreamData(
-                        "videoNode",
-                        "fileKeys",
-                    ) as string[] | undefined;
-                    const keys =
-                        upstreamKeys && upstreamKeys.length > 0
-                            ? upstreamKeys
-                            : fileKeys;
-
-                    // Prefer the latest text data from upstream nodes
-                    const ctxUpstreamTexts = ctx?.getAllUpstreamData(
-                        "textNode",
-                        "texts",
-                    ) as string[] | undefined;
-                    const text =
-                        ctxUpstreamTexts && ctxUpstreamTexts.length > 0
-                            ? ctxUpstreamTexts[0]
-                            : hasUpstreamTexts
-                              ? effectivePrompt
-                              : videoPrompt;
-
-                    return [
-                        {
-                            text,
-                            audio: keys[0],
-                        },
-                    ];
-                },
-            }}
+            title={t("titles.speechGenVideo")}
+            icon={<Atom className="h-5 w-5" />}
+            executeLabel={t("actions.generateAudio")}
+            executeDisabled={
+                !(videoPrompt || hasUpstreamTexts) || !fileKeys?.length
+            }
         >
             <div className="p-4 space-y-4">
-                {/* Media display area */}
                 <Card className="p-3">
                     <div className="space-y-2">
                         <Label className="text-sm font-medium text-muted-foreground">
@@ -149,7 +78,6 @@ const SpeechGenVideoNode = ({
                     </div>
                 </Card>
 
-                {/* Audio description input - show a preview when upstream text exists */}
                 {hasUpstreamTexts ? (
                     <Card className="p-3 bg-muted/50">
                         <div className="space-y-2">
@@ -175,12 +103,11 @@ const SpeechGenVideoNode = ({
                         icon={Wand2}
                         rows={4}
                         placeholder={t("speechGenVideo.audioPromptPlaceholder")}
-                        value={videoPrompt}
-                        onChange={(value) => setState({ videoPrompt: value })}
+                        {...form.bind("text")}
                     />
                 )}
             </div>
-        </BaseNode>
+        </AbiNodeShell>
     );
 };
 

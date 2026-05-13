@@ -2,6 +2,7 @@ import { Atom, Mic, Upload } from "lucide-react";
 import { useTranslations } from "next-intl";
 import type { ReactNode } from "react";
 import { memo, useState } from "react";
+
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import {
@@ -21,92 +22,48 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
-import { useNodeState } from "@/hooks/use-node-data";
+import { useAbiForm } from "@/hooks/use-abi-form";
+import { batchOn } from "@/lib/abi/sources";
 import { logger } from "@/lib/logger";
 import type { RfDataNodeProps } from "@/types/nodes";
-import {
-    configParam,
-    type GetPromptsContext,
-    staticParam,
-    upstreamParam,
-} from "@/utils/node-execution-config";
-import { BaseNode } from "../base/base-node";
+
+import { AbiNodeShell } from "../base/abi-node-shell";
 
 type ConvertVoiceRfProps = RfDataNodeProps<"convertVoiceNode">;
 
-const DEFAULT_FEATURE = "convert_voice";
-
-const voiceOptions = [
+const VOICE_OPTIONS = [
     { key: "female", value: "zh_famale_1.wav" },
     { key: "male", value: "zh_male_1.wav" },
-    // Can be extended based on the voices actually supported
 ];
-
-// Workflow execution config
-const workflowConfig = {
-    feature: DEFAULT_FEATURE,
-    outputType: "audioNode",
-    outputField: "fileKeys" as const,
-    supportsBatch: true,
-    batchParam: "sourceKey",
-    paramMappings: {
-        sourceKey: {
-            sources: [upstreamParam("audioNode", "fileKeys[0]")],
-            required: true,
-        },
-        targetKey: {
-            sources: [configParam("voice"), staticParam("zh_famale_1.wav")],
-        },
-    },
-};
 
 const ConvertVoiceNode = ({ selected, data }: ConvertVoiceRfProps) => {
     const t = useTranslations("Workspace.nodes");
+    const form = useAbiForm("convert_voice");
     const fileKeys = data.fileKeys;
 
-    // Use the new hook to manage state persistence
-    const [state, setState] = useNodeState(
-        {
-            voice: "zh_famale_1.wav",
-            speakers: voiceOptions,
-        },
-        data,
-    );
-    const { voice, speakers } = state;
+    const [extraSpeakers, setExtraSpeakers] = useState<
+        { key: string; value: string }[]
+    >([]);
+    const speakers = [...VOICE_OPTIONS, ...extraSpeakers];
+
+    const targetKey = (form.state.targetKey as string) ?? "zh_famale_1.wav";
 
     return (
-        <BaseNode
+        <AbiNodeShell
+            feature="convert_voice"
+            sourceSpec={{ sourceKey: batchOn({ nodeType: "audioNode" }) }}
+            form={form}
             selected={selected}
             data={data}
-            workflowConfig={{
-                ...workflowConfig,
-                title: t("titles.convertVoice"),
-                icon: <Atom className="h-5 w-5" />,
-                executeLabel: t("actions.startReplace"),
-                executeDisabled: !fileKeys?.length,
-                getPrompts: (ctx?: GetPromptsContext) => {
-                    const upstreamKeys = ctx?.getAllUpstreamData(
-                        "audioNode",
-                        "fileKeys",
-                    ) as string[] | undefined;
-                    const keys =
-                        upstreamKeys && upstreamKeys.length > 0
-                            ? upstreamKeys
-                            : fileKeys;
-                    return (
-                        keys?.map((fileKey) => ({
-                            sourceKey: fileKey,
-                            targetKey: voice,
-                        })) || []
-                    );
-                },
-            }}
+            title={t("titles.convertVoice")}
+            icon={<Atom className="h-5 w-5" />}
+            executeLabel={t("actions.startReplace")}
+            executeDisabled={!fileKeys?.length}
         >
             <Card
                 className="p-5 nodrag"
                 onPointerDown={(e) => e.stopPropagation()}
             >
-                {/* Voice selection dropdown button (styled version) */}
                 <div className="mb-4 flex flex-wrap items-center gap-3">
                     <label
                         htmlFor="voice-select"
@@ -115,8 +72,8 @@ const ConvertVoiceNode = ({ selected, data }: ConvertVoiceRfProps) => {
                         {t("convertVoice.voiceLabel")}
                     </label>
                     <Select
-                        value={voice}
-                        onValueChange={(value) => setState({ voice: value })}
+                        value={targetKey}
+                        onValueChange={(value) => form.set("targetKey", value)}
                     >
                         <SelectTrigger id="voice-select" className="w-36 h-9">
                             <SelectValue
@@ -145,13 +102,10 @@ const ConvertVoiceNode = ({ selected, data }: ConvertVoiceRfProps) => {
                             </Button>
                         }
                         onChange={(key) => {
-                            setState((prev) => ({
+                            setExtraSpeakers((prev) => [
                                 ...prev,
-                                speakers: [
-                                    ...prev.speakers,
-                                    { key: "", value: key },
-                                ],
-                            }));
+                                { key: "", value: key },
+                            ]);
                         }}
                     />
                     <SpeakerVoiceRecorder
@@ -166,18 +120,15 @@ const ConvertVoiceNode = ({ selected, data }: ConvertVoiceRfProps) => {
                             </Button>
                         }
                         onChange={(key) => {
-                            setState((prev) => ({
+                            setExtraSpeakers((prev) => [
                                 ...prev,
-                                speakers: [
-                                    ...prev.speakers,
-                                    { key: "", value: key },
-                                ],
-                            }));
+                                { key: "", value: key },
+                            ]);
                         }}
                     />
                 </div>
             </Card>
-        </BaseNode>
+        </AbiNodeShell>
     );
 };
 
@@ -191,11 +142,8 @@ const SpeakerVoiceUploader = ({
     onChange: (key: string) => void;
 }) => {
     const [_uploaded, setUploaded] = useState<boolean>(false);
-    const [_progress, _setProgress] = useState<number>(0);
 
     const doUpload = async (files: File[]) => {
-        // Upload logic is temporarily simplified
-        // The real implementation needs to call the upload API
         logger.debug("Uploading files:", files);
         setUploaded(true);
     };
@@ -232,7 +180,6 @@ export const SpeakerVoiceRecorder = ({
 
     const onFinish = async () => {
         if (!file) return;
-        // Recording upload logic is temporarily simplified
         logger.debug("Recording file:", file);
     };
 

@@ -1,91 +1,43 @@
 import { Atom } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { memo } from "react";
-import { useNodeState } from "@/hooks/use-node-data";
+
+import { useAbiForm } from "@/hooks/use-abi-form";
+import { collectAll } from "@/lib/abi/sources";
 import type { TongflowPluginNodeProps } from "@/types/tongflow-flow";
-import {
-    configParam,
-    type GetPromptsContext,
-    upstreamParam,
-} from "@/utils/node-execution-config";
-import { BaseNode } from "../base/base-node";
+
+import { AbiNodeShell } from "../base/abi-node-shell";
 import { NodeTextarea } from "../base/node-textarea";
-
-const DEFAULT_FEATURE = "drop-video";
-
-// Workflow execution config
-const workflowConfig = {
-    feature: DEFAULT_FEATURE,
-    outputType: "videoNode",
-    outputField: "fileKeys" as const,
-    supportsBatch: false,
-    paramMappings: {
-        fileKeys: {
-            sources: [upstreamParam("videoNode", "fileKeys")],
-            required: true,
-        },
-        query: {
-            sources: [configParam("query")],
-        },
-    },
-};
 
 const DropVideoNode = ({
     selected,
     data,
 }: TongflowPluginNodeProps<"drop-video", "dropVideoNode">) => {
     const t = useTranslations("Workspace.nodes.batch");
-    const _tNodes = useTranslations("Workspace.nodes");
+    const form = useAbiForm("drop-video", { videos: collectAll() });
     const fileKeys = data.fileKeys;
 
-    // Use the new hook to manage state persistence
-    const [state, setState] = useNodeState(
-        {
-            query: "",
-        },
-        data,
-    );
-    const { query } = state;
-
     return (
-        <BaseNode
+        <AbiNodeShell
+            feature="drop-video"
+            sourceSpec={{ videos: collectAll() }}
+            form={form}
             selected={selected}
             data={data}
-            workflowConfig={{
-                ...workflowConfig,
-                title: t("videoFilter"),
-                icon: <Atom className="h-5 w-5" />,
-                executeLabel: t("startFilter"),
-                executeDisabled: !fileKeys?.length,
-                getPrompts: (ctx?: GetPromptsContext) => {
-                    const upstreamKeys = ctx?.getAllUpstreamData(
-                        "videoNode",
-                        "fileKeys",
-                    );
-                    const finalKeys = upstreamKeys?.length
-                        ? upstreamKeys
-                        : fileKeys;
-                    return finalKeys?.length
-                        ? [
-                              {
-                                  fileKeys: finalKeys,
-                                  query,
-                              },
-                          ]
-                        : [];
-                },
-            }}
+            title={t("videoFilter")}
+            icon={<Atom className="h-5 w-5" />}
+            executeLabel={t("startFilter")}
+            executeDisabled={!fileKeys?.length}
         >
             <div className="p-4 space-y-4">
                 <NodeTextarea
                     cardClassName="p-5"
                     rows={6}
                     placeholder={t("describeRequirements")}
-                    value={query}
-                    onChange={(value) => setState({ query: value })}
+                    {...form.bind("query")}
                 />
             </div>
-        </BaseNode>
+        </AbiNodeShell>
     );
 };
 

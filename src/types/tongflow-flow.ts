@@ -16,7 +16,7 @@ type TongflowPluginSharedFields<S extends NodeSlot> = {
 
 /**
  * @param Extra — per-node UI-only fields not covered by `BaseNodeData` /
- *   ABI `SlotInput` (e.g. a rare legacy flag).
+ *   ABI `SlotInput` (e.g. a transient UI flag local to one node).
  */
 export type TongflowPluginNodeData<
     S extends NodeSlot,

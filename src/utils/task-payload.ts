@@ -137,17 +137,3 @@ export function normalizeTaskPayloadData(
     }
     return undefined;
 }
-
-export function pickMarkdownFromPayload(
-    d: Record<string, unknown> | undefined,
-): string | undefined {
-    if (!d) return undefined;
-    const m = d.markdown;
-    if (typeof m === "string" && m.length > 0) return m;
-    const res = d.result;
-    if (res && typeof res === "object") {
-        const rm = (res as Record<string, unknown>).markdown;
-        if (typeof rm === "string" && rm.length > 0) return rm;
-    }
-    return undefined;
-}

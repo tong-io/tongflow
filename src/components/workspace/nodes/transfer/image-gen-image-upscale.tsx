@@ -3,19 +3,16 @@
 import { Maximize2, Sparkles } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { memo } from "react";
+
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import { useNodeState } from "@/hooks/use-node-data";
+import { useAbiForm } from "@/hooks/use-abi-form";
+import { batchOn } from "@/lib/abi/sources";
 import { cn } from "@/lib/utils";
 import type { TongflowPluginNodeProps } from "@/types/tongflow-flow";
-import {
-    type GetPromptsContext,
-    upstreamParam,
-} from "@/utils/node-execution-config";
-import { BaseNode } from "../base/base-node";
 
-const DEFAULT_FEATURE = "image-upscale";
+import { AbiNodeShell } from "../base/abi-node-shell";
 
 type UpscaleTier = "1k" | "2k" | "4k";
 
@@ -28,60 +25,28 @@ const UPSCALE_TIERS: {
     { value: "4k", labelKey: "upscaleTier4k" },
 ];
 
-// Workflow execution config
-const workflowConfig = {
-    feature: DEFAULT_FEATURE,
-    outputType: "imageNode",
-    outputField: "fileKeys" as const,
-    supportsBatch: true,
-    batchParam: "image",
-    paramMappings: {
-        image: {
-            sources: [upstreamParam("imageNode", "fileKeys[0]")],
-            required: true,
-        },
-    },
-};
-
 const ImageGenImageUpscaleNode = ({
     selected,
     data,
 }: TongflowPluginNodeProps<"image-upscale", "imageGenImageUpscaleNode">) => {
     const t = useTranslations("Workspace.nodes");
+    const form = useAbiForm("image-upscale");
     const fileKeys = data.fileKeys ?? [];
 
-    const [state, setState] = useNodeState<{ resolution: UpscaleTier }>(
-        { resolution: "2k" },
-        data,
-    );
-    const { resolution } = state;
+    const resolution = (form.state.resolution as UpscaleTier) ?? "2k";
 
     return (
-        <BaseNode
+        <AbiNodeShell
+            feature="image-upscale"
+            sourceSpec={{ image: batchOn() }}
+            form={form}
             selected={selected}
             className="min-w-[480px]"
             data={data}
-            workflowConfig={{
-                ...workflowConfig,
-                title: t("titles.imageUpscale"),
-                icon: <Sparkles className="h-5 w-5" />,
-                executeLabel: t("actions.imageUpscale"),
-                executeDisabled: !fileKeys?.length,
-                getPrompts: (ctx?: GetPromptsContext) => {
-                    const upstreamKeys = ctx?.getAllUpstreamData(
-                        "imageNode",
-                        "fileKeys",
-                    ) as string[] | undefined;
-                    const keys =
-                        upstreamKeys && upstreamKeys.length > 0
-                            ? upstreamKeys
-                            : fileKeys;
-                    return keys.map((fileKey) => ({
-                        image: fileKey,
-                        resolution,
-                    }));
-                },
-            }}
+            title={t("titles.imageUpscale")}
+            icon={<Sparkles className="h-5 w-5" />}
+            executeLabel={t("actions.imageUpscale")}
+            executeDisabled={!fileKeys?.length}
         >
             <div className="p-4 pt-0 space-y-3">
                 <Card className="p-3">
@@ -101,7 +66,7 @@ const ImageGenImageUpscaleNode = ({
                                     }
                                     size="sm"
                                     onClick={() =>
-                                        setState({ resolution: tier.value })
+                                        form.set("resolution", tier.value)
                                     }
                                     className={cn(
                                         "h-auto py-2 px-1 flex flex-col gap-0.5 text-xs",
@@ -122,7 +87,7 @@ const ImageGenImageUpscaleNode = ({
                     </div>
                 </Card>
             </div>
-        </BaseNode>
+        </AbiNodeShell>
     );
 };
 

@@ -1,68 +1,70 @@
 /**
- * React Flow connection validation: matches by the node's "logical output type" against the upstream declarations in the target node's paramMappings.
+ * React Flow connection validation: logical output types, ABI schema checks,
+ * and optional duplicate-edge rules for single-slot text handles.
  */
 
 import type { Connection, Edge, Node } from "@xyflow/react";
+import { getAbiNodeRegistration } from "@/lib/abi/node-registry";
+import {
+    resolveSpec,
+    singleEdgeTextScalarTargetHandles,
+} from "@/lib/abi/resolve";
+import type { FieldSourceOverride } from "@/lib/abi/sources";
 import { tryAbiCompatibility } from "@/lib/connection-validator";
 import { DATA_NODE_TYPES } from "./executable-workflow";
-import {
-    getEffectiveNodeConfig,
-    getEffectiveOutputType,
-    normalizeFlowTargetHandle,
-} from "./flow-connection-shared";
-import type { NodeExecutionConfig } from "./node-execution-config";
+import { getEffectiveOutputType } from "./flow-connection-shared";
 
 export {
     ADD_NODE_OUTPUT_TYPE,
-    getEffectiveNodeConfig,
     getEffectiveOutputType,
-    normalizeFlowTargetHandle,
 } from "./flow-connection-shared";
 
-/** Text-to-music node: style / lyrics input handles (each handle allows only one edge) */
-export const TEXT_GEN_MUSIC_HANDLES = {
-    style: "in:style",
-    lyric: "in:lyric",
-} as const;
+function singleEdgeHandlesForTarget(targetNodeId: string): ReadonlySet<string> {
+    const reg = getAbiNodeRegistration(targetNodeId);
+    if (!reg) return new Set();
+    return new Set(
+        singleEdgeTextScalarTargetHandles(
+            reg.feature,
+            reg.sourceSpec as Record<string, FieldSourceOverride>,
+        ),
+    );
+}
 
-const SINGLE_EDGE_TARGET_HANDLES = new Set<string>([
-    TEXT_GEN_MUSIC_HANDLES.style,
-    TEXT_GEN_MUSIC_HANDLES.lyric,
-]);
-
-function collectUpstreamTypesFromConfig(
-    config: NodeExecutionConfig,
-): Set<string> {
+/** Set of upstream node types this target accepts on any handle. */
+function collectUpstreamTypesForTarget(targetNodeId: string): Set<string> {
+    const reg = getAbiNodeRegistration(targetNodeId);
+    if (!reg) return new Set();
+    const spec = resolveSpec(
+        reg.feature,
+        reg.sourceSpec as Record<string, FieldSourceOverride> | undefined,
+    );
     const out = new Set<string>();
-    const mappings = config.paramMappings ?? {};
-    for (const mapping of Object.values(mappings)) {
-        for (const src of mapping.sources ?? []) {
-            if (src.type === "upstream" && src.upstreamType) {
-                out.add(src.upstreamType);
-            }
-        }
+    for (const f of Object.values(spec.fields)) {
+        if (f.kind === "handle") out.add(f.nodeType);
     }
     return out;
 }
 
 /**
- * Check whether an incoming edge already occupies the same targetHandle (for single-slot handles such as in:style / in:lyric)
+ * Check whether an incoming edge already occupies the same targetHandle for
+ * handles that only allow a single connection (e.g. text-scalar `in:tags`).
  */
 export function hasDuplicateTargetHandle(
     edges: Edge[],
     connection: Connection,
 ): boolean {
+    const targetId = connection.target;
+    if (!targetId) return false;
     const th = connection.targetHandle;
-    if (!th || !SINGLE_EDGE_TARGET_HANDLES.has(th)) return false;
-    return edges.some(
-        (e) =>
-            e.target === connection.target &&
-            normalizeFlowTargetHandle(e.targetHandle) === th,
-    );
+    if (!th) return false;
+    const singleEdge = singleEdgeHandlesForTarget(targetId);
+    if (!singleEdge.has(th)) return false;
+    return edges.some((e) => e.target === targetId && e.targetHandle === th);
 }
 
 /**
- * Validate whether a connection is allowed. Unknown configurations are allowed by default to prevent unregistered nodes from being unable to connect.
+ * Validate whether a connection is allowed. Unknown configurations are allowed
+ * by default so unregistered or non-ABI nodes remain connectable.
  */
 export function isValidFlowConnection(
     connection: Connection,
@@ -79,9 +81,11 @@ export function isValidFlowConnection(
     const targetNode = nodes.find((n) => n.id === target);
     if (!sourceNode || !targetNode) return false;
 
-    const sourceData = (sourceNode.data as Record<string, unknown>) ?? {};
-    const targetData = (targetNode.data as Record<string, unknown>) ?? {};
-    const outType = getEffectiveOutputType(sourceNode.type, sourceData);
+    const outType = getEffectiveOutputType(
+        sourceNode.id,
+        sourceNode.type,
+        connection.sourceHandle,
+    );
 
     /** Must stay before ABI refinement (stricter behavioural guardrails). */
     if (!outType) return true;
@@ -93,28 +97,11 @@ export function isValidFlowConnection(
         return outType === targetType;
     }
 
-    // Text-to-music: semantic handles only accept text-type output
-    if (targetType === "textGenMusicNode") {
-        const th = connection.targetHandle;
-        if (
-            th === TEXT_GEN_MUSIC_HANDLES.style ||
-            th === TEXT_GEN_MUSIC_HANDLES.lyric
-        ) {
-            return outType === "textNode";
-        }
-    }
-
     const abiDecision = tryAbiCompatibility(connection, nodes);
     if (abiDecision !== undefined) return abiDecision;
 
-    const cfg = getEffectiveNodeConfig(targetType, targetData);
-    const allowed = cfg
-        ? collectUpstreamTypesFromConfig(cfg)
-        : new Set<string>();
-
-    if (!cfg || allowed.size === 0) {
-        return true;
-    }
+    const allowed = collectUpstreamTypesForTarget(targetNode.id);
+    if (allowed.size === 0) return true;
 
     return allowed.has(outType);
 }

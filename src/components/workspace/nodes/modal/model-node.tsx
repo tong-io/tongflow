@@ -1,5 +1,6 @@
 "use client";
 
+import { Handle, Position } from "@xyflow/react";
 import { Box, Download, Maximize2, RotateCcw, X } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { memo, useCallback, useEffect, useRef, useState } from "react";
@@ -10,7 +11,7 @@ import { DropdownMenuLabel } from "@/components/ui/dropdown-menu";
 import { useFileAsyncLoader } from "@/hooks/use-file-async-loader";
 import { logger } from "@/lib/logger";
 import type { RfDataNodeProps } from "@/types/nodes";
-import { BaseNode } from "../base/base-node";
+import { BaseNodeShell } from "../base/base-node-shell";
 import {
     NodeHeader,
     NodeHeaderActions,
@@ -1267,7 +1268,17 @@ const ModelNode = ({ selected, data }: ModelNodeRfProps) => {
 
     if (!fileKey) {
         return (
-            <BaseNode selected={selected}>
+            <BaseNodeShell selected={selected}>
+                <Handle
+                    type="target"
+                    position={Position.Left}
+                    id="in:modelNode"
+                />
+                <Handle
+                    type="source"
+                    position={Position.Right}
+                    id="out:modelNode"
+                />
                 <NodeHeader>
                     <NodeHeaderIcon>
                         <Box />
@@ -1279,13 +1290,23 @@ const ModelNode = ({ selected, data }: ModelNodeRfProps) => {
                         {t("noModelLoaded")}
                     </p>
                 </div>
-            </BaseNode>
+            </BaseNodeShell>
         );
     }
 
     return (
         <>
-            <BaseNode selected={selected}>
+            <BaseNodeShell selected={selected}>
+                <Handle
+                    type="target"
+                    position={Position.Left}
+                    id="in:modelNode"
+                />
+                <Handle
+                    type="source"
+                    position={Position.Right}
+                    id="out:modelNode"
+                />
                 <NodeHeader>
                     <NodeHeaderIcon>
                         <Box />
@@ -1351,7 +1372,7 @@ const ModelNode = ({ selected, data }: ModelNodeRfProps) => {
                         </div>
                     )}
                 </div>
-            </BaseNode>
+            </BaseNodeShell>
 
             {/* Full screen modal */}
             {isFullScreen && isSupported && fileKey && (

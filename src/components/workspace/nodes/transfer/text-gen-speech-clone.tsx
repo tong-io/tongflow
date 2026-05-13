@@ -1,37 +1,23 @@
-import { Atom, Ear, Mic, Upload } from "lucide-react";
+import { Atom, Mic, Upload } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
-import { memo, useCallback, useMemo, useRef } from "react";
+import { memo, useState } from "react";
+
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from "@/components/ui/select";
 import { SpeakerVoiceRecorder } from "@/components/workspace/speaker-voice-recorder";
 import {
     crawledVoiceOptions,
     type VoiceLanguage,
 } from "@/config/voice-options";
-import { useNodeState } from "@/hooks/use-node-data";
-import { getFileUrl } from "@/lib/file-url";
+import { useAbiForm } from "@/hooks/use-abi-form";
+import { batchOn } from "@/lib/abi/sources";
 import { logger } from "@/lib/logger";
 import type { TongflowPluginNodeProps } from "@/types/tongflow-flow";
-import {
-    configParam,
-    type GetPromptsContext,
-    upstreamParam,
-} from "@/utils/node-execution-config";
-import { BaseNode } from "../base/base-node";
-import {
-    getDefaultVoice,
-    getVoiceOptions,
-    TEXT_GEN_SPEECH_CLONE,
-    VOICE_LANG_LABELS,
-} from "./text-gen-speech-shared";
+
+import { AbiNodeShell } from "../base/abi-node-shell";
+import { VoiceLangSelect } from "../base/voice-lang-select";
+import { getDefaultVoice } from "./text-gen-speech-shared";
 
 const TextGenSpeechCloneNode = ({
     selected,
@@ -42,165 +28,51 @@ const TextGenSpeechCloneNode = ({
 >) => {
     const t = useTranslations("Workspace.nodes");
     const locale = useLocale();
+    const form = useAbiForm("text-gen-speech-clone");
     const texts = data.texts ?? [];
 
     const defaultVoiceLang: VoiceLanguage =
         locale in crawledVoiceOptions ? (locale as VoiceLanguage) : "zh";
+    const voice =
+        (form.state.ref_audio as string | undefined) ??
+        getDefaultVoice(defaultVoiceLang);
 
-    const getVoiceOpts = useCallback(
-        (lang: VoiceLanguage) => getVoiceOptions(lang, t),
-        [t],
-    );
+    const [extraSpeakers, setExtraSpeakers] = useState<
+        { label: string; value: string }[]
+    >([]);
 
-    const [state, setState] = useNodeState(
-        {
-            voiceLang: defaultVoiceLang,
-            voice: getDefaultVoice(defaultVoiceLang),
-            speakers: getVoiceOpts(defaultVoiceLang),
-        },
-        data,
-    );
-    const { voiceLang = defaultVoiceLang, voice } = state;
-
-    const voiceOptions = useMemo(
-        () => getVoiceOpts(voiceLang),
-        [voiceLang, getVoiceOpts],
-    );
-
-    const audioRef = useRef<HTMLAudioElement | null>(null);
-
-    const playVoicePreview = useCallback(() => {
-        if (!voice || voice === "default") return;
-        if (audioRef.current) {
-            audioRef.current.pause();
-            audioRef.current = null;
-        }
-        const audioUrl = getFileUrl(voice);
-        const audio = new Audio(audioUrl);
-        audioRef.current = audio;
-        audio.play().catch((err) => {
-            logger.error("Failed to play audio:", err);
-        });
-    }, [voice]);
-
-    const workflowConfig = {
-        feature: TEXT_GEN_SPEECH_CLONE,
-        outputType: "audioNode",
-        outputField: "fileKeys" as const,
-        supportsBatch: true,
-        batchParam: "text",
-        paramMappings: {
-            text: {
-                sources: [upstreamParam("textNode", "texts")],
-                required: true,
-            },
-            audio: {
-                sources: [configParam("voice", "zh_famale_1.wav")],
-            },
-        },
-    };
+    // ABI types `ref_audio`/`audio` as Asset objects, but the backend
+    // accepts a stored voice file_key here (e.g. "zh_famale_1.wav").
+    const setVoice = (v: string) =>
+        form.patch({ ref_audio: v as any, audio: v as any });
 
     return (
-        <BaseNode
+        <AbiNodeShell
+            feature="text-gen-speech-clone"
+            sourceSpec={{
+                text: batchOn({ nodeType: "textNode", path: "texts" }),
+            }}
+            form={form}
             selected={selected}
             className="min-w-[480px]"
             data={data}
-            workflowConfig={{
-                ...workflowConfig,
-                title: t("titles.textGenSpeechClone"),
-                icon: <Atom className="h-5 w-5" />,
-                executeLabel: t("actions.generateSpeech"),
-                executeDisabled: !texts?.length,
-                getPrompts: (ctx?: GetPromptsContext) => {
-                    const upstreamTexts = ctx?.getAllUpstreamData(
-                        "textNode",
-                        "texts",
-                    ) as string[] | undefined;
-                    const inputTexts =
-                        upstreamTexts && upstreamTexts.length > 0
-                            ? upstreamTexts
-                            : texts;
-
-                    const slot = TEXT_GEN_SPEECH_CLONE;
-                    return (
-                        inputTexts?.map((text) => ({
-                            text,
-                            nodeSlot: slot,
-                            audio: voice,
-                            ref_audio: voice,
-                        })) || []
-                    );
-                },
-            }}
+            title={t("titles.textGenSpeechClone")}
+            icon={<Atom className="h-5 w-5" />}
+            executeLabel={t("actions.generateSpeech")}
+            executeDisabled={!texts?.length}
         >
             <Card
                 className="p-5 nodrag"
                 onPointerDown={(e) => e.stopPropagation()}
             >
                 <div className="mb-4 flex flex-wrap items-center gap-3">
-                    <Select
-                        value={voiceLang}
-                        onValueChange={(value) => {
-                            const lang = value as VoiceLanguage;
-                            setState({
-                                voiceLang: lang,
-                                voice: getDefaultVoice(lang),
-                                speakers: getVoiceOpts(lang),
-                            });
-                        }}
-                    >
-                        <SelectTrigger className="w-28 h-9">
-                            <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                            {(
-                                Object.keys(
-                                    crawledVoiceOptions,
-                                ) as VoiceLanguage[]
-                            ).map((lang) => (
-                                <SelectItem key={lang} value={lang}>
-                                    {VOICE_LANG_LABELS[lang]}
-                                </SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
-                    <label
-                        htmlFor="voice-select-clone"
-                        className="text-sm text-muted-foreground whitespace-nowrap"
-                    >
-                        {t("common.voice")}：
-                    </label>
-                    <Select
+                    <VoiceLangSelect
+                        id="voice-select-clone"
                         value={voice}
-                        onValueChange={(value) => setState({ voice: value })}
-                    >
-                        <SelectTrigger
-                            id="voice-select-clone"
-                            className="w-36 h-9"
-                        >
-                            <SelectValue
-                                placeholder={t("common.selectVoice")}
-                            />
-                        </SelectTrigger>
-                        <SelectContent>
-                            {voiceOptions.map((opt) => (
-                                <SelectItem key={opt.value} value={opt.value}>
-                                    {opt.label}
-                                </SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
-                    <Button
-                        type="button"
-                        variant="ghost"
-                        size="icon"
-                        className="ml-1"
-                        title={t("common.previewVoice")}
-                        onClick={playVoicePreview}
-                        disabled={!voice || voice === "default"}
-                    >
-                        <Ear className="w-5 h-5 text-primary" />
-                    </Button>
+                        onChange={setVoice}
+                        defaultLang={defaultVoiceLang}
+                        extraSpeakers={extraSpeakers}
+                    />
                     <label className="cursor-pointer">
                         <input
                             type="file"
@@ -237,14 +109,11 @@ const TextGenSpeechCloneNode = ({
                             </Button>
                         }
                         onChange={(key) => {
-                            setState((prev) => ({
+                            setExtraSpeakers((prev) => [
                                 ...prev,
-                                voice: key,
-                                speakers: [
-                                    ...prev.speakers,
-                                    { label: key, value: key },
-                                ],
-                            }));
+                                { label: key, value: key },
+                            ]);
+                            setVoice(key);
                         }}
                     />
                 </div>
@@ -266,7 +135,7 @@ const TextGenSpeechCloneNode = ({
                     </div>
                 )}
             </Card>
-        </BaseNode>
+        </AbiNodeShell>
     );
 };
 

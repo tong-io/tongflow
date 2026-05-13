@@ -1,3 +1,4 @@
+import { Handle, Position } from "@xyflow/react";
 import {
     FileArchive,
     FileCode,
@@ -12,7 +13,7 @@ import { DropdownMenuLabel } from "@/components/ui/dropdown-menu";
 import { useFileAsyncLoader } from "@/hooks/use-file-async-loader";
 import { logger } from "@/lib/logger";
 import type { RfDataNodeProps } from "@/types/nodes";
-import { BaseNode } from "../base/base-node";
+import { BaseNodeShell } from "../base/base-node-shell";
 import {
     NodeHeader,
     NodeHeaderActions,
@@ -165,7 +166,9 @@ const FileNode = ({ selected, data }: FileNodeRfProps) => {
     };
 
     return (
-        <BaseNode selected={selected} count={count}>
+        <BaseNodeShell selected={selected} count={count}>
+            <Handle type="target" position={Position.Left} id="in:fileNode" />
+            <Handle type="source" position={Position.Right} id="out:fileNode" />
             <NodeHeader>
                 <NodeHeaderIcon>
                     <FileIcon />
@@ -228,7 +231,7 @@ const FileNode = ({ selected, data }: FileNodeRfProps) => {
                     </div>
                 )}
             </div>
-        </BaseNode>
+        </BaseNodeShell>
     );
 };
 

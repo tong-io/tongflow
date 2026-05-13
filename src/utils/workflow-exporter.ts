@@ -4,66 +4,44 @@
  */
 
 import type { Edge, Node } from "@xyflow/react";
+import type { NodeSlot } from "@/generated/abi";
+import { targetHandleId } from "@/lib/abi/handle-introspect";
+import {
+    type AbiNodeRegistration,
+    getAbiNodeRegistration,
+} from "@/lib/abi/node-registry";
+import {
+    deriveOutputType,
+    type ResolvedSpec,
+    resolveSpec,
+} from "@/lib/abi/resolve";
+import type { FieldSourceOverride } from "@/lib/abi/sources";
 import { logger } from "@/lib/logger";
-import { migrateWorkflowNodes } from "@/utils/migrate-workflow-nodes";
 import {
     DATA_NODE_TYPES,
     type DataNode,
     type ExecutableNode,
     type ExecutableWorkflow,
-    type ParamMapping,
+    type FieldBinding,
     type WorkflowInput,
     type WorkflowOutput,
 } from "./executable-workflow";
-import {
-    getNodeExecutionConfig,
-    type NodeExecutionConfig,
-    type ParamMappingConfig,
-} from "./node-execution-config";
 import { WorkflowParser } from "./workflow-parser";
 
 /**
- * Build a NodeExecutionConfig from node.data
- * The config in node.data is preferred so the backend does not need to rely on the front-end runtime registry
- * A config is returned only when both feature and paramMappings are present in node.data
+ * Resolve a node's ABI spec from the mount registry. Returns the registration +
+ * resolved spec, or undefined if the node isn't ABI-registered.
  */
-function getNodeConfigFromData(
-    nodeData: Record<string, unknown>,
-): NodeExecutionConfig | undefined {
-    const feature = nodeData.feature as string | undefined;
-    const paramMappings = nodeData.paramMappings as
-        | Record<string, ParamMappingConfig>
-        | undefined;
-
-    // Both feature and paramMappings must be present for the config to be considered complete
-    // Otherwise fall back to the registry for the full config
-    if (!feature || !paramMappings) return undefined;
-
-    return {
-        nodeType: "", // Not needed by the backend
-        feature,
-        outputType: nodeData.outputType as string | undefined,
-        outputField: nodeData.outputField as "fileKeys" | "texts" | undefined,
-        paramMappings,
-        supportsBatch: nodeData.supportsBatch as boolean | undefined,
-        batchParam: nodeData.batchParam as string | undefined,
-        label: nodeData.label as string | undefined,
-    };
-}
-
-/**
- * Get the node execution configuration (prefers the latest config from the registry; falls back to node.data)
- */
-function getEffectiveNodeConfig(
-    nodeType: string,
-    nodeData: Record<string, unknown>,
-): NodeExecutionConfig | undefined {
-    // Prefer the latest config from the runtime registry (front-end scenario)
-    const registryConfig = getNodeExecutionConfig(nodeType);
-    if (registryConfig) return registryConfig;
-
-    // Fall back to node.data (back-end scenario or unregistered nodes)
-    return getNodeConfigFromData(nodeData);
+function getNodeSpec(
+    nodeId: string,
+): { reg: AbiNodeRegistration; spec: ResolvedSpec } | undefined {
+    const reg = getAbiNodeRegistration(nodeId);
+    if (!reg) return undefined;
+    const spec = resolveSpec(
+        reg.feature as NodeSlot,
+        reg.sourceSpec as Record<string, FieldSourceOverride> | undefined,
+    );
+    return { reg, spec };
 }
 
 /* ========================================================================== */
@@ -117,10 +95,6 @@ function isAddNode(nodeType: string): boolean {
 /**
  * Get upstream node data
  */
-function normalizeEdgeTargetHandle(id: string | null | undefined): string {
-    return id ?? "a";
-}
-
 function getUpstreamNodeData(
     nodeId: string,
     nodes: Node[],
@@ -260,19 +234,23 @@ export class WorkflowExporter {
                     field: dataTypeInfo.outputField,
                 });
             } else {
-                // Output of executable nodes
-                const nodeData = (node.data as Record<string, unknown>) ?? {};
-                const mapping = getEffectiveNodeConfig(nodeType, nodeData);
-                if (mapping?.outputType) {
-                    outputs.push({
-                        name: `output_${nodeId.substring(0, 8)}`,
-                        type: mapping.outputType.replace(
-                            "Node",
-                            "",
-                        ) as WorkflowOutput["type"],
-                        nodeId,
-                        field: mapping.outputField ?? "output",
-                    });
+                // Output of executable nodes — ABI-derived
+                const ns = getNodeSpec(nodeId);
+                if (ns) {
+                    const { outputType, outputField } = deriveOutputType(
+                        ns.spec,
+                    );
+                    if (outputType) {
+                        outputs.push({
+                            name: `output_${nodeId.substring(0, 8)}`,
+                            type: outputType.replace(
+                                "Node",
+                                "",
+                            ) as WorkflowOutput["type"],
+                            nodeId,
+                            field: outputField ?? "fileKeys",
+                        });
+                    }
                 }
             }
         }
@@ -490,20 +468,15 @@ export class WorkflowExporter {
         }
 
         // AI generation mode; treat as an executable node
-        const mapping = getEffectiveNodeConfig(nodeType, nodeData);
-        if (!mapping) {
+        const ns = getNodeSpec(node.id);
+        if (!ns) {
             logger.warn(
                 `[WorkflowExporter] Unknown add node type: ${nodeType}`,
             );
             return {};
         }
 
-        const execNode = this.buildExecutableNode(
-            node,
-            mapping,
-            level,
-            nodeData,
-        );
+        const execNode = this.buildExecutableNode(node, ns, level, nodeData);
         return { executableNode: execNode };
     }
 
@@ -546,27 +519,23 @@ export class WorkflowExporter {
         node: Node,
         level: number,
     ): ExecutableNode | null {
-        const nodeType = node.type ?? "unknown";
-        const nodeData = (node.data as Record<string, unknown>) ?? {};
-
-        // Look up the node type mapping (prefer node.data; fall back to the registry)
-        const mapping = getEffectiveNodeConfig(nodeType, nodeData);
-        if (!mapping) {
+        const ns = getNodeSpec(node.id);
+        if (!ns) {
             logger.warn(
-                `[WorkflowExporter] Unknown node type: ${nodeType}, skipping...`,
+                `[WorkflowExporter] Unknown node type: ${node.type}, skipping...`,
             );
             return null;
         }
-
-        return this.buildExecutableNode(node, mapping, level, nodeData);
+        const nodeData = (node.data as Record<string, unknown>) ?? {};
+        return this.buildExecutableNode(node, ns, level, nodeData);
     }
 
     /**
-     * Build an executable node
+     * Build an executable node from an ABI registration + resolved spec.
      */
     private buildExecutableNode(
         node: Node,
-        mapping: NodeExecutionConfig,
+        ns: { reg: AbiNodeRegistration; spec: ResolvedSpec },
         level: number,
         nodeData: Record<string, unknown>,
     ): ExecutableNode {
@@ -577,48 +546,31 @@ export class WorkflowExporter {
             this.edges,
         );
 
-        // For Compose nodes, use the ids array
-        const ids = nodeData.ids as string[] | undefined;
+        const bindings = this.buildBindings(ns.spec, upstreamNodes, nodeData);
 
-        // Build the input parameter mapping
-        const inputMapping: Record<string, ParamMapping> = {};
+        const dependencies = Array.from(
+            new Set(upstreamNodes.map((u) => u.node.id)),
+        );
 
-        for (const [paramName, paramConfig] of Object.entries(
-            mapping.paramMappings ?? {},
-        )) {
-            const paramMapping = this.resolveParamMapping(
-                paramName,
-                paramConfig,
-                nodeData,
-                upstreamNodes,
-                ids,
-            );
-            inputMapping[paramName] = paramMapping;
-        }
-
-        // Get dependency nodes
-        const dependencies = upstreamNodes.map((u) => u.node.id);
-
-        // Get label and comment
-        const label = mapping.label ?? (nodeData.label as string | undefined);
+        const label = ns.reg.label ?? (nodeData.label as string | undefined);
         const comment = nodeData.comment as string | undefined;
         const locked = nodeData.locked as boolean | undefined;
 
-        // Find the directly connected downstream data node
         const downstreamDataNodeId = this.findDownstreamDataNode(node.id);
+
+        const { outputType, outputField } = deriveOutputType(ns.spec);
 
         return {
             id: node.id,
             type: nodeType,
-            feature: (nodeData.feature as string) ?? mapping.feature,
+            feature: ns.reg.feature,
             label,
             comment,
             locked,
-            inputMapping,
-            outputType: mapping.outputType ?? "file",
-            outputField: mapping.outputField ?? "fileKeys",
-            isBatch: mapping.supportsBatch,
-            batchParam: mapping.batchParam,
+            bindings,
+            batchField: ns.spec.batchField,
+            outputType: outputType ?? "fileNode",
+            outputField: outputField ?? "fileKeys",
             dependencies,
             level,
             downstreamDataNodeId,
@@ -627,135 +579,62 @@ export class WorkflowExporter {
     }
 
     /**
-     * Resolve parameter mapping
+     * Build per-field bindings for an executable node by walking its resolved
+     * ABI spec. Handle fields are wired to upstream edges via targetHandle.
      */
-    private resolveParamMapping(
-        paramName: string,
-        paramConfig: ParamMappingConfig,
-        nodeData: Record<string, unknown>,
+    private buildBindings(
+        spec: ResolvedSpec,
         upstreamNodes: {
             node: Node;
             edgeSourceHandle?: string;
             edgeTargetHandle?: string;
         }[],
-        ids?: string[],
-    ): ParamMapping {
-        for (const sourceConfig of paramConfig.sources) {
-            switch (sourceConfig.type) {
-                case "config": {
-                    const value = getValueFromPath(
-                        nodeData,
-                        sourceConfig.configPath!,
+        nodeData: Record<string, unknown>,
+    ): Record<string, FieldBinding> {
+        const out: Record<string, FieldBinding> = {};
+
+        for (const [field, fSpec] of Object.entries(spec.fields)) {
+            switch (fSpec.kind) {
+                case "handle": {
+                    const handleId = targetHandleId(field);
+                    const matches = upstreamNodes.filter(
+                        (u) => u.edgeTargetHandle === handleId,
                     );
-                    if (value !== undefined && value !== null && value !== "") {
-                        return {
-                            source: "static",
-                            value,
-                        };
-                    }
-                    break;
-                }
-
-                case "upstream": {
-                    // Find upstream nodes matching the type
-                    let upstreamNode: Node | undefined;
-                    let arrayIndex: number | undefined;
-
-                    if (ids && ids.length > 0) {
-                        // Compose node: find by type from the ids array
-                        const matchingNodes = this.nodes.filter(
-                            (n) =>
-                                ids.includes(n.id) &&
-                                n.type === sourceConfig.upstreamType,
-                        );
-
-                        // collectAll mode: collect data from all matching nodes
-                        if (
-                            sourceConfig.collectAll &&
-                            matchingNodes.length > 0
-                        ) {
-                            return {
-                                source: "upstream",
-                                nodeIds: matchingNodes.map((n) => n.id),
-                                field: sourceConfig.upstreamField,
-                            };
-                        }
-
-                        // If there are multiple nodes of the same type, determine which one to use
-                        // For scenarios like first/last frame, determine by parameter name
-                        if (matchingNodes.length > 1) {
-                            if (
-                                paramName.includes("start") ||
-                                paramName.includes("first")
-                            ) {
-                                upstreamNode = matchingNodes[0];
-                                arrayIndex = 0;
-                            } else if (
-                                paramName.includes("end") ||
-                                paramName.includes("second")
-                            ) {
-                                upstreamNode = matchingNodes[1];
-                                arrayIndex = 1;
-                            } else {
-                                upstreamNode = matchingNodes[0];
-                            }
-                        } else {
-                            upstreamNode = matchingNodes[0];
-                        }
-                    } else {
-                        // Transfer node: find from edge relationships (supports targetHandle to distinguish multi-slot)
-                        const upstream = upstreamNodes.find((u) => {
-                            if (u.node.type !== sourceConfig.upstreamType) {
-                                return false;
-                            }
-                            if (sourceConfig.targetHandle) {
-                                return (
-                                    normalizeEdgeTargetHandle(
-                                        u.edgeTargetHandle,
-                                    ) === sourceConfig.targetHandle
-                                );
-                            }
-                            return true;
-                        });
-                        upstreamNode = upstream?.node;
-                    }
-
-                    if (upstreamNode) {
-                        return {
-                            source: "upstream",
-                            nodeId: upstreamNode.id,
-                            field: sourceConfig.upstreamField,
-                            arrayIndex,
-                            edgeTargetHandle: sourceConfig.targetHandle,
-                        };
-                    }
-                    break;
-                }
-
-                case "static": {
-                    if (sourceConfig.defaultValue !== undefined) {
-                        return {
-                            source: "static",
-                            value: sourceConfig.defaultValue,
-                        };
-                    }
-                    break;
-                }
-
-                case "input": {
-                    return {
-                        source: "input",
-                        inputName: sourceConfig.inputName,
+                    if (matches.length === 0) break;
+                    const collect = fSpec.batch || fSpec.collect;
+                    out[field] = {
+                        kind: "handle",
+                        sources: matches.map((u) => ({
+                            fromNodeId: u.node.id,
+                            fromField: fSpec.path,
+                        })),
+                        targetHandle: handleId,
+                        ...(collect ? { collect: true as const } : {}),
                     };
+                    break;
+                }
+                case "config": {
+                    const value = getValueFromPath(nodeData, field);
+                    if (value !== undefined && value !== null && value !== "") {
+                        out[field] = { kind: "config", value };
+                    }
+                    break;
+                }
+                case "static": {
+                    out[field] = { kind: "static", value: fSpec.value };
+                    break;
+                }
+                case "input": {
+                    out[field] = {
+                        kind: "input",
+                        inputName: fSpec.inputName ?? field,
+                    };
+                    break;
                 }
             }
         }
 
-        // Default to a static empty value
-        return {
-            source: "static",
-            value: paramConfig.required ? undefined : "",
-        };
+        return out;
     }
 
     /**
@@ -881,7 +760,7 @@ export function parseWorkflowImportJson(raw: unknown): ParsedWorkflowImport {
     }
 
     return {
-        nodes: migrateWorkflowNodes(nodes as Node[]),
+        nodes: nodes as Node[],
         edges: edges as Edge[],
         name: typeof obj.name === "string" ? obj.name : undefined,
         description:

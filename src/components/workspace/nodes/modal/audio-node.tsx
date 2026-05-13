@@ -1,4 +1,4 @@
-import { useNodeId } from "@xyflow/react";
+import { Handle, Position, useNodeId } from "@xyflow/react";
 import { Download, Maximize2, Music, X } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { memo, useEffect, useRef, useState } from "react";
@@ -16,7 +16,7 @@ import {
 } from "@/hooks/use-file-async-loader";
 import { logger } from "@/lib/logger";
 import type { RfDataNodeProps } from "@/types/nodes";
-import { BaseNode } from "../base/base-node";
+import { BaseNodeShell } from "../base/base-node-shell";
 import {
     NodeHeader,
     NodeHeaderActions,
@@ -215,7 +215,17 @@ const AudioNode = ({ selected, data }: AudioNodeRfProps) => {
 
     return (
         <>
-            <BaseNode selected={selected} count={count}>
+            <BaseNodeShell selected={selected} count={count}>
+                <Handle
+                    type="target"
+                    position={Position.Left}
+                    id="in:audioNode"
+                />
+                <Handle
+                    type="source"
+                    position={Position.Right}
+                    id="out:audioNode"
+                />
                 <NodeHeader>
                     <NodeHeaderIcon>
                         <Music />
@@ -369,9 +379,9 @@ const AudioNode = ({ selected, data }: AudioNodeRfProps) => {
                         </div>
                     </div>
                 )}
-            </BaseNode>
+            </BaseNodeShell>
 
-            {/* Full screen modals - rendered outside BaseNode */}
+            {/* Full screen modals - rendered outside BaseNodeShell */}
             {isFullScreen && isSingle && keys[0] && (
                 <FullScreenAudioModal
                     fileKey={keys[0]}

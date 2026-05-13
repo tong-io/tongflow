@@ -9,12 +9,12 @@ import {
  * Resolves the active plugin for a node given its ABI feature/nodeSlot.
  *
  * Responsibilities:
- * - Ensures the plugins registry is fetched (so `nodePluginMap` populates on any BaseNode).
+ * - Ensures the plugins registry is fetched (so `nodePluginMap` populates on canvas).
  * - Reads pluginOptions from the scanned registry (`nodePluginMap[feature]`).
- * - Persists a default `pluginId` into node data before paint so getPrompts()
- *   closures always see a value (avoids run-before-effect race).
+ * - Persists a default `pluginId` into node data before paint so execution hooks
+ *   always see a value (avoids run-before-effect race).
  * - Provides `mergePluginIdIntoPrompts` to inject `routing.pluginId` into prompt
- *   objects that don't already carry one (legacy flat `pluginId` still honored when reading).
+ *   objects that don't already carry one.
  */
 export function useNodePluginResolver(feature: string | undefined) {
     usePluginsRegistry();
@@ -28,15 +28,9 @@ export function useNodePluginResolver(feature: string | undefined) {
         if (pluginOptions.length === 0) return;
         if (!defaultPluginIdFromRegistry) return;
         const n = getNode(nodeId);
-        const d = n?.data as
-            | { pluginId?: string; pluginRepo?: string }
-            | undefined;
+        const d = n?.data as { pluginId?: string } | undefined;
         const current = (
-            typeof d?.pluginId === "string"
-                ? d.pluginId
-                : typeof d?.pluginRepo === "string"
-                  ? d.pluginRepo
-                  : ""
+            typeof d?.pluginId === "string" ? d.pluginId : ""
         ).trim();
         if (current && pluginOptions.includes(current)) return;
         updateNodeData(nodeId, { pluginId: defaultPluginIdFromRegistry });
@@ -54,14 +48,10 @@ export function useNodePluginResolver(feature: string | undefined) {
             if (!nodeId) return prompts;
             const n = getNode(nodeId);
             const nodeData = (n?.data ?? undefined) as
-                | { pluginId?: string; pluginRepo?: string }
+                | { pluginId?: string }
                 | undefined;
             const fromData = (
-                typeof nodeData?.pluginId === "string"
-                    ? nodeData.pluginId
-                    : typeof nodeData?.pluginRepo === "string"
-                      ? nodeData.pluginRepo
-                      : ""
+                typeof nodeData?.pluginId === "string" ? nodeData.pluginId : ""
             ).trim();
             const validData = !fromData
                 ? ""
@@ -85,8 +75,6 @@ export function useNodePluginResolver(feature: string | undefined) {
                     return o;
                 }
                 if (typeof rec.pluginId === "string" && rec.pluginId.trim())
-                    return o;
-                if (typeof rec.pluginRepo === "string" && rec.pluginRepo.trim())
                     return o;
                 return {
                     ...rec,

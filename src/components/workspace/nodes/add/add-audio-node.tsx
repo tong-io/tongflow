@@ -1,8 +1,8 @@
-import { type NodeProps, useNodeId } from "@xyflow/react";
+import { Handle, type NodeProps, Position, useNodeId } from "@xyflow/react";
 import { Library, Mic, Music, Upload } from "lucide-react";
 import { useTranslations } from "next-intl";
 import type React from "react";
-import { memo, useCallback, useState } from "react";
+import { memo, useState } from "react";
 import { AudioRecorderWithVisualizer } from "@/components/ui/audio-recorder";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -11,7 +11,7 @@ import useFlow from "@/hooks/use-flow";
 import { useMultipleUpload, useUpload } from "@/hooks/use-upload";
 import { logger } from "@/lib/logger";
 import { LibInput } from "../../share/lib-input";
-import { BaseNode } from "../base/base-node";
+import { BaseNodeShell } from "../base/base-node-shell";
 
 // Recording component
 const RecordTab = () => {
@@ -208,30 +208,25 @@ export const AddAudioNode: React.FC<NodeProps> = ({ selected, data }) => {
     const updates = useFlow((s) => s.updates);
     const _activeTab = (data as any)?.activeTab || "upload";
 
-    // Save state on tab change
     const handleTabChange = (value: string) => {
-        if (id) {
-            updates(id, { ...data, activeTab: value });
-        }
+        if (id) updates(id, { ...data, activeTab: value });
     };
 
-    // Get base configuration
-    const getWorkflowConfig = useCallback(() => {
-        return {
-            feature: "",
-            title: t("addAudio"),
-            icon: <Music className="h-5 w-5" />,
-            isInputNode: true,
-        };
-    }, [t]);
-
     return (
-        <BaseNode
+        <BaseNodeShell
             selected={selected}
             className="min-w-[480px]"
             data={data}
-            workflowConfig={getWorkflowConfig()}
+            title={t("addAudio")}
+            icon={<Music className="h-5 w-5" />}
+            isInputNode
+            showPluginSelect={false}
         >
+            <Handle
+                type="source"
+                position={Position.Right}
+                id="out:audioNode"
+            />
             <div className="p-4 space-y-2">
                 <Tabs
                     defaultValue={(data as any)?.activeTab || "upload"}
@@ -284,7 +279,7 @@ export const AddAudioNode: React.FC<NodeProps> = ({ selected, data }) => {
                     </div>
                 </Tabs>
             </div>
-        </BaseNode>
+        </BaseNodeShell>
     );
 };
 

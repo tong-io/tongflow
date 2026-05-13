@@ -62,7 +62,7 @@ export type NodeHeaderProps = HTMLAttributes<HTMLElement>;
 
 /**
  * A container for a consistent header layout intended to be used inside the
- * `<BaseNode />` component.
+ * `<BaseNodeShell />` component.
  */
 export const NodeHeader = forwardRef<HTMLElement, NodeHeaderProps>(
     ({ className, ...props }, ref) => {

@@ -17,7 +17,6 @@ import {
 import { v4 } from "uuid";
 import { create } from "zustand";
 import { DATA_NODE_TYPES } from "@/utils/executable-workflow";
-import { migrateWorkflowNodes } from "@/utils/migrate-workflow-nodes";
 
 // True when React Flow reports a persisted data/input node type
 function isDataNode(nodeType: string): boolean {
@@ -185,9 +184,8 @@ export const useFlow = create<FlowState>((set, get) => ({
         debouncedSaveEdges(edges);
     },
     setNodes: (nodes) => {
-        const migrated = migrateWorkflowNodes(nodes);
-        set({ nodes: migrated });
-        debouncedSaveNodes(migrated);
+        set({ nodes });
+        debouncedSaveNodes(nodes);
     },
     setEdges: (edges) => {
         set({ edges });
@@ -365,7 +363,7 @@ export const useFlow = create<FlowState>((set, get) => ({
             }
         }
 
-        const allNodes = migrateWorkflowNodes(updatedNodes.concat(newNodes));
+        const allNodes = updatedNodes.concat(newNodes);
         set({
             nodes: allNodes,
             edges: [...edges],
@@ -442,7 +440,7 @@ export const useFlow = create<FlowState>((set, get) => ({
             .filter(Boolean) as Edge[];
 
         const allEdges = edges.concat(newEdges);
-        const allNodes = migrateWorkflowNodes(nodes.concat([newNode]));
+        const allNodes = nodes.concat([newNode]);
 
         set({
             nodes: allNodes,

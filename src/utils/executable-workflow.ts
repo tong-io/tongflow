@@ -10,39 +10,24 @@ import type { Edge, Node } from "@xyflow/react";
 /* ========================================================================== */
 
 /**
- * Parameter source type
+ * Source for a single ABI input field. Discriminated by `kind`.
+ *  - `handle`: comes from one or more upstream nodes via a target Handle
+ *  - `config`: literal value harvested from the node's own form/config
+ *  - `static`: literal value declared via the sourceSpec `staticValue` helper
+ *  - `input`: workflow-level input, supplied at execution time
  */
-export type ParamSource =
-    | "static" // Static value; use value directly
-    | "upstream" // From the output of an upstream node
-    | "input" // User input (provided at workflow execution time)
-    | "config"; // Node configuration item
-
-/**
- * Parameter mapping definition
- */
-export interface ParamMapping {
-    /** Parameter source */
-    source: ParamSource;
-    /** Upstream node ID (required when source is "upstream") */
-    nodeId?: string;
-    /** Multiple upstream node IDs (used in collectAll mode) */
-    nodeIds?: string[];
-    /** Upstream node output field (required when source is "upstream"), e.g. "fileKeys[0]", "texts", "fileKeys" */
-    field?: string;
-    /** Static value (used when source is "static") */
-    value?: unknown;
-    /** Input parameter name (used when source is "input"; identifies the workflow input) */
-    inputName?: string;
-    /** Config field path (used when source is "config") */
-    configPath?: string;
-    /** Whether this is an array; if so, execution runs for each element */
-    isArray?: boolean;
-    /** Array index (if a specific element of the array is needed) */
-    arrayIndex?: number;
-    /** Incoming edge target handle (corresponds to canvas edge.targetHandle in multi-slot scenarios) */
-    edgeTargetHandle?: string;
-}
+export type FieldBinding =
+    | {
+          kind: "handle";
+          sources: { fromNodeId: string; fromField: string }[];
+          /** RF target handle id (`in:<field>`). */
+          targetHandle: string;
+          /** True for batch / collect-all handles (multi-source allowed). */
+          collect?: true;
+      }
+    | { kind: "config"; value: unknown }
+    | { kind: "static"; value: unknown }
+    | { kind: "input"; inputName: string };
 
 /**
  * Executable node definition
@@ -50,26 +35,24 @@ export interface ParamMapping {
 export interface ExecutableNode {
     /** Node ID */
     id: string;
-    /** Node type */
+    /** RF node type (`textGenImageNode`, etc.) */
     type: string;
-    /** Backend API feature identifier */
+    /** ABI feature identifier (slot) */
     feature: string;
     /** Node display name (used for mobile execution progress display) */
     label?: string;
-    /** Node comment (used for mobile execution progress display) */
+    /** Node comment */
     comment?: string;
-    /** Whether the node is locked (locked nodes cannot be edited during mobile execution) */
+    /** Whether the node is locked */
     locked?: boolean;
-    /** Input parameter mapping */
-    inputMapping: Record<string, ParamMapping>;
-    /** Output type */
+    /** ABI input field → resolved binding */
+    bindings: Record<string, FieldBinding>;
+    /** Field that drives batch expansion (from sourceSpec batchOn). */
+    batchField?: string;
+    /** ABI-derived primary output channel (RF type, e.g. `imageNode`). */
     outputType: string;
-    /** Output field */
+    /** Output field name (`fileKeys` or `texts`). */
     outputField: "fileKeys" | "texts";
-    /** Whether this is batch execution (executes separately for each element in the array) */
-    isBatch?: boolean;
-    /** Array parameter name for batch execution */
-    batchParam?: string;
     /** IDs of upstream dependency nodes */
     dependencies: string[];
     /** Execution level (used to determine parallel execution groups) */

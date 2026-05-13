@@ -1,4 +1,4 @@
-import { type NodeProps, useNodeId } from "@xyflow/react";
+import { Handle, type NodeProps, Position, useNodeId } from "@xyflow/react";
 import {
     Camera,
     Image as ImageIcon,
@@ -7,7 +7,7 @@ import {
     Upload,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
-import React, { memo, useCallback, useRef, useState } from "react";
+import React, { memo, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
     Dialog,
@@ -24,7 +24,7 @@ import { useMultipleUpload, useUpload } from "@/hooks/use-upload";
 import { logger } from "@/lib/logger";
 import { cn } from "@/lib/utils";
 import { LibInput } from "../../share/lib-input";
-import { BaseNode } from "../base/base-node";
+import { BaseNodeShell } from "../base/base-node-shell";
 
 // File upload component
 const UploadTab = () => {
@@ -412,23 +412,21 @@ export const AddImageNode: React.FC<NodeProps> = ({ selected, data }) => {
         }
     };
 
-    // Get base configuration
-    const getWorkflowConfig = useCallback(() => {
-        return {
-            feature: "",
-            title: t("addImage"),
-            icon: <ImageIcon className="h-5 w-5" />,
-            isInputNode: true,
-        };
-    }, [t]);
-
     return (
-        <BaseNode
+        <BaseNodeShell
             selected={selected}
             className="min-w-[480px]"
             data={data}
-            workflowConfig={getWorkflowConfig()}
+            title={t("addImage")}
+            icon={<ImageIcon className="h-5 w-5" />}
+            isInputNode
+            showPluginSelect={false}
         >
+            <Handle
+                type="source"
+                position={Position.Right}
+                id="out:imageNode"
+            />
             <div className="p-4 space-y-2">
                 <Tabs
                     defaultValue={(data as any)?.activeTab || "upload"}
@@ -509,7 +507,7 @@ export const AddImageNode: React.FC<NodeProps> = ({ selected, data }) => {
                     </div>
                 </Tabs>
             </div>
-        </BaseNode>
+        </BaseNodeShell>
     );
 };
 

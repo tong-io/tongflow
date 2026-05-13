@@ -19,7 +19,13 @@ export type TongflowAbiNode = z.infer<typeof AbiNodeSchema>;
 
 export interface ResolvedOutputRoute {
     sourceField: string;
-    nodeType: "videoNode" | "audioNode" | "imageNode" | "textNode";
+    nodeType:
+        | "videoNode"
+        | "audioNode"
+        | "imageNode"
+        | "textNode"
+        | "modelNode"
+        | "fileNode";
     dataField: "fileKeys" | "texts";
     expandEach: boolean;
     itemValuePath?: string;
@@ -33,6 +39,8 @@ const REF_TO_NODE_TYPE: Record<
     VideoRef: "videoNode",
     AudioRef: "audioNode",
     ImageRef: "imageNode",
+    ModelRef: "modelNode",
+    FileRef: "fileNode",
 };
 
 type JsonSchema = Record<string, unknown>;
@@ -73,6 +81,17 @@ export function resolveAbiOutputMappings(
                     itemValuePath: "file_key",
                 });
             }
+            continue;
+        }
+
+        // Primitive string output → single text route.
+        if (schema.type === "string") {
+            routes.push({
+                sourceField: field,
+                nodeType: "textNode",
+                dataField: "texts",
+                expandEach: false,
+            });
             continue;
         }
 
@@ -120,13 +139,13 @@ export function resolveAbiOutputMappings(
                 continue;
             }
 
-            // array of strings with x-expand-each -> textNode
-            if (items.type === "string" && expandEach) {
+            // array of strings → textNode (single combined if !expandEach, one-per if x-expand-each)
+            if (items.type === "string") {
                 routes.push({
                     sourceField: field,
                     nodeType: "textNode",
                     dataField: "texts",
-                    expandEach: true,
+                    expandEach,
                 });
             }
         }

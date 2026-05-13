@@ -1,125 +1,58 @@
-import { useNodesData } from "@xyflow/react";
 import { Video } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { memo, useEffect, useRef, useState } from "react";
+import { memo } from "react";
+
 import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
+import { useAbiForm } from "@/hooks/use-abi-form";
+import { collectAll } from "@/lib/abi/sources";
 import type { TongflowPluginNodeProps } from "@/types/tongflow-flow";
-import { upstreamParam } from "@/utils/node-execution-config";
-import { BaseNode } from "../base/base-node";
-import { MediaThumbnail } from "../base/media-thumbnail";
 
-// Workflow execution config
-const workflowConfig = {
-    feature: "concat-videos",
-    outputType: "videoNode",
-    outputField: "fileKeys" as const,
-    supportsBatch: false,
-    paramMappings: {
-        fileKeys: {
-            sources: [upstreamParam("videoNode", "fileKeys")],
-            required: true,
-        },
-    },
-};
+import { AbiNodeShell } from "../base/abi-node-shell";
+import { MediaThumbnail } from "../base/media-thumbnail";
 
 const ConcatVideoNode = ({
     selected,
     data,
 }: TongflowPluginNodeProps<"concat-videos", "concatVideoNode">) => {
     const t = useTranslations("Workspace.nodes");
-    const ids = data.ids ?? [];
-    const fromNodes = useNodesData(ids);
+    const form = useAbiForm("concat-videos", {
+        // Concat all upstream videoNodes' fileKeys into the `videos` array.
+        videos: collectAll(),
+    });
 
-    // Get all connected video nodes
-    const videoNodes = fromNodes.filter((node) => node.type === "videoNode");
-
-    // Collect fileKeys from all videos
-    const videoFileKeys = videoNodes.flatMap(
-        (node) => (node.data as any)?.fileKeys || [],
-    );
-
-    // Local ordering state
-    const [orderedFileKeys, setOrderedFileKeys] =
-        useState<string[]>(videoFileKeys);
-    const dragIndexRef = useRef<number | null>(null);
-
-    // Reset order when upstream inputs change
-    useEffect(() => {
-        setOrderedFileKeys(videoFileKeys);
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [videoFileKeys.join(",")]);
-
-    const handleDragStart = (index: number) => {
-        dragIndexRef.current = index;
-    };
-
-    const handleDragOver = (e: React.DragEvent, index: number) => {
-        e.preventDefault();
-        if (dragIndexRef.current === null || dragIndexRef.current === index)
-            return;
-        const newKeys = [...orderedFileKeys];
-        const [dragged] = newKeys.splice(dragIndexRef.current, 1);
-        newKeys.splice(index, 0, dragged);
-        dragIndexRef.current = index;
-        setOrderedFileKeys(newKeys);
-    };
-
-    const handleDragEnd = () => {
-        dragIndexRef.current = null;
-    };
+    // The displayed list comes from form state if present (set after exec)
+    // or remains empty in the editor view; runtime concat-collects from edges.
+    const videoFileKeys = (data.fileKeys ?? []) as string[];
 
     return (
-        <BaseNode
+        <AbiNodeShell
+            feature="concat-videos"
+            sourceSpec={{ videos: collectAll() }}
+            form={form}
             selected={selected}
             className="min-w-[480px]"
             data={data}
-            workflowConfig={{
-                ...workflowConfig,
-                title: t("titles.concatVideo"),
-                icon: <Video className="h-5 w-5" />,
-                executeLabel: t("actions.concatVideo"),
-                executeDisabled: orderedFileKeys.length === 0,
-                getPrompts: () =>
-                    orderedFileKeys.length > 0
-                        ? [
-                              {
-                                  videos: orderedFileKeys,
-                              },
-                          ]
-                        : [],
-            }}
+            title={t("titles.concatVideo")}
+            icon={<Video className="h-5 w-5" />}
+            executeLabel={t("actions.concatVideo")}
         >
             <div className="p-4 space-y-4">
-                {/* Media display area */}
                 <Card className="p-3">
                     <div className="space-y-2">
                         <Label className="text-sm font-medium text-muted-foreground">
                             {t("compose.videoFiles")} ({videoFileKeys.length})
                         </Label>
                         <div className="flex flex-wrap gap-4">
-                            {orderedFileKeys.length > 0 ? (
-                                orderedFileKeys.map((fileKey, index) => (
-                                    <div
+                            {videoFileKeys.length > 0 ? (
+                                videoFileKeys.map((fileKey, index) => (
+                                    <MediaThumbnail
                                         key={`${fileKey}-${index}`}
-                                        draggable
-                                        onDragStart={(e) => {
-                                            e.stopPropagation();
-                                            handleDragStart(index);
-                                        }}
-                                        onDragOver={(e) =>
-                                            handleDragOver(e, index)
-                                        }
-                                        onDragEnd={handleDragEnd}
-                                        className="nodrag cursor-grab active:opacity-50 transition-opacity"
-                                    >
-                                        <MediaThumbnail
-                                            fileKey={fileKey}
-                                            label={`${t("compose.video")} ${index + 1}`}
-                                            type="video"
-                                            loadingText={t("compose.loading")}
-                                        />
-                                    </div>
+                                        fileKey={fileKey}
+                                        label={`${t("compose.video")} ${index + 1}`}
+                                        type="video"
+                                        loadingText={t("compose.loading")}
+                                    />
                                 ))
                             ) : (
                                 <p className="text-xs text-red-500">
@@ -130,7 +63,7 @@ const ConcatVideoNode = ({
                     </div>
                 </Card>
             </div>
-        </BaseNode>
+        </AbiNodeShell>
     );
 };
 
