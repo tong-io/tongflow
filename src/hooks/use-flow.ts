@@ -16,7 +16,7 @@ import {
 } from "@xyflow/react";
 import { v4 } from "uuid";
 import { create } from "zustand";
-import { DATA_NODE_TYPES } from "@/utils/executable-workflow";
+import { DATA_NODE_TYPES } from "@/lib/workflow/executable-workflow";
 
 // True when React Flow reports a persisted data/input node type
 function isDataNode(nodeType: string): boolean {

@@ -1,7 +1,7 @@
 import "server-only";
 
 import type { NodeSlot } from "@/generated/abi";
-import { getPluginConfig } from "@/lib/plugins-registry.server";
+import { getPluginConfig } from "@/lib/plugins/plugins-registry.server";
 import type { PluginExecRequest, PluginExecResult } from "./types";
 
 export async function executePlugin<S extends NodeSlot = NodeSlot>(

@@ -9,7 +9,7 @@ import { SpeakerVoiceRecorder } from "@/components/workspace/speaker-voice-recor
 import {
     crawledVoiceOptions,
     type VoiceLanguage,
-} from "@/config/voice-options";
+} from "@/constants/voice-options";
 import { useAbiForm } from "@/hooks/use-abi-form";
 import { batchOn } from "@/lib/abi/sources";
 import { logger } from "@/lib/logger";

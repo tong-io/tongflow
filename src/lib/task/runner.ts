@@ -13,6 +13,9 @@ import {
 } from "@/constants/task-status";
 import { getDb, tasks } from "@/db";
 import { ABI_NODES, type NodeSlot } from "@/generated/abi";
+import { logger } from "@/lib/logger";
+import { executePlugin } from "@/lib/plugin-executor/execute";
+import { prepareAssetInput } from "@/lib/plugin-executor/prepare-asset-input.server";
 import {
     AbiValidationError,
     extractAbiBusinessInput,
@@ -23,12 +26,9 @@ import {
     validateSlotInput,
     validateSlotOutput,
     workflowTaskFailureEnvelope,
-} from "@/lib/abi-schema-validate";
-import { logger } from "@/lib/logger";
-import { executePlugin } from "@/lib/plugin-executor/execute";
-import { prepareAssetInput } from "@/lib/plugin-executor/prepare-asset-input.server";
-import { resolveRoutingPluginId } from "@/lib/task-prompt-routing";
-import { notifyTask, registerTask, removeTask } from "./task-emitter";
+} from "@/lib/schema/abi-schema-validate";
+import { resolveRoutingPluginId } from "@/lib/task/prompt-routing";
+import { notifyTask, registerTask, removeTask } from "./emitter";
 
 export function isNodeSlot(s: string): s is NodeSlot {
     return Object.hasOwn(ABI_NODES, s);

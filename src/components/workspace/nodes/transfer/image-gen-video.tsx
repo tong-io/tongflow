@@ -13,8 +13,8 @@ import {
 } from "@/constants/media-options";
 import { useAbiForm } from "@/hooks/use-abi-form";
 import { batchOn } from "@/lib/abi/sources";
+import { coerceBaseNodeData } from "@/lib/workflow/flow-node-data";
 import type { TongflowPluginNodeProps } from "@/types/tongflow-flow";
-import { coerceBaseNodeData } from "@/utils/flow-node-data";
 import { AbiNodeShell } from "../base/abi-node-shell";
 import { AspectRatioPicker } from "../base/aspect-ratio-picker";
 import { DurationPicker } from "../base/duration-picker";

@@ -10,7 +10,7 @@ import {
     singleEdgeTextScalarTargetHandles,
 } from "@/lib/abi/resolve";
 import type { FieldSourceOverride } from "@/lib/abi/sources";
-import { tryAbiCompatibility } from "@/lib/connection-validator";
+import { tryAbiCompatibility } from "@/lib/workflow/connection-validator";
 import { DATA_NODE_TYPES } from "./executable-workflow";
 import { getEffectiveOutputType } from "./flow-connection-shared";
 

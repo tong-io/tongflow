@@ -5,12 +5,12 @@ import {
     modalPluginPythonEnv,
     requireModalTokenEnv,
     resolvePython,
-} from "@/lib/modal-deploy-workers";
+} from "@/lib/modal/deploy-workers";
 import {
     getModalPluginConfig,
     getPluginFileAbsolutePath,
     loadPluginsRegistry,
-} from "@/lib/plugins-registry.server";
+} from "@/lib/plugins/plugins-registry.server";
 
 /**
  * We intentionally do NOT cache download state locally.

@@ -38,7 +38,7 @@ import {
     type ParsedWorkflowImport,
     parseWorkflowImportJson,
     WORKFLOW_IMPORT_NO_CANVAS,
-} from "@/utils/workflow-exporter";
+} from "@/lib/workflow/exporter";
 
 function safeWorkflowFileName(name: string): string {
     const s = name.replace(/[/\\?%*:|"<>]/g, "_").trim();

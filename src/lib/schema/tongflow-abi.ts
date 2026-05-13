@@ -1,6 +1,6 @@
 import { z } from "zod";
-import { MIN_SUPPORTED_ABI_VERSION } from "@/lib/abi-version";
-import tongflowAbi from "../../config/tongflow.abi.json";
+import { MIN_SUPPORTED_ABI_VERSION } from "@/lib/schema/abi-version";
+import tongflowAbi from "../../../config/tongflow.abi.json";
 
 const AbiNodeSchema = z.object({
     nodeSlot: z.string().min(1),

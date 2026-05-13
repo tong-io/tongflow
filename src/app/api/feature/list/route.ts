@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import {
     getAllFeatures,
     getFeatureRegistryAliases,
-} from "@/lib/feature-registry.server";
+} from "@/lib/plugins/feature-registry.server";
 
 /**
  * GET /api/feature/list

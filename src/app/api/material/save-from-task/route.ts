@@ -11,7 +11,7 @@ import { logger } from "@/lib/logger";
 import {
     handleTaskCompletion,
     type TaskCompletionData,
-} from "@/services/task-completion";
+} from "@/lib/task/completion";
 
 interface SaveFromTaskRequest {
     taskId: string;

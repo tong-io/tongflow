@@ -6,7 +6,7 @@ import { spawn } from "node:child_process";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import { resolvePython } from "@/lib/modal-deploy-workers";
+import { resolvePython } from "@/lib/modal/deploy-workers";
 
 export function modalTomlPath(): string {
     return path.join(os.homedir(), ".modal.toml");

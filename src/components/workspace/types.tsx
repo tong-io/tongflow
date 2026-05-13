@@ -38,13 +38,13 @@ import VideoImageGenVideoMoveNode from "./nodes/compose/video-image-gen-video-mo
 import SplitTextNode from "./nodes/decompose/split-text";
 // Decompose nodes
 import SplitVideoNode from "./nodes/decompose/split-video";
-import AudioNode from "./nodes/modal/audio-node";
-import FileNode from "./nodes/modal/file-node";
+import AudioNode from "./nodes/modality/audio-node";
+import FileNode from "./nodes/modality/file-node";
 // Data nodes
-import ImageNode from "./nodes/modal/image-node";
-import ModelNode from "./nodes/modal/model-node";
-import TextNode from "./nodes/modal/text-node";
-import VideoNode from "./nodes/modal/video-node";
+import ImageNode from "./nodes/modality/image-node";
+import ModelNode from "./nodes/modality/model-node";
+import TextNode from "./nodes/modality/text-node";
+import VideoNode from "./nodes/modality/video-node";
 import AudioGenTextSpeechRecognizeNode from "./nodes/transfer/audio-gen-text-speech-recognize";
 import ConvertVoiceNode from "./nodes/transfer/convert-voice";
 import DenoiseAudioNode from "./nodes/transfer/denoise-audio";
@@ -231,8 +231,3 @@ export const NODE_CATEGORIES = {
     ],
     DECOMPOSE: ["splitVideoNode", "splitTextNode"],
 } as const;
-
-export const isModalNode = (type?: string | null): boolean => {
-    if (!type) return false;
-    return NODE_CATEGORIES.DATA.includes(type as any);
-};

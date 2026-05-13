@@ -11,7 +11,7 @@ import { logger } from "@/lib/logger";
 import {
     handleTaskCompletion,
     type TaskCompletionData,
-} from "@/services/task-completion";
+} from "@/lib/task/completion";
 
 // Webhook Token validation
 const WEBHOOK_TOKEN = process.env.TASK_WEBHOOK_TOKEN;

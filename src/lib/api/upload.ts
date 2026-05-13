@@ -7,7 +7,7 @@ import {
     type FileValidationResult,
     UploadValidationError,
     validateFile,
-} from "@/lib/upload-validation";
+} from "@/lib/upload/validation";
 import { apiClient } from "@/utils/api-client";
 
 export interface PresignedUrlResponse {

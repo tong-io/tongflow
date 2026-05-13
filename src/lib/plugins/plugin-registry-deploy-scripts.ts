@@ -5,7 +5,7 @@
 
 import fs from "node:fs";
 import path from "node:path";
-import { loadPluginsRegistry } from "@/lib/plugins-registry.server";
+import { loadPluginsRegistry } from "@/lib/plugins/plugins-registry.server";
 
 /**
  * Paths to plugin deploy entry scripts for plugins registered with runner `modal`

@@ -5,9 +5,9 @@
  */
 
 import { useEffect, useRef, useState } from "react";
-import { getGlobalFileQueue, type LoadPriority } from "@/lib/file-loader-queue";
-import { getFileUrl } from "@/lib/file-url";
-import { getGlobalFileCache } from "@/lib/file-url-cache";
+import { getGlobalFileQueue, type LoadPriority } from "@/lib/file/loader-queue";
+import { getFileUrl } from "@/lib/file/url";
+import { getGlobalFileCache } from "@/lib/file/url-cache";
 
 export interface UseFileAsyncLoaderOptions {
     priority?: LoadPriority;

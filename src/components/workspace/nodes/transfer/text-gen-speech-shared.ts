@@ -1,7 +1,7 @@
 import {
     crawledVoiceOptions,
     type VoiceLanguage,
-} from "@/config/voice-options";
+} from "@/constants/voice-options";
 
 export const TEXT_GEN_SPEECH_CLONE = "text-gen-speech-clone";
 export const TEXT_GEN_SPEECH_PRESET = "text-gen-speech-preset";

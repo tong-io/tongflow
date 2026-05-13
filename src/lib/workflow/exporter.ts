@@ -26,7 +26,7 @@ import {
     type WorkflowInput,
     type WorkflowOutput,
 } from "./executable-workflow";
-import { WorkflowParser } from "./workflow-parser";
+import { WorkflowParser } from "./parser";
 
 /**
  * Resolve a node's ABI spec from the mount registry. Returns the registration +

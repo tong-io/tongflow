@@ -1,4 +1,4 @@
-import { extractAbiBusinessInput } from "@/lib/abi-schema-validate";
+import { extractAbiBusinessInput } from "@/lib/schema/abi-schema-validate";
 
 /**
  * Resolve plugin id from nested `routing.pluginId` or flat `prompt.pluginId`.

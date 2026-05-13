@@ -1,5 +1,5 @@
 import type { PossibleNode } from "@/hooks/use-flow";
-import type { ResolvedOutputRoute } from "@/lib/tongflow-abi";
+import type { ResolvedOutputRoute } from "@/lib/schema/tongflow-abi";
 
 type ExpandsFn = (nodeId: string | null, nodes: PossibleNode[]) => string[];
 

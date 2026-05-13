@@ -4,7 +4,7 @@ Source file: `config/tongflow.abi.json`.
 
 ## `version` field
 
-- The top-level `version` is an **integer** shared by TypeScript ([`src/lib/tongflow-abi.ts`](../src/lib/tongflow-abi.ts)), the codegen script ([`scripts/gen-abi-types.ts`](../scripts/gen-abi-types.ts)), and Python ([`tongflow/abi.py`](../../tongflow-sdk/tongflow/abi.py)).
+- The top-level `version` is an **integer** shared by TypeScript ([`src/lib/schema/tongflow-abi.ts`](../src/lib/schema/tongflow-abi.ts)), the codegen script ([`scripts/gen-abi-types.ts`](../scripts/gen-abi-types.ts)), and Python ([`tongflow/abi.py`](../../tongflow-sdk/tongflow/abi.py)).
 - **Minimum supported**: `MIN_SUPPORTED_ABI_VERSION` in TypeScript and Python (currently `1`). Files with `version < 1` fail at load/codegen.
 
 ## Compatibility policy

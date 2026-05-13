@@ -33,9 +33,7 @@ next-env.d.ts
 # local Python venv (optional, e.g. pip install modal)
 .venv/
 
-# PyPI publish helper venv (scripts/publish-tongflow-pypi.sh)
-sdk/.venv-pypi/
-
+# runtime-installed plugin packages (see docs/plugins.md)
 plugins/
 
 .claude/

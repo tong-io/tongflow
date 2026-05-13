@@ -25,7 +25,7 @@ import {
 import { Waterfall } from "@/components/ui/waterfall";
 import { useFlow } from "@/hooks/use-flow";
 import { listWorkflows, type Workflow } from "@/lib/api/workspace";
-import { getFileUrl } from "@/lib/file-url";
+import { getFileUrl } from "@/lib/file/url";
 import { logger } from "@/lib/logger";
 import { formatDate } from "@/utils/date-utils";
 

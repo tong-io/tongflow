@@ -73,12 +73,6 @@
     },
     "overrides": [
         {
-            "includes": ["src/lib/legacy-plugin-id-map.ts"],
-            "formatter": {
-                "enabled": false
-            }
-        },
-        {
             "includes": ["**/*.css"],
             "linter": {
                 "rules": {

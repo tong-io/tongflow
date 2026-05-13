@@ -21,7 +21,7 @@ import {
     AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
-import { isModalNode } from "@/constants/modal-nodes";
+import { isModalityNode } from "@/constants/modality-nodes";
 import useFlow from "@/hooks/use-flow";
 import { cn } from "@/lib/utils";
 import type { BaseNodeData } from "@/types/nodes";
@@ -169,7 +169,7 @@ export const BaseNodeShell = forwardRef<HTMLDivElement, BaseNodeShellProps>(
                                 !isInCombo &&
                                 "ring-2 ring-blue-500 shadow-xl",
                             comboMode &&
-                                isModalNode(nodeType) &&
+                                isModalityNode(nodeType) &&
                                 isInCombo &&
                                 "ring-2 ring-primary shadow-lg shadow-primary/20",
                             className,

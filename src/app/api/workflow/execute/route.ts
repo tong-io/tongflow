@@ -8,9 +8,9 @@ import { nanoid } from "nanoid";
 import { type NextRequest, NextResponse } from "next/server";
 import { getDb } from "@/db";
 import { tasks, workflows } from "@/db/schema";
-import { getFeatureByName } from "@/lib/feature-registry.server";
 import { logger } from "@/lib/logger";
-import type { ExecutableWorkflow } from "@/utils/executable-workflow";
+import { getFeatureByName } from "@/lib/plugins/feature-registry.server";
+import type { ExecutableWorkflow } from "@/lib/workflow/executable-workflow";
 
 const DEFAULT_CONCURRENT_TASKS = 3;
 

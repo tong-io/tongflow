@@ -4,7 +4,7 @@ import path from "node:path";
 import type { JSONSchema7 } from "json-schema";
 
 import { ABI_NODES, type NodeSlot } from "@/generated/abi";
-import { readUploadFileByFileKey } from "@/utils/file-utils";
+import { readUploadFileByFileKey } from "@/lib/file/file-utils";
 
 /**
  * Schema-driven server resolver: walks the input schema for `$ref: Asset` (single or array)

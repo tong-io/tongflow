@@ -19,7 +19,7 @@ import {
 } from "@/constants/task-status";
 import { createTask as apiCreateTask, updateTaskStatus } from "@/lib/api/task";
 import { logger } from "@/lib/logger";
-import { getTaskStopUrl, getTaskWaitUrl } from "@/lib/task-api-url";
+import { getTaskStopUrl, getTaskWaitUrl } from "@/lib/task/api-url";
 
 // SSE message shape for the `/api/task/wait` stream
 interface SSETaskMessage {

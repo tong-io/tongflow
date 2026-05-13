@@ -14,7 +14,7 @@
 #   TONGFLOW_UPLOAD_TESTPYPI=1 pnpm tongflow:publish
 #
 # Requires: Python >= 3.10 (prefers Homebrew python3.12; avoids Xcode python3.9 + PEP 668 issues).
-# Uses sdk/.venv-pypi for build tools (created automatically).
+# Uses a cache venv outside the repo (XDG_CACHE_HOME or ~/.cache/tongflow/pypi-venv) for build tools.
 
 set -euo pipefail
 
@@ -56,7 +56,9 @@ BASE_PY="$(pick_python)" || {
   exit 1
 }
 
-VENV="${PKG}/.venv-pypi"
+CACHE_BASE="${XDG_CACHE_HOME:-${HOME}/.cache}/tongflow"
+mkdir -p "${CACHE_BASE}"
+VENV="${CACHE_BASE}/pypi-venv"
 if [[ ! -x "${VENV}/bin/python" ]]; then
   "${BASE_PY}" -m venv "${VENV}"
 fi

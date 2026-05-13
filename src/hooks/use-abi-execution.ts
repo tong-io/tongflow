@@ -27,11 +27,14 @@ import {
 import type { FieldSourceOverride, SourceSpec } from "@/lib/abi/sources";
 import { validateAbiInput } from "@/lib/abi/validators";
 import { logger } from "@/lib/logger";
-import { getAbiNodeBySlot, resolveAbiOutputMappings } from "@/lib/tongflow-abi";
+import {
+    getAbiNodeBySlot,
+    resolveAbiOutputMappings,
+} from "@/lib/schema/tongflow-abi";
 import {
     applyResolvedOutputRoutes,
     normalizeTaskPayloadData,
-} from "@/utils/task-payload";
+} from "@/lib/task/payload";
 
 import type { UseAbiFormReturn } from "./use-abi-form";
 import { useNodePluginResolver } from "./use-node-plugin-resolver";

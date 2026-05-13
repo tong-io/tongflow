@@ -8,7 +8,7 @@ import type { NodeSlot } from "@/generated/abi";
 import {
     requireModalTokenEnv,
     resolvePython,
-} from "@/lib/modal-deploy-workers";
+} from "@/lib/modal/deploy-workers";
 import { convertAssetOutputsToFileRefs } from "@/lib/plugin-executor/convert-modal-output-fileref";
 import {
     modalTerminateAfterTimeouts,
@@ -20,8 +20,8 @@ import {
 import {
     getModalPluginConfig,
     getPluginFileAbsolutePath,
-} from "@/lib/plugins-registry.server";
-import { notifyTask } from "@/lib/task-emitter";
+} from "@/lib/plugins/plugins-registry.server";
+import { notifyTask } from "@/lib/task/emitter";
 import type { PluginExecRequest, PluginExecResult } from "../types";
 
 /** `modal run download` — must not hang forever if CLI or Hub stalls */

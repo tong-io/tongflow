@@ -23,8 +23,8 @@ import {
 import {
     crawledVoiceOptions,
     type VoiceLanguage,
-} from "@/config/voice-options";
-import { getFileUrl } from "@/lib/file-url";
+} from "@/constants/voice-options";
+import { getFileUrl } from "@/lib/file/url";
 import { logger } from "@/lib/logger";
 
 import {

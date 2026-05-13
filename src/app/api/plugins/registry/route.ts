@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { loadPluginsRegistry } from "@/lib/plugins-registry.server";
+import { loadPluginsRegistry } from "@/lib/plugins/plugins-registry.server";
 
 export const runtime = "nodejs";
 

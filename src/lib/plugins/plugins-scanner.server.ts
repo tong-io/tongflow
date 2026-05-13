@@ -5,7 +5,7 @@ import { delimiter, join } from "node:path";
 import {
     type PluginsRegistry,
     PluginsRegistrySchema,
-} from "@/lib/plugins-registry-schema";
+} from "@/lib/plugins/plugins-registry-schema";
 
 function pickPython(): string {
     const fromEnv = process.env.PYTHON?.trim() || process.env.PYTHON3?.trim();

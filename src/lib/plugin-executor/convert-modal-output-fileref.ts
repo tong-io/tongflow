@@ -1,7 +1,7 @@
 import type { JSONSchema7 } from "json-schema";
 
 import { ABI_NODES, type NodeSlot } from "@/generated/abi";
-import { saveFile } from "@/utils/file-utils";
+import { saveFile } from "@/lib/file/file-utils";
 
 const FILE_REF_REFS = new Set([
     "#/$defs/FileRef",

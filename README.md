@@ -221,7 +221,7 @@ This project is licensed under **AGPL-3.0**.
 
 ## Extending AI capabilities
 
-Feature metadata (model slots, handler routing keys, processing time hints) lives in [`config/features.default.json`](config/features.default.json). See [docs/feature-registry.md](docs/feature-registry.md) for overrides, validation (`pnpm validate-features`), and how this relates to task handlers and node allowlists.
+Feature metadata (model slots, handler routing keys) is derived at runtime from the ABI ([`config/tongflow.abi.json`](config/tongflow.abi.json)) plus the plugin scanner registry. Optional overrides come from `.tongflow/features.local.json` or the `FEATURES_CONFIG_PATH` env var. See [docs/feature-registry.md](docs/feature-registry.md) for the merge order and how this relates to task handlers and node allowlists.
 
 ## Star History
 

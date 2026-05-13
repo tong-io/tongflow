@@ -23,7 +23,7 @@ import type { FlowState } from "@/hooks/use-flow";
 import { useFlow } from "@/hooks/use-flow";
 import { useWorkflowRecovery } from "@/hooks/use-workflow-recovery";
 import { logger } from "@/lib/logger";
-import { isValidFlowConnection } from "@/utils/connection-rules";
+import { isValidFlowConnection } from "@/lib/workflow/connection-rules";
 import { ModeSwitch } from "./mode-switch";
 import SmartIsland from "./smart-island";
 import { TaskProgressToast } from "./task-progress-toast";

@@ -1,7 +1,7 @@
 import { useNodeId, useStore } from "@xyflow/react";
 import { CheckCircle, Circle } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { isModalNode } from "@/constants/modal-nodes";
+import { isModalityNode } from "@/constants/modality-nodes";
 import useFlow from "@/hooks/use-flow";
 import { cn } from "@/lib/utils";
 
@@ -18,7 +18,7 @@ export function NodeComboButton() {
         return node?.type;
     });
 
-    if (!comboMode || !isModalNode(nodeType)) return null;
+    if (!comboMode || !isModalityNode(nodeType)) return null;
 
     return (
         <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 z-[100] nodrag">

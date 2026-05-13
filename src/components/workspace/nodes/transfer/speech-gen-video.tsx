@@ -7,8 +7,8 @@ import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { useAbiForm } from "@/hooks/use-abi-form";
 import { handle } from "@/lib/abi/sources";
+import { coerceBaseNodeData } from "@/lib/workflow/flow-node-data";
 import type { TongflowPluginNodeProps } from "@/types/tongflow-flow";
-import { coerceBaseNodeData } from "@/utils/flow-node-data";
 
 import { AbiNodeShell } from "../base/abi-node-shell";
 import { MediaThumbnail } from "../base/media-thumbnail";

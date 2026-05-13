@@ -7,7 +7,7 @@
 
 import { spawn } from "node:child_process";
 import path, { delimiter } from "node:path";
-import { listModalRunnerDeployScriptsFromRegistry } from "@/lib/plugin-registry-deploy-scripts";
+import { listModalRunnerDeployScriptsFromRegistry } from "@/lib/plugins/plugin-registry-deploy-scripts";
 
 async function canRunModal(exe: string): Promise<boolean> {
     try {

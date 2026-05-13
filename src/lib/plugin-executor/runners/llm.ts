@@ -3,8 +3,8 @@ import "server-only";
 import { spawn } from "node:child_process";
 import { delimiter, join } from "node:path";
 import type { NodeSlot } from "@/generated/abi";
-import { getLlmPluginConfig } from "@/lib/plugins-registry.server";
-import { resolvePythonLite } from "@/lib/python-lite";
+import { getLlmPluginConfig } from "@/lib/plugins/plugins-registry.server";
+import { resolvePythonLite } from "@/lib/plugins/python-lite";
 import type { PluginExecRequest, PluginExecResult } from "../types";
 
 function normalizePromptForNodeSlot(

@@ -11,13 +11,13 @@ import {
     type FeatureDefinition,
     type FeatureRegistryBundle,
     validateFeatureRegistryBundle,
-} from "@/lib/feature-registry-schema";
-import { TONGFLOW_ABI_NODES } from "@/lib/tongflow-abi";
+} from "@/lib/plugins/feature-registry-schema";
+import { TONGFLOW_ABI_NODES } from "@/lib/schema/tongflow-abi";
 
 export type {
     FeatureDefinition,
     FeatureRegistryBundle,
-} from "@/lib/feature-registry-schema";
+} from "@/lib/plugins/feature-registry-schema";
 
 /** Placeholder until `/api/feature/list` hydrates the client store. */
 function deriveFallbackBundleFromAbiSlots(): FeatureRegistryBundle {

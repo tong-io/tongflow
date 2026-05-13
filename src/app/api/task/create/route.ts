@@ -4,11 +4,11 @@ import { getDb } from "@/db";
 import { tasks } from "@/db/schema";
 import { ABI_NODES, type NodeSlot } from "@/generated/abi";
 import { logger } from "@/lib/logger";
+import { getAbiNodeBySlot } from "@/lib/schema/tongflow-abi";
 import {
     buildPersistedTaskPrompt,
     resolveRoutingPluginId,
-} from "@/lib/task-prompt-routing";
-import { getAbiNodeBySlot } from "@/lib/tongflow-abi";
+} from "@/lib/task/prompt-routing";
 
 function isAbiNodeSlot(s: string): s is NodeSlot {
     return Object.hasOwn(ABI_NODES, s);

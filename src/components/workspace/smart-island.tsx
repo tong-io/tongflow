@@ -55,13 +55,13 @@ import { useTaskStore } from "@/hooks/use-task";
 import { saveFromTask } from "@/lib/api/material";
 import { saveWorkflow } from "@/lib/api/workspace";
 import { logger } from "@/lib/logger";
-import { getTaskStopUrl, getTaskWaitUrl } from "@/lib/task-api-url";
+import { getTaskStopUrl, getTaskWaitUrl } from "@/lib/task/api-url";
 import { cn } from "@/lib/utils";
-import { exportWorkflow } from "@/utils/workflow-exporter";
+import { exportWorkflow } from "@/lib/workflow/exporter";
 import type {
     NodeExecutionInfo,
     WorkflowExecutor,
-} from "@/utils/workflow-parser";
+} from "@/lib/workflow/parser";
 
 const selector = (state: FlowState) => ({
     nodes: state.nodes,

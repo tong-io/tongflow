@@ -19,7 +19,7 @@ import {
     WorkflowStatus,
 } from "@/constants/task-status";
 import { logger } from "@/lib/logger";
-import { getTaskWaitUrl } from "@/lib/task-api-url";
+import { getTaskWaitUrl } from "@/lib/task/api-url";
 import { useTaskStore } from "./use-task";
 
 interface UseWorkflowRecoveryOptions {

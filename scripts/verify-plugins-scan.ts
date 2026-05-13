@@ -7,7 +7,7 @@ import { execFileSync } from "node:child_process";
 import { existsSync } from "node:fs";
 import { delimiter, join } from "node:path";
 
-import { PluginsRegistrySchema } from "../src/lib/plugins-registry-schema";
+import { PluginsRegistrySchema } from "../src/lib/plugins/plugins-registry-schema";
 
 const pluginsRoot = join(process.cwd(), "plugins");
 

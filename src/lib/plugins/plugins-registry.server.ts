@@ -8,8 +8,8 @@ import type {
     ModalPluginConfig,
     PluginConfig,
     PluginsRegistry,
-} from "@/lib/plugins-registry-schema";
-import { runPluginsScanner } from "@/lib/plugins-scanner.server";
+} from "@/lib/plugins/plugins-registry-schema";
+import { runPluginsScanner } from "@/lib/plugins/plugins-scanner.server";
 
 let cached: PluginsRegistry | null = null;
 let watcher: FSWatcher | null = null;

@@ -31,7 +31,7 @@ import {
     type MaterialType,
     toggleFavorite,
 } from "@/lib/api/material";
-import { getFileUrl } from "@/lib/file-url";
+import { getFileUrl } from "@/lib/file/url";
 import { logger } from "@/lib/logger";
 import { formatDate } from "@/utils/date-utils";
 

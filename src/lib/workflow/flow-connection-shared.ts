@@ -6,7 +6,7 @@
 import { getAbiNodeRegistration } from "@/lib/abi/node-registry";
 import { deriveOutputType, resolveSpec } from "@/lib/abi/resolve";
 import type { FieldSourceOverride } from "@/lib/abi/sources";
-import { DATA_NODE_TYPES } from "@/utils/executable-workflow";
+import { DATA_NODE_TYPES } from "@/lib/workflow/executable-workflow";
 
 /** Add node type → logical output type (consistent with workflow-exporter). */
 export const ADD_NODE_OUTPUT_TYPE: Record<string, string> = {

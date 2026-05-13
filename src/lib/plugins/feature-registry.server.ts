@@ -2,17 +2,16 @@ import "server-only";
 
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
-
-import { buildFeatureRegistry } from "@/lib/feature-registry";
+import { logger } from "@/lib/logger";
+import { buildFeatureRegistry } from "@/lib/plugins/feature-registry";
 import {
     type FeatureDefinition,
     type FeatureRegistryBundle,
     FeatureRegistryBundleSchema,
     validateFeatureRegistryBundle,
-} from "@/lib/feature-registry-schema";
-import { logger } from "@/lib/logger";
-import { loadPluginsRegistry } from "@/lib/plugins-registry.server";
-import { TONGFLOW_ABI_NODES } from "@/lib/tongflow-abi";
+} from "@/lib/plugins/feature-registry-schema";
+import { loadPluginsRegistry } from "@/lib/plugins/plugins-registry.server";
+import { TONGFLOW_ABI_NODES } from "@/lib/schema/tongflow-abi";
 
 function mergeBundles(
     base: FeatureRegistryBundle,
@@ -115,7 +114,7 @@ function loadMergedServerBundle(
             const msg = e instanceof Error ? e.message : String(e);
             if (process.env.NODE_ENV === "development") {
                 throw new Error(
-                    `[feature-registry] Invalid config/features.local.json: ${msg}`,
+                    `[feature-registry] Invalid .tongflow/features.local.json: ${msg}`,
                 );
             }
             logger.error(

@@ -8,7 +8,7 @@ import { promisify } from "node:util";
 import {
     getModalPluginConfig,
     getPluginFileAbsolutePath,
-} from "@/lib/plugins-registry.server";
+} from "@/lib/plugins/plugins-registry.server";
 
 const execFileAsync = promisify(execFile);
 

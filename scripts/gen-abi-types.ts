@@ -8,7 +8,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
-import { MIN_SUPPORTED_ABI_VERSION } from "../src/lib/abi-version";
+import { MIN_SUPPORTED_ABI_VERSION } from "../src/lib/schema/abi-version";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.join(__dirname, "..");

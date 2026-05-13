@@ -8,11 +8,11 @@ import type { JSONSchema7 } from "json-schema";
 
 import { ABI_DEFINITIONS, ABI_NODES, type NodeSlot } from "@/generated/abi";
 import { getAbiNodeRegistration } from "@/lib/abi/node-registry";
-import { DATA_NODE_TYPES } from "@/utils/executable-workflow";
+import { DATA_NODE_TYPES } from "@/lib/workflow/executable-workflow";
 import {
     getEffectiveOutputField,
     getEffectiveOutputType,
-} from "@/utils/flow-connection-shared";
+} from "@/lib/workflow/flow-connection-shared";
 
 type AtomicResult = "compatible" | "disjoint" | "unknown";
 
