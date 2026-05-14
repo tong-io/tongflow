@@ -36,6 +36,7 @@ const FullScreenAudioModal = ({
     fileKey: string;
     onClose: () => void;
 }) => {
+    const t = useTranslations("Workspace.nodes.modal");
     const [mounted, setMounted] = useState(false);
     const { url } = useFileAsyncLoader(fileKey, { priority: "high" });
 
@@ -55,7 +56,7 @@ const FullScreenAudioModal = ({
                 {/* Header */}
                 <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700 flex-shrink-0">
                     <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-                        Audio Preview
+                        {t("audioPreview")}
                     </h2>
                     <Button
                         size="sm"
@@ -99,6 +100,7 @@ const FullScreenWaterfallAudioModal = ({
     audioKeys: string[];
     onClose: () => void;
 }) => {
+    const t = useTranslations("Workspace.nodes.modal");
     const [mounted, setMounted] = useState(false);
     const { urls } = useFileAsyncLoaderBatch(audioKeys, { priority: "normal" });
 
@@ -148,7 +150,7 @@ const FullScreenWaterfallAudioModal = ({
                 {/* Header */}
                 <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700 flex-shrink-0">
                     <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-                        Audios ({audioKeys.length})
+                        {t("audios", { count: audioKeys.length })}
                     </h2>
                     <Button
                         size="sm"
@@ -255,7 +257,7 @@ const AudioNode = ({ selected, data }: AudioNodeRfProps) => {
                             </Button>
                         )}
                         <NodeHeaderComboAction
-                            onClick={() => logger.debug("组合模式切换")}
+                            onClick={() => logger.debug("compose mode toggle")}
                         />
                         <NodeHeaderMenuAction label={t("moreOptions")}>
                             <DropdownMenuLabel>

@@ -137,7 +137,7 @@ const TextNode = ({ selected, data }: TextNodeRfProps) => {
                             </Button>
                         )}
                         <NodeHeaderComboAction
-                            onClick={() => logger.debug("组合模式切换")}
+                            onClick={() => logger.debug("compose mode toggle")}
                         />
                         <NodeHeaderMenuAction label={t("moreOptions")}>
                             <DropdownMenuLabel>

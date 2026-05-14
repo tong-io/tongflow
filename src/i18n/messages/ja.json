@@ -108,10 +108,15 @@
             "executing": "実行中...",
             "completed": "完了",
             "cancelled": "キャンセル済み",
+            "cancelling": "キャンセル中...",
             "failed": "失敗",
             "nodes": "ノード",
             "cancelTask": "タスクをキャンセル",
-            "totalDuration": "合計時間"
+            "totalDuration": "合計時間",
+            "taskCompleted": "タスク完了",
+            "taskFailed": "タスク失敗",
+            "taskFailedWithMsg": "タスク失敗：{error}",
+            "level": "レベル {level}"
         },
         "dialog": {
             "myWorkflows": "マイワークフロー",
@@ -192,7 +197,10 @@
                 "pluginImplementationTitle": "実装",
                 "pluginImplementationLoading": "プラグイン実装一覧を読み込み中…",
                 "pluginImplementationEmpty": "この機能向けのプラグイン実装がスキャン結果にありません。リポジトリの plugins/ に Modal または LLM プラグインを追加してください（README 参照）。ページを再読み込みしてください。",
-                "pluginRegistryLoadError": "プラグイン登録情報を読み込めませんでした：{message}"
+                "pluginRegistryLoadError": "プラグイン登録情報を読み込めませんでした：{message}",
+                "pluginSelectPlaceholder": "リポジトリを選択…",
+                "missingImplTitle": "実装が未選択",
+                "missingImplDescription": "実行前に、このノードのプラグイン実装を選択してください。"
             },
             "common": {
                 "enterInstructions": "指示を入力してください...",
@@ -503,7 +511,10 @@
                 "15s": "15秒",
                 "30s": "30秒",
                 "1min": "1分",
-                "2min": "2分"
+                "2min": "2分",
+                "language": "言語",
+                "keyscale": "キー",
+                "auto": "自動"
             },
             "speechGenVideo": {
                 "loading": "読み込み中...",
@@ -682,6 +693,65 @@
             }
         }
     },
+    "Upload": {
+        "failed": "アップロードに失敗しました。後で再試行してください",
+        "partialFailed": "一部またはすべてのファイルのアップロードに失敗しました",
+        "maxFilesExceeded": "最大 {max} 個のファイルまで許可されています",
+        "fileTooLarge": "ファイル \"{name}\" が大きすぎます（最大 {max}MB）",
+        "fileTypeNotAccepted": "ファイル \"{name}\" の種類はサポートされていません",
+        "sizeLimit50MB": "ファイルサイズが上限を超えています。最大 50MB まで許可されています。",
+        "readImageFailed": "画像情報の読み取りに失敗しました",
+        "readVideoFailed": "動画情報の読み取りに失敗しました"
+    },
+    "LibInput": {
+        "deleteSuccess": "素材を削除しました",
+        "deleteFailed": "削除に失敗しました",
+        "emptyText": "空のテキスト",
+        "loadFailed": "素材の読み込みに失敗しました",
+        "added": "素材を追加しました",
+        "retry": "再試行",
+        "emptyMaterial": "{type}素材がまだありません",
+        "typeImage": "画像",
+        "typeVideo": "動画",
+        "typeAudio": "音声",
+        "typeText": "テキスト",
+        "typeFile": "ファイル",
+        "typeModel": "モデル",
+        "favoriteHint": "ノードの ❤️ アイコンをクリックして素材をお気に入りに追加",
+        "portfolio": "ポートフォリオ"
+    },
+    "Recorder": {
+        "audioStart": "録音開始",
+        "audioCancel": "キャンセル",
+        "audioCancelTooltip": "録音をキャンセル",
+        "audioFinish": "完了",
+        "audioFinishTooltip": "録音を完了",
+        "audioPermissionError": "マイクにアクセスできません。権限を許可してください。",
+        "videoPermissionError": "カメラとマイクにアクセスできません。権限を許可してください。",
+        "videoStart": "録画開始",
+        "videoStop": "録画停止"
+    },
+    "Languages": {
+        "zh": "中国語",
+        "ja": "日本語",
+        "yue": "広東語",
+        "en": "英語",
+        "ko": "韓国語",
+        "fr": "フランス語",
+        "es": "スペイン語"
+    },
+    "Errors": {
+        "somethingWentWrong": "問題が発生しました",
+        "tryAgain": "再試行"
+    },
+    "Api": {
+        "unknownError": "不明なエラー",
+        "unauthorized": "認証されていません",
+        "accessDenied": "アクセスが拒否されました",
+        "requestFailed": "リクエスト失敗：{status} {statusText}",
+        "success": "成功しました",
+        "timedOut": "リクエストがタイムアウトしました。再試行してください"
+    },
     "portfolio": {
         "title": "マイポートフォリオ",
         "all": "すべて",
@@ -703,6 +773,7 @@
         "noWorks": "作品がありません",
         "worksWillShow": "お気に入りの作品がここに表示されます",
         "retry": "再試行",
-        "operationFailed": "操作に失敗しました。もう一度お試しください"
+        "operationFailed": "操作に失敗しました。もう一度お試しください",
+        "fetchFailed": "ポートフォリオの取得に失敗しました。再試行してください"
     }
 }

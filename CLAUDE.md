@@ -49,7 +49,7 @@
 
 - **Annotate with the generated types.** `def foo(self, input: FooInput) -> FooOutput`. Access fields with `input.field` (attribute access). Return `FooOutput(success=..., ...)`.
 - **No dict shims.** `cast(dict, input)` / `dict(input)` / `d.get("field", default)` are forbidden — they bypass static checking.
-- **No `try: from tongflow.models ... except ModuleNotFoundError: TypedDict 兜底` fallback.** Plain `from tongflow.models.foo import FooInput` only. Dev environments must `pip install tongflow==<current>` locally.
+- **No `try: from tongflow.models ... except ModuleNotFoundError: TypedDict` fallback.** Plain `from tongflow.models.foo import FooInput` only. Dev environments must `pip install tongflow==<current>` locally.
 - **ABI gaps stay out of the ABI.** Fields only one plugin needs (model name, internal mode, output codec) become plugin-internal module-level constants or env vars (e.g. `DEFAULT_AUDIO_FORMAT = "mp3"`, `WHISPER_MODEL = os.environ.get(...)`). Don't invent fields the ABI doesn't expose — pyright will flag the access.
 - **Pin tongflow.** Every `deploy.py`'s `pip_install("tongflow==X.Y.Z")` must match [`sdk/pyproject.toml`](sdk/pyproject.toml).
 

@@ -9,9 +9,7 @@ class ImageGenModelInput(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     image: Asset
-    guidance_scale: float | None = None
     height: int | None = None
-    num_inference_steps: int | None = None
     seed: int | None = None
     text: str | None = None
     width: int | None = None

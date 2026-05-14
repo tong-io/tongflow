@@ -3,6 +3,7 @@ import { useTranslations } from "next-intl";
 import { memo, useCallback } from "react";
 import { useAbiForm } from "@/hooks/use-abi-form";
 import useFlow from "@/hooks/use-flow";
+import type { Task } from "@/hooks/use-task";
 import { batchOn } from "@/lib/abi/sources";
 import type { RfDataNodeProps } from "@/types/nodes";
 
@@ -21,7 +22,7 @@ const SeparateAudioTrackNode = ({
 
     // Filter to vocal stems only on task completion.
     const handleTaskUpdate = useCallback(
-        (task: any) => {
+        (task: Task) => {
             if (task?.status === "COMPLETED") {
                 const audioKeys = task?.data?.uploadedFiles as string[];
                 if (audioKeys && audioKeys.length > 0) {

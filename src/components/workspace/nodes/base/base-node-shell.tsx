@@ -136,11 +136,10 @@ export const BaseNodeShell = forwardRef<HTMLDivElement, BaseNodeShellProps>(
                         <AlertDialogContent>
                             <AlertDialogHeader>
                                 <AlertDialogTitle>
-                                    Missing Implementation
+                                    {t("missingImplTitle")}
                                 </AlertDialogTitle>
                                 <AlertDialogDescription>
-                                    Please select a plugin implementation in
-                                    this node before running.
+                                    {t("missingImplDescription")}
                                 </AlertDialogDescription>
                             </AlertDialogHeader>
                             <AlertDialogFooter>

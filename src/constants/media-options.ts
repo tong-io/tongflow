@@ -27,11 +27,11 @@ export const VIDEO_ASPECT_RATIOS: AspectRatio[] = [
 ];
 
 export const VIDEO_DURATIONS: Duration[] = [
-    { value: "5", label: "5秒" },
-    { value: "10", label: "10秒" },
-    { value: "15", label: "15秒" },
-    { value: "30", label: "30秒" },
-    { value: "60", label: "1分钟" },
+    { value: "5", label: "5s" },
+    { value: "10", label: "10s" },
+    { value: "15", label: "15s" },
+    { value: "30", label: "30s" },
+    { value: "60", label: "1min" },
 ];
 
 /** Icon sizing lookup for aspect ratio thumbnails */

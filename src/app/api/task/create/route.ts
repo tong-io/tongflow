@@ -30,21 +30,21 @@ export async function POST(request: NextRequest) {
 
         if (!feature || typeof feature !== "string") {
             return NextResponse.json(
-                { error: "功能参数不能为空" },
+                { error: "Feature parameter is required" },
                 { status: 400 },
             );
         }
 
         if (!prompt || typeof prompt !== "object") {
             return NextResponse.json(
-                { error: "提示词不能为空" },
+                { error: "Prompt is required" },
                 { status: 400 },
             );
         }
 
         if (!nodeId || typeof nodeId !== "string") {
             return NextResponse.json(
-                { error: "节点ID不能为空" },
+                { error: "nodeId is required" },
                 { status: 400 },
             );
         }
@@ -54,7 +54,7 @@ export async function POST(request: NextRequest) {
         if (!trimmedPluginId) {
             return NextResponse.json(
                 {
-                    error: "缺少 pluginId：请先在节点里选择一个插件实现（user/repo）",
+                    error: "Missing pluginId: select a plugin implementation (user/repo) on the node first",
                 },
                 { status: 400 },
             );
@@ -64,7 +64,7 @@ export async function POST(request: NextRequest) {
         const abiNode = getAbiNodeBySlot(normalizedFeature);
         if (!abiNode) {
             return NextResponse.json(
-                { error: `nodeSlot=${feature} 不存在（请检查 ABI）` },
+                { error: `nodeSlot=${feature} does not exist (check the ABI)` },
                 { status: 400 },
             );
         }
@@ -75,7 +75,7 @@ export async function POST(request: NextRequest) {
                 `[Task] ABI_TYPES missing slot while tongflow Abi has ${canonicalFeature}`,
             );
             return NextResponse.json(
-                { error: "节点槽位与生成 ABI 不一致，请联系管理员" },
+                { error: "Node slot is inconsistent with the generated ABI; contact an administrator" },
                 { status: 500 },
             );
         }
@@ -102,7 +102,7 @@ export async function POST(request: NextRequest) {
         } catch (dbError) {
             logger.error("[Task] Database write failed:", dbError);
             return NextResponse.json(
-                { error: "任务创建失败，请稍后重试" },
+                { error: "Failed to create task; please retry later" },
                 { status: 500 },
             );
         }
@@ -123,7 +123,7 @@ export async function POST(request: NextRequest) {
                 error:
                     error instanceof Error
                         ? error.message
-                        : "创建任务失败，请稍后重试",
+                        : "Failed to create task; please retry later",
             },
             { status: 500 },
         );

@@ -120,6 +120,7 @@ const FullScreen3DModal = ({
     fileExtension: string;
     onClose: () => void;
 }) => {
+    const t = useTranslations("Workspace.nodes.modal");
     const [mounted, setMounted] = useState(false);
     const mountRef = useRef<HTMLDivElement>(null);
     const sceneRef = useRef<THREE.Scene | null>(null);
@@ -484,14 +485,14 @@ const FullScreen3DModal = ({
                 {/* Header */}
                 <div className="flex items-center justify-between p-4 border-b border-gray-200 flex-shrink-0">
                     <h2 className="text-lg font-semibold text-gray-900">
-                        3D Model Preview
+                        {t("model3DPreview")}
                     </h2>
                     <div className="flex items-center gap-2">
                         <Button
                             size="sm"
                             variant="ghost"
                             onClick={handleResetView}
-                            title="Reset view"
+                            title={t("resetView")}
                         >
                             <RotateCcw className="h-4 w-4" />
                         </Button>
@@ -499,7 +500,7 @@ const FullScreen3DModal = ({
                             size="sm"
                             variant="ghost"
                             onClick={handleDownload}
-                            title="Download model"
+                            title={t("downloadModel")}
                         >
                             <Download className="h-4 w-4" />
                         </Button>
@@ -523,7 +524,7 @@ const FullScreen3DModal = ({
                                 <Box className="h-8 w-8 text-blue-500" />
                             </div>
                             <p className="text-gray-700 mt-4 font-medium">
-                                Loading 3D model...
+                                {t("loading3DModel")}
                             </p>
                         </div>
                     )}
@@ -531,7 +532,7 @@ const FullScreen3DModal = ({
                         <div className="absolute inset-0 flex items-center justify-center z-10">
                             <div className="text-center">
                                 <p className="text-red-500 font-semibold">
-                                    Error loading model
+                                    {t("errorLoadingModel")}
                                 </p>
                                 <p className="text-gray-500 text-sm mt-2">
                                     {error}
@@ -547,10 +548,7 @@ const FullScreen3DModal = ({
 
                 {/* Info Footer */}
                 <div className="px-4 py-2 border-t border-gray-200 bg-gray-50 text-xs text-gray-600 flex-shrink-0">
-                    <p>
-                        Left Click + Drag to Rotate | Scroll to Zoom | Click
-                        Reset to Center
-                    </p>
+                    <p>{t("dragToRotate")}</p>
                 </div>
             </div>
         </div>
@@ -1328,7 +1326,7 @@ const ModelNode = ({ selected, data }: ModelNodeRfProps) => {
                             </Button>
                         )}
                         <NodeHeaderComboAction
-                            onClick={() => logger.debug("组合模式切换")}
+                            onClick={() => logger.debug("compose mode toggle")}
                         />
                         <NodeHeaderMenuAction label={t("moreOptions")}>
                             <DropdownMenuLabel>

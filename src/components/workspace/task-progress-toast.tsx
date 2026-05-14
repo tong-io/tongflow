@@ -194,7 +194,7 @@ export function TaskProgressToast({ className }: TaskProgressToastProps) {
                 case TaskStatus.CANCELLED:
                     setFinalStatus("cancelled");
                     setCurrentNode(null);
-                    setStatusMessage(message.data?.message || "已取消");
+                    setStatusMessage(message.data?.message || t("cancelled"));
                     hideWithAnimation(3000);
                     break;
 
@@ -292,7 +292,7 @@ export function TaskProgressToast({ className }: TaskProgressToastProps) {
                     )}
                     {/* Cancel button - only shown while running */}
                     {finalStatus === null &&
-                        !statusMessage?.includes("取消中") && (
+                        statusMessage !== t("cancelling") && (
                             <button
                                 onClick={() => {
                                     // Dispatch cancel event
@@ -343,7 +343,7 @@ export function TaskProgressToast({ className }: TaskProgressToastProps) {
                         className={cn(
                             "flex items-center gap-2 p-2 rounded-md mb-2",
                             finalStatus === "cancelled" ||
-                                statusMessage.includes("取消中")
+                                statusMessage === t("cancelling")
                                 ? "bg-yellow-500/10 border border-yellow-500/20"
                                 : finalStatus === "failed"
                                   ? "bg-red-500/10 border border-red-500/20"
@@ -351,7 +351,7 @@ export function TaskProgressToast({ className }: TaskProgressToastProps) {
                         )}
                     >
                         {finalStatus === null &&
-                        statusMessage.includes("取消中") ? (
+                        statusMessage === t("cancelling") ? (
                             <Loader2 className="h-3.5 w-3.5 animate-spin text-yellow-500 flex-shrink-0" />
                         ) : finalStatus === null ? (
                             <Loader2 className="h-3.5 w-3.5 animate-spin text-primary flex-shrink-0" />
@@ -379,7 +379,7 @@ export function TaskProgressToast({ className }: TaskProgressToastProps) {
                                 {currentNode.label}
                             </div>
                             <div className="text-[10px] text-muted-foreground">
-                                Level {currentNode.level}
+                                {t("level", { level: currentNode.level })}
                             </div>
                         </div>
                     </div>

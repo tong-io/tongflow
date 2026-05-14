@@ -56,18 +56,3 @@ export function getEffectiveOutputType(
     return ADD_NODE_OUTPUT_TYPE[nodeType];
 }
 
-/**
- * ABI-derived output field ("texts" / "fileKeys") for a node, or undefined
- * if the node isn't ABI-registered.
- */
-export function getEffectiveOutputField(
-    nodeId: string,
-): "texts" | "fileKeys" | undefined {
-    const reg = getAbiNodeRegistration(nodeId);
-    if (!reg) return undefined;
-    const spec = resolveSpec(
-        reg.feature,
-        reg.sourceSpec as Record<string, FieldSourceOverride> | undefined,
-    );
-    return deriveOutputType(spec).outputField;
-}

@@ -420,12 +420,12 @@ export function PortfolioDialog({ trigger }: PortfolioDialogProps) {
             );
             setMaterials(response.materials);
         } catch (err) {
-            setError("获取作品集失败，请重试");
+            setError(t("fetchFailed"));
             logger.error("Failed to fetch materials:", err);
         } finally {
             setLoading(false);
         }
-    }, [filter]);
+    }, [filter, t]);
 
     useEffect(() => {
         if (open) {

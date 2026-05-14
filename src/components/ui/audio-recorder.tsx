@@ -1,6 +1,8 @@
 "use client";
 import { Mic, StopCircle, Trash } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useEffect, useMemo, useRef, useState } from "react";
+import toast from "react-hot-toast";
 import { logger } from "@/lib/logger";
 import { cn } from "@/lib/utils";
 import { Button } from "./button";
@@ -32,6 +34,7 @@ export const AudioRecorderWithVisualizer = ({
     timerClassName: _timerClassName,
     onRecord,
 }: Props) => {
+    const t = useTranslations("Recorder");
     // States
     const [isRecording, setIsRecording] = useState<boolean>(false);
     const [_isRecordingFinished, setIsRecordingFinished] =
@@ -117,7 +120,7 @@ export const AudioRecorderWithVisualizer = ({
                     };
                 })
                 .catch((error) => {
-                    alert(error);
+                    toast.error(t("audioPermissionError"));
                     logger.error(error);
                 });
         }
@@ -157,7 +160,7 @@ export const AudioRecorderWithVisualizer = ({
             };
             mediaRecorder.stop();
         } else {
-            alert("recorder instance is null!");
+            logger.error("recorder instance is null");
         }
 
         // Stop the web audio context and the analyser node
@@ -280,7 +283,7 @@ export const AudioRecorderWithVisualizer = ({
                         className="flex items-center gap-2"
                     >
                         <Mic className="h-5 w-5" />
-                        开始录音
+                        {t("audioStart")}
                     </Button>
                 </div>
             ) : (
@@ -314,11 +317,11 @@ export const AudioRecorderWithVisualizer = ({
                                     className="flex-1"
                                 >
                                     <Trash className="h-4 w-4 mr-2" />
-                                    取消
+                                    {t("audioCancel")}
                                 </Button>
                             </TooltipTrigger>
                             <TooltipContent>
-                                <span>取消录音</span>
+                                <span>{t("audioCancelTooltip")}</span>
                             </TooltipContent>
                         </Tooltip>
 
@@ -330,11 +333,11 @@ export const AudioRecorderWithVisualizer = ({
                                     className="flex-1"
                                 >
                                     <StopCircle className="h-4 w-4 mr-2" />
-                                    完成
+                                    {t("audioFinish")}
                                 </Button>
                             </TooltipTrigger>
                             <TooltipContent>
-                                <span>完成录音</span>
+                                <span>{t("audioFinishTooltip")}</span>
                             </TooltipContent>
                         </Tooltip>
                     </div>

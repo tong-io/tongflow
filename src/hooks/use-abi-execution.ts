@@ -14,6 +14,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import type { NodeSlot } from "@/generated/abi";
 import useFlow from "@/hooks/use-flow";
 import {
+    type Task,
     useBatchTaskManager,
     useNodeTaskUpdate,
     useTaskStore,
@@ -55,7 +56,7 @@ export interface UseAbiExecutionOptions<F extends NodeSlot> {
      * (skips the default ABI output routing).
      */
     onTaskUpdate?: (
-        task: any,
+        task: Task,
     ) => boolean | undefined | Promise<boolean | undefined>;
     /**
      * Final-stage transform applied to the prompts produced by `buildPrompts`.
@@ -265,7 +266,7 @@ export function useAbiExecution<F extends NodeSlot>(
         useNodePluginResolver(feature);
 
     const handleTaskUpdate = useCallback(
-        async (task: any) => {
+        async (task: Task) => {
             if (!nodeId) return;
 
             if (onTaskUpdate) {

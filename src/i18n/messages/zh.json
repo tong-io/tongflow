@@ -108,10 +108,15 @@
             "executing": "执行中...",
             "completed": "执行完成",
             "cancelled": "已取消",
+            "cancelling": "取消中...",
             "failed": "执行失败",
             "nodes": "节点",
             "cancelTask": "取消任务",
-            "totalDuration": "总耗时"
+            "totalDuration": "总耗时",
+            "taskCompleted": "任务完成",
+            "taskFailed": "任务失败",
+            "taskFailedWithMsg": "任务失败：{error}",
+            "level": "层级 {level}"
         },
         "dialog": {
             "myWorkflows": "我的工作流",
@@ -192,7 +197,10 @@
                 "pluginImplementationTitle": "实现",
                 "pluginImplementationLoading": "正在加载插件实现列表…",
                 "pluginImplementationEmpty": "未扫描到适用于该能力的插件实现。请在仓库的 plugins/ 目录下添加 Modal 或 LLM 插件（见 README），然后刷新页面。",
-                "pluginRegistryLoadError": "无法加载插件注册表：{message}"
+                "pluginRegistryLoadError": "无法加载插件注册表：{message}",
+                "pluginSelectPlaceholder": "选择一个仓库…",
+                "missingImplTitle": "未配置实现",
+                "missingImplDescription": "请先在该节点中选择一个插件实现，然后再运行。"
             },
             "common": {
                 "enterInstructions": "请输入指令...",
@@ -592,7 +600,8 @@
                 "fromUpstreamReadonly": "来自上游（只读）",
                 "lyricsPlaceholder": "输入歌词（未连接歌词输入时）",
                 "language": "语言",
-                "keyscale": "调式"
+                "keyscale": "调式",
+                "auto": "自动"
             },
             "speechGenVideo": {
                 "loading": "加载中...",
@@ -771,6 +780,65 @@
             }
         }
     },
+    "Upload": {
+        "failed": "上传失败，请稍后重试",
+        "partialFailed": "部分或全部文件上传失败",
+        "maxFilesExceeded": "最多允许 {max} 个文件",
+        "fileTooLarge": "文件 \"{name}\" 过大（上限 {max}MB）",
+        "fileTypeNotAccepted": "文件 \"{name}\" 类型不被支持",
+        "sizeLimit50MB": "文件大小超出限制。最大允许 50MB。",
+        "readImageFailed": "读取图片信息失败",
+        "readVideoFailed": "读取视频信息失败"
+    },
+    "LibInput": {
+        "deleteSuccess": "素材已删除",
+        "deleteFailed": "删除失败",
+        "emptyText": "空文本",
+        "loadFailed": "加载素材失败",
+        "added": "已添加素材",
+        "retry": "重试",
+        "emptyMaterial": "暂无{type}素材",
+        "typeImage": "图片",
+        "typeVideo": "视频",
+        "typeAudio": "音频",
+        "typeText": "文本",
+        "typeFile": "文件",
+        "typeModel": "模型",
+        "favoriteHint": "点击节点上的 ❤️ 图标收藏素材",
+        "portfolio": "作品集"
+    },
+    "Recorder": {
+        "audioStart": "开始录音",
+        "audioCancel": "取消",
+        "audioCancelTooltip": "取消录音",
+        "audioFinish": "完成",
+        "audioFinishTooltip": "完成录音",
+        "audioPermissionError": "无法访问麦克风。请确保已授予权限。",
+        "videoPermissionError": "无法访问摄像头和麦克风。请确保已授予权限。",
+        "videoStart": "开始录制",
+        "videoStop": "停止录制"
+    },
+    "Languages": {
+        "zh": "中文",
+        "ja": "日本語",
+        "yue": "粤语",
+        "en": "英语",
+        "ko": "韩语",
+        "fr": "法语",
+        "es": "西班牙语"
+    },
+    "Errors": {
+        "somethingWentWrong": "出现错误",
+        "tryAgain": "重试"
+    },
+    "Api": {
+        "unknownError": "未知错误",
+        "unauthorized": "未授权",
+        "accessDenied": "拒绝访问",
+        "requestFailed": "请求失败：{status} {statusText}",
+        "success": "操作成功",
+        "timedOut": "请求超时，请重试"
+    },
     "portfolio": {
         "title": "我的作品集",
         "all": "全部",
@@ -792,6 +860,7 @@
         "noWorks": "暂无作品",
         "worksWillShow": "收藏的作品将在这里展示",
         "retry": "重试",
-        "operationFailed": "操作失败，请重试"
+        "operationFailed": "操作失败，请重试",
+        "fetchFailed": "获取作品集失败，请重试"
     }
 }

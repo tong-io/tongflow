@@ -3,6 +3,7 @@
  * Uses SSE (Server-Sent Events) for realtime task updates.
  */
 
+import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
 import { create } from "zustand";
@@ -337,6 +338,7 @@ export function useTaskSubscription(
     taskId?: string,
     options?: TaskSubscriptionOptions,
 ) {
+    const t = useTranslations("Workspace.toast");
     const { setTask, routeTaskToNode } = useTaskStore();
     const [status, setStatus] = useState<
         "connecting" | "connected" | "reconnecting" | "disconnected" | "error"
@@ -421,14 +423,18 @@ export function useTaskSubscription(
 
                         // Toast on terminal outcomes
                         if (taskStatus === "COMPLETED") {
-                            toast.success(`任务完成`);
+                            toast.success(t("taskCompleted"));
                         } else if (taskStatus === "FAILED") {
                             const errorMsg =
                                 internalTask.error ||
                                 (message.data as Record<string, unknown>)
                                     ?.error;
                             toast.error(
-                                `任务失败${errorMsg ? `：${errorMsg}` : ""}`,
+                                errorMsg
+                                    ? t("taskFailedWithMsg", {
+                                          error: String(errorMsg),
+                                      })
+                                    : t("taskFailed"),
                             );
                         }
 
@@ -576,6 +582,7 @@ export function useTaskSubscription(
  * Create a task and automatically attach SSE streaming.
  */
 export function useCreateTask(options?: TaskSubscriptionOptions) {
+    const t = useTranslations("Workspace.toast");
     const { setTask, trackTaskToNode } = useTaskStore();
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<Error | null>(null);
@@ -639,6 +646,7 @@ export function useBatchTaskManager(
     config?: BatchTaskConfig,
     options?: TaskSubscriptionOptions,
 ) {
+    const t = useTranslations("Workspace.toast");
     const { setTask, trackTaskToNode, routeTaskToNode } = useTaskStore();
     const [isLoading, setIsLoading] = useState(false);
     const [completedTasks, setCompletedTasks] = useState<Task[]>([]);
@@ -736,10 +744,14 @@ export function useBatchTaskManager(
                                 routeTaskToNode(internalTask);
 
                                 if (taskStatus === "COMPLETED") {
-                                    toast.success(`任务完成`);
+                                    toast.success(t("taskCompleted"));
                                 } else if (taskStatus === "FAILED") {
                                     toast.error(
-                                        `任务失败${message.error ? `：${message.error}` : ""}`,
+                                        message.error
+                                            ? t("taskFailedWithMsg", {
+                                                  error: String(message.error),
+                                              })
+                                            : t("taskFailed"),
                                     );
                                 } else if (taskStatus === "CANCELLED") {
                                     if (batchCancelTimeoutRef.current != null) {
@@ -925,7 +937,7 @@ export function useBatchTaskManager(
                 id: taskId,
                 status: TaskStatus.RUNNING,
                 nodeId: null,
-                data: { message: "取消中..." },
+                data: { message: t("cancelling") },
             });
         }
 
@@ -972,7 +984,7 @@ export function useBatchTaskManager(
                     id: taskId,
                     status: TaskStatus.CANCELLED,
                     nodeId: null,
-                    data: { message: "任务已取消" },
+                    data: { message: t("cancelled") },
                 });
             }
 
@@ -989,7 +1001,7 @@ export function useBatchTaskManager(
         }, 10000);
 
         batchCancelTimeoutRef.current = timeoutId;
-    }, [currentBatchTaskIds]);
+    }, [currentBatchTaskIds, t]);
 
     // React to toast-driven cancel intents
     useEffect(() => {

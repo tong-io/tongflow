@@ -1,48 +1,48 @@
-# Feature registry（功能注册表）
+# Feature registry
 
-面向开源部署：功能（feature）的元数据由 **ABI + 插件扫描器** 派生，无需手写 JSON 列表。如需在本地或部署侧覆盖，可放一份可选的 JSON。
+For open-source deployments: feature metadata is **derived from the ABI + plugin scanner** — no hand-maintained JSON list. An optional JSON file can override values locally or per deployment.
 
-## 默认列表如何产生
+## How the default list is produced
 
-服务器端默认 bundle 由 [`feature-registry.server.ts`](../src/lib/plugins/feature-registry.server.ts) 在启动时根据：
+The server-side default bundle is built at startup by [`feature-registry.server.ts`](../src/lib/plugins/feature-registry.server.ts) from:
 
-- ABI 中的 `nodeSlot` 列表（[`config/tongflow.abi.json`](../config/tongflow.abi.json) → [`TONGFLOW_ABI_NODES`](../src/lib/schema/tongflow-abi.ts)）
-- 插件扫描器结果（[`plugins-registry.server.ts`](../src/lib/plugins/plugins-registry.server.ts)，含 `runner` 与 `nodePluginMap`）
+- The ABI's `nodeSlot` list ([`config/tongflow.abi.json`](../config/tongflow.abi.json) → [`TONGFLOW_ABI_NODES`](../src/lib/schema/tongflow-abi.ts))
+- The plugin scanner result ([`plugins-registry.server.ts`](../src/lib/plugins/plugins-registry.server.ts), which exposes `runner` and `nodePluginMap`)
 
-派生而成。每个 `nodeSlot` 取其在 `nodePluginMap` 中的首个插件，按 `runner` 决定 `type`/`function`：
+For each `nodeSlot`, the first plugin in `nodePluginMap` is used; `type` / `function` are decided by `runner`:
 
 | runner | type | function |
 |--------|------|----------|
-| `llm` | `llm` | 插件 id |
-| `modal` | `modal` | `runners.modal.appName ?? 插件 id` |
+| `llm` | `llm` | plugin id |
+| `modal` | `modal` | `runners.modal.appName ?? plugin id` |
 
-客户端导入的 [`feature-registry.ts`](../src/lib/plugins/feature-registry.ts) 只持有一个 `type=function=unregistered` 的占位 fallback，真正的列表通过 [`GET /api/feature/list`](../src/app/api/feature/list/route.ts) 下发后水合到客户端 store。
+The client-side import [`feature-registry.ts`](../src/lib/plugins/feature-registry.ts) only carries a single placeholder fallback (`type=function=unregistered`); the real list is delivered via [`GET /api/feature/list`](../src/app/api/feature/list/route.ts) and hydrated into the client store.
 
-## 可选覆盖
+## Optional overrides
 
-| 来源 | 说明 |
-|------|------|
-| `.tongflow/features.local.json` | **可选**，本地或部署覆盖（已在 [`.gitignore`](../.gitignore) 中忽略） |
-| 环境变量 `FEATURES_CONFIG_PATH` | **可选**，指向额外 JSON，在 `features.local.json` 之后合并 |
+| Source | Description |
+|--------|-------------|
+| `.tongflow/features.local.json` | **Optional** local or deployment override (already ignored in [`.gitignore`](../.gitignore)) |
+| Env var `FEATURES_CONFIG_PATH` | **Optional** path to an additional JSON, merged after `features.local.json` |
 
-合并顺序：**ABI/插件派生默认 bundle → `.tongflow/features.local.json`（若存在）→ `FEATURES_CONFIG_PATH`（若存在）**。  
-`features` 数组按 `name` 合并（后写覆盖先写）；`aliases.canonical` / `aliases.labelLookup` 同名键后写覆盖先写。
+Merge order: **ABI/plugin-derived default bundle → `.tongflow/features.local.json` (if present) → `FEATURES_CONFIG_PATH` (if present)**.
+The `features` array is merged by `name` (later writes override earlier); `aliases.canonical` / `aliases.labelLookup` collisions are resolved the same way.
 
-文件 schema 由 [`feature-registry-schema.ts`](../src/lib/plugins/feature-registry-schema.ts) 中的 zod schema 校验，无独立的 JSON Schema 文件。
+The file schema is validated by the zod schema in [`feature-registry-schema.ts`](../src/lib/plugins/feature-registry-schema.ts); there is no standalone JSON Schema file.
 
-## JSON 结构（覆盖文件）
+## JSON structure (override file)
 
-- **`features`**：每条为 `name`, `type`, `function`。
-- **`aliases.canonical`**：旧画布或别名 → 注册表中的规范 `name`（影响任务解析与查找）。
-- **`aliases.labelLookup`**：仅用于节点下拉等 **展示文案** 映射到另一条注册表记录，不改变任务路由。
+- **`features`**: each entry has `name`, `type`, `function`.
+- **`aliases.canonical`**: legacy canvas names or aliases → the canonical `name` in the registry (affects task resolution and lookup).
+- **`aliases.labelLookup`**: maps **display-only labels** (used by node dropdowns and similar) to another registry entry; does not change task routing.
 
-## 扩展一条 AI 能力时的三步
+## Three steps to add an AI capability
 
-1. **在 ABI 中加 `nodeSlot`**（[`config/tongflow.abi.json`](../config/tongflow.abi.json)）并跑 `pnpm gen:abi`。
-2. **实现对应插件**：在 `plugins/` 下放 Modal / LLM 插件并由 scanner 注册（见 [`docs/plugins.md`](plugins.md)）；任务执行走 [`executePlugin`](../src/lib/plugin-executor/execute.ts)。
-3. **若要在某节点下拉出现新 `name`**：更新该节点内的 **allowed feature 常量**（如 `GEN_TEXT_FEATURES`）——节点白名单与注册表解耦，避免误暴露未实现能力。
+1. **Add a `nodeSlot` in the ABI** ([`config/tongflow.abi.json`](../config/tongflow.abi.json)) and run `pnpm gen:abi`.
+2. **Implement the corresponding plugin**: drop a Modal / LLM plugin under `plugins/` and let the scanner register it (see [`docs/plugins.md`](plugins.md)); task execution flows through [`executePlugin`](../src/lib/plugin-executor/execute.ts).
+3. **To surface the new `name` in a node's dropdown**: update that node's **allowed-feature constant** (e.g. `GEN_TEXT_FEATURES`). Node whitelists are decoupled from the registry to prevent accidentally exposing unimplemented capabilities.
 
-## 客户端与服务器
+## Client vs server
 
-- 服务器合并后的列表与别名由 [`GET /api/feature/list`](../src/app/api/feature/list/route.ts) 下发（实现见 [`feature-registry.server.ts`](../src/lib/plugins/feature-registry.server.ts)，含 `node:fs`，**仅服务端**引用）。
-- 浏览器端代码请从 [`feature-registry.ts`](../src/lib/plugins/feature-registry.ts) 导入（只含 `unregistered` 占位 fallback，无 `fs`）。在 `/api/feature/list` 水合之前，**下拉标签** 可能回退为原始 id。
+- The merged list and aliases are delivered by [`GET /api/feature/list`](../src/app/api/feature/list/route.ts) (implementation in [`feature-registry.server.ts`](../src/lib/plugins/feature-registry.server.ts), which uses `node:fs` and is **server-only**).
+- Browser code should import from [`feature-registry.ts`](../src/lib/plugins/feature-registry.ts) (placeholder-only, no `fs`). Before `/api/feature/list` hydrates, **dropdown labels** may fall back to the raw id.

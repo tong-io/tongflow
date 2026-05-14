@@ -49,12 +49,12 @@ function generateMaterialName(taskName: string, type: MaterialType): string {
         "0",
     )}`;
     const typeLabel: Record<MaterialType, string> = {
-        image: "图片",
-        video: "视频",
-        audio: "音频",
-        text: "文本",
-        file: "文件",
-        model: "模型",
+        image: "Image",
+        video: "Video",
+        audio: "Audio",
+        text: "Text",
+        file: "File",
+        model: "Model",
     };
     return `${taskName} - ${typeLabel[type]} (${timestamp})`;
 }

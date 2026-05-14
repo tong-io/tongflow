@@ -108,10 +108,15 @@
             "executing": "Executing...",
             "completed": "Completed",
             "cancelled": "Cancelled",
+            "cancelling": "Cancelling...",
             "failed": "Failed",
             "nodes": "Nodes",
             "cancelTask": "Cancel Task",
-            "totalDuration": "Total Duration"
+            "totalDuration": "Total Duration",
+            "taskCompleted": "Task completed",
+            "taskFailed": "Task failed",
+            "taskFailedWithMsg": "Task failed: {error}",
+            "level": "Level {level}"
         },
         "dialog": {
             "myWorkflows": "My Workflows",
@@ -192,7 +197,10 @@
                 "pluginImplementationTitle": "Implementation",
                 "pluginImplementationLoading": "Loading plugin implementations…",
                 "pluginImplementationEmpty": "No plugin implementations were scanned for this capability. Add Modal or LLM plugins under the repo's plugins/ directory (see README), then reload this page.",
-                "pluginRegistryLoadError": "Could not load the plugin registry: {message}"
+                "pluginRegistryLoadError": "Could not load the plugin registry: {message}",
+                "pluginSelectPlaceholder": "Select a repo…",
+                "missingImplTitle": "Missing Implementation",
+                "missingImplDescription": "Please select a plugin implementation in this node before running."
             },
             "common": {
                 "enterInstructions": "Enter instructions...",
@@ -592,7 +600,8 @@
                 "fromUpstreamReadonly": "From upstream (read-only)",
                 "lyricsPlaceholder": "Enter lyrics when the lyric input is not connected",
                 "language": "Language",
-                "keyscale": "Key Scale"
+                "keyscale": "Key Scale",
+                "auto": "Auto"
             },
             "speechGenVideo": {
                 "loading": "Loading...",
@@ -771,6 +780,65 @@
             }
         }
     },
+    "Upload": {
+        "failed": "Upload failed, please retry later",
+        "partialFailed": "Some or all files failed to upload",
+        "maxFilesExceeded": "Maximum {max} files allowed",
+        "fileTooLarge": "File \"{name}\" is too large (max {max}MB)",
+        "fileTypeNotAccepted": "File \"{name}\" type not accepted",
+        "sizeLimit50MB": "File size exceeds the limit. Maximum allowed is 50MB.",
+        "readImageFailed": "Failed to read image information",
+        "readVideoFailed": "Failed to read video information"
+    },
+    "LibInput": {
+        "deleteSuccess": "Material deleted",
+        "deleteFailed": "Failed to delete",
+        "emptyText": "Empty text",
+        "loadFailed": "Failed to load materials",
+        "added": "Material added",
+        "retry": "Retry",
+        "emptyMaterial": "No {type} materials yet",
+        "typeImage": "image",
+        "typeVideo": "video",
+        "typeAudio": "audio",
+        "typeText": "text",
+        "typeFile": "file",
+        "typeModel": "model",
+        "favoriteHint": "Click the ❤️ icon on a node to favorite the material",
+        "portfolio": "Portfolio"
+    },
+    "Recorder": {
+        "audioStart": "Start recording",
+        "audioCancel": "Cancel",
+        "audioCancelTooltip": "Cancel recording",
+        "audioFinish": "Finish",
+        "audioFinishTooltip": "Finish recording",
+        "audioPermissionError": "Cannot access microphone. Please grant permission.",
+        "videoPermissionError": "Cannot access camera or microphone. Please grant permission.",
+        "videoStart": "Start recording",
+        "videoStop": "Stop recording"
+    },
+    "Languages": {
+        "zh": "Chinese",
+        "ja": "Japanese",
+        "yue": "Cantonese",
+        "en": "English",
+        "ko": "Korean",
+        "fr": "French",
+        "es": "Spanish"
+    },
+    "Errors": {
+        "somethingWentWrong": "Something went wrong",
+        "tryAgain": "Try again"
+    },
+    "Api": {
+        "unknownError": "Unknown error",
+        "unauthorized": "Unauthorized",
+        "accessDenied": "Access denied",
+        "requestFailed": "Request failed: {status} {statusText}",
+        "success": "Success",
+        "timedOut": "Request timed out; please retry"
+    },
     "portfolio": {
         "title": "My Portfolio",
         "all": "All",
@@ -792,6 +860,7 @@
         "noWorks": "No works yet",
         "worksWillShow": "Favorited works will appear here",
         "retry": "Retry",
-        "operationFailed": "Operation failed, please try again"
+        "operationFailed": "Operation failed, please try again",
+        "fetchFailed": "Failed to load portfolio, please retry"
     }
 }

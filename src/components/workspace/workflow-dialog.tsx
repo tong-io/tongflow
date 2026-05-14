@@ -217,12 +217,12 @@ export function WorkflowDialog({ trigger }: WorkflowDialogProps) {
             setWorkflows(data);
             setHasMore(pagination?.hasMore ?? false);
         } catch (error) {
-            logger.error("加载工作流失败:", error);
-            toast.error("加载工作流失败");
+            logger.error("Failed to load workflows:", error);
+            toast.error(t("loadFailed"));
         } finally {
             setLoading(false);
         }
-    }, []);
+    }, [t]);
 
     const loadMore = useCallback(async () => {
         if (loadingMore || !hasMore) return;
@@ -238,7 +238,7 @@ export function WorkflowDialog({ trigger }: WorkflowDialogProps) {
             setPage(nextPage);
             setHasMore(pagination?.hasMore ?? false);
         } catch (error) {
-            logger.error("加载更多失败:", error);
+            logger.error("Failed to load more workflows:", error);
         } finally {
             setLoadingMore(false);
         }
@@ -279,7 +279,7 @@ export function WorkflowDialog({ trigger }: WorkflowDialogProps) {
 
                 toast.success(t("loadSuccess"));
             } catch (error) {
-                logger.error("加载工作流失败:", error);
+                logger.error("Failed to load workflow:", error);
                 toast.error(t("loadFailed"));
             }
         },

@@ -3,7 +3,7 @@ import { isTerminalStatus } from "@/constants/task-status";
 import { jsonStringifyForSse } from "@/lib/json-sse";
 import { logger } from "@/lib/logger";
 import { isTaskRunning, onTaskEvent, type TaskEvent } from "@/lib/task/emitter";
-import { executeTask } from "@/lib/task/runner";
+import { dispatchTask } from "@/lib/task/runner";
 
 /**
  * GET /api/task/wait?taskId=xxx&reconnect=false
@@ -85,7 +85,7 @@ export async function GET(request: NextRequest) {
 
             // Non-reconnect mode: start task execution
             if (!reconnect) {
-                executeTask(taskId).catch((error) => {
+                dispatchTask(taskId).catch((error) => {
                     logger.error(
                         `[SSE] Failed to start task ${taskId}:`,
                         error,

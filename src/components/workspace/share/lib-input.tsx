@@ -9,6 +9,7 @@ import {
     Trash2,
     Video,
 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { memo, useCallback, useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { Button } from "@/components/ui/button";
@@ -74,6 +75,7 @@ const MaterialItem = memo(
         onSelect: (material: Material) => void;
         onDelete: (id: number) => void;
     }) => {
+        const t = useTranslations("LibInput");
         const [isDeleting, setIsDeleting] = useState(false);
 
         const handleDelete = async (e: React.MouseEvent) => {
@@ -84,10 +86,10 @@ const MaterialItem = memo(
             try {
                 await deleteMaterial(material.id);
                 onDelete(material.id);
-                toast.success("素材已删除");
+                toast.success(t("deleteSuccess"));
             } catch (error) {
                 logger.error("Failed to delete material:", error);
-                toast.error("删除失败");
+                toast.error(t("deleteFailed"));
             } finally {
                 setIsDeleting(false);
             }
@@ -96,7 +98,7 @@ const MaterialItem = memo(
         const renderThumbnail = () => {
             if (material.type === "text") {
                 const texts = material.content.texts || [];
-                const previewText = texts[0]?.substring(0, 60) || "空文本";
+                const previewText = texts[0]?.substring(0, 60) || t("emptyText");
                 return (
                     <div className="h-full w-full p-2 text-xs text-muted-foreground overflow-hidden">
                         {previewText}
@@ -176,6 +178,7 @@ const MaterialItem = memo(
 MaterialItem.displayName = "MaterialItem";
 
 export const LibInput = ({ resourceType }: LibInputProps) => {
+    const t = useTranslations("LibInput");
     const expands = useFlow((s) => s.expands);
     const id = useNodeId();
     const [materials, setMaterials] = useState<Material[]>([]);
@@ -203,11 +206,11 @@ export const LibInput = ({ resourceType }: LibInputProps) => {
             setMaterials(response.materials);
         } catch (err) {
             logger.error("Failed to load materials:", err);
-            setError("加载素材失败");
+            setError(t("loadFailed"));
         } finally {
             setIsLoading(false);
         }
-    }, [materialType]);
+    }, [materialType, t]);
 
     useEffect(() => {
         loadMaterials();
@@ -225,9 +228,9 @@ export const LibInput = ({ resourceType }: LibInputProps) => {
                     : { fileKeys: material.content.fileKeys };
 
             expands(id, [{ type: nodeType, data: nodeData }]);
-            toast.success("已添加素材");
+            toast.success(t("added"));
         },
-        [id, expands],
+        [id, expands, t],
     );
 
     // Update the list after deleting a material
@@ -257,7 +260,7 @@ export const LibInput = ({ resourceType }: LibInputProps) => {
                     <p className="text-sm text-destructive">{error}</p>
                     <Button size="sm" variant="outline" onClick={loadMaterials}>
                         <RefreshCw className="h-4 w-4 mr-2" />
-                        重试
+                        {t("retry")}
                     </Button>
                 </div>
             </Card>
@@ -272,22 +275,23 @@ export const LibInput = ({ resourceType }: LibInputProps) => {
                         {MaterialTypeIcon[materialType]}
                     </div>
                     <p className="text-sm text-muted-foreground">
-                        暂无
-                        {resourceType === "IMAGE"
-                            ? "图片"
-                            : resourceType === "VIDEO"
-                              ? "视频"
-                              : resourceType === "AUDIO"
-                                ? "音频"
-                                : resourceType === "TEXT"
-                                  ? "文本"
-                                  : resourceType === "FILE"
-                                    ? "文件"
-                                    : "模型"}
-                        素材
+                        {t("emptyMaterial", {
+                            type:
+                                resourceType === "IMAGE"
+                                    ? t("typeImage")
+                                    : resourceType === "VIDEO"
+                                      ? t("typeVideo")
+                                      : resourceType === "AUDIO"
+                                        ? t("typeAudio")
+                                        : resourceType === "TEXT"
+                                          ? t("typeText")
+                                          : resourceType === "FILE"
+                                            ? t("typeFile")
+                                            : t("typeModel"),
+                        })}
                     </p>
                     <p className="text-xs text-muted-foreground">
-                        点击节点上的 ❤️ 图标收藏素材
+                        {t("favoriteHint")}
                     </p>
                 </div>
             </Card>
@@ -298,7 +302,7 @@ export const LibInput = ({ resourceType }: LibInputProps) => {
         <Card className="p-3">
             <div className="flex items-center justify-between mb-3">
                 <p className="text-sm font-medium">
-                    作品集 ({materials.length})
+                    {t("portfolio")} ({materials.length})
                 </p>
                 <Button
                     size="icon"

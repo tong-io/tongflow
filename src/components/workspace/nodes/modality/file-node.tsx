@@ -178,7 +178,7 @@ const FileNode = ({ selected, data }: FileNodeRfProps) => {
                 </NodeHeaderTitle>
                 <NodeHeaderActions>
                     <NodeHeaderComboAction
-                        onClick={() => logger.debug("组合模式切换")}
+                        onClick={() => logger.debug("compose mode toggle")}
                     />
                     <NodeHeaderMenuAction label={t("moreOptions")}>
                         <DropdownMenuLabel>{t("actions")}</DropdownMenuLabel>

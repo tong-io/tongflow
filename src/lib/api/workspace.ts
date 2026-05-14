@@ -2,7 +2,7 @@
  * Workspace API client — local workflows
  */
 
-import { apiDelete, apiGet, apiPost, apiPut } from "@/utils/api-client";
+import { apiDelete, apiGet, apiPost, apiPut } from "./client";
 import type { ExecutableWorkflow } from "@/lib/workflow/executable-workflow";
 import type { Material } from "./material";
 

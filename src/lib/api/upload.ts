@@ -8,7 +8,7 @@ import {
     UploadValidationError,
     validateFile,
 } from "@/lib/upload/validation";
-import { apiClient } from "@/utils/api-client";
+import { apiClient } from "./client";
 
 export interface PresignedUrlResponse {
     uploadUrl: string;

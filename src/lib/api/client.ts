@@ -1,5 +1,7 @@
 import toast from "react-hot-toast";
 
+import { getClientTranslator } from "@/utils/client-i18n";
+
 /**
  * Request configuration options
  */
@@ -48,7 +50,7 @@ function getErrorMessage(error: unknown): string {
     ) {
         return (error as Record<string, unknown>).message as string;
     }
-    return "未知错误";
+    return getClientTranslator("Api")("unknownError");
 }
 
 /**
@@ -124,6 +126,7 @@ export async function apiClient<T = unknown>(
         ...fetchOptions
     } = options;
 
+    const t = getClientTranslator("Api");
     let errorToastShown = false; // Track whether an error toast has already been shown
 
     try {
@@ -158,7 +161,9 @@ export async function apiClient<T = unknown>(
             // Handle authentication errors: 401 (unauthenticated) and 403 (forbidden)
             if (response.status === 401 || response.status === 403) {
                 const authErrorMsg =
-                    response.status === 401 ? "未授权访问" : "拒绝访问";
+                    response.status === 401
+                        ? t("unauthorized")
+                        : t("accessDenied");
                 if (showErrorToast) {
                     toast.error(authErrorMsg);
                     errorToastShown = true;
@@ -173,7 +178,10 @@ export async function apiClient<T = unknown>(
             const errorMsg =
                 errorMessage ||
                 backendError ||
-                `请求失败: ${response.status} ${response.statusText}`;
+                t("requestFailed", {
+                    status: response.status,
+                    statusText: response.statusText,
+                });
 
             if (showErrorToast) {
                 // Backend error message is automatically shown in the toast
@@ -188,7 +196,7 @@ export async function apiClient<T = unknown>(
 
         // Show success message
         if (showSuccessToast) {
-            const message = successMessage || "操作成功";
+            const message = successMessage || t("success");
             toast.success(message);
         }
 
@@ -196,7 +204,7 @@ export async function apiClient<T = unknown>(
     } catch (error) {
         // Handle network errors and other errors
         if (error instanceof Error && error.name === "AbortError") {
-            const msg = errorMessage || "请求超时，请重试";
+            const msg = errorMessage || t("timedOut");
             if (showErrorToast && !errorToastShown) {
                 toast.error(msg);
                 errorToastShown = true;

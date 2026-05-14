@@ -117,25 +117,67 @@ def _input_model_cls(fn: Callable[..., object]) -> type[BaseModel] | None:
     return None
 
 
+def _is_method(fn: Callable[..., object]) -> bool:
+    """True when `fn`'s first positional parameter is `self`/`cls`.
+
+    Modal plugins decorate class methods (`def slot(self, input)`); LLM plugins
+    decorate module-level functions (`def slot(input)`). The wrapper signature
+    has to match so callers can invoke either form with a single `input` arg.
+    """
+    try:
+        sig = inspect.signature(fn)
+    except (TypeError, ValueError):
+        return False
+    for p in sig.parameters.values():
+        return p.name in ("self", "cls")
+    return False
+
+
 def node_slot(*slots: str) -> Callable[[F], F]:
     """Declare which ABI `nodeSlot`(s) this method implements.
 
     The decorated function is also wrapped so that:
     - its input `dict` is converted to a Pydantic instance (recursively), and
     - a Pydantic return value is dumped back to dict for Modal.
+
+    Works for both class methods (Modal plugins) and module functions (LLM
+    plugins) — the wrapper introspects the underlying signature at decoration
+    time.
     """
 
     def deco(fn: F) -> F:
         input_cls = _input_model_cls(fn)
+        is_method = _is_method(fn)
 
-        @functools.wraps(fn)
-        def wrapper(self: Any, input: Any, /, *args: Any, **kwargs: Any) -> Any:
+        def _marshal(input: Any) -> Any:
             if input_cls is not None and isinstance(input, dict):
-                input = _deep_construct(input_cls, input)
-            result = fn(self, input, *args, **kwargs)
+                return _deep_construct(input_cls, input)
+            return input
+
+        def _finalize(result: Any) -> Any:
             if isinstance(result, BaseModel):
                 return result.model_dump(mode="json")
             return result
+
+        wrapper: Callable[..., Any]
+        if is_method:
+
+            @functools.wraps(fn)
+            def method_wrapper(
+                self: Any, input: Any, /, *args: Any, **kwargs: Any
+            ) -> Any:
+                return _finalize(
+                    fn(self, _marshal(input), *args, **kwargs)
+                )
+
+            wrapper = method_wrapper
+        else:
+
+            @functools.wraps(fn)
+            def fn_wrapper(input: Any, /, *args: Any, **kwargs: Any) -> Any:
+                return _finalize(fn(_marshal(input), *args, **kwargs))
+
+            wrapper = fn_wrapper
 
         existing: tuple[str, ...] = getattr(fn, "__tongflow_slots__", ())
         merged = existing + tuple(slots)

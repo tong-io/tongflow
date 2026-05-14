@@ -29,8 +29,8 @@ import { logger } from "@/lib/logger";
 
 import {
     getDefaultVoice,
+    getVoiceLangLabels,
     getVoiceOptions,
-    VOICE_LANG_LABELS,
 } from "../transfer/text-gen-speech-shared";
 
 export interface VoiceLangSelectProps {
@@ -57,6 +57,8 @@ export function VoiceLangSelect({
     className,
 }: VoiceLangSelectProps) {
     const t = useTranslations("Workspace.nodes");
+    const tLang = useTranslations("Languages");
+    const langLabels = useMemo(() => getVoiceLangLabels(tLang), [tLang]);
     const [voiceLang, setVoiceLang] = useState<VoiceLanguage>(defaultLang);
 
     const voiceOptions = useMemo(
@@ -95,7 +97,7 @@ export function VoiceLangSelect({
                     {(Object.keys(crawledVoiceOptions) as VoiceLanguage[]).map(
                         (lang) => (
                             <SelectItem key={lang} value={lang}>
-                                {VOICE_LANG_LABELS[lang]}
+                                {langLabels[lang]}
                             </SelectItem>
                         ),
                     )}
@@ -105,7 +107,7 @@ export function VoiceLangSelect({
                 htmlFor={id}
                 className="text-sm text-muted-foreground whitespace-nowrap"
             >
-                {t("common.voice")}：
+                {t("common.voice")}
             </label>
             <Select value={value} onValueChange={onChange}>
                 <SelectTrigger id={id} className="w-36 h-9">

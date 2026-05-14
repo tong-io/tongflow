@@ -131,12 +131,6 @@
                     },
                     "userPrompt": {
                         "type": "string"
-                    },
-                    "pluginId": {
-                        "type": "string"
-                    },
-                    "nodeSlot": {
-                        "type": "string"
                     }
                 },
                 "additionalProperties": false
@@ -173,12 +167,6 @@
                         "minLength": 1
                     },
                     "userPrompt": {
-                        "type": "string"
-                    },
-                    "pluginId": {
-                        "type": "string"
-                    },
-                    "nodeSlot": {
                         "type": "string"
                     }
                 },
@@ -223,12 +211,6 @@
                         }
                     },
                     "userPrompt": {
-                        "type": "string"
-                    },
-                    "pluginId": {
-                        "type": "string"
-                    },
-                    "nodeSlot": {
                         "type": "string"
                     }
                 },
@@ -781,7 +763,7 @@
                     "error": {
                         "type": "string"
                     },
-                    "text": {
+                    "mainText": {
                         "type": "string"
                     },
                     "thinking": {
@@ -796,7 +778,7 @@
                     "audio": {
                         "$ref": "#/$defs/AudioRef"
                     },
-                    "texts": {
+                    "extractedTexts": {
                         "type": "array",
                         "items": {
                             "type": "string"
@@ -826,14 +808,8 @@
                     "width": {
                         "type": "integer"
                     },
-                    "num_inference_steps": {
-                        "type": "integer"
-                    },
                     "enhance_prompt": {
                         "type": "boolean"
-                    },
-                    "negative_prompt": {
-                        "type": "string"
                     },
                     "image": {
                         "$ref": "#/$defs/Asset"
@@ -899,12 +875,6 @@
                     },
                     "height": {
                         "type": "integer"
-                    },
-                    "num_inference_steps": {
-                        "type": "integer"
-                    },
-                    "guidance_scale": {
-                        "type": "number"
                     },
                     "seed": {
                         "type": "integer"
@@ -1055,14 +1025,8 @@
                     "width": {
                         "type": "integer"
                     },
-                    "num_inference_steps": {
-                        "type": "integer"
-                    },
                     "enhance_prompt": {
                         "type": "boolean"
-                    },
-                    "negative_prompt": {
-                        "type": "string"
                     },
                     "image": {
                         "$ref": "#/$defs/Asset"
@@ -1171,31 +1135,10 @@
                     "image": {
                         "$ref": "#/$defs/Asset"
                     },
-                    "video": {
-                        "$ref": "#/$defs/Asset"
-                    },
                     "resolution": {
                         "type": "string"
                     },
                     "seed": {
-                        "type": "integer"
-                    },
-                    "dit_variant": {
-                        "type": "string"
-                    },
-                    "color_correction": {
-                        "type": "string"
-                    },
-                    "out_fps": {
-                        "type": "number"
-                    },
-                    "batch_size": {
-                        "type": "integer"
-                    },
-                    "uniform_batch_size": {
-                        "type": "boolean"
-                    },
-                    "temporal_overlap": {
                         "type": "integer"
                     }
                 },
@@ -1228,9 +1171,6 @@
                     "video"
                 ],
                 "properties": {
-                    "image": {
-                        "$ref": "#/$defs/Asset"
-                    },
                     "video": {
                         "$ref": "#/$defs/Asset"
                     },
@@ -1238,24 +1178,6 @@
                         "type": "string"
                     },
                     "seed": {
-                        "type": "integer"
-                    },
-                    "dit_variant": {
-                        "type": "string"
-                    },
-                    "color_correction": {
-                        "type": "string"
-                    },
-                    "out_fps": {
-                        "type": "number"
-                    },
-                    "batch_size": {
-                        "type": "integer"
-                    },
-                    "uniform_batch_size": {
-                        "type": "boolean"
-                    },
-                    "temporal_overlap": {
                         "type": "integer"
                     }
                 },
@@ -1419,14 +1341,8 @@
                     "width": {
                         "type": "integer"
                     },
-                    "num_inference_steps": {
-                        "type": "integer"
-                    },
                     "enhance_prompt": {
                         "type": "boolean"
-                    },
-                    "negative_prompt": {
-                        "type": "string"
                     },
                     "image": {
                         "$ref": "#/$defs/Asset"
@@ -1626,14 +1542,8 @@
                     "width": {
                         "type": "integer"
                     },
-                    "num_inference_steps": {
-                        "type": "integer"
-                    },
                     "enhance_prompt": {
                         "type": "boolean"
-                    },
-                    "negative_prompt": {
-                        "type": "string"
                     },
                     "image": {
                         "$ref": "#/$defs/Asset"
@@ -1704,14 +1614,8 @@
                     "width": {
                         "type": "integer"
                     },
-                    "num_inference_steps": {
-                        "type": "integer"
-                    },
                     "enhance_prompt": {
                         "type": "boolean"
-                    },
-                    "negative_prompt": {
-                        "type": "string"
                     },
                     "image": {
                         "$ref": "#/$defs/Asset"
@@ -1776,12 +1680,6 @@
                     },
                     "height": {
                         "type": "integer"
-                    },
-                    "num_inference_steps": {
-                        "type": "integer"
-                    },
-                    "guidance_scale": {
-                        "type": "number"
                     },
                     "seed": {
                         "type": "integer"

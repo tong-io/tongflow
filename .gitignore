@@ -33,6 +33,11 @@ next-env.d.ts
 # local Python venv (optional, e.g. pip install modal)
 .venv/
 
+# Python bytecode
+__pycache__/
+*.pyc
+*.pyo
+
 # runtime-installed plugin packages (see docs/plugins.md)
 plugins/
 

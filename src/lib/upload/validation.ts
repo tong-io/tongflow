@@ -5,6 +5,7 @@
  */
 
 import type { ValidationResult } from "@/lib/upload/limits";
+import { getClientTranslator } from "@/utils/client-i18n";
 
 export type { ValidationResult } from "@/lib/upload/limits";
 
@@ -29,7 +30,7 @@ export function getImageDimensions(
 
         img.onerror = () => {
             URL.revokeObjectURL(url);
-            reject(new Error("无法读取图片信息"));
+            reject(new Error(getClientTranslator("Upload")("readImageFailed")));
         };
 
         img.src = url;
@@ -59,7 +60,7 @@ export function getVideoMetadata(
 
         video.onerror = () => {
             URL.revokeObjectURL(url);
-            reject(new Error("无法读取视频信息"));
+            reject(new Error(getClientTranslator("Upload")("readVideoFailed")));
         };
 
         video.src = url;
@@ -101,7 +102,7 @@ export async function validateFile(file: File): Promise<FileValidationResult> {
     if (file.size > MAX_FILE_SIZE) {
         return {
             allowed: false,
-            message: `文件大小超过限制。最大允许 50MB`,
+            message: getClientTranslator("Upload")("sizeLimit50MB"),
             maxAllowed: MAX_FILE_SIZE,
             fileInfo: { size: file.size },
         };
@@ -148,7 +149,7 @@ export class UploadValidationError extends Error {
     fileInfo?: FileValidationResult["fileInfo"];
 
     constructor(result: FileValidationResult) {
-        super(result.message || "文件不符合上传要求");
+        super(result.message || "File does not meet upload requirements");
         this.maxAllowed = result.maxAllowed;
         this.fileInfo = result.fileInfo;
     }

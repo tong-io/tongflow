@@ -9,8 +9,6 @@ class GenTextInput(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     text: str
-    nodeSlot: str | None = None
-    pluginId: str | None = None
     userPrompt: str | None = None
 
 class GenTextOutput(BaseModel):

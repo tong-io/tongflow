@@ -39,7 +39,9 @@ export function NodePluginSelect({
                 </Label>
                 <Select value={value} onValueChange={onValueChange}>
                     <SelectTrigger className="w-full" size="sm">
-                        <SelectValue placeholder="Select a repo…" />
+                        <SelectValue
+                            placeholder={t("pluginSelectPlaceholder")}
+                        />
                     </SelectTrigger>
                     <SelectContent>
                         {options.map((opt) => (

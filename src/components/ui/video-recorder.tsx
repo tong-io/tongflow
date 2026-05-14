@@ -1,6 +1,7 @@
 "use client";
 
 import { Camera, Circle, Square } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { logger } from "@/lib/logger";
 import { cn } from "@/lib/utils";
@@ -14,6 +15,7 @@ interface VideoRecorderProps {
 type RecordingStatus = "idle" | "recording" | "stopped";
 
 export const VideoRecorder = ({ onRecord, className }: VideoRecorderProps) => {
+    const t = useTranslations("Recorder");
     const [status, setStatus] = useState<RecordingStatus>("idle");
     const [mediaBlobUrl, setMediaBlobUrl] = useState<string>("");
     const [recordingTime, setRecordingTime] = useState(0);
@@ -88,9 +90,9 @@ export const VideoRecorder = ({ onRecord, className }: VideoRecorderProps) => {
             }, 1000);
         } catch (error) {
             logger.error("Failed to start recording:", error);
-            alert("无法访问摄像头和麦克风。请确保已授予权限。");
+            alert(t("videoPermissionError"));
         }
-    }, [onRecord]);
+    }, [onRecord, t]);
 
     // Stop recording
     const stopRecording = useCallback(() => {
@@ -133,7 +135,7 @@ export const VideoRecorder = ({ onRecord, className }: VideoRecorderProps) => {
                             className="flex items-center gap-2"
                         >
                             <Camera className="h-5 w-5" />
-                            开始录制
+                            {t("videoStart")}
                         </Button>
                     </div>
                 )}
@@ -153,7 +155,7 @@ export const VideoRecorder = ({ onRecord, className }: VideoRecorderProps) => {
                                 className="flex items-center gap-2 shadow-lg"
                             >
                                 <Square className="h-4 w-4" />
-                                停止录制
+                                {t("videoStop")}
                             </Button>
                         </div>
                     </>

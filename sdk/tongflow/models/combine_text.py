@@ -9,8 +9,6 @@ class CombineTextInput(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     texts: list[str]
-    nodeSlot: str | None = None
-    pluginId: str | None = None
     userPrompt: str | None = None
 
 class CombineTextOutput(BaseModel):

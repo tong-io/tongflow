@@ -30,7 +30,7 @@ const RecordTab = () => {
             }
         },
         onError: (error) => {
-            logger.error("上传失败:", error);
+            logger.error("Upload failed:", error);
         },
     });
 

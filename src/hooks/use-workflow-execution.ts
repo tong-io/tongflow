@@ -14,6 +14,7 @@
  */
 
 import type { Edge, Node } from "@xyflow/react";
+import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
 import {
@@ -90,6 +91,7 @@ export function useWorkflowExecution(
         defaultWorkflowName,
         t,
     } = args;
+    const tToast = useTranslations("Workspace.toast");
 
     const setWorkflowExecutionStatus = useTaskStore(
         (state) => state.setWorkflowExecutionStatus,
@@ -507,7 +509,7 @@ export function useWorkflowExecution(
                 id: taskIdToCancel,
                 status: TaskStatus.RUNNING,
                 nodeId: null,
-                data: { message: "取消中..." },
+                data: { message: tToast("cancelling") },
             });
         }
 
@@ -537,7 +539,7 @@ export function useWorkflowExecution(
                     id: taskIdToCancel,
                     status: TaskStatus.CANCELLED,
                     nodeId: null,
-                    data: { message: "任务已取消" },
+                    data: { message: tToast("cancelled") },
                 });
                 cleanupAfterCancel();
                 cancelTimeoutRef.current = null;
@@ -548,11 +550,11 @@ export function useWorkflowExecution(
                 id: taskIdToCancel,
                 status: TaskStatus.CANCELLED,
                 nodeId: null,
-                data: { message: "任务已取消" },
+                data: { message: tToast("cancelled") },
             });
             cleanupAfterCancel();
         }
-    }, [cleanupAfterCancel]);
+    }, [cleanupAfterCancel, tToast]);
 
     // External cancel button (TaskProgressToast) dispatches this window event
     useEffect(() => {

@@ -154,7 +154,7 @@ export function WorkflowTitleMenu() {
             setIsSaveDialogOpen(false);
             setIsSaveAsMode(false);
         } catch (error) {
-            logger.error("保存失败:", error);
+            logger.error("Save failed:", error);
             toast.error(t("saveFailed"));
         } finally {
             setSaving(false);

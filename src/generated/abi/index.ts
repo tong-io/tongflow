@@ -36,12 +36,6 @@ const _slot_gen_text_inputs = {
         userPrompt: {
             type: "string",
         },
-        pluginId: {
-            type: "string",
-        },
-        nodeSlot: {
-            type: "string",
-        },
     },
     additionalProperties: false,
 } as const;
@@ -73,12 +67,6 @@ const _slot_split_text_inputs = {
             minLength: 1,
         },
         userPrompt: {
-            type: "string",
-        },
-        pluginId: {
-            type: "string",
-        },
-        nodeSlot: {
             type: "string",
         },
     },
@@ -119,12 +107,6 @@ const _slot_combine_text_inputs = {
             },
         },
         userPrompt: {
-            type: "string",
-        },
-        pluginId: {
-            type: "string",
-        },
-        nodeSlot: {
             type: "string",
         },
     },
@@ -1020,7 +1002,7 @@ const _slot_link_outputs = {
         error: {
             type: "string",
         },
-        text: {
+        mainText: {
             type: "string",
         },
         thinking: {
@@ -1077,7 +1059,7 @@ const _slot_link_outputs = {
             },
             additionalProperties: false,
         },
-        texts: {
+        extractedTexts: {
             type: "array",
             items: {
                 type: "string",
@@ -1104,14 +1086,8 @@ const _slot_gen_video_inputs = {
         width: {
             type: "integer",
         },
-        num_inference_steps: {
-            type: "integer",
-        },
         enhance_prompt: {
             type: "boolean",
-        },
-        negative_prompt: {
-            type: "string",
         },
         image: {
             type: "object",
@@ -1259,12 +1235,6 @@ const _slot_image_gen_inputs = {
         },
         height: {
             type: "integer",
-        },
-        num_inference_steps: {
-            type: "integer",
-        },
-        guidance_scale: {
-            type: "number",
         },
         seed: {
             type: "integer",
@@ -1449,14 +1419,8 @@ const _slot_image_gen_video_inputs = {
         width: {
             type: "integer",
         },
-        num_inference_steps: {
-            type: "integer",
-        },
         enhance_prompt: {
             type: "boolean",
-        },
-        negative_prompt: {
-            type: "string",
         },
         image: {
             type: "object",
@@ -1686,45 +1650,10 @@ const _slot_image_upscale_inputs = {
             },
             additionalProperties: false,
         },
-        video: {
-            type: "object",
-            required: ["bytesBase64"],
-            properties: {
-                bytesBase64: {
-                    type: "string",
-                    minLength: 1,
-                },
-                filename: {
-                    type: "string",
-                },
-                mime: {
-                    type: "string",
-                },
-            },
-            additionalProperties: false,
-        },
         resolution: {
             type: "string",
         },
         seed: {
-            type: "integer",
-        },
-        dit_variant: {
-            type: "string",
-        },
-        color_correction: {
-            type: "string",
-        },
-        out_fps: {
-            type: "number",
-        },
-        batch_size: {
-            type: "integer",
-        },
-        uniform_batch_size: {
-            type: "boolean",
-        },
-        temporal_overlap: {
             type: "integer",
         },
     },
@@ -1767,23 +1696,6 @@ const _slot_video_upscale_inputs = {
     type: "object",
     required: ["video"],
     properties: {
-        image: {
-            type: "object",
-            required: ["bytesBase64"],
-            properties: {
-                bytesBase64: {
-                    type: "string",
-                    minLength: 1,
-                },
-                filename: {
-                    type: "string",
-                },
-                mime: {
-                    type: "string",
-                },
-            },
-            additionalProperties: false,
-        },
         video: {
             type: "object",
             required: ["bytesBase64"],
@@ -1805,24 +1717,6 @@ const _slot_video_upscale_inputs = {
             type: "string",
         },
         seed: {
-            type: "integer",
-        },
-        dit_variant: {
-            type: "string",
-        },
-        color_correction: {
-            type: "string",
-        },
-        out_fps: {
-            type: "number",
-        },
-        batch_size: {
-            type: "integer",
-        },
-        uniform_batch_size: {
-            type: "boolean",
-        },
-        temporal_overlap: {
             type: "integer",
         },
     },
@@ -2060,14 +1954,8 @@ const _slot_speech_text_gen_video_inputs = {
         width: {
             type: "integer",
         },
-        num_inference_steps: {
-            type: "integer",
-        },
         enhance_prompt: {
             type: "boolean",
-        },
-        negative_prompt: {
-            type: "string",
         },
         image: {
             type: "object",
@@ -2485,14 +2373,8 @@ const _slot_image_image_gen_video_inputs = {
         width: {
             type: "integer",
         },
-        num_inference_steps: {
-            type: "integer",
-        },
         enhance_prompt: {
             type: "boolean",
-        },
-        negative_prompt: {
-            type: "string",
         },
         image: {
             type: "object",
@@ -2647,14 +2529,8 @@ const _slot_text_gen_video_inputs = {
         width: {
             type: "integer",
         },
-        num_inference_steps: {
-            type: "integer",
-        },
         enhance_prompt: {
             type: "boolean",
-        },
-        negative_prompt: {
-            type: "string",
         },
         image: {
             type: "object",
@@ -2801,12 +2677,6 @@ const _slot_image_gen_model_inputs = {
         },
         height: {
             type: "integer",
-        },
-        num_inference_steps: {
-            type: "integer",
-        },
-        guidance_scale: {
-            type: "number",
         },
         seed: {
             type: "integer",
@@ -4244,12 +4114,6 @@ export const ABI_NODES = {
                 userPrompt: {
                     type: "string",
                 },
-                pluginId: {
-                    type: "string",
-                },
-                nodeSlot: {
-                    type: "string",
-                },
             },
             additionalProperties: false,
         },
@@ -4280,12 +4144,6 @@ export const ABI_NODES = {
                     minLength: 1,
                 },
                 userPrompt: {
-                    type: "string",
-                },
-                pluginId: {
-                    type: "string",
-                },
-                nodeSlot: {
                     type: "string",
                 },
             },
@@ -4325,12 +4183,6 @@ export const ABI_NODES = {
                     },
                 },
                 userPrompt: {
-                    type: "string",
-                },
-                pluginId: {
-                    type: "string",
-                },
-                nodeSlot: {
                     type: "string",
                 },
             },
@@ -4814,7 +4666,7 @@ export const ABI_NODES = {
                 error: {
                     type: "string",
                 },
-                text: {
+                mainText: {
                     type: "string",
                 },
                 thinking: {
@@ -4829,7 +4681,7 @@ export const ABI_NODES = {
                 audio: {
                     $ref: "#/$defs/AudioRef",
                 },
-                texts: {
+                extractedTexts: {
                     type: "array",
                     items: {
                         type: "string",
@@ -4856,14 +4708,8 @@ export const ABI_NODES = {
                 width: {
                     type: "integer",
                 },
-                num_inference_steps: {
-                    type: "integer",
-                },
                 enhance_prompt: {
                     type: "boolean",
-                },
-                negative_prompt: {
-                    type: "string",
                 },
                 image: {
                     $ref: "#/$defs/Asset",
@@ -4926,12 +4772,6 @@ export const ABI_NODES = {
                 },
                 height: {
                     type: "integer",
-                },
-                num_inference_steps: {
-                    type: "integer",
-                },
-                guidance_scale: {
-                    type: "number",
                 },
                 seed: {
                     type: "integer",
@@ -5067,14 +4907,8 @@ export const ABI_NODES = {
                 width: {
                     type: "integer",
                 },
-                num_inference_steps: {
-                    type: "integer",
-                },
                 enhance_prompt: {
                     type: "boolean",
-                },
-                negative_prompt: {
-                    type: "string",
                 },
                 image: {
                     $ref: "#/$defs/Asset",
@@ -5172,31 +5006,10 @@ export const ABI_NODES = {
                 image: {
                     $ref: "#/$defs/Asset",
                 },
-                video: {
-                    $ref: "#/$defs/Asset",
-                },
                 resolution: {
                     type: "string",
                 },
                 seed: {
-                    type: "integer",
-                },
-                dit_variant: {
-                    type: "string",
-                },
-                color_correction: {
-                    type: "string",
-                },
-                out_fps: {
-                    type: "number",
-                },
-                batch_size: {
-                    type: "integer",
-                },
-                uniform_batch_size: {
-                    type: "boolean",
-                },
-                temporal_overlap: {
                     type: "integer",
                 },
             },
@@ -5224,9 +5037,6 @@ export const ABI_NODES = {
             type: "object",
             required: ["video"],
             properties: {
-                image: {
-                    $ref: "#/$defs/Asset",
-                },
                 video: {
                     $ref: "#/$defs/Asset",
                 },
@@ -5234,24 +5044,6 @@ export const ABI_NODES = {
                     type: "string",
                 },
                 seed: {
-                    type: "integer",
-                },
-                dit_variant: {
-                    type: "string",
-                },
-                color_correction: {
-                    type: "string",
-                },
-                out_fps: {
-                    type: "number",
-                },
-                batch_size: {
-                    type: "integer",
-                },
-                uniform_batch_size: {
-                    type: "boolean",
-                },
-                temporal_overlap: {
                     type: "integer",
                 },
             },
@@ -5393,14 +5185,8 @@ export const ABI_NODES = {
                 width: {
                     type: "integer",
                 },
-                num_inference_steps: {
-                    type: "integer",
-                },
                 enhance_prompt: {
                     type: "boolean",
-                },
-                negative_prompt: {
-                    type: "string",
                 },
                 image: {
                     $ref: "#/$defs/Asset",
@@ -5574,14 +5360,8 @@ export const ABI_NODES = {
                 width: {
                     type: "integer",
                 },
-                num_inference_steps: {
-                    type: "integer",
-                },
                 enhance_prompt: {
                     type: "boolean",
-                },
-                negative_prompt: {
-                    type: "string",
                 },
                 image: {
                     $ref: "#/$defs/Asset",
@@ -5647,14 +5427,8 @@ export const ABI_NODES = {
                 width: {
                     type: "integer",
                 },
-                num_inference_steps: {
-                    type: "integer",
-                },
                 enhance_prompt: {
                     type: "boolean",
-                },
-                negative_prompt: {
-                    type: "string",
                 },
                 image: {
                     $ref: "#/$defs/Asset",
@@ -5714,12 +5488,6 @@ export const ABI_NODES = {
                 },
                 height: {
                     type: "integer",
-                },
-                num_inference_steps: {
-                    type: "integer",
-                },
-                guidance_scale: {
-                    type: "number",
                 },
                 seed: {
                     type: "integer",

@@ -1,12 +1,6 @@
-import type { JSONSchema7 } from "json-schema";
 import { describe, expect, it } from "vitest";
 
-import { ABI_NODES } from "@/generated/abi";
-
-import {
-    compareAbiProducerConsumerSchemas,
-    narrowAbiProducerOutputField,
-} from "./connection-validator";
+import { compareAbiProducerConsumerSchemas } from "./connection-validator";
 
 describe("compareAbiProducerConsumerSchemas", () => {
     it("returns compatible when both sides are primitive string", () => {
@@ -57,7 +51,16 @@ describe("compareAbiProducerConsumerSchemas", () => {
         ).toBe("disjoint");
     });
 
-    it("returns unknown for anyOf unions (until OR-aggregate lands)", () => {
+    it("aggregates producer anyOf — compatible when every branch matches", () => {
+        expect(
+            compareAbiProducerConsumerSchemas(
+                { anyOf: [{ type: "string" }, { type: "string" }] },
+                { type: "string" },
+            ),
+        ).toBe("compatible");
+    });
+
+    it("aggregates producer anyOf — unknown when branches disagree", () => {
         expect(
             compareAbiProducerConsumerSchemas(
                 { anyOf: [{ type: "string" }, { type: "number" }] },
@@ -65,33 +68,22 @@ describe("compareAbiProducerConsumerSchemas", () => {
             ),
         ).toBe("unknown");
     });
-});
 
-describe("narrowAbiProducerOutputField", () => {
-    const genTextOut = ABI_NODES["gen-text"].outputs as JSONSchema7;
-
-    it("picks heuristic text field when outputField is texts", () => {
-        const s = narrowAbiProducerOutputField(genTextOut, "texts", undefined);
-        expect(s?.type).toBe("string");
+    it("aggregates consumer anyOf — compatible when any branch matches", () => {
+        expect(
+            compareAbiProducerConsumerSchemas(
+                { type: "string" },
+                { anyOf: [{ type: "string" }, { type: "integer" }] },
+            ),
+        ).toBe("compatible");
     });
 
-    it("respects preferredKeys before built-in text heuristics", () => {
-        const outputs = {
-            type: "object",
-            properties: {
-                text: { type: "string", enum: ["a"] },
-                result: { type: "string", enum: ["b"] },
-                texts: { type: "string", enum: ["c"] },
-            },
-        } as const satisfies JSONSchema7;
-
-        const first = narrowAbiProducerOutputField(outputs, "texts", undefined);
-        expect(first).toEqual({ type: "string", enum: ["a"] });
-
-        const prioritized = narrowAbiProducerOutputField(outputs, "texts", [
-            "texts",
-            "text",
-        ]);
-        expect(prioritized).toEqual({ type: "string", enum: ["c"] });
+    it("aggregates consumer anyOf — disjoint when every branch clashes", () => {
+        expect(
+            compareAbiProducerConsumerSchemas(
+                { type: "string" },
+                { anyOf: [{ type: "boolean" }, { type: "integer" }] },
+            ),
+        ).toBe("disjoint");
     });
 });

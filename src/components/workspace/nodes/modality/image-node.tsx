@@ -34,6 +34,7 @@ const FullScreenImageModal = ({
     fileKey: string;
     onClose: () => void;
 }) => {
+    const t = useTranslations("Workspace.nodes.modal");
     const [mounted, setMounted] = useState(false);
     const { url } = useFileAsyncLoader(fileKey, { priority: "high" });
 
@@ -53,7 +54,7 @@ const FullScreenImageModal = ({
                 {/* Header */}
                 <div className="flex items-center justify-between p-4 border-b border-gray-200 flex-shrink-0">
                     <h2 className="text-lg font-semibold text-gray-900">
-                        Image Preview
+                        {t("imagePreview")}
                     </h2>
                     <Button size="sm" variant="ghost" onClick={onClose}>
                         <X className="h-4 w-4" />
@@ -65,11 +66,11 @@ const FullScreenImageModal = ({
                     {url ? (
                         <img
                             src={url}
-                            alt="Full screen preview"
+                            alt={t("fullScreenPreview")}
                             className="max-w-full max-h-full object-contain"
                         />
                     ) : (
-                        <div className="text-gray-500">Loading...</div>
+                        <div className="text-gray-500">{t("loading")}</div>
                     )}
                 </div>
             </div>
@@ -87,6 +88,7 @@ const FullScreenWaterfallImageModal = ({
     imageKeys: string[];
     onClose: () => void;
 }) => {
+    const t = useTranslations("Workspace.nodes.modal");
     const [mounted, setMounted] = useState(false);
     const { urls } = useFileAsyncLoaderBatch(imageKeys, { priority: "normal" });
 
@@ -115,13 +117,13 @@ const FullScreenWaterfallImageModal = ({
                     {url ? (
                         <img
                             src={url}
-                            alt="Image thumbnail"
+                            alt={t("image")}
                             className="h-full w-full object-cover"
                         />
                     ) : (
                         <div className="flex items-center justify-center h-full w-full bg-gray-300">
                             <div className="text-xs text-gray-500">
-                                Loading...
+                                {t("loading")}
                             </div>
                         </div>
                     )}
@@ -136,7 +138,7 @@ const FullScreenWaterfallImageModal = ({
                 {/* Header */}
                 <div className="flex items-center justify-between p-4 border-b border-gray-200 flex-shrink-0">
                     <h2 className="text-lg font-semibold text-gray-900">
-                        Images ({imageKeys.length})
+                        {t("images", { count: imageKeys.length })}
                     </h2>
                     <Button size="sm" variant="ghost" onClick={onClose}>
                         <X className="h-4 w-4" />
@@ -269,7 +271,7 @@ const ImageNode = ({ selected, data }: ImageNodeRfProps) => {
                             </Button>
                         )}
                         <NodeHeaderComboAction
-                            onClick={() => logger.debug("组合模式切换")}
+                            onClick={() => logger.debug("compose mode toggle")}
                         />
                         <NodeHeaderMenuAction label={t("moreOptions")}>
                             <DropdownMenuLabel>

@@ -11,7 +11,7 @@ import {
     TaskStatus,
     WorkflowStatus,
 } from "@/constants/task-status";
-import { getDb, tasks } from "@/db";
+import { getDb, tasks, workflows } from "@/db";
 import { ABI_NODES, type NodeSlot } from "@/generated/abi";
 import { logger } from "@/lib/logger";
 import { executePlugin } from "@/lib/plugin-executor/execute";
@@ -76,6 +76,55 @@ export async function loadTaskData(taskId: string): Promise<TaskData | null> {
 }
 
 /**
+ * SSE entry point. Inspects the task row and routes single-node tasks to
+ * `executeTask` and workflow tasks (`feature === "workflow"`) to
+ * `executeWorkflowTask`, loading the workflow's executable JSON on the way.
+ */
+export async function dispatchTask(taskId: string): Promise<void> {
+    const db = await getDb();
+    const task = await db.query.tasks.findFirst({
+        where: eq(tasks.id, taskId),
+    });
+
+    if (!task) {
+        notifyTask(
+            taskId,
+            TaskStatus.FAILED,
+            { message: "Task not found or expired" },
+            null,
+        );
+        return;
+    }
+
+    if (task.feature === "workflow") {
+        if (!task.workflowId) {
+            notifyTask(
+                taskId,
+                WorkflowStatus.WORKFLOW_FAILED,
+                { message: "Workflow task missing workflowId" },
+                null,
+            );
+            return;
+        }
+        const wf = await db.query.workflows.findFirst({
+            where: eq(workflows.id, task.workflowId),
+        });
+        if (!wf?.executable) {
+            notifyTask(
+                taskId,
+                WorkflowStatus.WORKFLOW_FAILED,
+                { message: "Workflow not found or has no executable data" },
+                null,
+            );
+            return;
+        }
+        return executeWorkflowTask(taskId, wf.executable, {});
+    }
+
+    return executeTask(taskId);
+}
+
+/**
  * Execute a task (called by the SSE endpoint)
  *
  * Flow:
@@ -91,7 +140,7 @@ export async function executeTask(taskId: string): Promise<void> {
         notifyTask(
             taskId,
             TaskStatus.FAILED,
-            { message: "任务不存在或已过期" },
+            { message: "Task not found or expired" },
             null,
         );
         return;
@@ -110,7 +159,7 @@ export async function executeTask(taskId: string): Promise<void> {
         notifyTask(
             taskId,
             TaskStatus.RUNNING,
-            { message: "任务开始执行" },
+            { message: "Task started" },
             taskData.nodeId,
         );
 
@@ -146,7 +195,7 @@ export async function executeTask(taskId: string): Promise<void> {
             const failMsg =
                 typeof rawErr === "string" && rawErr.trim().length > 0
                     ? rawErr.trim()
-                    : "任务失败";
+                    : "Task failed";
             notifyTask(
                 taskId,
                 TaskStatus.FAILED,
@@ -186,7 +235,7 @@ export async function executeTask(taskId: string): Promise<void> {
             taskId,
             TaskStatus.FAILED,
             {
-                message: "任务执行失败",
+                message: "Task execution failed",
                 error: errorMsg,
             },
             taskData.nodeId,
@@ -282,7 +331,7 @@ export async function executeWorkflowTask(
         for (let levelIdx = 0; levelIdx < executionLevels.length; levelIdx++) {
             if (controller.signal.aborted) {
                 notifyTask(taskId, WorkflowStatus.WORKFLOW_CANCELLED, {
-                    message: "工作流已取消",
+                    message: "Workflow canceled",
                 });
                 return;
             }
@@ -297,7 +346,7 @@ export async function executeWorkflowTask(
             for (const node of levelExecNodes) {
                 if (controller.signal.aborted) {
                     notifyTask(taskId, WorkflowStatus.WORKFLOW_CANCELLED, {
-                        message: "工作流已取消",
+                        message: "Workflow canceled",
                     });
                     return;
                 }
@@ -354,7 +403,7 @@ export async function executeWorkflowTask(
                         taskId,
                         NodeStatus.NODE_FAILED,
                         {
-                            message: "节点执行失败",
+                            message: "Node execution failed",
                             error: errMsg,
                             label: nodeLabel,
                         },
@@ -410,7 +459,7 @@ export async function executeWorkflowTask(
         logger.error(`[Workflow] Task ${taskId} failed:`, errorMsg);
 
         notifyTask(taskId, WorkflowStatus.WORKFLOW_FAILED, {
-            message: "工作流执行失败",
+            message: "Workflow execution failed",
             error: errorMsg,
         });
 

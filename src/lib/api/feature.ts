@@ -1,4 +1,4 @@
-import { apiGet } from "@/utils/api-client";
+import { apiGet } from "./client";
 
 export interface Feature {
     name: string;

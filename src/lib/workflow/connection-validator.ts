@@ -4,15 +4,13 @@
  */
 
 import type { Connection, Node as FlowNode } from "@xyflow/react";
-import type { JSONSchema7 } from "json-schema";
+import type { JSONSchema7, JSONSchema7Definition } from "json-schema";
 
 import { ABI_DEFINITIONS, ABI_NODES, type NodeSlot } from "@/generated/abi";
+import { parseSourceHandleId } from "@/lib/abi/handle-introspect";
 import { getAbiNodeRegistration } from "@/lib/abi/node-registry";
 import { DATA_NODE_TYPES } from "@/lib/workflow/executable-workflow";
-import {
-    getEffectiveOutputField,
-    getEffectiveOutputType,
-} from "@/lib/workflow/flow-connection-shared";
+import { getEffectiveOutputType } from "@/lib/workflow/flow-connection-shared";
 
 type AtomicResult = "compatible" | "disjoint" | "unknown";
 
@@ -120,6 +118,17 @@ function primitiveTypesExplicitlyContradict(
     );
 }
 
+function collectBranches(s: JSONSchema7): JSONSchema7[] {
+    const list: JSONSchema7Definition[] | undefined = s.anyOf ?? s.oneOf;
+    if (!list || list.length === 0) return [];
+    const out: JSONSchema7[] = [];
+    for (const b of list) {
+        if (typeof b === "boolean") continue;
+        out.push(resolveRefs(b));
+    }
+    return out;
+}
+
 function schemasAtomicCompare(
     producer: JSONSchema7,
     consumer: JSONSchema7,
@@ -130,17 +139,35 @@ function schemasAtomicCompare(
     const prod = resolveRefs(producer);
     const cons = resolveRefs(consumer);
 
-    if (
-        (prod.anyOf && prod.anyOf.length > 0) ||
-        (prod.oneOf && prod.oneOf.length > 0) ||
-        (cons.anyOf && cons.anyOf.length > 0) ||
-        (cons.oneOf && cons.oneOf.length > 0)
-    ) {
-        /**
-         * TODO: OR-aggregate branches (e.g. Asset unions) so ABI edge checks can still return
-         * compatible/disjoint when every branch agrees. Until then, return "unknown" which lets
-         * `tryAbiCompatibility` defer to the coarser modality check in `connection-rules`.
-         */
+    const prodBranches = collectBranches(prod);
+    if (prodBranches.length > 0) {
+        // Producer may emit any of these branches; conservative aggregation:
+        // every branch must agree before claiming compatible or disjoint.
+        let allCompat = true;
+        let allDisj = true;
+        for (const branch of prodBranches) {
+            const r = schemasAtomicCompare(branch, cons, depth + 1);
+            if (r !== "compatible") allCompat = false;
+            if (r !== "disjoint") allDisj = false;
+        }
+        if (allCompat) return "compatible";
+        if (allDisj) return "disjoint";
+        return "unknown";
+    }
+
+    const consBranches = collectBranches(cons);
+    if (consBranches.length > 0) {
+        // Consumer accepts any of these branches; the producer just needs to
+        // match one. Disjoint only when it clashes with every branch.
+        let anyCompat = false;
+        let allDisj = true;
+        for (const branch of consBranches) {
+            const r = schemasAtomicCompare(prod, branch, depth + 1);
+            if (r === "compatible") anyCompat = true;
+            if (r !== "disjoint") allDisj = false;
+        }
+        if (anyCompat) return "compatible";
+        if (allDisj) return "disjoint";
         return "unknown";
     }
 
@@ -191,58 +218,16 @@ function schemasAtomicCompare(
     return "compatible";
 }
 
-const DEFAULT_ABI_PRODUCER_TEXT_KEYS = [
-    "text",
-    "result",
-    "texts",
-    "content",
-    "caption",
-    "title",
-] as const;
-const DEFAULT_ABI_PRODUCER_FILE_KEYS = [
-    "fileKeys",
-    "files",
-    "video",
-    "image",
-    "audio",
-    "url",
-    "urls",
-    "r2_key",
-] as const;
-
-function pickProducerFieldSchema(
-    outputs: JSONSchema7,
-    outputField: "texts" | "fileKeys" | undefined,
-    preferredKeys?: readonly string[] | undefined,
+function getAbiOutputProperty(
+    slot: NodeSlot,
+    field: string,
 ): JSONSchema7 | undefined {
-    const base = resolveRefs(outputs as JSONSchema7);
-    const props = (
-        base as JSONSchema7 & {
-            properties?: Record<string, JSONSchema7>;
-        }
-    ).properties;
-    if (!props) return undefined;
-
-    const chain: string[] = [];
-    if (preferredKeys?.length) {
-        for (const k of preferredKeys) {
-            if (typeof k === "string" && k.length > 0) chain.push(k);
-        }
-    }
-    if (outputField === "texts") {
-        chain.push(...DEFAULT_ABI_PRODUCER_TEXT_KEYS);
-    } else if (outputField === "fileKeys") {
-        chain.push(...DEFAULT_ABI_PRODUCER_FILE_KEYS);
-    }
-
-    const seen = new Set<string>();
-    for (const k of chain) {
-        if (seen.has(k)) continue;
-        seen.add(k);
-        const p = props[k];
-        if (p) return resolveRefs(p as JSONSchema7);
-    }
-    return undefined;
+    const outputs = resolveRefs(ABI_NODES[slot].outputs as JSONSchema7);
+    const props = outputs.properties as
+        | Record<string, JSONSchema7>
+        | undefined;
+    const raw = props?.[field];
+    return raw ? resolveRefs(raw as JSONSchema7) : undefined;
 }
 
 function getAbiInputProperties(slot: NodeSlot): Record<string, JSONSchema7> {
@@ -318,13 +303,11 @@ export function tryAbiCompatibility(
     if (!consumerField) return undefined;
     if (!(consumerField in getAbiInputProperties(targetSlot))) return undefined;
 
-    const outputField = getEffectiveOutputField(sourceNode.id);
-
-    const producerNarrow = pickProducerFieldSchema(
-        ABI_NODES[sourceSlot].outputs as JSONSchema7,
-        outputField,
-        undefined,
-    );
+    // Source handle id (`out:<field>`) is the absolute address for the
+    // producer ABI output property — no heuristic fallback needed.
+    const producerField = parseSourceHandleId(connection.sourceHandle);
+    if (!producerField) return undefined;
+    const producerNarrow = getAbiOutputProperty(sourceSlot, producerField);
     if (!producerNarrow) return undefined;
 
     const consumerSch = consumerFieldSchema(targetSlot, consumerField);
@@ -346,11 +329,3 @@ export function compareAbiProducerConsumerSchemas(
     return schemasAtomicCompare(producer, consumer, 0);
 }
 
-/** Resolve which `outputs.properties` entry represents the narrowed producer payload. */
-export function narrowAbiProducerOutputField(
-    outputs: JSONSchema7,
-    outputField: "texts" | "fileKeys" | undefined,
-    preferredKeys?: readonly string[] | undefined,
-): JSONSchema7 | undefined {
-    return pickProducerFieldSchema(outputs, outputField, preferredKeys);
-}

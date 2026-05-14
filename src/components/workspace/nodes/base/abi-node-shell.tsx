@@ -11,6 +11,7 @@ import type { ReactNode } from "react";
 import type { NodeSlot } from "@/generated/abi";
 import { useAbiExecution } from "@/hooks/use-abi-execution";
 import type { UseAbiFormReturn } from "@/hooks/use-abi-form";
+import type { Task } from "@/hooks/use-task";
 import type { SourceSpec } from "@/lib/abi/sources";
 import type { BaseNodeData } from "@/types/nodes";
 
@@ -49,7 +50,7 @@ export interface AbiNodeShellProps<F extends NodeSlot> {
     data?: BaseNodeData;
     /** Custom task update handler (forwarded to useAbiExecution). */
     onTaskUpdate?: (
-        task: any,
+        task: Task,
     ) => boolean | undefined | Promise<boolean | undefined>;
     /** Final-stage prompt transformer (forwarded to useAbiExecution). */
     transformPrompts?: (

@@ -20,29 +20,33 @@ import type { TongflowPluginNodeProps } from "@/types/tongflow-flow";
 
 import { AbiNodeShell } from "../base/abi-node-shell";
 
-const LANGUAGE_OPTIONS = [
-    { value: "zh", label: "中文" },
-    { value: "en", label: "English" },
-    { value: "cantonese", label: "粤语" },
-    { value: "ja", label: "日本語" },
-    { value: "ko", label: "한국어" },
-    { value: "fr", label: "Français" },
-    { value: "es", label: "Español" },
-];
+function buildLanguageOptions(tLang: (key: string) => string) {
+    return [
+        { value: "zh", label: tLang("zh") },
+        { value: "en", label: tLang("en") },
+        { value: "cantonese", label: tLang("yue") },
+        { value: "ja", label: tLang("ja") },
+        { value: "ko", label: tLang("ko") },
+        { value: "fr", label: tLang("fr") },
+        { value: "es", label: tLang("es") },
+    ];
+}
 
-const BPM_OPTIONS = [
-    { value: "auto", label: "Auto" },
-    { value: "60", label: "60" },
-    { value: "80", label: "80" },
-    { value: "90", label: "90" },
-    { value: "100", label: "100" },
-    { value: "110", label: "110" },
-    { value: "120", label: "120" },
-    { value: "130", label: "130" },
-    { value: "140", label: "140" },
-    { value: "160", label: "160" },
-    { value: "180", label: "180" },
-];
+function buildBpmOptions(autoLabel: string) {
+    return [
+        { value: "auto", label: autoLabel },
+        { value: "60", label: "60" },
+        { value: "80", label: "80" },
+        { value: "90", label: "90" },
+        { value: "100", label: "100" },
+        { value: "110", label: "110" },
+        { value: "120", label: "120" },
+        { value: "130", label: "130" },
+        { value: "140", label: "140" },
+        { value: "160", label: "160" },
+        { value: "180", label: "180" },
+    ];
+}
 
 const KEYSCALE_OPTIONS = [
     "C major",
@@ -68,6 +72,9 @@ type TextGenMusicNodeProps = TongflowPluginNodeProps<
 
 const TextGenMusicNode = ({ selected, data }: TextGenMusicNodeProps) => {
     const t = useTranslations("Workspace.nodes");
+    const tLang = useTranslations("Languages");
+    const LANGUAGE_OPTIONS = buildLanguageOptions(tLang);
+    const BPM_OPTIONS = buildBpmOptions(t("music.auto"));
     const form = useAbiForm("gen-music", {
         // Both `tags` and `lyrics` are scalar strings that may be fed from
         // upstream textNodes via the auto-rendered `in:tags` / `in:lyrics`
@@ -204,7 +211,9 @@ const TextGenMusicNode = ({ selected, data }: TextGenMusicNodeProps) => {
                                 }
                             >
                                 <SelectTrigger className="h-8 text-xs">
-                                    <SelectValue placeholder="Auto" />
+                                    <SelectValue
+                                        placeholder={t("music.auto")}
+                                    />
                                 </SelectTrigger>
                                 <SelectContent>
                                     {BPM_OPTIONS.map((opt) => (

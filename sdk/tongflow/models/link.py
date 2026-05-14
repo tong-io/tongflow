@@ -16,9 +16,9 @@ class LinkOutput(BaseModel):
     success: bool
     audio: Asset | None = None
     error: str | None = None
+    extractedTexts: list[str] | None = None
     image: Asset | None = None
-    text: str | None = None
-    texts: list[str] | None = None
+    mainText: str | None = None
     thinking: str | None = None
     video: Asset | None = None
 

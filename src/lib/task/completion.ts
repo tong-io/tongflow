@@ -73,12 +73,12 @@ function generateMaterialName(taskName: string, type: MaterialType): string {
         "0",
     )}`;
     const typeLabel: Record<MaterialType, string> = {
-        image: "图片",
-        video: "视频",
-        audio: "音频",
-        text: "文本",
-        file: "文件",
-        model: "模型",
+        image: "Image",
+        video: "Video",
+        audio: "Audio",
+        text: "Text",
+        file: "File",
+        model: "Model",
     };
     return `${taskName} - ${typeLabel[type]} (${timestamp})`;
 }
@@ -228,7 +228,7 @@ export async function handleTaskCompletion(
             return { success: true, taskUpdated, savedMaterials: 0 };
         }
 
-        const taskName = data.feature || "任务";
+        const taskName = data.feature || "Task";
         const savedMaterialIds: number[] = [];
 
         for (const fileKey of fileKeys) {

@@ -19,8 +19,6 @@ class GenVideoInput(BaseModel):
     image2: Asset | None = None
     image_frame_idx: int | None = None
     image_strength: float | None = None
-    negative_prompt: str | None = None
-    num_inference_steps: int | None = None
     seed: float | None = None
     speech: Asset | None = None
     width: int | None = None

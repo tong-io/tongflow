@@ -38,6 +38,7 @@ const FullScreenVideoModal = ({
     fileKey: string;
     onClose: () => void;
 }) => {
+    const t = useTranslations("Workspace.nodes.modal");
     const [mounted, setMounted] = useState(false);
     const { url } = useFileAsyncLoader(fileKey, { priority: "high" });
 
@@ -57,7 +58,7 @@ const FullScreenVideoModal = ({
                 {/* Header */}
                 <div className="flex items-center justify-between p-4 border-b border-gray-200 flex-shrink-0">
                     <h2 className="text-lg font-semibold text-gray-900">
-                        Video Preview
+                        {t("videoPreview")}
                     </h2>
                     <Button size="sm" variant="ghost" onClick={onClose}>
                         <X className="h-4 w-4" />
@@ -76,7 +77,7 @@ const FullScreenVideoModal = ({
                             Your browser does not support the video tag.
                         </video>
                     ) : (
-                        <div className="text-gray-500">Loading...</div>
+                        <div className="text-gray-500">{t("loading")}</div>
                     )}
                 </div>
             </div>
@@ -94,6 +95,7 @@ const FullScreenWaterfallModal = ({
     videoKeys: string[];
     onClose: () => void;
 }) => {
+    const t = useTranslations("Workspace.nodes.modal");
     const [mounted, setMounted] = useState(false);
     const { urls } = useFileAsyncLoaderBatch(videoKeys, { priority: "normal" });
 
@@ -183,7 +185,7 @@ const FullScreenWaterfallModal = ({
                     ) : (
                         <div className="flex items-center justify-center h-full w-full">
                             <div className="text-xs text-gray-500">
-                                Loading...
+                                {t("loading")}
                             </div>
                         </div>
                     )}
@@ -198,7 +200,7 @@ const FullScreenWaterfallModal = ({
                 {/* Header */}
                 <div className="flex items-center justify-between p-4 border-b border-gray-200 flex-shrink-0">
                     <h2 className="text-lg font-semibold text-gray-900">
-                        Videos ({videoKeys.length})
+                        {t("videos", { count: videoKeys.length })}
                     </h2>
                     <Button size="sm" variant="ghost" onClick={onClose}>
                         <X className="h-4 w-4" />
@@ -355,7 +357,7 @@ const VideoNode = ({ selected, data }: VideoNodeRfProps) => {
                             </Button>
                         )}
                         <NodeHeaderComboAction
-                            onClick={() => logger.debug("组合模式切换")}
+                            onClick={() => logger.debug("compose mode toggle")}
                         />
                         <NodeHeaderMenuAction label={t("moreOptions")}>
                             <DropdownMenuLabel>

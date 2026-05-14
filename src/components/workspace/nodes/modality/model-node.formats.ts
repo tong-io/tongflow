@@ -13,32 +13,32 @@ const SUPPORTED_FORMATS = {
     glb: {
         name: "glTF Binary",
         extension: ".glb",
-        description: "推荐格式，支持动画、材质、压缩",
-        features: ["动画", "PBR材质", "轻量级", "跨平台"],
+        description: "Recommended format. Supports animation, materials, and compression.",
+        features: ["Animation", "PBR materials", "Lightweight", "Cross-platform"],
         loader: "GLTFLoader",
     },
 
     gltf: {
         name: "glTF (Embedded JSON)",
         extension: ".gltf",
-        description: "glTF 文本格式，适合编辑和调试",
-        features: ["动画", "PBR材质", "易于编辑"],
+        description: "Text form of glTF; good for editing and debugging.",
+        features: ["Animation", "PBR materials", "Easy to edit"],
         loader: "GLTFLoader",
     },
 
     obj: {
         name: "Wavefront OBJ",
         extension: ".obj",
-        description: "经典网格格式，广泛支持",
-        features: ["简单网格", "广泛兼容性", "轻量级"],
+        description: "Classic mesh format; widely supported.",
+        features: ["Simple meshes", "Broad compatibility", "Lightweight"],
         loader: "OBJLoader",
     },
 
     fbx: {
         name: "Autodesk FBX",
         extension: ".fbx",
-        description: "专业3D格式，支持骨骼和动画",
-        features: ["骨骼动画", "变形器", "材质", "复杂拓扑"],
+        description: "Professional 3D format; supports skeletons and animation.",
+        features: ["Skeletal animation", "Morph targets", "Materials", "Complex topology"],
         loader: "FBXLoader",
     },
 
@@ -46,32 +46,32 @@ const SUPPORTED_FORMATS = {
     ply: {
         name: "Polygon File Format",
         extension: ".ply",
-        description: "点云和网格格式，支持颜色和法线",
-        features: ["点云", "颜色信息", "法线数据"],
+        description: "Point cloud and mesh format; supports color and normals.",
+        features: ["Point cloud", "Color info", "Normal data"],
         loader: "PLYLoader",
     },
 
     ptx: {
         name: "Leica Point Cloud",
         extension: ".ptx",
-        description: "激光扫描点云格式",
-        features: ["高密度点云", "扫描数据", "XYZ + RGB"],
+        description: "Laser-scan point cloud format.",
+        features: ["High-density point cloud", "Scan data", "XYZ + RGB"],
         loader: "PointCloudLoader (Custom)",
     },
 
     pts: {
         name: "Simple Point Cloud",
         extension: ".pts",
-        description: "简单的点云格式 (X Y Z R G B)",
-        features: ["轻量级点云", "XYZ坐标", "RGB颜色"],
+        description: "Simple point cloud format (X Y Z R G B).",
+        features: ["Lightweight point cloud", "XYZ coordinates", "RGB color"],
         loader: "PointCloudLoader (Custom)",
     },
 
     xyz: {
         name: "XYZ Point Cloud",
         extension: ".xyz",
-        description: "简单的点云格式 (X Y Z)",
-        features: ["基础点云", "简单格式"],
+        description: "Simple point cloud format (X Y Z).",
+        features: ["Basic point cloud", "Simple format"],
         loader: "PointCloudLoader (Custom)",
     },
 
@@ -79,32 +79,32 @@ const SUPPORTED_FORMATS = {
     spz: {
         name: "Scaniverse Splat",
         extension: ".spz",
-        description: "压缩的高斯泼溅格式",
-        features: ["高质量", "快速渲染", "压缩"],
+        description: "Compressed Gaussian splat format.",
+        features: ["High quality", "Fast rendering", "Compressed"],
         loader: "SplatMesh (Spark)",
     },
 
     splat: {
         name: "Splat Format",
         extension: ".splat",
-        description: "高斯泼溅格式 (Antimatter15)",
-        features: ["高斯泼溅", "逼真渲染"],
+        description: "Gaussian splat format (Antimatter15).",
+        features: ["Gaussian splat", "Photorealistic rendering"],
         loader: "SplatMesh (Spark)",
     },
 
     ksplat: {
         name: "Gaussian Splat",
         extension: ".ksplat",
-        description: "高斯泼溅格式 (mkkellogg)",
-        features: ["高斯泼溅", "优化版本"],
+        description: "Gaussian splat format (mkkellogg).",
+        features: ["Gaussian splat", "Optimized variant"],
         loader: "SplatMesh (Spark)",
     },
 
     sog: {
         name: "PlayCanvas Splat",
         extension: ".sog",
-        description: "PlayCanvas 高斯泼溅格式",
-        features: ["高斯泼溅", "Web优化"],
+        description: "PlayCanvas Gaussian splat format.",
+        features: ["Gaussian splat", "Web-optimized"],
         loader: "SplatMesh (Spark)",
     },
 
@@ -112,8 +112,8 @@ const SUPPORTED_FORMATS = {
     stl: {
         name: "Stereolithography",
         extension: ".stl",
-        description: "3D打印常用格式",
-        features: ["3D打印", "简单网格", "二进制/ASCII"],
+        description: "Common 3D printing format.",
+        features: ["3D printing", "Simple meshes", "Binary / ASCII"],
         loader: "STLLoader",
     },
 
@@ -121,57 +121,57 @@ const SUPPORTED_FORMATS = {
     step: {
         name: "STEP (ISO 10303)",
         extension: ".step / .stp",
-        description: "专业CAD交换格式",
-        features: ["参数化几何", "装配体", "精确数据"],
-        note: "需要专门的库支持，建议转换为GLTF或OBJ",
+        description: "Professional CAD interchange format.",
+        features: ["Parametric geometry", "Assemblies", "Precise data"],
+        note: "Requires dedicated library support; convert to GLTF or OBJ recommended.",
     },
 
     iges: {
         name: "IGES",
         extension: ".igs / .iges",
-        description: "CAD文件交换格式",
-        features: ["CAD数据", "精确几何"],
-        note: "需要专门的库支持，建议转换为GLTF或OBJ",
+        description: "CAD file interchange format.",
+        features: ["CAD data", "Precise geometry"],
+        note: "Requires dedicated library support; convert to GLTF or OBJ recommended.",
     },
 
     // Model formats
     dae: {
         name: "COLLADA",
         extension: ".dae",
-        description: "COLLADA 3D格式",
-        features: ["动画", "材质", "跨平台"],
+        description: "COLLADA 3D format.",
+        features: ["Animation", "Materials", "Cross-platform"],
         loader: "ColladaLoader",
     },
 
     usdz: {
         name: "USD Zip",
         extension: ".usdz",
-        description: "USD 压缩格式 (Apple推荐用于AR)",
-        features: ["AR/VR", "压缩", "跨平台"],
+        description: "USD compressed format (Apple's recommendation for AR).",
+        features: ["AR / VR", "Compressed", "Cross-platform"],
         loader: "USDZLoader",
     },
 
     usd: {
         name: "Pixar USD",
         extension: ".usd",
-        description: "Pixar 通用场景描述格式",
-        features: ["复杂场景", "参数化", "版本控制"],
+        description: "Pixar Universal Scene Description format.",
+        features: ["Complex scenes", "Parametric", "Version control"],
         loader: "USDZLoader",
     },
 
     tds: {
         name: "3D Studio Max",
         extension: ".3ds",
-        description: "3DS Max 模型格式",
-        features: ["动画", "材质", "老格式"],
+        description: "3DS Max model format.",
+        features: ["Animation", "Materials", "Legacy format"],
         loader: "TDSLoader",
     },
 
     vtp: {
         name: "VTK Polydata",
         extension: ".vtp",
-        description: "VTK 多边形格式",
-        features: ["科学计算", "网格数据"],
+        description: "VTK polygon format.",
+        features: ["Scientific computing", "Mesh data"],
         loader: "VTKLoader",
     },
 };
@@ -181,49 +181,49 @@ const SUPPORTED_FORMATS = {
 // ============================================================================
 
 const FORMAT_CATEGORIES = {
-    推荐格式: {
-        description: "最佳兼容性和特性",
+    recommended: {
+        description: "Best compatibility and feature support",
         formats: [".glb", ".gltf"],
     },
 
-    通用3D格式: {
-        description: "广泛支持的通用格式",
+    general3D: {
+        description: "Widely supported general-purpose formats",
         formats: [".fbx", ".obj", ".dae"],
     },
 
-    点云格式: {
-        description: "用于点云数据",
+    pointCloud: {
+        description: "For point cloud data",
         formats: [".ply", ".ptx", ".pts", ".xyz"],
     },
 
-    高斯泼溅格式: {
-        description: "新一代高质量渲染格式（需要 Spark 库）",
+    gaussianSplat: {
+        description: "Next-generation high-quality rendering format (requires the Spark library)",
         formats: [".spz", ".splat", ".ksplat", ".sog"],
     },
 
-    CAD格式: {
-        description: "工程设计和制造文件",
+    cad: {
+        description: "Engineering design and manufacturing files",
         formats: [".step", ".stp", ".igs", ".iges"],
-        note: "建议转换为 GLTF 以获得最佳支持",
+        note: "Convert to GLTF for the best support.",
     },
 
-    "3D打印": {
-        description: "3D打印相关格式",
+    "3DPrinting": {
+        description: "3D-printing-related formats",
         formats: [".stl"],
     },
 
-    "Apple AR": {
-        description: "Apple 增强现实推荐格式",
+    "AppleAR": {
+        description: "Apple's recommended AR format",
         formats: [".usdz"],
     },
 
-    "学术/科学": {
-        description: "学术和科学计算格式",
+    academic: {
+        description: "Academic and scientific-computing formats",
         formats: [".vtp", ".usd"],
     },
 
-    过时格式: {
-        description: "仍然支持但不推荐的旧格式",
+    legacy: {
+        description: "Still supported but no longer recommended",
         formats: [".3ds", ".dae"],
     },
 };
@@ -311,16 +311,16 @@ const FORMAT_CATEGORIES = {
 // ============================================================================
 
 const RECOMMENDATIONS = {
-    最佳通用格式: ".glb",
-    最佳点云格式: ".ply",
-    最佳摄影测量: ".spz (Gaussian Splat)",
-    "3D打印": ".stl",
-    网页应用: ".glb 或 .gltf",
-    移动AR: ".glb 或 .usdz",
-    游戏引擎: ".fbx 或 .glb",
-    CAD专业工作: ".step (转换为 .glb)",
-    点云可视化: ".ply 或 .ptx",
-    文件大小最小: ".glb (压缩)",
+    bestGeneralPurpose: ".glb",
+    bestPointCloud: ".ply",
+    bestPhotogrammetry: ".spz (Gaussian Splat)",
+    "3DPrinting": ".stl",
+    web: ".glb or .gltf",
+    mobileAR: ".glb or .usdz",
+    gameEngine: ".fbx or .glb",
+    professionalCAD: ".step (convert to .glb)",
+    pointCloudVisualization: ".ply or .ptx",
+    smallestFileSize: ".glb (compressed)",
 };
 
 // ============================================================================
@@ -328,28 +328,28 @@ const RECOMMENDATIONS = {
 // ============================================================================
 
 const TROUBLESHOOTING = {
-    格式不支持: {
-        solution: "将文件转换为支持的格式（推荐 .glb）",
+    formatUnsupported: {
+        solution: "Convert the file to a supported format (.glb is recommended).",
     },
 
-    文件无法加载: {
-        causes: ["网络问题导致下载失败", "文件损坏", "格式不正确"],
-        solution: "检查文件有效性，尝试重新转换或从原始软件导出",
+    fileFailedToLoad: {
+        causes: ["Network failure during download", "Corrupted file", "Wrong format"],
+        solution: "Validate the file and try re-converting or re-exporting from the source software.",
     },
 
-    "颜色/材质丢失": {
-        causes: ["某些格式不支持纹理", "导出设置不正确", "缺少关联的纹理文件"],
-        solution: "使用支持材质的格式（如 .glb）或确保正确导出所有资源",
+    colorsOrMaterialsMissing: {
+        causes: ["The format does not support textures", "Incorrect export settings", "Missing referenced texture files"],
+        solution: "Use a format that supports materials (such as .glb), or ensure all assets are exported correctly.",
     },
 
-    模型显示不全: {
-        causes: ["模型非常大或非常小", "相机视角问题"],
-        solution: "自动缩放应该处理大多数情况，可以使用鼠标操作调整视角",
+    modelNotFullyVisible: {
+        causes: ["Model is very large or very small", "Camera framing issue"],
+        solution: "Auto-fit handles most cases; use the mouse controls to adjust the view manually.",
     },
 
-    动画不播放: {
-        causes: ["格式不支持动画", "导出时未包含动画"],
-        solution: "使用支持动画的格式（.glb, .fbx）并确保动画被正确导出",
+    animationNotPlaying: {
+        causes: ["The format does not support animation", "Animation was not included on export"],
+        solution: "Use a format that supports animation (.glb, .fbx) and ensure the animation is exported.",
     },
 };
 

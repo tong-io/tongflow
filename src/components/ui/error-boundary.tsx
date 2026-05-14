@@ -2,6 +2,7 @@
 
 import { Component, type ErrorInfo, type ReactNode } from "react";
 import { logger } from "@/lib/logger";
+import { getClientTranslator } from "@/utils/client-i18n";
 
 interface Props {
     children: ReactNode;
@@ -35,17 +36,18 @@ export class ErrorBoundary extends Component<Props, State> {
         if (this.state.hasError) {
             if (this.props.fallback) return this.props.fallback;
 
+            const t = getClientTranslator("Errors");
             return (
                 <div className="flex flex-col items-center justify-center min-h-[200px] gap-4 p-8 text-center">
                     <p className="text-sm text-muted-foreground">
-                        {this.state.error?.message || "Something went wrong"}
+                        {this.state.error?.message || t("somethingWentWrong")}
                     </p>
                     <button
                         type="button"
                         onClick={this.handleReset}
                         className="px-4 py-2 text-sm rounded-md border hover:bg-accent transition-colors"
                     >
-                        Try again
+                        {t("tryAgain")}
                     </button>
                 </div>
             );

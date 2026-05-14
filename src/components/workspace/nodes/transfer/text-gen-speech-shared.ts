@@ -7,11 +7,19 @@ export const TEXT_GEN_SPEECH_CLONE = "text-gen-speech-clone";
 export const TEXT_GEN_SPEECH_PRESET = "text-gen-speech-preset";
 export const TEXT_GEN_SPEECH_INSTRUCT = "text-gen-speech-instruct";
 
-export const VOICE_LANG_LABELS: Record<VoiceLanguage, string> = {
-    zh: "中文",
-    en: "English",
-    ja: "日本語",
-};
+/**
+ * Localized labels for the voice-language dropdown.
+ * Use `useTranslations("Languages")` and pass it via `getVoiceLangLabels(t)`.
+ */
+export function getVoiceLangLabels(
+    tLang: (key: string) => string,
+): Record<VoiceLanguage, string> {
+    return {
+        zh: tLang("zh"),
+        en: "English",
+        ja: tLang("ja"),
+    };
+}
 
 /** Labels from `useTranslations("Workspace.nodes")` */
 export type NodesT = (key: string) => string;
@@ -136,5 +144,5 @@ export function buildPresetDescription(
         if (labels.length > 0) parts.push(...labels);
     }
 
-    return parts.join("，");
+    return parts.join(", ");
 }

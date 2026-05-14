@@ -3,7 +3,7 @@
  */
 
 import { logger } from "@/lib/logger";
-import { apiDelete, apiGet, apiPatch, apiPost } from "@/utils/api-client";
+import { apiDelete, apiGet, apiPatch, apiPost } from "./client";
 
 export type MaterialType =
     | "image"

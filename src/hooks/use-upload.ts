@@ -3,6 +3,7 @@
  * Uploads files directly to local server
  */
 
+import { useTranslations } from "next-intl";
 import { useCallback, useState } from "react";
 import toast from "react-hot-toast";
 import { getPresignedUploadUrl, UploadValidationError } from "@/lib/api/upload";
@@ -39,6 +40,7 @@ export interface UseMultipleUploadOptions {
 // -------------------- Single-file upload hook --------------------
 
 export function useUpload(options?: UseUploadOptions) {
+    const t = useTranslations("Upload");
     const [state, setState] = useState<UploadState>({
         isUploading: false,
         progress: 0,
@@ -83,14 +85,14 @@ export function useUpload(options?: UseUploadOptions) {
                 if (err instanceof UploadValidationError) {
                     toast.error(err.message);
                 } else {
-                    toast.error("上传失败，请稍后重试");
+                    toast.error(t("failed"));
                 }
 
                 options?.onError?.(error);
                 return null;
             }
         },
-        [options],
+        [options, t],
     );
 
     const reset = useCallback(() => {
@@ -108,6 +110,7 @@ export function useUpload(options?: UseUploadOptions) {
 // -------------------- Multi-file upload hook --------------------
 
 export function useMultipleUpload(options?: UseMultipleUploadOptions) {
+    const t = useTranslations("Upload");
     const [state, setState] = useState<UploadState>({
         isUploading: false,
         progress: 0,
@@ -172,14 +175,14 @@ export function useMultipleUpload(options?: UseMultipleUploadOptions) {
                 if (err instanceof UploadValidationError) {
                     toast.error(err.message);
                 } else {
-                    toast.error("部分或全部文件上传失败");
+                    toast.error(t("partialFailed"));
                 }
 
                 options?.onError?.(error);
                 return [];
             }
         },
-        [options],
+        [options, t],
     );
 
     const reset = useCallback(() => {
@@ -202,6 +205,7 @@ export function useDropzone(options?: {
     maxSize?: number;
     maxFiles?: number;
 }) {
+    const tUpload = useTranslations("Upload");
     const [isDragActive, setIsDragActive] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
@@ -209,14 +213,19 @@ export function useDropzone(options?: {
         (files: File[]): File[] => {
             setError(null);
             if (options?.maxFiles && files.length > options.maxFiles) {
-                setError(`Maximum ${options.maxFiles} files allowed`);
+                setError(
+                    tUpload("maxFilesExceeded", { max: options.maxFiles }),
+                );
                 return [];
             }
             const validFiles: File[] = [];
             for (const file of files) {
                 if (options?.maxSize && file.size > options.maxSize) {
                     setError(
-                        `File "${file.name}" is too large (max ${Math.round(options.maxSize / 1024 / 1024)}MB)`,
+                        tUpload("fileTooLarge", {
+                            name: file.name,
+                            max: Math.round(options.maxSize / 1024 / 1024),
+                        }),
                     );
                     continue;
                 }
@@ -232,7 +241,11 @@ export function useDropzone(options?: {
                         return type === file.type;
                     });
                     if (!isAccepted) {
-                        setError(`File "${file.name}" type not accepted`);
+                        setError(
+                            tUpload("fileTypeNotAccepted", {
+                                name: file.name,
+                            }),
+                        );
                         continue;
                     }
                 }
@@ -240,7 +253,7 @@ export function useDropzone(options?: {
             }
             return validFiles;
         },
-        [options],
+        [options, tUpload],
     );
 
     const handleDragEnter = useCallback((e: React.DragEvent) => {

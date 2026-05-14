@@ -42,7 +42,7 @@ export function WorkspaceLeftNav() {
             setTaskList(tasks);
             setTaskHasMore(tasks.length >= 20);
         } catch (error) {
-            logger.error("加载任务列表失败:", error);
+            logger.error("Failed to load task list:", error);
         } finally {
             setTaskLoading(false);
         }
@@ -60,7 +60,7 @@ export function WorkspaceLeftNav() {
             setTaskPage(nextPage);
             setTaskHasMore(tasks.length >= 20);
         } catch (error) {
-            logger.error("加载更多任务失败:", error);
+            logger.error("Failed to load more tasks:", error);
         } finally {
             setTaskLoadingMore(false);
         }
