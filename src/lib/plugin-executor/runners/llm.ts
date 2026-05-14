@@ -116,8 +116,16 @@ export async function execLlmPlugin<S extends NodeSlot>(
             stdoutBuf += String(b);
         });
 
+        // Forward plugin stderr to the parent (dev server terminal) in real
+        // time AND keep a buffer for inclusion in error messages on crash.
+        // Plugins log via `logging` (default stream=sys.stderr) — stdout is
+        // reserved for the ABI JSON response so we can't merge them.
         child.stderr?.on("data", (b: Buffer) => {
-            stderrText += String(b);
+            const chunk = String(b);
+            stderrText += chunk;
+            process.stderr.write(
+                `[plugin:${req.pluginId}/${req.nodeSlot}] ${chunk}`,
+            );
         });
 
         child.on("error", (e) => fail(e));

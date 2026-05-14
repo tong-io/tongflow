@@ -1,21 +1,22 @@
 from __future__ import annotations
 
-from typing import Required, TypedDict
+from pydantic import BaseModel, ConfigDict
 
-from .asset import Asset, AudioRef, FileRef, ImageRef, VideoRef
+from .asset import Asset, AudioRef, FileRef, ImageRef, ModelRef, VideoRef
 
 
-class TranscribeInput(TypedDict, total=False):
-    audio: Required[Asset]
-    context: str
-    language: str
-    max_new_tokens: float
+class TranscribeInput(BaseModel):
+    model_config = ConfigDict(extra="forbid")
 
-class TranscribeOutput(TypedDict, total=False):
-    error: str
-    file_key: str
-    language: str
-    result: str
-    success: Required[bool]
-    text: str
+    audio: Asset
+    context: str | None = None
+    language: str | None = None
+    max_new_tokens: float | None = None
+
+class TranscribeOutput(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    success: bool
+    error: str | None = None
+    text: str | None = None
 

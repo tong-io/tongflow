@@ -1,19 +1,22 @@
 from __future__ import annotations
 
-from typing import Required, TypedDict
+from pydantic import BaseModel, ConfigDict
 
-from .asset import Asset, AudioRef, FileRef, ImageRef, VideoRef
+from .asset import Asset, AudioRef, FileRef, ImageRef, ModelRef, VideoRef
 
 
-class GenTextInput(TypedDict, total=False):
-    nodeSlot: str
-    pluginId: str
-    text: Required[str]
-    userPrompt: str
+class GenTextInput(BaseModel):
+    model_config = ConfigDict(extra="forbid")
 
-class GenTextOutput(TypedDict, total=False):
-    error: str
-    result: str
-    success: Required[bool]
     text: str
+    nodeSlot: str | None = None
+    pluginId: str | None = None
+    userPrompt: str | None = None
+
+class GenTextOutput(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    success: bool
+    error: str | None = None
+    text: str | None = None
 

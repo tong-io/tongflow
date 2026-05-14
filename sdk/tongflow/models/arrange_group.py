@@ -1,33 +1,35 @@
 from __future__ import annotations
 
-from typing import Required, TypedDict
+from pydantic import BaseModel, ConfigDict
 
-from .asset import Asset, AudioRef, FileRef, ImageRef, VideoRef
+from .asset import Asset, AudioRef, FileRef, ImageRef, ModelRef, VideoRef
 
 
-class ArrangeGroupInputRootInfosItem(TypedDict, total=False):
-    pass
+class ArrangeGroupInputRootInfosItem(BaseModel):
+    model_config = ConfigDict(extra="forbid")
 
-class ArrangeGroupInputRootItemsItem(TypedDict, total=False):
-    id: str
-    text: str
 
-class ArrangeGroupInput(TypedDict, total=False):
-    duplicatable: bool
-    groupCount: int
-    images: list[Asset]
-    infos: list["ArrangeGroupInputRootInfosItem"]
-    items: list["ArrangeGroupInputRootItemsItem"]
-    query: str
+class ArrangeGroupInputRootItemsItem(BaseModel):
+    model_config = ConfigDict(extra="forbid")
 
-class ArrangeGroupOutput(TypedDict, total=False):
-    audio: AudioRef
-    error: str
-    groups: list[list[VideoRef]]
-    image: ImageRef
-    success: Required[bool]
-    text: str
-    texts: list[str]
-    thinking: str
-    video: VideoRef
+    id: str | None = None
+    text: str | None = None
+
+class ArrangeGroupInput(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    duplicatable: bool | None = None
+    fileKeys: list[Asset] | None = None
+    groupCount: int | None = None
+    images: list[Asset] | None = None
+    infos: list["ArrangeGroupInputRootInfosItem"] | None = None
+    items: list["ArrangeGroupInputRootItemsItem"] | None = None
+    query: str | None = None
+
+class ArrangeGroupOutput(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    success: bool
+    error: str | None = None
+    groups: list[list[Asset]] | None = None
 

@@ -63,6 +63,19 @@ def _type_expr(
 
     if "$ref" in prop:
         ref = str(prop["$ref"])
+        # Output-side asymmetry: ABI declares *Ref types for output fields, but
+        # plugins actually emit `Asset` (bytesBase64) — the server-side
+        # `convertAssetOutputsToFileRefs` uploads bytes and rewrites them to
+        # `{ file_key }` before downstream consumers see VideoRef/etc. So for
+        # outputs we type *Ref fields as `Asset` (the plugin-emitted shape).
+        if role == "Output" and ref in {
+            "#/$defs/FileRef",
+            "#/$defs/ImageRef",
+            "#/$defs/VideoRef",
+            "#/$defs/AudioRef",
+            "#/$defs/ModelRef",
+        }:
+            return "Asset"
         if ref == "#/$defs/Asset":
             return "Asset"
         if ref == "#/$defs/FileRef":
@@ -73,6 +86,8 @@ def _type_expr(
             return "VideoRef"
         if ref == "#/$defs/AudioRef":
             return "AudioRef"
+        if ref == "#/$defs/ModelRef":
+            return "ModelRef"
         raise ValueError(f"Unsupported $ref: {ref}")
 
     t = prop.get("type")
@@ -109,6 +124,12 @@ def _build_class_body(
     path: str,
     pending: list[tuple[str, str]],
 ) -> str:
+    """Render a Pydantic BaseModel body for a JSON Schema object.
+
+    Pydantic field ordering rule: fields without a default must come before
+    fields with a default. We emit required fields first, then optional ones
+    as ``field: T | None = None``.
+    """
     if schema.get("type") != "object":
         raise ValueError("Expected object")
     props = schema.get("properties")
@@ -118,7 +139,8 @@ def _build_class_body(
     req = schema.get("required")
     required: set[str] = set(req) if isinstance(req, list) else set()
 
-    parts: list[str] = []
+    required_lines: list[str] = []
+    optional_lines: list[str] = []
     for key in sorted(props.keys()):
         p = props[key]
         if not isinstance(p, dict):
@@ -127,10 +149,16 @@ def _build_class_body(
             p, defs, slot_pascal, role, f"{path}.{key}", 0, pending
         )
         if key in required:
-            parts.append(f"    {key}: Required[{typ}]")
+            required_lines.append(f"    {key}: {typ}")
         else:
-            parts.append(f"    {key}: {typ}")
-    return "\n".join(parts) if parts else "    pass"
+            optional_lines.append(f"    {key}: {typ} | None = None")
+
+    body_lines: list[str] = ['    model_config = ConfigDict(extra="forbid")', ""]
+    body_lines.extend(required_lines)
+    body_lines.extend(optional_lines)
+    # Pydantic v2 requires at least a class body; the model_config line covers it
+    # even when there are zero properties.
+    return "\n".join(body_lines)
 
 
 def write_models(out_dir: Path, nodes: list[dict[str, Any]], defs: dict[str, Any]) -> None:
@@ -141,31 +169,9 @@ def write_models(out_dir: Path, nodes: list[dict[str, Any]], defs: dict[str, Any
         encoding="utf-8",
     )
 
-    asset_py = (
-        "from __future__ import annotations\n\n"
-        "from typing import Required, TypedDict\n\n\n"
-        "class Asset(TypedDict, total=False):\n"
-        "    bytesBase64: str\n"
-        "    filename: str\n"
-        "    mime: str\n\n\n"
-        "class FileRef(TypedDict, total=False):\n"
-        "    file_key: Required[str]\n"
-        "    mime: str\n"
-        "    filename: str\n\n\n"
-        "class ImageRef(TypedDict, total=False):\n"
-        "    file_key: Required[str]\n"
-        "    mime: str\n"
-        "    filename: str\n\n\n"
-        "class VideoRef(TypedDict, total=False):\n"
-        "    file_key: Required[str]\n"
-        "    mime: str\n"
-        "    filename: str\n\n\n"
-        "class AudioRef(TypedDict, total=False):\n"
-        "    file_key: Required[str]\n"
-        "    mime: str\n"
-        "    filename: str\n"
-    )
-    (out_dir / "asset.py").write_text(asset_py, encoding="utf-8")
+    # NOTE: `asset.py` is intentionally NOT regenerated here. The Asset / *Ref
+    # Pydantic models live as a hand-maintained file (matching ABI $defs) so
+    # we keep their pydantic ConfigDict / field defaults stable across runs.
 
     for n in nodes:
         slot = str(n["nodeSlot"])
@@ -199,8 +205,8 @@ def write_models(out_dir: Path, nodes: list[dict[str, Any]], defs: dict[str, Any
 
         lines: list[str] = [
             "from __future__ import annotations\n",
-            "from typing import Required, TypedDict\n",
-            "from .asset import Asset, AudioRef, FileRef, ImageRef, VideoRef\n",
+            "from pydantic import BaseModel, ConfigDict\n",
+            "from .asset import Asset, AudioRef, FileRef, ImageRef, ModelRef, VideoRef\n",
             "",
         ]
 
@@ -210,15 +216,15 @@ def write_models(out_dir: Path, nodes: list[dict[str, Any]], defs: dict[str, Any
         for nm, bd in nested.items():
             if nm in (root_in_nested, root_out_nested):
                 continue
-            lines.extend([f"class {nm}(TypedDict, total=False):", bd, ""])
+            lines.extend([f"class {nm}(BaseModel):", bd, ""])
 
         lines.extend(
             [
-                f"class {input_name}(TypedDict, total=False):",
-                in_body if in_body != "    pass" else nested.get(root_in_nested, "    pass"),
+                f"class {input_name}(BaseModel):",
+                in_body,
                 "",
-                f"class {output_name}(TypedDict, total=False):",
-                out_body if out_body != "    pass" else nested.get(root_out_nested, "    pass"),
+                f"class {output_name}(BaseModel):",
+                out_body,
                 "",
             ]
         )

@@ -1,33 +1,51 @@
 from __future__ import annotations
 
-from typing import Required, TypedDict
+from pydantic import BaseModel, ConfigDict
 
 
-class Asset(TypedDict, total=False):
+class Asset(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
     bytesBase64: str
-    filename: str
-    mime: str
+    filename: str | None = None
+    mime: str | None = None
 
 
-class FileRef(TypedDict, total=False):
-    file_key: Required[str]
-    mime: str
-    filename: str
+class FileRef(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    file_key: str
+    mime: str | None = None
+    filename: str | None = None
 
 
-class ImageRef(TypedDict, total=False):
-    file_key: Required[str]
-    mime: str
-    filename: str
+class ImageRef(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    file_key: str
+    mime: str | None = None
+    filename: str | None = None
 
 
-class VideoRef(TypedDict, total=False):
-    file_key: Required[str]
-    mime: str
-    filename: str
+class VideoRef(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    file_key: str
+    mime: str | None = None
+    filename: str | None = None
 
 
-class AudioRef(TypedDict, total=False):
-    file_key: Required[str]
-    mime: str
-    filename: str
+class AudioRef(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    file_key: str
+    mime: str | None = None
+    filename: str | None = None
+
+
+class ModelRef(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    file_key: str
+    mime: str | None = None
+    filename: str | None = None

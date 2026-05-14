@@ -1,4 +1,4 @@
-import type { SerializedTaskError } from "@/lib/schema/abi-schema-validate";
+import type { SerializedTaskError } from "@/lib/task/error-envelope";
 
 /** Human line from persisted `tasks.error` JSON (`SerializedTaskError`); returns the raw string on parse failure. */
 export function formatStoredTaskErrorForDisplay(

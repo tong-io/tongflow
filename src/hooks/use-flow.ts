@@ -16,6 +16,7 @@ import {
 } from "@xyflow/react";
 import { v4 } from "uuid";
 import { create } from "zustand";
+import { resolveEdgeHandles } from "@/lib/abi/node-feature-registry";
 import { DATA_NODE_TYPES } from "@/lib/workflow/executable-workflow";
 
 // True when React Flow reports a persisted data/input node type
@@ -349,12 +350,19 @@ export const useFlow = create<FlowState>((set, get) => ({
                     data,
                 });
 
+                const { sourceHandle, targetHandle } = resolveEdgeHandles({
+                    sourceType: currNode.type,
+                    targetType: type,
+                });
+
                 edges = addEdge(
                     {
                         id: edgeId,
                         source: `${currNode.id}`,
                         target: newNodeId,
                         type: "custom-edge",
+                        ...(sourceHandle ? { sourceHandle } : {}),
+                        ...(targetHandle ? { targetHandle } : {}),
                     },
                     edges,
                 );
@@ -430,15 +438,27 @@ export const useFlow = create<FlowState>((set, get) => ({
             data: (data ?? {}) as Record<string, unknown>,
         };
 
+        // Track target handles already chosen on this new node so multi-source
+        // combos (e.g. video + image) wire to distinct handle fields instead of
+        // all stacking on the same handle.
+        const usedTargetHandles = new Set<string>();
         const newEdges: Edge[] = Array.from(comboSelectedIds)
             .map((id) => {
                 const node = nodes.find((n) => n.id === id);
                 if (!node) return null;
+                const { sourceHandle, targetHandle } = resolveEdgeHandles({
+                    sourceType: node.type,
+                    targetType: type,
+                    usedTargetHandles,
+                });
+                if (targetHandle) usedTargetHandles.add(targetHandle);
                 return {
                     id: v4(),
                     source: `${node.id}`,
                     target: nodeId,
                     type: "custom-edge",
+                    ...(sourceHandle ? { sourceHandle } : {}),
+                    ...(targetHandle ? { targetHandle } : {}),
                 };
             })
             .filter(Boolean) as Edge[];

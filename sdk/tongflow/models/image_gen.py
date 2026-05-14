@@ -1,26 +1,24 @@
 from __future__ import annotations
 
-from typing import Required, TypedDict
+from pydantic import BaseModel, ConfigDict
 
-from .asset import Asset, AudioRef, FileRef, ImageRef, VideoRef
+from .asset import Asset, AudioRef, FileRef, ImageRef, ModelRef, VideoRef
 
 
-class ImageGenInput(TypedDict, total=False):
-    guidance_scale: float
-    height: int
-    num_inference_steps: int
-    seed: int
-    text: str
-    texts: list[str]
-    width: int
+class ImageGenInput(BaseModel):
+    model_config = ConfigDict(extra="forbid")
 
-class ImageGenOutput(TypedDict, total=False):
-    audio: AudioRef
-    error: str
-    image: ImageRef
-    success: Required[bool]
-    text: str
-    texts: list[str]
-    thinking: str
-    video: VideoRef
+    guidance_scale: float | None = None
+    height: int | None = None
+    num_inference_steps: int | None = None
+    seed: int | None = None
+    text: str | None = None
+    width: int | None = None
+
+class ImageGenOutput(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    success: bool
+    error: str | None = None
+    image: Asset | None = None
 

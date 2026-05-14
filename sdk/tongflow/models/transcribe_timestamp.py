@@ -1,27 +1,30 @@
 from __future__ import annotations
 
-from typing import Required, TypedDict
+from pydantic import BaseModel, ConfigDict
 
-from .asset import Asset, AudioRef, FileRef, ImageRef, VideoRef
+from .asset import Asset, AudioRef, FileRef, ImageRef, ModelRef, VideoRef
 
 
-class TranscribeTimestampOutputRootTimeStampsItem(TypedDict, total=False):
-    end_time: Required[float]
-    start_time: Required[float]
-    text: Required[str]
+class TranscribeTimestampOutputRootTimeStampsItem(BaseModel):
+    model_config = ConfigDict(extra="forbid")
 
-class TranscribeTimestampInput(TypedDict, total=False):
-    audio: Required[Asset]
-    context: str
-    language: str
-    max_new_tokens: float
-
-class TranscribeTimestampOutput(TypedDict, total=False):
-    error: str
-    file_key: str
-    language: str
-    result: str
-    success: Required[bool]
+    end: float
+    start: float
     text: str
-    time_stamps: list["TranscribeTimestampOutputRootTimeStampsItem"]
+
+class TranscribeTimestampInput(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    audio: Asset
+    context: str | None = None
+    language: str | None = None
+    max_new_tokens: float | None = None
+
+class TranscribeTimestampOutput(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    success: bool
+    error: str | None = None
+    text: str | None = None
+    time_stamps: list["TranscribeTimestampOutputRootTimeStampsItem"] | None = None
 

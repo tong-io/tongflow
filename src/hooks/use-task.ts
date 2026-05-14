@@ -113,6 +113,7 @@ export interface TaskState {
 // Single-task creation payload
 export interface TaskCreationConfig {
     feature: string;
+    pluginId: string;
     prompt: Record<string, unknown>;
     nodeId: string;
     workflowId?: number;

@@ -1,29 +1,28 @@
 from __future__ import annotations
 
-from typing import Required, TypedDict
+from pydantic import BaseModel, ConfigDict
 
-from .asset import Asset, AudioRef, FileRef, ImageRef, VideoRef
+from .asset import Asset, AudioRef, FileRef, ImageRef, ModelRef, VideoRef
 
 
-class VideoUpscaleInput(TypedDict, total=False):
-    batch_size: int
-    color_correction: str
-    dit_variant: str
-    image: Asset
-    out_fps: float
-    resolution: str
-    seed: int
-    temporal_overlap: int
-    uniform_batch_size: bool
-    video: Required[Asset]
+class VideoUpscaleInput(BaseModel):
+    model_config = ConfigDict(extra="forbid")
 
-class VideoUpscaleOutput(TypedDict, total=False):
-    audio: AudioRef
-    error: str
-    image: ImageRef
-    success: Required[bool]
-    text: str
-    texts: list[str]
-    thinking: str
-    video: VideoRef
+    video: Asset
+    batch_size: int | None = None
+    color_correction: str | None = None
+    dit_variant: str | None = None
+    image: Asset | None = None
+    out_fps: float | None = None
+    resolution: str | None = None
+    seed: int | None = None
+    temporal_overlap: int | None = None
+    uniform_batch_size: bool | None = None
+
+class VideoUpscaleOutput(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    success: bool
+    error: str | None = None
+    video: Asset | None = None
 

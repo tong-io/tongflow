@@ -17,17 +17,10 @@ import { logger } from "@/lib/logger";
 import { executePlugin } from "@/lib/plugin-executor/execute";
 import { prepareAssetInput } from "@/lib/plugin-executor/prepare-asset-input.server";
 import {
-    AbiValidationError,
-    extractAbiBusinessInput,
-    isAbiValidationError,
     type SerializedWorkflowFailure,
     serializeTaskErrorForDb,
-    standaloneAbiValidationEnvelope,
-    validateSlotInput,
-    validateSlotOutput,
     workflowTaskFailureEnvelope,
-} from "@/lib/schema/abi-schema-validate";
-import { resolveRoutingPluginId } from "@/lib/task/prompt-routing";
+} from "@/lib/task/error-envelope";
 import { notifyTask, registerTask, removeTask } from "./emitter";
 
 export function isNodeSlot(s: string): s is NodeSlot {
@@ -65,11 +58,8 @@ export async function loadTaskData(taskId: string): Promise<TaskData | null> {
     if (!task) return null;
 
     const prompt = JSON.parse(task.prompt) as Record<string, unknown>;
-    const pluginId = resolveRoutingPluginId(prompt);
-    const rawSlot =
-        (typeof prompt.nodeSlot === "string" && prompt.nodeSlot.trim()) ||
-        (typeof task.feature === "string" ? task.feature.trim() : "");
-    const nodeSlot = rawSlot;
+    const pluginId = (task.pluginId ?? "").trim();
+    const nodeSlot = (task.feature ?? "").trim();
 
     if (!pluginId) return null;
     if (!nodeSlot) return null;
@@ -124,34 +114,14 @@ export async function executeTask(taskId: string): Promise<void> {
             taskData.nodeId,
         );
 
-        // Hard requirement: pluginId + nodeSlot must exist (platform-agnostic core).
-        // Resolve `$ref: Asset` fields (fileKey/URL/dataURL → inline bytes), then
-        // validate ABI input against the resolved payload.
+        // Resolve `$ref: Asset` fields (fileKey/URL/dataURL → inline bytes),
+        // then hand the payload straight to the plugin. The contract is
+        // enforced by the generated Pydantic models on the plugin side; the
+        // runner does not validate at runtime.
         const businessInput = await prepareAssetInput(
             taskData.nodeSlot,
-            extractAbiBusinessInput(taskData.prompt),
+            taskData.prompt,
         );
-        const inputCheck = validateSlotInput(taskData.nodeSlot, businessInput);
-        if (!inputCheck.ok) {
-            const persisted = serializeTaskErrorForDb(
-                standaloneAbiValidationEnvelope(inputCheck.failure),
-            );
-            notifyTask(
-                taskId,
-                TaskStatus.FAILED,
-                {
-                    message: "输入参数不符合 ABI 校验",
-                    error: inputCheck.failure.errorsText,
-                    ajvErrors: inputCheck.failure.ajvErrors,
-                },
-                taskData.nodeId,
-            );
-            await db
-                .update(tasks)
-                .set({ status: "failed", error: persisted })
-                .where(eq(tasks.id, taskId));
-            return;
-        }
         const result = await executePlugin({
             pluginId: taskData.pluginId,
             nodeSlot: taskData.nodeSlot,
@@ -167,31 +137,6 @@ export async function executeTask(taskId: string): Promise<void> {
 
         if (result == null || typeof result !== "object") {
             throw new Error("Handler returned no result");
-        }
-
-        const outputCheck = validateSlotOutput(taskData.nodeSlot, result);
-        if (!outputCheck.ok) {
-            const persisted = serializeTaskErrorForDb(
-                standaloneAbiValidationEnvelope(outputCheck.failure),
-            );
-            notifyTask(
-                taskId,
-                TaskStatus.FAILED,
-                {
-                    message: "任务产出不符合 ABI 校验",
-                    error: outputCheck.failure.errorsText,
-                    ajvErrors: outputCheck.failure.ajvErrors,
-                },
-                taskData.nodeId,
-            );
-            await db
-                .update(tasks)
-                .set({
-                    status: "failed",
-                    error: persisted,
-                })
-                .where(eq(tasks.id, taskId));
-            return;
         }
 
         // Emit completion payloads
@@ -294,16 +239,13 @@ export async function executeWorkflowTask(
             nodes: nodesInfo,
         });
 
-        // callApi bridge used by the workflow runner to spawn child tasks
+        // callApi bridge used by the workflow runner to spawn child tasks.
         async function callApi(
-            feature: string,
+            node: { feature: string; pluginId: string },
             params: Record<string, unknown>,
         ): Promise<Record<string, unknown>> {
-            const pluginId = resolveRoutingPluginId(params);
-            const nodeSlot =
-                typeof params.nodeSlot === "string" && params.nodeSlot.trim()
-                    ? params.nodeSlot.trim()
-                    : feature.trim();
+            const pluginId = (node.pluginId ?? "").trim();
+            const nodeSlot = (node.feature ?? "").trim();
 
             if (!pluginId) {
                 throw new Error(
@@ -317,19 +259,7 @@ export async function executeWorkflowTask(
                 );
             }
 
-            const businessInput = await prepareAssetInput(
-                nodeSlot,
-                extractAbiBusinessInput(params),
-            );
-            const inputCheck = validateSlotInput(nodeSlot, businessInput);
-            if (!inputCheck.ok) {
-                throw new AbiValidationError(
-                    "input",
-                    nodeSlot,
-                    inputCheck.failure,
-                );
-            }
-
+            const businessInput = await prepareAssetInput(nodeSlot, params);
             const result = await executePlugin({
                 pluginId,
                 nodeSlot,
@@ -338,17 +268,7 @@ export async function executeWorkflowTask(
                 signal: controller.signal,
             });
 
-            const raw = result as Record<string, unknown>;
-            const outputCheck = validateSlotOutput(nodeSlot, raw);
-            if (!outputCheck.ok) {
-                throw new AbiValidationError(
-                    "output",
-                    nodeSlot,
-                    outputCheck.failure,
-                );
-            }
-
-            return raw;
+            return result as Record<string, unknown>;
         }
 
         // Execute nodes tier-by-tier
@@ -406,7 +326,7 @@ export async function executeWorkflowTask(
                         inputs,
                     );
 
-                    const result = await callApi(node.feature, params);
+                    const result = await callApi(node, params);
                     nodeOutputs.set(nodeId, result);
 
                     notifyTask(
@@ -425,17 +345,10 @@ export async function executeWorkflowTask(
                     const summaryLine = `Node ${nodeId} failed: ${errMsg}`;
                     workflowErrorSummaries.push(summaryLine);
 
-                    const failureRow: SerializedWorkflowFailure = {
+                    workflowFailures.push({
                         nodeId,
                         summary: errMsg,
-                    };
-                    if (isAbiValidationError(e)) {
-                        failureRow.validationKind = e.kind;
-                        failureRow.nodeSlot = e.nodeSlot;
-                        failureRow.details = e.failure.errorsText;
-                        failureRow.ajvErrors = e.failure.ajvErrors;
-                    }
-                    workflowFailures.push(failureRow);
+                    });
 
                     notifyTask(
                         taskId,
@@ -444,14 +357,6 @@ export async function executeWorkflowTask(
                             message: "节点执行失败",
                             error: errMsg,
                             label: nodeLabel,
-                            ...(isAbiValidationError(e)
-                                ? {
-                                      details: e.failure.errorsText,
-                                      ajvErrors: e.failure.ajvErrors,
-                                      validationKind: e.kind,
-                                      nodeSlot: e.nodeSlot,
-                                  }
-                                : {}),
                         },
                         nodeId,
                     );

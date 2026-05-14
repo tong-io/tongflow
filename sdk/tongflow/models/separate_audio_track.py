@@ -1,15 +1,19 @@
 from __future__ import annotations
 
-from typing import Required, TypedDict
+from pydantic import BaseModel, ConfigDict
 
-from .asset import Asset, AudioRef, FileRef, ImageRef, VideoRef
+from .asset import Asset, AudioRef, FileRef, ImageRef, ModelRef, VideoRef
 
 
-class SeparateAudioTrackInput(TypedDict, total=False):
-    audio: Required[Asset]
+class SeparateAudioTrackInput(BaseModel):
+    model_config = ConfigDict(extra="forbid")
 
-class SeparateAudioTrackOutput(TypedDict, total=False):
-    error: str
-    file_key: AudioRef
-    success: Required[bool]
+    audio: Asset
+
+class SeparateAudioTrackOutput(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    success: bool
+    error: str | None = None
+    file_key: Asset | None = None
 

@@ -2,7 +2,7 @@ import type { Edge } from "@xyflow/react";
 import { useNodeId, useNodesData, useStore } from "@xyflow/react";
 import { Atom } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { memo, useMemo } from "react";
+import { memo, useEffect, useMemo } from "react";
 
 import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
@@ -76,6 +76,12 @@ const ImageGenVideoNode = ({
     const width = (form.state.width as number | undefined) ?? 1024;
     const height = (form.state.height as number | undefined) ?? 576;
     const durationSeconds = (form.state.duration as number | undefined) ?? 5;
+
+    // `duration` is ABI-required; persist the displayed default so pre-flight
+    // validation doesn't fail when the user never opens the picker.
+    useEffect(() => {
+        if (form.state.duration === undefined) form.set("duration", 5);
+    }, [form.state.duration, form.set]);
     const currentRatio: AspectRatio =
         VIDEO_ASPECT_RATIOS.find(
             (r) => r.width === width && r.height === height,

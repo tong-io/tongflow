@@ -1,26 +1,25 @@
 from __future__ import annotations
 
-from typing import Required, TypedDict
+from pydantic import BaseModel, ConfigDict
 
-from .asset import Asset, AudioRef, FileRef, ImageRef, VideoRef
+from .asset import Asset, AudioRef, FileRef, ImageRef, ModelRef, VideoRef
 
 
-class TextGenSpeechCloneInput(TypedDict, total=False):
-    audio: Asset
-    language: str
-    max_new_tokens: int
-    ref_audio: Required[Asset]
-    ref_text: str
-    text: Required[str]
-    x_vector_only: bool
+class TextGenSpeechCloneInput(BaseModel):
+    model_config = ConfigDict(extra="forbid")
 
-class TextGenSpeechCloneOutput(TypedDict, total=False):
-    audio: AudioRef
-    error: str
-    image: ImageRef
-    success: Required[bool]
+    ref_audio: Asset
     text: str
-    texts: list[str]
-    thinking: str
-    video: VideoRef
+    audio: Asset | None = None
+    language: str | None = None
+    max_new_tokens: int | None = None
+    ref_text: str | None = None
+    x_vector_only: bool | None = None
+
+class TextGenSpeechCloneOutput(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    success: bool
+    audio: Asset | None = None
+    error: str | None = None
 

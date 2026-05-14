@@ -5,10 +5,6 @@ import { tasks } from "@/db/schema";
 import { ABI_NODES, type NodeSlot } from "@/generated/abi";
 import { logger } from "@/lib/logger";
 import { getAbiNodeBySlot } from "@/lib/schema/tongflow-abi";
-import {
-    buildPersistedTaskPrompt,
-    resolveRoutingPluginId,
-} from "@/lib/task/prompt-routing";
 
 function isAbiNodeSlot(s: string): s is NodeSlot {
     return Object.hasOwn(ABI_NODES, s);
@@ -16,23 +12,21 @@ function isAbiNodeSlot(s: string): s is NodeSlot {
 
 /**
  * POST /api/task/create
+ *
+ * Wire shape: `{ feature, pluginId, prompt, nodeId, workflowId? }`. `prompt`
+ * holds only ABI business fields — routing/pluginId live at the top level and
+ * are persisted in their own column.
  */
 export async function POST(request: NextRequest) {
     try {
         const body = (await request.json()) as {
             feature: string;
+            pluginId: string;
             prompt: Record<string, unknown>;
             nodeId: string;
             workflowId?: number;
-            routing?: { pluginId?: string };
         };
-        const {
-            feature,
-            prompt,
-            nodeId,
-            workflowId,
-            routing: bodyRouting,
-        } = body;
+        const { feature, pluginId, prompt, nodeId, workflowId } = body;
 
         if (!feature || typeof feature !== "string") {
             return NextResponse.json(
@@ -55,6 +49,17 @@ export async function POST(request: NextRequest) {
             );
         }
 
+        const trimmedPluginId =
+            typeof pluginId === "string" ? pluginId.trim() : "";
+        if (!trimmedPluginId) {
+            return NextResponse.json(
+                {
+                    error: "缺少 pluginId：请先在节点里选择一个插件实现（user/repo）",
+                },
+                { status: 400 },
+            );
+        }
+
         const normalizedFeature = feature.trim();
         const abiNode = getAbiNodeBySlot(normalizedFeature);
         if (!abiNode) {
@@ -64,27 +69,6 @@ export async function POST(request: NextRequest) {
             );
         }
         const canonicalFeature = abiNode.nodeSlot;
-
-        const mergedPrompt: Record<string, unknown> = { ...prompt };
-        if (bodyRouting && typeof bodyRouting === "object") {
-            const prev =
-                mergedPrompt.routing &&
-                typeof mergedPrompt.routing === "object" &&
-                !Array.isArray(mergedPrompt.routing)
-                    ? (mergedPrompt.routing as Record<string, unknown>)
-                    : {};
-            mergedPrompt.routing = { ...prev, ...bodyRouting };
-        }
-
-        const pluginId = resolveRoutingPluginId(mergedPrompt);
-        if (!pluginId) {
-            return NextResponse.json(
-                {
-                    error: "缺少 pluginId：请先在节点里选择一个插件实现（user/repo）",
-                },
-                { status: 400 },
-            );
-        }
 
         if (!isAbiNodeSlot(canonicalFeature)) {
             logger.error(
@@ -109,9 +93,8 @@ export async function POST(request: NextRequest) {
                 id: taskId,
                 nodeId,
                 feature: canonicalFeature,
-                prompt: JSON.stringify(
-                    buildPersistedTaskPrompt(mergedPrompt, pluginId),
-                ),
+                pluginId: trimmedPluginId,
+                prompt: JSON.stringify(prompt),
                 status: "pending",
                 progress: 0,
                 workflowId: workflowId ?? null,
@@ -128,7 +111,7 @@ export async function POST(request: NextRequest) {
             feature: canonicalFeature,
             requestedFeature: feature,
             taskId,
-            pluginId,
+            pluginId: trimmedPluginId,
         });
 
         return NextResponse.json({ taskId });

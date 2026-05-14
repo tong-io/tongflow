@@ -46,7 +46,7 @@ const TextGenVideoNode = ({
 
     const width = (form.state.width as number | undefined) ?? 1024;
     const height = (form.state.height as number | undefined) ?? 576;
-    const duration = (form.state.duration as string | undefined) ?? "5";
+    const duration = (form.state.duration as number | undefined) ?? 5;
 
     const currentRatio: AspectRatio =
         VIDEO_ASPECT_RATIOS.find(
@@ -91,8 +91,8 @@ const TextGenVideoNode = ({
 
                 <DurationPicker
                     durations={VIDEO_DURATIONS}
-                    value={duration}
-                    onChange={(dur) => form.set("duration", dur)}
+                    value={String(duration)}
+                    onChange={(dur) => form.set("duration", Number(dur))}
                 />
             </div>
         </AbiNodeShell>

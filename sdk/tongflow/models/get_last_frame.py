@@ -1,20 +1,19 @@
 from __future__ import annotations
 
-from typing import Required, TypedDict
+from pydantic import BaseModel, ConfigDict
 
-from .asset import Asset, AudioRef, FileRef, ImageRef, VideoRef
+from .asset import Asset, AudioRef, FileRef, ImageRef, ModelRef, VideoRef
 
 
-class GetLastFrameInput(TypedDict, total=False):
-    video: Required[Asset]
+class GetLastFrameInput(BaseModel):
+    model_config = ConfigDict(extra="forbid")
 
-class GetLastFrameOutput(TypedDict, total=False):
-    audio: AudioRef
-    error: str
-    image: ImageRef
-    success: Required[bool]
-    text: str
-    texts: list[str]
-    thinking: str
-    video: VideoRef
+    video: Asset
+
+class GetLastFrameOutput(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    success: bool
+    error: str | None = None
+    image: Asset | None = None
 

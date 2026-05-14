@@ -1,23 +1,27 @@
 from __future__ import annotations
 
-from typing import Required, TypedDict
+from pydantic import BaseModel, ConfigDict
 
-from .asset import Asset, AudioRef, FileRef, ImageRef, VideoRef
+from .asset import Asset, AudioRef, FileRef, ImageRef, ModelRef, VideoRef
 
 
-class GenMusicInput(TypedDict, total=False):
-    duration: float
-    lyrics: str
-    seed: int
-    text: str
+class GenMusicInput(BaseModel):
+    model_config = ConfigDict(extra="forbid")
 
-class GenMusicOutput(TypedDict, total=False):
-    audio: AudioRef
-    error: str
-    image: ImageRef
-    success: Required[bool]
-    text: str
-    texts: list[str]
-    thinking: str
-    video: VideoRef
+    bpm: float | None = None
+    duration: float | None = None
+    keyscale: str | None = None
+    language: str | None = None
+    lyrics: str | None = None
+    seed: int | None = None
+    songTitle: str | None = None
+    tags: str | None = None
+    text: str | None = None
+
+class GenMusicOutput(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    success: bool
+    audio: Asset | None = None
+    error: str | None = None
 

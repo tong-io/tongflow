@@ -1,25 +1,24 @@
 from __future__ import annotations
 
-from typing import Required, TypedDict
+from pydantic import BaseModel, ConfigDict
 
-from .asset import Asset, AudioRef, FileRef, ImageRef, VideoRef
+from .asset import Asset, AudioRef, FileRef, ImageRef, ModelRef, VideoRef
 
 
-class ImageEditInput(TypedDict, total=False):
-    height: int
-    image: Required[Asset]
-    match_input_size: bool
-    seed: int
-    text: Required[str]
-    width: int
+class ImageEditInput(BaseModel):
+    model_config = ConfigDict(extra="forbid")
 
-class ImageEditOutput(TypedDict, total=False):
-    audio: AudioRef
-    error: str
-    image: ImageRef
-    success: Required[bool]
+    image: Asset
     text: str
-    texts: list[str]
-    thinking: str
-    video: VideoRef
+    height: int | None = None
+    match_input_size: bool | None = None
+    seed: int | None = None
+    width: int | None = None
+
+class ImageEditOutput(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    success: bool
+    error: str | None = None
+    image: Asset | None = None
 

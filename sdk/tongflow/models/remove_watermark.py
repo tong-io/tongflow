@@ -5,14 +5,12 @@ from pydantic import BaseModel, ConfigDict
 from .asset import Asset, AudioRef, FileRef, ImageRef, ModelRef, VideoRef
 
 
-class AudioImageGenVideoInput(BaseModel):
+class RemoveWatermarkInput(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
-    audio: Asset
-    image: Asset
-    text: str | None = None
+    fileKey: Asset
 
-class AudioImageGenVideoOutput(BaseModel):
+class RemoveWatermarkOutput(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     success: bool

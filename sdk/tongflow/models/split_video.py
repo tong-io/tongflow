@@ -1,17 +1,20 @@
 from __future__ import annotations
 
-from typing import Required, TypedDict
+from pydantic import BaseModel, ConfigDict
 
-from .asset import Asset, AudioRef, FileRef, ImageRef, VideoRef
+from .asset import Asset, AudioRef, FileRef, ImageRef, ModelRef, VideoRef
 
 
-class SplitVideoInput(TypedDict, total=False):
-    video: Required[Asset]
+class SplitVideoInput(BaseModel):
+    model_config = ConfigDict(extra="forbid")
 
-class SplitVideoOutput(TypedDict, total=False):
-    error: str
-    success: Required[bool]
-    text: str
-    thinking: str
-    video_parts: list[VideoRef]
+    video: Asset
+    threshold: float | None = None
+
+class SplitVideoOutput(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    success: bool
+    error: str | None = None
+    video_parts: list[Asset] | None = None
 

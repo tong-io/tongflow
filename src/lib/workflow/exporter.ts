@@ -561,10 +561,16 @@ export class WorkflowExporter {
 
         const { outputType, outputField } = deriveOutputType(ns.spec);
 
+        const pluginId =
+            typeof nodeData.pluginId === "string"
+                ? nodeData.pluginId.trim()
+                : "";
+
         return {
             id: node.id,
             type: nodeType,
             feature: ns.reg.feature,
+            pluginId,
             label,
             comment,
             locked,

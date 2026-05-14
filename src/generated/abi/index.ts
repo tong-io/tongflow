@@ -59,9 +59,6 @@ const _slot_gen_text_outputs = {
         text: {
             type: "string",
         },
-        result: {
-            type: "string",
-        },
     },
     additionalProperties: false,
 } as const;
@@ -96,12 +93,6 @@ const _slot_split_text_outputs = {
             type: "boolean",
         },
         error: {
-            type: "string",
-        },
-        text: {
-            type: "string",
-        },
-        result: {
             type: "string",
         },
         texts: {
@@ -151,9 +142,6 @@ const _slot_combine_text_outputs = {
             type: "string",
         },
         text: {
-            type: "string",
-        },
-        result: {
             type: "string",
         },
     },
@@ -246,12 +234,6 @@ const _slot_image_fusion_outputs = {
         error: {
             type: "string",
         },
-        text: {
-            type: "string",
-        },
-        thinking: {
-            type: "string",
-        },
         image: {
             type: "object",
             required: ["file_key"],
@@ -269,46 +251,6 @@ const _slot_image_fusion_outputs = {
             },
             additionalProperties: false,
         },
-        video: {
-            type: "object",
-            required: ["file_key"],
-            properties: {
-                file_key: {
-                    type: "string",
-                    minLength: 1,
-                },
-                mime: {
-                    type: "string",
-                },
-                filename: {
-                    type: "string",
-                },
-            },
-            additionalProperties: false,
-        },
-        audio: {
-            type: "object",
-            required: ["file_key"],
-            properties: {
-                file_key: {
-                    type: "string",
-                    minLength: 1,
-                },
-                mime: {
-                    type: "string",
-                },
-                filename: {
-                    type: "string",
-                },
-            },
-            additionalProperties: false,
-        },
-        texts: {
-            type: "array",
-            items: {
-                type: "string",
-            },
-        },
     },
     additionalProperties: false,
 } as const;
@@ -320,12 +262,6 @@ const _slot_image_gen_text_inputs = {
     properties: {
         text: {
             type: "string",
-        },
-        texts: {
-            type: "array",
-            items: {
-                type: "string",
-            },
         },
         system: {
             type: "string",
@@ -399,66 +335,6 @@ const _slot_image_gen_text_outputs = {
         text: {
             type: "string",
         },
-        thinking: {
-            type: "string",
-        },
-        image: {
-            type: "object",
-            required: ["file_key"],
-            properties: {
-                file_key: {
-                    type: "string",
-                    minLength: 1,
-                },
-                mime: {
-                    type: "string",
-                },
-                filename: {
-                    type: "string",
-                },
-            },
-            additionalProperties: false,
-        },
-        video: {
-            type: "object",
-            required: ["file_key"],
-            properties: {
-                file_key: {
-                    type: "string",
-                    minLength: 1,
-                },
-                mime: {
-                    type: "string",
-                },
-                filename: {
-                    type: "string",
-                },
-            },
-            additionalProperties: false,
-        },
-        audio: {
-            type: "object",
-            required: ["file_key"],
-            properties: {
-                file_key: {
-                    type: "string",
-                    minLength: 1,
-                },
-                mime: {
-                    type: "string",
-                },
-                filename: {
-                    type: "string",
-                },
-            },
-            additionalProperties: false,
-        },
-        texts: {
-            type: "array",
-            items: {
-                type: "string",
-            },
-        },
     },
     additionalProperties: false,
 } as const;
@@ -472,12 +348,6 @@ const _slot_video_gen_text_inputs = {
     properties: {
         text: {
             type: "string",
-        },
-        texts: {
-            type: "array",
-            items: {
-                type: "string",
-            },
         },
         system: {
             type: "string",
@@ -568,66 +438,6 @@ const _slot_video_gen_text_outputs = {
         text: {
             type: "string",
         },
-        thinking: {
-            type: "string",
-        },
-        image: {
-            type: "object",
-            required: ["file_key"],
-            properties: {
-                file_key: {
-                    type: "string",
-                    minLength: 1,
-                },
-                mime: {
-                    type: "string",
-                },
-                filename: {
-                    type: "string",
-                },
-            },
-            additionalProperties: false,
-        },
-        video: {
-            type: "object",
-            required: ["file_key"],
-            properties: {
-                file_key: {
-                    type: "string",
-                    minLength: 1,
-                },
-                mime: {
-                    type: "string",
-                },
-                filename: {
-                    type: "string",
-                },
-            },
-            additionalProperties: false,
-        },
-        audio: {
-            type: "object",
-            required: ["file_key"],
-            properties: {
-                file_key: {
-                    type: "string",
-                    minLength: 1,
-                },
-                mime: {
-                    type: "string",
-                },
-                filename: {
-                    type: "string",
-                },
-            },
-            additionalProperties: false,
-        },
-        texts: {
-            type: "array",
-            items: {
-                type: "string",
-            },
-        },
     },
     additionalProperties: false,
 } as const;
@@ -682,15 +492,6 @@ const _slot_transcribe_outputs = {
         text: {
             type: "string",
         },
-        result: {
-            type: "string",
-        },
-        language: {
-            type: "string",
-        },
-        file_key: {
-            type: "string",
-        },
     },
     additionalProperties: false,
 } as const;
@@ -734,29 +535,6 @@ const _slot_concat_videos_outputs = {
         error: {
             type: "string",
         },
-        text: {
-            type: "string",
-        },
-        thinking: {
-            type: "string",
-        },
-        image: {
-            type: "object",
-            required: ["file_key"],
-            properties: {
-                file_key: {
-                    type: "string",
-                    minLength: 1,
-                },
-                mime: {
-                    type: "string",
-                },
-                filename: {
-                    type: "string",
-                },
-            },
-            additionalProperties: false,
-        },
         video: {
             type: "object",
             required: ["file_key"],
@@ -773,29 +551,6 @@ const _slot_concat_videos_outputs = {
                 },
             },
             additionalProperties: false,
-        },
-        audio: {
-            type: "object",
-            required: ["file_key"],
-            properties: {
-                file_key: {
-                    type: "string",
-                    minLength: 1,
-                },
-                mime: {
-                    type: "string",
-                },
-                filename: {
-                    type: "string",
-                },
-            },
-            additionalProperties: false,
-        },
-        texts: {
-            type: "array",
-            items: {
-                type: "string",
-            },
         },
     },
     additionalProperties: false,
@@ -837,46 +592,6 @@ const _slot_extract_audio_outputs = {
         error: {
             type: "string",
         },
-        text: {
-            type: "string",
-        },
-        thinking: {
-            type: "string",
-        },
-        image: {
-            type: "object",
-            required: ["file_key"],
-            properties: {
-                file_key: {
-                    type: "string",
-                    minLength: 1,
-                },
-                mime: {
-                    type: "string",
-                },
-                filename: {
-                    type: "string",
-                },
-            },
-            additionalProperties: false,
-        },
-        video: {
-            type: "object",
-            required: ["file_key"],
-            properties: {
-                file_key: {
-                    type: "string",
-                    minLength: 1,
-                },
-                mime: {
-                    type: "string",
-                },
-                filename: {
-                    type: "string",
-                },
-            },
-            additionalProperties: false,
-        },
         audio: {
             type: "object",
             required: ["file_key"],
@@ -893,12 +608,6 @@ const _slot_extract_audio_outputs = {
                 },
             },
             additionalProperties: false,
-        },
-        texts: {
-            type: "array",
-            items: {
-                type: "string",
-            },
         },
     },
     additionalProperties: false,
@@ -940,12 +649,6 @@ const _slot_separate_video_audio_outputs = {
             type: "boolean",
         },
         error: {
-            type: "string",
-        },
-        text: {
-            type: "string",
-        },
-        thinking: {
             type: "string",
         },
         video: {
@@ -1043,29 +746,6 @@ const _slot_merge_video_audio_outputs = {
         error: {
             type: "string",
         },
-        text: {
-            type: "string",
-        },
-        thinking: {
-            type: "string",
-        },
-        image: {
-            type: "object",
-            required: ["file_key"],
-            properties: {
-                file_key: {
-                    type: "string",
-                    minLength: 1,
-                },
-                mime: {
-                    type: "string",
-                },
-                filename: {
-                    type: "string",
-                },
-            },
-            additionalProperties: false,
-        },
         video: {
             type: "object",
             required: ["file_key"],
@@ -1082,29 +762,6 @@ const _slot_merge_video_audio_outputs = {
                 },
             },
             additionalProperties: false,
-        },
-        audio: {
-            type: "object",
-            required: ["file_key"],
-            properties: {
-                file_key: {
-                    type: "string",
-                    minLength: 1,
-                },
-                mime: {
-                    type: "string",
-                },
-                filename: {
-                    type: "string",
-                },
-            },
-            additionalProperties: false,
-        },
-        texts: {
-            type: "array",
-            items: {
-                type: "string",
-            },
         },
     },
     additionalProperties: false,
@@ -1150,12 +807,6 @@ const _slot_get_first_frame_outputs = {
         error: {
             type: "string",
         },
-        text: {
-            type: "string",
-        },
-        thinking: {
-            type: "string",
-        },
         image: {
             type: "object",
             required: ["file_key"],
@@ -1172,46 +823,6 @@ const _slot_get_first_frame_outputs = {
                 },
             },
             additionalProperties: false,
-        },
-        video: {
-            type: "object",
-            required: ["file_key"],
-            properties: {
-                file_key: {
-                    type: "string",
-                    minLength: 1,
-                },
-                mime: {
-                    type: "string",
-                },
-                filename: {
-                    type: "string",
-                },
-            },
-            additionalProperties: false,
-        },
-        audio: {
-            type: "object",
-            required: ["file_key"],
-            properties: {
-                file_key: {
-                    type: "string",
-                    minLength: 1,
-                },
-                mime: {
-                    type: "string",
-                },
-                filename: {
-                    type: "string",
-                },
-            },
-            additionalProperties: false,
-        },
-        texts: {
-            type: "array",
-            items: {
-                type: "string",
-            },
         },
     },
     additionalProperties: false,
@@ -1255,12 +866,6 @@ const _slot_get_last_frame_outputs = {
         error: {
             type: "string",
         },
-        text: {
-            type: "string",
-        },
-        thinking: {
-            type: "string",
-        },
         image: {
             type: "object",
             required: ["file_key"],
@@ -1277,46 +882,6 @@ const _slot_get_last_frame_outputs = {
                 },
             },
             additionalProperties: false,
-        },
-        video: {
-            type: "object",
-            required: ["file_key"],
-            properties: {
-                file_key: {
-                    type: "string",
-                    minLength: 1,
-                },
-                mime: {
-                    type: "string",
-                },
-                filename: {
-                    type: "string",
-                },
-            },
-            additionalProperties: false,
-        },
-        audio: {
-            type: "object",
-            required: ["file_key"],
-            properties: {
-                file_key: {
-                    type: "string",
-                    minLength: 1,
-                },
-                mime: {
-                    type: "string",
-                },
-                filename: {
-                    type: "string",
-                },
-            },
-            additionalProperties: false,
-        },
-        texts: {
-            type: "array",
-            items: {
-                type: "string",
-            },
         },
     },
     additionalProperties: false,
@@ -1363,66 +928,6 @@ const _slot_parse_document_outputs = {
         text: {
             type: "string",
         },
-        thinking: {
-            type: "string",
-        },
-        image: {
-            type: "object",
-            required: ["file_key"],
-            properties: {
-                file_key: {
-                    type: "string",
-                    minLength: 1,
-                },
-                mime: {
-                    type: "string",
-                },
-                filename: {
-                    type: "string",
-                },
-            },
-            additionalProperties: false,
-        },
-        video: {
-            type: "object",
-            required: ["file_key"],
-            properties: {
-                file_key: {
-                    type: "string",
-                    minLength: 1,
-                },
-                mime: {
-                    type: "string",
-                },
-                filename: {
-                    type: "string",
-                },
-            },
-            additionalProperties: false,
-        },
-        audio: {
-            type: "object",
-            required: ["file_key"],
-            properties: {
-                file_key: {
-                    type: "string",
-                    minLength: 1,
-                },
-                mime: {
-                    type: "string",
-                },
-                filename: {
-                    type: "string",
-                },
-            },
-            additionalProperties: false,
-        },
-        texts: {
-            type: "array",
-            items: {
-                type: "string",
-            },
-        },
     },
     additionalProperties: false,
 } as const;
@@ -1466,12 +971,6 @@ const _slot_split_video_outputs = {
             type: "boolean",
         },
         error: {
-            type: "string",
-        },
-        text: {
-            type: "string",
-        },
-        thinking: {
             type: "string",
         },
         video_parts: {
@@ -1596,12 +1095,6 @@ const _slot_gen_video_inputs = {
         text: {
             type: "string",
         },
-        texts: {
-            type: "array",
-            items: {
-                type: "string",
-            },
-        },
         seed: {
             type: "number",
         },
@@ -1610,12 +1103,6 @@ const _slot_gen_video_inputs = {
         },
         width: {
             type: "integer",
-        },
-        num_frames: {
-            type: "integer",
-        },
-        frame_rate: {
-            type: "number",
         },
         num_inference_steps: {
             type: "integer",
@@ -1717,10 +1204,10 @@ const _slot_gen_video_inputs = {
             },
             additionalProperties: false,
         },
-        audio_max_duration: {
+        audio_start_time: {
             type: "number",
         },
-        audio_start_time: {
+        duration: {
             type: "number",
         },
     },
@@ -1736,29 +1223,6 @@ const _slot_gen_video_outputs = {
         },
         error: {
             type: "string",
-        },
-        text: {
-            type: "string",
-        },
-        thinking: {
-            type: "string",
-        },
-        image: {
-            type: "object",
-            required: ["file_key"],
-            properties: {
-                file_key: {
-                    type: "string",
-                    minLength: 1,
-                },
-                mime: {
-                    type: "string",
-                },
-                filename: {
-                    type: "string",
-                },
-            },
-            additionalProperties: false,
         },
         video: {
             type: "object",
@@ -1777,29 +1241,6 @@ const _slot_gen_video_outputs = {
             },
             additionalProperties: false,
         },
-        audio: {
-            type: "object",
-            required: ["file_key"],
-            properties: {
-                file_key: {
-                    type: "string",
-                    minLength: 1,
-                },
-                mime: {
-                    type: "string",
-                },
-                filename: {
-                    type: "string",
-                },
-            },
-            additionalProperties: false,
-        },
-        texts: {
-            type: "array",
-            items: {
-                type: "string",
-            },
-        },
     },
     additionalProperties: false,
 } as const;
@@ -1812,12 +1253,6 @@ const _slot_image_gen_inputs = {
         text: {
             type: "string",
             minLength: 1,
-        },
-        texts: {
-            type: "array",
-            items: {
-                type: "string",
-            },
         },
         width: {
             type: "integer",
@@ -1848,12 +1283,6 @@ const _slot_image_gen_outputs = {
         error: {
             type: "string",
         },
-        text: {
-            type: "string",
-        },
-        thinking: {
-            type: "string",
-        },
         image: {
             type: "object",
             required: ["file_key"],
@@ -1870,46 +1299,6 @@ const _slot_image_gen_outputs = {
                 },
             },
             additionalProperties: false,
-        },
-        video: {
-            type: "object",
-            required: ["file_key"],
-            properties: {
-                file_key: {
-                    type: "string",
-                    minLength: 1,
-                },
-                mime: {
-                    type: "string",
-                },
-                filename: {
-                    type: "string",
-                },
-            },
-            additionalProperties: false,
-        },
-        audio: {
-            type: "object",
-            required: ["file_key"],
-            properties: {
-                file_key: {
-                    type: "string",
-                    minLength: 1,
-                },
-                mime: {
-                    type: "string",
-                },
-                filename: {
-                    type: "string",
-                },
-            },
-            additionalProperties: false,
-        },
-        texts: {
-            type: "array",
-            items: {
-                type: "string",
-            },
         },
     },
     additionalProperties: false,
@@ -1962,46 +1351,6 @@ const _slot_gen_music_outputs = {
         error: {
             type: "string",
         },
-        text: {
-            type: "string",
-        },
-        thinking: {
-            type: "string",
-        },
-        image: {
-            type: "object",
-            required: ["file_key"],
-            properties: {
-                file_key: {
-                    type: "string",
-                    minLength: 1,
-                },
-                mime: {
-                    type: "string",
-                },
-                filename: {
-                    type: "string",
-                },
-            },
-            additionalProperties: false,
-        },
-        video: {
-            type: "object",
-            required: ["file_key"],
-            properties: {
-                file_key: {
-                    type: "string",
-                    minLength: 1,
-                },
-                mime: {
-                    type: "string",
-                },
-                filename: {
-                    type: "string",
-                },
-            },
-            additionalProperties: false,
-        },
         audio: {
             type: "object",
             required: ["file_key"],
@@ -2018,12 +1367,6 @@ const _slot_gen_music_outputs = {
                 },
             },
             additionalProperties: false,
-        },
-        texts: {
-            type: "array",
-            items: {
-                type: "string",
-            },
         },
     },
     additionalProperties: false,
@@ -2063,46 +1406,6 @@ const _slot_text_gen_speech_preset_outputs = {
         error: {
             type: "string",
         },
-        text: {
-            type: "string",
-        },
-        thinking: {
-            type: "string",
-        },
-        image: {
-            type: "object",
-            required: ["file_key"],
-            properties: {
-                file_key: {
-                    type: "string",
-                    minLength: 1,
-                },
-                mime: {
-                    type: "string",
-                },
-                filename: {
-                    type: "string",
-                },
-            },
-            additionalProperties: false,
-        },
-        video: {
-            type: "object",
-            required: ["file_key"],
-            properties: {
-                file_key: {
-                    type: "string",
-                    minLength: 1,
-                },
-                mime: {
-                    type: "string",
-                },
-                filename: {
-                    type: "string",
-                },
-            },
-            additionalProperties: false,
-        },
         audio: {
             type: "object",
             required: ["file_key"],
@@ -2119,12 +1422,6 @@ const _slot_text_gen_speech_preset_outputs = {
                 },
             },
             additionalProperties: false,
-        },
-        texts: {
-            type: "array",
-            items: {
-                type: "string",
-            },
         },
     },
     additionalProperties: false,
@@ -2143,12 +1440,6 @@ const _slot_image_gen_video_inputs = {
         text: {
             type: "string",
         },
-        texts: {
-            type: "array",
-            items: {
-                type: "string",
-            },
-        },
         seed: {
             type: "number",
         },
@@ -2157,12 +1448,6 @@ const _slot_image_gen_video_inputs = {
         },
         width: {
             type: "integer",
-        },
-        num_frames: {
-            type: "integer",
-        },
-        frame_rate: {
-            type: "number",
         },
         num_inference_steps: {
             type: "integer",
@@ -2264,9 +1549,6 @@ const _slot_image_gen_video_inputs = {
             },
             additionalProperties: false,
         },
-        audio_max_duration: {
-            type: "number",
-        },
         audio_start_time: {
             type: "number",
         },
@@ -2286,29 +1568,6 @@ const _slot_image_gen_video_outputs = {
         error: {
             type: "string",
         },
-        text: {
-            type: "string",
-        },
-        thinking: {
-            type: "string",
-        },
-        image: {
-            type: "object",
-            required: ["file_key"],
-            properties: {
-                file_key: {
-                    type: "string",
-                    minLength: 1,
-                },
-                mime: {
-                    type: "string",
-                },
-                filename: {
-                    type: "string",
-                },
-            },
-            additionalProperties: false,
-        },
         video: {
             type: "object",
             required: ["file_key"],
@@ -2325,29 +1584,6 @@ const _slot_image_gen_video_outputs = {
                 },
             },
             additionalProperties: false,
-        },
-        audio: {
-            type: "object",
-            required: ["file_key"],
-            properties: {
-                file_key: {
-                    type: "string",
-                    minLength: 1,
-                },
-                mime: {
-                    type: "string",
-                },
-                filename: {
-                    type: "string",
-                },
-            },
-            additionalProperties: false,
-        },
-        texts: {
-            type: "array",
-            items: {
-                type: "string",
-            },
         },
     },
     additionalProperties: false,
@@ -2407,12 +1643,6 @@ const _slot_image_edit_outputs = {
         error: {
             type: "string",
         },
-        text: {
-            type: "string",
-        },
-        thinking: {
-            type: "string",
-        },
         image: {
             type: "object",
             required: ["file_key"],
@@ -2429,46 +1659,6 @@ const _slot_image_edit_outputs = {
                 },
             },
             additionalProperties: false,
-        },
-        video: {
-            type: "object",
-            required: ["file_key"],
-            properties: {
-                file_key: {
-                    type: "string",
-                    minLength: 1,
-                },
-                mime: {
-                    type: "string",
-                },
-                filename: {
-                    type: "string",
-                },
-            },
-            additionalProperties: false,
-        },
-        audio: {
-            type: "object",
-            required: ["file_key"],
-            properties: {
-                file_key: {
-                    type: "string",
-                    minLength: 1,
-                },
-                mime: {
-                    type: "string",
-                },
-                filename: {
-                    type: "string",
-                },
-            },
-            additionalProperties: false,
-        },
-        texts: {
-            type: "array",
-            items: {
-                type: "string",
-            },
         },
     },
     additionalProperties: false,
@@ -2551,12 +1741,6 @@ const _slot_image_upscale_outputs = {
         error: {
             type: "string",
         },
-        text: {
-            type: "string",
-        },
-        thinking: {
-            type: "string",
-        },
         image: {
             type: "object",
             required: ["file_key"],
@@ -2573,46 +1757,6 @@ const _slot_image_upscale_outputs = {
                 },
             },
             additionalProperties: false,
-        },
-        video: {
-            type: "object",
-            required: ["file_key"],
-            properties: {
-                file_key: {
-                    type: "string",
-                    minLength: 1,
-                },
-                mime: {
-                    type: "string",
-                },
-                filename: {
-                    type: "string",
-                },
-            },
-            additionalProperties: false,
-        },
-        audio: {
-            type: "object",
-            required: ["file_key"],
-            properties: {
-                file_key: {
-                    type: "string",
-                    minLength: 1,
-                },
-                mime: {
-                    type: "string",
-                },
-                filename: {
-                    type: "string",
-                },
-            },
-            additionalProperties: false,
-        },
-        texts: {
-            type: "array",
-            items: {
-                type: "string",
-            },
         },
     },
     additionalProperties: false,
@@ -2695,29 +1839,6 @@ const _slot_video_upscale_outputs = {
         error: {
             type: "string",
         },
-        text: {
-            type: "string",
-        },
-        thinking: {
-            type: "string",
-        },
-        image: {
-            type: "object",
-            required: ["file_key"],
-            properties: {
-                file_key: {
-                    type: "string",
-                    minLength: 1,
-                },
-                mime: {
-                    type: "string",
-                },
-                filename: {
-                    type: "string",
-                },
-            },
-            additionalProperties: false,
-        },
         video: {
             type: "object",
             required: ["file_key"],
@@ -2734,29 +1855,6 @@ const _slot_video_upscale_outputs = {
                 },
             },
             additionalProperties: false,
-        },
-        audio: {
-            type: "object",
-            required: ["file_key"],
-            properties: {
-                file_key: {
-                    type: "string",
-                    minLength: 1,
-                },
-                mime: {
-                    type: "string",
-                },
-                filename: {
-                    type: "string",
-                },
-            },
-            additionalProperties: false,
-        },
-        texts: {
-            type: "array",
-            items: {
-                type: "string",
-            },
         },
     },
     additionalProperties: false,
@@ -2806,66 +1904,6 @@ const _slot_image_describe_outputs = {
         },
         text: {
             type: "string",
-        },
-        thinking: {
-            type: "string",
-        },
-        image: {
-            type: "object",
-            required: ["file_key"],
-            properties: {
-                file_key: {
-                    type: "string",
-                    minLength: 1,
-                },
-                mime: {
-                    type: "string",
-                },
-                filename: {
-                    type: "string",
-                },
-            },
-            additionalProperties: false,
-        },
-        video: {
-            type: "object",
-            required: ["file_key"],
-            properties: {
-                file_key: {
-                    type: "string",
-                    minLength: 1,
-                },
-                mime: {
-                    type: "string",
-                },
-                filename: {
-                    type: "string",
-                },
-            },
-            additionalProperties: false,
-        },
-        audio: {
-            type: "object",
-            required: ["file_key"],
-            properties: {
-                file_key: {
-                    type: "string",
-                    minLength: 1,
-                },
-                mime: {
-                    type: "string",
-                },
-                filename: {
-                    type: "string",
-                },
-            },
-            additionalProperties: false,
-        },
-        texts: {
-            type: "array",
-            items: {
-                type: "string",
-            },
         },
     },
     additionalProperties: false,
@@ -2917,66 +1955,6 @@ const _slot_video_describe_outputs = {
         },
         text: {
             type: "string",
-        },
-        thinking: {
-            type: "string",
-        },
-        image: {
-            type: "object",
-            required: ["file_key"],
-            properties: {
-                file_key: {
-                    type: "string",
-                    minLength: 1,
-                },
-                mime: {
-                    type: "string",
-                },
-                filename: {
-                    type: "string",
-                },
-            },
-            additionalProperties: false,
-        },
-        video: {
-            type: "object",
-            required: ["file_key"],
-            properties: {
-                file_key: {
-                    type: "string",
-                    minLength: 1,
-                },
-                mime: {
-                    type: "string",
-                },
-                filename: {
-                    type: "string",
-                },
-            },
-            additionalProperties: false,
-        },
-        audio: {
-            type: "object",
-            required: ["file_key"],
-            properties: {
-                file_key: {
-                    type: "string",
-                    minLength: 1,
-                },
-                mime: {
-                    type: "string",
-                },
-                filename: {
-                    type: "string",
-                },
-            },
-            additionalProperties: false,
-        },
-        texts: {
-            type: "array",
-            items: {
-                type: "string",
-            },
         },
     },
     additionalProperties: false,
@@ -3042,29 +2020,6 @@ const _slot_audio_image_gen_video_outputs = {
         error: {
             type: "string",
         },
-        text: {
-            type: "string",
-        },
-        thinking: {
-            type: "string",
-        },
-        image: {
-            type: "object",
-            required: ["file_key"],
-            properties: {
-                file_key: {
-                    type: "string",
-                    minLength: 1,
-                },
-                mime: {
-                    type: "string",
-                },
-                filename: {
-                    type: "string",
-                },
-            },
-            additionalProperties: false,
-        },
         video: {
             type: "object",
             required: ["file_key"],
@@ -3082,29 +2037,6 @@ const _slot_audio_image_gen_video_outputs = {
             },
             additionalProperties: false,
         },
-        audio: {
-            type: "object",
-            required: ["file_key"],
-            properties: {
-                file_key: {
-                    type: "string",
-                    minLength: 1,
-                },
-                mime: {
-                    type: "string",
-                },
-                filename: {
-                    type: "string",
-                },
-            },
-            additionalProperties: false,
-        },
-        texts: {
-            type: "array",
-            items: {
-                type: "string",
-            },
-        },
     },
     additionalProperties: false,
 } as const;
@@ -3119,12 +2051,6 @@ const _slot_speech_text_gen_video_inputs = {
         text: {
             type: "string",
         },
-        texts: {
-            type: "array",
-            items: {
-                type: "string",
-            },
-        },
         seed: {
             type: "number",
         },
@@ -3133,12 +2059,6 @@ const _slot_speech_text_gen_video_inputs = {
         },
         width: {
             type: "integer",
-        },
-        num_frames: {
-            type: "integer",
-        },
-        frame_rate: {
-            type: "number",
         },
         num_inference_steps: {
             type: "integer",
@@ -3240,10 +2160,10 @@ const _slot_speech_text_gen_video_inputs = {
             },
             additionalProperties: false,
         },
-        audio_max_duration: {
+        audio_start_time: {
             type: "number",
         },
-        audio_start_time: {
+        duration: {
             type: "number",
         },
     },
@@ -3262,29 +2182,6 @@ const _slot_speech_text_gen_video_outputs = {
         error: {
             type: "string",
         },
-        text: {
-            type: "string",
-        },
-        thinking: {
-            type: "string",
-        },
-        image: {
-            type: "object",
-            required: ["file_key"],
-            properties: {
-                file_key: {
-                    type: "string",
-                    minLength: 1,
-                },
-                mime: {
-                    type: "string",
-                },
-                filename: {
-                    type: "string",
-                },
-            },
-            additionalProperties: false,
-        },
         video: {
             type: "object",
             required: ["file_key"],
@@ -3301,29 +2198,6 @@ const _slot_speech_text_gen_video_outputs = {
                 },
             },
             additionalProperties: false,
-        },
-        audio: {
-            type: "object",
-            required: ["file_key"],
-            properties: {
-                file_key: {
-                    type: "string",
-                    minLength: 1,
-                },
-                mime: {
-                    type: "string",
-                },
-                filename: {
-                    type: "string",
-                },
-            },
-            additionalProperties: false,
-        },
-        texts: {
-            type: "array",
-            items: {
-                type: "string",
-            },
         },
     },
     additionalProperties: false,
@@ -3406,29 +2280,6 @@ const _slot_speech_image_video_gen_video_outputs = {
         error: {
             type: "string",
         },
-        text: {
-            type: "string",
-        },
-        thinking: {
-            type: "string",
-        },
-        image: {
-            type: "object",
-            required: ["file_key"],
-            properties: {
-                file_key: {
-                    type: "string",
-                    minLength: 1,
-                },
-                mime: {
-                    type: "string",
-                },
-                filename: {
-                    type: "string",
-                },
-            },
-            additionalProperties: false,
-        },
         video: {
             type: "object",
             required: ["file_key"],
@@ -3445,29 +2296,6 @@ const _slot_speech_image_video_gen_video_outputs = {
                 },
             },
             additionalProperties: false,
-        },
-        audio: {
-            type: "object",
-            required: ["file_key"],
-            properties: {
-                file_key: {
-                    type: "string",
-                    minLength: 1,
-                },
-                mime: {
-                    type: "string",
-                },
-                filename: {
-                    type: "string",
-                },
-            },
-            additionalProperties: false,
-        },
-        texts: {
-            type: "array",
-            items: {
-                type: "string",
-            },
         },
     },
     additionalProperties: false,
@@ -3533,29 +2361,6 @@ const _slot_video_image_gen_video_mix_outputs = {
         error: {
             type: "string",
         },
-        text: {
-            type: "string",
-        },
-        thinking: {
-            type: "string",
-        },
-        image: {
-            type: "object",
-            required: ["file_key"],
-            properties: {
-                file_key: {
-                    type: "string",
-                    minLength: 1,
-                },
-                mime: {
-                    type: "string",
-                },
-                filename: {
-                    type: "string",
-                },
-            },
-            additionalProperties: false,
-        },
         video: {
             type: "object",
             required: ["file_key"],
@@ -3572,29 +2377,6 @@ const _slot_video_image_gen_video_mix_outputs = {
                 },
             },
             additionalProperties: false,
-        },
-        audio: {
-            type: "object",
-            required: ["file_key"],
-            properties: {
-                file_key: {
-                    type: "string",
-                    minLength: 1,
-                },
-                mime: {
-                    type: "string",
-                },
-                filename: {
-                    type: "string",
-                },
-            },
-            additionalProperties: false,
-        },
-        texts: {
-            type: "array",
-            items: {
-                type: "string",
-            },
         },
     },
     additionalProperties: false,
@@ -3660,29 +2442,6 @@ const _slot_video_image_gen_video_move_outputs = {
         error: {
             type: "string",
         },
-        text: {
-            type: "string",
-        },
-        thinking: {
-            type: "string",
-        },
-        image: {
-            type: "object",
-            required: ["file_key"],
-            properties: {
-                file_key: {
-                    type: "string",
-                    minLength: 1,
-                },
-                mime: {
-                    type: "string",
-                },
-                filename: {
-                    type: "string",
-                },
-            },
-            additionalProperties: false,
-        },
         video: {
             type: "object",
             required: ["file_key"],
@@ -3700,29 +2459,6 @@ const _slot_video_image_gen_video_move_outputs = {
             },
             additionalProperties: false,
         },
-        audio: {
-            type: "object",
-            required: ["file_key"],
-            properties: {
-                file_key: {
-                    type: "string",
-                    minLength: 1,
-                },
-                mime: {
-                    type: "string",
-                },
-                filename: {
-                    type: "string",
-                },
-            },
-            additionalProperties: false,
-        },
-        texts: {
-            type: "array",
-            items: {
-                type: "string",
-            },
-        },
     },
     additionalProperties: false,
 } as const;
@@ -3737,12 +2473,6 @@ const _slot_image_image_gen_video_inputs = {
         text: {
             type: "string",
         },
-        texts: {
-            type: "array",
-            items: {
-                type: "string",
-            },
-        },
         duration: {
             type: "number",
         },
@@ -3754,12 +2484,6 @@ const _slot_image_image_gen_video_inputs = {
         },
         width: {
             type: "integer",
-        },
-        num_frames: {
-            type: "integer",
-        },
-        frame_rate: {
-            type: "number",
         },
         num_inference_steps: {
             type: "integer",
@@ -3860,9 +2584,6 @@ const _slot_image_image_gen_video_inputs = {
                 },
             },
             additionalProperties: false,
-        },
-        audio_max_duration: {
-            type: "number",
         },
         audio_start_time: {
             type: "number",
@@ -3883,29 +2604,6 @@ const _slot_image_image_gen_video_outputs = {
         error: {
             type: "string",
         },
-        text: {
-            type: "string",
-        },
-        thinking: {
-            type: "string",
-        },
-        image: {
-            type: "object",
-            required: ["file_key"],
-            properties: {
-                file_key: {
-                    type: "string",
-                    minLength: 1,
-                },
-                mime: {
-                    type: "string",
-                },
-                filename: {
-                    type: "string",
-                },
-            },
-            additionalProperties: false,
-        },
         video: {
             type: "object",
             required: ["file_key"],
@@ -3923,29 +2621,6 @@ const _slot_image_image_gen_video_outputs = {
             },
             additionalProperties: false,
         },
-        audio: {
-            type: "object",
-            required: ["file_key"],
-            properties: {
-                file_key: {
-                    type: "string",
-                    minLength: 1,
-                },
-                mime: {
-                    type: "string",
-                },
-                filename: {
-                    type: "string",
-                },
-            },
-            additionalProperties: false,
-        },
-        texts: {
-            type: "array",
-            items: {
-                type: "string",
-            },
-        },
     },
     additionalProperties: false,
 } as const;
@@ -3960,14 +2635,8 @@ const _slot_text_gen_video_inputs = {
         text: {
             type: "string",
         },
-        texts: {
-            type: "array",
-            items: {
-                type: "string",
-            },
-        },
         duration: {
-            type: "string",
+            type: "number",
         },
         seed: {
             type: "number",
@@ -3977,12 +2646,6 @@ const _slot_text_gen_video_inputs = {
         },
         width: {
             type: "integer",
-        },
-        num_frames: {
-            type: "integer",
-        },
-        frame_rate: {
-            type: "number",
         },
         num_inference_steps: {
             type: "integer",
@@ -4084,9 +2747,6 @@ const _slot_text_gen_video_inputs = {
             },
             additionalProperties: false,
         },
-        audio_max_duration: {
-            type: "number",
-        },
         audio_start_time: {
             type: "number",
         },
@@ -4103,29 +2763,6 @@ const _slot_text_gen_video_outputs = {
         },
         error: {
             type: "string",
-        },
-        text: {
-            type: "string",
-        },
-        thinking: {
-            type: "string",
-        },
-        image: {
-            type: "object",
-            required: ["file_key"],
-            properties: {
-                file_key: {
-                    type: "string",
-                    minLength: 1,
-                },
-                mime: {
-                    type: "string",
-                },
-                filename: {
-                    type: "string",
-                },
-            },
-            additionalProperties: false,
         },
         video: {
             type: "object",
@@ -4144,29 +2781,6 @@ const _slot_text_gen_video_outputs = {
             },
             additionalProperties: false,
         },
-        audio: {
-            type: "object",
-            required: ["file_key"],
-            properties: {
-                file_key: {
-                    type: "string",
-                    minLength: 1,
-                },
-                mime: {
-                    type: "string",
-                },
-                filename: {
-                    type: "string",
-                },
-            },
-            additionalProperties: false,
-        },
-        texts: {
-            type: "array",
-            items: {
-                type: "string",
-            },
-        },
     },
     additionalProperties: false,
 } as const;
@@ -4181,12 +2795,6 @@ const _slot_image_gen_model_inputs = {
         text: {
             type: "string",
             minLength: 1,
-        },
-        texts: {
-            type: "array",
-            items: {
-                type: "string",
-            },
         },
         width: {
             type: "integer",
@@ -4234,12 +2842,6 @@ const _slot_image_gen_model_outputs = {
             type: "boolean",
         },
         error: {
-            type: "string",
-        },
-        text: {
-            type: "string",
-        },
-        thinking: {
             type: "string",
         },
         model: {
@@ -4320,29 +2922,6 @@ const _slot_speech_video_gen_video_outputs = {
         error: {
             type: "string",
         },
-        text: {
-            type: "string",
-        },
-        thinking: {
-            type: "string",
-        },
-        image: {
-            type: "object",
-            required: ["file_key"],
-            properties: {
-                file_key: {
-                    type: "string",
-                    minLength: 1,
-                },
-                mime: {
-                    type: "string",
-                },
-                filename: {
-                    type: "string",
-                },
-            },
-            additionalProperties: false,
-        },
         video: {
             type: "object",
             required: ["file_key"],
@@ -4359,29 +2938,6 @@ const _slot_speech_video_gen_video_outputs = {
                 },
             },
             additionalProperties: false,
-        },
-        audio: {
-            type: "object",
-            required: ["file_key"],
-            properties: {
-                file_key: {
-                    type: "string",
-                    minLength: 1,
-                },
-                mime: {
-                    type: "string",
-                },
-                filename: {
-                    type: "string",
-                },
-            },
-            additionalProperties: false,
-        },
-        texts: {
-            type: "array",
-            items: {
-                type: "string",
-            },
         },
     },
     additionalProperties: false,
@@ -4460,46 +3016,6 @@ const _slot_text_gen_speech_clone_outputs = {
         error: {
             type: "string",
         },
-        text: {
-            type: "string",
-        },
-        thinking: {
-            type: "string",
-        },
-        image: {
-            type: "object",
-            required: ["file_key"],
-            properties: {
-                file_key: {
-                    type: "string",
-                    minLength: 1,
-                },
-                mime: {
-                    type: "string",
-                },
-                filename: {
-                    type: "string",
-                },
-            },
-            additionalProperties: false,
-        },
-        video: {
-            type: "object",
-            required: ["file_key"],
-            properties: {
-                file_key: {
-                    type: "string",
-                    minLength: 1,
-                },
-                mime: {
-                    type: "string",
-                },
-                filename: {
-                    type: "string",
-                },
-            },
-            additionalProperties: false,
-        },
         audio: {
             type: "object",
             required: ["file_key"],
@@ -4516,12 +3032,6 @@ const _slot_text_gen_speech_clone_outputs = {
                 },
             },
             additionalProperties: false,
-        },
-        texts: {
-            type: "array",
-            items: {
-                type: "string",
-            },
         },
     },
     additionalProperties: false,
@@ -4579,30 +3089,20 @@ const _slot_transcribe_timestamp_outputs = {
         text: {
             type: "string",
         },
-        result: {
-            type: "string",
-        },
-        language: {
-            type: "string",
-        },
-        file_key: {
-            type: "string",
-        },
         time_stamps: {
             type: "array",
             items: {
                 type: "object",
-                required: ["text", "start_time", "end_time"],
+                required: ["start", "end", "text"],
                 properties: {
+                    start: {
+                        type: "number",
+                    },
+                    end: {
+                        type: "number",
+                    },
                     text: {
                         type: "string",
-                        minLength: 1,
-                    },
-                    start_time: {
-                        type: "number",
-                    },
-                    end_time: {
-                        type: "number",
                     },
                 },
                 additionalProperties: false,
@@ -4651,46 +3151,6 @@ const _slot_text_gen_speech_instruct_outputs = {
         error: {
             type: "string",
         },
-        text: {
-            type: "string",
-        },
-        thinking: {
-            type: "string",
-        },
-        image: {
-            type: "object",
-            required: ["file_key"],
-            properties: {
-                file_key: {
-                    type: "string",
-                    minLength: 1,
-                },
-                mime: {
-                    type: "string",
-                },
-                filename: {
-                    type: "string",
-                },
-            },
-            additionalProperties: false,
-        },
-        video: {
-            type: "object",
-            required: ["file_key"],
-            properties: {
-                file_key: {
-                    type: "string",
-                    minLength: 1,
-                },
-                mime: {
-                    type: "string",
-                },
-                filename: {
-                    type: "string",
-                },
-            },
-            additionalProperties: false,
-        },
         audio: {
             type: "object",
             required: ["file_key"],
@@ -4707,12 +3167,6 @@ const _slot_text_gen_speech_instruct_outputs = {
                 },
             },
             additionalProperties: false,
-        },
-        texts: {
-            type: "array",
-            items: {
-                type: "string",
-            },
         },
     },
     additionalProperties: false,
@@ -4778,29 +3232,6 @@ const _slot_video_image_move_animal_outputs = {
         error: {
             type: "string",
         },
-        text: {
-            type: "string",
-        },
-        thinking: {
-            type: "string",
-        },
-        image: {
-            type: "object",
-            required: ["file_key"],
-            properties: {
-                file_key: {
-                    type: "string",
-                    minLength: 1,
-                },
-                mime: {
-                    type: "string",
-                },
-                filename: {
-                    type: "string",
-                },
-            },
-            additionalProperties: false,
-        },
         video: {
             type: "object",
             required: ["file_key"],
@@ -4817,29 +3248,6 @@ const _slot_video_image_move_animal_outputs = {
                 },
             },
             additionalProperties: false,
-        },
-        audio: {
-            type: "object",
-            required: ["file_key"],
-            properties: {
-                file_key: {
-                    type: "string",
-                    minLength: 1,
-                },
-                mime: {
-                    type: "string",
-                },
-                filename: {
-                    type: "string",
-                },
-            },
-            additionalProperties: false,
-        },
-        texts: {
-            type: "array",
-            items: {
-                type: "string",
-            },
         },
     },
     additionalProperties: false,
@@ -4905,29 +3313,6 @@ const _slot_wan_animate_mix_outputs = {
         error: {
             type: "string",
         },
-        text: {
-            type: "string",
-        },
-        thinking: {
-            type: "string",
-        },
-        image: {
-            type: "object",
-            required: ["file_key"],
-            properties: {
-                file_key: {
-                    type: "string",
-                    minLength: 1,
-                },
-                mime: {
-                    type: "string",
-                },
-                filename: {
-                    type: "string",
-                },
-            },
-            additionalProperties: false,
-        },
         video: {
             type: "object",
             required: ["file_key"],
@@ -4944,29 +3329,6 @@ const _slot_wan_animate_mix_outputs = {
                 },
             },
             additionalProperties: false,
-        },
-        audio: {
-            type: "object",
-            required: ["file_key"],
-            properties: {
-                file_key: {
-                    type: "string",
-                    minLength: 1,
-                },
-                mime: {
-                    type: "string",
-                },
-                filename: {
-                    type: "string",
-                },
-            },
-            additionalProperties: false,
-        },
-        texts: {
-            type: "array",
-            items: {
-                type: "string",
-            },
         },
     },
     additionalProperties: false,
@@ -5015,69 +3377,6 @@ const _slot_drop_video_outputs = {
         },
         error: {
             type: "string",
-        },
-        text: {
-            type: "string",
-        },
-        thinking: {
-            type: "string",
-        },
-        image: {
-            type: "object",
-            required: ["file_key"],
-            properties: {
-                file_key: {
-                    type: "string",
-                    minLength: 1,
-                },
-                mime: {
-                    type: "string",
-                },
-                filename: {
-                    type: "string",
-                },
-            },
-            additionalProperties: false,
-        },
-        video: {
-            type: "object",
-            required: ["file_key"],
-            properties: {
-                file_key: {
-                    type: "string",
-                    minLength: 1,
-                },
-                mime: {
-                    type: "string",
-                },
-                filename: {
-                    type: "string",
-                },
-            },
-            additionalProperties: false,
-        },
-        audio: {
-            type: "object",
-            required: ["file_key"],
-            properties: {
-                file_key: {
-                    type: "string",
-                    minLength: 1,
-                },
-                mime: {
-                    type: "string",
-                },
-                filename: {
-                    type: "string",
-                },
-            },
-            additionalProperties: false,
-        },
-        texts: {
-            type: "array",
-            items: {
-                type: "string",
-            },
         },
         clips: {
             type: "array",
@@ -5194,69 +3493,6 @@ const _slot_arrange_group_outputs = {
         },
         error: {
             type: "string",
-        },
-        text: {
-            type: "string",
-        },
-        thinking: {
-            type: "string",
-        },
-        image: {
-            type: "object",
-            required: ["file_key"],
-            properties: {
-                file_key: {
-                    type: "string",
-                    minLength: 1,
-                },
-                mime: {
-                    type: "string",
-                },
-                filename: {
-                    type: "string",
-                },
-            },
-            additionalProperties: false,
-        },
-        video: {
-            type: "object",
-            required: ["file_key"],
-            properties: {
-                file_key: {
-                    type: "string",
-                    minLength: 1,
-                },
-                mime: {
-                    type: "string",
-                },
-                filename: {
-                    type: "string",
-                },
-            },
-            additionalProperties: false,
-        },
-        audio: {
-            type: "object",
-            required: ["file_key"],
-            properties: {
-                file_key: {
-                    type: "string",
-                    minLength: 1,
-                },
-                mime: {
-                    type: "string",
-                },
-                filename: {
-                    type: "string",
-                },
-            },
-            additionalProperties: false,
-        },
-        texts: {
-            type: "array",
-            items: {
-                type: "string",
-            },
         },
         groups: {
             type: "array",
@@ -6030,9 +4266,6 @@ export const ABI_NODES = {
                 text: {
                     type: "string",
                 },
-                result: {
-                    type: "string",
-                },
             },
             additionalProperties: false,
         },
@@ -6066,12 +4299,6 @@ export const ABI_NODES = {
                     type: "boolean",
                 },
                 error: {
-                    type: "string",
-                },
-                text: {
-                    type: "string",
-                },
-                result: {
                     type: "string",
                 },
                 texts: {
@@ -6122,9 +4349,6 @@ export const ABI_NODES = {
                 text: {
                     type: "string",
                 },
-                result: {
-                    type: "string",
-                },
             },
             additionalProperties: false,
         },
@@ -6172,26 +4396,8 @@ export const ABI_NODES = {
                 error: {
                     type: "string",
                 },
-                text: {
-                    type: "string",
-                },
-                thinking: {
-                    type: "string",
-                },
                 image: {
                     $ref: "#/$defs/ImageRef",
-                },
-                video: {
-                    $ref: "#/$defs/VideoRef",
-                },
-                audio: {
-                    $ref: "#/$defs/AudioRef",
-                },
-                texts: {
-                    type: "array",
-                    items: {
-                        type: "string",
-                    },
                 },
             },
             additionalProperties: false,
@@ -6205,12 +4411,6 @@ export const ABI_NODES = {
                 text: {
                     type: "string",
                 },
-                texts: {
-                    type: "array",
-                    items: {
-                        type: "string",
-                    },
-                },
                 system: {
                     type: "string",
                 },
@@ -6253,24 +4453,6 @@ export const ABI_NODES = {
                 },
                 text: {
                     type: "string",
-                },
-                thinking: {
-                    type: "string",
-                },
-                image: {
-                    $ref: "#/$defs/ImageRef",
-                },
-                video: {
-                    $ref: "#/$defs/VideoRef",
-                },
-                audio: {
-                    $ref: "#/$defs/AudioRef",
-                },
-                texts: {
-                    type: "array",
-                    items: {
-                        type: "string",
-                    },
                 },
             },
             additionalProperties: false,
@@ -6284,12 +4466,6 @@ export const ABI_NODES = {
                 text: {
                     type: "string",
                 },
-                texts: {
-                    type: "array",
-                    items: {
-                        type: "string",
-                    },
-                },
                 system: {
                     type: "string",
                 },
@@ -6335,24 +4511,6 @@ export const ABI_NODES = {
                 },
                 text: {
                     type: "string",
-                },
-                thinking: {
-                    type: "string",
-                },
-                image: {
-                    $ref: "#/$defs/ImageRef",
-                },
-                video: {
-                    $ref: "#/$defs/VideoRef",
-                },
-                audio: {
-                    $ref: "#/$defs/AudioRef",
-                },
-                texts: {
-                    type: "array",
-                    items: {
-                        type: "string",
-                    },
                 },
             },
             additionalProperties: false,
@@ -6391,15 +4549,6 @@ export const ABI_NODES = {
                 text: {
                     type: "string",
                 },
-                result: {
-                    type: "string",
-                },
-                language: {
-                    type: "string",
-                },
-                file_key: {
-                    type: "string",
-                },
             },
             additionalProperties: false,
         },
@@ -6428,26 +4577,8 @@ export const ABI_NODES = {
                 error: {
                     type: "string",
                 },
-                text: {
-                    type: "string",
-                },
-                thinking: {
-                    type: "string",
-                },
-                image: {
-                    $ref: "#/$defs/ImageRef",
-                },
                 video: {
                     $ref: "#/$defs/VideoRef",
-                },
-                audio: {
-                    $ref: "#/$defs/AudioRef",
-                },
-                texts: {
-                    type: "array",
-                    items: {
-                        type: "string",
-                    },
                 },
             },
             additionalProperties: false,
@@ -6474,26 +4605,8 @@ export const ABI_NODES = {
                 error: {
                     type: "string",
                 },
-                text: {
-                    type: "string",
-                },
-                thinking: {
-                    type: "string",
-                },
-                image: {
-                    $ref: "#/$defs/ImageRef",
-                },
-                video: {
-                    $ref: "#/$defs/VideoRef",
-                },
                 audio: {
                     $ref: "#/$defs/AudioRef",
-                },
-                texts: {
-                    type: "array",
-                    items: {
-                        type: "string",
-                    },
                 },
             },
             additionalProperties: false,
@@ -6518,12 +4631,6 @@ export const ABI_NODES = {
                     type: "boolean",
                 },
                 error: {
-                    type: "string",
-                },
-                text: {
-                    type: "string",
-                },
-                thinking: {
                     type: "string",
                 },
                 video: {
@@ -6560,26 +4667,8 @@ export const ABI_NODES = {
                 error: {
                     type: "string",
                 },
-                text: {
-                    type: "string",
-                },
-                thinking: {
-                    type: "string",
-                },
-                image: {
-                    $ref: "#/$defs/ImageRef",
-                },
                 video: {
                     $ref: "#/$defs/VideoRef",
-                },
-                audio: {
-                    $ref: "#/$defs/AudioRef",
-                },
-                texts: {
-                    type: "array",
-                    items: {
-                        type: "string",
-                    },
                 },
             },
             additionalProperties: false,
@@ -6606,26 +4695,8 @@ export const ABI_NODES = {
                 error: {
                     type: "string",
                 },
-                text: {
-                    type: "string",
-                },
-                thinking: {
-                    type: "string",
-                },
                 image: {
                     $ref: "#/$defs/ImageRef",
-                },
-                video: {
-                    $ref: "#/$defs/VideoRef",
-                },
-                audio: {
-                    $ref: "#/$defs/AudioRef",
-                },
-                texts: {
-                    type: "array",
-                    items: {
-                        type: "string",
-                    },
                 },
             },
             additionalProperties: false,
@@ -6652,26 +4723,8 @@ export const ABI_NODES = {
                 error: {
                     type: "string",
                 },
-                text: {
-                    type: "string",
-                },
-                thinking: {
-                    type: "string",
-                },
                 image: {
                     $ref: "#/$defs/ImageRef",
-                },
-                video: {
-                    $ref: "#/$defs/VideoRef",
-                },
-                audio: {
-                    $ref: "#/$defs/AudioRef",
-                },
-                texts: {
-                    type: "array",
-                    items: {
-                        type: "string",
-                    },
                 },
             },
             additionalProperties: false,
@@ -6701,24 +4754,6 @@ export const ABI_NODES = {
                 text: {
                     type: "string",
                 },
-                thinking: {
-                    type: "string",
-                },
-                image: {
-                    $ref: "#/$defs/ImageRef",
-                },
-                video: {
-                    $ref: "#/$defs/VideoRef",
-                },
-                audio: {
-                    $ref: "#/$defs/AudioRef",
-                },
-                texts: {
-                    type: "array",
-                    items: {
-                        type: "string",
-                    },
-                },
             },
             additionalProperties: false,
         },
@@ -6745,12 +4780,6 @@ export const ABI_NODES = {
                     type: "boolean",
                 },
                 error: {
-                    type: "string",
-                },
-                text: {
-                    type: "string",
-                },
-                thinking: {
                     type: "string",
                 },
                 video_parts: {
@@ -6818,12 +4847,6 @@ export const ABI_NODES = {
                 text: {
                     type: "string",
                 },
-                texts: {
-                    type: "array",
-                    items: {
-                        type: "string",
-                    },
-                },
                 seed: {
                     type: "number",
                 },
@@ -6832,12 +4855,6 @@ export const ABI_NODES = {
                 },
                 width: {
                     type: "integer",
-                },
-                num_frames: {
-                    type: "integer",
-                },
-                frame_rate: {
-                    type: "number",
                 },
                 num_inference_steps: {
                     type: "integer",
@@ -6869,10 +4886,10 @@ export const ABI_NODES = {
                 audio: {
                     $ref: "#/$defs/Asset",
                 },
-                audio_max_duration: {
+                audio_start_time: {
                     type: "number",
                 },
-                audio_start_time: {
+                duration: {
                     type: "number",
                 },
             },
@@ -6888,26 +4905,8 @@ export const ABI_NODES = {
                 error: {
                     type: "string",
                 },
-                text: {
-                    type: "string",
-                },
-                thinking: {
-                    type: "string",
-                },
-                image: {
-                    $ref: "#/$defs/ImageRef",
-                },
                 video: {
                     $ref: "#/$defs/VideoRef",
-                },
-                audio: {
-                    $ref: "#/$defs/AudioRef",
-                },
-                texts: {
-                    type: "array",
-                    items: {
-                        type: "string",
-                    },
                 },
             },
             additionalProperties: false,
@@ -6921,12 +4920,6 @@ export const ABI_NODES = {
                 text: {
                     type: "string",
                     minLength: 1,
-                },
-                texts: {
-                    type: "array",
-                    items: {
-                        type: "string",
-                    },
                 },
                 width: {
                     type: "integer",
@@ -6956,26 +4949,8 @@ export const ABI_NODES = {
                 error: {
                     type: "string",
                 },
-                text: {
-                    type: "string",
-                },
-                thinking: {
-                    type: "string",
-                },
                 image: {
                     $ref: "#/$defs/ImageRef",
-                },
-                video: {
-                    $ref: "#/$defs/VideoRef",
-                },
-                audio: {
-                    $ref: "#/$defs/AudioRef",
-                },
-                texts: {
-                    type: "array",
-                    items: {
-                        type: "string",
-                    },
                 },
             },
             additionalProperties: false,
@@ -7027,26 +5002,8 @@ export const ABI_NODES = {
                 error: {
                     type: "string",
                 },
-                text: {
-                    type: "string",
-                },
-                thinking: {
-                    type: "string",
-                },
-                image: {
-                    $ref: "#/$defs/ImageRef",
-                },
-                video: {
-                    $ref: "#/$defs/VideoRef",
-                },
                 audio: {
                     $ref: "#/$defs/AudioRef",
-                },
-                texts: {
-                    type: "array",
-                    items: {
-                        type: "string",
-                    },
                 },
             },
             additionalProperties: false,
@@ -7083,26 +5040,8 @@ export const ABI_NODES = {
                 error: {
                     type: "string",
                 },
-                text: {
-                    type: "string",
-                },
-                thinking: {
-                    type: "string",
-                },
-                image: {
-                    $ref: "#/$defs/ImageRef",
-                },
-                video: {
-                    $ref: "#/$defs/VideoRef",
-                },
                 audio: {
                     $ref: "#/$defs/AudioRef",
-                },
-                texts: {
-                    type: "array",
-                    items: {
-                        type: "string",
-                    },
                 },
             },
             additionalProperties: false,
@@ -7119,12 +5058,6 @@ export const ABI_NODES = {
                 text: {
                     type: "string",
                 },
-                texts: {
-                    type: "array",
-                    items: {
-                        type: "string",
-                    },
-                },
                 seed: {
                     type: "number",
                 },
@@ -7133,12 +5066,6 @@ export const ABI_NODES = {
                 },
                 width: {
                     type: "integer",
-                },
-                num_frames: {
-                    type: "integer",
-                },
-                frame_rate: {
-                    type: "number",
                 },
                 num_inference_steps: {
                     type: "integer",
@@ -7170,9 +5097,6 @@ export const ABI_NODES = {
                 audio: {
                     $ref: "#/$defs/Asset",
                 },
-                audio_max_duration: {
-                    type: "number",
-                },
                 audio_start_time: {
                     type: "number",
                 },
@@ -7189,26 +5113,8 @@ export const ABI_NODES = {
                 error: {
                     type: "string",
                 },
-                text: {
-                    type: "string",
-                },
-                thinking: {
-                    type: "string",
-                },
-                image: {
-                    $ref: "#/$defs/ImageRef",
-                },
                 video: {
                     $ref: "#/$defs/VideoRef",
-                },
-                audio: {
-                    $ref: "#/$defs/AudioRef",
-                },
-                texts: {
-                    type: "array",
-                    items: {
-                        type: "string",
-                    },
                 },
             },
             additionalProperties: false,
@@ -7251,26 +5157,8 @@ export const ABI_NODES = {
                 error: {
                     type: "string",
                 },
-                text: {
-                    type: "string",
-                },
-                thinking: {
-                    type: "string",
-                },
                 image: {
                     $ref: "#/$defs/ImageRef",
-                },
-                video: {
-                    $ref: "#/$defs/VideoRef",
-                },
-                audio: {
-                    $ref: "#/$defs/AudioRef",
-                },
-                texts: {
-                    type: "array",
-                    items: {
-                        type: "string",
-                    },
                 },
             },
             additionalProperties: false,
@@ -7324,26 +5212,8 @@ export const ABI_NODES = {
                 error: {
                     type: "string",
                 },
-                text: {
-                    type: "string",
-                },
-                thinking: {
-                    type: "string",
-                },
                 image: {
                     $ref: "#/$defs/ImageRef",
-                },
-                video: {
-                    $ref: "#/$defs/VideoRef",
-                },
-                audio: {
-                    $ref: "#/$defs/AudioRef",
-                },
-                texts: {
-                    type: "array",
-                    items: {
-                        type: "string",
-                    },
                 },
             },
             additionalProperties: false,
@@ -7397,26 +5267,8 @@ export const ABI_NODES = {
                 error: {
                     type: "string",
                 },
-                text: {
-                    type: "string",
-                },
-                thinking: {
-                    type: "string",
-                },
-                image: {
-                    $ref: "#/$defs/ImageRef",
-                },
                 video: {
                     $ref: "#/$defs/VideoRef",
-                },
-                audio: {
-                    $ref: "#/$defs/AudioRef",
-                },
-                texts: {
-                    type: "array",
-                    items: {
-                        type: "string",
-                    },
                 },
             },
             additionalProperties: false,
@@ -7452,24 +5304,6 @@ export const ABI_NODES = {
                 text: {
                     type: "string",
                 },
-                thinking: {
-                    type: "string",
-                },
-                image: {
-                    $ref: "#/$defs/ImageRef",
-                },
-                video: {
-                    $ref: "#/$defs/VideoRef",
-                },
-                audio: {
-                    $ref: "#/$defs/AudioRef",
-                },
-                texts: {
-                    type: "array",
-                    items: {
-                        type: "string",
-                    },
-                },
             },
             additionalProperties: false,
         },
@@ -7504,24 +5338,6 @@ export const ABI_NODES = {
                 text: {
                     type: "string",
                 },
-                thinking: {
-                    type: "string",
-                },
-                image: {
-                    $ref: "#/$defs/ImageRef",
-                },
-                video: {
-                    $ref: "#/$defs/VideoRef",
-                },
-                audio: {
-                    $ref: "#/$defs/AudioRef",
-                },
-                texts: {
-                    type: "array",
-                    items: {
-                        type: "string",
-                    },
-                },
             },
             additionalProperties: false,
         },
@@ -7553,26 +5369,8 @@ export const ABI_NODES = {
                 error: {
                     type: "string",
                 },
-                text: {
-                    type: "string",
-                },
-                thinking: {
-                    type: "string",
-                },
-                image: {
-                    $ref: "#/$defs/ImageRef",
-                },
                 video: {
                     $ref: "#/$defs/VideoRef",
-                },
-                audio: {
-                    $ref: "#/$defs/AudioRef",
-                },
-                texts: {
-                    type: "array",
-                    items: {
-                        type: "string",
-                    },
                 },
             },
             additionalProperties: false,
@@ -7586,12 +5384,6 @@ export const ABI_NODES = {
                 text: {
                     type: "string",
                 },
-                texts: {
-                    type: "array",
-                    items: {
-                        type: "string",
-                    },
-                },
                 seed: {
                     type: "number",
                 },
@@ -7600,12 +5392,6 @@ export const ABI_NODES = {
                 },
                 width: {
                     type: "integer",
-                },
-                num_frames: {
-                    type: "integer",
-                },
-                frame_rate: {
-                    type: "number",
                 },
                 num_inference_steps: {
                     type: "integer",
@@ -7637,10 +5423,10 @@ export const ABI_NODES = {
                 audio: {
                     $ref: "#/$defs/Asset",
                 },
-                audio_max_duration: {
+                audio_start_time: {
                     type: "number",
                 },
-                audio_start_time: {
+                duration: {
                     type: "number",
                 },
             },
@@ -7656,26 +5442,8 @@ export const ABI_NODES = {
                 error: {
                     type: "string",
                 },
-                text: {
-                    type: "string",
-                },
-                thinking: {
-                    type: "string",
-                },
-                image: {
-                    $ref: "#/$defs/ImageRef",
-                },
                 video: {
                     $ref: "#/$defs/VideoRef",
-                },
-                audio: {
-                    $ref: "#/$defs/AudioRef",
-                },
-                texts: {
-                    type: "array",
-                    items: {
-                        type: "string",
-                    },
                 },
             },
             additionalProperties: false,
@@ -7711,26 +5479,8 @@ export const ABI_NODES = {
                 error: {
                     type: "string",
                 },
-                text: {
-                    type: "string",
-                },
-                thinking: {
-                    type: "string",
-                },
-                image: {
-                    $ref: "#/$defs/ImageRef",
-                },
                 video: {
                     $ref: "#/$defs/VideoRef",
-                },
-                audio: {
-                    $ref: "#/$defs/AudioRef",
-                },
-                texts: {
-                    type: "array",
-                    items: {
-                        type: "string",
-                    },
                 },
             },
             additionalProperties: false,
@@ -7763,26 +5513,8 @@ export const ABI_NODES = {
                 error: {
                     type: "string",
                 },
-                text: {
-                    type: "string",
-                },
-                thinking: {
-                    type: "string",
-                },
-                image: {
-                    $ref: "#/$defs/ImageRef",
-                },
                 video: {
                     $ref: "#/$defs/VideoRef",
-                },
-                audio: {
-                    $ref: "#/$defs/AudioRef",
-                },
-                texts: {
-                    type: "array",
-                    items: {
-                        type: "string",
-                    },
                 },
             },
             additionalProperties: false,
@@ -7815,26 +5547,8 @@ export const ABI_NODES = {
                 error: {
                     type: "string",
                 },
-                text: {
-                    type: "string",
-                },
-                thinking: {
-                    type: "string",
-                },
-                image: {
-                    $ref: "#/$defs/ImageRef",
-                },
                 video: {
                     $ref: "#/$defs/VideoRef",
-                },
-                audio: {
-                    $ref: "#/$defs/AudioRef",
-                },
-                texts: {
-                    type: "array",
-                    items: {
-                        type: "string",
-                    },
                 },
             },
             additionalProperties: false,
@@ -7848,12 +5562,6 @@ export const ABI_NODES = {
                 text: {
                     type: "string",
                 },
-                texts: {
-                    type: "array",
-                    items: {
-                        type: "string",
-                    },
-                },
                 duration: {
                     type: "number",
                 },
@@ -7865,12 +5573,6 @@ export const ABI_NODES = {
                 },
                 width: {
                     type: "integer",
-                },
-                num_frames: {
-                    type: "integer",
-                },
-                frame_rate: {
-                    type: "number",
                 },
                 num_inference_steps: {
                     type: "integer",
@@ -7902,9 +5604,6 @@ export const ABI_NODES = {
                 audio: {
                     $ref: "#/$defs/Asset",
                 },
-                audio_max_duration: {
-                    type: "number",
-                },
                 audio_start_time: {
                     type: "number",
                 },
@@ -7921,26 +5620,8 @@ export const ABI_NODES = {
                 error: {
                     type: "string",
                 },
-                text: {
-                    type: "string",
-                },
-                thinking: {
-                    type: "string",
-                },
-                image: {
-                    $ref: "#/$defs/ImageRef",
-                },
                 video: {
                     $ref: "#/$defs/VideoRef",
-                },
-                audio: {
-                    $ref: "#/$defs/AudioRef",
-                },
-                texts: {
-                    type: "array",
-                    items: {
-                        type: "string",
-                    },
                 },
             },
             additionalProperties: false,
@@ -7954,14 +5635,8 @@ export const ABI_NODES = {
                 text: {
                     type: "string",
                 },
-                texts: {
-                    type: "array",
-                    items: {
-                        type: "string",
-                    },
-                },
                 duration: {
-                    type: "string",
+                    type: "number",
                 },
                 seed: {
                     type: "number",
@@ -7971,12 +5646,6 @@ export const ABI_NODES = {
                 },
                 width: {
                     type: "integer",
-                },
-                num_frames: {
-                    type: "integer",
-                },
-                frame_rate: {
-                    type: "number",
                 },
                 num_inference_steps: {
                     type: "integer",
@@ -8008,9 +5677,6 @@ export const ABI_NODES = {
                 audio: {
                     $ref: "#/$defs/Asset",
                 },
-                audio_max_duration: {
-                    type: "number",
-                },
                 audio_start_time: {
                     type: "number",
                 },
@@ -8027,26 +5693,8 @@ export const ABI_NODES = {
                 error: {
                     type: "string",
                 },
-                text: {
-                    type: "string",
-                },
-                thinking: {
-                    type: "string",
-                },
-                image: {
-                    $ref: "#/$defs/ImageRef",
-                },
                 video: {
                     $ref: "#/$defs/VideoRef",
-                },
-                audio: {
-                    $ref: "#/$defs/AudioRef",
-                },
-                texts: {
-                    type: "array",
-                    items: {
-                        type: "string",
-                    },
                 },
             },
             additionalProperties: false,
@@ -8060,12 +5708,6 @@ export const ABI_NODES = {
                 text: {
                     type: "string",
                     minLength: 1,
-                },
-                texts: {
-                    type: "array",
-                    items: {
-                        type: "string",
-                    },
                 },
                 width: {
                     type: "integer",
@@ -8096,12 +5738,6 @@ export const ABI_NODES = {
                     type: "boolean",
                 },
                 error: {
-                    type: "string",
-                },
-                text: {
-                    type: "string",
-                },
-                thinking: {
                     type: "string",
                 },
                 model: {
@@ -8135,26 +5771,8 @@ export const ABI_NODES = {
                 error: {
                     type: "string",
                 },
-                text: {
-                    type: "string",
-                },
-                thinking: {
-                    type: "string",
-                },
-                image: {
-                    $ref: "#/$defs/ImageRef",
-                },
                 video: {
                     $ref: "#/$defs/VideoRef",
-                },
-                audio: {
-                    $ref: "#/$defs/AudioRef",
-                },
-                texts: {
-                    type: "array",
-                    items: {
-                        type: "string",
-                    },
                 },
             },
             additionalProperties: false,
@@ -8200,26 +5818,8 @@ export const ABI_NODES = {
                 error: {
                     type: "string",
                 },
-                text: {
-                    type: "string",
-                },
-                thinking: {
-                    type: "string",
-                },
-                image: {
-                    $ref: "#/$defs/ImageRef",
-                },
-                video: {
-                    $ref: "#/$defs/VideoRef",
-                },
                 audio: {
                     $ref: "#/$defs/AudioRef",
-                },
-                texts: {
-                    type: "array",
-                    items: {
-                        type: "string",
-                    },
                 },
             },
             additionalProperties: false,
@@ -8258,30 +5858,20 @@ export const ABI_NODES = {
                 text: {
                     type: "string",
                 },
-                result: {
-                    type: "string",
-                },
-                language: {
-                    type: "string",
-                },
-                file_key: {
-                    type: "string",
-                },
                 time_stamps: {
                     type: "array",
                     items: {
                         type: "object",
-                        required: ["text", "start_time", "end_time"],
+                        required: ["start", "end", "text"],
                         properties: {
+                            start: {
+                                type: "number",
+                            },
+                            end: {
+                                type: "number",
+                            },
                             text: {
                                 type: "string",
-                                minLength: 1,
-                            },
-                            start_time: {
-                                type: "number",
-                            },
-                            end_time: {
-                                type: "number",
                             },
                         },
                         additionalProperties: false,
@@ -8325,26 +5915,8 @@ export const ABI_NODES = {
                 error: {
                     type: "string",
                 },
-                text: {
-                    type: "string",
-                },
-                thinking: {
-                    type: "string",
-                },
-                image: {
-                    $ref: "#/$defs/ImageRef",
-                },
-                video: {
-                    $ref: "#/$defs/VideoRef",
-                },
                 audio: {
                     $ref: "#/$defs/AudioRef",
-                },
-                texts: {
-                    type: "array",
-                    items: {
-                        type: "string",
-                    },
                 },
             },
             additionalProperties: false,
@@ -8377,26 +5949,8 @@ export const ABI_NODES = {
                 error: {
                     type: "string",
                 },
-                text: {
-                    type: "string",
-                },
-                thinking: {
-                    type: "string",
-                },
-                image: {
-                    $ref: "#/$defs/ImageRef",
-                },
                 video: {
                     $ref: "#/$defs/VideoRef",
-                },
-                audio: {
-                    $ref: "#/$defs/AudioRef",
-                },
-                texts: {
-                    type: "array",
-                    items: {
-                        type: "string",
-                    },
                 },
             },
             additionalProperties: false,
@@ -8429,26 +5983,8 @@ export const ABI_NODES = {
                 error: {
                     type: "string",
                 },
-                text: {
-                    type: "string",
-                },
-                thinking: {
-                    type: "string",
-                },
-                image: {
-                    $ref: "#/$defs/ImageRef",
-                },
                 video: {
                     $ref: "#/$defs/VideoRef",
-                },
-                audio: {
-                    $ref: "#/$defs/AudioRef",
-                },
-                texts: {
-                    type: "array",
-                    items: {
-                        type: "string",
-                    },
                 },
             },
             additionalProperties: false,
@@ -8480,27 +6016,6 @@ export const ABI_NODES = {
                 },
                 error: {
                     type: "string",
-                },
-                text: {
-                    type: "string",
-                },
-                thinking: {
-                    type: "string",
-                },
-                image: {
-                    $ref: "#/$defs/ImageRef",
-                },
-                video: {
-                    $ref: "#/$defs/VideoRef",
-                },
-                audio: {
-                    $ref: "#/$defs/AudioRef",
-                },
-                texts: {
-                    type: "array",
-                    items: {
-                        type: "string",
-                    },
                 },
                 clips: {
                     type: "array",
@@ -8574,27 +6089,6 @@ export const ABI_NODES = {
                 },
                 error: {
                     type: "string",
-                },
-                text: {
-                    type: "string",
-                },
-                thinking: {
-                    type: "string",
-                },
-                image: {
-                    $ref: "#/$defs/ImageRef",
-                },
-                video: {
-                    $ref: "#/$defs/VideoRef",
-                },
-                audio: {
-                    $ref: "#/$defs/AudioRef",
-                },
-                texts: {
-                    type: "array",
-                    items: {
-                        type: "string",
-                    },
                 },
                 groups: {
                     type: "array",

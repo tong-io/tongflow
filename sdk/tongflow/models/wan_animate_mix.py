@@ -1,22 +1,21 @@
 from __future__ import annotations
 
-from typing import Required, TypedDict
+from pydantic import BaseModel, ConfigDict
 
-from .asset import Asset, AudioRef, FileRef, ImageRef, VideoRef
+from .asset import Asset, AudioRef, FileRef, ImageRef, ModelRef, VideoRef
 
 
-class WanAnimateMixInput(TypedDict, total=False):
-    image: Required[Asset]
-    text: str
-    video: Required[Asset]
+class WanAnimateMixInput(BaseModel):
+    model_config = ConfigDict(extra="forbid")
 
-class WanAnimateMixOutput(TypedDict, total=False):
-    audio: AudioRef
-    error: str
-    image: ImageRef
-    success: Required[bool]
-    text: str
-    texts: list[str]
-    thinking: str
-    video: VideoRef
+    image: Asset
+    video: Asset
+    text: str | None = None
+
+class WanAnimateMixOutput(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    success: bool
+    error: str | None = None
+    video: Asset | None = None
 

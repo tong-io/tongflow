@@ -64,7 +64,6 @@
         "@radix-ui/react-tooltip": "1.2.8",
         "@types/three": "^0.183.1",
         "@xyflow/react": "12.9.0",
-        "ajv": "8.18.0",
         "better-sqlite3": "12.2.0",
         "chokidar": "^4.0.3",
         "class-variance-authority": "0.7.1",

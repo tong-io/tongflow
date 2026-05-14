@@ -1,24 +1,23 @@
 from __future__ import annotations
 
-from typing import Required, TypedDict
+from pydantic import BaseModel, ConfigDict
 
-from .asset import Asset, AudioRef, FileRef, ImageRef, VideoRef
+from .asset import Asset, AudioRef, FileRef, ImageRef, ModelRef, VideoRef
 
 
-class TextGenSpeechInstructInput(TypedDict, total=False):
-    instruct: str
-    language: str
-    max_new_tokens: int
-    speaker: str
-    text: Required[str]
+class TextGenSpeechInstructInput(BaseModel):
+    model_config = ConfigDict(extra="forbid")
 
-class TextGenSpeechInstructOutput(TypedDict, total=False):
-    audio: AudioRef
-    error: str
-    image: ImageRef
-    success: Required[bool]
     text: str
-    texts: list[str]
-    thinking: str
-    video: VideoRef
+    instruct: str | None = None
+    language: str | None = None
+    max_new_tokens: int | None = None
+    speaker: str | None = None
+
+class TextGenSpeechInstructOutput(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    success: bool
+    audio: Asset | None = None
+    error: str | None = None
 

@@ -1,38 +1,34 @@
 from __future__ import annotations
 
-from typing import Required, TypedDict
+from pydantic import BaseModel, ConfigDict
 
-from .asset import Asset, AudioRef, FileRef, ImageRef, VideoRef
+from .asset import Asset, AudioRef, FileRef, ImageRef, ModelRef, VideoRef
 
 
-class ImageImageGenVideoInput(TypedDict, total=False):
-    audio: Asset
-    audio_max_duration: float
-    audio_start_time: float
-    end_image: Required[Asset]
-    enhance_prompt: bool
-    frame_rate: float
-    height: int
-    image: Required[Asset]
-    image2: Asset
-    image_frame_idx: int
-    image_strength: float
-    negative_prompt: str
-    num_frames: int
-    num_inference_steps: int
-    seed: float
-    speech: Asset
-    text: Required[str]
-    texts: list[str]
-    width: int
+class ImageImageGenVideoInput(BaseModel):
+    model_config = ConfigDict(extra="forbid")
 
-class ImageImageGenVideoOutput(TypedDict, total=False):
-    audio: AudioRef
-    error: str
-    image: ImageRef
-    success: Required[bool]
+    end_image: Asset
+    image: Asset
     text: str
-    texts: list[str]
-    thinking: str
-    video: VideoRef
+    audio: Asset | None = None
+    audio_start_time: float | None = None
+    duration: float | None = None
+    enhance_prompt: bool | None = None
+    height: int | None = None
+    image2: Asset | None = None
+    image_frame_idx: int | None = None
+    image_strength: float | None = None
+    negative_prompt: str | None = None
+    num_inference_steps: int | None = None
+    seed: float | None = None
+    speech: Asset | None = None
+    width: int | None = None
+
+class ImageImageGenVideoOutput(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    success: bool
+    error: str | None = None
+    video: Asset | None = None
 

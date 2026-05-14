@@ -1,18 +1,20 @@
 from __future__ import annotations
 
-from typing import Required, TypedDict
+from pydantic import BaseModel, ConfigDict
 
-from .asset import Asset, AudioRef, FileRef, ImageRef, VideoRef
+from .asset import Asset, AudioRef, FileRef, ImageRef, ModelRef, VideoRef
 
 
-class SeparateVideoAudioInput(TypedDict, total=False):
-    video: Required[Asset]
+class SeparateVideoAudioInput(BaseModel):
+    model_config = ConfigDict(extra="forbid")
 
-class SeparateVideoAudioOutput(TypedDict, total=False):
-    audio: AudioRef
-    error: str
-    success: Required[bool]
-    text: str
-    thinking: str
-    video: VideoRef
+    video: Asset
+
+class SeparateVideoAudioOutput(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    success: bool
+    audio: Asset | None = None
+    error: str | None = None
+    video: Asset | None = None
 

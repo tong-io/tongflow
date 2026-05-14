@@ -25,10 +25,6 @@ import useFlow from "@/hooks/use-flow";
 
 import { type ResolvedSpec, resolveSpec } from "@/lib/abi/resolve";
 import type { FieldSourceOverride, SourceSpec } from "@/lib/abi/sources";
-import {
-    type AbiValidationError,
-    validateAbiInput,
-} from "@/lib/abi/validators";
 
 /* ------------------------------------------------------------------ */
 /* Types                                                               */
@@ -63,13 +59,6 @@ export interface UseAbiFormReturn<F extends NodeSlot> {
         onChange: (
             e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
         ) => void;
-    };
-    /** Per-field validation errors, keyed by field name. */
-    errors: Record<string, AbiValidationError | undefined>;
-    /** Run ajv against the merged prompt object. Returns valid + error list. */
-    validate: (merged: Record<string, unknown>) => {
-        valid: boolean;
-        errors: AbiValidationError[];
     };
 }
 
@@ -169,18 +158,6 @@ export function useAbiForm<F extends NodeSlot>(
         [state, set],
     );
 
-    const validate = useCallback(
-        (merged: Record<string, unknown>) => validateAbiInput(feature, merged),
-        [feature],
-    );
-
-    // Lightweight per-field error map (populated on demand; live state changes
-    // don't auto-validate — the execution hook does pre-flight validation).
-    const errors: Record<string, AbiValidationError | undefined> = useMemo(
-        () => ({}),
-        [],
-    );
-
     return {
         feature,
         spec,
@@ -189,8 +166,6 @@ export function useAbiForm<F extends NodeSlot>(
         patch,
         bind,
         register,
-        errors,
-        validate,
     };
 }
 

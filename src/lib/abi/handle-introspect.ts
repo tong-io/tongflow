@@ -258,13 +258,17 @@ function classifyOutputs(outputs: JSONSchema7): OutputHandle[] {
                 }
                 continue;
             }
-            if (items.type === "string" && expandEach) {
-                out.push({ field, nodeType: "textNode", expandEach: true });
+            if (items.type === "string") {
+                out.push({ field, nodeType: "textNode", expandEach });
             }
+            continue;
         }
 
-        // Bare text-producing fields → no handle (consumed by downstream textNode via the catch-all routes)
-        // Bare scalar outputs aren't connectable as handles by default.
+        // Bare string output → textNode handle. Stays aligned with
+        // `resolveAbiOutputMappings` in schema/tongflow-abi.ts.
+        if (flat?.type === "string") {
+            out.push({ field, nodeType: "textNode", expandEach: false });
+        }
     }
     return out;
 }

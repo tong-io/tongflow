@@ -5,17 +5,18 @@ from pydantic import BaseModel, ConfigDict
 from .asset import Asset, AudioRef, FileRef, ImageRef, ModelRef, VideoRef
 
 
-class AudioImageGenVideoInput(BaseModel):
+class TextAudioGenSpeechInput(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     audio: Asset
-    image: Asset
-    text: str | None = None
+    text: str
+    emotion: str | None = None
+    style: str | None = None
 
-class AudioImageGenVideoOutput(BaseModel):
+class TextAudioGenSpeechOutput(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     success: bool
+    audio: Asset | None = None
     error: str | None = None
-    video: Asset | None = None
 

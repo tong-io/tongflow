@@ -18,6 +18,7 @@ import {
     useNodeTaskUpdate,
     useTaskStore,
 } from "@/hooks/use-task";
+import { resolveEdgeHandles } from "@/lib/abi/node-feature-registry";
 import { registerAbiNode, unregisterAbiNode } from "@/lib/abi/node-registry";
 import {
     buildPrompts,
@@ -25,7 +26,6 @@ import {
     resolveSpec,
 } from "@/lib/abi/resolve";
 import type { FieldSourceOverride, SourceSpec } from "@/lib/abi/sources";
-import { validateAbiInput } from "@/lib/abi/validators";
 import { logger } from "@/lib/logger";
 import {
     getAbiNodeBySlot,
@@ -73,8 +73,6 @@ export interface UseAbiExecutionReturn {
     loading: boolean;
     elapsedSeconds: number;
     canRun: boolean;
-    /** Latest pre-flight validation errors (per ABI field). */
-    invalidFields: string[];
     /** ABI feature being executed. */
     feature: string;
     /** Whether running in execute-mode (vs design mode). */
@@ -114,7 +112,6 @@ export function useAbiExecution<F extends NodeSlot>(
 
     const [elapsedSeconds, setElapsedSeconds] = useState(0);
     const [missingPluginOpen, setMissingPluginOpen] = useState(false);
-    const [invalidFields, setInvalidFields] = useState<string[]>([]);
 
     /* ---------- spec resolution (memo via feature/sourceSpec ref) ---- */
 
@@ -153,20 +150,100 @@ export function useAbiExecution<F extends NodeSlot>(
     // Mirror just `feature` into node.data — required so persisted workflows
     // can be restored knowing which ABI slot a node is. `outputType` /
     // `outputField` are derived on-demand from the registry, not mirrored.
+    // Deferred to a microtask so the flow-store write can't interleave with
+    // a sibling component's render (which surfaced as a "setState while
+    // rendering SmartIsland" warning).
     useEffect(() => {
         if (!nodeId) return;
-        const { nodes } = storeApi.getState();
-        const data =
-            (nodes.find((n) => n.id === nodeId)?.data as
-                | Record<string, unknown>
-                | undefined) ?? {};
+        let cancelled = false;
+        queueMicrotask(() => {
+            if (cancelled) return;
+            const { nodes } = storeApi.getState();
+            const data =
+                (nodes.find((n) => n.id === nodeId)?.data as
+                    | Record<string, unknown>
+                    | undefined) ?? {};
 
-        const needsSync = !hasSyncedRef.current && data.feature !== feature;
-        if (!needsSync) return;
+            const needsSync = !hasSyncedRef.current && data.feature !== feature;
+            if (!needsSync) return;
 
-        hasSyncedRef.current = true;
-        flowUpdates(nodeId, { ...data, feature });
+            hasSyncedRef.current = true;
+            flowUpdates(nodeId, { ...data, feature });
+        });
+        return () => {
+            cancelled = true;
+        };
     }, [nodeId, feature, storeApi, flowUpdates]);
+
+    // Heal incoming edges that lack `targetHandle` / `sourceHandle` (e.g. from
+    // saved workflows or pre-fix `expands`/`compose` spawns). Without these,
+    // `collectHandleValues` can't match the edge to a handle field and the
+    // execute click silently produces no prompts.
+    //
+    // Subscribed to edge changes (via the `incomingEdgeSig` selector) so we
+    // also catch edges that arrive after the node first mounts — e.g. a
+    // workflow restored from the server in a later tick. The patch itself is
+    // idempotent (skips edges already carrying both handle ids).
+    const incomingEdgeSig = useFlow((s) =>
+        nodeId
+            ? s.edges
+                  .filter((e) => e.target === nodeId)
+                  .map(
+                      (e) =>
+                          `${e.id}|${e.sourceHandle ?? ""}|${e.targetHandle ?? ""}`,
+                  )
+                  .join(";")
+            : "",
+    );
+    useEffect(() => {
+        if (!nodeId) return;
+        const flowState = useFlow.getState();
+        const targetType = flowState.nodes.find((n) => n.id === nodeId)?.type;
+        const broken = flowState.edges.filter(
+            (e) =>
+                e.target === nodeId && (!e.targetHandle || !e.sourceHandle),
+        );
+        if (broken.length === 0) return;
+        const usedTargetHandles = new Set<string>(
+            flowState.edges
+                .filter((e) => e.target === nodeId && e.targetHandle)
+                .map((e) => e.targetHandle as string),
+        );
+        let mutated = false;
+        const patched = flowState.edges.map((edge) => {
+            if (edge.target !== nodeId) return edge;
+            if (edge.targetHandle && edge.sourceHandle) return edge;
+            const sourceType = flowState.nodes.find(
+                (n) => n.id === edge.source,
+            )?.type;
+            const { sourceHandle, targetHandle } = resolveEdgeHandles({
+                sourceType,
+                targetType,
+                usedTargetHandles,
+                // Crucial: the resolved spec respects per-node `sourceSpec`
+                // overrides that promote bare-string ABI inputs (classified
+                // as config by topology) into handles — e.g. `gen-text.text`.
+                targetSpec: specRef.current,
+            });
+            if (!sourceHandle && !targetHandle) return edge;
+            if (targetHandle) usedTargetHandles.add(targetHandle);
+            mutated = true;
+            return {
+                ...edge,
+                ...(edge.sourceHandle
+                    ? {}
+                    : sourceHandle
+                      ? { sourceHandle }
+                      : {}),
+                ...(edge.targetHandle
+                    ? {}
+                    : targetHandle
+                      ? { targetHandle }
+                      : {}),
+            };
+        });
+        if (mutated) flowState.setEdges(patched);
+    }, [nodeId, incomingEdgeSig]);
 
     /* ---------- mode / loading / output routing --------------------- */
 
@@ -184,7 +261,7 @@ export function useAbiExecution<F extends NodeSlot>(
     const { isLoading: taskLoading, createBatchTasks } = useBatchTaskManager();
     const loading = taskLoading || nodeExecutionStatus === "running";
 
-    const { pluginOptions, mergePluginIdIntoPrompts } =
+    const { pluginOptions, resolveActivePluginId } =
         useNodePluginResolver(feature);
 
     const handleTaskUpdate = useCallback(
@@ -246,40 +323,33 @@ export function useAbiExecution<F extends NodeSlot>(
 
         const built = buildPrompts({ spec, configValues, handleValues });
         const prompts = transformPrompts ? transformPrompts(built) : built;
-        if (prompts.length === 0) return;
-
-        // ajv pre-flight; collect the failing fields for UI feedback.
-        const invalid: string[] = [];
-        for (const p of prompts) {
-            const result = validateAbiInput(feature, p);
-            if (!result.valid) {
-                for (const e of result.errors) {
-                    if (e.field) invalid.push(e.field);
-                }
-            }
-        }
-        setInvalidFields([...new Set(invalid)]);
-        if (invalid.length > 0) {
+        if (prompts.length === 0) {
+            const incomingEdges = edges.filter((e) => e.target === nodeId);
+            const upstreamSnapshot = incomingEdges.map((e) => {
+                const src = nodes.find((n) => n.id === e.source);
+                return {
+                    edgeId: e.id,
+                    source: e.source,
+                    sourceType: src?.type,
+                    sourceData: src?.data,
+                    sourceHandle: e.sourceHandle,
+                    targetHandle: e.targetHandle,
+                };
+            });
             logger.warn(
-                `[useAbiExecution] Validation failed for ${feature}; missing/invalid fields:`,
-                invalid,
+                `[useAbiExecution] No prompts built for ${feature}; node ${nodeId} has no upstream handle values for batch field`,
+                {
+                    spec,
+                    handleValues,
+                    configValues,
+                    incomingEdgeCount: incomingEdges.length,
+                    incomingEdges: upstreamSnapshot,
+                },
             );
             return;
         }
 
-        const merged = mergePluginIdIntoPrompts(prompts);
-        const first = merged[0] as Record<string, unknown> | undefined;
-        const routing =
-            first?.routing && typeof first.routing === "object"
-                ? (first.routing as Record<string, unknown>)
-                : undefined;
-        const pluginId =
-            routing && typeof routing.pluginId === "string"
-                ? routing.pluginId.trim()
-                : first && typeof first.pluginId === "string"
-                  ? first.pluginId.trim()
-                  : "";
-
+        const pluginId = resolveActivePluginId();
         if (!pluginId) {
             setMissingPluginOpen(true);
             return;
@@ -287,12 +357,13 @@ export function useAbiExecution<F extends NodeSlot>(
 
         updateNodeData(nodeId, {
             feature,
-            prompt: merged.length === 1 ? merged[0] : merged,
+            prompt: prompts.length === 1 ? prompts[0] : prompts,
         });
 
         try {
-            const taskConfigs = merged.map((prompt) => ({
+            const taskConfigs = prompts.map((prompt) => ({
                 feature,
+                pluginId,
                 prompt,
                 nodeId,
             }));
@@ -307,7 +378,7 @@ export function useAbiExecution<F extends NodeSlot>(
         storeApi,
         updateNodeData,
         createBatchTasks,
-        mergePluginIdIntoPrompts,
+        resolveActivePluginId,
         transformPrompts,
     ]);
 
@@ -318,7 +389,6 @@ export function useAbiExecution<F extends NodeSlot>(
         loading,
         elapsedSeconds,
         canRun,
-        invalidFields,
         feature,
         isExecuteMode,
         missingPluginOpen,

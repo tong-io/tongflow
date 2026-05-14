@@ -1,19 +1,22 @@
 from __future__ import annotations
 
-from typing import Required, TypedDict
+from pydantic import BaseModel, ConfigDict
 
-from .asset import Asset, AudioRef, FileRef, ImageRef, VideoRef
+from .asset import Asset, AudioRef, FileRef, ImageRef, ModelRef, VideoRef
 
 
-class CombineTextInput(TypedDict, total=False):
-    nodeSlot: str
-    pluginId: str
-    texts: Required[list[str]]
-    userPrompt: str
+class CombineTextInput(BaseModel):
+    model_config = ConfigDict(extra="forbid")
 
-class CombineTextOutput(TypedDict, total=False):
-    error: str
-    result: str
-    success: Required[bool]
-    text: str
+    texts: list[str]
+    nodeSlot: str | None = None
+    pluginId: str | None = None
+    userPrompt: str | None = None
+
+class CombineTextOutput(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    success: bool
+    error: str | None = None
+    text: str | None = None
 

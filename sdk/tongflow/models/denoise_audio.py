@@ -5,17 +5,15 @@ from pydantic import BaseModel, ConfigDict
 from .asset import Asset, AudioRef, FileRef, ImageRef, ModelRef, VideoRef
 
 
-class AudioImageGenVideoInput(BaseModel):
+class DenoiseAudioInput(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
-    audio: Asset
-    image: Asset
-    text: str | None = None
+    fileKey: Asset
 
-class AudioImageGenVideoOutput(BaseModel):
+class DenoiseAudioOutput(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     success: bool
+    audio: Asset | None = None
     error: str | None = None
-    video: Asset | None = None
 
