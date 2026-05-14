@@ -2,7 +2,7 @@
 
 import { Component, type ErrorInfo, type ReactNode } from "react";
 import { logger } from "@/lib/logger";
-import { getClientTranslator } from "@/utils/client-i18n";
+import { getClientTranslator } from "@/i18n/client";
 
 interface Props {
     children: ReactNode;

@@ -1,6 +1,6 @@
 import toast from "react-hot-toast";
 
-import { getClientTranslator } from "@/utils/client-i18n";
+import { getClientTranslator } from "@/i18n/client";
 
 /**
  * Request configuration options

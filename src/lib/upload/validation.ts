@@ -5,7 +5,7 @@
  */
 
 import type { ValidationResult } from "@/lib/upload/limits";
-import { getClientTranslator } from "@/utils/client-i18n";
+import { getClientTranslator } from "@/i18n/client";
 
 export type { ValidationResult } from "@/lib/upload/limits";
 

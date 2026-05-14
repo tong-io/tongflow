@@ -19,7 +19,7 @@ import { PortfolioDialog } from "@/components/workspace/portfolio-dialog";
 import { WorkflowDialog } from "@/components/workspace/workflow-dialog";
 import { listTasks, type Task } from "@/lib/api/task";
 import { logger } from "@/lib/logger";
-import { formatStoredTaskErrorForDisplay } from "@/utils/task-error-format";
+import { formatStoredTaskErrorForDisplay } from "@/lib/task/error-format";
 
 export function WorkspaceLeftNav() {
     const t = useTranslations("Navigation");

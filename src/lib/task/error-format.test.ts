@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { formatStoredTaskErrorForDisplay } from "./task-error-format";
+import { formatStoredTaskErrorForDisplay } from "./error-format";
 
 describe("formatStoredTaskErrorForDisplay", () => {
     it("reads SerializedTaskError.message", () => {
