@@ -186,3 +186,13 @@
         --angle: 360deg;
     }
 }
+
+/* Shimmer sweep for inline execution status text */
+@keyframes shimmer {
+    0% {
+        background-position: 200% 0;
+    }
+    100% {
+        background-position: -200% 0;
+    }
+}

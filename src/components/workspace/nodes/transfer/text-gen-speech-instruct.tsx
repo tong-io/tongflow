@@ -9,6 +9,7 @@ import { batchOn } from "@/lib/abi/sources";
 import type { TongflowPluginNodeProps } from "@/types/tongflow-flow";
 
 import { AbiNodeShell } from "../base/abi-node-shell";
+import { LanguageSelect } from "../base/language-select";
 
 const TextGenSpeechInstructNode = ({
     selected,
@@ -40,6 +41,19 @@ const TextGenSpeechInstructNode = ({
                 className="p-5 nodrag"
                 onPointerDown={(e) => e.stopPropagation()}
             >
+                <div className="mb-4 flex flex-wrap items-center gap-3">
+                    <Label
+                        htmlFor="instruct-language-select"
+                        className="text-sm text-muted-foreground"
+                    >
+                        {t("common.language")}：
+                    </Label>
+                    <LanguageSelect
+                        id="instruct-language-select"
+                        value={form.state.language ?? "Chinese"}
+                        onChange={(v) => form.set("language", v)}
+                    />
+                </div>
                 <div className="mb-4">
                     <label
                         htmlFor="instruct-input"

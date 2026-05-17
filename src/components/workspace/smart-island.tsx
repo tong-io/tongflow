@@ -20,12 +20,14 @@ import {
     TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { ExecutionButton } from "@/components/workspace/execution-button";
+import { ExecutionStatusLine } from "@/components/workspace/execution-status-line";
 import { SaveExecuteDialog } from "@/components/workspace/save-execute-dialog";
 import type { FlowState, PossibleNode } from "@/hooks/use-flow";
 import { useFlow } from "@/hooks/use-flow";
 import { useNodeActions } from "@/hooks/use-node-actions";
 import { useTaskStore } from "@/hooks/use-task";
 import { useWorkflowExecution } from "@/hooks/use-workflow-execution";
+import { emitTaskCancelRequest } from "@/lib/task/sse-events";
 import { cn } from "@/lib/utils";
 
 interface IconButtonProps {
@@ -68,7 +70,6 @@ const selector = (state: FlowState) => ({
     selectedNodes: state.selectedNodes,
     expands: state.expands,
     compose: state.compose,
-    updates: state.updates,
     workflowId: state.workflowId,
     workflowName: state.workflowName,
     workflowDescription: state.workflowDescription,
@@ -87,7 +88,6 @@ export default function SmartIsland() {
         comboSelectedIds,
         expands,
         compose,
-        updates,
         workflowId,
         workflowName,
         workflowDescription,
@@ -148,7 +148,6 @@ export default function SmartIsland() {
         setWorkflowId,
         setWorkflowName,
         setWorkflowDescription,
-        updates,
         defaultWorkflowName: tIndex("title"),
         t,
     });
@@ -178,10 +177,14 @@ export default function SmartIsland() {
                     onConfirm={handleSaveAndExecute}
                     isSaving={isSaving}
                 />
-                <ExecutionButton
-                    isRunning={isRunning}
-                    onExecute={handleExecuteClick}
-                />
+                <div className="flex flex-col items-center gap-2">
+                    <ExecutionStatusLine />
+                    <ExecutionButton
+                        isRunning={isRunning}
+                        onExecute={handleExecuteClick}
+                        onCancel={() => emitTaskCancelRequest(null)}
+                    />
+                </div>
             </>
         );
     }

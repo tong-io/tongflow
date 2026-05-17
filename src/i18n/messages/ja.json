@@ -93,9 +93,9 @@
             "imageFusion": "画像合成",
             "rewriteText": "テキストリライト",
             "textToSpeech": "テキスト読み上げ",
-            "textToSpeechClone": "TTS：ボイスクローン",
-            "textToSpeechPreset": "TTS：プリセット",
-            "textToSpeechInstruct": "TTS：指示文",
+            "textToSpeechClone": "音声生成（クローン）",
+            "textToSpeechPreset": "音声生成（プリセット）",
+            "textToSpeechInstruct": "音声生成（説明）",
             "motionControl": "モーション制御",
             "videoTransfer": "動画転送",
             "characterReplace": "キャラクター置換",
@@ -307,6 +307,11 @@
                 "selectStyle": "スタイルを選択（任意）",
                 "voiceDescription": "音声の説明",
                 "voiceDescriptionPlaceholder": "音声スタイルの説明を入力してください。例：優しく甘い女性の声、ゆっくり話す...",
+                "referenceAudio": "参照音声",
+                "noReferenceAudio": "参照音声をアップロードまたは録音してください（3秒以上）",
+                "referenceText": "参照テキスト",
+                "referenceTextPlaceholder": "任意：参照音声の書き起こしテキスト。クローン品質の向上に役立ちます",
+                "language": "言語",
                 "inputText": "テキスト入力",
                 "voiceOptions": {
                     "female": "女性の声",
@@ -320,9 +325,9 @@
                 "textGenText": "テキスト生成",
                 "combineText": "テキスト結合",
                 "textGenImage": "テキストから画像",
-                "textGenSpeechClone": "ボイスクローンTTS",
-                "textGenSpeechPreset": "テキストから音声（プリセット）",
-                "textGenSpeechInstruct": "テキストから音声（指示）",
+                "textGenSpeechClone": "音声生成（クローン）",
+                "textGenSpeechPreset": "音声生成（プリセット）",
+                "textGenSpeechInstruct": "音声生成（説明）",
                 "imageFusion": "画像合成",
                 "videoUpscale": "動画高画質化",
                 "videoGenText": "動画説明",
@@ -514,6 +519,7 @@
                 "2min": "2分",
                 "language": "言語",
                 "keyscale": "キー",
+                "bpm": "BPM",
                 "auto": "自動"
             },
             "speechGenVideo": {
@@ -732,13 +738,18 @@
         "videoStop": "録画停止"
     },
     "Languages": {
+        "auto": "自動",
         "zh": "中国語",
         "ja": "日本語",
         "yue": "広東語",
         "en": "英語",
         "ko": "韓国語",
         "fr": "フランス語",
-        "es": "スペイン語"
+        "es": "スペイン語",
+        "de": "ドイツ語",
+        "ru": "ロシア語",
+        "pt": "ポルトガル語",
+        "it": "イタリア語"
     },
     "Errors": {
         "somethingWentWrong": "問題が発生しました",

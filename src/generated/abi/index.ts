@@ -1354,6 +1354,9 @@ const _slot_text_gen_speech_preset_inputs = {
         language: {
             type: "string",
         },
+        speaker: {
+            type: "string",
+        },
         instruct: {
             type: "string",
         },
@@ -2994,9 +2997,6 @@ const _slot_text_gen_speech_instruct_inputs = {
             minLength: 1,
         },
         language: {
-            type: "string",
-        },
-        speaker: {
             type: "string",
         },
         instruct: {
@@ -4861,6 +4861,9 @@ export const ABI_NODES = {
                 language: {
                     type: "string",
                 },
+                speaker: {
+                    type: "string",
+                },
                 instruct: {
                     type: "string",
                 },
@@ -5659,9 +5662,6 @@ export const ABI_NODES = {
                     minLength: 1,
                 },
                 language: {
-                    type: "string",
-                },
-                speaker: {
                     type: "string",
                 },
                 instruct: {

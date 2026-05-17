@@ -284,16 +284,21 @@ export const useFlow = create<FlowState>((set, get) => ({
             .map((edge) => nodes.find((n) => n.id === edge.target))
             .filter(Boolean) as Node[];
 
-        // Map downstream nodes by Flow type so we can reuse slots
-        // Processing nodes shouldn't spawn duplicate sibling data sinks
-        const existingChildByType = new Map<string, Node>();
+        // Bucket existing downstream siblings by Flow type. Multiple same-type
+        // siblings are kept in edge order so caller can request N-of-same-type
+        // expansion (e.g. ABI `x-expand-each` arrays) and we reuse the first N
+        // in order, spawning more only when the new batch is larger.
+        const existingChildrenByType = new Map<string, Node[]>();
         if (!sourceIsDataNode) {
             for (const child of existingChildNodes) {
-                if (child.type) {
-                    existingChildByType.set(child.type, child);
-                }
+                if (!child.type) continue;
+                const bucket = existingChildrenByType.get(child.type);
+                if (bucket) bucket.push(child);
+                else existingChildrenByType.set(child.type, [child]);
             }
         }
+        // Cursor per type tracking how many same-type siblings we've consumed.
+        const reuseCursorByType = new Map<string, number>();
 
         const { measured, position } = currNode;
         const ids: string[] = [];
@@ -301,10 +306,20 @@ export const useFlow = create<FlowState>((set, get) => ({
         const newlyCreatedIds: string[] = [];
         let updatedNodes = [...nodes];
 
-        // Only materialize missing downstream types
-        const nodesToCreate = possibleNodes.filter(
-            ({ type }) => !existingChildByType.has(type),
-        );
+        // Count how many will be freshly created so vertical layout centers
+        // only the new ones around the parent (existing ones keep position).
+        const nodesToCreate = possibleNodes.filter(({ type }) => {
+            const available = existingChildrenByType.get(type)?.length ?? 0;
+            const cursor = reuseCursorByType.get(type) ?? 0;
+            if (cursor < available) {
+                reuseCursorByType.set(type, cursor + 1);
+                return false;
+            }
+            return true;
+        });
+        // Reset cursors for the real loop below — the filter pass above only
+        // consumed them to compute how many fresh nodes we'll spawn.
+        reuseCursorByType.clear();
 
         const X_OFFSET = 250; // Horizontal gap from parent
         const Y_SPACING = 150; // Vertical spacing between spawned nodes
@@ -318,7 +333,12 @@ export const useFlow = create<FlowState>((set, get) => ({
 
         let newNodeIndex = 0;
         for (const { type, data = {} } of possibleNodes) {
-            const existingChild = existingChildByType.get(type);
+            const bucket = existingChildrenByType.get(type);
+            const cursor = reuseCursorByType.get(type) ?? 0;
+            const existingChild = bucket && cursor < bucket.length
+                ? bucket[cursor]
+                : undefined;
+            if (existingChild) reuseCursorByType.set(type, cursor + 1);
 
             if (existingChild) {
                 // Reuse sibling data node shell; merge payloads

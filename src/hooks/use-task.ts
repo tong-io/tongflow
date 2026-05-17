@@ -8,11 +8,6 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
 import { create } from "zustand";
 import {
-    emitSSEConnected,
-    emitSSETaskMessage,
-    type SSEMessage,
-} from "@/components/workspace/task-progress-toast";
-import {
     isTerminalStatus,
     mapSSEStatusToTaskStatus,
     type SSEStatusType,
@@ -21,6 +16,12 @@ import {
 import { createTask as apiCreateTask, updateTaskStatus } from "@/lib/api/task";
 import { logger } from "@/lib/logger";
 import { getTaskStopUrl, getTaskWaitUrl } from "@/lib/task/api-url";
+import {
+    emitSSEConnected,
+    emitSSETaskMessage,
+    TASK_CANCEL_REQUEST_EVENT,
+} from "@/lib/task/sse-events";
+import type { SSEMessage } from "@/types/sse";
 
 // SSE message shape for the `/api/task/wait` stream
 interface SSETaskMessage {
@@ -1015,10 +1016,10 @@ export function useBatchTaskManager(
             }
         };
 
-        window.addEventListener("task-cancel-request", handleCancelRequest);
+        window.addEventListener(TASK_CANCEL_REQUEST_EVENT, handleCancelRequest);
         return () => {
             window.removeEventListener(
-                "task-cancel-request",
+                TASK_CANCEL_REQUEST_EVENT,
                 handleCancelRequest,
             );
         };

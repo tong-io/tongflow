@@ -1,48 +1,9 @@
-import {
-    crawledVoiceOptions,
-    type VoiceLanguage,
-} from "@/constants/voice-options";
-
 export const TEXT_GEN_SPEECH_CLONE = "text-gen-speech-clone";
 export const TEXT_GEN_SPEECH_PRESET = "text-gen-speech-preset";
 export const TEXT_GEN_SPEECH_INSTRUCT = "text-gen-speech-instruct";
 
-/**
- * Localized labels for the voice-language dropdown.
- * Use `useTranslations("Languages")` and pass it via `getVoiceLangLabels(t)`.
- */
-export function getVoiceLangLabels(
-    tLang: (key: string) => string,
-): Record<VoiceLanguage, string> {
-    return {
-        zh: tLang("zh"),
-        en: "English",
-        ja: tLang("ja"),
-    };
-}
-
 /** Labels from `useTranslations("Workspace.nodes")` */
 export type NodesT = (key: string) => string;
-
-export function getDefaultVoice(lang: VoiceLanguage): string {
-    return lang === "zh"
-        ? "zh_famale_1.wav"
-        : (crawledVoiceOptions[lang][0]?.value ?? "zh_famale_1.wav");
-}
-
-export function getVoiceOptions(lang: VoiceLanguage, t: NodesT) {
-    if (lang === "zh") {
-        return [
-            {
-                label: t("common.voiceOptions.female"),
-                value: "zh_famale_1.wav",
-            },
-            { label: t("common.voiceOptions.male"), value: "zh_male_1.wav" },
-            ...crawledVoiceOptions.zh,
-        ];
-    }
-    return [...crawledVoiceOptions[lang]];
-}
 
 export function buildEmotionOptions(t: NodesT) {
     return [
@@ -98,51 +59,4 @@ export function buildStyleOptions(t: NodesT) {
         { label: t("styles.deeply"), value: "deeply" },
         { label: t("styles.loudly"), value: "loudly" },
     ];
-}
-
-export function buildGenderOptions(t: NodesT) {
-    return [
-        { label: t("genders.none"), value: "none" },
-        { label: t("genders.male"), value: "male" },
-        { label: t("genders.female"), value: "female" },
-    ];
-}
-
-export function buildPresetDescription(
-    genders: string[],
-    emotions: string[],
-    styles: string[],
-    genderOptions: { label: string; value: string }[],
-    emotionOptions: { label: string; value: string }[],
-    styleOptions: { label: string; value: string }[],
-): string {
-    const parts: string[] = [];
-
-    if (genders?.length) {
-        const labels = genders
-            .map(
-                (g) => genderOptions.find((opt) => opt.value === g)?.label || g,
-            )
-            .filter(Boolean);
-        if (labels.length > 0) parts.push(...labels);
-    }
-
-    if (emotions?.length) {
-        const labels = emotions
-            .map(
-                (e) =>
-                    emotionOptions.find((opt) => opt.value === e)?.label || e,
-            )
-            .filter(Boolean);
-        if (labels.length > 0) parts.push(...labels);
-    }
-
-    if (styles?.length) {
-        const labels = styles
-            .map((s) => styleOptions.find((opt) => opt.value === s)?.label || s)
-            .filter(Boolean);
-        if (labels.length > 0) parts.push(...labels);
-    }
-
-    return parts.join(", ");
 }

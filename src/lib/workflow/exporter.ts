@@ -5,24 +5,25 @@
 
 import type { Edge, Node } from "@xyflow/react";
 import type { NodeSlot } from "@/generated/abi";
-import { targetHandleId } from "@/lib/abi/handle-introspect";
+import {
+    parseSourceHandleId,
+    targetHandleId,
+} from "@/lib/abi/handle-introspect";
 import {
     type AbiNodeRegistration,
     getAbiNodeRegistration,
 } from "@/lib/abi/node-registry";
-import {
-    deriveOutputType,
-    type ResolvedSpec,
-    resolveSpec,
-} from "@/lib/abi/resolve";
+import { type ResolvedSpec, resolveSpec } from "@/lib/abi/resolve";
 import type { FieldSourceOverride } from "@/lib/abi/sources";
 import { logger } from "@/lib/logger";
+import { getAbiOutputRoutesBySlot } from "@/lib/schema/tongflow-abi";
 import {
     DATA_NODE_TYPES,
     type DataNode,
     type ExecutableNode,
     type ExecutableWorkflow,
     type FieldBinding,
+    type OutputRoute,
     type WorkflowInput,
     type WorkflowOutput,
 } from "./executable-workflow";
@@ -235,21 +236,25 @@ export class WorkflowExporter {
                     field: dataTypeInfo.outputField,
                 });
             } else {
-                // Output of executable nodes — ABI-derived
+                // Output of executable nodes — pick the primary ABI route.
                 const ns = getNodeSpec(nodeId);
                 if (ns) {
-                    const { outputType, outputField } = deriveOutputType(
-                        ns.spec,
-                    );
-                    if (outputType) {
+                    const routes = getAbiOutputRoutesBySlot(ns.reg.feature);
+                    const primary =
+                        routes.find((r) => !r.expandEach) ?? routes[0];
+                    if (primary) {
+                        const semType: WorkflowOutput["type"] =
+                            primary.nodeType === "textNode"
+                                ? "text"
+                                : (primary.nodeType.replace(
+                                      "Node",
+                                      "",
+                                  ) as WorkflowOutput["type"]);
                         outputs.push({
                             name: `output_${nodeId.substring(0, 8)}`,
-                            type: outputType.replace(
-                                "Node",
-                                "",
-                            ) as WorkflowOutput["type"],
+                            type: semType,
                             nodeId,
-                            field: outputField ?? "fileKeys",
+                            field: primary.dataField,
                         });
                     }
                 }
@@ -499,7 +504,8 @@ export class WorkflowExporter {
 
     /**
      * Find the downstream data node directly connected to an executable node
-     * Traverses all edges from the node and returns the first target that is a data node type
+     * (single-channel fallback used by Add nodes). Returns the first target
+     * that is a data node type.
      */
     private findDownstreamDataNode(nodeId: string): string | undefined {
         for (const edge of this.edges) {
@@ -511,6 +517,49 @@ export class WorkflowExporter {
             }
         }
         return undefined;
+    }
+
+    /**
+     * Multi-channel variant: for each outgoing edge to a data node, return the
+     * mapping `ABI sourceField → dataNodeId`, derived from the edge's
+     * `sourceHandle` (`out:<field>`). Edges without a sourceHandle are
+     * attributed to the route slot determined by the data node's nodeType
+     * (`textNode` → first text route, `imageNode` → first image route, etc.).
+     */
+    private findDownstreamDataNodes(
+        nodeId: string,
+        routes: OutputRoute[],
+    ): Map<string, string> {
+        const out = new Map<string, string>();
+        const routeByField = new Map(routes.map((r) => [r.sourceField, r]));
+        const firstRouteByNodeType = new Map<string, OutputRoute>();
+        for (const r of routes) {
+            if (!firstRouteByNodeType.has(r.nodeType)) {
+                firstRouteByNodeType.set(r.nodeType, r);
+            }
+        }
+
+        for (const edge of this.edges) {
+            if (edge.source !== nodeId) continue;
+            const targetNode = this.nodes.find((n) => n.id === edge.target);
+            if (!targetNode) continue;
+            const targetType = targetNode.type ?? "";
+            if (!isDataNode(targetType)) continue;
+
+            // Prefer the explicit sourceHandle (`out:<field>`).
+            const handleField = parseSourceHandleId(edge.sourceHandle);
+            if (handleField && routeByField.has(handleField)) {
+                if (!out.has(handleField)) out.set(handleField, targetNode.id);
+                continue;
+            }
+
+            // Fall back to the first route whose nodeType matches the data node's type.
+            const fallback = firstRouteByNodeType.get(targetType);
+            if (fallback && !out.has(fallback.sourceField)) {
+                out.set(fallback.sourceField, targetNode.id);
+            }
+        }
+        return out;
     }
 
     /**
@@ -557,9 +606,25 @@ export class WorkflowExporter {
         const comment = nodeData.comment as string | undefined;
         const locked = nodeData.locked as boolean | undefined;
 
-        const downstreamDataNodeId = this.findDownstreamDataNode(node.id);
-
-        const { outputType, outputField } = deriveOutputType(ns.spec);
+        const baseRoutes = getAbiOutputRoutesBySlot(ns.reg.feature);
+        const downstreamMap = this.findDownstreamDataNodes(node.id, baseRoutes);
+        const outputRoutes: OutputRoute[] = baseRoutes.map((r) => ({
+            sourceField: r.sourceField,
+            nodeType: r.nodeType,
+            dataField: r.dataField,
+            expandEach: r.expandEach,
+            ...(r.itemValuePath ? { itemValuePath: r.itemValuePath } : {}),
+            ...(r.isArrayOfArrays
+                ? { isArrayOfArrays: r.isArrayOfArrays }
+                : {}),
+            ...(downstreamMap.get(r.sourceField)
+                ? {
+                      downstreamDataNodeId: downstreamMap.get(
+                          r.sourceField,
+                      ) as string,
+                  }
+                : {}),
+        }));
 
         const pluginId =
             typeof nodeData.pluginId === "string"
@@ -576,11 +641,9 @@ export class WorkflowExporter {
             locked,
             bindings,
             batchField: ns.spec.batchField,
-            outputType: outputType ?? "fileNode",
-            outputField: outputField ?? "fileKeys",
+            outputs: outputRoutes,
             dependencies,
             level,
-            downstreamDataNodeId,
             rawConfig: this.extractRawConfig(nodeData),
         };
     }
@@ -588,6 +651,12 @@ export class WorkflowExporter {
     /**
      * Build per-field bindings for an executable node by walking its resolved
      * ABI spec. Handle fields are wired to upstream edges via targetHandle.
+     *
+     * `fromField` semantics:
+     *  - upstream is a data node → canvas-side dataField (`texts` / `fileKeys`).
+     *  - upstream is an executable → the upstream's ABI output source field
+     *    whose route nodeType matches this consumer's nodeType. The workflow
+     *    runner reads the upstream's projected `AbiOutputView` by this key.
      */
     private buildBindings(
         spec: ResolvedSpec,
@@ -608,15 +677,24 @@ export class WorkflowExporter {
                         (u) => u.edgeTargetHandle === handleId,
                     );
                     if (matches.length === 0) break;
-                    const collect = fSpec.batch || fSpec.collect;
+                    // `consumerShape` describes the per-call plugin shape.
+                    //  - intrinsic ABI array OR `collectAll` → "array".
+                    //  - `batchOn` does NOT force "array": each batch iteration
+                    //    consumes a single scalar value on the plugin side
+                    //    (the runner handles fan-out separately).
+                    const consumerShape: "scalar" | "array" =
+                        fSpec.array || fSpec.collect ? "array" : "scalar";
                     out[field] = {
                         kind: "handle",
-                        sources: matches.map((u) => ({
-                            fromNodeId: u.node.id,
-                            fromField: fSpec.path,
-                        })),
+                        sources: matches.map((u) =>
+                            this.resolveBindingSource(
+                                u.node,
+                                u.edgeSourceHandle,
+                                fSpec.nodeType,
+                            ),
+                        ),
                         targetHandle: handleId,
-                        ...(collect ? { collect: true as const } : {}),
+                        consumerShape,
                     };
                     break;
                 }
@@ -642,6 +720,90 @@ export class WorkflowExporter {
         }
 
         return out;
+    }
+
+    /**
+     * Pick the right `fromField` for a binding source:
+     *  - upstream is a data node → dataField (`texts` / `fileKeys`) from DATA_NODE_TYPES.
+     *  - upstream is an executable / Add executable → ABI sourceField via the
+     *    upstream's output routes; prefer the route whose nodeType matches the
+     *    consumer's expected nodeType (so multi-channel sources route correctly).
+     *  - Add data node not yet registered → fall back to its dataField via the
+     *    Add-node-type mapping.
+     */
+    private resolveBindingSource(
+        upstream: Node,
+        edgeSourceHandle: string | undefined,
+        consumerNodeType: string,
+    ): { fromNodeId: string; fromField: string } {
+        const upstreamType = upstream.type ?? "";
+
+        if (isDataNode(upstreamType)) {
+            const info = DATA_NODE_TYPES[upstreamType];
+            return { fromNodeId: upstream.id, fromField: info.outputField };
+        }
+
+        if (isAddNode(upstreamType)) {
+            const reg = getAbiNodeRegistration(upstream.id);
+            if (!reg) {
+                // Add node acting as a data node (upload / manual input mode).
+                const outNodeType = this.getAddNodeOutputType(upstreamType);
+                const info = DATA_NODE_TYPES[outNodeType];
+                return {
+                    fromNodeId: upstream.id,
+                    fromField: info?.outputField ?? "texts",
+                };
+            }
+            // Add node acting as an executable (AI mode): use ABI route.
+            return this.pickExecutableSourceField(
+                upstream.id,
+                reg.feature,
+                edgeSourceHandle,
+                consumerNodeType,
+            );
+        }
+
+        const reg = getAbiNodeRegistration(upstream.id);
+        if (reg) {
+            return this.pickExecutableSourceField(
+                upstream.id,
+                reg.feature,
+                edgeSourceHandle,
+                consumerNodeType,
+            );
+        }
+
+        // Fallback: assume the upstream behaves like a same-type data node.
+        const info = DATA_NODE_TYPES[upstreamType];
+        return {
+            fromNodeId: upstream.id,
+            fromField: info?.outputField ?? "texts",
+        };
+    }
+
+    private pickExecutableSourceField(
+        nodeId: string,
+        feature: string,
+        edgeSourceHandle: string | undefined,
+        consumerNodeType: string,
+    ): { fromNodeId: string; fromField: string } {
+        const routes = getAbiOutputRoutesBySlot(feature);
+        // Prefer explicit `out:<field>` sourceHandle, when valid.
+        const handleField = parseSourceHandleId(edgeSourceHandle);
+        if (handleField && routes.some((r) => r.sourceField === handleField)) {
+            return { fromNodeId: nodeId, fromField: handleField };
+        }
+        // Match by consumer's nodeType to disambiguate multi-channel outputs.
+        const byType = routes.find((r) => r.nodeType === consumerNodeType);
+        if (byType) {
+            return { fromNodeId: nodeId, fromField: byType.sourceField };
+        }
+        // Last resort: first route (preserves single-channel pre-multi-channel
+        // workflows where the consumer's nodeType happens to differ).
+        if (routes[0]) {
+            return { fromNodeId: nodeId, fromField: routes[0].sourceField };
+        }
+        return { fromNodeId: nodeId, fromField: "" };
     }
 
     /**

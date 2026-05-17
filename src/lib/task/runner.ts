@@ -16,11 +16,14 @@ import { ABI_NODES, type NodeSlot } from "@/generated/abi";
 import { logger } from "@/lib/logger";
 import { executePlugin } from "@/lib/plugin-executor/execute";
 import { prepareAssetInput } from "@/lib/plugin-executor/prepare-asset-input.server";
+import { getAbiOutputRoutesBySlot } from "@/lib/schema/tongflow-abi";
 import {
     type SerializedWorkflowFailure,
     serializeTaskErrorForDb,
     workflowTaskFailureEnvelope,
 } from "@/lib/task/error-envelope";
+import { type AbiOutputView, computeOutputView } from "@/lib/task/payload";
+import type { OutputRoute } from "@/lib/workflow/executable-workflow";
 import { notifyTask, registerTask, removeTask } from "./emitter";
 
 export function isNodeSlot(s: string): s is NodeSlot {
@@ -323,7 +326,34 @@ export async function executeWorkflowTask(
         // Execute nodes tier-by-tier
         const executionLevels: string[][] = workflow.executionLevels || [];
         const dataNodes = (workflow.dataNodes ?? []) as DataNodeStub[];
+        // Raw plugin outputs (kept for the final aggregate notification only).
         const nodeOutputs = new Map<string, Record<string, unknown>>();
+        // ABI-projected views per executable node — what downstream bindings read.
+        const outputViews = new Map<string, AbiOutputView>();
+        // Live canvas-side data node state. Seeded from staticData (and workflow
+        // inputs at first read); written after each executable completes via
+        // its `downstreamDataNodeId` routes. Keys are `texts` / `fileKeys`.
+        const dataNodeState = new Map<
+            string,
+            { texts?: string[]; fileKeys?: string[] }
+        >();
+        for (const dn of dataNodes) {
+            if (dn.staticData) {
+                const slot: { texts?: string[]; fileKeys?: string[] } = {};
+                if (dn.staticData.texts && dn.staticData.texts.length > 0) {
+                    slot.texts = dn.staticData.texts;
+                }
+                if (
+                    dn.staticData.fileKeys &&
+                    dn.staticData.fileKeys.length > 0
+                ) {
+                    slot.fileKeys = dn.staticData.fileKeys;
+                }
+                if (slot.texts || slot.fileKeys) {
+                    dataNodeState.set(dn.id, slot);
+                }
+            }
+        }
         const workflowErrorSummaries: string[] = [];
         const workflowFailures: SerializedWorkflowFailure[] = [];
         const startTime = Date.now();
@@ -367,16 +397,52 @@ export async function executeWorkflowTask(
                 );
 
                 try {
-                    // Resolve node inputs from upstream outputs / workflow payloads
+                    // Resolve node inputs from upstream views / data node state / workflow inputs
                     const params = resolveNodeParams(
                         node,
-                        nodeOutputs,
+                        outputViews,
+                        dataNodeState,
                         dataNodes,
                         inputs,
                     );
 
                     const result = await callApi(node, params);
                     nodeOutputs.set(nodeId, result);
+
+                    // Project the raw plugin output into the ABI-shaped view
+                    // (asset $ref → file_key string, scalar → length-1 array).
+                    const routes: OutputRoute[] = Array.isArray(node.outputs)
+                        ? (node.outputs as OutputRoute[])
+                        : getAbiOutputRoutesBySlot(node.feature ?? "").map(
+                              (r) => ({
+                                  sourceField: r.sourceField,
+                                  nodeType: r.nodeType,
+                                  dataField: r.dataField,
+                                  expandEach: r.expandEach,
+                                  ...(r.itemValuePath
+                                      ? { itemValuePath: r.itemValuePath }
+                                      : {}),
+                                  ...(r.isArrayOfArrays
+                                      ? { isArrayOfArrays: r.isArrayOfArrays }
+                                      : {}),
+                              }),
+                          );
+                    const view = computeOutputView(routes, result);
+                    outputViews.set(nodeId, view);
+                    // Refresh any downstream data nodes this executable directly feeds.
+                    for (const route of routes) {
+                        const targetId = route.downstreamDataNodeId;
+                        if (!targetId) continue;
+                        const channel = view[route.sourceField];
+                        if (!channel) continue;
+                        const slot = dataNodeState.get(targetId) ?? {};
+                        if (route.dataField === "texts") {
+                            slot.texts = channel.values;
+                        } else {
+                            slot.fileKeys = channel.values;
+                        }
+                        dataNodeState.set(targetId, slot);
+                    }
 
                     notifyTask(
                         taskId,
@@ -478,27 +544,6 @@ export async function executeWorkflowTask(
 
 // ==================== Utilities ====================
 
-/**
- * Read a value out of a nested object via a path like `texts[0]` or `fileKeys`.
- */
-function readByPath(obj: unknown, path: string): unknown {
-    if (obj === null || obj === undefined) return undefined;
-    const parts = path.split(".");
-    let cur: unknown = obj;
-    for (const part of parts) {
-        if (cur === null || cur === undefined) return undefined;
-        const arrayMatch = part.match(/^(\w+)\[(\d+)\]$/);
-        if (arrayMatch) {
-            const [, key, idx] = arrayMatch;
-            const arr = (cur as Record<string, unknown>)[key];
-            cur = Array.isArray(arr) ? arr[parseInt(idx, 10)] : undefined;
-        } else {
-            cur = (cur as Record<string, unknown>)[part];
-        }
-    }
-    return cur;
-}
-
 interface DataNodeStub {
     id: string;
     staticData?: { texts?: string[]; fileKeys?: string[] };
@@ -510,7 +555,7 @@ type FieldBinding =
           kind: "handle";
           sources: { fromNodeId: string; fromField: string }[];
           targetHandle: string;
-          collect?: true;
+          consumerShape: "scalar" | "array";
       }
     | { kind: "config"; value: unknown }
     | { kind: "static"; value: unknown }
@@ -518,15 +563,21 @@ type FieldBinding =
 
 /**
  * Resolve a node's ABI input parameters from its `bindings` table, the live
- * upstream outputs map, the workflow's data nodes (static / input payloads),
- * and the workflow-level input map.
+ * `outputViews` map (per-executable ABI projection), the `dataNodeState` map
+ * (canvas-side data nodes, seeded from staticData and refreshed after each
+ * executable that feeds them), and the workflow-level input map.
+ *
+ * `fromField` resolves either to an upstream ABI sourceField (executable side)
+ * or to a `texts` / `fileKeys` slot (data node side). Returned values are
+ * always normalized to string[] before shape coercion.
  */
 function resolveNodeParams(
     node: {
         id: string;
         bindings?: Record<string, FieldBinding>;
     },
-    nodeOutputs: Map<string, Record<string, unknown>>,
+    outputViews: Map<string, AbiOutputView>,
+    dataNodeState: Map<string, { texts?: string[]; fileKeys?: string[] }>,
     dataNodes: DataNodeStub[],
     inputs: Record<string, unknown>,
 ): Record<string, unknown> {
@@ -535,37 +586,53 @@ function resolveNodeParams(
 
     const dataNodeMap = new Map(dataNodes.map((d) => [d.id, d]));
 
-    const readSource = (fromNodeId: string, fromField: string): unknown => {
-        const live = nodeOutputs.get(fromNodeId);
-        if (live !== undefined) return readByPath(live, fromField);
-
+    const readSource = (fromNodeId: string, fromField: string): string[] => {
+        // 1) Upstream executable: read the projected view.
+        const view = outputViews.get(fromNodeId);
+        if (view) {
+            const channel = view[fromField];
+            return channel ? channel.values : [];
+        }
+        // 2) Upstream data node: read live state (texts / fileKeys).
+        const slot = dataNodeState.get(fromNodeId);
+        if (slot) {
+            if (fromField === "texts" && slot.texts) return slot.texts;
+            if (fromField === "fileKeys" && slot.fileKeys) return slot.fileKeys;
+        }
+        // 3) Workflow input fallback (data node with inputName).
         const dn = dataNodeMap.get(fromNodeId);
-        if (!dn) return undefined;
-        if (dn.staticData) {
-            const fromStatic = readByPath(dn.staticData, fromField);
-            if (fromStatic !== undefined) return fromStatic;
+        if (dn?.inputName) {
+            const supplied = inputs[dn.inputName];
+            if (
+                supplied &&
+                typeof supplied === "object" &&
+                !Array.isArray(supplied)
+            ) {
+                const obj = supplied as Record<string, unknown>;
+                const arr = obj[fromField];
+                if (Array.isArray(arr))
+                    return (arr as unknown[]).map((v) => String(v));
+            } else if (Array.isArray(supplied)) {
+                return (supplied as unknown[]).map((v) => String(v));
+            } else if (typeof supplied === "string") {
+                return [supplied];
+            }
         }
-        if (dn.inputName && inputs[dn.inputName] !== undefined) {
-            return readByPath(inputs[dn.inputName], fromField);
-        }
-        return undefined;
+        return [];
     };
 
     for (const [field, binding] of Object.entries(node.bindings)) {
         switch (binding.kind) {
             case "handle": {
-                if (binding.collect) {
-                    params[field] = binding.sources
-                        .map((s) => readSource(s.fromNodeId, s.fromField))
-                        .filter((v) => v !== undefined);
+                const collected: string[] = [];
+                for (const s of binding.sources) {
+                    const values = readSource(s.fromNodeId, s.fromField);
+                    for (const v of values) collected.push(v);
+                }
+                if (binding.consumerShape === "scalar") {
+                    if (collected.length > 0) params[field] = collected[0];
                 } else {
-                    const first = binding.sources[0];
-                    if (first) {
-                        params[field] = readSource(
-                            first.fromNodeId,
-                            first.fromField,
-                        );
-                    }
+                    params[field] = collected;
                 }
                 break;
             }

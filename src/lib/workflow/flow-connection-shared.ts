@@ -4,7 +4,7 @@
  */
 
 import { getAbiNodeRegistration } from "@/lib/abi/node-registry";
-import { deriveOutputType, resolveSpec } from "@/lib/abi/resolve";
+import { resolveSpec } from "@/lib/abi/resolve";
 import type { FieldSourceOverride } from "@/lib/abi/sources";
 import { DATA_NODE_TYPES } from "@/lib/workflow/executable-workflow";
 
@@ -24,8 +24,8 @@ export const ADD_NODE_OUTPUT_TYPE: Record<string, string> = {
  *
  * - data node → itself
  * - ABI node → if `sourceHandle = out:<field>` resolves to a specific output
- *   route, returns that route's modality. Otherwise falls back to the primary
- *   output (`deriveOutputType`).
+ *   route, returns that route's modality. Otherwise falls back to the first
+ *   non-expanding ABI output's nodeType.
  * - add node → fixed mapping
  */
 export function getEffectiveOutputType(
@@ -49,10 +49,11 @@ export function getEffectiveOutputType(
             if (match) return match.nodeType;
         }
 
-        const { outputType } = deriveOutputType(spec);
-        if (outputType) return outputType;
+        const primary =
+            spec.topology.outputs.find((o) => !o.expandEach) ??
+            spec.topology.outputs[0];
+        if (primary) return primary.nodeType;
     }
 
     return ADD_NODE_OUTPUT_TYPE[nodeType];
 }
-

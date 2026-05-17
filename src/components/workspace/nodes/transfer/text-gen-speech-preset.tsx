@@ -4,15 +4,22 @@ import { memo, useEffect, useMemo, useState } from "react";
 
 import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
+import { DEFAULT_QWEN_SPEAKER, QWEN_SPEAKERS } from "@/constants/qwen-speakers";
 import { useAbiForm } from "@/hooks/use-abi-form";
 import { batchOn } from "@/lib/abi/sources";
 import type { TongflowPluginNodeProps } from "@/types/tongflow-flow";
 
 import { AbiNodeShell } from "../base/abi-node-shell";
+import { LanguageSelect } from "../base/language-select";
 import {
     buildEmotionOptions,
-    buildGenderOptions,
-    buildPresetDescription,
     buildStyleOptions,
 } from "./text-gen-speech-shared";
 
@@ -24,41 +31,57 @@ const TextGenSpeechPresetNode = ({
     "textGenSpeechPresetNode"
 >) => {
     const t = useTranslations("Workspace.nodes");
+    const tLang = useTranslations("Languages");
     const form = useAbiForm("text-gen-speech-preset");
     const texts = data.texts ?? [];
 
-    const genderOptions = useMemo(() => buildGenderOptions(t), [t]);
+    const speaker = form.state.speaker ?? DEFAULT_QWEN_SPEAKER.value;
+    const setForm = form.set;
+    const patch = form.patch;
+
+    // Ensure speaker + language are persisted to ABI state on first mount.
+    useEffect(() => {
+        const next: Partial<{ speaker: string; language: string }> = {};
+        if (form.state.speaker === undefined) {
+            next.speaker = DEFAULT_QWEN_SPEAKER.value;
+        }
+        if (form.state.language === undefined) {
+            next.language = DEFAULT_QWEN_SPEAKER.language;
+        }
+        if (Object.keys(next).length > 0) patch(next);
+    }, [form.state.speaker, form.state.language, patch]);
+
+    // Picking a speaker auto-fills its native language; user can still override.
+    const handleSpeakerChange = (value: string) => {
+        const sp = QWEN_SPEAKERS.find((s) => s.value === value);
+        patch(
+            sp ? { speaker: value, language: sp.language } : { speaker: value },
+        );
+    };
+
     const emotionOptions = useMemo(() => buildEmotionOptions(t), [t]);
     const styleOptions = useMemo(() => buildStyleOptions(t), [t]);
 
     // UI-only multi-select state; collapsed into ABI `instruct` below.
-    const [genders, setGenders] = useState<string[]>([]);
     const [emotions, setEmotions] = useState<string[]>([]);
     const [styles, setStyles] = useState<string[]>([]);
 
-    const presetDesc = useMemo(
-        () =>
-            buildPresetDescription(
-                genders,
-                emotions,
-                styles,
-                genderOptions,
-                emotionOptions,
-                styleOptions,
-            ),
-        [
-            genders,
-            emotions,
-            styles,
-            genderOptions,
-            emotionOptions,
-            styleOptions,
-        ],
-    );
+    const instructText = useMemo(() => {
+        const parts: string[] = [];
+        for (const e of emotions) {
+            const opt = emotionOptions.find((o) => o.value === e);
+            if (opt) parts.push(opt.label);
+        }
+        for (const s of styles) {
+            const opt = styleOptions.find((o) => o.value === s);
+            if (opt) parts.push(opt.label);
+        }
+        return parts.join(", ");
+    }, [emotions, styles, emotionOptions, styleOptions]);
 
     useEffect(() => {
-        form.set("instruct", presetDesc || undefined);
-    }, [presetDesc, form]);
+        setForm("instruct", instructText || undefined);
+    }, [instructText, setForm]);
 
     const toggle = (
         list: string[],
@@ -88,12 +111,41 @@ const TextGenSpeechPresetNode = ({
                 className="p-5 nodrag"
                 onPointerDown={(e) => e.stopPropagation()}
             >
-                <ChipGroup
-                    label={`${t("common.gender")}：`}
-                    options={genderOptions.filter((o) => o.value !== "none")}
-                    selected={genders}
-                    onChange={(v, c) => toggle(genders, setGenders, v, c)}
-                />
+                <div className="mb-4 flex flex-wrap items-center gap-3">
+                    <Label
+                        htmlFor="speaker-select"
+                        className="text-sm text-muted-foreground"
+                    >
+                        {t("common.voice")}：
+                    </Label>
+                    <Select
+                        value={speaker}
+                        onValueChange={handleSpeakerChange}
+                    >
+                        <SelectTrigger id="speaker-select" className="w-44 h-9">
+                            <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                            {QWEN_SPEAKERS.map((sp) => (
+                                <SelectItem key={sp.value} value={sp.value}>
+                                    {sp.value} · {t(`genders.${sp.gender}`)} ·{" "}
+                                    {tLang(sp.langKey)}
+                                </SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+                    <Label
+                        htmlFor="preset-language-select"
+                        className="text-sm text-muted-foreground"
+                    >
+                        {t("common.language")}：
+                    </Label>
+                    <LanguageSelect
+                        id="preset-language-select"
+                        value={form.state.language ?? "Chinese"}
+                        onChange={(v) => setForm("language", v)}
+                    />
+                </div>
                 <ChipGroup
                     label={`${t("common.emotion")}：`}
                     options={emotionOptions.filter((o) => o.value !== "none")}

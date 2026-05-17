@@ -1,7 +1,7 @@
 /**
  * SSE (Server-Sent Events) message shapes shared by workflow execution and progress UI.
  *
- * Centralized here so consumers (`smart-island`, `task-progress-toast`, `use-workflow-recovery`)
+ * Centralized here so consumers (`execution-status-line`, `use-workflow-execution`, `use-workflow-recovery`)
  * stop relying on locally-typed JSON.parse results, which previously required `as any` casts.
  */
 

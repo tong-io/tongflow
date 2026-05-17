@@ -26,7 +26,6 @@ import { logger } from "@/lib/logger";
 import { isValidFlowConnection } from "@/lib/workflow/connection-rules";
 import { ModeSwitch } from "./mode-switch";
 import SmartIsland from "./smart-island";
-import { TaskProgressToast } from "./task-progress-toast";
 import { EDGE_TYPES, NODE_TYPES } from "./types";
 import { WorkflowTitleMenu } from "./workflow-title-menu";
 import { WorkspaceLeftNav } from "./workspace-left-nav";
@@ -296,9 +295,6 @@ function WorkspaceInner({
             <div className="absolute right-4 bottom-5 z-10">
                 <ModeSwitch />
             </div>
-
-            {/* SSE task progress floating toast */}
-            <TaskProgressToast />
         </div>
     );
 }

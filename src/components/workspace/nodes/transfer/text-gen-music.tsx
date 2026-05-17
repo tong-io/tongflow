@@ -1,9 +1,12 @@
-import { Clock, Music, Tag } from "lucide-react";
+import type { Edge } from "@xyflow/react";
+import { useNodeId, useNodesData, useStore } from "@xyflow/react";
+import { Clock, Maximize2, Music, Tag, X } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { memo } from "react";
+import { memo, useEffect, useMemo, useState } from "react";
+import { createPortal } from "react-dom";
 
+import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
     Select,
@@ -16,6 +19,7 @@ import { Slider } from "@/components/ui/slider";
 import { Textarea } from "@/components/ui/textarea";
 import { useAbiForm } from "@/hooks/use-abi-form";
 import { handle } from "@/lib/abi/sources";
+import { coerceBaseNodeData } from "@/lib/workflow/flow-node-data";
 import type { TongflowPluginNodeProps } from "@/types/tongflow-flow";
 
 import { AbiNodeShell } from "../base/abi-node-shell";
@@ -65,6 +69,74 @@ const KEYSCALE_OPTIONS = [
     "B minor",
 ];
 
+const DEFAULT_BPM = 140;
+const DEFAULT_KEYSCALE = "C minor";
+
+interface FullScreenEditorProps {
+    title: string;
+    value: string;
+    readOnly: boolean;
+    placeholder?: string;
+    onClose: () => void;
+    onSave: (next: string) => void;
+}
+
+const FullScreenEditor = ({
+    title,
+    value,
+    readOnly,
+    placeholder,
+    onClose,
+    onSave,
+}: FullScreenEditorProps) => {
+    const [mounted, setMounted] = useState(false);
+    const [draft, setDraft] = useState(value);
+
+    useEffect(() => {
+        setMounted(true);
+        document.body.style.overflow = "hidden";
+        return () => {
+            document.body.style.overflow = "unset";
+        };
+    }, []);
+
+    useEffect(() => {
+        if (readOnly) setDraft(value);
+    }, [readOnly, value]);
+
+    if (!mounted) return null;
+
+    const handleClose = () => {
+        if (!readOnly && draft !== value) onSave(draft);
+        onClose();
+    };
+
+    return createPortal(
+        <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
+            <div className="bg-white dark:bg-slate-900 rounded-lg shadow-2xl w-11/12 h-5/6 max-h-screen flex flex-col">
+                <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700 flex-shrink-0">
+                    <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+                        {title}
+                    </h2>
+                    <Button size="sm" variant="ghost" onClick={handleClose}>
+                        <X className="h-4 w-4" />
+                    </Button>
+                </div>
+                <div className="flex-1 overflow-hidden p-6 bg-gray-50 dark:bg-slate-800">
+                    <textarea
+                        className="w-full h-full resize-none rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-slate-900 p-4 text-sm text-gray-700 dark:text-gray-300 leading-relaxed focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 whitespace-pre-wrap break-words"
+                        value={draft}
+                        readOnly={readOnly}
+                        placeholder={placeholder}
+                        onChange={(e) => setDraft(e.target.value)}
+                    />
+                </div>
+            </div>
+        </div>,
+        document.body,
+    );
+};
+
 type TextGenMusicNodeProps = TongflowPluginNodeProps<
     "gen-music",
     "textGenMusicNode"
@@ -72,6 +144,7 @@ type TextGenMusicNodeProps = TongflowPluginNodeProps<
 
 const TextGenMusicNode = ({ selected, data }: TextGenMusicNodeProps) => {
     const t = useTranslations("Workspace.nodes");
+    const tModal = useTranslations("Workspace.nodes.modal");
     const tLang = useTranslations("Languages");
     const LANGUAGE_OPTIONS = buildLanguageOptions(tLang);
     const BPM_OPTIONS = buildBpmOptions(t("music.auto"));
@@ -84,18 +157,66 @@ const TextGenMusicNode = ({ selected, data }: TextGenMusicNodeProps) => {
         lyrics: handle({ nodeType: "textNode", path: "texts[0]" }),
     });
 
-    const songTitle = (form.state.songTitle as string | undefined) ?? "";
-    const tags = (form.state.tags as string | undefined) ?? "";
-    const lyrics = (form.state.lyrics as string | undefined) ?? "";
+    const nodeId = useNodeId();
+    const edges = useStore((state) => state.edges as Edge[]);
+
+    const { tagsSourceId, lyricsSourceId } = useMemo(() => {
+        if (!nodeId) return { tagsSourceId: null, lyricsSourceId: null };
+        let tagsSrc: string | null = null;
+        let lyricsSrc: string | null = null;
+        for (const e of edges) {
+            if (e.target !== nodeId) continue;
+            if (e.targetHandle === "in:tags") tagsSrc = e.source;
+            else if (e.targetHandle === "in:lyrics") lyricsSrc = e.source;
+        }
+        return { tagsSourceId: tagsSrc, lyricsSourceId: lyricsSrc };
+    }, [edges, nodeId]);
+
+    const upstreamIds = useMemo(
+        () => [tagsSourceId, lyricsSourceId].filter((v): v is string => !!v),
+        [tagsSourceId, lyricsSourceId],
+    );
+    const upstreamNodes = useNodesData(upstreamIds);
+
+    const tagsUpstream = useMemo(() => {
+        if (!tagsSourceId) return null;
+        const n = upstreamNodes.find((u) => u.id === tagsSourceId);
+        if (!n || n.type !== "textNode") return null;
+        return coerceBaseNodeData(n.data).texts?.[0] ?? "";
+    }, [tagsSourceId, upstreamNodes]);
+
+    const lyricsUpstream = useMemo(() => {
+        if (!lyricsSourceId) return null;
+        const n = upstreamNodes.find((u) => u.id === lyricsSourceId);
+        if (!n || n.type !== "textNode") return null;
+        return coerceBaseNodeData(n.data).texts?.[0] ?? "";
+    }, [lyricsSourceId, upstreamNodes]);
+
+    const tagsLocal = (form.state.tags as string | undefined) ?? "";
+    const lyricsLocal = (form.state.lyrics as string | undefined) ?? "";
+    const tagsDisplay = tagsUpstream !== null ? tagsUpstream : tagsLocal;
+    const lyricsDisplay = lyricsUpstream !== null ? lyricsUpstream : lyricsLocal;
     const language = (form.state.language as string | undefined) ?? "zh";
-    const keyscale = (form.state.keyscale as string | undefined) ?? "C major";
-    const bpm = form.state.bpm == null ? "auto" : String(form.state.bpm);
+    const keyscale =
+        (form.state.keyscale as string | undefined) ?? DEFAULT_KEYSCALE;
+    const bpm = form.state.bpm == null ? String(DEFAULT_BPM) : String(form.state.bpm);
     const duration = (form.state.duration as number | undefined) ?? 30;
 
+    // Persist non-ABI-required defaults so the workflow exporter / runtime
+    // sees the same values the user sees in the UI.
+    useEffect(() => {
+        if (form.state.bpm == null) form.set("bpm", DEFAULT_BPM);
+    }, [form.state.bpm, form.set]);
+    useEffect(() => {
+        if (form.state.keyscale == null) form.set("keyscale", DEFAULT_KEYSCALE);
+    }, [form.state.keyscale, form.set]);
+
+    const [tagsExpanded, setTagsExpanded] = useState(false);
+    const [lyricsExpanded, setLyricsExpanded] = useState(false);
+
     const canExecute =
-        !!songTitle.trim() ||
-        !!tags.trim() ||
-        !!lyrics.trim() ||
+        !!tagsDisplay.trim() ||
+        !!lyricsDisplay.trim() ||
         !!(data.texts?.[0] && String(data.texts[0]).trim());
 
     return (
@@ -121,12 +242,27 @@ const TextGenMusicNode = ({ selected, data }: TextGenMusicNodeProps) => {
                             <Tag className="h-4 w-4" />
                             {t("music.styleSettings")}
                         </Label>
+                        <Button
+                            size="sm"
+                            variant="ghost"
+                            className="h-6 w-6 p-0"
+                            onClick={() => setTagsExpanded(true)}
+                            title={tModal("fullScreenPreview")}
+                        >
+                            <Maximize2 className="h-3.5 w-3.5" />
+                        </Button>
                     </div>
-                    <Input
-                        placeholder={t("music.tagsPlaceholder")}
-                        value={tags}
+                    <Textarea
+                        placeholder={
+                            tagsUpstream !== null
+                                ? t("music.fromUpstreamReadonly")
+                                : t("music.tagsPlaceholder")
+                        }
+                        value={tagsDisplay}
                         onChange={(e) => form.set("tags", e.target.value)}
-                        className="h-8 text-xs"
+                        readOnly={tagsUpstream !== null}
+                        rows={2}
+                        className="max-h-[80px] resize-none text-xs whitespace-pre-wrap break-words overflow-auto"
                     />
                     <p className="text-xs text-muted-foreground mt-1.5">
                         {t("music.tagsHint")}
@@ -138,12 +274,26 @@ const TextGenMusicNode = ({ selected, data }: TextGenMusicNodeProps) => {
                         <Label className="text-sm font-medium text-muted-foreground">
                             {t("music.inputLyrics")}
                         </Label>
+                        <Button
+                            size="sm"
+                            variant="ghost"
+                            className="h-6 w-6 p-0"
+                            onClick={() => setLyricsExpanded(true)}
+                            title={tModal("fullScreenPreview")}
+                        >
+                            <Maximize2 className="h-3.5 w-3.5" />
+                        </Button>
                     </div>
                     <Textarea
-                        placeholder={t("music.lyricsPlaceholder")}
-                        value={lyrics}
+                        placeholder={
+                            lyricsUpstream !== null
+                                ? t("music.fromUpstreamReadonly")
+                                : t("music.lyricsPlaceholder")
+                        }
+                        value={lyricsDisplay}
                         onChange={(e) => form.set("lyrics", e.target.value)}
-                        className="min-h-[120px] resize-none text-xs"
+                        readOnly={lyricsUpstream !== null}
+                        className="min-h-[120px] max-h-[180px] resize-none text-xs overflow-auto whitespace-pre-wrap break-words"
                     />
                 </Card>
 
@@ -199,7 +349,7 @@ const TextGenMusicNode = ({ selected, data }: TextGenMusicNodeProps) => {
                         </div>
                         <div className="space-y-1.5">
                             <Label className="text-xs text-muted-foreground">
-                                BPM
+                                {t("music.bpm")}
                             </Label>
                             <Select
                                 value={bpm}
@@ -228,22 +378,6 @@ const TextGenMusicNode = ({ selected, data }: TextGenMusicNodeProps) => {
                                 </SelectContent>
                             </Select>
                         </div>
-                    </div>
-                </Card>
-
-                <Card className="p-3">
-                    <div className="space-y-1.5">
-                        <Label className="text-xs text-muted-foreground">
-                            {t("music.songTitle")}
-                        </Label>
-                        <Input
-                            placeholder={t("music.songTitlePlaceholder")}
-                            value={songTitle}
-                            onChange={(e) =>
-                                form.set("songTitle", e.target.value)
-                            }
-                            className="h-8 text-xs"
-                        />
                     </div>
                 </Card>
 
@@ -291,6 +425,27 @@ const TextGenMusicNode = ({ selected, data }: TextGenMusicNodeProps) => {
                     </div>
                 </Card>
             </div>
+
+            {tagsExpanded && (
+                <FullScreenEditor
+                    title={t("music.styleSettings")}
+                    value={tagsDisplay}
+                    readOnly={tagsUpstream !== null}
+                    placeholder={t("music.tagsPlaceholder")}
+                    onClose={() => setTagsExpanded(false)}
+                    onSave={(next) => form.set("tags", next)}
+                />
+            )}
+            {lyricsExpanded && (
+                <FullScreenEditor
+                    title={t("music.inputLyrics")}
+                    value={lyricsDisplay}
+                    readOnly={lyricsUpstream !== null}
+                    placeholder={t("music.lyricsPlaceholder")}
+                    onClose={() => setLyricsExpanded(false)}
+                    onSave={(next) => form.set("lyrics", next)}
+                />
+            )}
         </AbiNodeShell>
     );
 };

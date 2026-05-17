@@ -15,6 +15,18 @@ import type { Edge, Node } from "@xyflow/react";
  *  - `config`: literal value harvested from the node's own form/config
  *  - `static`: literal value declared via the sourceSpec `staticValue` helper
  *  - `input`: workflow-level input, supplied at execution time
+ *
+ * `fromField` semantics depend on the upstream:
+ *  - upstream is an executable → ABI output field name (e.g. `text`, `image`,
+ *    `video_parts`). The runner reads from the upstream's projected
+ *    `AbiOutputView`.
+ *  - upstream is a data node → canvas-side data field (`texts` / `fileKeys`).
+ *    The runner reads from `dataNodeState` (initialized from `staticData` and
+ *    refreshed after each executable completes).
+ *
+ * `consumerShape` reflects the ABI shape of the destination input:
+ *  - `"scalar"` → runner takes the first value across collected sources.
+ *  - `"array"` → runner concatenates all collected values into an array.
  */
 export type FieldBinding =
     | {
@@ -22,12 +34,40 @@ export type FieldBinding =
           sources: { fromNodeId: string; fromField: string }[];
           /** RF target handle id (`in:<field>`). */
           targetHandle: string;
-          /** True for batch / collect-all handles (multi-source allowed). */
-          collect?: true;
+          /** Plugin-side input shape (`"scalar"` for a single value, `"array"` for a list). */
+          consumerShape: "scalar" | "array";
       }
     | { kind: "config"; value: unknown }
     | { kind: "static"; value: unknown }
     | { kind: "input"; inputName: string };
+
+/**
+ * Canonical projection of a single executable's output, indexed by ABI source
+ * field. `values` is always normalized to string[] (asset $refs already
+ * extracted via `itemValuePath`, scalars wrapped to length-1 arrays).
+ */
+export interface OutputRoute {
+    /** ABI output field name on the plugin (e.g. `text`, `image`, `video_parts`). */
+    sourceField: string;
+    /** Canvas node type this channel feeds (`textNode`, `imageNode`, …). */
+    nodeType:
+        | "videoNode"
+        | "audioNode"
+        | "imageNode"
+        | "textNode"
+        | "modelNode"
+        | "fileNode";
+    /** Where the projected values land on a canvas data node. */
+    dataField: "fileKeys" | "texts";
+    /** True for `x-expand-each` outputs (one downstream data node per item). */
+    expandEach: boolean;
+    /** When the source is an Asset/$ref object, the property name to extract. */
+    itemValuePath?: string;
+    /** True when the source is array-of-arrays (e.g. `groups: VideoRef[][]`). */
+    isArrayOfArrays?: boolean;
+    /** Direct downstream data node fed by this channel, if any (set by exporter). */
+    downstreamDataNodeId?: string;
+}
 
 /**
  * Executable node definition
@@ -51,16 +91,16 @@ export interface ExecutableNode {
     bindings: Record<string, FieldBinding>;
     /** Field that drives batch expansion (from sourceSpec batchOn). */
     batchField?: string;
-    /** ABI-derived primary output channel (RF type, e.g. `imageNode`). */
-    outputType: string;
-    /** Output field name (`fileKeys` or `texts`). */
-    outputField: "fileKeys" | "texts";
+    /**
+     * ABI-derived output routes, one per non-meta output field. Multi-channel
+     * nodes (e.g. `separate-video-audio` → video + audio) emit multiple routes;
+     * each may carry its own `downstreamDataNodeId`.
+     */
+    outputs: OutputRoute[];
     /** IDs of upstream dependency nodes */
     dependencies: string[];
     /** Execution level (used to determine parallel execution groups) */
     level: number;
-    /** Directly connected downstream data node ID (updated after execution completes) */
-    downstreamDataNodeId?: string;
     /** Raw node configuration data (used for UI restoration) */
     rawConfig?: Record<string, unknown>;
 }

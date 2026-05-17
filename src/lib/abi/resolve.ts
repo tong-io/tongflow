@@ -36,6 +36,16 @@ export type ResolvedField =
           path: NonNullable<HandleOverride["path"]>;
           batch?: boolean;
           collect?: boolean;
+          /**
+           * The ABI-declared per-call plugin shape:
+           *  - `true` when the plugin field is intrinsically array-typed
+           *    (e.g. `texts: string[]`, `videos: VideoRef[]`).
+           *  - `false` for scalar fields, including scalars promoted to a
+           *    handle via `batchOn` (each batch iteration delivers a single
+           *    scalar value to the plugin — the runner handles fan-out).
+           *  The workflow exporter uses this to derive `FieldBinding.consumerShape`.
+           */
+          array: boolean;
           required: boolean;
       }
     | { kind: "config"; required: boolean }
@@ -47,22 +57,6 @@ export interface ResolvedSpec {
     fields: Record<string, ResolvedField>;
     /** Field that drives batch expansion (only one supported). */
     batchField?: string;
-}
-
-/**
- * ABI-derived primary output channel for a node. Picks the first non-expand
- * route as the "primary" output and infers `outputField` from its modality.
- */
-export function deriveOutputType(spec: ResolvedSpec): {
-    outputType?: string;
-    outputField?: "fileKeys" | "texts";
-} {
-    const outs = spec.topology.outputs;
-    if (outs.length === 0) return {};
-    const primary = outs.find((o) => !o.expandEach) ?? outs[0];
-    const outputField: "fileKeys" | "texts" =
-        primary.nodeType === "textNode" ? "texts" : "fileKeys";
-    return { outputType: primary.nodeType, outputField };
 }
 
 const PATH_DEFAULTS = {
@@ -98,6 +92,7 @@ export function resolveSpec(
                     kind: "handle",
                     nodeType: defaultCls.nodeType,
                     path: defaultCls.path,
+                    array: defaultCls.array,
                     required: defaultCls.required,
                 };
             } else {
@@ -111,6 +106,11 @@ export function resolveSpec(
 
         switch (override.kind) {
             case "handle": {
+                // Intrinsic ABI plugin shape — preserved across overrides so
+                // the exporter can distinguish a scalar promoted via batchOn
+                // from a genuine array input.
+                const pluginIsArray =
+                    defaultCls.kind === "handle" ? defaultCls.array : false;
                 const baseCls =
                     defaultCls.kind === "handle"
                         ? defaultCls
@@ -122,15 +122,17 @@ export function resolveSpec(
                               required: defaultCls.required,
                           } satisfies Extract<FieldClass, { kind: "handle" }>);
                 const nodeType = override.nodeType ?? baseCls.nodeType;
+                // `pathArray` is the canvas-side collected-handle shape
+                // (drives `defaultPath` so `texts` vs `texts[0]` matches the
+                // upstream data-node read in edit mode).
+                const pathArray =
+                    !!override.batch || !!override.collect || baseCls.array;
                 const path =
                     override.path ??
                     defaultPath({
                         ...baseCls,
                         nodeType,
-                        array:
-                            !!override.batch ||
-                            !!override.collect ||
-                            baseCls.array,
+                        array: pathArray,
                     });
                 fields[fieldName] = {
                     kind: "handle",
@@ -138,6 +140,7 @@ export function resolveSpec(
                     path,
                     batch: override.batch,
                     collect: override.collect,
+                    array: pluginIsArray,
                     required: defaultCls.required,
                 };
                 if (override.batch) batchField = fieldName;

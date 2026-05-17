@@ -57,6 +57,8 @@ export type BaseNodeShellProps = HTMLAttributes<HTMLDivElement> & {
     // ----- Execute state -----
     loading?: boolean;
     elapsedSeconds?: number;
+    /** Live runner status text shown above the spinner. */
+    progressLabel?: string | null;
     /** When true, hides the execute button (already in execute mode). */
     isExecuteMode?: boolean;
     /**
@@ -95,6 +97,7 @@ export const BaseNodeShell = forwardRef<HTMLDivElement, BaseNodeShellProps>(
             headerActions,
             loading = false,
             elapsedSeconds = 0,
+            progressLabel = null,
             isExecuteMode = false,
             onExecute,
             executeLabel,
@@ -177,6 +180,7 @@ export const BaseNodeShell = forwardRef<HTMLDivElement, BaseNodeShellProps>(
                         <NodeLoadingOverlay
                             loading={loading}
                             elapsedSeconds={elapsedSeconds}
+                            progressLabel={progressLabel}
                         />
 
                         {/* Stack effect background cards */}

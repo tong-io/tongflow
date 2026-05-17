@@ -36,6 +36,7 @@ import {
     applyResolvedOutputRoutes,
     normalizeTaskPayloadData,
 } from "@/lib/task/payload";
+import type { SSEMessageData } from "@/types/sse";
 
 import type { UseAbiFormReturn } from "./use-abi-form";
 import { useNodePluginResolver } from "./use-node-plugin-resolver";
@@ -73,6 +74,8 @@ export interface UseAbiExecutionReturn {
     run: () => Promise<void>;
     loading: boolean;
     elapsedSeconds: number;
+    /** Live runner status text from SSE (label / feature / message). Null when no message yet. */
+    progressLabel: string | null;
     canRun: boolean;
     /** ABI feature being executed. */
     feature: string;
@@ -112,6 +115,7 @@ export function useAbiExecution<F extends NodeSlot>(
     });
 
     const [elapsedSeconds, setElapsedSeconds] = useState(0);
+    const [progressLabel, setProgressLabel] = useState<string | null>(null);
     const [missingPluginOpen, setMissingPluginOpen] = useState(false);
 
     /* ---------- spec resolution (memo via feature/sourceSpec ref) ---- */
@@ -201,8 +205,7 @@ export function useAbiExecution<F extends NodeSlot>(
         const flowState = useFlow.getState();
         const targetType = flowState.nodes.find((n) => n.id === nodeId)?.type;
         const broken = flowState.edges.filter(
-            (e) =>
-                e.target === nodeId && (!e.targetHandle || !e.sourceHandle),
+            (e) => e.target === nodeId && (!e.targetHandle || !e.sourceHandle),
         );
         if (broken.length === 0) return;
         const usedTargetHandles = new Set<string>(
@@ -274,6 +277,14 @@ export function useAbiExecution<F extends NodeSlot>(
                 if (handled) return;
             }
 
+            // Capture intermediate runner status text (label / feature / message)
+            // so the node loading overlay can show what the backend is doing.
+            if (task?.status === "PROCESSING" || task?.status === "PENDING") {
+                const d = task.data as SSEMessageData | undefined;
+                const label = d?.label || d?.feature || d?.message;
+                if (label) setProgressLabel(String(label));
+            }
+
             if (task?.status === "COMPLETED") {
                 const payload =
                     normalizeTaskPayloadData(task?.data) ??
@@ -304,6 +315,7 @@ export function useAbiExecution<F extends NodeSlot>(
     useEffect(() => {
         if (!loading) {
             setElapsedSeconds(0);
+            setProgressLabel(null);
             return;
         }
         const interval = setInterval(() => {
@@ -389,6 +401,7 @@ export function useAbiExecution<F extends NodeSlot>(
         run,
         loading,
         elapsedSeconds,
+        progressLabel,
         canRun,
         feature,
         isExecuteMode,

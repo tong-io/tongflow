@@ -18,35 +18,29 @@ import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
 import {
-    emitSSEConnected,
-    emitSSETaskMessage,
-} from "@/components/workspace/task-progress-toast";
-import {
     NodeStatus,
     TaskStatus,
     WorkflowStatus,
 } from "@/constants/task-status";
+import useFlow from "@/hooks/use-flow";
 import { useTaskStore } from "@/hooks/use-task";
 import { saveFromTask } from "@/lib/api/material";
 import { saveWorkflow } from "@/lib/api/workspace";
 import { logger } from "@/lib/logger";
+import {
+    getAbiNodeBySlot,
+    resolveAbiOutputMappings,
+} from "@/lib/schema/tongflow-abi";
 import { getTaskStopUrl, getTaskWaitUrl } from "@/lib/task/api-url";
+import { applyResolvedOutputRoutes } from "@/lib/task/payload";
+import {
+    emitSSEConnected,
+    emitSSETaskMessage,
+    TASK_CANCEL_REQUEST_EVENT,
+} from "@/lib/task/sse-events";
 import { exportWorkflow } from "@/lib/workflow/exporter";
 import type { WorkflowExecutor } from "@/lib/workflow/parser";
 import type { SSEMessage } from "@/types/sse";
-
-const DATA_NODE_TYPES = [
-    "textNode",
-    "imageNode",
-    "videoNode",
-    "audioNode",
-    "fileNode",
-    "modelNode",
-] as const;
-
-function isDataNodeType(type: string | undefined): boolean {
-    return !!type && (DATA_NODE_TYPES as readonly string[]).includes(type);
-}
 
 interface UseWorkflowExecutionArgs {
     nodes: Node[];
@@ -57,7 +51,6 @@ interface UseWorkflowExecutionArgs {
     setWorkflowId: (id: number) => void;
     setWorkflowName: (name: string) => void;
     setWorkflowDescription: (desc: string) => void;
-    updates: (nodeId: string, data: Record<string, unknown>) => void;
     defaultWorkflowName: string;
     t: (key: string) => string;
 }
@@ -87,7 +80,6 @@ export function useWorkflowExecution(
         setWorkflowId,
         setWorkflowName,
         setWorkflowDescription,
-        updates,
         defaultWorkflowName,
         t,
     } = args;
@@ -110,16 +102,12 @@ export function useWorkflowExecution(
     // Replaces the previous (window as any).__cancelTimeoutId pollution
     const cancelTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-    // Latest nodes/edges captured in a ref so SSE callbacks always see fresh canvas state
-    // without forcing the EventSource to be torn down on every change.
+    // Latest nodes captured in a ref so SSE callbacks always see fresh canvas
+    // state without forcing the EventSource to be torn down on every change.
     const nodesRef = useRef(nodes);
-    const edgesRef = useRef(edges);
     useEffect(() => {
         nodesRef.current = nodes;
     }, [nodes]);
-    useEffect(() => {
-        edgesRef.current = edges;
-    }, [edges]);
 
     const [showSaveDialog, setShowSaveDialog] = useState(false);
     const [tempName, setTempName] = useState("");
@@ -140,65 +128,29 @@ export function useWorkflowExecution(
         }
     }, []);
 
-    // Write output payload to current node + propagate to direct downstream data nodes.
-    // Only direct downstream data nodes receive a write; processing nodes read inputs lazily.
+    // Same canvas-side projection used by edit mode: look up the node's
+    // ABI output routes and let `expands` merge each channel into the
+    // existing downstream data node (or spawn one if absent).
+    const expands = useFlow((s) => s.expands);
     const applyNodeOutput = useCallback(
-        (
-            sourceNodeId: string,
-            output: { fileKeys?: string[]; texts?: string[] },
-        ) => {
+        (sourceNodeId: string, output: Record<string, unknown> | undefined) => {
+            if (!output) return;
             const currentNodes = nodesRef.current;
-            const currentEdges = edgesRef.current;
-
             const currentNode = currentNodes.find((n) => n.id === sourceNodeId);
-            if (currentNode) {
-                const currentData =
-                    (currentNode.data as Record<string, unknown>) || {};
-                const newData: Record<string, unknown> = { ...currentData };
-                if (output.fileKeys && output.fileKeys.length > 0) {
-                    newData.fileKeys = output.fileKeys;
-                }
-                if (output.texts && output.texts.length > 0) {
-                    newData.texts = output.texts;
-                }
-                updates(sourceNodeId, newData);
-                logger.debug(
-                    "[workflow-exec] Updated node data:",
-                    sourceNodeId,
-                    newData,
-                );
-            }
-
-            const downstreamEdges = currentEdges.filter(
-                (e) => e.source === sourceNodeId,
-            );
-            for (const edge of downstreamEdges) {
-                const downstreamNode = currentNodes.find(
-                    (n) => n.id === edge.target,
-                );
-                if (!downstreamNode) continue;
-                if (!isDataNodeType(downstreamNode.type)) continue;
-
-                const downstreamData =
-                    (downstreamNode.data as Record<string, unknown>) || {};
-                const newDownstreamData: Record<string, unknown> = {
-                    ...downstreamData,
-                };
-                if (output.fileKeys && output.fileKeys.length > 0) {
-                    newDownstreamData.fileKeys = output.fileKeys;
-                }
-                if (output.texts && output.texts.length > 0) {
-                    newDownstreamData.texts = output.texts;
-                }
-                updates(edge.target, newDownstreamData);
-                logger.debug(
-                    "[workflow-exec] Updated downstream data node:",
-                    edge.target,
-                    newDownstreamData,
-                );
-            }
+            const feature =
+                typeof currentNode?.data === "object" && currentNode?.data
+                    ? ((currentNode.data as Record<string, unknown>).feature as
+                          | string
+                          | undefined)
+                    : undefined;
+            if (!feature) return;
+            const abiNode = getAbiNodeBySlot(feature);
+            if (!abiNode) return;
+            const routes = resolveAbiOutputMappings(abiNode);
+            if (routes.length === 0) return;
+            applyResolvedOutputRoutes(sourceNodeId, output, routes, expands);
         },
-        [updates],
+        [expands],
     );
 
     const handleExecute = useCallback(
@@ -294,10 +246,10 @@ export function useWorkflowExecution(
                                     );
                                     const output = message.data?.output;
                                     if (output) {
-                                        applyNodeOutput(message.nodeId, {
-                                            fileKeys: output.fileKeys,
-                                            texts: output.texts,
-                                        });
+                                        applyNodeOutput(
+                                            message.nodeId,
+                                            output as Record<string, unknown>,
+                                        );
                                     }
                                 }
                                 break;
@@ -556,20 +508,20 @@ export function useWorkflowExecution(
         }
     }, [cleanupAfterCancel, tToast]);
 
-    // External cancel button (TaskProgressToast) dispatches this window event
+    // External cancel button (smart-island execute button) dispatches this window event
     useEffect(() => {
         const handleCancelRequest = () => {
             if (currentTaskIdRef.current) {
                 logger.debug(
-                    "[workflow-exec] Received cancel request from toast",
+                    "[workflow-exec] Received cancel request from execute button",
                 );
                 void handleStop();
             }
         };
-        window.addEventListener("task-cancel-request", handleCancelRequest);
+        window.addEventListener(TASK_CANCEL_REQUEST_EVENT, handleCancelRequest);
         return () => {
             window.removeEventListener(
-                "task-cancel-request",
+                TASK_CANCEL_REQUEST_EVENT,
                 handleCancelRequest,
             );
         };

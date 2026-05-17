@@ -10,16 +10,13 @@
 
 import { useCallback, useEffect, useRef } from "react";
 import {
-    emitSSEConnected,
-    emitSSETaskMessage,
-} from "@/components/workspace/task-progress-toast";
-import {
     NodeStatus,
     TaskStatus,
     WorkflowStatus,
 } from "@/constants/task-status";
 import { logger } from "@/lib/logger";
 import { getTaskWaitUrl } from "@/lib/task/api-url";
+import { emitSSEConnected, emitSSETaskMessage } from "@/lib/task/sse-events";
 import type { SSEMessage, SSEStatus } from "@/types/sse";
 import { useTaskStore } from "./use-task";
 

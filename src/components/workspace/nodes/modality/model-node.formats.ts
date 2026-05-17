@@ -13,8 +13,14 @@ const SUPPORTED_FORMATS = {
     glb: {
         name: "glTF Binary",
         extension: ".glb",
-        description: "Recommended format. Supports animation, materials, and compression.",
-        features: ["Animation", "PBR materials", "Lightweight", "Cross-platform"],
+        description:
+            "Recommended format. Supports animation, materials, and compression.",
+        features: [
+            "Animation",
+            "PBR materials",
+            "Lightweight",
+            "Cross-platform",
+        ],
         loader: "GLTFLoader",
     },
 
@@ -37,8 +43,14 @@ const SUPPORTED_FORMATS = {
     fbx: {
         name: "Autodesk FBX",
         extension: ".fbx",
-        description: "Professional 3D format; supports skeletons and animation.",
-        features: ["Skeletal animation", "Morph targets", "Materials", "Complex topology"],
+        description:
+            "Professional 3D format; supports skeletons and animation.",
+        features: [
+            "Skeletal animation",
+            "Morph targets",
+            "Materials",
+            "Complex topology",
+        ],
         loader: "FBXLoader",
     },
 
@@ -197,7 +209,8 @@ const FORMAT_CATEGORIES = {
     },
 
     gaussianSplat: {
-        description: "Next-generation high-quality rendering format (requires the Spark library)",
+        description:
+            "Next-generation high-quality rendering format (requires the Spark library)",
         formats: [".spz", ".splat", ".ksplat", ".sog"],
     },
 
@@ -212,7 +225,7 @@ const FORMAT_CATEGORIES = {
         formats: [".stl"],
     },
 
-    "AppleAR": {
+    AppleAR: {
         description: "Apple's recommended AR format",
         formats: [".usdz"],
     },
@@ -329,27 +342,43 @@ const RECOMMENDATIONS = {
 
 const TROUBLESHOOTING = {
     formatUnsupported: {
-        solution: "Convert the file to a supported format (.glb is recommended).",
+        solution:
+            "Convert the file to a supported format (.glb is recommended).",
     },
 
     fileFailedToLoad: {
-        causes: ["Network failure during download", "Corrupted file", "Wrong format"],
-        solution: "Validate the file and try re-converting or re-exporting from the source software.",
+        causes: [
+            "Network failure during download",
+            "Corrupted file",
+            "Wrong format",
+        ],
+        solution:
+            "Validate the file and try re-converting or re-exporting from the source software.",
     },
 
     colorsOrMaterialsMissing: {
-        causes: ["The format does not support textures", "Incorrect export settings", "Missing referenced texture files"],
-        solution: "Use a format that supports materials (such as .glb), or ensure all assets are exported correctly.",
+        causes: [
+            "The format does not support textures",
+            "Incorrect export settings",
+            "Missing referenced texture files",
+        ],
+        solution:
+            "Use a format that supports materials (such as .glb), or ensure all assets are exported correctly.",
     },
 
     modelNotFullyVisible: {
         causes: ["Model is very large or very small", "Camera framing issue"],
-        solution: "Auto-fit handles most cases; use the mouse controls to adjust the view manually.",
+        solution:
+            "Auto-fit handles most cases; use the mouse controls to adjust the view manually.",
     },
 
     animationNotPlaying: {
-        causes: ["The format does not support animation", "Animation was not included on export"],
-        solution: "Use a format that supports animation (.glb, .fbx) and ensure the animation is exported.",
+        causes: [
+            "The format does not support animation",
+            "Animation was not included on export",
+        ],
+        solution:
+            "Use a format that supports animation (.glb, .fbx) and ensure the animation is exported.",
     },
 };
 

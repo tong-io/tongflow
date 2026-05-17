@@ -98,7 +98,8 @@ const MaterialItem = memo(
         const renderThumbnail = () => {
             if (material.type === "text") {
                 const texts = material.content.texts || [];
-                const previewText = texts[0]?.substring(0, 60) || t("emptyText");
+                const previewText =
+                    texts[0]?.substring(0, 60) || t("emptyText");
                 return (
                     <div className="h-full w-full p-2 text-xs text-muted-foreground overflow-hidden">
                         {previewText}

@@ -170,4 +170,21 @@ export function getAbiNodeBySlot(
     return bySlot.get(nodeSlot);
 }
 
+/**
+ * Memoized output-route lookup keyed by ABI slot. The exporter, workflow
+ * runner, and SSE hooks all need the same routes — share the cache.
+ */
+const ROUTES_CACHE = new Map<string, ResolvedOutputRoute[]>();
+
+export function getAbiOutputRoutesBySlot(
+    nodeSlot: string,
+): ResolvedOutputRoute[] {
+    const cached = ROUTES_CACHE.get(nodeSlot);
+    if (cached) return cached;
+    const node = bySlot.get(nodeSlot);
+    const routes = node ? resolveAbiOutputMappings(node) : [];
+    ROUTES_CACHE.set(nodeSlot, routes);
+    return routes;
+}
+
 export { MIN_SUPPORTED_ABI_VERSION };

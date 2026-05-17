@@ -75,7 +75,9 @@ export async function POST(request: NextRequest) {
                 `[Task] ABI_TYPES missing slot while tongflow Abi has ${canonicalFeature}`,
             );
             return NextResponse.json(
-                { error: "Node slot is inconsistent with the generated ABI; contact an administrator" },
+                {
+                    error: "Node slot is inconsistent with the generated ABI; contact an administrator",
+                },
                 { status: 500 },
             );
         }

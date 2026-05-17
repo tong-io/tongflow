@@ -223,9 +223,7 @@ function getAbiOutputProperty(
     field: string,
 ): JSONSchema7 | undefined {
     const outputs = resolveRefs(ABI_NODES[slot].outputs as JSONSchema7);
-    const props = outputs.properties as
-        | Record<string, JSONSchema7>
-        | undefined;
+    const props = outputs.properties as Record<string, JSONSchema7> | undefined;
     const raw = props?.[field];
     return raw ? resolveRefs(raw as JSONSchema7) : undefined;
 }
@@ -328,4 +326,3 @@ export function compareAbiProducerConsumerSchemas(
 ): AbiSchemaEdgeResult {
     return schemasAtomicCompare(producer, consumer, 0);
 }
-

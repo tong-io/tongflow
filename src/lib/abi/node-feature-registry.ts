@@ -76,7 +76,9 @@ export const NODE_TYPE_TO_ABI_FEATURE: Readonly<Record<string, NodeSlot>> = {
     splitTextNode: "split-text",
 };
 
-export function featureForNodeType(nodeType: string | undefined): NodeSlot | undefined {
+export function featureForNodeType(
+    nodeType: string | undefined,
+): NodeSlot | undefined {
     if (!nodeType) return undefined;
     return NODE_TYPE_TO_ABI_FEATURE[nodeType];
 }
@@ -142,17 +144,13 @@ export function resolveEdgeHandles(args: {
             (targetType
                 ? (() => {
                       const feature = featureForNodeType(targetType);
-                      return feature
-                          ? getAbiTopology(feature).inputOrder
-                          : [];
+                      return feature ? getAbiTopology(feature).inputOrder : [];
                   })()
                 : []);
         const isHandleForUpstream = (field: string): boolean => {
             if (targetSpec) {
                 const f = targetSpec.fields[field];
-                return (
-                    f?.kind === "handle" && f.nodeType === upstreamNodeType
-                );
+                return f?.kind === "handle" && f.nodeType === upstreamNodeType;
             }
             if (!targetType) return false;
             const feature = featureForNodeType(targetType);

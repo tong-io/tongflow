@@ -1,23 +1,25 @@
 "use client";
 
-import { Play } from "lucide-react";
+import { Play, Square } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface ExecutionButtonProps {
     isRunning: boolean;
     onExecute: () => void;
+    onCancel?: () => void;
 }
 
 /**
  * Play / "running" button shown in execute mode.
  *
  * When idle, renders a play affordance. When a workflow is running, renders a
- * Siri-style multicolor breathing ball — stopping is initiated externally
- * (via the progress toast), so this component does not own the stop action.
+ * Siri-style multicolor breathing ball; clicking it cancels the execution
+ * (a stop icon fades in on hover to make this discoverable).
  */
 export function ExecutionButton({
     isRunning,
     onExecute,
+    onCancel,
 }: ExecutionButtonProps) {
     return (
         <div className="flex items-center justify-center">
@@ -47,7 +49,12 @@ export function ExecutionButton({
                     )}
                 >
                     {isRunning ? (
-                        <div className="relative w-full h-full rounded-full flex items-center justify-center overflow-hidden bg-white/20">
+                        <button
+                            type="button"
+                            onClick={onCancel}
+                            className="group relative w-full h-full rounded-full flex items-center justify-center overflow-hidden bg-white/20"
+                            title="Click to cancel"
+                        >
                             <div
                                 className="absolute inset-[-50%] blur-xl opacity-70 animate-[spin_3s_linear_infinite]"
                                 style={{
@@ -63,8 +70,13 @@ export function ExecutionButton({
                                 }}
                             />
                             <div className="absolute inset-1 bg-white/40 rounded-full blur-md animate-pulse" />
-                            <div className="absolute inset-0 rounded-full" />
-                        </div>
+                            <Square
+                                className={cn(
+                                    "relative w-4 h-4 text-red-500 fill-red-500",
+                                    "opacity-0 group-hover:opacity-100 transition-opacity",
+                                )}
+                            />
+                        </button>
                     ) : (
                         <button
                             type="button"

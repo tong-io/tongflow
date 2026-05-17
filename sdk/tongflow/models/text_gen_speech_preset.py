@@ -12,6 +12,7 @@ class TextGenSpeechPresetInput(BaseModel):
     instruct: str | None = None
     language: str | None = None
     max_new_tokens: int | None = None
+    speaker: str | None = None
 
 class TextGenSpeechPresetOutput(BaseModel):
     model_config = ConfigDict(extra="forbid")

@@ -3,9 +3,7 @@
     "$defs": {
         "Asset": {
             "type": "object",
-            "required": [
-                "bytesBase64"
-            ],
+            "required": ["bytesBase64"],
             "properties": {
                 "bytesBase64": {
                     "type": "string",
@@ -22,9 +20,7 @@
         },
         "FileRef": {
             "type": "object",
-            "required": [
-                "file_key"
-            ],
+            "required": ["file_key"],
             "properties": {
                 "file_key": {
                     "type": "string",
@@ -41,9 +37,7 @@
         },
         "VideoRef": {
             "type": "object",
-            "required": [
-                "file_key"
-            ],
+            "required": ["file_key"],
             "properties": {
                 "file_key": {
                     "type": "string",
@@ -60,9 +54,7 @@
         },
         "AudioRef": {
             "type": "object",
-            "required": [
-                "file_key"
-            ],
+            "required": ["file_key"],
             "properties": {
                 "file_key": {
                     "type": "string",
@@ -79,9 +71,7 @@
         },
         "ImageRef": {
             "type": "object",
-            "required": [
-                "file_key"
-            ],
+            "required": ["file_key"],
             "properties": {
                 "file_key": {
                     "type": "string",
@@ -98,9 +88,7 @@
         },
         "ModelRef": {
             "type": "object",
-            "required": [
-                "file_key"
-            ],
+            "required": ["file_key"],
             "properties": {
                 "file_key": {
                     "type": "string",
@@ -121,9 +109,7 @@
             "nodeSlot": "gen-text",
             "inputs": {
                 "type": "object",
-                "required": [
-                    "text"
-                ],
+                "required": ["text"],
                 "properties": {
                     "text": {
                         "type": "string",
@@ -137,9 +123,7 @@
             },
             "outputs": {
                 "type": "object",
-                "required": [
-                    "success"
-                ],
+                "required": ["success"],
                 "properties": {
                     "success": {
                         "type": "boolean"
@@ -158,9 +142,7 @@
             "nodeSlot": "split-text",
             "inputs": {
                 "type": "object",
-                "required": [
-                    "text"
-                ],
+                "required": ["text"],
                 "properties": {
                     "text": {
                         "type": "string",
@@ -174,9 +156,7 @@
             },
             "outputs": {
                 "type": "object",
-                "required": [
-                    "success"
-                ],
+                "required": ["success"],
                 "properties": {
                     "success": {
                         "type": "boolean"
@@ -199,9 +179,7 @@
             "nodeSlot": "combine-text",
             "inputs": {
                 "type": "object",
-                "required": [
-                    "texts"
-                ],
+                "required": ["texts"],
                 "properties": {
                     "texts": {
                         "type": "array",
@@ -218,9 +196,7 @@
             },
             "outputs": {
                 "type": "object",
-                "required": [
-                    "success"
-                ],
+                "required": ["success"],
                 "properties": {
                     "success": {
                         "type": "boolean"
@@ -239,9 +215,7 @@
             "nodeSlot": "image-fusion",
             "inputs": {
                 "type": "object",
-                "required": [
-                    "text"
-                ],
+                "required": ["text"],
                 "properties": {
                     "text": {
                         "type": "string",
@@ -273,9 +247,7 @@
             },
             "outputs": {
                 "type": "object",
-                "required": [
-                    "success"
-                ],
+                "required": ["success"],
                 "properties": {
                     "success": {
                         "type": "boolean"
@@ -294,9 +266,7 @@
             "nodeSlot": "image-gen-text",
             "inputs": {
                 "type": "object",
-                "required": [
-                    "text"
-                ],
+                "required": ["text"],
                 "properties": {
                     "text": {
                         "type": "string"
@@ -333,9 +303,7 @@
             },
             "outputs": {
                 "type": "object",
-                "required": [
-                    "success"
-                ],
+                "required": ["success"],
                 "properties": {
                     "success": {
                         "type": "boolean"
@@ -354,10 +322,7 @@
             "nodeSlot": "video-gen-text",
             "inputs": {
                 "type": "object",
-                "required": [
-                    "text",
-                    "video"
-                ],
+                "required": ["text", "video"],
                 "properties": {
                     "text": {
                         "type": "string"
@@ -397,9 +362,7 @@
             },
             "outputs": {
                 "type": "object",
-                "required": [
-                    "success"
-                ],
+                "required": ["success"],
                 "properties": {
                     "success": {
                         "type": "boolean"
@@ -418,9 +381,7 @@
             "nodeSlot": "transcribe",
             "inputs": {
                 "type": "object",
-                "required": [
-                    "audio"
-                ],
+                "required": ["audio"],
                 "properties": {
                     "context": {
                         "type": "string"
@@ -439,9 +400,7 @@
             },
             "outputs": {
                 "type": "object",
-                "required": [
-                    "success"
-                ],
+                "required": ["success"],
                 "properties": {
                     "success": {
                         "type": "boolean"
@@ -460,9 +419,7 @@
             "nodeSlot": "concat-videos",
             "inputs": {
                 "type": "object",
-                "required": [
-                    "videos"
-                ],
+                "required": ["videos"],
                 "properties": {
                     "videos": {
                         "type": "array",
@@ -475,9 +432,7 @@
             },
             "outputs": {
                 "type": "object",
-                "required": [
-                    "success"
-                ],
+                "required": ["success"],
                 "properties": {
                     "success": {
                         "type": "boolean"
@@ -496,9 +451,7 @@
             "nodeSlot": "extract-audio",
             "inputs": {
                 "type": "object",
-                "required": [
-                    "video"
-                ],
+                "required": ["video"],
                 "properties": {
                     "video": {
                         "$ref": "#/$defs/Asset"
@@ -508,9 +461,7 @@
             },
             "outputs": {
                 "type": "object",
-                "required": [
-                    "success"
-                ],
+                "required": ["success"],
                 "properties": {
                     "success": {
                         "type": "boolean"
@@ -529,9 +480,7 @@
             "nodeSlot": "separate-video-audio",
             "inputs": {
                 "type": "object",
-                "required": [
-                    "video"
-                ],
+                "required": ["video"],
                 "properties": {
                     "video": {
                         "$ref": "#/$defs/Asset"
@@ -541,9 +490,7 @@
             },
             "outputs": {
                 "type": "object",
-                "required": [
-                    "success"
-                ],
+                "required": ["success"],
                 "properties": {
                     "success": {
                         "type": "boolean"
@@ -565,10 +512,7 @@
             "nodeSlot": "merge-video-audio",
             "inputs": {
                 "type": "object",
-                "required": [
-                    "video",
-                    "audio"
-                ],
+                "required": ["video", "audio"],
                 "properties": {
                     "video": {
                         "$ref": "#/$defs/Asset"
@@ -581,9 +525,7 @@
             },
             "outputs": {
                 "type": "object",
-                "required": [
-                    "success"
-                ],
+                "required": ["success"],
                 "properties": {
                     "success": {
                         "type": "boolean"
@@ -602,9 +544,7 @@
             "nodeSlot": "get-first-frame",
             "inputs": {
                 "type": "object",
-                "required": [
-                    "video"
-                ],
+                "required": ["video"],
                 "properties": {
                     "video": {
                         "$ref": "#/$defs/Asset"
@@ -614,9 +554,7 @@
             },
             "outputs": {
                 "type": "object",
-                "required": [
-                    "success"
-                ],
+                "required": ["success"],
                 "properties": {
                     "success": {
                         "type": "boolean"
@@ -635,9 +573,7 @@
             "nodeSlot": "get-last-frame",
             "inputs": {
                 "type": "object",
-                "required": [
-                    "video"
-                ],
+                "required": ["video"],
                 "properties": {
                     "video": {
                         "$ref": "#/$defs/Asset"
@@ -647,9 +583,7 @@
             },
             "outputs": {
                 "type": "object",
-                "required": [
-                    "success"
-                ],
+                "required": ["success"],
                 "properties": {
                     "success": {
                         "type": "boolean"
@@ -668,9 +602,7 @@
             "nodeSlot": "parse-document",
             "inputs": {
                 "type": "object",
-                "required": [
-                    "document"
-                ],
+                "required": ["document"],
                 "properties": {
                     "document": {
                         "$ref": "#/$defs/Asset"
@@ -680,9 +612,7 @@
             },
             "outputs": {
                 "type": "object",
-                "required": [
-                    "success"
-                ],
+                "required": ["success"],
                 "properties": {
                     "success": {
                         "type": "boolean"
@@ -701,9 +631,7 @@
             "nodeSlot": "split-video",
             "inputs": {
                 "type": "object",
-                "required": [
-                    "video"
-                ],
+                "required": ["video"],
                 "properties": {
                     "video": {
                         "$ref": "#/$defs/Asset"
@@ -716,9 +644,7 @@
             },
             "outputs": {
                 "type": "object",
-                "required": [
-                    "success"
-                ],
+                "required": ["success"],
                 "properties": {
                     "success": {
                         "type": "boolean"
@@ -740,9 +666,7 @@
             "nodeSlot": "link",
             "inputs": {
                 "type": "object",
-                "required": [
-                    "url"
-                ],
+                "required": ["url"],
                 "properties": {
                     "url": {
                         "type": "string",
@@ -753,9 +677,7 @@
             },
             "outputs": {
                 "type": "object",
-                "required": [
-                    "success"
-                ],
+                "required": ["success"],
                 "properties": {
                     "success": {
                         "type": "boolean"
@@ -792,9 +714,7 @@
             "nodeSlot": "gen-video",
             "inputs": {
                 "type": "object",
-                "required": [
-                    "text"
-                ],
+                "required": ["text"],
                 "properties": {
                     "text": {
                         "type": "string"
@@ -843,9 +763,7 @@
             },
             "outputs": {
                 "type": "object",
-                "required": [
-                    "success"
-                ],
+                "required": ["success"],
                 "properties": {
                     "success": {
                         "type": "boolean"
@@ -884,9 +802,7 @@
             },
             "outputs": {
                 "type": "object",
-                "required": [
-                    "success"
-                ],
+                "required": ["success"],
                 "properties": {
                     "success": {
                         "type": "boolean"
@@ -940,9 +856,7 @@
             },
             "outputs": {
                 "type": "object",
-                "required": [
-                    "success"
-                ],
+                "required": ["success"],
                 "properties": {
                     "success": {
                         "type": "boolean"
@@ -961,15 +875,16 @@
             "nodeSlot": "text-gen-speech-preset",
             "inputs": {
                 "type": "object",
-                "required": [
-                    "text"
-                ],
+                "required": ["text"],
                 "properties": {
                     "text": {
                         "type": "string",
                         "minLength": 1
                     },
                     "language": {
+                        "type": "string"
+                    },
+                    "speaker": {
                         "type": "string"
                     },
                     "instruct": {
@@ -983,9 +898,7 @@
             },
             "outputs": {
                 "type": "object",
-                "required": [
-                    "success"
-                ],
+                "required": ["success"],
                 "properties": {
                     "success": {
                         "type": "boolean"
@@ -1004,11 +917,7 @@
             "nodeSlot": "image-gen-video",
             "inputs": {
                 "type": "object",
-                "required": [
-                    "text",
-                    "image",
-                    "duration"
-                ],
+                "required": ["text", "image", "duration"],
                 "properties": {
                     "duration": {
                         "type": "number"
@@ -1057,9 +966,7 @@
             },
             "outputs": {
                 "type": "object",
-                "required": [
-                    "success"
-                ],
+                "required": ["success"],
                 "properties": {
                     "success": {
                         "type": "boolean"
@@ -1078,10 +985,7 @@
             "nodeSlot": "image-edit",
             "inputs": {
                 "type": "object",
-                "required": [
-                    "text",
-                    "image"
-                ],
+                "required": ["text", "image"],
                 "properties": {
                     "text": {
                         "type": "string",
@@ -1107,9 +1011,7 @@
             },
             "outputs": {
                 "type": "object",
-                "required": [
-                    "success"
-                ],
+                "required": ["success"],
                 "properties": {
                     "success": {
                         "type": "boolean"
@@ -1128,9 +1030,7 @@
             "nodeSlot": "image-upscale",
             "inputs": {
                 "type": "object",
-                "required": [
-                    "image"
-                ],
+                "required": ["image"],
                 "properties": {
                     "image": {
                         "$ref": "#/$defs/Asset"
@@ -1146,9 +1046,7 @@
             },
             "outputs": {
                 "type": "object",
-                "required": [
-                    "success"
-                ],
+                "required": ["success"],
                 "properties": {
                     "success": {
                         "type": "boolean"
@@ -1167,9 +1065,7 @@
             "nodeSlot": "video-upscale",
             "inputs": {
                 "type": "object",
-                "required": [
-                    "video"
-                ],
+                "required": ["video"],
                 "properties": {
                     "video": {
                         "$ref": "#/$defs/Asset"
@@ -1185,9 +1081,7 @@
             },
             "outputs": {
                 "type": "object",
-                "required": [
-                    "success"
-                ],
+                "required": ["success"],
                 "properties": {
                     "success": {
                         "type": "boolean"
@@ -1206,9 +1100,7 @@
             "nodeSlot": "image-describe",
             "inputs": {
                 "type": "object",
-                "required": [
-                    "image"
-                ],
+                "required": ["image"],
                 "properties": {
                     "text": {
                         "type": "string"
@@ -1224,9 +1116,7 @@
             },
             "outputs": {
                 "type": "object",
-                "required": [
-                    "success"
-                ],
+                "required": ["success"],
                 "properties": {
                     "success": {
                         "type": "boolean"
@@ -1245,9 +1135,7 @@
             "nodeSlot": "video-describe",
             "inputs": {
                 "type": "object",
-                "required": [
-                    "video"
-                ],
+                "required": ["video"],
                 "properties": {
                     "text": {
                         "type": "string"
@@ -1263,9 +1151,7 @@
             },
             "outputs": {
                 "type": "object",
-                "required": [
-                    "success"
-                ],
+                "required": ["success"],
                 "properties": {
                     "success": {
                         "type": "boolean"
@@ -1284,10 +1170,7 @@
             "nodeSlot": "audio-image-gen-video",
             "inputs": {
                 "type": "object",
-                "required": [
-                    "image",
-                    "audio"
-                ],
+                "required": ["image", "audio"],
                 "properties": {
                     "text": {
                         "type": "string"
@@ -1303,9 +1186,7 @@
             },
             "outputs": {
                 "type": "object",
-                "required": [
-                    "success"
-                ],
+                "required": ["success"],
                 "properties": {
                     "success": {
                         "type": "boolean"
@@ -1324,10 +1205,7 @@
             "nodeSlot": "speech-text-gen-video",
             "inputs": {
                 "type": "object",
-                "required": [
-                    "text",
-                    "audio"
-                ],
+                "required": ["text", "audio"],
                 "properties": {
                     "text": {
                         "type": "string"
@@ -1376,9 +1254,7 @@
             },
             "outputs": {
                 "type": "object",
-                "required": [
-                    "success"
-                ],
+                "required": ["success"],
                 "properties": {
                     "success": {
                         "type": "boolean"
@@ -1397,11 +1273,7 @@
             "nodeSlot": "speech-image-video-gen-video",
             "inputs": {
                 "type": "object",
-                "required": [
-                    "image",
-                    "video",
-                    "audio"
-                ],
+                "required": ["image", "video", "audio"],
                 "properties": {
                     "text": {
                         "type": "string"
@@ -1420,9 +1292,7 @@
             },
             "outputs": {
                 "type": "object",
-                "required": [
-                    "success"
-                ],
+                "required": ["success"],
                 "properties": {
                     "success": {
                         "type": "boolean"
@@ -1441,10 +1311,7 @@
             "nodeSlot": "video-image-gen-video-mix",
             "inputs": {
                 "type": "object",
-                "required": [
-                    "image",
-                    "video"
-                ],
+                "required": ["image", "video"],
                 "properties": {
                     "text": {
                         "type": "string"
@@ -1460,9 +1327,7 @@
             },
             "outputs": {
                 "type": "object",
-                "required": [
-                    "success"
-                ],
+                "required": ["success"],
                 "properties": {
                     "success": {
                         "type": "boolean"
@@ -1481,10 +1346,7 @@
             "nodeSlot": "video-image-gen-video-move",
             "inputs": {
                 "type": "object",
-                "required": [
-                    "image",
-                    "video"
-                ],
+                "required": ["image", "video"],
                 "properties": {
                     "text": {
                         "type": "string"
@@ -1500,9 +1362,7 @@
             },
             "outputs": {
                 "type": "object",
-                "required": [
-                    "success"
-                ],
+                "required": ["success"],
                 "properties": {
                     "success": {
                         "type": "boolean"
@@ -1521,11 +1381,7 @@
             "nodeSlot": "image-image-gen-video",
             "inputs": {
                 "type": "object",
-                "required": [
-                    "text",
-                    "image",
-                    "end_image"
-                ],
+                "required": ["text", "image", "end_image"],
                 "properties": {
                     "text": {
                         "type": "string"
@@ -1574,9 +1430,7 @@
             },
             "outputs": {
                 "type": "object",
-                "required": [
-                    "success"
-                ],
+                "required": ["success"],
                 "properties": {
                     "success": {
                         "type": "boolean"
@@ -1595,9 +1449,7 @@
             "nodeSlot": "text-gen-video",
             "inputs": {
                 "type": "object",
-                "required": [
-                    "text"
-                ],
+                "required": ["text"],
                 "properties": {
                     "text": {
                         "type": "string"
@@ -1646,9 +1498,7 @@
             },
             "outputs": {
                 "type": "object",
-                "required": [
-                    "success"
-                ],
+                "required": ["success"],
                 "properties": {
                     "success": {
                         "type": "boolean"
@@ -1667,9 +1517,7 @@
             "nodeSlot": "image-gen-model",
             "inputs": {
                 "type": "object",
-                "required": [
-                    "image"
-                ],
+                "required": ["image"],
                 "properties": {
                     "text": {
                         "type": "string",
@@ -1692,9 +1540,7 @@
             },
             "outputs": {
                 "type": "object",
-                "required": [
-                    "success"
-                ],
+                "required": ["success"],
                 "properties": {
                     "success": {
                         "type": "boolean"
@@ -1713,10 +1559,7 @@
             "nodeSlot": "speech-video-gen-video",
             "inputs": {
                 "type": "object",
-                "required": [
-                    "video",
-                    "audio"
-                ],
+                "required": ["video", "audio"],
                 "properties": {
                     "video": {
                         "$ref": "#/$defs/Asset"
@@ -1729,9 +1572,7 @@
             },
             "outputs": {
                 "type": "object",
-                "required": [
-                    "success"
-                ],
+                "required": ["success"],
                 "properties": {
                     "success": {
                         "type": "boolean"
@@ -1750,10 +1591,7 @@
             "nodeSlot": "text-gen-speech-clone",
             "inputs": {
                 "type": "object",
-                "required": [
-                    "text",
-                    "ref_audio"
-                ],
+                "required": ["text", "ref_audio"],
                 "properties": {
                     "text": {
                         "type": "string",
@@ -1782,9 +1620,7 @@
             },
             "outputs": {
                 "type": "object",
-                "required": [
-                    "success"
-                ],
+                "required": ["success"],
                 "properties": {
                     "success": {
                         "type": "boolean"
@@ -1803,9 +1639,7 @@
             "nodeSlot": "transcribe-timestamp",
             "inputs": {
                 "type": "object",
-                "required": [
-                    "audio"
-                ],
+                "required": ["audio"],
                 "properties": {
                     "context": {
                         "type": "string"
@@ -1824,9 +1658,7 @@
             },
             "outputs": {
                 "type": "object",
-                "required": [
-                    "success"
-                ],
+                "required": ["success"],
                 "properties": {
                     "success": {
                         "type": "boolean"
@@ -1841,11 +1673,7 @@
                         "type": "array",
                         "items": {
                             "type": "object",
-                            "required": [
-                                "start",
-                                "end",
-                                "text"
-                            ],
+                            "required": ["start", "end", "text"],
                             "properties": {
                                 "start": {
                                     "type": "number"
@@ -1868,18 +1696,13 @@
             "nodeSlot": "text-gen-speech-instruct",
             "inputs": {
                 "type": "object",
-                "required": [
-                    "text"
-                ],
+                "required": ["text"],
                 "properties": {
                     "text": {
                         "type": "string",
                         "minLength": 1
                     },
                     "language": {
-                        "type": "string"
-                    },
-                    "speaker": {
                         "type": "string"
                     },
                     "instruct": {
@@ -1893,9 +1716,7 @@
             },
             "outputs": {
                 "type": "object",
-                "required": [
-                    "success"
-                ],
+                "required": ["success"],
                 "properties": {
                     "success": {
                         "type": "boolean"
@@ -1914,10 +1735,7 @@
             "nodeSlot": "video-image-move-animal",
             "inputs": {
                 "type": "object",
-                "required": [
-                    "image",
-                    "video"
-                ],
+                "required": ["image", "video"],
                 "properties": {
                     "text": {
                         "type": "string"
@@ -1933,9 +1751,7 @@
             },
             "outputs": {
                 "type": "object",
-                "required": [
-                    "success"
-                ],
+                "required": ["success"],
                 "properties": {
                     "success": {
                         "type": "boolean"
@@ -1954,10 +1770,7 @@
             "nodeSlot": "wan-animate-mix",
             "inputs": {
                 "type": "object",
-                "required": [
-                    "image",
-                    "video"
-                ],
+                "required": ["image", "video"],
                 "properties": {
                     "text": {
                         "type": "string"
@@ -1973,9 +1786,7 @@
             },
             "outputs": {
                 "type": "object",
-                "required": [
-                    "success"
-                ],
+                "required": ["success"],
                 "properties": {
                     "success": {
                         "type": "boolean"
@@ -1994,9 +1805,7 @@
             "nodeSlot": "drop-video",
             "inputs": {
                 "type": "object",
-                "required": [
-                    "videos"
-                ],
+                "required": ["videos"],
                 "properties": {
                     "query": {
                         "type": "string"
@@ -2012,9 +1821,7 @@
             },
             "outputs": {
                 "type": "object",
-                "required": [
-                    "success"
-                ],
+                "required": ["success"],
                 "properties": {
                     "success": {
                         "type": "boolean"
@@ -2088,9 +1895,7 @@
             },
             "outputs": {
                 "type": "object",
-                "required": [
-                    "success"
-                ],
+                "required": ["success"],
                 "properties": {
                     "success": {
                         "type": "boolean"
@@ -2116,9 +1921,7 @@
             "nodeSlot": "separate_speaker",
             "inputs": {
                 "type": "object",
-                "required": [
-                    "audio"
-                ],
+                "required": ["audio"],
                 "properties": {
                     "audio": {
                         "$ref": "#/$defs/Asset"
@@ -2128,9 +1931,7 @@
             },
             "outputs": {
                 "type": "object",
-                "required": [
-                    "success"
-                ],
+                "required": ["success"],
                 "properties": {
                     "success": {
                         "type": "boolean"
@@ -2153,9 +1954,7 @@
             "nodeSlot": "separate_audio_track",
             "inputs": {
                 "type": "object",
-                "required": [
-                    "audio"
-                ],
+                "required": ["audio"],
                 "properties": {
                     "audio": {
                         "$ref": "#/$defs/Asset"
@@ -2165,9 +1964,7 @@
             },
             "outputs": {
                 "type": "object",
-                "required": [
-                    "success"
-                ],
+                "required": ["success"],
                 "properties": {
                     "success": {
                         "type": "boolean"
@@ -2186,9 +1983,7 @@
             "nodeSlot": "denoise_audio",
             "inputs": {
                 "type": "object",
-                "required": [
-                    "fileKey"
-                ],
+                "required": ["fileKey"],
                 "properties": {
                     "fileKey": {
                         "$ref": "#/$defs/Asset"
@@ -2198,9 +1993,7 @@
             },
             "outputs": {
                 "type": "object",
-                "required": [
-                    "success"
-                ],
+                "required": ["success"],
                 "properties": {
                     "success": {
                         "type": "boolean"
@@ -2219,10 +2012,7 @@
             "nodeSlot": "convert_voice",
             "inputs": {
                 "type": "object",
-                "required": [
-                    "sourceKey",
-                    "targetKey"
-                ],
+                "required": ["sourceKey", "targetKey"],
                 "properties": {
                     "sourceKey": {
                         "$ref": "#/$defs/Asset"
@@ -2235,9 +2025,7 @@
             },
             "outputs": {
                 "type": "object",
-                "required": [
-                    "success"
-                ],
+                "required": ["success"],
                 "properties": {
                     "success": {
                         "type": "boolean"
@@ -2256,9 +2044,7 @@
             "nodeSlot": "remove_watermark",
             "inputs": {
                 "type": "object",
-                "required": [
-                    "fileKey"
-                ],
+                "required": ["fileKey"],
                 "properties": {
                     "fileKey": {
                         "$ref": "#/$defs/Asset"
@@ -2268,9 +2054,7 @@
             },
             "outputs": {
                 "type": "object",
-                "required": [
-                    "success"
-                ],
+                "required": ["success"],
                 "properties": {
                     "success": {
                         "type": "boolean"
@@ -2289,9 +2073,7 @@
             "nodeSlot": "subtitle_remove",
             "inputs": {
                 "type": "object",
-                "required": [
-                    "fileKey"
-                ],
+                "required": ["fileKey"],
                 "properties": {
                     "fileKey": {
                         "$ref": "#/$defs/Asset"
@@ -2301,9 +2083,7 @@
             },
             "outputs": {
                 "type": "object",
-                "required": [
-                    "success"
-                ],
+                "required": ["success"],
                 "properties": {
                     "success": {
                         "type": "boolean"
@@ -2322,10 +2102,7 @@
             "nodeSlot": "text-audio-gen-speech",
             "inputs": {
                 "type": "object",
-                "required": [
-                    "text",
-                    "audio"
-                ],
+                "required": ["text", "audio"],
                 "properties": {
                     "text": {
                         "type": "string",
@@ -2345,9 +2122,7 @@
             },
             "outputs": {
                 "type": "object",
-                "required": [
-                    "success"
-                ],
+                "required": ["success"],
                 "properties": {
                     "success": {
                         "type": "boolean"
