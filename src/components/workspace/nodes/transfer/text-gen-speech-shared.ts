@@ -1,7 +1,3 @@
-export const TEXT_GEN_SPEECH_CLONE = "text-gen-speech-clone";
-export const TEXT_GEN_SPEECH_PRESET = "text-gen-speech-preset";
-export const TEXT_GEN_SPEECH_INSTRUCT = "text-gen-speech-instruct";
-
 /** Labels from `useTranslations("Workspace.nodes")` */
 export type NodesT = (key: string) => string;
 

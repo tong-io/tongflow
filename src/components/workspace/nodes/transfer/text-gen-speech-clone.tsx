@@ -1,6 +1,6 @@
-import { Atom, Mic, Upload } from "lucide-react";
+import { Atom, Ear, Mic, Upload } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { memo } from "react";
+import { memo, useCallback, useRef } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -8,7 +8,8 @@ import { Label } from "@/components/ui/label";
 import { SpeakerVoiceRecorder } from "@/components/workspace/speaker-voice-recorder";
 import { useAbiForm } from "@/hooks/use-abi-form";
 import { useUpload } from "@/hooks/use-upload";
-import { batchOn } from "@/lib/abi/sources";
+import { batchOn, configField } from "@/lib/abi/sources";
+import { getFileUrl } from "@/lib/file/url";
 import { logger } from "@/lib/logger";
 import type { TongflowPluginNodeProps } from "@/types/tongflow-flow";
 
@@ -26,7 +27,7 @@ const TextGenSpeechCloneNode = ({
     const form = useAbiForm("text-gen-speech-clone");
     const texts = data.texts ?? [];
 
-    const refAudio = form.state.ref_audio as string | undefined;
+    const refAudio = data.ref_audio as string | undefined;
 
     // ABI types `ref_audio`/`audio` as Asset, but the backend accepts a stored
     // voice file_key string here (e.g. "uploads/abc.wav") via asset_as_path().
@@ -44,11 +45,30 @@ const TextGenSpeechCloneNode = ({
         e.target.value = "";
     };
 
+    const audioRef = useRef<HTMLAudioElement | null>(null);
+    const playPreview = useCallback(() => {
+        if (!refAudio) return;
+        if (audioRef.current) {
+            audioRef.current.pause();
+            audioRef.current = null;
+        }
+        const audio = new Audio(getFileUrl(refAudio));
+        audioRef.current = audio;
+        audio.play().catch((err) =>
+            logger.error("Failed to play reference audio:", err),
+        );
+    }, [refAudio]);
+
     return (
         <AbiNodeShell
             feature="text-gen-speech-clone"
             sourceSpec={{
                 text: batchOn({ nodeType: "textNode", path: "texts" }),
+                // `ref_audio` / `audio` come from local upload/record on this
+                // node, not an upstream Asset edge — mark them as config so the
+                // ABI runtime reads them from node.data instead of edges.
+                ref_audio: configField(),
+                audio: configField(),
             }}
             form={form}
             selected={selected}
@@ -98,6 +118,16 @@ const TextGenSpeechCloneNode = ({
                         }
                         onChange={(key) => setVoice(key)}
                     />
+                    <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        title={t("common.previewVoice")}
+                        onClick={playPreview}
+                        disabled={!refAudio}
+                    >
+                        <Ear className="w-5 h-5 text-primary" />
+                    </Button>
                     <Label
                         htmlFor="clone-language-select"
                         className="text-sm text-muted-foreground"

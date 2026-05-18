@@ -1,6 +1,6 @@
 import { Atom } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { memo, useEffect, useMemo, useState } from "react";
+import { memo, useEffect } from "react";
 
 import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
@@ -18,10 +18,6 @@ import type { TongflowPluginNodeProps } from "@/types/tongflow-flow";
 
 import { AbiNodeShell } from "../base/abi-node-shell";
 import { LanguageSelect } from "../base/language-select";
-import {
-    buildEmotionOptions,
-    buildStyleOptions,
-} from "./text-gen-speech-shared";
 
 const TextGenSpeechPresetNode = ({
     selected,
@@ -57,39 +53,6 @@ const TextGenSpeechPresetNode = ({
         patch(
             sp ? { speaker: value, language: sp.language } : { speaker: value },
         );
-    };
-
-    const emotionOptions = useMemo(() => buildEmotionOptions(t), [t]);
-    const styleOptions = useMemo(() => buildStyleOptions(t), [t]);
-
-    // UI-only multi-select state; collapsed into ABI `instruct` below.
-    const [emotions, setEmotions] = useState<string[]>([]);
-    const [styles, setStyles] = useState<string[]>([]);
-
-    const instructText = useMemo(() => {
-        const parts: string[] = [];
-        for (const e of emotions) {
-            const opt = emotionOptions.find((o) => o.value === e);
-            if (opt) parts.push(opt.label);
-        }
-        for (const s of styles) {
-            const opt = styleOptions.find((o) => o.value === s);
-            if (opt) parts.push(opt.label);
-        }
-        return parts.join(", ");
-    }, [emotions, styles, emotionOptions, styleOptions]);
-
-    useEffect(() => {
-        setForm("instruct", instructText || undefined);
-    }, [instructText, setForm]);
-
-    const toggle = (
-        list: string[],
-        setter: (next: string[]) => void,
-        value: string,
-        checked: boolean,
-    ) => {
-        setter(checked ? [...list, value] : list.filter((v) => v !== value));
     };
 
     return (
@@ -146,19 +109,6 @@ const TextGenSpeechPresetNode = ({
                         onChange={(v) => setForm("language", v)}
                     />
                 </div>
-                <ChipGroup
-                    label={`${t("common.emotion")}：`}
-                    options={emotionOptions.filter((o) => o.value !== "none")}
-                    selected={emotions}
-                    onChange={(v, c) => toggle(emotions, setEmotions, v, c)}
-                />
-                <ChipGroup
-                    label={`${t("common.style")}：`}
-                    options={styleOptions.filter((o) => o.value !== "none")}
-                    selected={styles}
-                    onChange={(v, c) => toggle(styles, setStyles, v, c)}
-                    scrollable
-                />
                 {texts && texts.length > 0 && (
                     <div className="space-y-2">
                         <Label className="text-sm font-medium text-muted-foreground">
@@ -180,54 +130,6 @@ const TextGenSpeechPresetNode = ({
         </AbiNodeShell>
     );
 };
-
-interface ChipGroupProps {
-    label: string;
-    options: { value: string; label: string }[];
-    selected: string[];
-    onChange: (value: string, checked: boolean) => void;
-    scrollable?: boolean;
-}
-
-function ChipGroup({
-    label,
-    options,
-    selected,
-    onChange,
-    scrollable,
-}: ChipGroupProps) {
-    return (
-        <div className="mb-4">
-            <div className="text-sm text-muted-foreground block mb-2">
-                {label}
-            </div>
-            <div
-                className={`flex flex-wrap gap-2 ${scrollable ? "max-h-40 overflow-y-auto" : ""}`}
-            >
-                {options.map((opt) => (
-                    <label
-                        key={opt.value}
-                        className={`px-3 py-1.5 rounded-md text-sm cursor-pointer border transition-colors ${
-                            selected.includes(opt.value)
-                                ? "bg-primary text-primary-foreground border-primary"
-                                : "bg-background border-border hover:bg-accent"
-                        }`}
-                    >
-                        <input
-                            type="checkbox"
-                            className="sr-only"
-                            checked={selected.includes(opt.value)}
-                            onChange={(e) =>
-                                onChange(opt.value, e.target.checked)
-                            }
-                        />
-                        {opt.label}
-                    </label>
-                ))}
-            </div>
-        </div>
-    );
-}
 
 TextGenSpeechPresetNode.displayName = "TextGenSpeechPresetNode";
 
