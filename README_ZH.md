@@ -85,7 +85,6 @@ pnpm dev
 - `OPENROUTER_API_KEY`（可选：`OPENROUTER_FREE_MODEL`、`OPENROUTER_HTTP_REFERER`、`OPENROUTER_APP_TITLE`）：默认**生成文本**节点（`gen_text`）使用 OpenRouter 免费路由
 - `GEMINI_API_KEY` 或 `GOOGLE_API_KEY`：模型选择 Gemini 时的**生成文本**及其他 Gemini 多模态处理
 - `OPENAI_API_KEY`（可选：`OPENAI_CHAT_MODEL`）：模型选择 OpenAI 时的**生成文本**；默认模型为 `gpt-4o-mini`
-- `DEEPSEEK_API_KEY`：仅用于直接调用 DeepSeek API 的功能（如批量排列/分组文本），非主文本生成下拉
 - `NEXT_PUBLIC_FILE_BASE_URL`：可选；文件存储的 Base URL
 
 授权 Modal（Token 写入 `~/.modal.toml`）：
@@ -174,18 +173,22 @@ pnpm modal:setup
 ## 后端与模型服务
 
 - **FFmpeg**: 转码、混流与媒体处理管线
-- **场景检测**: 用于分割片段的镜头边界检测
+- **PySceneDetect**: 用于分割片段的镜头边界检测
 - **Z-Image**: 文本生图
+- **ERNIE Image**: 文本生图（备选）
 - **FLUX.2 Klein 9B**: 多参考融合与图像编辑
-- **LTX-2**: 文本 / 图像生视频
+- **LTX-2.3**: 文本 / 图像生视频
 - **SeedVR2**: 图像和视频超分辨率
+- **Color-Fix Lab**: 图像 / 视频超分辨率（备选）
 - **Gemma 4**: 多模态文本（图像 / 视频理解）
-- **Qwen3**: 语音识别与文字转语音
+- **Qwen3**: 语音识别（`qwen3asr`）与文字转语音（`qwen3tts`）
+- **Whisper**: 语音识别备选（带时间戳）
 - **ACE-Step**: 文本生音乐
-- **OpenRouter（LLM 路由）**: `gen_text` 的默认免费路由/模型（`OPENROUTER_API_KEY`；可选 `OPENROUTER_FREE_MODEL`）
-- **Google Gemini（API）**: `gen_text_gemini` 及相关处理（设置 `GEMINI_API_KEY` 或 `GOOGLE_API_KEY`）
-- **OpenAI（API）**: `gen_text_openai`（`OPENAI_API_KEY`；可选默认 `OPENAI_CHAT_MODEL`）
-- **DeepSeek（API）**: 仅用于直接调用 DeepSeek 的代码路径（如批量文本分组），非主**生成文本**模型列表
+- **Docling / PaddleOCR**: 文档 → 文本解析
+- **Crawl4AI**: URL / 链接 → 文本提取
+- **OpenRouter（LLM 路由）**: 默认 `gen_text` 插件使用 OpenRouter 免费路由（`OPENROUTER_API_KEY`；可选 `OPENROUTER_FREE_MODEL`）
+- **Google Gemini（API）**: 基于 Gemini 的 `gen_text` 插件及其他 Gemini 多模态处理（设置 `GEMINI_API_KEY` 或 `GOOGLE_API_KEY`）
+- **OpenAI（API）**: 基于 OpenAI 的 `gen_text` 插件（`OPENAI_API_KEY`；可选默认 `OPENAI_CHAT_MODEL`）
 
 ## 联系我们
 

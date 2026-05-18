@@ -91,7 +91,6 @@ Common variables:
 - `OPENROUTER_API_KEY` (optional `OPENROUTER_FREE_MODEL`, `OPENROUTER_HTTP_REFERER`, `OPENROUTER_APP_TITLE`): default **Generate text** node (`gen_text`) uses the OpenRouter free router
 - `GEMINI_API_KEY` or `GOOGLE_API_KEY`: **Generate text** when the model slot is Gemini, and other Gemini text/multimodal handlers
 - `OPENAI_API_KEY` (optional `OPENAI_CHAT_MODEL`): **Generate text** when the model slot is OpenAI; default chat model is `gpt-4o-mini` if unset
-- `DEEPSEEK_API_KEY`: only needed for features that still call the DeepSeek API directly (for example batch arrange / grouping text), not for the main text-generation dropdown
 - `NEXT_PUBLIC_FILE_BASE_URL`: optional; base URL for file storage
 
 To authorize Modal (writes tokens to `~/.modal.toml`):
@@ -180,18 +179,22 @@ pnpm modal:setup
 ## Backend & model providers
 
 - **FFmpeg**: transcoding, muxing, and media pipelines
-- **Scene detection**: shot boundaries for splitting clips
+- **PySceneDetect**: shot boundaries for splitting clips
 - **Z-Image**: text-to-image
+- **ERNIE Image**: alternative text-to-image plugin
 - **FLUX.2 Klein 9B**: multi-reference fusion and image editing
-- **LTX-2**: text/image-to-video
+- **LTX-2.3**: text/image-to-video
 - **SeedVR2**: image and video super-resolution
+- **Color-Fix Lab**: image / video upscaling variant
 - **Gemma 4**: multimodal text (image/video understanding)
-- **Qwen3**: speech recognition and text-to-speech
+- **Qwen3**: speech recognition (`qwen3asr`) and text-to-speech (`qwen3tts`)
+- **Whisper**: alternative speech recognition (with timestamps)
 - **ACE-Step**: text-to-music
-- **OpenRouter (LLM routing)**: default free route/model for `gen_text` (`OPENROUTER_API_KEY`; optional `OPENROUTER_FREE_MODEL` in `.env`)
-- **Google Gemini (API)**: `gen_text_gemini` and related handlers (set `GEMINI_API_KEY` or `GOOGLE_API_KEY`); the node UI can pick the Gemini model id
-- **OpenAI (API)**: `gen_text_openai` (`OPENAI_API_KEY`; optional default `OPENAI_CHAT_MODEL`; the node UI can pick the OpenAI model)
-- **DeepSeek (API)**: only for code paths that call DeepSeek directly (for example batch text grouping), not the main **Generate text** model list
+- **Docling / PaddleOCR**: document → text parsing
+- **Crawl4AI**: URL / link → text extraction
+- **OpenRouter (LLM routing)**: default `gen_text` plugin uses the OpenRouter free router (`OPENROUTER_API_KEY`; optional `OPENROUTER_FREE_MODEL`)
+- **Google Gemini (API)**: Gemini-backed `gen_text` plugin and other Gemini multimodal handlers (set `GEMINI_API_KEY` or `GOOGLE_API_KEY`); the node UI can pick the Gemini model id
+- **OpenAI (API)**: OpenAI-backed `gen_text` plugin (`OPENAI_API_KEY`; optional default `OPENAI_CHAT_MODEL`; the node UI can pick the OpenAI model)
 
 ## Contact
 
