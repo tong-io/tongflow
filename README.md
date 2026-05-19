@@ -25,6 +25,8 @@
 
 - **Simple to use**: no complex parameter panels and no manual node connecting; just **add**, **transform**, and **combine**. Arrange ideas freely.
 
+- **Open plugin ecosystem**: every model and capability is an independently versioned plugin (`tongflow-modal-*` for GPU/CPU workers, `tongflow-llm-*` for LLM adapters), installed at runtime. The core stays small while the ecosystem grows — anyone can publish a plugin and have it appear in the in-app market.
+
 ## Demo Use Case
 
 - **Text → image → video**: generate images, then turn them into video.
@@ -41,65 +43,79 @@ With TongFlow, you can expand your imagination and stretch your ideas with gener
 
 ## How To Use
 
-## Run locally (quickstart)
+This is a **local-first** app: workflows and materials live in SQLite (`data/tongflow.db`) and uploads on disk (`data/uploads/`). There is no hosted TongFlow account, login, or central file CDN. AI inference goes through **external APIs you configure**: [Modal](https://modal.com) for GPU/CPU plugins (Modal offers a **$30/month FREE** quota for cloud GPU/CPU such as **H100**), plus LLM vendors (OpenRouter, Gemini, OpenAI, …) for text plugins.
 
-This is a **local-first** app: workflows and materials live in SQLite (`data/tongflow.db`) and uploads on disk (`data/uploads/`). There is no hosted TongFlow account, login, or central file CDN.
+### Step 1 — Prerequisites
 
-AI inference uses **external APIs you configure**: [Modal](https://modal.com) for most transform plugins (Modal offers a **$30/month FREE** quota for cloud GPU/CPU such as **H100**), plus LLM vendors (OpenRouter, Gemini, OpenAI, etc.) where nodes need them. Set tokens in `.env` and run `pnpm modal:setup` when using Modal (see **Environment variables** below).
+- **Node.js 20+** and **pnpm**
+- **Git** (plugins are installed by cloning their repos)
+- **Python 3 + Modal CLI** (`pip install modal`) — the server spawns `modal deploy` / `modal run download` as subprocesses when GPU/CPU plugins are first invoked
 
-### Two ways to run
+### Step 2 — Get the code and start the app
 
-#### 1) Docker Compose (good for self-hosting)
-
-`compose.yaml` lives at the repo root:
-
-```bash
-docker compose up --build
-```
-
-Open `http://localhost:3000` (lands on `/workspace`).
-
-> Data persists in Docker volumes (SQLite at `data/tongflow.db` plus uploads).
-
-**Pre-built image (GHCR):** CI publishes [`ghcr.io/tong-io/tongflow`](https://github.com/tong-io/tongflow/pkgs/container/tongflow) on pushes to `main` (tags `latest` and `main`) and on version tags `v*` (e.g. `v0.1.0` → `0.1.0`). Pull and run:
-
-```bash
-docker pull ghcr.io/tong-io/tongflow:latest
-docker run --rm -p 3000:3000 --env-file .env -v tongflow_data:/app/data ghcr.io/tong-io/tongflow:latest
-```
-
-For private repositories you may need `docker login ghcr.io` with a token that has the `read:packages` scope.
-
-#### 2) Local development (`pnpm dev`)
-
-Requires Node.js (20+ recommended) and pnpm.
+#### Option A) Local development
 
 ```bash
 pnpm install
 pnpm dev
 ```
 
-Open `http://localhost:3000` (lands on `/workspace`).
+#### Option B) Docker Compose
 
-### Environment variables (Modal & providers)
+```bash
+docker compose up --build
+```
 
-The app calls **Modal** (worker execution) and optional **LLM/API** services. Copy [`.env.example`](.env.example) to `.env` and fill in keys. No TongFlow-hosted services are required for core editing, saving, or import/export.
+> ⚠️ The current Docker image does **not** bundle Python + Modal CLI, so Modal-backed plugins cannot auto-deploy from inside the container. Use Option A if you need GPU/CPU plugins, or pre-deploy them from a host that has `modal` installed.
 
-Common variables:
+Either option lands on `http://localhost:3000/workspace`. Data persists in `data/` (SQLite + uploads); Docker stores it in the `tongflow_data` volume.
 
-- `MODAL_TOKEN_ID` / `MODAL_TOKEN_SECRET`: Modal workers
-- `OPENROUTER_API_KEY` (optional `OPENROUTER_FREE_MODEL`, `OPENROUTER_HTTP_REFERER`, `OPENROUTER_APP_TITLE`): default **Generate text** node (`gen_text`) uses the OpenRouter free router
-- `GEMINI_API_KEY` or `GOOGLE_API_KEY`: **Generate text** when the model slot is Gemini, and other Gemini text/multimodal handlers
-- `OPENAI_API_KEY` (optional `OPENAI_CHAT_MODEL`): **Generate text** when the model slot is OpenAI; default chat model is `gpt-4o-mini` if unset
-- `NEXT_PUBLIC_FILE_BASE_URL`: optional; base URL for file storage
+**Pre-built image (GHCR):** CI publishes [`ghcr.io/tong-io/tongflow`](https://github.com/tong-io/tongflow/pkgs/container/tongflow) on pushes to `main` (tags `latest` and `main`) and on version tags `v*`:
 
-To authorize Modal (writes tokens to `~/.modal.toml`):
+```bash
+docker pull ghcr.io/tong-io/tongflow:latest
+docker run --rm -p 3000:3000 --env-file .env -v tongflow_data:/app/data ghcr.io/tong-io/tongflow:latest
+```
+
+### Step 3 — Configure `.env`
+
+Copy [`.env.example`](.env.example) to `.env` and fill in the keys you need. The UI works without any keys, but no execution node will run until at least one provider is configured.
+
+- `MODAL_TOKEN_ID` / `MODAL_TOKEN_SECRET` — required for any `tongflow-modal-*` plugin
+- `OPENROUTER_API_KEY` (optional `OPENROUTER_FREE_MODEL`, `OPENROUTER_HTTP_REFERER`, `OPENROUTER_APP_TITLE`) — default **Generate text** node uses the OpenRouter free router
+- `GEMINI_API_KEY` or `GOOGLE_API_KEY` — Gemini-backed `gen_text` and other Gemini multimodal handlers
+- `OPENAI_API_KEY` (optional `OPENAI_CHAT_MODEL`, defaults to `gpt-4o-mini`) — OpenAI-backed `gen_text`
+- `NEXT_PUBLIC_FILE_BASE_URL` — optional; override the file base URL
+
+For an interactive Modal login (writes tokens to `~/.modal.toml`):
 
 ```bash
 pnpm modal:setup
 ```
 
-## What’s implemented
+### Step 4 — Install plugins
+
+The `plugins/` directory is **gitignored and empty on first start** — the UI loads, but every transform / compose / decompose node is unusable until at least one plugin is installed. See [docs/plugins.md](docs/plugins.md).
+
+Two ways to install:
+
+**a) In-app market** — open `http://localhost:3000/plugins`, pick the plugins you need, and click install. The server will `git clone` each into `plugins/<plugin-id>/`.
+
+**b) Manual clone** — for the official plugins (see [Official plugins](#official-plugins) below):
+
+```bash
+git clone https://github.com/tong-io/tongflow-modal-z-image.git plugins/tongflow-modal-z-image
+git clone https://github.com/tong-io/tongflow-llm-openrouter-free.git plugins/tongflow-llm-openrouter-free
+# …repeat for the plugins you want
+```
+
+The scanner picks up new plugins on next page load.
+
+### Step 5 — Run a node
+
+When you first execute a Modal-backed node, the server automatically runs `modal deploy plugins/<id>/deploy.py` (and `modal run plugins/<id>/download.py::download` if that plugin ships model weights). Results are cached, so subsequent runs go straight to the deployed worker. LLM plugins (`tongflow-llm-*`) don't need deploy — they call the provider API directly with your keys.
+
+## What’s Defined
 
 ### Add
 
@@ -176,25 +192,36 @@ pnpm modal:setup
 - ✅ **Filter or drop clips**: drop unwanted clips by rule or selection.
 - ✅ **Arrange & batch groups**: group and arrange text/clip batches for downstream processing.
 
-## Backend & model providers
+## Official plugins
 
-- **FFmpeg**: transcoding, muxing, and media pipelines
-- **PySceneDetect**: shot boundaries for splitting clips
-- **Z-Image**: text-to-image
-- **ERNIE Image**: alternative text-to-image plugin
-- **FLUX.2 Klein 9B**: multi-reference fusion and image editing
-- **LTX-2.3**: text/image-to-video
-- **SeedVR2**: image and video super-resolution
-- **Color-Fix Lab**: image / video upscaling variant
-- **Gemma 4**: multimodal text (image/video understanding)
-- **Qwen3**: speech recognition (`qwen3asr`) and text-to-speech (`qwen3tts`)
-- **Whisper**: alternative speech recognition (with timestamps)
-- **ACE-Step**: text-to-music
-- **Docling / PaddleOCR**: document → text parsing
-- **Crawl4AI**: URL / link → text extraction
-- **OpenRouter (LLM routing)**: default `gen_text` plugin uses the OpenRouter free router (`OPENROUTER_API_KEY`; optional `OPENROUTER_FREE_MODEL`)
-- **Google Gemini (API)**: Gemini-backed `gen_text` plugin and other Gemini multimodal handlers (set `GEMINI_API_KEY` or `GOOGLE_API_KEY`); the node UI can pick the Gemini model id
-- **OpenAI (API)**: OpenAI-backed `gen_text` plugin (`OPENAI_API_KEY`; optional default `OPENAI_CHAT_MODEL`; the node UI can pick the OpenAI model)
+TongFlow runs on a **plugin ecosystem**. Every model / capability is an independently versioned package — Modal GPU/CPU workers as `tongflow-modal-*`, LLM API adapters as `tongflow-llm-*`. They live under [tong-io](https://github.com/tong-io) on GitHub and on PyPI, are installed at runtime into the gitignored `plugins/` directory (via the in-app market at `/plugins` or `git clone`), and are picked up by the scanner on next start. See [docs/plugins.md](docs/plugins.md). Third parties can publish their own plugins the same way.
+
+The plugins below are the official ones maintained alongside this repo.
+
+### LLM (text-generation) plugins
+
+- [tongflow-llm-openrouter-free](https://github.com/tong-io/tongflow-llm-openrouter-free) — default `gen_text` route via OpenRouter's free models
+- [tongflow-llm-gemini](https://github.com/tong-io/tongflow-llm-gemini) — Google Gemini for `gen_text` and other Gemini multimodal handlers
+- [tongflow-llm-openai](https://github.com/tong-io/tongflow-llm-openai) — OpenAI for `gen_text`
+
+### Modal (GPU/CPU) plugins
+
+- [tongflow-modal-ffmpeg](https://github.com/tong-io/tongflow-modal-ffmpeg) — transcoding, muxing, media pipelines
+- [tongflow-modal-pyscenedetect](https://github.com/tong-io/tongflow-modal-pyscenedetect) — shot-boundary detection for splitting clips
+- [tongflow-modal-z-image](https://github.com/tong-io/tongflow-modal-z-image) — Z-Image text-to-image
+- [tongflow-modal-ernie-image](https://github.com/tong-io/tongflow-modal-ernie-image) — ERNIE Image text-to-image (alternative)
+- [tongflow-modal-flux2-klein9b](https://github.com/tong-io/tongflow-modal-flux2-klein9b) — FLUX.2 Klein 9B multi-reference fusion / image editing
+- [tongflow-modal-ltx](https://github.com/tong-io/tongflow-modal-ltx) — LTX-2.3 text / image-to-video
+- [tongflow-modal-seedvr2](https://github.com/tong-io/tongflow-modal-seedvr2) — SeedVR2 image / video super-resolution
+- [tongflow-modal-color-fix-lab](https://github.com/tong-io/tongflow-modal-color-fix-lab) — image / video upscaling (alternative)
+- [tongflow-modal-gemma4](https://github.com/tong-io/tongflow-modal-gemma4) — Gemma-4 multimodal text (image / video understanding)
+- [tongflow-modal-qwen3asr](https://github.com/tong-io/tongflow-modal-qwen3asr) — Qwen3 speech recognition
+- [tongflow-modal-qwen3tts](https://github.com/tong-io/tongflow-modal-qwen3tts) — Qwen3 text-to-speech
+- [tongflow-modal-whisper](https://github.com/tong-io/tongflow-modal-whisper) — Whisper speech recognition with timestamps (alternative)
+- [tongflow-modal-ace-step](https://github.com/tong-io/tongflow-modal-ace-step) — ACE-Step text-to-music
+- [tongflow-modal-docling](https://github.com/tong-io/tongflow-modal-docling) — Docling document → text
+- [tongflow-modal-paddle](https://github.com/tong-io/tongflow-modal-paddle) — PaddleOCR document → text
+- [tongflow-modal-crawl4ai](https://github.com/tong-io/tongflow-modal-crawl4ai) — Crawl4AI URL / link → text
 
 ## Contact
 
@@ -221,10 +248,6 @@ If you like this project, a Star on GitHub helps a lot. Thank you.
 </div>
 
 This project is licensed under **AGPL-3.0**.
-
-## Extending AI capabilities
-
-Feature metadata (model slots, handler routing keys) is derived at runtime from the ABI ([`config/tongflow.abi.json`](config/tongflow.abi.json)) plus the plugin scanner registry. Optional overrides come from `.tongflow/features.local.json` or the `FEATURES_CONFIG_PATH` env var. See [docs/feature-registry.md](docs/feature-registry.md) for the merge order and how this relates to task handlers and node allowlists.
 
 ## Star History
 

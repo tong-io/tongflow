@@ -8,13 +8,24 @@ import { Label } from "@/components/ui/label";
 import { SpeakerVoiceRecorder } from "@/components/workspace/speaker-voice-recorder";
 import { useAbiForm } from "@/hooks/use-abi-form";
 import { useUpload } from "@/hooks/use-upload";
-import { batchOn, configField } from "@/lib/abi/sources";
+import { batchOn, configField, type SourceSpec } from "@/lib/abi/sources";
 import { getFileUrl } from "@/lib/file/url";
 import { logger } from "@/lib/logger";
 import type { TongflowPluginNodeProps } from "@/types/tongflow-flow";
 
 import { AbiNodeShell } from "../base/abi-node-shell";
 import { LanguageSelect } from "../base/language-select";
+
+// `ref_audio` / `audio` are Asset $refs in the ABI, so default classification
+// treats them as handles (fed by upstream edges). But this node owns the
+// reference audio via local upload/record, so override to `config` — both
+// `useAbiForm` and `AbiNodeShell` need to see the override so canvas execution
+// reads from local `node.data` instead of edges.
+const CLONE_SOURCE_SPEC: SourceSpec<"text-gen-speech-clone"> = {
+    text: batchOn({ nodeType: "textNode", path: "texts" }),
+    ref_audio: configField(),
+    audio: configField(),
+};
 
 const TextGenSpeechCloneNode = ({
     selected,
@@ -24,7 +35,7 @@ const TextGenSpeechCloneNode = ({
     "textGenSpeechCloneNode"
 >) => {
     const t = useTranslations("Workspace.nodes");
-    const form = useAbiForm("text-gen-speech-clone");
+    const form = useAbiForm("text-gen-speech-clone", CLONE_SOURCE_SPEC);
     const texts = data.texts ?? [];
 
     const refAudio = data.ref_audio as string | undefined;
@@ -62,14 +73,7 @@ const TextGenSpeechCloneNode = ({
     return (
         <AbiNodeShell
             feature="text-gen-speech-clone"
-            sourceSpec={{
-                text: batchOn({ nodeType: "textNode", path: "texts" }),
-                // `ref_audio` / `audio` come from local upload/record on this
-                // node, not an upstream Asset edge — mark them as config so the
-                // ABI runtime reads them from node.data instead of edges.
-                ref_audio: configField(),
-                audio: configField(),
-            }}
+            sourceSpec={CLONE_SOURCE_SPEC}
             form={form}
             selected={selected}
             className="min-w-[480px]"

@@ -159,6 +159,10 @@ export async function executeTask(taskId: string): Promise<void> {
             .set({ status: "processing" })
             .where(eq(tasks.id, taskId));
 
+        logger.info(
+            `[TaskRunner] task=${taskId} starting nodeSlot=${taskData.nodeSlot} plugin=${taskData.pluginId} nodeId=${taskData.nodeId}`,
+        );
+
         notifyTask(
             taskId,
             TaskStatus.RUNNING,
@@ -170,10 +174,12 @@ export async function executeTask(taskId: string): Promise<void> {
         // then hand the payload straight to the plugin. The contract is
         // enforced by the generated Pydantic models on the plugin side; the
         // runner does not validate at runtime.
+        logger.info(`[TaskRunner] task=${taskId} preparing assets`);
         const businessInput = await prepareAssetInput(
             taskData.nodeSlot,
             taskData.prompt,
         );
+        logger.info(`[TaskRunner] task=${taskId} assets ready, invoking plugin`);
         const result = await executePlugin({
             pluginId: taskData.pluginId,
             nodeSlot: taskData.nodeSlot,
@@ -199,6 +205,9 @@ export async function executeTask(taskId: string): Promise<void> {
                 typeof rawErr === "string" && rawErr.trim().length > 0
                     ? rawErr.trim()
                     : "Task failed";
+            logger.info(
+                `[TaskRunner] task=${taskId} plugin returned success=false: ${failMsg}`,
+            );
             notifyTask(
                 taskId,
                 TaskStatus.FAILED,
@@ -213,6 +222,9 @@ export async function executeTask(taskId: string): Promise<void> {
                 })
                 .where(eq(tasks.id, taskId));
         } else {
+            logger.info(
+                `[TaskRunner] task=${taskId} plugin returned success=true`,
+            );
             notifyTask(
                 taskId,
                 TaskStatus.COMPLETED,
@@ -232,7 +244,9 @@ export async function executeTask(taskId: string): Promise<void> {
 
         const errorMsg =
             error instanceof Error ? error.message : "Unknown error";
-        logger.error(`[TaskRunner] Task ${taskId} failed:`, errorMsg);
+        const errorStack =
+            error instanceof Error && error.stack ? error.stack : errorMsg;
+        logger.error(`[TaskRunner] Task ${taskId} failed:\n${errorStack}`);
 
         notifyTask(
             taskId,
@@ -285,6 +299,9 @@ export async function executeWorkflowTask(
         );
 
         // Announce workflow execution start
+        logger.info(
+            `[Workflow] task=${taskId} starting nodes=${execNodes.length} levels=${(workflow.executionLevels || []).length}`,
+        );
         notifyTask(taskId, WorkflowStatus.WORKFLOW_STARTED, {
             totalNodes: execNodes.length,
             levels: (workflow.executionLevels || []).length,
@@ -385,6 +402,9 @@ export async function executeWorkflowTask(
                 const nodeLabel = node.label || node.feature || "";
                 const nodeStartTime = Date.now();
 
+                logger.info(
+                    `[Workflow] task=${taskId} level=${levelIdx + 1} node=${nodeId} feature=${node.feature || ""} starting`,
+                );
                 notifyTask(
                     taskId,
                     NodeStatus.NODE_STARTED,
@@ -444,12 +464,16 @@ export async function executeWorkflowTask(
                         dataNodeState.set(targetId, slot);
                     }
 
+                    const nodeDuration = Date.now() - nodeStartTime;
+                    logger.info(
+                        `[Workflow] task=${taskId} node=${nodeId} completed duration=${nodeDuration}ms`,
+                    );
                     notifyTask(
                         taskId,
                         NodeStatus.NODE_COMPLETED,
                         {
                             output: result,
-                            duration: Date.now() - nodeStartTime,
+                            duration: nodeDuration,
                             label: nodeLabel,
                         },
                         nodeId,
@@ -457,8 +481,13 @@ export async function executeWorkflowTask(
                 } catch (e) {
                     const errMsg =
                         e instanceof Error ? e.message : "Unknown error";
+                    const errStack =
+                        e instanceof Error && e.stack ? e.stack : errMsg;
                     const summaryLine = `Node ${nodeId} failed: ${errMsg}`;
                     workflowErrorSummaries.push(summaryLine);
+                    logger.error(
+                        `[Workflow] task=${taskId} node=${nodeId} failed:\n${errStack}`,
+                    );
 
                     workflowFailures.push({
                         nodeId,
@@ -522,7 +551,9 @@ export async function executeWorkflowTask(
 
         const errorMsg =
             error instanceof Error ? error.message : "Unknown error";
-        logger.error(`[Workflow] Task ${taskId} failed:`, errorMsg);
+        const errorStack =
+            error instanceof Error && error.stack ? error.stack : errorMsg;
+        logger.error(`[Workflow] Task ${taskId} failed:\n${errorStack}`);
 
         notifyTask(taskId, WorkflowStatus.WORKFLOW_FAILED, {
             message: "Workflow execution failed",

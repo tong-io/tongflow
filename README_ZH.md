@@ -25,6 +25,8 @@
 
 - **简单易用**: 无复杂参数面板，无需手动连接节点；只需**添加**、**转换**和**组合**，自由排列创意。
 
+- **开放插件生态**: 每个模型和能力都是独立版本的插件（`tongflow-modal-*` 为 GPU/CPU Worker，`tongflow-llm-*` 为 LLM 适配器），运行时按需安装。核心保持精简，生态持续扩张——任何人都可发布插件并出现在应用内市场。
+
 ## 应用场景
 
 - **文本 → 图像 → 视频**: 生成图像，再将其转化为视频。
@@ -35,63 +37,79 @@
 
 用 TongFlow 释放想象力，借助生成式 AI 拓展你的创意边界！
 
-## 快速开始（本地运行）
+## 快速开始
 
-这是一款**本地优先**的应用：工作流与素材存储在 SQLite（`data/tongflow.db`），上传文件保存在磁盘（`data/uploads/`）。无需 TongFlow 账号、登录或中心化文件 CDN。
+这是一款**本地优先**的应用：工作流与素材存储在 SQLite（`data/tongflow.db`），上传文件保存在磁盘（`data/uploads/`）。无需 TongFlow 账号、登录或中心化文件 CDN。AI 推理走**你配置的外部 API**：GPU/CPU 插件用 [Modal](https://modal.com)（**每月 $30 免费额度**，可用 H100 等云端 GPU/CPU），文本插件用 OpenRouter / Gemini / OpenAI 等供应商。
 
-AI 推理使用**你配置的外部 API**：大多数转换插件使用 [Modal](https://modal.com)（Modal 提供 **每月 $30 免费额度**，可用于 H100 等云端 GPU/CPU），LLM 节点使用 OpenRouter、Gemini、OpenAI 等供应商。请在 `.env` 中配置 API Key，使用 Modal 时运行 `pnpm modal:setup`（详见下方**环境变量**）。
+### Step 1 — 前置依赖
 
-### 两种运行方式
+- **Node.js 20+** 与 **pnpm**
+- **Git**（插件通过 clone 仓库安装）
+- **Python 3 + Modal CLI**（`pip install modal`）—— GPU/CPU 插件首次调用时，服务端会子进程执行 `modal deploy` / `modal run download`
 
-#### 1) Docker Compose（推荐自托管）
+### Step 2 — 拉取代码并启动
 
-仓库根目录提供 `compose.yaml`：
-
-```bash
-docker compose up --build
-```
-
-打开 `http://localhost:3000`（进入 `/workspace`）。
-
-> 数据持久化在 Docker Volume（SQLite 位于 `data/tongflow.db`，含上传文件）。
-
-**预构建镜像（GHCR）：** CI 在 `main` 分支推送时自动发布 [`ghcr.io/tong-io/tongflow`](https://github.com/tong-io/tongflow/pkgs/container/tongflow)（标签 `latest` 和 `main`），版本标签 `v*` 也同步发布（如 `v0.1.0` → `0.1.0`）。拉取并运行：
-
-```bash
-docker pull ghcr.io/tong-io/tongflow:latest
-docker run --rm -p 3000:3000 --env-file .env -v tongflow_data:/app/data ghcr.io/tong-io/tongflow:latest
-```
-
-私有仓库可能需要先 `docker login ghcr.io`（Token 需有 `read:packages` 权限）。
-
-#### 2) 本地开发（`pnpm dev`）
-
-需要 Node.js（建议 20+）和 pnpm。
+#### 方式 A）本地开发
 
 ```bash
 pnpm install
 pnpm dev
 ```
 
-打开 `http://localhost:3000`（进入 `/workspace`）。
+#### 方式 B）Docker Compose
 
-### 环境变量（Modal 与各服务商）
+```bash
+docker compose up --build
+```
 
-应用调用 **Modal**（Worker 执行）和可选的 **LLM / API** 服务。将 [`.env.example`](.env.example) 复制为 `.env` 并填写 Key。核心编辑、保存和导入/导出功能无需任何 TongFlow 托管服务。
+> ⚠️ 当前 Docker 镜像**未**内置 Python + Modal CLI，因此容器内无法自动部署 Modal 插件。若需用 GPU/CPU 插件，请走方式 A，或先在装有 `modal` 的主机上预部署。
 
-常用变量：
+两种方式启动后都落到 `http://localhost:3000/workspace`。数据持久化在 `data/`（SQLite + 上传文件），Docker 模式则在 `tongflow_data` Volume 内。
 
-- `MODAL_TOKEN_ID` / `MODAL_TOKEN_SECRET`：Modal Worker
-- `OPENROUTER_API_KEY`（可选：`OPENROUTER_FREE_MODEL`、`OPENROUTER_HTTP_REFERER`、`OPENROUTER_APP_TITLE`）：默认**生成文本**节点（`gen_text`）使用 OpenRouter 免费路由
-- `GEMINI_API_KEY` 或 `GOOGLE_API_KEY`：模型选择 Gemini 时的**生成文本**及其他 Gemini 多模态处理
-- `OPENAI_API_KEY`（可选：`OPENAI_CHAT_MODEL`）：模型选择 OpenAI 时的**生成文本**；默认模型为 `gpt-4o-mini`
-- `NEXT_PUBLIC_FILE_BASE_URL`：可选；文件存储的 Base URL
+**预构建镜像（GHCR）：** CI 在 `main` 分支推送时发布 [`ghcr.io/tong-io/tongflow`](https://github.com/tong-io/tongflow/pkgs/container/tongflow)（标签 `latest` 和 `main`），版本标签 `v*` 同步发布：
 
-授权 Modal（Token 写入 `~/.modal.toml`）：
+```bash
+docker pull ghcr.io/tong-io/tongflow:latest
+docker run --rm -p 3000:3000 --env-file .env -v tongflow_data:/app/data ghcr.io/tong-io/tongflow:latest
+```
+
+### Step 3 — 配置 `.env`
+
+将 [`.env.example`](.env.example) 复制为 `.env`，按需填 Key。UI 不依赖 Key 即可加载，但任何执行类节点都需要至少一个供应商配置好。
+
+- `MODAL_TOKEN_ID` / `MODAL_TOKEN_SECRET` —— 任何 `tongflow-modal-*` 插件必需
+- `OPENROUTER_API_KEY`（可选 `OPENROUTER_FREE_MODEL`、`OPENROUTER_HTTP_REFERER`、`OPENROUTER_APP_TITLE`）—— 默认**生成文本**节点走 OpenRouter 免费路由
+- `GEMINI_API_KEY` 或 `GOOGLE_API_KEY` —— 基于 Gemini 的 `gen_text` 及其他 Gemini 多模态处理
+- `OPENAI_API_KEY`（可选 `OPENAI_CHAT_MODEL`，默认 `gpt-4o-mini`）—— 基于 OpenAI 的 `gen_text`
+- `NEXT_PUBLIC_FILE_BASE_URL` —— 可选；文件 Base URL
+
+Modal 交互式登录（Token 写入 `~/.modal.toml`）：
 
 ```bash
 pnpm modal:setup
 ```
+
+### Step 4 — 安装插件
+
+`plugins/` 目录是 **gitignored 且首次启动为空** —— UI 能加载，但任何 transform / compose / decompose 节点在装好插件前都跑不了。详见 [docs/plugins.md](docs/plugins.md)。
+
+两种安装方式：
+
+**a）应用内市场** —— 打开 `http://localhost:3000/plugins`，挑选要用的插件并点击安装。服务端会把每个插件 `git clone` 到 `plugins/<plugin-id>/`。
+
+**b）手动 clone** —— 官方插件清单见下方 [官方插件](#官方插件)：
+
+```bash
+git clone https://github.com/tong-io/tongflow-modal-z-image.git plugins/tongflow-modal-z-image
+git clone https://github.com/tong-io/tongflow-llm-openrouter-free.git plugins/tongflow-llm-openrouter-free
+# …按需重复
+```
+
+下次页面加载时扫描器会自动识别新插件。
+
+### Step 5 — 跑节点
+
+首次执行某个 Modal 插件节点时，服务端会自动执行 `modal deploy plugins/<id>/deploy.py`（若插件带模型权重，还会 `modal run plugins/<id>/download.py::download`）。结果有缓存，后续直接调用已部署的 Worker。LLM 插件（`tongflow-llm-*`）无需部署，按你配置的 Key 直接调供应商 API。
 
 ## 已实现功能
 
@@ -170,25 +188,36 @@ pnpm modal:setup
 - ✅ **过滤 / 丢弃片段**: 按规则或手动选择丢弃不需要的片段。
 - ✅ **排列与批量分组**: 对文本或片段批次进行分组排列，供下游处理使用。
 
-## 后端与模型服务
+## 官方插件
 
-- **FFmpeg**: 转码、混流与媒体处理管线
-- **PySceneDetect**: 用于分割片段的镜头边界检测
-- **Z-Image**: 文本生图
-- **ERNIE Image**: 文本生图（备选）
-- **FLUX.2 Klein 9B**: 多参考融合与图像编辑
-- **LTX-2.3**: 文本 / 图像生视频
-- **SeedVR2**: 图像和视频超分辨率
-- **Color-Fix Lab**: 图像 / 视频超分辨率（备选）
-- **Gemma 4**: 多模态文本（图像 / 视频理解）
-- **Qwen3**: 语音识别（`qwen3asr`）与文字转语音（`qwen3tts`）
-- **Whisper**: 语音识别备选（带时间戳）
-- **ACE-Step**: 文本生音乐
-- **Docling / PaddleOCR**: 文档 → 文本解析
-- **Crawl4AI**: URL / 链接 → 文本提取
-- **OpenRouter（LLM 路由）**: 默认 `gen_text` 插件使用 OpenRouter 免费路由（`OPENROUTER_API_KEY`；可选 `OPENROUTER_FREE_MODEL`）
-- **Google Gemini（API）**: 基于 Gemini 的 `gen_text` 插件及其他 Gemini 多模态处理（设置 `GEMINI_API_KEY` 或 `GOOGLE_API_KEY`）
-- **OpenAI（API）**: 基于 OpenAI 的 `gen_text` 插件（`OPENAI_API_KEY`；可选默认 `OPENAI_CHAT_MODEL`）
+TongFlow 采用**插件生态**：所有模型 / 能力都是独立版本的包——Modal GPU/CPU Worker 为 `tongflow-modal-*`，LLM API 适配器为 `tongflow-llm-*`。它们托管在 GitHub 的 [tong-io](https://github.com/tong-io) 组织及 PyPI 上，运行时安装到 gitignored 的 `plugins/` 目录（通过应用内 `/plugins` 市场或直接 `git clone`），扫描器在下次启动时自动识别。详见 [docs/plugins.md](docs/plugins.md)。第三方可以同样的方式发布自己的插件。
+
+下方列出的是随本仓库一同维护的官方插件。
+
+### LLM（文本生成）插件
+
+- [tongflow-llm-openrouter-free](https://github.com/tong-io/tongflow-llm-openrouter-free) — 默认 `gen_text` 路由，使用 OpenRouter 免费模型
+- [tongflow-llm-gemini](https://github.com/tong-io/tongflow-llm-gemini) — 基于 Google Gemini 的 `gen_text` 及多模态处理
+- [tongflow-llm-openai](https://github.com/tong-io/tongflow-llm-openai) — 基于 OpenAI 的 `gen_text`
+
+### Modal（GPU/CPU）插件
+
+- [tongflow-modal-ffmpeg](https://github.com/tong-io/tongflow-modal-ffmpeg) — 转码、混流、媒体处理管线
+- [tongflow-modal-pyscenedetect](https://github.com/tong-io/tongflow-modal-pyscenedetect) — 镜头边界检测，用于分割片段
+- [tongflow-modal-z-image](https://github.com/tong-io/tongflow-modal-z-image) — Z-Image 文本生图
+- [tongflow-modal-ernie-image](https://github.com/tong-io/tongflow-modal-ernie-image) — ERNIE Image 文本生图（备选）
+- [tongflow-modal-flux2-klein9b](https://github.com/tong-io/tongflow-modal-flux2-klein9b) — FLUX.2 Klein 9B 多参考融合与图像编辑
+- [tongflow-modal-ltx](https://github.com/tong-io/tongflow-modal-ltx) — LTX-2.3 文本 / 图像生视频
+- [tongflow-modal-seedvr2](https://github.com/tong-io/tongflow-modal-seedvr2) — SeedVR2 图像 / 视频超分辨率
+- [tongflow-modal-color-fix-lab](https://github.com/tong-io/tongflow-modal-color-fix-lab) — 图像 / 视频超分辨率（备选）
+- [tongflow-modal-gemma4](https://github.com/tong-io/tongflow-modal-gemma4) — Gemma-4 多模态文本（图像 / 视频理解）
+- [tongflow-modal-qwen3asr](https://github.com/tong-io/tongflow-modal-qwen3asr) — Qwen3 语音识别
+- [tongflow-modal-qwen3tts](https://github.com/tong-io/tongflow-modal-qwen3tts) — Qwen3 文字转语音
+- [tongflow-modal-whisper](https://github.com/tong-io/tongflow-modal-whisper) — Whisper 语音识别（带时间戳，备选）
+- [tongflow-modal-ace-step](https://github.com/tong-io/tongflow-modal-ace-step) — ACE-Step 文本生音乐
+- [tongflow-modal-docling](https://github.com/tong-io/tongflow-modal-docling) — Docling 文档 → 文本
+- [tongflow-modal-paddle](https://github.com/tong-io/tongflow-modal-paddle) — PaddleOCR 文档 → 文本
+- [tongflow-modal-crawl4ai](https://github.com/tong-io/tongflow-modal-crawl4ai) — Crawl4AI URL / 链接 → 文本
 
 ## 联系我们
 
@@ -214,10 +243,6 @@ pnpm modal:setup
 </div>
 
 本项目基于 **AGPL-3.0** 协议开源。
-
-## 扩展 AI 能力
-
-功能元数据（模型插槽、处理路由键、耗时提示）集中在 [`config/features.default.json`](config/features.default.json)。覆盖方式、校验（`pnpm validate-features`）以及与任务处理器和节点白名单的关系，请参阅 [docs/feature-registry.md](docs/feature-registry.md)。
 
 ## Star 历史
 

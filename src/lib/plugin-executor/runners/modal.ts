@@ -21,6 +21,7 @@ import {
     getModalPluginConfig,
     getPluginFileAbsolutePath,
 } from "@/lib/plugins/plugins-registry.server";
+import { logger } from "@/lib/logger";
 import { notifyTask } from "@/lib/task/emitter";
 import type { PluginExecRequest, PluginExecResult } from "../types";
 
@@ -83,6 +84,23 @@ async function runModalDownloadPluginMaybeCached(
     if (await shouldSkipModalDownload(pluginId)) return;
     await runModalDownloadPlugin(pluginId, signal);
     await recordModalDownloadCache(pluginId);
+}
+
+function forwardSubprocessChunk(
+    stream: NodeJS.WriteStream,
+    prefix: string,
+    chunk: Buffer,
+): void {
+    const text = chunk.toString("utf8");
+    if (!text) return;
+    // Preserve a trailing newline if present; prefix each line for grep-ability.
+    const hadTrailingNewline = text.endsWith("\n");
+    const body = hadTrailingNewline ? text.slice(0, -1) : text;
+    const prefixed = body
+        .split("\n")
+        .map((line) => `${prefix} ${line}`)
+        .join("\n");
+    stream.write(hadTrailingNewline ? `${prefixed}\n` : prefixed);
 }
 
 let modalSdkTimeoutCancelStreak = 0;
@@ -176,6 +194,7 @@ function runModalCli(
         env: NodeJS.ProcessEnv;
         timeoutMs: number;
         signal?: AbortSignal;
+        pluginId: string;
     },
     python: string,
 ): Promise<void> {
@@ -188,8 +207,15 @@ function runModalCli(
         });
         const stderr: Buffer[] = [];
         const stdout: Buffer[] = [];
-        child.stderr?.on("data", (d: Buffer) => stderr.push(d));
-        child.stdout?.on("data", (d: Buffer) => stdout.push(d));
+        const prefix = `[modal:${opts.pluginId} ${label}]`;
+        child.stderr?.on("data", (d: Buffer) => {
+            stderr.push(d);
+            forwardSubprocessChunk(process.stderr, prefix, d);
+        });
+        child.stdout?.on("data", (d: Buffer) => {
+            stdout.push(d);
+            forwardSubprocessChunk(process.stdout, prefix, d);
+        });
 
         let settled = false;
         const fail = (err: Error) => {
@@ -289,6 +315,7 @@ async function runModalDeployPlugin(
             env: pythonEnvWithTongflow(),
             timeoutMs: MODAL_DEPLOY_TIMEOUT_MS,
             signal,
+            pluginId,
         },
         python,
     );
@@ -313,6 +340,7 @@ async function runModalDownloadPlugin(
             env: pythonEnvWithTongflow(),
             timeoutMs: MODAL_DOWNLOAD_TIMEOUT_MS,
             signal,
+            pluginId,
         },
         python,
     );
@@ -355,6 +383,7 @@ export async function execModalPlugin<S extends NodeSlot>(
 
     const stage = (message: string) => {
         // nodeId is optional here; SSE consumers still receive RUNNING updates.
+        logger.info(`[modal:${req.pluginId}] ${message}`);
         notifyTask(req.taskId, TaskStatus.RUNNING, { message });
     };
 
