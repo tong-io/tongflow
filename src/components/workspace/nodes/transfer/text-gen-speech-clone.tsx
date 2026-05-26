@@ -16,15 +16,12 @@ import type { TongflowPluginNodeProps } from "@/types/tongflow-flow";
 import { AbiNodeShell } from "../base/abi-node-shell";
 import { LanguageSelect } from "../base/language-select";
 
-// `ref_audio` / `audio` are Asset $refs in the ABI, so default classification
-// treats them as handles (fed by upstream edges). But this node owns the
-// reference audio via local upload/record, so override to `config` — both
-// `useAbiForm` and `AbiNodeShell` need to see the override so canvas execution
-// reads from local `node.data` instead of edges.
-const CLONE_SOURCE_SPEC: SourceSpec<"text-gen-speech-clone"> = {
+// `ref_audio` is an Asset $ref in the ABI (default = upstream handle). This
+// transfer node owns reference audio via local upload/record → config override.
+// Wired text+audio uses `textGenSpeechCloneComposeNode` (default handles).
+const CLONE_TRANSFER_SOURCE_SPEC: SourceSpec<"text-gen-speech-clone"> = {
     text: batchOn({ nodeType: "textNode", path: "texts" }),
     ref_audio: configField(),
-    audio: configField(),
 };
 
 const TextGenSpeechCloneNode = ({
@@ -35,15 +32,14 @@ const TextGenSpeechCloneNode = ({
     "textGenSpeechCloneNode"
 >) => {
     const t = useTranslations("Workspace.nodes");
-    const form = useAbiForm("text-gen-speech-clone", CLONE_SOURCE_SPEC);
+    const form = useAbiForm("text-gen-speech-clone", CLONE_TRANSFER_SOURCE_SPEC);
     const texts = data.texts ?? [];
 
     const refAudio = data.ref_audio as string | undefined;
 
-    // ABI types `ref_audio`/`audio` as Asset, but the backend accepts a stored
-    // voice file_key string here (e.g. "uploads/abc.wav") via asset_as_path().
-    const setVoice = (v: string) =>
-        form.patch({ ref_audio: v as any, audio: v as any });
+    // ABI types `ref_audio` as Asset; canvas stores a file_key string until
+    // `prepareAssetInput` materializes bytes for Modal.
+    const setVoice = (v: string) => form.patch({ ref_audio: v as any });
 
     const { upload, isUploading } = useUpload({
         onSuccess: (resp) => setVoice(resp.key),
@@ -73,7 +69,7 @@ const TextGenSpeechCloneNode = ({
     return (
         <AbiNodeShell
             feature="text-gen-speech-clone"
-            sourceSpec={CLONE_SOURCE_SPEC}
+            sourceSpec={CLONE_TRANSFER_SOURCE_SPEC}
             form={form}
             selected={selected}
             className="min-w-[480px]"
@@ -157,7 +153,7 @@ const TextGenSpeechCloneNode = ({
                     <textarea
                         id="ref-text-input"
                         className="w-full h-16 p-2 text-sm rounded-md border border-input bg-background resize-none focus:outline-none focus:ring-2 focus:ring-ring"
-                        placeholder={t("common.referenceTextPlaceholder")}
+                        placeholder={t("common.referenceTextCloneHint")}
                         {...form.register("ref_text")}
                     />
                 </div>

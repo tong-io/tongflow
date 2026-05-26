@@ -5,6 +5,7 @@ import type { JSONSchema7 } from "json-schema";
 
 import { ABI_NODES, type NodeSlot } from "@/generated/abi";
 import { readUploadFileByFileKey } from "@/lib/file/file-utils";
+import { parseUploadFileKeyReference } from "@/lib/file/parse-upload-file-key";
 
 /**
  * Schema-driven server resolver: walks the input schema for `$ref: Asset` (single or array)
@@ -48,30 +49,6 @@ function isAlreadyAsset(value: unknown): value is Asset {
     );
 }
 
-function parseTongflowUploadsFileKey(raw: string): string | null {
-    const t = raw.trim();
-    if (!t) return null;
-    const prefix = "/api/uploads/";
-    if (t.startsWith(prefix)) {
-        return t.slice(prefix.length);
-    }
-    if (t.startsWith("http://") || t.startsWith("https://")) {
-        try {
-            const u = new URL(t);
-            if (u.pathname.startsWith(prefix)) {
-                return u.pathname.slice(prefix.length);
-            }
-        } catch {
-            return null;
-        }
-        return null;
-    }
-    if (!t.startsWith("/") && !t.includes("://") && t.includes("/")) {
-        return t;
-    }
-    return null;
-}
-
 function stripDataUrlToAsset(s: string): Asset | null {
     const t = s.trim();
     if (!t.startsWith("data:") || !t.includes(",")) return null;
@@ -92,16 +69,28 @@ async function resolveSingleAsset(
     const dataAsset = stripDataUrlToAsset(value);
     if (dataAsset) return dataAsset;
 
-    const fileKey = parseTongflowUploadsFileKey(value);
+    const fileKey = parseUploadFileKeyReference(value);
     if (!fileKey) {
         throw new Error(
             `[prepare-asset-input] field "${fieldName}" is a string but not an Asset, file_key, or data URL`,
         );
     }
     const buf = await readUploadFileByFileKey(fileKey);
+    const filename = path.basename(fileKey);
+    const ext = path.extname(filename).slice(1).toLowerCase();
+    const mimeByExt: Record<string, string> = {
+        wav: "audio/wav",
+        mp3: "audio/mpeg",
+        m4a: "audio/mp4",
+        ogg: "audio/ogg",
+        opus: "audio/opus",
+        flac: "audio/flac",
+        webm: "audio/webm",
+    };
     return {
         bytesBase64: buf.toString("base64"),
-        filename: path.basename(fileKey),
+        filename,
+        ...(ext && mimeByExt[ext] ? { mime: mimeByExt[ext] } : {}),
     } satisfies Asset;
 }
 

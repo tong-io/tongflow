@@ -327,20 +327,20 @@ export function useNodeActions(args: UseNodeActionsArgs): UseNodeActionsResult {
                 <ActionItem
                     buttons={[
                         {
+                            text: t("lipSync"),
+                            id: "lip-sync",
+                            onClick: () =>
+                                compose({
+                                    type: "audioVideoLipSyncNode",
+                                    data: { ids },
+                                }),
+                        },
+                        {
                             text: t("merge"),
                             id: "merge-video-audio",
                             onClick: () =>
                                 compose({
                                     type: "mergeVideoAudioNode",
-                                    data: { ids },
-                                }),
-                        },
-                        {
-                            text: t("lipSync"),
-                            id: "lip-sync",
-                            onClick: () =>
-                                compose({
-                                    type: "speechVideoGenVideoNode",
                                     data: { ids },
                                 }),
                         },
@@ -390,11 +390,6 @@ export function useNodeActions(args: UseNodeActionsArgs): UseNodeActionsResult {
         }
         // Image + text
         if (counts.imageNode === 1 && counts.textNode === 1) {
-            const textNode = ids
-                .map((id) => nodes.find((n) => n.id === id))
-                .find((node) => node?.type === "textNode");
-            const textContent = asBaseData(textNode?.data).texts?.[0] ?? "";
-
             return (
                 <ActionItem
                     buttons={[
@@ -410,14 +405,11 @@ export function useNodeActions(args: UseNodeActionsArgs): UseNodeActionsResult {
                         {
                             text: t("generateVideo"),
                             id: "generate-video",
-                            nodeType: "imageGenVideoNode",
+                            nodeType: "imageGenVideoComposeNode",
                             onClick: () =>
                                 compose({
-                                    type: "imageGenVideoNode",
-                                    data: {
-                                        ids,
-                                        query: textContent,
-                                    },
+                                    type: "imageGenVideoComposeNode",
+                                    data: { ids },
                                 }),
                         },
                     ]}
@@ -434,7 +426,7 @@ export function useNodeActions(args: UseNodeActionsArgs): UseNodeActionsResult {
                             id: "clone-voice",
                             onClick: () =>
                                 compose({
-                                    type: "textAudioGenSpeechNode",
+                                    type: "textGenSpeechCloneComposeNode",
                                     data: { ids },
                                 }),
                         },
@@ -450,17 +442,17 @@ export function useNodeActions(args: UseNodeActionsArgs): UseNodeActionsResult {
                 />
             );
         }
-        // Text + video
+        // Text + video → LipDub (reference video + target dialogue in prompt)
         if (counts.textNode === 1 && counts.videoNode === 1) {
             return (
                 <ActionItem
                     buttons={[
                         {
-                            text: t("speechGenVideo"),
-                            id: "speech-gen-video",
+                            text: t("lipDub"),
+                            id: "lip-dub",
                             onClick: () =>
                                 compose({
-                                    type: "speechGenVideoNode",
+                                    type: "speechVideoGenVideoNode",
                                     data: { ids },
                                 }),
                         },
@@ -800,13 +792,13 @@ export function useNodeActions(args: UseNodeActionsArgs): UseNodeActionsResult {
                                     ]),
                             },
                             {
-                                text: t("splitVideoAudio"),
-                                id: "split-video-audio",
-                                nodeType: "separateVideoAudioNode",
+                                text: t("removeVideoAudio"),
+                                id: "remove-video-audio",
+                                nodeType: "removeVideoAudioNode",
                                 onClick: () =>
                                     expands(id, [
                                         {
-                                            type: "separateVideoAudioNode",
+                                            type: "removeVideoAudioNode",
                                             data,
                                         },
                                     ]),

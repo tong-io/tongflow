@@ -8,8 +8,14 @@ from .asset import Asset, AudioRef, FileRef, ImageRef, ModelRef, VideoRef
 class SpeechVideoGenVideoInput(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
-    audio: Asset
+    text: str
     video: Asset
+    enhance_prompt: bool | None = None
+    height: int | None = None
+    reference_strength: float | None = None
+    seed: float | None = None
+    width: int | None = None
+
 
 class SpeechVideoGenVideoOutput(BaseModel):
     model_config = ConfigDict(extra="forbid")
@@ -17,4 +23,3 @@ class SpeechVideoGenVideoOutput(BaseModel):
     success: bool
     error: str | None = None
     video: Asset | None = None
-

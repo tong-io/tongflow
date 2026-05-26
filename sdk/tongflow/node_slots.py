@@ -27,8 +27,9 @@ class NodeSlots:
     TRANSCRIBE: Final[str] = 'transcribe'
     CONCAT_VIDEOS: Final[str] = 'concat-videos'
     EXTRACT_AUDIO: Final[str] = 'extract-audio'
-    SEPARATE_VIDEO_AUDIO: Final[str] = 'separate-video-audio'
+    REMOVE_VIDEO_AUDIO: Final[str] = 'remove-video-audio'
     MERGE_VIDEO_AUDIO: Final[str] = 'merge-video-audio'
+    AUDIO_VIDEO_LIP_SYNC: Final[str] = 'audio-video-lip-sync'
     GET_FIRST_FRAME: Final[str] = 'get-first-frame'
     GET_LAST_FRAME: Final[str] = 'get-last-frame'
     PARSE_DOCUMENT: Final[str] = 'parse-document'
@@ -72,8 +73,9 @@ ALL_NODE_SLOTS: Final[tuple[str, ...]] = (
     'transcribe',
     'concat-videos',
     'extract-audio',
-    'separate-video-audio',
+    'remove-video-audio',
     'merge-video-audio',
+    'audio-video-lip-sync',
     'get-first-frame',
     'get-last-frame',
     'parse-document',

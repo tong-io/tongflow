@@ -34,6 +34,16 @@ export const VIDEO_DURATIONS: Duration[] = [
     { value: "60", label: "1min" },
 ];
 
+/** Slider range for text/image → video nodes (seconds). */
+export const VIDEO_DURATION_MIN = 1;
+export const VIDEO_DURATION_MAX = 30;
+export const VIDEO_DURATION_DEFAULT = 5;
+
+export function clampVideoDuration(raw: number): number {
+    const v = Math.round(raw);
+    return Math.max(VIDEO_DURATION_MIN, Math.min(VIDEO_DURATION_MAX, v));
+}
+
 /** Icon sizing lookup for aspect ratio thumbnails */
 export function getAspectRatioIconSize(ratio: string): {
     width: string;

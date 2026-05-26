@@ -86,13 +86,39 @@ def asset_from_path(p: Union[str, Path], *, mime: str | None = None) -> Asset:
     )
 
 
+def _suffix_for_media(val: object, suffix: str) -> str:
+    if suffix:
+        return suffix
+    filename: str | None = None
+    mime: str | None = None
+    if isinstance(val, Asset):
+        filename = val.filename
+        mime = val.mime
+    elif isinstance(val, dict):
+        fn = val.get("filename")
+        if isinstance(fn, str) and fn:
+            filename = fn
+        m = val.get("mime")
+        if isinstance(m, str) and m:
+            mime = m
+    if filename:
+        ext = Path(filename).suffix
+        if ext:
+            return ext
+    if mime:
+        for ext, mt in _EXT_TO_MIME.items():
+            if mt == mime:
+                return f".{ext}"
+    return ""
+
+
 def asset_to_tempfile(val: object, *, suffix: str = "") -> Path:
     """Decode an Asset / base64 / bytes into a NamedTemporaryFile and return the path.
 
     Caller is responsible for cleanup. Prefer :func:`asset_as_path` (context manager).
     """
     data = prompt_media_to_bytes(val)
-    fd, path = tempfile.mkstemp(suffix=suffix)
+    fd, path = tempfile.mkstemp(suffix=_suffix_for_media(val, suffix))
     try:
         with os.fdopen(fd, "wb") as f:
             f.write(data)

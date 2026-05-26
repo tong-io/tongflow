@@ -83,7 +83,7 @@
             "removeSubtitle": "字幕削除",
             "removeWatermark": "透かし削除",
             "extractAudioTrack": "音声抽出",
-            "splitVideoAudio": "映像・音声の分離",
+            "removeVideoAudio": "音声を除去",
             "slice": "スライス",
             "firstFrame": "最初のフレーム",
             "lastFrame": "最後のフレーム",
@@ -101,6 +101,7 @@
             "characterReplace": "キャラクター置換",
             "merge": "結合",
             "lipSync": "リップシンク",
+            "lipDub": "吹き替え・口パク",
             "cloneVoice": "ボイスクローン",
             "speechGenVideo": "音声から動画生成"
         },
@@ -248,7 +249,7 @@
                         "transcribe-timestamp": "音声認識（タイムスタンプ）",
                         "concat-videos": "動画連結",
                         "extract-audio": "音声抽出",
-                        "separate-video-audio": "映像・音声の分離",
+                        "remove-video-audio": "音声除去（無音動画）",
                         "merge-video-audio": "動画+音声合成",
                         "get-first-frame": "先頭フレーム",
                         "get-last-frame": "末尾フレーム",
@@ -273,7 +274,8 @@
                         "image-image-gen-video": "画像+画像から動画",
                         "text-gen-video": "テキストから動画",
                         "image-gen-model": "画像から3D",
-                        "speech-video-gen-video": "音声+動画から動画",
+                        "speech-video-gen-video": "動画+台詞吹き替え",
+                        "audio-video-lip-sync": "音声+動画リップシンク",
                         "text-gen-speech-clone": "ボイスクローン",
                         "text-gen-speech-instruct": "指示TTS",
                         "video-image-move-animal": "動画+画像（動物）",
@@ -311,6 +313,7 @@
                 "noReferenceAudio": "参照音声をアップロードまたは録音してください（3秒以上）",
                 "referenceText": "参照テキスト",
                 "referenceTextPlaceholder": "任意：参照音声の書き起こしテキスト。クローン品質の向上に役立ちます",
+                "referenceTextCloneHint": "空欄の場合は x-vector クローン。転写テキストを入力すると ICL 高品質クローンになります",
                 "language": "言語",
                 "inputText": "テキスト入力",
                 "voiceOptions": {
@@ -326,6 +329,8 @@
                 "combineText": "テキスト結合",
                 "textGenImage": "テキストから画像",
                 "textGenSpeechClone": "音声生成（クローン）",
+                "textGenSpeechCloneCompose": "ボイスクローン（テキスト+参考音声）",
+                "imageGenVideoCompose": "画像から動画（テキスト+画像）",
                 "textGenSpeechPreset": "音声生成（プリセット）",
                 "textGenSpeechInstruct": "音声生成（説明）",
                 "imageFusion": "画像合成",
@@ -349,9 +354,10 @@
                 "speechImageGenVideo": "音声+画像から動画",
                 "concatVideo": "動画結合",
                 "mergeVideoAudio": "動画と音声を結合",
+                "audioVideoLipSync": "動画リップシンク",
                 "speechImageVideoGenVideo": "音声+画像+動画から動画",
                 "speechTextGenVideo": "音声+テキストから動画",
-                "speechVideoGenVideo": "音声+動画から動画",
+                "speechVideoGenVideo": "動画吹き替え・口パク",
                 "imageImageGenVideo": "画像+画像から動画",
                 "textAudioGenSpeech": "テキスト+音声から音声",
                 "videoImageMix": "動画+画像ミックス",
@@ -361,7 +367,7 @@
                 "getFirstFrame": "最初のフレーム",
                 "getLastFrame": "最後のフレーム",
                 "extractAudioTrack": "音声抽出",
-                "splitVideoAudio": "映像・音声の分離"
+                "removeVideoAudio": "音声除去（無音動画）"
             },
             "options": {
                 "portrait": "縦向き",
@@ -400,12 +406,13 @@
                 "startSeparation": "分離を開始",
                 "concatVideo": "動画を結合",
                 "startMerge": "結合を開始",
+                "lipDub": "吹き替え・口パク",
                 "splitVideo": "動画を分割",
                 "splitText": "スマート分割",
                 "getFirstFrame": "最初のフレームを取得",
                 "getLastFrame": "最後のフレームを取得",
                 "extractAudioTrack": "音声を抽出",
-                "splitVideoAudio": "映像と音声を分離"
+                "removeVideoAudio": "音声を除去"
             },
             "params": {
                 "prompt": "プロンプト",
@@ -525,8 +532,8 @@
             "speechGenVideo": {
                 "loading": "読み込み中...",
                 "inputContent": "入力内容",
-                "video": "動画",
-                "connectVideoHint": "動画ファイルを接続してください",
+                "audio": "音声",
+                "connectAudioHint": "音声ノードを接続するか、音声ファイルをアップロードしてください",
                 "audioPromptLabel": "音声プロンプト",
                 "audioPromptPlaceholder": "音声吹き替えのプロンプトを入力"
             },
@@ -555,6 +562,16 @@
             "textGenText": {
                 "instructions": "指示"
             },
+            "lipDub": {
+                "targetDialogue": "目標台詞（プロンプト）",
+                "targetDialoguePlaceholder": "キャラクター説明と目標言語の台詞を含む完全なプロンプト（自動翻訳なし）",
+                "promptHint": "解像度は参照動画に合わせます。キャラクター＋目標言語の台詞を含む完全なプロンプト（自動翻訳なし）。長さは原動画に近づけ、話者1人のみ。"
+            },
+            "lipSync": {
+                "scenePrompt": "シーン説明（任意）",
+                "scenePromptPlaceholder": "画面と話者を記述。口パクは接続した音声に同期します。台詞全文はここに書かないでください。",
+                "audioDrivenHint": "口パクと音声は音声入力に従います。音声の長さは参照動画に近づけてください。出力は既定 720p。"
+            },
             "imageEdit": {
                 "performanceMode": "パフォーマンスモード",
                 "ecoMode": "💰 エコ（FLUX.2 Klein 9B）",
@@ -577,6 +594,11 @@
                 "connectVideo": "少なくとも1つの動画ファイルを接続してください",
                 "connectImageVideoAudio": "画像、動画、音声ファイルを接続してください",
                 "connectTextAudio": "テキスト内容と音声ファイルを接続してください",
+                "connectTextReferenceAudio": "テキストノードと音声ノード（参考音声）を接続してください",
+                "connectTextImage": "テキストノードと画像ノードを接続してください",
+                "connectTextVideoNode": "動画ノードとテキストノードを接続してください（目標台詞はプロンプトに記載）",
+                "referenceAudio": "参考音声",
+                "referenceTextOptional": "参照テキスト（任意・クローン品質向上）",
                 "connectVideoAudio": "動画と音声ファイルを接続してください",
                 "generatePromptLabel": "生成プロンプト",
                 "generatePromptPlaceholder": "動画生成プロンプトを入力：内容、スタイル、アクションなどを説明（任意）",

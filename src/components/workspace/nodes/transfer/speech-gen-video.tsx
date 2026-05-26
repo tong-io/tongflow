@@ -24,13 +24,13 @@ const SpeechGenVideoNode = ({
     const localFileKeys = data.fileKeys ?? [];
 
     const fromNodes = useNodesData(ids);
-    const videoNode = fromNodes.find((node) => node.type === "videoNode");
+    const audioNode = fromNodes.find((node) => node.type === "audioNode");
     const textNode = fromNodes.find((node) => node.type === "textNode");
 
     const fileKeys: string[] = useMemo(() => {
-        if (videoNode) return coerceBaseNodeData(videoNode.data).fileKeys || [];
+        if (audioNode) return coerceBaseNodeData(audioNode.data).fileKeys || [];
         return localFileKeys;
-    }, [videoNode, localFileKeys]);
+    }, [audioNode, localFileKeys]);
 
     const upstreamTexts: string[] = useMemo(() => {
         if (textNode) return coerceBaseNodeData(textNode.data).texts || [];
@@ -43,14 +43,14 @@ const SpeechGenVideoNode = ({
     return (
         <AbiNodeShell
             feature="speech-text-gen-video"
-            sourceSpec={{ audio: handle({ nodeType: "videoNode" }) }}
+            sourceSpec={{ audio: handle({ nodeType: "audioNode" }) }}
             form={form}
             selected={selected}
             className="min-w-[480px]"
             data={data}
             title={t("titles.speechGenVideo")}
             icon={<Atom className="h-5 w-5" />}
-            executeLabel={t("actions.generateAudio")}
+            executeLabel={t("actions.generateVideo")}
             executeDisabled={
                 !(videoPrompt || hasUpstreamTexts) || !fileKeys?.length
             }
@@ -65,14 +65,14 @@ const SpeechGenVideoNode = ({
                             {fileKeys && fileKeys.length > 0 && (
                                 <MediaThumbnail
                                     fileKey={fileKeys[0]}
-                                    label={t("speechGenVideo.video")}
-                                    type="video"
+                                    label={t("speechGenVideo.audio")}
+                                    type="audio"
                                 />
                             )}
                         </div>
                         {(!fileKeys || fileKeys.length === 0) && (
                             <p className="text-xs text-red-500">
-                                {t("speechGenVideo.connectVideoHint")}
+                                {t("speechGenVideo.connectAudioHint")}
                             </p>
                         )}
                     </div>

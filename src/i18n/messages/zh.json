@@ -83,7 +83,7 @@
             "removeSubtitle": "去字幕",
             "removeWatermark": "去水印",
             "extractAudioTrack": "提取音轨",
-            "splitVideoAudio": "音视频分离",
+            "removeVideoAudio": "去除音频",
             "slice": "切片",
             "firstFrame": "首帧截图",
             "lastFrame": "尾帧截图",
@@ -101,6 +101,7 @@
             "characterReplace": "人物替换",
             "merge": "合并",
             "lipSync": "视频对口型",
+            "lipDub": "配音对口型",
             "cloneVoice": "克隆语音",
             "speechGenVideo": "音频生成视频"
         },
@@ -248,7 +249,7 @@
                         "transcribe-timestamp": "语音转文字（带时间戳）",
                         "concat-videos": "拼接视频",
                         "extract-audio": "提取音轨",
-                        "separate-video-audio": "音视频分离",
+                        "remove-video-audio": "去除音频（无声视频）",
                         "merge-video-audio": "音视频合并",
                         "get-first-frame": "首帧",
                         "get-last-frame": "尾帧",
@@ -273,7 +274,8 @@
                         "image-image-gen-video": "图+图生视频",
                         "text-gen-video": "文生视频",
                         "image-gen-model": "图生3D",
-                        "speech-video-gen-video": "语音+视频生视频",
+                        "speech-video-gen-video": "视频+台词配音对口型",
+                        "audio-video-lip-sync": "音频+视频对口型",
                         "text-gen-speech-clone": "音色克隆",
                         "text-gen-speech-instruct": "指令语音",
                         "video-image-move-animal": "视频+图驱动（动物）",
@@ -311,6 +313,7 @@
                 "noReferenceAudio": "请上传或录制一段参考音频（≥3 秒）",
                 "referenceText": "参考文本",
                 "referenceTextPlaceholder": "可选：参考音频的转写文本，有助于提升克隆质量",
+                "referenceTextCloneHint": "不填则使用 x-vector 快速克隆；填写参考音频转写文本可启用更高质量的 ICL 克隆",
                 "language": "语言",
                 "inputText": "输入文本",
                 "voiceOptions": {
@@ -326,6 +329,8 @@
                 "combineText": "合并文本",
                 "textGenImage": "文本生成图片",
                 "textGenSpeechClone": "生成语音(克隆音色)",
+                "textGenSpeechCloneCompose": "音色克隆（文本+参考音频）",
+                "imageGenVideoCompose": "图生视频（文本+图片）",
                 "textGenSpeechPreset": "生成语音(预设音色)",
                 "textGenSpeechInstruct": "生成语音(描述音色)",
                 "imageFusion": "图片融合",
@@ -349,9 +354,10 @@
                 "speechImageGenVideo": "语音图片生成视频",
                 "concatVideo": "视频拼接",
                 "mergeVideoAudio": "音视频合并",
+                "audioVideoLipSync": "视频对口型",
                 "speechImageVideoGenVideo": "语音图片视频生成视频",
                 "speechTextGenVideo": "语音文本生成视频",
-                "speechVideoGenVideo": "语音视频生成视频",
+                "speechVideoGenVideo": "视频配音对口型",
                 "imageImageGenVideo": "图片图片生成视频",
                 "textAudioGenSpeech": "文本音频生成语音",
                 "videoImageMix": "视频图片混合",
@@ -361,7 +367,7 @@
                 "getFirstFrame": "首帧截图",
                 "getLastFrame": "尾帧截图",
                 "extractAudioTrack": "提取音轨",
-                "splitVideoAudio": "音视频分离"
+                "removeVideoAudio": "去除音频（无声视频）"
             },
             "options": {
                 "portrait": "竖屏",
@@ -400,12 +406,13 @@
                 "startSeparation": "开始分离",
                 "concatVideo": "拼接视频",
                 "startMerge": "开始合并",
+                "lipDub": "配音对口型",
                 "splitVideo": "分割视频",
                 "splitText": "智能拆分",
                 "getFirstFrame": "截取首帧",
                 "getLastFrame": "截取尾帧",
                 "extractAudioTrack": "提取音轨",
-                "splitVideoAudio": "分离音视频"
+                "removeVideoAudio": "去除音频"
             },
             "params": {
                 "prompt": "提示词",
@@ -611,8 +618,8 @@
             "speechGenVideo": {
                 "loading": "加载中...",
                 "inputContent": "输入内容",
-                "video": "视频",
-                "connectVideoHint": "请确保已连接视频文件",
+                "audio": "音频",
+                "connectAudioHint": "请连接音频节点或上传音频文件",
                 "audioPromptLabel": "配音提示词",
                 "audioPromptPlaceholder": "输入音频配音提示词"
             },
@@ -641,6 +648,16 @@
             "textGenText": {
                 "instructions": "指令"
             },
+            "lipDub": {
+                "targetDialogue": "目标台词（提示词）",
+                "targetDialoguePlaceholder": "写入完整提示词，需包含角色描述与要说的目标语言台词（模型不会自动翻译）",
+                "promptHint": "输出分辨率跟随参考视频。台词宜写完整提示词（含角色与目标语言对白，模型不自动翻译），长度接近原片；仅支持单说话人。"
+            },
+            "lipSync": {
+                "scenePrompt": "场景描述（可选）",
+                "scenePromptPlaceholder": "描述画面与说话人，例如：一位女性对着镜头说话。口型由连接的音频驱动，不要在这里写台词全文。",
+                "audioDrivenHint": "口型与配音由音频轨决定；音频时长宜与参考视频接近。输出默认 720p。"
+            },
             "imageEdit": {
                 "performanceMode": "性能模式",
                 "ecoMode": "💰 性价比（FLUX.2 Klein 9B）",
@@ -663,6 +680,11 @@
                 "connectVideo": "请连接至少一个视频文件",
                 "connectImageVideoAudio": "请确保已连接一张图片、一个视频和一个音频文件",
                 "connectTextAudio": "请确保已连接文本内容和音频文件",
+                "connectTextReferenceAudio": "请连接文本节点与音频节点（参考音色）",
+                "connectTextImage": "请连接文本节点与图片节点",
+                "connectTextVideoNode": "请连接视频节点与文本节点（目标台词写入提示词）",
+                "referenceAudio": "参考音频",
+                "referenceTextOptional": "参考文本（可选，提升克隆质量）",
                 "connectVideoAudio": "请确保已连接视频和音频文件",
                 "generatePromptLabel": "生成提示词",
                 "generatePromptPlaceholder": "输入视频生成提示词，描述要生成的视频内容、风格、动作等（可选）",

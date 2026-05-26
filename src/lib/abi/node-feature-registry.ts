@@ -19,7 +19,13 @@ import {
     sourceHandleId,
     targetHandleId,
 } from "./handle-introspect";
-import type { ResolvedSpec } from "./resolve";
+import { resolveSpec, type ResolvedSpec } from "./resolve";
+import {
+    batchOn,
+    configField,
+    handle,
+    type FieldSourceOverride,
+} from "./sources";
 
 export const NODE_TYPE_TO_ABI_FEATURE: Readonly<Record<string, NodeSlot>> = {
     // transfer/
@@ -33,13 +39,15 @@ export const NODE_TYPE_TO_ABI_FEATURE: Readonly<Record<string, NodeSlot>> = {
     textGenImageNode: "image-gen",
     textGenMusicNode: "gen-music",
     textGenSpeechCloneNode: "text-gen-speech-clone",
+    textGenSpeechCloneComposeNode: "text-gen-speech-clone",
+    imageGenVideoComposeNode: "image-gen-video",
     textGenSpeechPresetNode: "text-gen-speech-preset",
     textGenSpeechInstructNode: "text-gen-speech-instruct",
     removeVideoSubtitleNode: "subtitle_remove",
     videoUpscaleNode: "video-upscale",
     removeWatermarkNode: "remove_watermark",
     extractAudioNode: "extract-audio",
-    separateVideoAudioNode: "separate-video-audio",
+    removeVideoAudioNode: "remove-video-audio",
     denoiseAudioSubtitleNode: "denoise_audio",
     separateAudioTrackNode: "separate_audio_track",
     separateSpeakerNode: "separate_speaker",
@@ -59,6 +67,7 @@ export const NODE_TYPE_TO_ABI_FEATURE: Readonly<Record<string, NodeSlot>> = {
 
     // compose/
     mergeVideoAudioNode: "merge-video-audio",
+    audioVideoLipSyncNode: "audio-video-lip-sync",
     imageFusionNode: "image-fusion",
     speechImageGenVideoNode: "audio-image-gen-video",
     speechTextGenVideoNode: "speech-text-gen-video",
@@ -81,6 +90,60 @@ export function featureForNodeType(
 ): NodeSlot | undefined {
     if (!nodeType) return undefined;
     return NODE_TYPE_TO_ABI_FEATURE[nodeType];
+}
+
+/**
+ * Per-node `sourceSpec` overrides used at graph-mutation time so new edges get
+ * the correct `targetHandle` before the target mounts. Keep in sync with each
+ * ABI node component's `sourceSpec` prop.
+ */
+export const NODE_TYPE_SOURCE_SPEC: Partial<
+    Record<string, Record<string, FieldSourceOverride>>
+> = {
+    textGenVideoNode: {
+        text: batchOn({ nodeType: "textNode", path: "texts" }),
+    },
+    imageGenVideoNode: {
+        image: batchOn(),
+        text: configField(),
+    },
+    imageGenVideoComposeNode: {
+        image: batchOn(),
+        text: handle({ nodeType: "textNode", path: "texts[0]" }),
+    },
+    imageGenImageNode: {
+        image: handle({ nodeType: "imageNode" }),
+        text: handle({ nodeType: "textNode", path: "texts[0]" }),
+    },
+    speechTextGenVideoNode: {
+        text: handle({ nodeType: "textNode", path: "texts[0]" }),
+        audio: handle({ nodeType: "audioNode" }),
+    },
+    speechImageGenVideoNode: {
+        image: handle({ nodeType: "imageNode" }),
+        audio: handle({ nodeType: "audioNode" }),
+    },
+    speechVideoGenVideoNode: {
+        video: handle({ nodeType: "videoNode" }),
+        text: handle({ nodeType: "textNode", path: "texts[0]" }),
+    },
+    audioVideoLipSyncNode: {
+        video: handle({ nodeType: "videoNode" }),
+        audio: handle({ nodeType: "audioNode" }),
+        text: configField(),
+    },
+    textGenSpeechCloneComposeNode: {
+        text: batchOn({ nodeType: "textNode", path: "texts" }),
+    },
+};
+
+export function resolvedSpecForNodeType(
+    nodeType: string | undefined,
+): ResolvedSpec | undefined {
+    const feature = featureForNodeType(nodeType);
+    const overrides = nodeType ? NODE_TYPE_SOURCE_SPEC[nodeType] : undefined;
+    if (!feature || !overrides) return undefined;
+    return resolveSpec(feature, overrides);
 }
 
 /**

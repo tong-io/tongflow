@@ -1,23 +1,24 @@
 from __future__ import annotations
 
+from typing import Optional
+
 from pydantic import BaseModel, ConfigDict
 
 from .asset import Asset, AudioRef, FileRef, ImageRef, ModelRef, VideoRef
 
 
-class AudioImageGenVideoInput(BaseModel):
+class AudioVideoLipSyncInput(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     audio: Asset
-    image: Asset
-    text: str | None = None
-    height: int | None = None
-    width: int | None = None
+    video: Asset
+    seed: Optional[float] = None
+    text: Optional[str] = None
 
-class AudioImageGenVideoOutput(BaseModel):
+
+class AudioVideoLipSyncOutput(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     success: bool
-    error: str | None = None
-    video: Asset | None = None
-
+    error: Optional[str] = None
+    video: Optional[Asset] = None

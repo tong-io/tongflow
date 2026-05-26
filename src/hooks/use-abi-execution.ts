@@ -24,6 +24,7 @@ import { registerAbiNode, unregisterAbiNode } from "@/lib/abi/node-registry";
 import {
     buildPrompts,
     collectHandleValues,
+    promptMissingRequired,
     resolveSpec,
 } from "@/lib/abi/resolve";
 import type { FieldSourceOverride, SourceSpec } from "@/lib/abi/sources";
@@ -336,6 +337,16 @@ export function useAbiExecution<F extends NodeSlot>(
 
         const built = buildPrompts({ spec, configValues, handleValues });
         const prompts = transformPrompts ? transformPrompts(built) : built;
+        for (const prompt of prompts) {
+            const missing = promptMissingRequired(spec, prompt);
+            if (missing) {
+                logger.warn(
+                    `[useAbiExecution] Refusing to run ${feature}: required input "${missing}" is empty (node ${nodeId})`,
+                    { prompt, handleValues, configValues },
+                );
+                return;
+            }
+        }
         if (prompts.length === 0) {
             const incomingEdges = edges.filter((e) => e.target === nodeId);
             const upstreamSnapshot = incomingEdges.map((e) => {

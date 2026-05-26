@@ -24,8 +24,10 @@ import DropVideoNode from "./nodes/batch/drop-video";
 import ConcatVideoNode from "./nodes/compose/concat-video";
 import ConcatVideoComposeNode from "./nodes/compose/concat-video";
 import ImageFusionNode from "./nodes/compose/image-fusion";
+import ImageGenVideoComposeNode from "./nodes/compose/image-gen-video-compose";
 import ImageImageGenVideoNode from "./nodes/compose/image-image-gen-video";
 // Compose nodes
+import AudioVideoLipSyncNode from "./nodes/compose/audio-video-lip-sync";
 import MergeVideoAudioNode from "./nodes/compose/merge-video-audio";
 import SpeechImageGenVideoNode from "./nodes/compose/speech-image-gen-video";
 import SpeechImageVideoGenVideoNode from "./nodes/compose/speech-image-video-gen-video";
@@ -62,10 +64,11 @@ import RemoveVideoSubtitleNode from "./nodes/transfer/remove-subtitle";
 import RemoveWatermarkNode from "./nodes/transfer/remove-watermark";
 import SeparateAudioTrackNode from "./nodes/transfer/separate-audio-track";
 import SeparateSpeakerNode from "./nodes/transfer/separate-speaker";
-import SeparateVideoAudioNode from "./nodes/transfer/separate-video-audio";
+import RemoveVideoAudioNode from "./nodes/transfer/remove-video-audio";
 import SpeechGenVideoNode from "./nodes/transfer/speech-gen-video";
 import TextGenImageNode from "./nodes/transfer/text-gen-image";
 import TextGenMusicNode from "./nodes/transfer/text-gen-music";
+import TextGenSpeechCloneComposeNode from "./nodes/compose/text-gen-speech-clone-compose";
 import TextGenSpeechCloneNode from "./nodes/transfer/text-gen-speech-clone";
 import TextGenSpeechInstructNode from "./nodes/transfer/text-gen-speech-instruct";
 import TextGenSpeechPresetNode from "./nodes/transfer/text-gen-speech-preset";
@@ -99,6 +102,7 @@ export const NODE_TYPES: NodeTypes = {
 
     // Transform nodes - Implemented
     imageGenVideoNode: ImageGenVideoNode,
+    imageGenVideoComposeNode: ImageGenVideoComposeNode,
     textGenVideoNode: TextGenVideoNode,
     imageGenModelNode: ImageGenModelNode,
     speechGenVideoNode: SpeechGenVideoNode,
@@ -108,13 +112,14 @@ export const NODE_TYPES: NodeTypes = {
     textGenImageNode: TextGenImageNode,
     textGenMusicNode: TextGenMusicNode,
     textGenSpeechCloneNode: TextGenSpeechCloneNode,
+    textGenSpeechCloneComposeNode: TextGenSpeechCloneComposeNode,
     textGenSpeechPresetNode: TextGenSpeechPresetNode,
     textGenSpeechInstructNode: TextGenSpeechInstructNode,
     removeVideoSubtitleNode: RemoveVideoSubtitleNode,
     videoUpscaleNode: VideoUpscaleNode,
     removeWatermarkNode: RemoveWatermarkNode,
     extractAudioNode: ExtractAudioNode,
-    separateVideoAudioNode: SeparateVideoAudioNode,
+    removeVideoAudioNode: RemoveVideoAudioNode,
     denoiseAudioSubtitleNode: DenoiseAudioNode,
     separateAudioTrackNode: SeparateAudioTrackNode,
     separateSpeakerNode: SeparateSpeakerNode,
@@ -134,6 +139,7 @@ export const NODE_TYPES: NodeTypes = {
 
     // Compose nodes - Implemented
     mergeVideoAudioNode: MergeVideoAudioNode,
+    audioVideoLipSyncNode: AudioVideoLipSyncNode,
     imageFusionNode: ImageFusionNode,
     speechImageGenVideoNode: SpeechImageGenVideoNode,
     speechTextGenVideoNode: SpeechTextGenVideoNode,
@@ -201,7 +207,7 @@ export const NODE_CATEGORIES = {
         "removeWatermarkNode",
         "videoUpscaleNode",
         "extractAudioNode",
-        "separateVideoAudioNode",
+        "removeVideoAudioNode",
         "denoiseAudioSubtitleNode",
         "separateAudioTrackNode",
         "separateSpeakerNode",
@@ -217,6 +223,7 @@ export const NODE_CATEGORIES = {
     BATCH: ["dropVideoNode", "arrangeNode", "concatVideoNode"],
     COMPOSE: [
         "mergeVideoAudioNode",
+        "audioVideoLipSyncNode",
         "imageFusionNode",
         "speechImageGenVideoNode",
         "speechTextGenVideoNode",
@@ -226,6 +233,8 @@ export const NODE_CATEGORIES = {
         "videoImageGenVideoMixNode",
         "imageImageGenVideoNode",
         "textAudioGenSpeechNode",
+        "textGenSpeechCloneComposeNode",
+        "imageGenVideoComposeNode",
         "textsGenTextNode",
         "concatVideoComposeNode",
     ],

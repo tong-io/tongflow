@@ -16,7 +16,10 @@ import {
 } from "@xyflow/react";
 import { v4 } from "uuid";
 import { create } from "zustand";
-import { resolveEdgeHandles } from "@/lib/abi/node-feature-registry";
+import {
+    resolveEdgeHandles,
+    resolvedSpecForNodeType,
+} from "@/lib/abi/node-feature-registry";
 import { DATA_NODE_TYPES } from "@/lib/workflow/executable-workflow";
 
 // True when React Flow reports a persisted data/input node type
@@ -373,6 +376,7 @@ export const useFlow = create<FlowState>((set, get) => ({
                 const { sourceHandle, targetHandle } = resolveEdgeHandles({
                     sourceType: currNode.type,
                     targetType: type,
+                    targetSpec: resolvedSpecForNodeType(type),
                 });
 
                 edges = addEdge(
@@ -470,6 +474,7 @@ export const useFlow = create<FlowState>((set, get) => ({
                     sourceType: node.type,
                     targetType: type,
                     usedTargetHandles,
+                    targetSpec: resolvedSpecForNodeType(type),
                 });
                 if (targetHandle) usedTargetHandles.add(targetHandle);
                 return {

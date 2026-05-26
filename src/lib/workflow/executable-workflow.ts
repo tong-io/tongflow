@@ -93,7 +93,7 @@ export interface ExecutableNode {
     batchField?: string;
     /**
      * ABI-derived output routes, one per non-meta output field. Multi-channel
-     * nodes (e.g. `separate-video-audio` → video + audio) emit multiple routes;
+     * nodes with multiple output handles may emit multiple routes;
      * each may carry its own `downstreamDataNodeId`.
      */
     outputs: OutputRoute[];

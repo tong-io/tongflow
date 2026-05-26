@@ -10,7 +10,6 @@ class TextGenSpeechCloneInput(BaseModel):
 
     ref_audio: Asset
     text: str
-    audio: Asset | None = None
     language: str | None = None
     max_new_tokens: int | None = None
     ref_text: str | None = None

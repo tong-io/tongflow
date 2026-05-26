@@ -6,8 +6,13 @@ import type { Edge, Node } from "@xyflow/react";
 import { describe, expect, it } from "vitest";
 
 import { targetHandleId } from "./handle-introspect";
-import { buildPrompts, collectHandleValues, resolveSpec } from "./resolve";
-import { batchOn, handle, staticValue } from "./sources";
+import {
+    buildPrompts,
+    collectHandleValues,
+    promptMissingRequired,
+    resolveSpec,
+} from "./resolve";
+import { batchOn, configField, handle, staticValue } from "./sources";
 
 function makeNode(
     id: string,
@@ -27,6 +32,43 @@ function makeEdge(
 }
 
 describe("resolve — collectHandleValues + buildPrompts", () => {
+    it("collects ref_audio from upstream when using compose topology (default handle)", () => {
+        const spec = resolveSpec("text-gen-speech-clone", {
+            text: batchOn({ nodeType: "textNode", path: "texts" }),
+        });
+        const nodes = [
+            makeNode("u1", "textNode", { texts: ["a", "b"] }),
+            makeNode("u2", "audioNode", { fileKeys: ["voice.wav"] }),
+            makeNode("n", "textGenSpeechCloneComposeNode", {}),
+        ];
+        const edges = [
+            makeEdge("e1", "u1", "n", targetHandleId("text")),
+            makeEdge("e2", "u2", "n", targetHandleId("ref_audio")),
+        ];
+        const values = collectHandleValues("n", spec, nodes, edges);
+        expect(values.text).toEqual(["a", "b"]);
+        expect(values.ref_audio).toBe("voice.wav");
+    });
+
+    it("buildPrompts reads ref_audio from config on transfer clone (configField)", () => {
+        const spec = resolveSpec("text-gen-speech-clone", {
+            text: batchOn({ nodeType: "textNode", path: "texts" }),
+            ref_audio: configField(),
+        });
+        const prompts = buildPrompts({
+            spec,
+            configValues: { ref_audio: "uploads/ref.wav", language: "Auto" },
+            handleValues: { text: ["hello"] },
+        });
+        expect(prompts).toEqual([
+            {
+                text: "hello",
+                ref_audio: "uploads/ref.wav",
+                language: "Auto",
+            },
+        ]);
+    });
+
     it("collects a scalar handle value from the right upstream by targetHandle", () => {
         const spec = resolveSpec("text-gen-speech-clone", {
             text: handle({ nodeType: "textNode", path: "texts[0]" }),
@@ -98,6 +140,37 @@ describe("resolve — collectHandleValues + buildPrompts", () => {
         expect(prompts).toHaveLength(1);
         expect(prompts[0].text).toBe("hi");
         expect(prompts[0]).not.toHaveProperty("image");
+    });
+
+    it("promptMissingRequired flags empty required image-gen-video inputs", () => {
+        const spec = resolveSpec("image-gen-video", {
+            image: batchOn(),
+            text: handle({ nodeType: "textNode", path: "texts[0]" }),
+        });
+        const prompts = buildPrompts({
+            spec,
+            configValues: { duration: 5 },
+            handleValues: { image: ["fk1"], text: "scene" },
+        });
+        expect(prompts[0].text).toBe("scene");
+        expect(promptMissingRequired(spec, prompts[0])).toBeUndefined();
+        expect(
+            promptMissingRequired(spec, { duration: 5, image: "fk1" }),
+        ).toBe("text");
+    });
+
+    it("buildPrompts reads config text on image-gen-video transfer", () => {
+        const spec = resolveSpec("image-gen-video", {
+            image: batchOn(),
+            text: configField(),
+        });
+        const prompts = buildPrompts({
+            spec,
+            configValues: { text: "pan left", duration: 8 },
+            handleValues: { image: ["fk1"] },
+        });
+        expect(prompts[0].text).toBe("pan left");
+        expect(prompts[0].duration).toBe(8);
     });
 
     it("static overrides flow through to prompt", () => {

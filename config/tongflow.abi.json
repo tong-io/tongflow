@@ -477,7 +477,7 @@
             }
         },
         {
-            "nodeSlot": "separate-video-audio",
+            "nodeSlot": "remove-video-audio",
             "inputs": {
                 "type": "object",
                 "required": ["video"],
@@ -500,9 +500,6 @@
                     },
                     "video": {
                         "$ref": "#/$defs/VideoRef"
-                    },
-                    "audio": {
-                        "$ref": "#/$defs/AudioRef"
                     }
                 },
                 "additionalProperties": false
@@ -518,6 +515,44 @@
                         "$ref": "#/$defs/Asset"
                     },
                     "audio": {
+                        "$ref": "#/$defs/Asset"
+                    }
+                },
+                "additionalProperties": false
+            },
+            "outputs": {
+                "type": "object",
+                "required": ["success"],
+                "properties": {
+                    "success": {
+                        "type": "boolean"
+                    },
+                    "error": {
+                        "type": "string"
+                    },
+                    "video": {
+                        "$ref": "#/$defs/VideoRef"
+                    }
+                },
+                "additionalProperties": false
+            }
+        },
+        {
+            "nodeSlot": "audio-video-lip-sync",
+            "inputs": {
+                "type": "object",
+                "required": ["video", "audio"],
+                "properties": {
+                    "audio": {
+                        "$ref": "#/$defs/Asset"
+                    },
+                    "text": {
+                        "type": "string"
+                    },
+                    "seed": {
+                        "type": "number"
+                    },
+                    "video": {
                         "$ref": "#/$defs/Asset"
                     }
                 },
@@ -1175,6 +1210,12 @@
                     "text": {
                         "type": "string"
                     },
+                    "height": {
+                        "type": "integer"
+                    },
+                    "width": {
+                        "type": "integer"
+                    },
                     "image": {
                         "$ref": "#/$defs/Asset"
                     },
@@ -1449,7 +1490,7 @@
             "nodeSlot": "text-gen-video",
             "inputs": {
                 "type": "object",
-                "required": ["text"],
+                "required": ["text", "duration"],
                 "properties": {
                     "text": {
                         "type": "string"
@@ -1559,13 +1600,29 @@
             "nodeSlot": "speech-video-gen-video",
             "inputs": {
                 "type": "object",
-                "required": ["video", "audio"],
+                "required": ["video", "text"],
                 "properties": {
+                    "text": {
+                        "type": "string",
+                        "minLength": 1
+                    },
                     "video": {
                         "$ref": "#/$defs/Asset"
                     },
-                    "audio": {
-                        "$ref": "#/$defs/Asset"
+                    "enhance_prompt": {
+                        "type": "boolean"
+                    },
+                    "height": {
+                        "type": "integer"
+                    },
+                    "reference_strength": {
+                        "type": "number"
+                    },
+                    "seed": {
+                        "type": "number"
+                    },
+                    "width": {
+                        "type": "integer"
                     }
                 },
                 "additionalProperties": false
@@ -1598,9 +1655,6 @@
                         "minLength": 1
                     },
                     "ref_audio": {
-                        "$ref": "#/$defs/Asset"
-                    },
-                    "audio": {
                         "$ref": "#/$defs/Asset"
                     },
                     "language": {

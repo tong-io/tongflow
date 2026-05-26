@@ -1,5 +1,6 @@
 import "server-only";
 
+import { createHash } from "node:crypto";
 import { execFile } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
@@ -21,7 +22,22 @@ const GIT_TIMEOUT_MS = 8000;
 export type ModalDeployFingerprint = {
     headSha: string;
     dirty: boolean;
+    /** Content hash of deploy.py (plugins/ is gitignored — pin bumps must redeploy). */
+    deployFileSha256: string;
 };
+
+function cacheKey(fp: ModalDeployFingerprint): string {
+    return `${fp.headSha}:${fp.deployFileSha256}`;
+}
+
+function hashDeployFile(deployFile: string): string | null {
+    try {
+        const buf = fs.readFileSync(deployFile);
+        return createHash("sha256").update(buf).digest("hex");
+    } catch {
+        return null;
+    }
+}
 
 type CacheMap = Record<string, string>;
 
@@ -115,11 +131,14 @@ export async function readModalDeployFingerprint(
     const headSha = await gitRevParseHead(pluginRoot);
     if (!headSha) return null;
 
+    const deployFileSha256 = hashDeployFile(deployFile);
+    if (!deployFileSha256) return null;
+
     const porcelainRaw = await gitStatusPorcelain(pluginRoot);
     if (porcelainRaw === null) return null;
 
     const dirty = porcelainRaw.trim().length > 0;
-    return { headSha, dirty };
+    return { headSha, dirty, deployFileSha256 };
 }
 
 async function shouldSkip(
@@ -130,14 +149,14 @@ async function shouldSkip(
     if (process.env[forceEnv] === "1") return false;
     const fp = await readModalDeployFingerprint(pluginId);
     if (!fp || fp.dirty) return false;
-    return loadMap(filePath)[pluginId] === fp.headSha;
+    return loadMap(filePath)[pluginId] === cacheKey(fp);
 }
 
 async function record(pluginId: string, filePath: string): Promise<void> {
     const fp = await readModalDeployFingerprint(pluginId);
     if (!fp || fp.dirty) return;
     const map = loadMap(filePath);
-    map[pluginId] = fp.headSha;
+    map[pluginId] = cacheKey(fp);
     saveMap(filePath, map);
 }
 

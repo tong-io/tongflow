@@ -1,15 +1,11 @@
 import type { Edge } from "@xyflow/react";
 import { useNodeId, useStore } from "@xyflow/react";
-import { Image as ImageIcon, Music, Sparkles, Video } from "lucide-react";
+import { Music, Sparkles, Video } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { memo, useEffect, useMemo } from "react";
+import { memo, useMemo } from "react";
 
 import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import {
-    type AspectRatio,
-    VIDEO_ASPECT_RATIOS,
-} from "@/constants/media-options";
 import { useAbiForm } from "@/hooks/use-abi-form";
 import { NODE_TYPE_SOURCE_SPEC } from "@/lib/abi/node-feature-registry";
 import { collectHandleValues, resolveSpec } from "@/lib/abi/resolve";
@@ -17,25 +13,21 @@ import type { SourceSpec } from "@/lib/abi/sources";
 import type { TongflowPluginNodeProps } from "@/types/tongflow-flow";
 
 import { AbiNodeShell } from "../base/abi-node-shell";
-import { AspectRatioPicker } from "../base/aspect-ratio-picker";
 import { MediaThumbnail } from "../base/media-thumbnail";
 import { NodeTextarea } from "../base/node-textarea";
 
-const AUDIO_IMAGE_GEN_VIDEO_SOURCE_SPEC = NODE_TYPE_SOURCE_SPEC
-    .speechImageGenVideoNode as SourceSpec<"audio-image-gen-video">;
+const AUDIO_VIDEO_LIP_SYNC_SOURCE_SPEC = NODE_TYPE_SOURCE_SPEC
+    .audioVideoLipSyncNode as SourceSpec<"audio-video-lip-sync">;
 
-const SpeechImageGenVideoNode = ({
+const AudioVideoLipSyncNode = ({
     selected,
     data,
-}: TongflowPluginNodeProps<
-    "audio-image-gen-video",
-    "speechImageGenVideoNode"
->) => {
+}: TongflowPluginNodeProps<"audio-video-lip-sync", "audioVideoLipSyncNode">) => {
     const t = useTranslations("Workspace.nodes");
     const tActions = useTranslations("Workspace.nodes.actions");
     const form = useAbiForm(
-        "audio-image-gen-video",
-        AUDIO_IMAGE_GEN_VIDEO_SOURCE_SPEC,
+        "audio-video-lip-sync",
+        AUDIO_VIDEO_LIP_SYNC_SOURCE_SPEC,
     );
 
     const nodeId = useNodeId();
@@ -45,18 +37,18 @@ const SpeechImageGenVideoNode = ({
     const resolvedSpec = useMemo(
         () =>
             resolveSpec(
-                "audio-image-gen-video",
-                AUDIO_IMAGE_GEN_VIDEO_SOURCE_SPEC,
+                "audio-video-lip-sync",
+                AUDIO_VIDEO_LIP_SYNC_SOURCE_SPEC,
             ),
         [],
     );
 
-    const { hasImage, hasAudio, imageFileKey, audioFileKey } = useMemo(() => {
+    const { hasVideo, hasAudio, videoFileKey, audioFileKey } = useMemo(() => {
         if (!nodeId) {
             return {
-                hasImage: false,
+                hasVideo: false,
                 hasAudio: false,
-                imageFileKey: undefined as string | undefined,
+                videoFileKey: undefined as string | undefined,
                 audioFileKey: undefined as string | undefined,
             };
         }
@@ -66,44 +58,30 @@ const SpeechImageGenVideoNode = ({
             Array.from(nodeLookup.values()),
             edges,
         );
-        const image =
-            typeof values.image === "string" ? values.image : undefined;
+        const video =
+            typeof values.video === "string" ? values.video : undefined;
         const audio =
             typeof values.audio === "string" ? values.audio : undefined;
         return {
-            hasImage: Boolean(image),
+            hasVideo: Boolean(video),
             hasAudio: Boolean(audio),
-            imageFileKey: image,
+            videoFileKey: video,
             audioFileKey: audio,
         };
     }, [nodeId, resolvedSpec, nodeLookup, edges]);
 
-    const width = (form.state.width as number | undefined) ?? 1024;
-    const height = (form.state.height as number | undefined) ?? 576;
-
-    useEffect(() => {
-        if (form.state.width === undefined && form.state.height === undefined) {
-            form.patch({ width: 1024, height: 576 });
-        }
-    }, [form.state.width, form.state.height, form.patch]);
-
-    const currentRatio: AspectRatio =
-        VIDEO_ASPECT_RATIOS.find(
-            (r) => r.width === width && r.height === height,
-        ) ?? VIDEO_ASPECT_RATIOS[0];
-
     return (
         <AbiNodeShell
-            feature="audio-image-gen-video"
-            sourceSpec={AUDIO_IMAGE_GEN_VIDEO_SOURCE_SPEC}
+            feature="audio-video-lip-sync"
+            sourceSpec={AUDIO_VIDEO_LIP_SYNC_SOURCE_SPEC}
             form={form}
             selected={selected}
             className="min-w-[480px]"
             data={data}
-            title={t("titles.speechImageGenVideo")}
+            title={t("titles.audioVideoLipSync")}
             icon={<Video className="h-5 w-5" />}
-            executeLabel={tActions("generateVideo")}
-            executeDisabled={!hasImage || !hasAudio}
+            executeLabel={tActions("lipSync")}
+            executeDisabled={!hasVideo || !hasAudio}
         >
             <div className="p-4 space-y-4">
                 <Card className="p-3">
@@ -111,22 +89,25 @@ const SpeechImageGenVideoNode = ({
                         <Label className="text-sm font-medium text-muted-foreground">
                             {t("compose.inputData")}
                         </Label>
+                        <p className="text-xs text-muted-foreground">
+                            {t("compose.connectVideoAudio")}
+                        </p>
                         <div className="flex gap-4">
-                            {imageFileKey ? (
+                            {videoFileKey ? (
                                 <MediaThumbnail
-                                    fileKey={imageFileKey}
-                                    label={t("compose.image")}
-                                    type="image"
+                                    fileKey={videoFileKey}
+                                    label={t("compose.video")}
+                                    type="video"
                                 />
                             ) : (
                                 <div className="flex flex-col items-center gap-1.5">
                                     <div className="relative w-16 h-16 rounded-md border-2 border-gray-300 overflow-hidden bg-gray-100">
-                                        <div className="flex items-center justify-center h-full w-full bg-blue-50">
-                                            <ImageIcon className="w-6 h-6 text-blue-600" />
+                                        <div className="flex items-center justify-center h-full w-full bg-purple-50">
+                                            <Video className="w-6 h-6 text-purple-600" />
                                         </div>
                                     </div>
-                                    <div className="px-1.5 py-0.5 bg-blue-100 text-blue-700 text-xs font-medium rounded">
-                                        {t("compose.image")}
+                                    <div className="px-1.5 py-0.5 bg-purple-100 text-purple-700 text-xs font-medium rounded">
+                                        {t("compose.video")}
                                     </div>
                                 </div>
                             )}
@@ -149,35 +130,30 @@ const SpeechImageGenVideoNode = ({
                                 </div>
                             )}
                         </div>
-                        {(!hasImage || !hasAudio) && (
+                        {(!hasVideo || !hasAudio) && (
                             <p className="text-xs text-red-500">
-                                {t("compose.connectImageAudio")}
+                                {t("compose.connectVideoAudio")}
                             </p>
                         )}
                     </div>
                 </Card>
 
                 <NodeTextarea
-                    label={t("compose.generatePromptLabel")}
+                    label={t("lipSync.scenePrompt")}
                     icon={Sparkles}
-                    placeholder={t("compose.generatePromptPlaceholder")}
+                    placeholder={t("lipSync.scenePromptPlaceholder")}
                     {...form.bind("text")}
-                    rows={4}
+                    rows={3}
                 />
 
-                <AspectRatioPicker
-                    ratios={VIDEO_ASPECT_RATIOS}
-                    value={currentRatio}
-                    onChange={(ratio) =>
-                        form.patch({ width: ratio.width, height: ratio.height })
-                    }
-                    showSize
-                />
+                <p className="text-xs text-muted-foreground">
+                    {t("lipSync.audioDrivenHint")}
+                </p>
             </div>
         </AbiNodeShell>
     );
 };
 
-SpeechImageGenVideoNode.displayName = "SpeechImageGenVideoNode";
+AudioVideoLipSyncNode.displayName = "AudioVideoLipSyncNode";
 
-export default memo(SpeechImageGenVideoNode);
+export default memo(AudioVideoLipSyncNode);

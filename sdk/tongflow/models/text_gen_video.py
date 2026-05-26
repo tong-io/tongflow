@@ -8,10 +8,10 @@ from .asset import Asset, AudioRef, FileRef, ImageRef, ModelRef, VideoRef
 class TextGenVideoInput(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
+    duration: float
     text: str
     audio: Asset | None = None
     audio_start_time: float | None = None
-    duration: float | None = None
     end_image: Asset | None = None
     enhance_prompt: bool | None = None
     height: int | None = None

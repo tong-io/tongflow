@@ -271,8 +271,9 @@ export interface BuildPromptsArgs {
  * Build one prompt per element in the batch field (if any), otherwise a
  * single prompt. Static / input overrides are inlined.
  *
- * Empty / null values are dropped (except required fields, which surface
- * as `undefined` and let ajv validation report them).
+ * Empty / null values are dropped for optional fields. Required fields with
+ * no value are still written onto the prompt object so callers can detect
+ * gaps before creating a task (see `promptMissingRequired`).
  */
 export function buildPrompts({
     spec,
@@ -321,6 +322,19 @@ export function buildPrompts({
     const items: unknown[] = Array.isArray(batchValue) ? batchValue : [];
     if (items.length === 0) return [];
     return items.map((item) => baseAssemble({ [spec.batchField!]: item }));
+}
+
+/** First required ABI input missing from a built prompt, if any. */
+export function promptMissingRequired(
+    spec: ResolvedSpec,
+    prompt: Record<string, unknown>,
+): string | undefined {
+    for (const field of spec.topology.requiredInputs) {
+        const v = prompt[field];
+        if (v === undefined || v === null || v === "") return field;
+        if (Array.isArray(v) && v.length === 0) return field;
+    }
+    return undefined;
 }
 
 /* ------------------------------------------------------------------ */

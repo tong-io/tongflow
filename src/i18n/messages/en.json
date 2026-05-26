@@ -83,7 +83,7 @@
             "removeSubtitle": "Remove Subtitle",
             "removeWatermark": "Remove Watermark",
             "extractAudioTrack": "Extract audio track",
-            "splitVideoAudio": "Split video & audio",
+            "removeVideoAudio": "Remove audio",
             "slice": "Slice",
             "firstFrame": "First Frame",
             "lastFrame": "Last Frame",
@@ -101,6 +101,7 @@
             "characterReplace": "Character Replace",
             "merge": "Merge",
             "lipSync": "Lip Sync",
+            "lipDub": "Lip Dub",
             "cloneVoice": "Clone Voice",
             "speechGenVideo": "Audio Generate Video"
         },
@@ -248,7 +249,7 @@
                         "transcribe-timestamp": "Speech to text (with timestamps)",
                         "concat-videos": "Concatenate videos",
                         "extract-audio": "Extract audio track",
-                        "separate-video-audio": "Split audio & video",
+                        "remove-video-audio": "Remove audio (silent video)",
                         "merge-video-audio": "Mux audio + video",
                         "get-first-frame": "First frame",
                         "get-last-frame": "Last frame",
@@ -273,7 +274,8 @@
                         "image-image-gen-video": "Image+image to video",
                         "text-gen-video": "Text to video",
                         "image-gen-model": "Image to 3D",
-                        "speech-video-gen-video": "Speech+video to video",
+                        "speech-video-gen-video": "Video lip dub (text+video)",
+                        "audio-video-lip-sync": "Audio+video lip sync",
                         "text-gen-speech-clone": "Voice clone TTS",
                         "text-gen-speech-instruct": "Instruct TTS",
                         "video-image-move-animal": "Video+image move (animal)",
@@ -311,6 +313,7 @@
                 "noReferenceAudio": "Upload or record a reference clip (≥3 s)",
                 "referenceText": "Reference Text",
                 "referenceTextPlaceholder": "Optional: transcript of the reference audio — improves clone quality",
+                "referenceTextCloneHint": "Leave empty for fast x-vector clone; paste the reference transcript for higher-quality ICL clone",
                 "language": "Language",
                 "inputText": "Input Text",
                 "voiceOptions": {
@@ -326,6 +329,8 @@
                 "combineText": "Combine Texts",
                 "textGenImage": "Text to Image",
                 "textGenSpeechClone": "Generate Speech (Clone)",
+                "textGenSpeechCloneCompose": "Voice Clone (Text + Audio)",
+                "imageGenVideoCompose": "Image to Video (Text + Image)",
                 "textGenSpeechPreset": "Generate Speech (Preset)",
                 "textGenSpeechInstruct": "Generate Speech (Describe)",
                 "imageFusion": "Image Fusion",
@@ -349,9 +354,10 @@
                 "speechImageGenVideo": "Speech+Image to Video",
                 "concatVideo": "Concat Video",
                 "mergeVideoAudio": "Merge Video Audio",
+                "audioVideoLipSync": "Video Lip Sync",
                 "speechImageVideoGenVideo": "Speech+Image+Video to Video",
                 "speechTextGenVideo": "Speech+Text to Video",
-                "speechVideoGenVideo": "Speech+Video to Video",
+                "speechVideoGenVideo": "Video Lip Dub",
                 "imageImageGenVideo": "Image+Image to Video",
                 "textAudioGenSpeech": "Text+Audio to Speech",
                 "videoImageMix": "Video+Image Mix",
@@ -361,7 +367,7 @@
                 "getFirstFrame": "First Frame",
                 "getLastFrame": "Last Frame",
                 "extractAudioTrack": "Extract audio track",
-                "splitVideoAudio": "Split video & audio"
+                "removeVideoAudio": "Remove audio (silent video)"
             },
             "options": {
                 "portrait": "Portrait",
@@ -400,12 +406,13 @@
                 "startSeparation": "Start Separation",
                 "concatVideo": "Concat Video",
                 "startMerge": "Start Merge",
+                "lipDub": "Lip Dub",
                 "splitVideo": "Split Video",
                 "splitText": "Smart Split",
                 "getFirstFrame": "Get First Frame",
                 "getLastFrame": "Get Last Frame",
                 "extractAudioTrack": "Extract audio",
-                "splitVideoAudio": "Split A/V"
+                "removeVideoAudio": "Remove audio"
             },
             "params": {
                 "prompt": "Prompt",
@@ -611,8 +618,8 @@
             "speechGenVideo": {
                 "loading": "Loading...",
                 "inputContent": "Input Content",
-                "video": "Video",
-                "connectVideoHint": "Please connect a video file",
+                "audio": "Audio",
+                "connectAudioHint": "Connect an audio node or upload an audio file",
                 "audioPromptLabel": "Audio Prompt",
                 "audioPromptPlaceholder": "Enter audio dubbing prompt"
             },
@@ -641,6 +648,16 @@
             "textGenText": {
                 "instructions": "Instructions"
             },
+            "lipDub": {
+                "targetDialogue": "Target dialogue (prompt)",
+                "targetDialoguePlaceholder": "Full prompt with character description and target-language lines (model does not translate for you)",
+                "promptHint": "Output resolution follows the reference video. Use a full prompt (character + target-language lines; no auto-translation). Match original clip length; single speaker only."
+            },
+            "lipSync": {
+                "scenePrompt": "Scene description (optional)",
+                "scenePromptPlaceholder": "Describe the shot and speaker. Lip sync follows the connected audio — do not paste full dialogue here.",
+                "audioDrivenHint": "Mouth motion and audio come from the audio input. Keep audio duration close to the reference video. Default output 720p."
+            },
             "imageEdit": {
                 "performanceMode": "Performance Mode",
                 "ecoMode": "💰 Eco (FLUX.2 Klein 9B)",
@@ -663,6 +680,11 @@
                 "connectVideo": "Please connect at least one video file",
                 "connectImageVideoAudio": "Please connect an image, a video and an audio file",
                 "connectTextAudio": "Please connect text content and an audio file",
+                "connectTextReferenceAudio": "Connect a text node and an audio node (reference voice)",
+                "connectTextImage": "Connect a text node and an image node",
+                "connectTextVideoNode": "Connect a video node and a text node (target dialogue goes in the prompt)",
+                "referenceAudio": "Reference audio",
+                "referenceTextOptional": "Reference transcript (optional, improves clone quality)",
                 "connectVideoAudio": "Please connect a video and an audio file",
                 "generatePromptLabel": "Generate Prompt",
                 "generatePromptPlaceholder": "Enter video generation prompt describing content, style, action, etc. (optional)",

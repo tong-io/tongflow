@@ -5,16 +5,15 @@ from pydantic import BaseModel, ConfigDict
 from .asset import Asset, AudioRef, FileRef, ImageRef, ModelRef, VideoRef
 
 
-class SeparateVideoAudioInput(BaseModel):
+class RemoveVideoAudioInput(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     video: Asset
 
-class SeparateVideoAudioOutput(BaseModel):
+class RemoveVideoAudioOutput(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     success: bool
-    audio: Asset | None = None
     error: str | None = None
     video: Asset | None = None
 
