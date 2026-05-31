@@ -16,6 +16,20 @@
         }
     },
     "Workspace": {
+        "handles": {
+            "text": "テキスト",
+            "image": "画像",
+            "image2": "画像 2",
+            "images": "画像",
+            "end_image": "終了画像",
+            "video": "動画",
+            "videos": "動画",
+            "audio": "音声",
+            "speech": "音声",
+            "ref_audio": "参照音声",
+            "ref_text": "参照テキスト",
+            "document": "ドキュメント"
+        },
         "modeSwitch": {
             "createMode": "作成モード",
             "executeMode": "実行モード",
@@ -407,6 +421,7 @@
                 "concatVideo": "動画を結合",
                 "startMerge": "結合を開始",
                 "lipDub": "吹き替え・口パク",
+                "motionTrackGenerate": "軌跡で生成",
                 "splitVideo": "動画を分割",
                 "splitText": "スマート分割",
                 "getFirstFrame": "最初のフレームを取得",
@@ -566,6 +581,12 @@
                 "targetDialogue": "目標台詞（プロンプト）",
                 "targetDialoguePlaceholder": "キャラクター説明と目標言語の台詞を含む完全なプロンプト（自動翻訳なし）",
                 "promptHint": "解像度は参照動画に合わせます。キャラクター＋目標言語の台詞を含む完全なプロンプト（自動翻訳なし）。長さは原動画に近づけ、話者1人のみ。"
+            },
+            "motionTrack": {
+                "connectHint": "先頭フレーム画像、参考動画（動きを自動抽出して転写）、テキストプロンプト（見た目・スタイルのみ）を接続してください。",
+                "controlVideo": "参考動画",
+                "promptPlaceholder": "見た目とスタイルを記述。動きは参考動画から自動抽出されます。",
+                "promptHint": "プロンプトは見た目・スタイルのみ。動きは参考動画から自動抽出されます。長さスライダーは参考動画の上限です。",                "missing": "あと必要: {items}"
             },
             "lipSync": {
                 "scenePrompt": "シーン説明（任意）",

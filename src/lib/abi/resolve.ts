@@ -46,6 +46,11 @@ export type ResolvedField =
            *  The workflow exporter uses this to derive `FieldBinding.consumerShape`.
            */
           array: boolean;
+          /**
+           * True if the field is also manually settable via the node form. When no
+           * upstream value is present, `buildPrompts` falls back to the config value.
+           */
+          manual?: boolean;
           required: boolean;
       }
     | { kind: "config"; required: boolean }
@@ -141,6 +146,7 @@ export function resolveSpec(
                     batch: override.batch,
                     collect: override.collect,
                     array: pluginIsArray,
+                    manual: override.manual,
                     required: defaultCls.required,
                 };
                 if (override.batch) batchField = fieldName;
@@ -295,6 +301,13 @@ export function buildPrompts({
                 v = overrides[field];
             } else if (f.kind === "handle") {
                 v = handleValues[field];
+                // Widget ⇄ input duality: upstream wins, manual config is fallback.
+                if (
+                    (v === undefined || v === null || v === "") &&
+                    f.manual
+                ) {
+                    v = configValues[field];
+                }
             } else if (f.kind === "config") {
                 v = configValues[field];
             } else if (f.kind === "static") {

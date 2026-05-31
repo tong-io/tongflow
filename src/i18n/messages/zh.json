@@ -16,6 +16,20 @@
         }
     },
     "Workspace": {
+        "handles": {
+            "text": "文本",
+            "image": "图片",
+            "image2": "图片 2",
+            "images": "图片",
+            "end_image": "尾帧图片",
+            "video": "视频",
+            "videos": "视频",
+            "audio": "音频",
+            "speech": "语音",
+            "ref_audio": "参考音频",
+            "ref_text": "参考文本",
+            "document": "文档"
+        },
         "modeSwitch": {
             "createMode": "创作模式",
             "executeMode": "执行模式",
@@ -407,6 +421,7 @@
                 "concatVideo": "拼接视频",
                 "startMerge": "开始合并",
                 "lipDub": "配音对口型",
+                "motionTrackGenerate": "按轨迹生成",
                 "splitVideo": "分割视频",
                 "splitText": "智能拆分",
                 "getFirstFrame": "截取首帧",
@@ -652,6 +667,12 @@
                 "targetDialogue": "目标台词（提示词）",
                 "targetDialoguePlaceholder": "写入完整提示词，需包含角色描述与要说的目标语言台词（模型不会自动翻译）",
                 "promptHint": "输出分辨率跟随参考视频。台词宜写完整提示词（含角色与目标语言对白，模型不自动翻译），长度接近原片；仅支持单说话人。"
+            },
+            "motionTrack": {
+                "connectHint": "请连接首帧图片、参考视频（自动提取并迁移其运动），以及文本提示词（仅描述外观/风格）。",
+                "controlVideo": "参考视频",
+                "promptPlaceholder": "描述外观与风格；运动从参考视频中自动提取。",
+                "promptHint": "提示词仅描述外观与风格；运动会从参考视频自动提取。时长滑块用于裁剪参考视频长度。",                "missing": "还需提供：{items}"
             },
             "lipSync": {
                 "scenePrompt": "场景描述（可选）",

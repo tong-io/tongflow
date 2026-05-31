@@ -242,7 +242,27 @@ TongFlow 采用**插件生态**：所有模型 / 能力都是独立版本的包�
   <img src="docs/assets/star.gif" alt="Star on GitHub" />
 </div>
 
-本项目基于 **AGPL-3.0** 协议开源。
+## 赞助
+
+TongFlow 在开放环境中开发。如果你的团队依赖它,或愿意支持项目持续迭代,
+欢迎**[赞助](SPONSORS.md)** —— 赞助资助维护工作,并可在此展示你的 logo、获得鸣谢
+与优先反馈。
+
+> 赞助是支持与合作,**不是授权** —— 它**不会**免除 AGPL 义务。若要在闭源 / SaaS
+> 产品中使用 TongFlow,请见下方[授权协议](#授权协议)。洽询:**business@tongflow.com**。
+
+## 授权协议
+
+TongFlow 采用 **双授权(dual-licensing)** 模式:
+
+- **[AGPL-3.0](LICENSE)** —— 对个人、研究、开源项目,以及愿意遵守 AGPL(含第 13 条
+  网络/源码公开义务)的使用者**免费**。
+- **[商业授权](COMMERCIAL-LICENSE.md)** —— 面向希望在**闭源 / SaaS** 产品中使用
+  TongFlow 且**不愿公开源码**,或需要保证条款与平台技术支持的组织。
+  价格面议,联系 **business@tongflow.com**。
+
+`sdk/` 目录(发布到 PyPI 的 `tongflow` 包)单独以 **[Apache-2.0](sdk/LICENSE)**
+授权,使第三方插件不受 copyleft 约束。贡献代码受 [CLA](CLA.md) 约束。
 
 ## Star 历史
 

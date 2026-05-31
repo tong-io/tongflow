@@ -10,11 +10,24 @@ import {
     VIDEO_DURATIONS,
 } from "@/constants/media-options";
 import { useAbiForm } from "@/hooks/use-abi-form";
+import { configField } from "@/lib/abi/sources";
 import type { TongflowPluginNodeProps } from "@/types/tongflow-flow";
 import { AbiNodeShell } from "../base/abi-node-shell";
 import { AspectRatioPicker } from "../base/aspect-ratio-picker";
 import { DurationPicker } from "../base/duration-picker";
 import { NodeTextarea } from "../base/node-textarea";
+
+/**
+ * First-and-last-frame node: only `image` (first frame) and `end_image` (last
+ * frame) are upstream image handles. The shared gen-video schema also carries
+ * `image2` / `speech` / `audio` asset inputs, but they aren't part of this
+ * node's product surface — demote them to config so they don't render handles.
+ */
+const SOURCE_SPEC = {
+    image2: configField(),
+    speech: configField(),
+    audio: configField(),
+} as const;
 
 const ImageImageGenVideoNode = ({
     selected,
@@ -24,7 +37,7 @@ const ImageImageGenVideoNode = ({
     "imageImageGenVideoNode"
 >) => {
     const t = useTranslations("Workspace.nodes");
-    const form = useAbiForm("image-image-gen-video");
+    const form = useAbiForm("image-image-gen-video", SOURCE_SPEC);
 
     const width = (form.state.width as number | undefined) ?? 1280;
     const height = (form.state.height as number | undefined) ?? 704;
@@ -37,6 +50,7 @@ const ImageImageGenVideoNode = ({
     return (
         <AbiNodeShell
             feature="image-image-gen-video"
+            sourceSpec={SOURCE_SPEC}
             form={form}
             selected={selected}
             className="min-w-[480px]"

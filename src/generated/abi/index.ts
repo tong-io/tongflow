@@ -2356,6 +2356,15 @@ const _slot_video_image_gen_video_move_inputs = {
         text: {
             type: "string",
         },
+        duration: {
+            type: "number",
+        },
+        seed: {
+            type: "number",
+        },
+        enhance_prompt: {
+            type: "boolean",
+        },
         image: {
             type: "object",
             required: ["bytesBase64"],
@@ -5417,6 +5426,15 @@ export const ABI_NODES = {
             properties: {
                 text: {
                     type: "string",
+                },
+                duration: {
+                    type: "number",
+                },
+                seed: {
+                    type: "number",
+                },
+                enhance_prompt: {
+                    type: "boolean",
                 },
                 image: {
                     $ref: "#/$defs/Asset",

@@ -247,7 +247,31 @@ If you like this project, a Star on GitHub helps a lot. Thank you.
   <img src="docs/assets/star.gif" alt="Star on GitHub" />
 </div>
 
-This project is licensed under **AGPL-3.0**.
+## Sponsors
+
+TongFlow is built in the open. If your team relies on it or you want to support
+ongoing development, **[sponsorship](SPONSORS.md)** funds maintenance and gets your
+logo here, with recognition and priority feedback.
+
+> Sponsorship is goodwill, not a license — it does **not** remove AGPL obligations.
+> To use TongFlow in a closed-source / SaaS product, see the [License](#license)
+> section below. Inquiries: **business@tongflow.com**.
+
+## License
+
+TongFlow is **dual-licensed**:
+
+- **[AGPL-3.0](LICENSE)** — free for individuals, research, open-source projects,
+  and anyone willing to comply with the AGPL (including its Section 13
+  network/source-disclosure obligation).
+- **[Commercial License](COMMERCIAL-LICENSE.md)** — for organizations that want to
+  use TongFlow in closed-source or SaaS products **without** AGPL's
+  source-disclosure obligation, or that need warranties and platform support.
+  Contact **business@tongflow.com**.
+
+The `sdk/` directory (the `tongflow` PyPI package) is separately licensed under
+**[Apache-2.0](sdk/LICENSE)** so that third-party plugins are not subject to
+copyleft. Contributions are covered by our [CLA](CLA.md).
 
 ## Star History
 

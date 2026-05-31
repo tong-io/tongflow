@@ -132,6 +132,11 @@ export const NODE_TYPE_SOURCE_SPEC: Partial<
         audio: handle({ nodeType: "audioNode" }),
         text: configField(),
     },
+    videoImageGenVideoMoveNode: {
+        image: handle({ nodeType: "imageNode" }),
+        video: handle({ nodeType: "videoNode" }),
+        text: handle({ nodeType: "textNode", path: "texts[0]", manual: true }),
+    },
     textGenSpeechCloneComposeNode: {
         text: batchOn({ nodeType: "textNode", path: "texts" }),
     },

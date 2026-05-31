@@ -10,7 +10,11 @@ class VideoImageGenVideoMoveInput(BaseModel):
 
     image: Asset
     video: Asset
+    duration: float | None = None
+    enhance_prompt: bool | None = None
+    seed: float | None = None
     text: str | None = None
+
 
 class VideoImageGenVideoMoveOutput(BaseModel):
     model_config = ConfigDict(extra="forbid")
@@ -18,4 +22,3 @@ class VideoImageGenVideoMoveOutput(BaseModel):
     success: bool
     error: str | None = None
     video: Asset | None = None
-

@@ -35,6 +35,13 @@ export interface HandleOverride {
      * Use for concat-style fields (e.g. `videos: Asset[]`).
      */
     collect?: boolean;
+    /**
+     * True if this field is *also* manually settable via the node form (ComfyUI-style
+     * widget ⇄ input duality). An upstream edge always wins; the manual config value
+     * is used as a fallback when nothing is connected. Requires the node to render a
+     * manual control bound to the same field.
+     */
+    manual?: boolean;
 }
 
 export interface ConfigOverride {
@@ -66,6 +73,7 @@ export function handle(opts?: {
     nodeType?: DataNodeType;
     path?: string;
     batch?: boolean;
+    manual?: boolean;
 }): HandleOverride {
     return { kind: "handle", ...opts };
 }

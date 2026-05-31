@@ -676,7 +676,21 @@ export class WorkflowExporter {
                     const matches = upstreamNodes.filter(
                         (u) => u.edgeTargetHandle === handleId,
                     );
-                    if (matches.length === 0) break;
+                    if (matches.length === 0) {
+                        // Widget ⇄ input duality: nothing connected, so fall back
+                        // to the manual config value if this field allows it.
+                        if (fSpec.manual) {
+                            const value = getValueFromPath(nodeData, field);
+                            if (
+                                value !== undefined &&
+                                value !== null &&
+                                value !== ""
+                            ) {
+                                out[field] = { kind: "config", value };
+                            }
+                        }
+                        break;
+                    }
                     // `consumerShape` describes the per-call plugin shape.
                     //  - intrinsic ABI array OR `collectAll` → "array".
                     //  - `batchOn` does NOT force "array": each batch iteration

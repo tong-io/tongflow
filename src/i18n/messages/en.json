@@ -16,6 +16,20 @@
         }
     },
     "Workspace": {
+        "handles": {
+            "text": "Text",
+            "image": "Image",
+            "image2": "Image 2",
+            "images": "Images",
+            "end_image": "End image",
+            "video": "Video",
+            "videos": "Videos",
+            "audio": "Audio",
+            "speech": "Speech",
+            "ref_audio": "Reference audio",
+            "ref_text": "Reference text",
+            "document": "Document"
+        },
         "modeSwitch": {
             "createMode": "Create Mode",
             "executeMode": "Execute Mode",
@@ -407,6 +421,7 @@
                 "concatVideo": "Concat Video",
                 "startMerge": "Start Merge",
                 "lipDub": "Lip Dub",
+                "motionTrackGenerate": "Generate (motion track)",
                 "splitVideo": "Split Video",
                 "splitText": "Smart Split",
                 "getFirstFrame": "Get First Frame",
@@ -657,6 +672,12 @@
                 "scenePrompt": "Scene description (optional)",
                 "scenePromptPlaceholder": "Describe the shot and speaker. Lip sync follows the connected audio — do not paste full dialogue here.",
                 "audioDrivenHint": "Mouth motion and audio come from the audio input. Keep audio duration close to the reference video. Default output 720p."
+            },
+            "motionTrack": {
+                "connectHint": "Connect a first-frame image, a reference video (its motion is auto-tracked and transferred), and a text prompt (appearance/style only).",
+                "controlVideo": "Reference video",
+                "promptPlaceholder": "Describe appearance and style — motion is extracted from the reference video.",
+                "promptHint": "Describe appearance/style only; motion is auto-extracted from the reference video. Duration slider caps the reference clip length.",                "missing": "Still needed: {items}"
             },
             "imageEdit": {
                 "performanceMode": "Performance Mode",

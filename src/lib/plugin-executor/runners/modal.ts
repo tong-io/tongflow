@@ -35,10 +35,12 @@ const MODAL_DEPLOY_TIMEOUT_MS = parseEnvMs(
     process.env.MODAL_DEPLOY_TIMEOUT_MS,
     10 * 60 * 1000,
 );
-/** `call.get()` waiting for GPU work — cap cost if Modal keeps retrying / stalling */
+/** `call.get()` waiting for GPU work — cap cost if Modal keeps retrying / stalling.
+ * Video models (e.g. Wan-Animate) legitimately run tens of minutes; keep this in
+ * line with the heaviest plugin's own Modal function timeout (3600s). */
 const MODAL_CALL_GET_TIMEOUT_MS = parseEnvMs(
     process.env.MODAL_CALL_GET_TIMEOUT_MS,
-    15 * 60 * 1000,
+    40 * 60 * 1000,
 );
 
 function parseEnvMs(raw: string | undefined, fallback: number): number {

@@ -180,7 +180,9 @@ function pickConfig<F extends NodeSlot>(
     if (!data) return {} as ConfigState<F>;
     const out: Record<string, unknown> = {};
     for (const [field, resolved] of Object.entries(spec.fields)) {
-        if (resolved.kind === "config" && field in data) {
+        const isManualHandle =
+            resolved.kind === "handle" && resolved.manual === true;
+        if ((resolved.kind === "config" || isManualHandle) && field in data) {
             out[field] = data[field];
         }
     }

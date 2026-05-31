@@ -1392,6 +1392,15 @@
                     "text": {
                         "type": "string"
                     },
+                    "duration": {
+                        "type": "number"
+                    },
+                    "seed": {
+                        "type": "number"
+                    },
+                    "enhance_prompt": {
+                        "type": "boolean"
+                    },
                     "image": {
                         "$ref": "#/$defs/Asset"
                     },

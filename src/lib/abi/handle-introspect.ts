@@ -130,7 +130,12 @@ function flattenSchema(schema: JSONSchema7): JSONSchema7 {
  */
 function inferNodeTypeFromFieldName(field: string): DataNodeType {
     const lower = field.toLowerCase();
-    if (/(^|_|-)audio($|_|-|key)/.test(lower) || lower.includes("audio"))
+    if (
+        /(^|_|-)audio($|_|-|key)/.test(lower) ||
+        lower.includes("audio") ||
+        lower.includes("speech") ||
+        lower.includes("voice")
+    )
         return "audioNode";
     if (/(^|_|-)video($|_|-|key)/.test(lower) || lower.includes("video"))
         return "videoNode";

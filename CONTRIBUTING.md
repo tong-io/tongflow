@@ -172,6 +172,17 @@ See [docs/feature-registry.md](docs/feature-registry.md) for plugin development 
 - Join our [Discord](https://discord.gg/K7V8az94Zf)
 - Open a [GitHub Discussion](https://github.com/tong-io/tongflow/discussions)
 
-## License
+## License & Contributor License Agreement (CLA)
 
-By contributing, you agree that your contributions will be licensed under the AGPL-3.0 License.
+TongFlow is distributed under a **dual-licensing** model: [AGPL-3.0](LICENSE) for
+the community and a separate [commercial license](COMMERCIAL-LICENSE.md) for
+organizations that cannot comply with the AGPL.
+
+To make this possible, **all contributions are covered by our
+[Contributor License Agreement (CLA)](CLA.md)**. By submitting a pull request you
+agree to the CLA: you keep full copyright of your contribution, and you grant
+tong-io the right to relicense it (including under the AGPL-3.0 and under
+commercial terms). Please read [CLA.md](CLA.md) before contributing.
+
+> Note: the `sdk/` directory (the `tongflow` PyPI package) is licensed under
+> **Apache-2.0**, not AGPL-3.0. The CLA still applies to contributions there.

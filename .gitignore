@@ -25,6 +25,9 @@ data/
 # local feature registry overrides (see docs/feature-registry.md)
 .tongflow/features.local.json
 
+# private commercial/legal documents (contracts, order forms, signed agreements)
+legal/
+
 # misc
 .DS_Store
 *.tsbuildinfo

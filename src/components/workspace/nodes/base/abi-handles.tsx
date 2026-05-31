@@ -4,9 +4,9 @@
  * Inputs:  one target Handle per `kind:"handle"` field (id = `in:<field>`)
  * Outputs: one source Handle per ABI output route (id = `out:<field>`)
  *
- * Layout: handles are evenly distributed along the node's left (targets)
- * and right (sources) edges. Callers can override layout via `style` or
- * a `layout` prop later if needed.
+ * Layout: all handles emit from the vertical center of the node's left
+ * (targets) and right (sources) edges, regardless of how many there are.
+ * Callers can override layout via `style` or a `layout` prop later if needed.
  */
 
 import { Handle, Position } from "@xyflow/react";
@@ -42,14 +42,10 @@ interface HandleSpec {
 
 function distributeHandles(targets: string[], sources: string[]): HandleSpec[] {
     const out: HandleSpec[] = [];
-    targets.forEach((id, i) => {
-        const offset = (i + 1) / (targets.length + 1);
-        out.push({ id, role: "target", offset });
-    });
-    sources.forEach((id, i) => {
-        const offset = (i + 1) / (sources.length + 1);
-        out.push({ id, role: "source", offset });
-    });
+    // All handles emit from the vertical center of their side, regardless of
+    // count. Note: multiple handles on the same side overlap at 50%.
+    targets.forEach((id) => out.push({ id, role: "target", offset: 0.5 }));
+    sources.forEach((id) => out.push({ id, role: "source", offset: 0.5 }));
     return out;
 }
 

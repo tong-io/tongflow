@@ -69,3 +69,10 @@ This runs [`scripts/publish-tongflow-pypi.sh`](../../scripts/publish-tongflow-py
 TestPyPI: `TONGFLOW_UPLOAD_TESTPYPI=1 pnpm tongflow:publish` (use a [TestPyPI token](https://test.pypi.org/manage/account/token/)).
 
 Manual equivalent from `sdk/`: `python -m pip install build twine && python -m build && python -m twine upload dist/*`
+
+## License
+
+The `tongflow` SDK is licensed under **Apache-2.0** (see [`LICENSE`](LICENSE)), so
+third-party plugins are not subject to copyleft. The TongFlow **platform** (the
+rest of the repository) is dual-licensed under AGPL-3.0 / a commercial license —
+see [`COMMERCIAL-LICENSE.md`](../COMMERCIAL-LICENSE.md).
