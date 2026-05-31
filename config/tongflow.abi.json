@@ -746,74 +746,6 @@
             }
         },
         {
-            "nodeSlot": "gen-video",
-            "inputs": {
-                "type": "object",
-                "required": ["text"],
-                "properties": {
-                    "text": {
-                        "type": "string"
-                    },
-                    "seed": {
-                        "type": "number"
-                    },
-                    "height": {
-                        "type": "integer"
-                    },
-                    "width": {
-                        "type": "integer"
-                    },
-                    "enhance_prompt": {
-                        "type": "boolean"
-                    },
-                    "image": {
-                        "$ref": "#/$defs/Asset"
-                    },
-                    "image_frame_idx": {
-                        "type": "integer"
-                    },
-                    "image_strength": {
-                        "type": "number"
-                    },
-                    "end_image": {
-                        "$ref": "#/$defs/Asset"
-                    },
-                    "image2": {
-                        "$ref": "#/$defs/Asset"
-                    },
-                    "speech": {
-                        "$ref": "#/$defs/Asset"
-                    },
-                    "audio": {
-                        "$ref": "#/$defs/Asset"
-                    },
-                    "audio_start_time": {
-                        "type": "number"
-                    },
-                    "duration": {
-                        "type": "number"
-                    }
-                },
-                "additionalProperties": false
-            },
-            "outputs": {
-                "type": "object",
-                "required": ["success"],
-                "properties": {
-                    "success": {
-                        "type": "boolean"
-                    },
-                    "error": {
-                        "type": "string"
-                    },
-                    "video": {
-                        "$ref": "#/$defs/VideoRef"
-                    }
-                },
-                "additionalProperties": false
-            }
-        },
-        {
             "nodeSlot": "image-gen",
             "inputs": {
                 "type": "object",
@@ -979,21 +911,6 @@
                         "type": "integer"
                     },
                     "image_strength": {
-                        "type": "number"
-                    },
-                    "end_image": {
-                        "$ref": "#/$defs/Asset"
-                    },
-                    "image2": {
-                        "$ref": "#/$defs/Asset"
-                    },
-                    "speech": {
-                        "$ref": "#/$defs/Asset"
-                    },
-                    "audio": {
-                        "$ref": "#/$defs/Asset"
-                    },
-                    "audio_start_time": {
                         "type": "number"
                     }
                 },
@@ -1272,15 +1189,6 @@
                     "image_strength": {
                         "type": "number"
                     },
-                    "end_image": {
-                        "$ref": "#/$defs/Asset"
-                    },
-                    "image2": {
-                        "$ref": "#/$defs/Asset"
-                    },
-                    "speech": {
-                        "$ref": "#/$defs/Asset"
-                    },
                     "audio": {
                         "$ref": "#/$defs/Asset"
                     },
@@ -1289,44 +1197,6 @@
                     },
                     "duration": {
                         "type": "number"
-                    }
-                },
-                "additionalProperties": false
-            },
-            "outputs": {
-                "type": "object",
-                "required": ["success"],
-                "properties": {
-                    "success": {
-                        "type": "boolean"
-                    },
-                    "error": {
-                        "type": "string"
-                    },
-                    "video": {
-                        "$ref": "#/$defs/VideoRef"
-                    }
-                },
-                "additionalProperties": false
-            }
-        },
-        {
-            "nodeSlot": "speech-image-video-gen-video",
-            "inputs": {
-                "type": "object",
-                "required": ["image", "video", "audio"],
-                "properties": {
-                    "text": {
-                        "type": "string"
-                    },
-                    "image": {
-                        "$ref": "#/$defs/Asset"
-                    },
-                    "video": {
-                        "$ref": "#/$defs/Asset"
-                    },
-                    "audio": {
-                        "$ref": "#/$defs/Asset"
                     }
                 },
                 "additionalProperties": false
@@ -1398,6 +1268,12 @@
                     "seed": {
                         "type": "number"
                     },
+                    "height": {
+                        "type": "integer"
+                    },
+                    "width": {
+                        "type": "integer"
+                    },
                     "enhance_prompt": {
                         "type": "boolean"
                     },
@@ -1406,6 +1282,9 @@
                     },
                     "video": {
                         "$ref": "#/$defs/Asset"
+                    },
+                    "attention_strength": {
+                        "type": "number"
                     }
                 },
                 "additionalProperties": false
@@ -1454,26 +1333,11 @@
                     "image": {
                         "$ref": "#/$defs/Asset"
                     },
-                    "image_frame_idx": {
-                        "type": "integer"
-                    },
                     "image_strength": {
                         "type": "number"
                     },
                     "end_image": {
                         "$ref": "#/$defs/Asset"
-                    },
-                    "image2": {
-                        "$ref": "#/$defs/Asset"
-                    },
-                    "speech": {
-                        "$ref": "#/$defs/Asset"
-                    },
-                    "audio": {
-                        "$ref": "#/$defs/Asset"
-                    },
-                    "audio_start_time": {
-                        "type": "number"
                     }
                 },
                 "additionalProperties": false
@@ -1518,30 +1382,6 @@
                     },
                     "enhance_prompt": {
                         "type": "boolean"
-                    },
-                    "image": {
-                        "$ref": "#/$defs/Asset"
-                    },
-                    "image_frame_idx": {
-                        "type": "integer"
-                    },
-                    "image_strength": {
-                        "type": "number"
-                    },
-                    "end_image": {
-                        "$ref": "#/$defs/Asset"
-                    },
-                    "image2": {
-                        "$ref": "#/$defs/Asset"
-                    },
-                    "speech": {
-                        "$ref": "#/$defs/Asset"
-                    },
-                    "audio": {
-                        "$ref": "#/$defs/Asset"
-                    },
-                    "audio_start_time": {
-                        "type": "number"
                     }
                 },
                 "additionalProperties": false
@@ -1621,17 +1461,11 @@
                     "enhance_prompt": {
                         "type": "boolean"
                     },
-                    "height": {
-                        "type": "integer"
-                    },
                     "reference_strength": {
                         "type": "number"
                     },
                     "seed": {
                         "type": "number"
-                    },
-                    "width": {
-                        "type": "integer"
                     }
                 },
                 "additionalProperties": false
@@ -1789,76 +1623,6 @@
                     },
                     "audio": {
                         "$ref": "#/$defs/AudioRef"
-                    }
-                },
-                "additionalProperties": false
-            }
-        },
-        {
-            "nodeSlot": "video-image-move-animal",
-            "inputs": {
-                "type": "object",
-                "required": ["image", "video"],
-                "properties": {
-                    "text": {
-                        "type": "string"
-                    },
-                    "image": {
-                        "$ref": "#/$defs/Asset"
-                    },
-                    "video": {
-                        "$ref": "#/$defs/Asset"
-                    }
-                },
-                "additionalProperties": false
-            },
-            "outputs": {
-                "type": "object",
-                "required": ["success"],
-                "properties": {
-                    "success": {
-                        "type": "boolean"
-                    },
-                    "error": {
-                        "type": "string"
-                    },
-                    "video": {
-                        "$ref": "#/$defs/VideoRef"
-                    }
-                },
-                "additionalProperties": false
-            }
-        },
-        {
-            "nodeSlot": "wan-animate-mix",
-            "inputs": {
-                "type": "object",
-                "required": ["image", "video"],
-                "properties": {
-                    "text": {
-                        "type": "string"
-                    },
-                    "image": {
-                        "$ref": "#/$defs/Asset"
-                    },
-                    "video": {
-                        "$ref": "#/$defs/Asset"
-                    }
-                },
-                "additionalProperties": false
-            },
-            "outputs": {
-                "type": "object",
-                "required": ["success"],
-                "properties": {
-                    "success": {
-                        "type": "boolean"
-                    },
-                    "error": {
-                        "type": "string"
-                    },
-                    "video": {
-                        "$ref": "#/$defs/VideoRef"
                     }
                 },
                 "additionalProperties": false

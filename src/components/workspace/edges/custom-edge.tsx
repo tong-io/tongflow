@@ -115,15 +115,27 @@ const CustomEdge = ({
                                 <SelectValue />
                             </SelectTrigger>
                             <SelectContent>
-                                {options.map((o) => (
-                                    <SelectItem
-                                        key={o.handleId}
-                                        value={o.handleId}
-                                        className="text-xs"
-                                    >
-                                        {t.has(o.field) ? t(o.field) : o.field}
-                                    </SelectItem>
-                                ))}
+                                {options.map((o) => {
+                                    // Per-node override (e.g. `image` reads as
+                                    // "first frame" on the first/last-frame node)
+                                    // falls back to the global field label, then
+                                    // the raw field name.
+                                    const perNode = `byFeature.${o.feature}.${o.field}`;
+                                    const label = t.has(perNode)
+                                        ? t(perNode)
+                                        : t.has(o.field)
+                                          ? t(o.field)
+                                          : o.field;
+                                    return (
+                                        <SelectItem
+                                            key={o.handleId}
+                                            value={o.handleId}
+                                            className="text-xs"
+                                        >
+                                            {label}
+                                        </SelectItem>
+                                    );
+                                })}
                             </SelectContent>
                         </Select>
                     </div>

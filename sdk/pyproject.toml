@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "tongflow"
-version = "0.0.19"
+version = "0.0.20"
 description = "Tongflow plugin package (node contracts, deploy scan, ABI helpers)"
 readme = "README.md"
 requires-python = ">=3.10"

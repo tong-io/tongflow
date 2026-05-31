@@ -28,7 +28,13 @@
             "speech": "Speech",
             "ref_audio": "Reference audio",
             "ref_text": "Reference text",
-            "document": "Document"
+            "document": "Document",
+            "byFeature": {
+                "image-image-gen-video": {
+                    "image": "First frame",
+                    "end_image": "Last frame"
+                }
+            }
         },
         "modeSwitch": {
             "createMode": "Create Mode",
@@ -282,7 +288,6 @@
                         "video-describe": "Video understanding",
                         "audio-image-gen-video": "Speech+image to video",
                         "speech-text-gen-video": "Speech+text to video",
-                        "speech-image-video-gen-video": "Speech+image+video to video",
                         "video-image-gen-video-mix": "Video+image mix",
                         "video-image-gen-video-move": "Video+image move",
                         "image-image-gen-video": "Image+image to video",
@@ -369,10 +374,9 @@
                 "concatVideo": "Concat Video",
                 "mergeVideoAudio": "Merge Video Audio",
                 "audioVideoLipSync": "Video Lip Sync",
-                "speechImageVideoGenVideo": "Speech+Image+Video to Video",
                 "speechTextGenVideo": "Speech+Text to Video",
                 "speechVideoGenVideo": "Video Lip Dub",
-                "imageImageGenVideo": "Image+Image to Video",
+                "imageImageGenVideo": "First/Last Frame Video",
                 "textAudioGenSpeech": "Text+Audio to Speech",
                 "videoImageMix": "Video+Image Mix",
                 "videoImageMove": "Video+Image Move",
@@ -677,7 +681,8 @@
                 "connectHint": "Connect a first-frame image, a reference video (its motion is auto-tracked and transferred), and a text prompt (appearance/style only).",
                 "controlVideo": "Reference video",
                 "promptPlaceholder": "Describe appearance and style — motion is extracted from the reference video.",
-                "promptHint": "Describe appearance/style only; motion is auto-extracted from the reference video. Duration slider caps the reference clip length.",                "missing": "Still needed: {items}"
+                "promptHint": "Describe appearance/style only; motion is auto-extracted from the reference video. Duration slider caps the reference clip length.",
+                "missing": "Still needed: {items}"
             },
             "imageEdit": {
                 "performanceMode": "Performance Mode",

@@ -11,16 +11,11 @@ class ImageImageGenVideoInput(BaseModel):
     end_image: Asset
     image: Asset
     text: str
-    audio: Asset | None = None
-    audio_start_time: float | None = None
     duration: float | None = None
     enhance_prompt: bool | None = None
     height: int | None = None
-    image2: Asset | None = None
-    image_frame_idx: int | None = None
     image_strength: float | None = None
     seed: float | None = None
-    speech: Asset | None = None
     width: int | None = None
 
 class ImageImageGenVideoOutput(BaseModel):

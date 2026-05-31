@@ -272,28 +272,6 @@ export function useNodeActions(args: UseNodeActionsArgs): UseNodeActionsResult {
                 />
             );
         }
-        // Audio + video + image (3-way)
-        if (
-            counts.audioNode === 1 &&
-            counts.videoNode === 1 &&
-            counts.imageNode === 1
-        ) {
-            return (
-                <ActionItem
-                    buttons={[
-                        {
-                            text: t("motionControl"),
-                            id: "motion-control",
-                            onClick: () =>
-                                compose({
-                                    type: "speechImageVideoGenVideoNode",
-                                    data: { ids },
-                                }),
-                        },
-                    ]}
-                />
-            );
-        }
         // Video + image
         if (counts.videoNode === 1 && counts.imageNode === 1) {
             return (

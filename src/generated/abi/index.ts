@@ -1137,158 +1137,6 @@ const _slot_link_outputs = {
 } as const;
 export type LinkOutput = FromSchema<typeof _slot_link_outputs>;
 
-const _slot_gen_video_inputs = {
-    type: "object",
-    required: ["text"],
-    properties: {
-        text: {
-            type: "string",
-        },
-        seed: {
-            type: "number",
-        },
-        height: {
-            type: "integer",
-        },
-        width: {
-            type: "integer",
-        },
-        enhance_prompt: {
-            type: "boolean",
-        },
-        image: {
-            type: "object",
-            required: ["bytesBase64"],
-            properties: {
-                bytesBase64: {
-                    type: "string",
-                    minLength: 1,
-                },
-                filename: {
-                    type: "string",
-                },
-                mime: {
-                    type: "string",
-                },
-            },
-            additionalProperties: false,
-        },
-        image_frame_idx: {
-            type: "integer",
-        },
-        image_strength: {
-            type: "number",
-        },
-        end_image: {
-            type: "object",
-            required: ["bytesBase64"],
-            properties: {
-                bytesBase64: {
-                    type: "string",
-                    minLength: 1,
-                },
-                filename: {
-                    type: "string",
-                },
-                mime: {
-                    type: "string",
-                },
-            },
-            additionalProperties: false,
-        },
-        image2: {
-            type: "object",
-            required: ["bytesBase64"],
-            properties: {
-                bytesBase64: {
-                    type: "string",
-                    minLength: 1,
-                },
-                filename: {
-                    type: "string",
-                },
-                mime: {
-                    type: "string",
-                },
-            },
-            additionalProperties: false,
-        },
-        speech: {
-            type: "object",
-            required: ["bytesBase64"],
-            properties: {
-                bytesBase64: {
-                    type: "string",
-                    minLength: 1,
-                },
-                filename: {
-                    type: "string",
-                },
-                mime: {
-                    type: "string",
-                },
-            },
-            additionalProperties: false,
-        },
-        audio: {
-            type: "object",
-            required: ["bytesBase64"],
-            properties: {
-                bytesBase64: {
-                    type: "string",
-                    minLength: 1,
-                },
-                filename: {
-                    type: "string",
-                },
-                mime: {
-                    type: "string",
-                },
-            },
-            additionalProperties: false,
-        },
-        audio_start_time: {
-            type: "number",
-        },
-        duration: {
-            type: "number",
-        },
-    },
-    additionalProperties: false,
-} as const;
-export type GenVideoInput = FromSchema<typeof _slot_gen_video_inputs>;
-const _slot_gen_video_outputs = {
-    type: "object",
-    required: ["success"],
-    properties: {
-        success: {
-            type: "boolean",
-        },
-        error: {
-            type: "string",
-        },
-        video: {
-            type: "object",
-            required: ["file_key"],
-            properties: {
-                file_key: {
-                    type: "string",
-                    minLength: 1,
-                },
-                mime: {
-                    type: "string",
-                },
-                filename: {
-                    type: "string",
-                },
-            },
-            additionalProperties: false,
-        },
-    },
-    additionalProperties: false,
-} as const;
-export type GenVideoOutput = FromSchema<typeof _slot_gen_video_outputs>;
-
 const _slot_image_gen_inputs = {
     type: "object",
     required: [],
@@ -1513,77 +1361,6 @@ const _slot_image_gen_video_inputs = {
             type: "integer",
         },
         image_strength: {
-            type: "number",
-        },
-        end_image: {
-            type: "object",
-            required: ["bytesBase64"],
-            properties: {
-                bytesBase64: {
-                    type: "string",
-                    minLength: 1,
-                },
-                filename: {
-                    type: "string",
-                },
-                mime: {
-                    type: "string",
-                },
-            },
-            additionalProperties: false,
-        },
-        image2: {
-            type: "object",
-            required: ["bytesBase64"],
-            properties: {
-                bytesBase64: {
-                    type: "string",
-                    minLength: 1,
-                },
-                filename: {
-                    type: "string",
-                },
-                mime: {
-                    type: "string",
-                },
-            },
-            additionalProperties: false,
-        },
-        speech: {
-            type: "object",
-            required: ["bytesBase64"],
-            properties: {
-                bytesBase64: {
-                    type: "string",
-                    minLength: 1,
-                },
-                filename: {
-                    type: "string",
-                },
-                mime: {
-                    type: "string",
-                },
-            },
-            additionalProperties: false,
-        },
-        audio: {
-            type: "object",
-            required: ["bytesBase64"],
-            properties: {
-                bytesBase64: {
-                    type: "string",
-                    minLength: 1,
-                },
-                filename: {
-                    type: "string",
-                },
-                mime: {
-                    type: "string",
-                },
-            },
-            additionalProperties: false,
-        },
-        audio_start_time: {
             type: "number",
         },
     },
@@ -2056,57 +1833,6 @@ const _slot_speech_text_gen_video_inputs = {
         image_strength: {
             type: "number",
         },
-        end_image: {
-            type: "object",
-            required: ["bytesBase64"],
-            properties: {
-                bytesBase64: {
-                    type: "string",
-                    minLength: 1,
-                },
-                filename: {
-                    type: "string",
-                },
-                mime: {
-                    type: "string",
-                },
-            },
-            additionalProperties: false,
-        },
-        image2: {
-            type: "object",
-            required: ["bytesBase64"],
-            properties: {
-                bytesBase64: {
-                    type: "string",
-                    minLength: 1,
-                },
-                filename: {
-                    type: "string",
-                },
-                mime: {
-                    type: "string",
-                },
-            },
-            additionalProperties: false,
-        },
-        speech: {
-            type: "object",
-            required: ["bytesBase64"],
-            properties: {
-                bytesBase64: {
-                    type: "string",
-                    minLength: 1,
-                },
-                filename: {
-                    type: "string",
-                },
-                mime: {
-                    type: "string",
-                },
-            },
-            additionalProperties: false,
-        },
         audio: {
             type: "object",
             required: ["bytesBase64"],
@@ -2168,104 +1894,6 @@ const _slot_speech_text_gen_video_outputs = {
 } as const;
 export type SpeechTextGenVideoOutput = FromSchema<
     typeof _slot_speech_text_gen_video_outputs
->;
-
-const _slot_speech_image_video_gen_video_inputs = {
-    type: "object",
-    required: ["image", "video", "audio"],
-    properties: {
-        text: {
-            type: "string",
-        },
-        image: {
-            type: "object",
-            required: ["bytesBase64"],
-            properties: {
-                bytesBase64: {
-                    type: "string",
-                    minLength: 1,
-                },
-                filename: {
-                    type: "string",
-                },
-                mime: {
-                    type: "string",
-                },
-            },
-            additionalProperties: false,
-        },
-        video: {
-            type: "object",
-            required: ["bytesBase64"],
-            properties: {
-                bytesBase64: {
-                    type: "string",
-                    minLength: 1,
-                },
-                filename: {
-                    type: "string",
-                },
-                mime: {
-                    type: "string",
-                },
-            },
-            additionalProperties: false,
-        },
-        audio: {
-            type: "object",
-            required: ["bytesBase64"],
-            properties: {
-                bytesBase64: {
-                    type: "string",
-                    minLength: 1,
-                },
-                filename: {
-                    type: "string",
-                },
-                mime: {
-                    type: "string",
-                },
-            },
-            additionalProperties: false,
-        },
-    },
-    additionalProperties: false,
-} as const;
-export type SpeechImageVideoGenVideoInput = FromSchema<
-    typeof _slot_speech_image_video_gen_video_inputs
->;
-const _slot_speech_image_video_gen_video_outputs = {
-    type: "object",
-    required: ["success"],
-    properties: {
-        success: {
-            type: "boolean",
-        },
-        error: {
-            type: "string",
-        },
-        video: {
-            type: "object",
-            required: ["file_key"],
-            properties: {
-                file_key: {
-                    type: "string",
-                    minLength: 1,
-                },
-                mime: {
-                    type: "string",
-                },
-                filename: {
-                    type: "string",
-                },
-            },
-            additionalProperties: false,
-        },
-    },
-    additionalProperties: false,
-} as const;
-export type SpeechImageVideoGenVideoOutput = FromSchema<
-    typeof _slot_speech_image_video_gen_video_outputs
 >;
 
 const _slot_video_image_gen_video_mix_inputs = {
@@ -2362,6 +1990,12 @@ const _slot_video_image_gen_video_move_inputs = {
         seed: {
             type: "number",
         },
+        height: {
+            type: "integer",
+        },
+        width: {
+            type: "integer",
+        },
         enhance_prompt: {
             type: "boolean",
         },
@@ -2398,6 +2032,9 @@ const _slot_video_image_gen_video_move_inputs = {
                 },
             },
             additionalProperties: false,
+        },
+        attention_strength: {
+            type: "number",
         },
     },
     additionalProperties: false,
@@ -2478,9 +2115,6 @@ const _slot_image_image_gen_video_inputs = {
             },
             additionalProperties: false,
         },
-        image_frame_idx: {
-            type: "integer",
-        },
         image_strength: {
             type: "number",
         },
@@ -2500,60 +2134,6 @@ const _slot_image_image_gen_video_inputs = {
                 },
             },
             additionalProperties: false,
-        },
-        image2: {
-            type: "object",
-            required: ["bytesBase64"],
-            properties: {
-                bytesBase64: {
-                    type: "string",
-                    minLength: 1,
-                },
-                filename: {
-                    type: "string",
-                },
-                mime: {
-                    type: "string",
-                },
-            },
-            additionalProperties: false,
-        },
-        speech: {
-            type: "object",
-            required: ["bytesBase64"],
-            properties: {
-                bytesBase64: {
-                    type: "string",
-                    minLength: 1,
-                },
-                filename: {
-                    type: "string",
-                },
-                mime: {
-                    type: "string",
-                },
-            },
-            additionalProperties: false,
-        },
-        audio: {
-            type: "object",
-            required: ["bytesBase64"],
-            properties: {
-                bytesBase64: {
-                    type: "string",
-                    minLength: 1,
-                },
-                filename: {
-                    type: "string",
-                },
-                mime: {
-                    type: "string",
-                },
-            },
-            additionalProperties: false,
-        },
-        audio_start_time: {
-            type: "number",
         },
     },
     additionalProperties: false,
@@ -2616,100 +2196,6 @@ const _slot_text_gen_video_inputs = {
         },
         enhance_prompt: {
             type: "boolean",
-        },
-        image: {
-            type: "object",
-            required: ["bytesBase64"],
-            properties: {
-                bytesBase64: {
-                    type: "string",
-                    minLength: 1,
-                },
-                filename: {
-                    type: "string",
-                },
-                mime: {
-                    type: "string",
-                },
-            },
-            additionalProperties: false,
-        },
-        image_frame_idx: {
-            type: "integer",
-        },
-        image_strength: {
-            type: "number",
-        },
-        end_image: {
-            type: "object",
-            required: ["bytesBase64"],
-            properties: {
-                bytesBase64: {
-                    type: "string",
-                    minLength: 1,
-                },
-                filename: {
-                    type: "string",
-                },
-                mime: {
-                    type: "string",
-                },
-            },
-            additionalProperties: false,
-        },
-        image2: {
-            type: "object",
-            required: ["bytesBase64"],
-            properties: {
-                bytesBase64: {
-                    type: "string",
-                    minLength: 1,
-                },
-                filename: {
-                    type: "string",
-                },
-                mime: {
-                    type: "string",
-                },
-            },
-            additionalProperties: false,
-        },
-        speech: {
-            type: "object",
-            required: ["bytesBase64"],
-            properties: {
-                bytesBase64: {
-                    type: "string",
-                    minLength: 1,
-                },
-                filename: {
-                    type: "string",
-                },
-                mime: {
-                    type: "string",
-                },
-            },
-            additionalProperties: false,
-        },
-        audio: {
-            type: "object",
-            required: ["bytesBase64"],
-            properties: {
-                bytesBase64: {
-                    type: "string",
-                    minLength: 1,
-                },
-                filename: {
-                    type: "string",
-                },
-                mime: {
-                    type: "string",
-                },
-            },
-            additionalProperties: false,
-        },
-        audio_start_time: {
-            type: "number",
         },
     },
     additionalProperties: false,
@@ -2851,17 +2337,11 @@ const _slot_speech_video_gen_video_inputs = {
         enhance_prompt: {
             type: "boolean",
         },
-        height: {
-            type: "integer",
-        },
         reference_strength: {
             type: "number",
         },
         seed: {
             type: "number",
-        },
-        width: {
-            type: "integer",
         },
     },
     additionalProperties: false,
@@ -3110,168 +2590,6 @@ const _slot_text_gen_speech_instruct_outputs = {
 } as const;
 export type TextGenSpeechInstructOutput = FromSchema<
     typeof _slot_text_gen_speech_instruct_outputs
->;
-
-const _slot_video_image_move_animal_inputs = {
-    type: "object",
-    required: ["image", "video"],
-    properties: {
-        text: {
-            type: "string",
-        },
-        image: {
-            type: "object",
-            required: ["bytesBase64"],
-            properties: {
-                bytesBase64: {
-                    type: "string",
-                    minLength: 1,
-                },
-                filename: {
-                    type: "string",
-                },
-                mime: {
-                    type: "string",
-                },
-            },
-            additionalProperties: false,
-        },
-        video: {
-            type: "object",
-            required: ["bytesBase64"],
-            properties: {
-                bytesBase64: {
-                    type: "string",
-                    minLength: 1,
-                },
-                filename: {
-                    type: "string",
-                },
-                mime: {
-                    type: "string",
-                },
-            },
-            additionalProperties: false,
-        },
-    },
-    additionalProperties: false,
-} as const;
-export type VideoImageMoveAnimalInput = FromSchema<
-    typeof _slot_video_image_move_animal_inputs
->;
-const _slot_video_image_move_animal_outputs = {
-    type: "object",
-    required: ["success"],
-    properties: {
-        success: {
-            type: "boolean",
-        },
-        error: {
-            type: "string",
-        },
-        video: {
-            type: "object",
-            required: ["file_key"],
-            properties: {
-                file_key: {
-                    type: "string",
-                    minLength: 1,
-                },
-                mime: {
-                    type: "string",
-                },
-                filename: {
-                    type: "string",
-                },
-            },
-            additionalProperties: false,
-        },
-    },
-    additionalProperties: false,
-} as const;
-export type VideoImageMoveAnimalOutput = FromSchema<
-    typeof _slot_video_image_move_animal_outputs
->;
-
-const _slot_wan_animate_mix_inputs = {
-    type: "object",
-    required: ["image", "video"],
-    properties: {
-        text: {
-            type: "string",
-        },
-        image: {
-            type: "object",
-            required: ["bytesBase64"],
-            properties: {
-                bytesBase64: {
-                    type: "string",
-                    minLength: 1,
-                },
-                filename: {
-                    type: "string",
-                },
-                mime: {
-                    type: "string",
-                },
-            },
-            additionalProperties: false,
-        },
-        video: {
-            type: "object",
-            required: ["bytesBase64"],
-            properties: {
-                bytesBase64: {
-                    type: "string",
-                    minLength: 1,
-                },
-                filename: {
-                    type: "string",
-                },
-                mime: {
-                    type: "string",
-                },
-            },
-            additionalProperties: false,
-        },
-    },
-    additionalProperties: false,
-} as const;
-export type WanAnimateMixInput = FromSchema<
-    typeof _slot_wan_animate_mix_inputs
->;
-const _slot_wan_animate_mix_outputs = {
-    type: "object",
-    required: ["success"],
-    properties: {
-        success: {
-            type: "boolean",
-        },
-        error: {
-            type: "string",
-        },
-        video: {
-            type: "object",
-            required: ["file_key"],
-            properties: {
-                file_key: {
-                    type: "string",
-                    minLength: 1,
-                },
-                mime: {
-                    type: "string",
-                },
-                filename: {
-                    type: "string",
-                },
-            },
-            additionalProperties: false,
-        },
-    },
-    additionalProperties: false,
-} as const;
-export type WanAnimateMixOutput = FromSchema<
-    typeof _slot_wan_animate_mix_outputs
 >;
 
 const _slot_drop_video_inputs = {
@@ -3915,7 +3233,6 @@ export type NodeSlot =
     | "parse-document"
     | "split-video"
     | "link"
-    | "gen-video"
     | "image-gen"
     | "gen-music"
     | "text-gen-speech-preset"
@@ -3927,7 +3244,6 @@ export type NodeSlot =
     | "video-describe"
     | "audio-image-gen-video"
     | "speech-text-gen-video"
-    | "speech-image-video-gen-video"
     | "video-image-gen-video-mix"
     | "video-image-gen-video-move"
     | "image-image-gen-video"
@@ -3937,8 +3253,6 @@ export type NodeSlot =
     | "text-gen-speech-clone"
     | "transcribe-timestamp"
     | "text-gen-speech-instruct"
-    | "video-image-move-animal"
-    | "wan-animate-mix"
     | "drop-video"
     | "arrange-group"
     | "separate_speaker"
@@ -3968,7 +3282,6 @@ export type SlotInputsMap = {
     "parse-document": ParseDocumentInput;
     "split-video": SplitVideoInput;
     link: LinkInput;
-    "gen-video": GenVideoInput;
     "image-gen": ImageGenInput;
     "gen-music": GenMusicInput;
     "text-gen-speech-preset": TextGenSpeechPresetInput;
@@ -3980,7 +3293,6 @@ export type SlotInputsMap = {
     "video-describe": VideoDescribeInput;
     "audio-image-gen-video": AudioImageGenVideoInput;
     "speech-text-gen-video": SpeechTextGenVideoInput;
-    "speech-image-video-gen-video": SpeechImageVideoGenVideoInput;
     "video-image-gen-video-mix": VideoImageGenVideoMixInput;
     "video-image-gen-video-move": VideoImageGenVideoMoveInput;
     "image-image-gen-video": ImageImageGenVideoInput;
@@ -3990,8 +3302,6 @@ export type SlotInputsMap = {
     "text-gen-speech-clone": TextGenSpeechCloneInput;
     "transcribe-timestamp": TranscribeTimestampInput;
     "text-gen-speech-instruct": TextGenSpeechInstructInput;
-    "video-image-move-animal": VideoImageMoveAnimalInput;
-    "wan-animate-mix": WanAnimateMixInput;
     "drop-video": DropVideoInput;
     "arrange-group": ArrangeGroupInput;
     separate_speaker: SeparateSpeakerInput;
@@ -4021,7 +3331,6 @@ export type SlotOutputsMap = {
     "parse-document": ParseDocumentOutput;
     "split-video": SplitVideoOutput;
     link: LinkOutput;
-    "gen-video": GenVideoOutput;
     "image-gen": ImageGenOutput;
     "gen-music": GenMusicOutput;
     "text-gen-speech-preset": TextGenSpeechPresetOutput;
@@ -4033,7 +3342,6 @@ export type SlotOutputsMap = {
     "video-describe": VideoDescribeOutput;
     "audio-image-gen-video": AudioImageGenVideoOutput;
     "speech-text-gen-video": SpeechTextGenVideoOutput;
-    "speech-image-video-gen-video": SpeechImageVideoGenVideoOutput;
     "video-image-gen-video-mix": VideoImageGenVideoMixOutput;
     "video-image-gen-video-move": VideoImageGenVideoMoveOutput;
     "image-image-gen-video": ImageImageGenVideoOutput;
@@ -4043,8 +3351,6 @@ export type SlotOutputsMap = {
     "text-gen-speech-clone": TextGenSpeechCloneOutput;
     "transcribe-timestamp": TranscribeTimestampOutput;
     "text-gen-speech-instruct": TextGenSpeechInstructOutput;
-    "video-image-move-animal": VideoImageMoveAnimalOutput;
-    "wan-animate-mix": WanAnimateMixOutput;
     "drop-video": DropVideoOutput;
     "arrange-group": ArrangeGroupOutput;
     separate_speaker: SeparateSpeakerOutput;
@@ -4795,73 +4101,6 @@ export const ABI_NODES = {
             additionalProperties: false,
         },
     },
-    "gen-video": {
-        inputs: {
-            type: "object",
-            required: ["text"],
-            properties: {
-                text: {
-                    type: "string",
-                },
-                seed: {
-                    type: "number",
-                },
-                height: {
-                    type: "integer",
-                },
-                width: {
-                    type: "integer",
-                },
-                enhance_prompt: {
-                    type: "boolean",
-                },
-                image: {
-                    $ref: "#/$defs/Asset",
-                },
-                image_frame_idx: {
-                    type: "integer",
-                },
-                image_strength: {
-                    type: "number",
-                },
-                end_image: {
-                    $ref: "#/$defs/Asset",
-                },
-                image2: {
-                    $ref: "#/$defs/Asset",
-                },
-                speech: {
-                    $ref: "#/$defs/Asset",
-                },
-                audio: {
-                    $ref: "#/$defs/Asset",
-                },
-                audio_start_time: {
-                    type: "number",
-                },
-                duration: {
-                    type: "number",
-                },
-            },
-            additionalProperties: false,
-        },
-        outputs: {
-            type: "object",
-            required: ["success"],
-            properties: {
-                success: {
-                    type: "boolean",
-                },
-                error: {
-                    type: "string",
-                },
-                video: {
-                    $ref: "#/$defs/VideoRef",
-                },
-            },
-            additionalProperties: false,
-        },
-    },
     "image-gen": {
         inputs: {
             type: "object",
@@ -5024,21 +4263,6 @@ export const ABI_NODES = {
                     type: "integer",
                 },
                 image_strength: {
-                    type: "number",
-                },
-                end_image: {
-                    $ref: "#/$defs/Asset",
-                },
-                image2: {
-                    $ref: "#/$defs/Asset",
-                },
-                speech: {
-                    $ref: "#/$defs/Asset",
-                },
-                audio: {
-                    $ref: "#/$defs/Asset",
-                },
-                audio_start_time: {
                     type: "number",
                 },
             },
@@ -5310,15 +4534,6 @@ export const ABI_NODES = {
                 image_strength: {
                     type: "number",
                 },
-                end_image: {
-                    $ref: "#/$defs/Asset",
-                },
-                image2: {
-                    $ref: "#/$defs/Asset",
-                },
-                speech: {
-                    $ref: "#/$defs/Asset",
-                },
                 audio: {
                     $ref: "#/$defs/Asset",
                 },
@@ -5327,43 +4542,6 @@ export const ABI_NODES = {
                 },
                 duration: {
                     type: "number",
-                },
-            },
-            additionalProperties: false,
-        },
-        outputs: {
-            type: "object",
-            required: ["success"],
-            properties: {
-                success: {
-                    type: "boolean",
-                },
-                error: {
-                    type: "string",
-                },
-                video: {
-                    $ref: "#/$defs/VideoRef",
-                },
-            },
-            additionalProperties: false,
-        },
-    },
-    "speech-image-video-gen-video": {
-        inputs: {
-            type: "object",
-            required: ["image", "video", "audio"],
-            properties: {
-                text: {
-                    type: "string",
-                },
-                image: {
-                    $ref: "#/$defs/Asset",
-                },
-                video: {
-                    $ref: "#/$defs/Asset",
-                },
-                audio: {
-                    $ref: "#/$defs/Asset",
                 },
             },
             additionalProperties: false,
@@ -5433,6 +4611,12 @@ export const ABI_NODES = {
                 seed: {
                     type: "number",
                 },
+                height: {
+                    type: "integer",
+                },
+                width: {
+                    type: "integer",
+                },
                 enhance_prompt: {
                     type: "boolean",
                 },
@@ -5441,6 +4625,9 @@ export const ABI_NODES = {
                 },
                 video: {
                     $ref: "#/$defs/Asset",
+                },
+                attention_strength: {
+                    type: "number",
                 },
             },
             additionalProperties: false,
@@ -5488,26 +4675,11 @@ export const ABI_NODES = {
                 image: {
                     $ref: "#/$defs/Asset",
                 },
-                image_frame_idx: {
-                    type: "integer",
-                },
                 image_strength: {
                     type: "number",
                 },
                 end_image: {
                     $ref: "#/$defs/Asset",
-                },
-                image2: {
-                    $ref: "#/$defs/Asset",
-                },
-                speech: {
-                    $ref: "#/$defs/Asset",
-                },
-                audio: {
-                    $ref: "#/$defs/Asset",
-                },
-                audio_start_time: {
-                    type: "number",
                 },
             },
             additionalProperties: false,
@@ -5551,30 +4723,6 @@ export const ABI_NODES = {
                 },
                 enhance_prompt: {
                     type: "boolean",
-                },
-                image: {
-                    $ref: "#/$defs/Asset",
-                },
-                image_frame_idx: {
-                    type: "integer",
-                },
-                image_strength: {
-                    type: "number",
-                },
-                end_image: {
-                    $ref: "#/$defs/Asset",
-                },
-                image2: {
-                    $ref: "#/$defs/Asset",
-                },
-                speech: {
-                    $ref: "#/$defs/Asset",
-                },
-                audio: {
-                    $ref: "#/$defs/Asset",
-                },
-                audio_start_time: {
-                    type: "number",
                 },
             },
             additionalProperties: false,
@@ -5652,17 +4800,11 @@ export const ABI_NODES = {
                 enhance_prompt: {
                     type: "boolean",
                 },
-                height: {
-                    type: "integer",
-                },
                 reference_strength: {
                     type: "number",
                 },
                 seed: {
                     type: "number",
-                },
-                width: {
-                    type: "integer",
                 },
             },
             additionalProperties: false,
@@ -5817,74 +4959,6 @@ export const ABI_NODES = {
                 },
                 audio: {
                     $ref: "#/$defs/AudioRef",
-                },
-            },
-            additionalProperties: false,
-        },
-    },
-    "video-image-move-animal": {
-        inputs: {
-            type: "object",
-            required: ["image", "video"],
-            properties: {
-                text: {
-                    type: "string",
-                },
-                image: {
-                    $ref: "#/$defs/Asset",
-                },
-                video: {
-                    $ref: "#/$defs/Asset",
-                },
-            },
-            additionalProperties: false,
-        },
-        outputs: {
-            type: "object",
-            required: ["success"],
-            properties: {
-                success: {
-                    type: "boolean",
-                },
-                error: {
-                    type: "string",
-                },
-                video: {
-                    $ref: "#/$defs/VideoRef",
-                },
-            },
-            additionalProperties: false,
-        },
-    },
-    "wan-animate-mix": {
-        inputs: {
-            type: "object",
-            required: ["image", "video"],
-            properties: {
-                text: {
-                    type: "string",
-                },
-                image: {
-                    $ref: "#/$defs/Asset",
-                },
-                video: {
-                    $ref: "#/$defs/Asset",
-                },
-            },
-            additionalProperties: false,
-        },
-        outputs: {
-            type: "object",
-            required: ["success"],
-            properties: {
-                success: {
-                    type: "boolean",
-                },
-                error: {
-                    type: "string",
-                },
-                video: {
-                    $ref: "#/$defs/VideoRef",
                 },
             },
             additionalProperties: false,

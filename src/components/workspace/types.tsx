@@ -21,19 +21,19 @@ import AddVideoNode from "./nodes/add/add-video-node";
 import ArrangeTextNode from "./nodes/batch/arrange-text";
 // Batch nodes
 import DropVideoNode from "./nodes/batch/drop-video";
+// Compose nodes
+import AudioVideoLipSyncNode from "./nodes/compose/audio-video-lip-sync";
 import ConcatVideoNode from "./nodes/compose/concat-video";
 import ConcatVideoComposeNode from "./nodes/compose/concat-video";
 import ImageFusionNode from "./nodes/compose/image-fusion";
 import ImageGenVideoComposeNode from "./nodes/compose/image-gen-video-compose";
 import ImageImageGenVideoNode from "./nodes/compose/image-image-gen-video";
-// Compose nodes
-import AudioVideoLipSyncNode from "./nodes/compose/audio-video-lip-sync";
 import MergeVideoAudioNode from "./nodes/compose/merge-video-audio";
 import SpeechImageGenVideoNode from "./nodes/compose/speech-image-gen-video";
-import SpeechImageVideoGenVideoNode from "./nodes/compose/speech-image-video-gen-video";
 import SpeechTextGenVideoNode from "./nodes/compose/speech-text-gen-video";
 import speechVideoGenVideoNode from "./nodes/compose/speech-video-gen-video";
 import TextAudioGenSpeechNode from "./nodes/compose/text-audio-gen-speech";
+import TextGenSpeechCloneComposeNode from "./nodes/compose/text-gen-speech-clone-compose";
 import TextsGenTextNode from "./nodes/compose/texts-gen-text";
 import VideoImageGenVideoMixNode from "./nodes/compose/video-image-gen-video-mix";
 import VideoImageGenVideoMoveNode from "./nodes/compose/video-image-gen-video-move";
@@ -61,14 +61,13 @@ import ImageGenTextNode from "./nodes/transfer/image-gen-text";
 // Transform nodes
 import ImageGenVideoNode from "./nodes/transfer/image-gen-video";
 import RemoveVideoSubtitleNode from "./nodes/transfer/remove-subtitle";
+import RemoveVideoAudioNode from "./nodes/transfer/remove-video-audio";
 import RemoveWatermarkNode from "./nodes/transfer/remove-watermark";
 import SeparateAudioTrackNode from "./nodes/transfer/separate-audio-track";
 import SeparateSpeakerNode from "./nodes/transfer/separate-speaker";
-import RemoveVideoAudioNode from "./nodes/transfer/remove-video-audio";
 import SpeechGenVideoNode from "./nodes/transfer/speech-gen-video";
 import TextGenImageNode from "./nodes/transfer/text-gen-image";
 import TextGenMusicNode from "./nodes/transfer/text-gen-music";
-import TextGenSpeechCloneComposeNode from "./nodes/compose/text-gen-speech-clone-compose";
 import TextGenSpeechCloneNode from "./nodes/transfer/text-gen-speech-clone";
 import TextGenSpeechInstructNode from "./nodes/transfer/text-gen-speech-instruct";
 import TextGenSpeechPresetNode from "./nodes/transfer/text-gen-speech-preset";
@@ -143,7 +142,6 @@ export const NODE_TYPES: NodeTypes = {
     imageFusionNode: ImageFusionNode,
     speechImageGenVideoNode: SpeechImageGenVideoNode,
     speechTextGenVideoNode: SpeechTextGenVideoNode,
-    speechImageVideoGenVideoNode: SpeechImageVideoGenVideoNode,
     speechVideoGenVideoNode: speechVideoGenVideoNode,
     videoImageGenVideoMixNode: VideoImageGenVideoMixNode,
     videoImageGenVideoMoveNode: VideoImageGenVideoMoveNode,
@@ -227,7 +225,6 @@ export const NODE_CATEGORIES = {
         "imageFusionNode",
         "speechImageGenVideoNode",
         "speechTextGenVideoNode",
-        "speechImageVideoGenVideoNode",
         "speechVideoGenVideoNode",
         "videoImageGenVideoMoveNode",
         "videoImageGenVideoMixNode",

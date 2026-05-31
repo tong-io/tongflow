@@ -10,8 +10,8 @@ class AudioImageGenVideoInput(BaseModel):
 
     audio: Asset
     image: Asset
-    text: str | None = None
     height: int | None = None
+    text: str | None = None
     width: int | None = None
 
 class AudioImageGenVideoOutput(BaseModel):

@@ -1,7 +1,7 @@
 <div align="center">
   <img src="public/logo.svg" alt="TongFlow" width="320" />
 
-  <h1>A Multi-Modal AIGC Studio</h1>
+  <h1>A OpenSource Multi-Modal AIGC Canvas</h1>
   <p>
     <a href="https://github.com/tong-io/tongflow/stargazers"><img src="https://img.shields.io/github/stars/tong-io/tongflow?style=flat&logo=github" alt="GitHub stars" /></a>
     <a href="https://github.com/tong-io/tongflow/blob/main/LICENSE"><img src="https://img.shields.io/badge/License-AGPL--3.0-blue.svg" alt="License" /></a>
@@ -60,22 +60,25 @@ pnpm install
 pnpm dev
 ```
 
-#### Option B) Docker Compose
+#### Option B) Docker
 
-```bash
-docker compose up --build
-```
-
-> ⚠️ The current Docker image does **not** bundle Python + Modal CLI, so Modal-backed plugins cannot auto-deploy from inside the container. Use Option A if you need GPU/CPU plugins, or pre-deploy them from a host that has `modal` installed.
-
-Either option lands on `http://localhost:3000/workspace`. Data persists in `data/` (SQLite + uploads); Docker stores it in the `tongflow_data` volume.
-
-**Pre-built image (GHCR):** CI publishes [`ghcr.io/tong-io/tongflow`](https://github.com/tong-io/tongflow/pkgs/container/tongflow) on pushes to `main` (tags `latest` and `main`) and on version tags `v*`:
+Run the pre-built image published to [GHCR](https://github.com/tong-io/tongflow/pkgs/container/tongflow) (CI pushes tags `latest` / `main` on `main`, plus version tags `v*`):
 
 ```bash
 docker pull ghcr.io/tong-io/tongflow:latest
 docker run --rm -p 3000:3000 --env-file .env -v tongflow_data:/app/data ghcr.io/tong-io/tongflow:latest
 ```
+
+Or build the image yourself from the bundled `Dockerfile`:
+
+```bash
+docker build -t tongflow .
+docker run --rm -p 3000:3000 --env-file .env -v tongflow_data:/app/data tongflow
+```
+
+> ⚠️ The Docker image does **not** bundle Python + Modal CLI, so Modal-backed plugins cannot auto-deploy from inside the container. Use Option A if you need GPU/CPU plugins, or pre-deploy them from a host that has `modal` installed.
+
+Either option lands on `http://localhost:3000/workspace`. Data persists in `data/` (SQLite + uploads); the Docker image stores it in the `tongflow_data` volume.
 
 ### Step 3 — Configure `.env`
 
@@ -85,6 +88,7 @@ Copy [`.env.example`](.env.example) to `.env` and fill in the keys you need. The
 - `OPENROUTER_API_KEY` (optional `OPENROUTER_FREE_MODEL`, `OPENROUTER_HTTP_REFERER`, `OPENROUTER_APP_TITLE`) — default **Generate text** node uses the OpenRouter free router
 - `GEMINI_API_KEY` or `GOOGLE_API_KEY` — Gemini-backed `gen_text` and other Gemini multimodal handlers
 - `OPENAI_API_KEY` (optional `OPENAI_CHAT_MODEL`, defaults to `gpt-4o-mini`) — OpenAI-backed `gen_text`
+- `DEEPSEEK_API_KEY` — optional; alternative LLM for the batch **Arrange / group** logic
 - `NEXT_PUBLIC_FILE_BASE_URL` — optional; override the file base URL
 
 For an interactive Modal login (writes tokens to `~/.modal.toml`):
@@ -116,6 +120,8 @@ The scanner picks up new plugins on next page load.
 When you first execute a Modal-backed node, the server automatically runs `modal deploy plugins/<id>/deploy.py` (and `modal run plugins/<id>/download.py::download` if that plugin ships model weights). Results are cached, so subsequent runs go straight to the deployed worker. LLM plugins (`tongflow-llm-*`) don't need deploy — they call the provider API directly with your keys.
 
 ## What’s Defined
+
+> ✅ = available out of the box with an official plugin · ⬜ = node exists in the canvas but has no official plugin yet (planned).
 
 ### Add
 
@@ -152,31 +158,31 @@ When you first execute a Modal-backed node, the server automatically runs `modal
 - ✅ **Video understanding**: summaries or descriptions from video.
 - ✅ **Video upscaling**: higher-resolution output.
 - ✅ **Extract first / last frame**: grab a frame as an image.
-- ✅ **Subtitle removal**: clean subtitles from a video.
-- ✅ **Watermark removal**: remove watermarks from a video.
+- ⬜ **Subtitle removal**: clean subtitles from a video.
+- ⬜ **Watermark removal**: remove watermarks from a video.
 
 #### Audio
 
 - ✅ **Music generation**: music from text.
 - ✅ **Speech synthesis**: text-to-speech — preset style, voice clone (reference audio), or instruction-driven.
 - ✅ **Speech recognition**: transcribe speech from audio or video.
-- ✅ **Noise reduction**: denoise audio.
-- ✅ **Speaker diarization**: separate audio by speaker.
-- ✅ **Voice / timbre replacement**: replace or clone a voice with a reference sample.
+- ⬜ **Noise reduction**: denoise audio.
+- ⬜ **Speaker diarization**: separate audio by speaker.
+- ⬜ **Voice / timbre replacement**: replace or clone a voice with a reference sample.
 - ⬜ **Multi-track / vocal-accompaniment separation**
 
 ### Combine
 
 - ✅ **Image fusion**: blend or edit multiple references into one image.
-- ✅ **Lip sync**: audio + video → video (lip-sync); also audio + image → video, audio + text → video, and audio + image + video → video variants.
-- ✅ **Clone voice**: text + reference audio → speech with a cloned voice.
+- ✅ **Lip sync**: audio + video → video (lip-sync); also audio + image → video and audio + text → video variants.
+- ⬜ **Clone voice**: text + reference audio → speech with a cloned voice (the **Speech synthesis → voice clone** node above already covers this).
 - ✅ **Character swap**: video + reference (scene blend / character replacement), Animate Mix-style generation.
 - ✅ **Motion transfer**: video + reference (motion / retarget), Animate Move-style generation.
 - ✅ **Combine text**: merge multiple text nodes into one.
 
 ### Other
 
-- ✅ **Image → 3D**: single-view 3D model from an image.
+- ⬜ **Image → 3D**: single-view 3D model from an image.
 - ✅ **Document → text**: extract plain text from documents.
 - ✅ **Link → text**: turn page content into text.
 
@@ -212,6 +218,8 @@ The plugins below are the official ones maintained alongside this repo.
 - [tongflow-modal-ernie-image](https://github.com/tong-io/tongflow-modal-ernie-image) — ERNIE Image text-to-image (alternative)
 - [tongflow-modal-flux2-klein9b](https://github.com/tong-io/tongflow-modal-flux2-klein9b) — FLUX.2 Klein 9B multi-reference fusion / image editing
 - [tongflow-modal-ltx](https://github.com/tong-io/tongflow-modal-ltx) — LTX-2.3 text / image-to-video
+- [tongflow-modal-infinitetalk](https://github.com/tong-io/tongflow-modal-infinitetalk) — InfiniteTalk audio-driven lip-sync (audio + video → talking-head video)
+- [tongflow-modal-wan-animate](https://github.com/tong-io/tongflow-modal-wan-animate) — Wan-Animate character swap & motion transfer (video + reference)
 - [tongflow-modal-seedvr2](https://github.com/tong-io/tongflow-modal-seedvr2) — SeedVR2 image / video super-resolution
 - [tongflow-modal-color-fix-lab](https://github.com/tong-io/tongflow-modal-color-fix-lab) — image / video upscaling (alternative)
 - [tongflow-modal-gemma4](https://github.com/tong-io/tongflow-modal-gemma4) — Gemma-4 multimodal text (image / video understanding)

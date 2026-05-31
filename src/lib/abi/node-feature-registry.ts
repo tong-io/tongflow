@@ -10,8 +10,8 @@
  * Modality / add / data nodes are intentionally omitted — they're not ABI-driven.
  */
 
-import type { NodeSlot } from "@/generated/abi";
 import { isModalityNode } from "@/constants/modality-nodes";
+import type { NodeSlot } from "@/generated/abi";
 
 import {
     type DataNodeType,
@@ -19,12 +19,12 @@ import {
     sourceHandleId,
     targetHandleId,
 } from "./handle-introspect";
-import { resolveSpec, type ResolvedSpec } from "./resolve";
+import { type ResolvedSpec, resolveSpec } from "./resolve";
 import {
     batchOn,
     configField,
-    handle,
     type FieldSourceOverride,
+    handle,
 } from "./sources";
 
 export const NODE_TYPE_TO_ABI_FEATURE: Readonly<Record<string, NodeSlot>> = {
@@ -71,7 +71,6 @@ export const NODE_TYPE_TO_ABI_FEATURE: Readonly<Record<string, NodeSlot>> = {
     imageFusionNode: "image-fusion",
     speechImageGenVideoNode: "audio-image-gen-video",
     speechTextGenVideoNode: "speech-text-gen-video",
-    speechImageVideoGenVideoNode: "speech-image-video-gen-video",
     speechVideoGenVideoNode: "speech-video-gen-video",
     videoImageGenVideoMixNode: "video-image-gen-video-mix",
     videoImageGenVideoMoveNode: "video-image-gen-video-move",

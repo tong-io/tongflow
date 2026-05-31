@@ -1,7 +1,7 @@
 <div align="center">
   <img src="public/logo.svg" alt="TongFlow" width="320" />
 
-  <h1>多模态 AIGC 创作工作室</h1>
+  <h1>开源的多模态 AIGC 无限画布</h1>
   <p>
     <a href="https://github.com/tong-io/tongflow/stargazers"><img src="https://img.shields.io/github/stars/tong-io/tongflow?style=flat&logo=github" alt="GitHub Stars" /></a>
     <a href="https://github.com/tong-io/tongflow/blob/main/LICENSE"><img src="https://img.shields.io/badge/License-AGPL--3.0-blue.svg" alt="License" /></a>
@@ -56,22 +56,25 @@ pnpm install
 pnpm dev
 ```
 
-#### 方式 B）Docker Compose
+#### 方式 B）Docker
 
-```bash
-docker compose up --build
-```
-
-> ⚠️ 当前 Docker 镜像**未**内置 Python + Modal CLI，因此容器内无法自动部署 Modal 插件。若需用 GPU/CPU 插件，请走方式 A，或先在装有 `modal` 的主机上预部署。
-
-两种方式启动后都落到 `http://localhost:3000/workspace`。数据持久化在 `data/`（SQLite + 上传文件），Docker 模式则在 `tongflow_data` Volume 内。
-
-**预构建镜像（GHCR）：** CI 在 `main` 分支推送时发布 [`ghcr.io/tong-io/tongflow`](https://github.com/tong-io/tongflow/pkgs/container/tongflow)（标签 `latest` 和 `main`），版本标签 `v*` 同步发布：
+运行发布到 [GHCR](https://github.com/tong-io/tongflow/pkgs/container/tongflow) 的预构建镜像（CI 在 `main` 分支推送时发布标签 `latest` / `main`，版本标签 `v*` 同步发布）：
 
 ```bash
 docker pull ghcr.io/tong-io/tongflow:latest
 docker run --rm -p 3000:3000 --env-file .env -v tongflow_data:/app/data ghcr.io/tong-io/tongflow:latest
 ```
+
+或基于仓库内的 `Dockerfile` 自行构建：
+
+```bash
+docker build -t tongflow .
+docker run --rm -p 3000:3000 --env-file .env -v tongflow_data:/app/data tongflow
+```
+
+> ⚠️ Docker 镜像**未**内置 Python + Modal CLI，因此容器内无法自动部署 Modal 插件。若需用 GPU/CPU 插件，请走方式 A，或先在装有 `modal` 的主机上预部署。
+
+两种方式启动后都落到 `http://localhost:3000/workspace`。数据持久化在 `data/`（SQLite + 上传文件），Docker 镜像则存于 `tongflow_data` Volume 内。
 
 ### Step 3 — 配置 `.env`
 
@@ -81,6 +84,7 @@ docker run --rm -p 3000:3000 --env-file .env -v tongflow_data:/app/data ghcr.io/
 - `OPENROUTER_API_KEY`（可选 `OPENROUTER_FREE_MODEL`、`OPENROUTER_HTTP_REFERER`、`OPENROUTER_APP_TITLE`）—— 默认**生成文本**节点走 OpenRouter 免费路由
 - `GEMINI_API_KEY` 或 `GOOGLE_API_KEY` —— 基于 Gemini 的 `gen_text` 及其他 Gemini 多模态处理
 - `OPENAI_API_KEY`（可选 `OPENAI_CHAT_MODEL`，默认 `gpt-4o-mini`）—— 基于 OpenAI 的 `gen_text`
+- `DEEPSEEK_API_KEY` —— 可选；批量**排列 / 分组**逻辑的备选 LLM
 - `NEXT_PUBLIC_FILE_BASE_URL` —— 可选；文件 Base URL
 
 Modal 交互式登录（Token 写入 `~/.modal.toml`）：
@@ -112,6 +116,8 @@ git clone https://github.com/tong-io/tongflow-llm-openrouter-free.git plugins/to
 首次执行某个 Modal 插件节点时，服务端会自动执行 `modal deploy plugins/<id>/deploy.py`（若插件带模型权重，还会 `modal run plugins/<id>/download.py::download`）。结果有缓存，后续直接调用已部署的 Worker。LLM 插件（`tongflow-llm-*`）无需部署，按你配置的 Key 直接调供应商 API。
 
 ## 已实现功能
+
+> ✅ = 开箱即用（已有官方插件）· ⬜ = 画布中已有节点，但暂无官方插件（规划中）。
 
 ### 添加
 
@@ -148,31 +154,31 @@ git clone https://github.com/tong-io/tongflow-llm-openrouter-free.git plugins/to
 - ✅ **视频理解**: 从视频生成摘要或描述。
 - ✅ **视频超分**: 输出更高分辨率的视频。
 - ✅ **提取首帧 / 尾帧**: 将帧提取为图片。
-- ✅ **去字幕**: 从视频中清除字幕。
-- ✅ **去水印**: 从视频中去除水印。
+- ⬜ **去字幕**: 从视频中清除字幕。
+- ⬜ **去水印**: 从视频中去除水印。
 
 #### 音频
 
 - ✅ **音乐生成**: 从文本生成音乐。
 - ✅ **语音合成**: 文字转语音——预设风格、声音克隆（参考音频）或指令驱动。
 - ✅ **语音识别**: 转录音频或视频中的语音。
-- ✅ **降噪**: 对音频降噪处理。
-- ✅ **说话人分离**: 按说话人分离音频。
-- ✅ **音色转换**: 使用参考样本替换或克隆音色。
+- ⬜ **降噪**: 对音频降噪处理。
+- ⬜ **说话人分离**: 按说话人分离音频。
+- ⬜ **音色转换**: 使用参考样本替换或克隆音色。
 - ⬜ **多轨 / 人声伴奏分离**
 
 ### 组合
 
 - ✅ **图像融合**: 将多张参考图融合或编辑为一张图。
-- ✅ **口型同步**: 音频 + 视频 → 视频（口型同步）；也支持音频 + 图片 → 视频、音频 + 文本 → 视频、音频 + 图片 + 视频 → 视频等变体。
-- ✅ **声音克隆合成**: 文本 + 参考音频 → 克隆指定音色的语音。
+- ✅ **口型同步**: 音频 + 视频 → 视频（口型同步）；也支持音频 + 图片 → 视频、音频 + 文本 → 视频等变体。
+- ⬜ **声音克隆合成**: 文本 + 参考音频 → 克隆指定音色的语音（上方**语音合成 → 声音克隆**节点已覆盖该能力）。
 - ✅ **换角色**: 视频 + 参考（场景融合 / 角色替换），Animate Mix 风格生成。
 - ✅ **动作迁移**: 视频 + 参考（动作 / 重定向），Animate Move 风格生成。
 - ✅ **文本合并**: 将多个文本节点合并为一个。
 
 ### 其他
 
-- ✅ **图像 → 3D**: 从单张图像生成 3D 模型。
+- ⬜ **图像 → 3D**: 从单张图像生成 3D 模型。
 - ✅ **文档 → 文本**: 从文档中提取纯文本。
 - ✅ **链接 → 文本**: 将页面内容转换为文本。
 
@@ -208,6 +214,8 @@ TongFlow 采用**插件生态**：所有模型 / 能力都是独立版本的包�
 - [tongflow-modal-ernie-image](https://github.com/tong-io/tongflow-modal-ernie-image) — ERNIE Image 文本生图（备选）
 - [tongflow-modal-flux2-klein9b](https://github.com/tong-io/tongflow-modal-flux2-klein9b) — FLUX.2 Klein 9B 多参考融合与图像编辑
 - [tongflow-modal-ltx](https://github.com/tong-io/tongflow-modal-ltx) — LTX-2.3 文本 / 图像生视频
+- [tongflow-modal-infinitetalk](https://github.com/tong-io/tongflow-modal-infinitetalk) — InfiniteTalk 音频驱动口型同步（音频 + 视频 → 数字人视频）
+- [tongflow-modal-wan-animate](https://github.com/tong-io/tongflow-modal-wan-animate) — Wan-Animate 换角色与动作迁移（视频 + 参考）
 - [tongflow-modal-seedvr2](https://github.com/tong-io/tongflow-modal-seedvr2) — SeedVR2 图像 / 视频超分辨率
 - [tongflow-modal-color-fix-lab](https://github.com/tong-io/tongflow-modal-color-fix-lab) — 图像 / 视频超分辨率（备选）
 - [tongflow-modal-gemma4](https://github.com/tong-io/tongflow-modal-gemma4) — Gemma-4 多模态文本（图像 / 视频理解）

@@ -28,7 +28,13 @@
             "speech": "音声",
             "ref_audio": "参照音声",
             "ref_text": "参照テキスト",
-            "document": "ドキュメント"
+            "document": "ドキュメント",
+            "byFeature": {
+                "image-image-gen-video": {
+                    "image": "開始フレーム",
+                    "end_image": "終了フレーム"
+                }
+            }
         },
         "modeSwitch": {
             "createMode": "作成モード",
@@ -282,7 +288,6 @@
                         "video-describe": "動画理解",
                         "audio-image-gen-video": "音声+画像から動画",
                         "speech-text-gen-video": "音声+テキストから動画",
-                        "speech-image-video-gen-video": "音声+画像+動画",
                         "video-image-gen-video-mix": "動画+画像ミックス",
                         "video-image-gen-video-move": "動画+画像モーション",
                         "image-image-gen-video": "画像+画像から動画",
@@ -369,10 +374,9 @@
                 "concatVideo": "動画結合",
                 "mergeVideoAudio": "動画と音声を結合",
                 "audioVideoLipSync": "動画リップシンク",
-                "speechImageVideoGenVideo": "音声+画像+動画から動画",
                 "speechTextGenVideo": "音声+テキストから動画",
                 "speechVideoGenVideo": "動画吹き替え・口パク",
-                "imageImageGenVideo": "画像+画像から動画",
+                "imageImageGenVideo": "始点/終点フレーム動画",
                 "textAudioGenSpeech": "テキスト+音声から音声",
                 "videoImageMix": "動画+画像ミックス",
                 "videoImageMove": "動画+画像移動",
@@ -586,7 +590,8 @@
                 "connectHint": "先頭フレーム画像、参考動画（動きを自動抽出して転写）、テキストプロンプト（見た目・スタイルのみ）を接続してください。",
                 "controlVideo": "参考動画",
                 "promptPlaceholder": "見た目とスタイルを記述。動きは参考動画から自動抽出されます。",
-                "promptHint": "プロンプトは見た目・スタイルのみ。動きは参考動画から自動抽出されます。長さスライダーは参考動画の上限です。",                "missing": "あと必要: {items}"
+                "promptHint": "プロンプトは見た目・スタイルのみ。動きは参考動画から自動抽出されます。長さスライダーは参考動画の上限です。",
+                "missing": "あと必要: {items}"
             },
             "lipSync": {
                 "scenePrompt": "シーン説明（任意）",

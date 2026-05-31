@@ -28,7 +28,13 @@
             "speech": "语音",
             "ref_audio": "参考音频",
             "ref_text": "参考文本",
-            "document": "文档"
+            "document": "文档",
+            "byFeature": {
+                "image-image-gen-video": {
+                    "image": "首帧图片",
+                    "end_image": "尾帧图片"
+                }
+            }
         },
         "modeSwitch": {
             "createMode": "创作模式",
@@ -282,7 +288,6 @@
                         "video-describe": "视频理解",
                         "audio-image-gen-video": "语音+图生视频",
                         "speech-text-gen-video": "语音+文生视频",
-                        "speech-image-video-gen-video": "语音+图+视频生视频",
                         "video-image-gen-video-mix": "视频+图混合",
                         "video-image-gen-video-move": "视频+图驱动",
                         "image-image-gen-video": "图+图生视频",
@@ -369,10 +374,9 @@
                 "concatVideo": "视频拼接",
                 "mergeVideoAudio": "音视频合并",
                 "audioVideoLipSync": "视频对口型",
-                "speechImageVideoGenVideo": "语音图片视频生成视频",
                 "speechTextGenVideo": "语音文本生成视频",
                 "speechVideoGenVideo": "视频配音对口型",
-                "imageImageGenVideo": "图片图片生成视频",
+                "imageImageGenVideo": "首尾帧生成视频",
                 "textAudioGenSpeech": "文本音频生成语音",
                 "videoImageMix": "视频图片混合",
                 "videoImageMove": "视频图片迁移",
@@ -672,7 +676,8 @@
                 "connectHint": "请连接首帧图片、参考视频（自动提取并迁移其运动），以及文本提示词（仅描述外观/风格）。",
                 "controlVideo": "参考视频",
                 "promptPlaceholder": "描述外观与风格；运动从参考视频中自动提取。",
-                "promptHint": "提示词仅描述外观与风格；运动会从参考视频自动提取。时长滑块用于裁剪参考视频长度。",                "missing": "还需提供：{items}"
+                "promptHint": "提示词仅描述外观与风格；运动会从参考视频自动提取。时长滑块用于裁剪参考视频长度。",
+                "missing": "还需提供：{items}"
             },
             "lipSync": {
                 "scenePrompt": "场景描述（可选）",

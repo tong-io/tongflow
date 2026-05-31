@@ -25,6 +25,8 @@ export interface EdgeTargetOption {
      * Reselecting onto an occupied single handle swaps the two edges.
      */
     single: boolean;
+    /** Target node's ABI feature, for per-node label overrides. */
+    feature: string;
 }
 
 /**
@@ -63,6 +65,7 @@ export function getEdgeTargetOptions(
                 handleId: targetHandleId(field),
                 field,
                 single: !f.array && !f.collect,
+                feature: reg.feature,
             });
         }
     }
