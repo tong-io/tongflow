@@ -24,6 +24,7 @@ import { useFlow } from "@/hooks/use-flow";
 import { useWorkflowRecovery } from "@/hooks/use-workflow-recovery";
 import { logger } from "@/lib/logger";
 import { isValidFlowConnection } from "@/lib/workflow/connection-rules";
+import { parseWorkflowImportJson } from "@/lib/workflow/exporter";
 import { ModeSwitch } from "./mode-switch";
 import SmartIsland from "./smart-island";
 import { EDGE_TYPES, NODE_TYPES } from "./types";
@@ -236,6 +237,40 @@ function WorkspaceInner({
                 workflowName: tIndex("title"),
             });
         }
+    }, []);
+
+    // First open: preload the bundled example workflow so the canvas isn't
+    // empty. Only when nothing has ever been saved locally, and only once.
+    useEffect(() => {
+        if (localStorage.getItem("nodes") || localStorage.getItem("edges")) {
+            return;
+        }
+        if (localStorage.getItem("exampleLoaded")) return;
+        localStorage.setItem("exampleLoaded", "1");
+
+        let cancelled = false;
+        fetch("/example.json")
+            .then((r) => r.json())
+            .then((json) => {
+                if (cancelled) return;
+                const parsed = parseWorkflowImportJson(json);
+                useFlow.getState().setNodes(parsed.nodes);
+                useFlow.getState().setEdges(parsed.edges);
+                if (parsed.name)
+                    useFlow.getState().setWorkflowName(parsed.name);
+                if (parsed.description) {
+                    useFlow
+                        .getState()
+                        .setWorkflowDescription(parsed.description);
+                }
+            })
+            .catch((e) => {
+                logger.error("Failed to load example workflow:", e);
+            });
+
+        return () => {
+            cancelled = true;
+        };
     }, []);
 
     // Listen for locale changes: if the workflow is unsaved, update the name to the default for the new locale

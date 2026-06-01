@@ -22,6 +22,7 @@ import {
     NodeHeaderMenuAction,
     NodeHeaderTitle,
 } from "../base/node-header";
+import { ModalityPlaceholder } from "./modality-placeholder";
 
 type FileNodeRfProps = RfDataNodeProps<"fileNode">;
 
@@ -188,7 +189,10 @@ const FileNode = ({ selected, data }: FileNodeRfProps) => {
 
             {/* Content */}
             <div className="w-full p-4">
-                {isSingle ? (
+                {count === 0 ? (
+                    // No files attached -> neutral modality placeholder
+                    <ModalityPlaceholder modality="file" />
+                ) : isSingle ? (
                     // Single file - show single icon
                     <SingleFileDisplay
                         fileKey={keys[0]}

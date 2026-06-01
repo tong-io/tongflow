@@ -735,6 +735,7 @@
                 "audio": "Audio",
                 "audios": "Audios ({count})",
                 "loading": "Loading...",
+                "unavailable": "Content unavailable",
                 "more": "More",
                 "moreOptions": "More options",
                 "actions": "Actions",

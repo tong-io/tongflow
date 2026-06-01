@@ -25,8 +25,8 @@ import {
     NodeHeaderMenuAction,
     NodeHeaderTitle,
 } from "../base/node-header";
-
 import { proportionalMediaNodeWidthPx } from "./media-node-max-width";
+import { ModalityPlaceholder } from "./modality-placeholder";
 
 type VideoNodeRfProps = RfDataNodeProps<"videoNode">;
 
@@ -229,6 +229,45 @@ const FullScreenWaterfallModal = ({
     return createPortal(content, document.body);
 };
 
+// Grid thumbnail that falls back to a neutral placeholder on load failure.
+const VideoGridThumb = ({
+    url,
+    loadingLabel,
+}: {
+    url: string | undefined;
+    loadingLabel: string;
+}) => {
+    const [errored, setErrored] = useState(false);
+
+    if (url && !errored) {
+        return (
+            <>
+                <video
+                    src={url}
+                    className="h-full w-full object-cover"
+                    preload="metadata"
+                    onError={() => setErrored(true)}
+                />
+                <div className="absolute inset-0 flex items-center justify-center bg-black/30">
+                    <div className="flex h-6 w-6 items-center justify-center rounded-full bg-white/90">
+                        <VideoIcon className="h-3 w-3 text-gray-800" />
+                    </div>
+                </div>
+            </>
+        );
+    }
+
+    if (errored) {
+        return <ModalityPlaceholder modality="video" variant="thumb" />;
+    }
+
+    return (
+        <div className="h-full w-full flex items-center justify-center bg-gray-300">
+            <div className="text-xs text-gray-500">{loadingLabel}</div>
+        </div>
+    );
+};
+
 const VideoNode = ({ selected, data }: VideoNodeRfProps) => {
     const t = useTranslations("Workspace.nodes.modal");
     const keys: string[] = data.fileKeys ?? [];
@@ -241,6 +280,7 @@ const VideoNode = ({ selected, data }: VideoNodeRfProps) => {
         width: number;
         height: number;
     } | null>(null);
+    const [videoError, setVideoError] = useState(false);
 
     // Async embed one remote video preview
     const { url: singleVideoUrl } = useFileAsyncLoader(keys[0], {
@@ -259,9 +299,11 @@ const VideoNode = ({ selected, data }: VideoNodeRfProps) => {
     useEffect(() => {
         if (!isSingle || !singleVideoUrl) {
             setVideoDimensions(null);
+            setVideoError(false);
             return;
         }
 
+        setVideoError(false);
         const video = document.createElement("video");
         video.preload = "metadata";
 
@@ -275,7 +317,10 @@ const VideoNode = ({ selected, data }: VideoNodeRfProps) => {
             }
         };
 
-        const onError = () => setVideoDimensions(null);
+        const onError = () => {
+            setVideoDimensions(null);
+            setVideoError(true);
+        };
 
         video.addEventListener("loadedmetadata", onLoadedMetadata);
         video.addEventListener("error", onError);
@@ -390,7 +435,9 @@ const VideoNode = ({ selected, data }: VideoNodeRfProps) => {
                         className="relative w-full nodrag"
                         onPointerDown={(e) => e.stopPropagation()}
                     >
-                        {singleVideoUrl ? (
+                        {videoError ? (
+                            <ModalityPlaceholder modality="video" />
+                        ) : singleVideoUrl ? (
                             <video
                                 ref={singleVideoRef}
                                 src={singleVideoUrl}
@@ -398,6 +445,7 @@ const VideoNode = ({ selected, data }: VideoNodeRfProps) => {
                                 controlsList="nodownload"
                                 className="w-full h-auto object-contain"
                                 preload="metadata"
+                                onError={() => setVideoError(true)}
                                 onMouseEnter={() =>
                                     singleVideoRef.current?.play()
                                 }
@@ -466,26 +514,10 @@ const VideoNode = ({ selected, data }: VideoNodeRfProps) => {
                                             video?.pause();
                                         }}
                                     >
-                                        {url ? (
-                                            <>
-                                                <video
-                                                    src={url}
-                                                    className="h-full w-full object-cover"
-                                                    preload="metadata"
-                                                />
-                                                <div className="absolute inset-0 flex items-center justify-center bg-black/30">
-                                                    <div className="flex h-6 w-6 items-center justify-center rounded-full bg-white/90">
-                                                        <VideoIcon className="h-3 w-3 text-gray-800" />
-                                                    </div>
-                                                </div>
-                                            </>
-                                        ) : (
-                                            <div className="h-full w-full flex items-center justify-center bg-gray-300">
-                                                <div className="text-xs text-gray-500">
-                                                    {t("loading")}
-                                                </div>
-                                            </div>
-                                        )}
+                                        <VideoGridThumb
+                                            url={url}
+                                            loadingLabel={t("loading")}
+                                        />
                                     </div>
                                 );
                             })}

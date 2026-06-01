@@ -25,6 +25,7 @@ import {
     NodeHeaderMenuAction,
     NodeHeaderTitle,
 } from "../base/node-header";
+import { ModalityPlaceholder } from "./modality-placeholder";
 
 type AudioNodeRfProps = RfDataNodeProps<"audioNode">;
 
@@ -189,6 +190,7 @@ const AudioNode = ({ selected, data }: AudioNodeRfProps) => {
     const _id = useNodeId();
     const [isFullScreen, setIsFullScreen] = useState(false);
     const [isWaterfallFullScreen, setIsWaterfallFullScreen] = useState(false);
+    const [audioError, setAudioError] = useState(false);
 
     // Refs for audio elements
     const singleAudioRef = useRef<HTMLAudioElement>(null);
@@ -207,6 +209,11 @@ const AudioNode = ({ selected, data }: AudioNodeRfProps) => {
     // Determine if single or multiple
     const isSingle = keys.length === 1;
     const count = keys.length;
+
+    // Reset the error state when the source asset changes.
+    useEffect(() => {
+        setAudioError(false);
+    }, [singleAudioUrl]);
 
     const handleDownload = (url: string, fileKey: string) => {
         const ext = fileKey.includes(".") ? fileKey.split(".").pop() : "mp3";
@@ -290,7 +297,9 @@ const AudioNode = ({ selected, data }: AudioNodeRfProps) => {
                         className="px-3 pb-3 nodrag"
                         onPointerDown={(e) => e.stopPropagation()}
                     >
-                        {singleAudioUrl ? (
+                        {audioError ? (
+                            <ModalityPlaceholder modality="audio" />
+                        ) : singleAudioUrl ? (
                             <audio
                                 ref={singleAudioRef}
                                 src={singleAudioUrl}
@@ -298,6 +307,7 @@ const AudioNode = ({ selected, data }: AudioNodeRfProps) => {
                                 controlsList="nodownload"
                                 className="w-full"
                                 preload="metadata"
+                                onError={() => setAudioError(true)}
                                 onMouseEnter={() =>
                                     singleAudioRef.current?.play()
                                 }

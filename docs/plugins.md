@@ -4,9 +4,9 @@ The `plugins/` directory at the repo root is **gitignored** and is **not** part 
 
 ## How it gets populated
 
-- **Market install**: the UI under `/plugins` (see [src/app/plugins/page.tsx](../src/app/plugins/page.tsx)) downloads plugin packages from the registry into `plugins/<package-name>/` via [src/app/api/plugins/install/route.ts](../src/app/api/plugins/install/route.ts).
-- **Local development**: clone a plugin repo into `plugins/<package-name>/` directly. The scanner ([src/lib/plugins/plugins-scanner.server.ts](../src/lib/plugins/plugins-scanner.server.ts), formerly `src/lib/plugins-scanner.server.ts`) picks it up on next start.
-- **Manual download**: `plugins/deploy.py` and `plugins/download.py` are shared utility scripts that get fetched alongside packages.
+- **Official plugins**: run `pnpm plugins:install` ([scripts/install-official-plugins.mjs](../scripts/install-official-plugins.mjs)) to clone every official plugin into `plugins/<package-name>/`, or `pnpm plugins:install <package-name>` for a single one.
+- **Manual / third-party**: clone any plugin repo into `plugins/<package-name>/` directly. The scanner ([src/lib/plugins/plugins-scanner.server.ts](../src/lib/plugins/plugins-scanner.server.ts)) picks it up on next start.
+- **Shared helpers**: `plugins/deploy.py` and `plugins/download.py` are shared utility scripts that ship inside each plugin repo.
 
 ## Why it's gitignored
 

@@ -20,6 +20,7 @@ import {
     NodeHeaderMenuAction,
     NodeHeaderTitle,
 } from "../base/node-header";
+import { ModalityPlaceholder } from "./modality-placeholder";
 
 type ModelNodeRfProps = RfDataNodeProps<"modelNode">;
 
@@ -1283,11 +1284,7 @@ const ModelNode = ({ selected, data }: ModelNodeRfProps) => {
                     </NodeHeaderIcon>
                     <NodeHeaderTitle>{t("model3D")}</NodeHeaderTitle>
                 </NodeHeader>
-                <div className="w-full bg-gray-100 flex items-center justify-center py-8">
-                    <p className="text-gray-500 text-sm">
-                        {t("noModelLoaded")}
-                    </p>
-                </div>
+                <ModalityPlaceholder modality="model" />
             </BaseNodeShell>
         );
     }

@@ -16,6 +16,7 @@ import {
     NodeHeaderMenuAction,
     NodeHeaderTitle,
 } from "../base/node-header";
+import { ModalityPlaceholder } from "./modality-placeholder";
 
 type TextNodeRfProps = RfDataNodeProps<"textNode">;
 
@@ -148,7 +149,10 @@ const TextNode = ({ selected, data }: TextNodeRfProps) => {
                 </NodeHeader>
 
                 {/* Content */}
-                {isSingle ? (
+                {count === 0 || (isSingle && !textList[0]?.trim()) ? (
+                    // No usable text content -> neutral modality placeholder
+                    <ModalityPlaceholder modality="text" />
+                ) : isSingle ? (
                     // Single text display
                     <div
                         className="max-h-[600px] min-w-[120px] max-w-[420px] overflow-auto rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-slate-900 p-3 shadow-lg nodrag"

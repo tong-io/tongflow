@@ -13,107 +13,58 @@
 
 **TongFlow** 是一款一站式 AIGC 创作工作室，帮助你端到端构建多模态生成式 AI 工作流。
 
-<div align="center">
-  <img src="docs/assets/cover.png" alt="TongFlow" />
-</div>
-
 ## 核心理念
 
-- **全模型**: AI 模型可理解为**模态转换**（例如 LLM 是文本→文本，图像模型是文本→图像，音乐模型是文本→音频等）。TongFlow 将每种能力封装为节点。
+- **全模型**: AI 模型可理解为**模态转换**（例如 LLM 是文本→文本，图像模型是文本→图像，语音模型是文本→音频等）。TongFlow 将每种能力封装为节点。
 
-- **全模态**: 支持 Web 上实际流通的所有模态与格式。
+- **全模态**: TongFlow 支持 Web 上实际流通的几乎所有模态与文件格式。
 
-- **简单易用**: 无复杂参数面板，无需手动连接节点；只需**添加**、**转换**和**组合**，自由排列创意。
+- **低门槛，高可能性**: 无需学习复杂的AI参数，无需手动连接节点；只需**添加**、**转换**和**组合**三种操作，就能自由排列创意。同时，通过对AI模型的自由编排，可以生成独有的创意和作品。
 
-- **开放插件生态**: 每个模型和能力都是独立版本的插件（`tongflow-modal-*` 为 GPU/CPU Worker，`tongflow-llm-*` 为 LLM 适配器），运行时按需安装。核心保持精简，生态持续扩张——任何人都可发布插件并出现在应用内市场。
+- **开放生态**: TongFlow 基于插件的设计，使得每个平台都可以封装独立的插件，官方将对每个能力节点提供至少一个实现插件（目前开源模型的官方插件基于[Modal](https://modal.com)平台，因为它为用户提供每月最多$30的免费算力额度，可使用 H100/A100 等云端 GPU）。核心精简，生态开放，任何平台都可发布自己的插件。
 
-## 应用场景
+## Demo 示例
 
-- **文本 → 图像 → 视频**: 生成图像，再将其转化为视频。
-- **数字人**: 台词脚本 + 数字人形象。
-- **电商图片**: 多图融合或产品图修图。
-- **AI 音乐**: 从文本提示生成音乐。
-- **AI 短剧 / 漫画**: 从描述生成故事或剧集。
+| 场景 | 工作流截图 | 输出结果 |
+| --- | --- | --- |
+| **文本 → 图像 → 视频**<br/>生成图像，再转成视频。 | <img src="docs/assets/demos/text2video-flow.png" width="280" alt="工作流" /> | <img src="docs/assets/demos/text2video-out.gif" width="200" alt="结果" /> |
+| **数字人**<br/>台词脚本 + 数字人形象。 | <img src="docs/assets/cover.png" width="280" alt="工作流" /> | <img src="docs/assets/demos/avatar-out.gif" width="200" alt="结果" /> |
+| **电商图片**<br/>多图融合或产品图修图。 | <img src="docs/assets/demos/ecommerce-flow.png" width="280" alt="工作流" /> | <img src="docs/assets/demos/ecommerce-out.png" width="200" alt="结果" /> |
+| **AI 音乐**<br/>从文本提示生成音乐。 | <img src="docs/assets/demos/music-flow.png" width="280" alt="工作流" /> | <img src="docs/assets/demos/music-out.png" width="200" alt="结果" /> |
+| **AI 短剧 / 漫画**<br/>从描述生成故事或剧集。 | <img src="docs/assets/demos/shorts-flow.png" width="280" alt="工作流" /> | <img src="docs/assets/demos/shorts-out.gif" width="200" alt="结果" /> |
+
+> 截图为占位 —— 把真实图片放进 [`docs/assets/demos/`](docs/assets/demos/) 即可（工作流用 `<slug>-flow.png`，结果用 `<slug>-out.{png,gif}`）。
 
 用 TongFlow 释放想象力，借助生成式 AI 拓展你的创意边界！
 
 ## 快速开始
 
-这是一款**本地优先**的应用：工作流与素材存储在 SQLite（`data/tongflow.db`），上传文件保存在磁盘（`data/uploads/`）。无需 TongFlow 账号、登录或中心化文件 CDN。AI 推理走**你配置的外部 API**：GPU/CPU 插件用 [Modal](https://modal.com)（**每月 $30 免费额度**，可用 H100 等云端 GPU/CPU），文本插件用 OpenRouter / Gemini / OpenAI 等供应商。
+### Step 1 — 启动应用
 
-### Step 1 — 前置依赖
-
-- **Node.js 20+** 与 **pnpm**
-- **Git**（插件通过 clone 仓库安装）
-- **Python 3 + Modal CLI**（`pip install modal`）—— GPU/CPU 插件首次调用时，服务端会子进程执行 `modal deploy` / `modal run download`
-
-### Step 2 — 拉取代码并启动
-
-#### 方式 A）本地开发
+需要 **Node.js 20+**、**pnpm**、**Git**，以及 **Python 3.10+**。
 
 ```bash
 pnpm install
-pnpm dev
+pnpm plugins:install   # 克隆全部官方插件到 plugins/
+pnpm dev               # → http://localhost:3000
 ```
 
-#### 方式 B）Docker
+打开 **`http://localhost:3000`**，画布已就绪。
 
-运行发布到 [GHCR](https://github.com/tong-io/tongflow/pkgs/container/tongflow) 的预构建镜像（CI 在 `main` 分支推送时发布标签 `latest` / `main`，版本标签 `v*` 同步发布）：
+### Step 2 — 配置 Modal
+
+官方 GPU/CPU 插件跑在 [Modal](https://modal.com) 上（免费,含**每月 $30** GPU 额度）：
 
 ```bash
-docker pull ghcr.io/tong-io/tongflow:latest
-docker run --rm -p 3000:3000 --env-file .env -v tongflow_data:/app/data ghcr.io/tong-io/tongflow:latest
+pip install modal
+modal setup   # 打开浏览器授权;token 写入 ~/.modal.toml
 ```
 
-或基于仓库内的 `Dockerfile` 自行构建：
+### Step 3 — 运行示例工作流
 
-```bash
-docker build -t tongflow .
-docker run --rm -p 3000:3000 --env-file .env -v tongflow_data:/app/data tongflow
-```
+首次打开时，画布已预加载一个示例——一条短视频流水线（Wan-Animate + LTX + FFmpeg，均跑在 Modal 上）。只需把开关切到**执行模式**，点击运行按钮即可。
 
-> ⚠️ Docker 镜像**未**内置 Python + Modal CLI，因此容器内无法自动部署 Modal 插件。若需用 GPU/CPU 插件，请走方式 A，或先在装有 `modal` 的主机上预部署。
-
-两种方式启动后都落到 `http://localhost:3000/workspace`。数据持久化在 `data/`（SQLite + 上传文件），Docker 镜像则存于 `tongflow_data` Volume 内。
-
-### Step 3 — 配置 `.env`
-
-将 [`.env.example`](.env.example) 复制为 `.env`，按需填 Key。UI 不依赖 Key 即可加载，但任何执行类节点都需要至少一个供应商配置好。
-
-- `MODAL_TOKEN_ID` / `MODAL_TOKEN_SECRET` —— 任何 `tongflow-modal-*` 插件必需
-- `OPENROUTER_API_KEY`（可选 `OPENROUTER_FREE_MODEL`、`OPENROUTER_HTTP_REFERER`、`OPENROUTER_APP_TITLE`）—— 默认**生成文本**节点走 OpenRouter 免费路由
-- `GEMINI_API_KEY` 或 `GOOGLE_API_KEY` —— 基于 Gemini 的 `gen_text` 及其他 Gemini 多模态处理
-- `OPENAI_API_KEY`（可选 `OPENAI_CHAT_MODEL`，默认 `gpt-4o-mini`）—— 基于 OpenAI 的 `gen_text`
-- `DEEPSEEK_API_KEY` —— 可选；批量**排列 / 分组**逻辑的备选 LLM
-- `NEXT_PUBLIC_FILE_BASE_URL` —— 可选；文件 Base URL
-
-Modal 交互式登录（Token 写入 `~/.modal.toml`）：
-
-```bash
-pnpm modal:setup
-```
-
-### Step 4 — 安装插件
-
-`plugins/` 目录是 **gitignored 且首次启动为空** —— UI 能加载，但任何 transform / compose / decompose 节点在装好插件前都跑不了。详见 [docs/plugins.md](docs/plugins.md)。
-
-两种安装方式：
-
-**a）应用内市场** —— 打开 `http://localhost:3000/plugins`，挑选要用的插件并点击安装。服务端会把每个插件 `git clone` 到 `plugins/<plugin-id>/`。
-
-**b）手动 clone** —— 官方插件清单见下方 [官方插件](#官方插件)：
-
-```bash
-git clone https://github.com/tong-io/tongflow-modal-z-image.git plugins/tongflow-modal-z-image
-git clone https://github.com/tong-io/tongflow-llm-openrouter-free.git plugins/tongflow-llm-openrouter-free
-# …按需重复
-```
-
-下次页面加载时扫描器会自动识别新插件。
-
-### Step 5 — 跑节点
-
-首次执行某个 Modal 插件节点时，服务端会自动执行 `modal deploy plugins/<id>/deploy.py`（若插件带模型权重，还会 `modal run plugins/<id>/download.py::download`）。结果有缓存，后续直接调用已部署的 Worker。LLM 插件（`tongflow-llm-*`）无需部署，按你配置的 Key 直接调供应商 API。
+> 之后想重新加载它,用顶部的工作流名称菜单 → **导入 JSON** → [`public/example.json`](public/example.json)。
 
 ## 已实现功能
 
@@ -196,7 +147,7 @@ git clone https://github.com/tong-io/tongflow-llm-openrouter-free.git plugins/to
 
 ## 官方插件
 
-TongFlow 采用**插件生态**：所有模型 / 能力都是独立版本的包——Modal GPU/CPU Worker 为 `tongflow-modal-*`，LLM API 适配器为 `tongflow-llm-*`。它们托管在 GitHub 的 [tong-io](https://github.com/tong-io) 组织及 PyPI 上，运行时安装到 gitignored 的 `plugins/` 目录（通过应用内 `/plugins` 市场或直接 `git clone`），扫描器在下次启动时自动识别。详见 [docs/plugins.md](docs/plugins.md)。第三方可以同样的方式发布自己的插件。
+TongFlow 采用**插件生态**：所有模型 / 能力都是独立版本的包——Modal GPU/CPU Worker 为 `tongflow-modal-*`，LLM API 适配器为 `tongflow-llm-*`。它们托管在 GitHub 的 [tong-io](https://github.com/tong-io) 组织及 PyPI 上，运行时克隆到 gitignored 的 `plugins/` 目录（通过 `pnpm plugins:install` 或直接 `git clone`），扫描器在下次启动时自动识别。详见 [docs/plugins.md](docs/plugins.md)。第三方可以同样的方式发布自己的插件。
 
 下方列出的是随本仓库一同维护的官方插件。
 
@@ -226,6 +177,61 @@ TongFlow 采用**插件生态**：所有模型 / 能力都是独立版本的包�
 - [tongflow-modal-docling](https://github.com/tong-io/tongflow-modal-docling) — Docling 文档 → 文本
 - [tongflow-modal-paddle](https://github.com/tong-io/tongflow-modal-paddle) — PaddleOCR 文档 → 文本
 - [tongflow-modal-crawl4ai](https://github.com/tong-io/tongflow-modal-crawl4ai) — Crawl4AI URL / 链接 → 文本
+
+## 自定义插件
+
+插件就是一个小型 Python 包，实现一个或多个**节点槽（node slot）**——也就是画布暴露的那些带类型的能力（`gen-text`、`image-gen`、`gen-video`……完整清单见 [`config/tongflow.abi.json`](config/tongflow.abi.json) 及生成的 [`NodeSlots`](sdk/tongflow/node_slots.py)）。分两类：
+
+- **`tongflow-llm-*`** —— API 适配器（文本 / 多模态）。单个 `entry.py`，模块级函数即可。
+- **`tongflow-modal-*`** —— 跑在 [Modal](https://modal.com) 上的 GPU/CPU Worker。一个定义 Modal app 的 `deploy.py`，外加可选的下载模型权重的 `download.py`。
+
+两类的契约一致：给函数 / 方法加 `@node_slot(...)` 装饰器，并用生成的 input/output 模型标注类型。[`@node_slot`](sdk/tongflow/slots.py) 会把传入的 dict 转成带类型的模型、把你返回的模型转回 JSON——你的代码自始至终只接触类型化对象，永远不碰裸 dict。
+
+**LLM 插件** —— `plugins/tongflow-llm-myname/entry.py`：
+
+```python
+from tongflow.node_slots import NodeSlots
+from tongflow.slots import node_slot
+from tongflow.models.gen_text import GenTextInput, GenTextOutput
+
+@node_slot(NodeSlots.GEN_TEXT)
+def gen_text(input: GenTextInput) -> GenTextOutput:
+    answer = call_your_provider(input.text, input.userPrompt)
+    return GenTextOutput(success=True, text=answer)
+```
+
+**Modal 插件** —— `plugins/tongflow-modal-myname/deploy.py`：
+
+```python
+import modal
+from tongflow import current_app
+from tongflow.node_slots import NodeSlots
+from tongflow.protocol import asset
+from tongflow.slots import node_slot
+from tongflow.models.image_gen import ImageGenInput, ImageGenOutput
+
+app = current_app(__file__)  # app 名由目录名推导
+image = modal.Image.debian_slim().pip_install("tongflow==0.0.20", ...)  # 版本须与 SDK 一致
+
+@app.cls(image=image, gpu="L40S")
+class Inference:
+    @modal.method()
+    @node_slot(NodeSlots.IMAGE_GEN)
+    def image_gen(self, input: ImageGenInput) -> ImageGenOutput:
+        png = render(input.text)                       # 你的模型
+        return ImageGenOutput(success=True, image=asset(png, mime="image/png"))
+```
+
+二进制输出用 `asset(bytes, mime=...)` 包装；服务端会自动把它转成下游可用的文件引用。
+
+**步骤：**
+
+1. `pip install tongflow==0.0.20`（SDK 自带 `NodeSlots` 枚举和所有 `*Input` / `*Output` 模型）。
+2. 新建 `plugins/tongflow-{llm,modal}-<name>/`，按上面写 `entry.py` / `deploy.py`。
+3. 重启 —— 扫描器（`pnpm dev`）会自动识别，对应节点上就能选到你的新插件。Modal 插件首次运行时自动部署。
+4. 想分享，把仓库推到任意 GitHub 组织，别人 `git clone` 进自己的 `plugins/` 即可使用。
+
+目录契约详见 [docs/plugins.md](docs/plugins.md)，发布到 PyPI 的流程见 [sdk/README.md](sdk/README.md)。
 
 ## 联系我们
 

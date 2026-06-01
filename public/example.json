@@ -1,0 +1,1422 @@
+{
+  "name": "新创意",
+  "description": "",
+  "version": "1.0",
+  "exportedAt": "2026-06-01T11:42:30.353Z",
+  "inputs": [
+    {
+      "name": "input_f2929d60",
+      "type": "file[]",
+      "description": "Input data for addImageNode",
+      "required": true,
+      "defaultValue": {
+        "fileKeys": [
+          "IvPx-mj5dfXY9KYuZ57uc.jpg"
+        ]
+      },
+      "nodeId": "f2929d60-e61a-48a5-8a94-86e002e399ab"
+    },
+    {
+      "name": "input_5cbb66ca",
+      "type": "file[]",
+      "description": "Input data for addVideoNode",
+      "required": true,
+      "defaultValue": {
+        "fileKeys": [
+          "0988HxhcGBOQo1WCpuZ60.MP4"
+        ]
+      },
+      "nodeId": "5cbb66ca-6af1-4ac2-b895-df4219ad0b59"
+    }
+  ],
+  "outputs": [
+    {
+      "name": "output_6fe9830a",
+      "type": "video",
+      "nodeId": "6fe9830a-5b2a-42ed-80c4-6a9de4704ac6",
+      "field": "fileKeys"
+    },
+    {
+      "name": "output_f61395a4",
+      "type": "video",
+      "nodeId": "f61395a4-c2d9-417c-bbc0-4ee6b99d2b54",
+      "field": "fileKeys"
+    }
+  ],
+  "dataNodes": [
+    {
+      "id": "f2929d60-e61a-48a5-8a94-86e002e399ab",
+      "type": "addImageNode",
+      "dataType": "image",
+      "isInput": true,
+      "inputName": "input_f2929d60",
+      "staticData": {
+        "fileKeys": [
+          "IvPx-mj5dfXY9KYuZ57uc.jpg"
+        ]
+      },
+      "level": 0
+    },
+    {
+      "id": "5cbb66ca-6af1-4ac2-b895-df4219ad0b59",
+      "type": "addVideoNode",
+      "dataType": "video",
+      "isInput": true,
+      "inputName": "input_5cbb66ca",
+      "staticData": {
+        "fileKeys": [
+          "0988HxhcGBOQo1WCpuZ60.MP4"
+        ]
+      },
+      "level": 0
+    },
+    {
+      "id": "a0fa3e3f-20b5-4161-8859-3713e57c1ae8",
+      "type": "imageNode",
+      "dataType": "image",
+      "isInput": false,
+      "staticData": {
+        "fileKeys": [
+          "IvPx-mj5dfXY9KYuZ57uc.jpg"
+        ]
+      },
+      "level": 1
+    },
+    {
+      "id": "7303b8aa-7b72-4618-b176-6b4188b86feb",
+      "type": "videoNode",
+      "dataType": "video",
+      "isInput": false,
+      "staticData": {
+        "fileKeys": [
+          "0988HxhcGBOQo1WCpuZ60.MP4"
+        ]
+      },
+      "level": 1
+    },
+    {
+      "id": "ee0cbfa7-ef80-49e8-8648-5ecc021c1008",
+      "type": "videoNode",
+      "dataType": "video",
+      "isInput": false,
+      "staticData": {
+        "fileKeys": [
+          "tasks/brqsUJzFrSUgvCiTP73Jx/W22wDWc6VpqHx8wOXFVg_.mp4"
+        ]
+      },
+      "level": 3
+    },
+    {
+      "id": "311934b5-484a-4fdf-81d4-52ba0f9c4349",
+      "type": "videoNode",
+      "dataType": "video",
+      "isInput": false,
+      "staticData": {
+        "fileKeys": [
+          "tasks/rqh2_SN0ISRA8dXNAOQlR/gxqPP9h78xEFSNTlEEk4G.mp4"
+        ]
+      },
+      "level": 3
+    },
+    {
+      "id": "b121a215-382c-43a5-a926-f7a26a16f7d0",
+      "type": "audioNode",
+      "dataType": "audio",
+      "isInput": false,
+      "staticData": {
+        "fileKeys": [
+          "tasks/GOZJxW7BnGuaNBjSzqlWs/xpndLhdhxoP534d5SWFEr.mp3"
+        ]
+      },
+      "level": 3
+    },
+    {
+      "id": "6fe9830a-5b2a-42ed-80c4-6a9de4704ac6",
+      "type": "videoNode",
+      "dataType": "video",
+      "isInput": false,
+      "staticData": {
+        "fileKeys": [
+          "tasks/xAZK-w42rAUZTHo83WM8G/uPVELmvWthC9MJfG3dZ2v.mp4"
+        ]
+      },
+      "level": 5
+    },
+    {
+      "id": "cea9d841-6f09-4f32-858b-1a6d5faaf307",
+      "type": "videoNode",
+      "dataType": "video",
+      "isInput": false,
+      "staticData": {
+        "fileKeys": [
+          "tasks/jTaD20Ahns619SgU6O42T/XU3hZhcjKDU0DkCvUdQPu.mp4"
+        ]
+      },
+      "level": 5
+    },
+    {
+      "id": "6777f0ef-20b6-4ddd-9f81-58e26ff8becb",
+      "type": "imageNode",
+      "dataType": "image",
+      "isInput": false,
+      "staticData": {
+        "fileKeys": [
+          "tasks/vqOVMbY6iv6gCyn71dKMX/cZsBGhWB8S9zCxSJiYtp9.png"
+        ]
+      },
+      "level": 7
+    },
+    {
+      "id": "15b11160-862a-4327-959e-42499713bcd0",
+      "type": "imageNode",
+      "dataType": "image",
+      "isInput": false,
+      "staticData": {
+        "fileKeys": [
+          "tasks/kBZxPX6hKt6ayFdbYpkRV/hxt_M552UuGQhkBMo5TfY.png"
+        ]
+      },
+      "level": 7
+    },
+    {
+      "id": "f61395a4-c2d9-417c-bbc0-4ee6b99d2b54",
+      "type": "videoNode",
+      "dataType": "video",
+      "isInput": false,
+      "staticData": {
+        "fileKeys": [
+          "tasks/Aj282tUJuXm1prdt2iErA/INcis-9GTuQSxksBac_3y.mp4"
+        ]
+      },
+      "level": 9
+    }
+  ],
+  "executableNodes": [
+    {
+      "id": "55a03424-7f05-4618-88f1-9c6d24585747",
+      "type": "videoImageGenVideoMoveNode",
+      "feature": "video-image-gen-video-move",
+      "pluginId": "tongflow-modal-wan-animate",
+      "bindings": {
+        "text": {
+          "kind": "config",
+          "value": "男人跳舞"
+        },
+        "duration": {
+          "kind": "config",
+          "value": 5
+        },
+        "height": {
+          "kind": "config",
+          "value": 1024
+        },
+        "width": {
+          "kind": "config",
+          "value": 576
+        },
+        "image": {
+          "kind": "handle",
+          "sources": [
+            {
+              "fromNodeId": "a0fa3e3f-20b5-4161-8859-3713e57c1ae8",
+              "fromField": "fileKeys"
+            }
+          ],
+          "targetHandle": "in:image",
+          "consumerShape": "scalar"
+        },
+        "video": {
+          "kind": "handle",
+          "sources": [
+            {
+              "fromNodeId": "7303b8aa-7b72-4618-b176-6b4188b86feb",
+              "fromField": "fileKeys"
+            }
+          ],
+          "targetHandle": "in:video",
+          "consumerShape": "scalar"
+        },
+        "attention_strength": {
+          "kind": "config",
+          "value": 1
+        }
+      },
+      "outputs": [
+        {
+          "sourceField": "video",
+          "nodeType": "videoNode",
+          "dataField": "fileKeys",
+          "expandEach": false,
+          "itemValuePath": "file_key",
+          "downstreamDataNodeId": "ee0cbfa7-ef80-49e8-8648-5ecc021c1008"
+        }
+      ],
+      "dependencies": [
+        "a0fa3e3f-20b5-4161-8859-3713e57c1ae8",
+        "7303b8aa-7b72-4618-b176-6b4188b86feb"
+      ],
+      "level": 2,
+      "rawConfig": {
+        "duration": 5,
+        "attention_strength": 1,
+        "pluginId": "tongflow-modal-wan-animate",
+        "width": 576,
+        "height": 1024,
+        "text": "男人跳舞"
+      }
+    },
+    {
+      "id": "8a7b93f7-009b-4a01-9ba0-b1cd6b28e0c9",
+      "type": "videoImageGenVideoMixNode",
+      "feature": "video-image-gen-video-mix",
+      "pluginId": "tongflow-modal-wan-animate",
+      "bindings": {
+        "text": {
+          "kind": "config",
+          "value": "人物跳舞"
+        },
+        "image": {
+          "kind": "handle",
+          "sources": [
+            {
+              "fromNodeId": "a0fa3e3f-20b5-4161-8859-3713e57c1ae8",
+              "fromField": "fileKeys"
+            }
+          ],
+          "targetHandle": "in:image",
+          "consumerShape": "scalar"
+        },
+        "video": {
+          "kind": "handle",
+          "sources": [
+            {
+              "fromNodeId": "7303b8aa-7b72-4618-b176-6b4188b86feb",
+              "fromField": "fileKeys"
+            }
+          ],
+          "targetHandle": "in:video",
+          "consumerShape": "scalar"
+        }
+      },
+      "outputs": [
+        {
+          "sourceField": "video",
+          "nodeType": "videoNode",
+          "dataField": "fileKeys",
+          "expandEach": false,
+          "itemValuePath": "file_key",
+          "downstreamDataNodeId": "311934b5-484a-4fdf-81d4-52ba0f9c4349"
+        }
+      ],
+      "dependencies": [
+        "a0fa3e3f-20b5-4161-8859-3713e57c1ae8",
+        "7303b8aa-7b72-4618-b176-6b4188b86feb"
+      ],
+      "level": 2,
+      "rawConfig": {
+        "pluginId": "tongflow-modal-wan-animate",
+        "text": "人物跳舞"
+      }
+    },
+    {
+      "id": "6dc808be-9373-495c-bb76-740d05ac4bbb",
+      "type": "extractAudioNode",
+      "feature": "extract-audio",
+      "pluginId": "tongflow-modal-ffmpeg",
+      "bindings": {
+        "video": {
+          "kind": "handle",
+          "sources": [
+            {
+              "fromNodeId": "7303b8aa-7b72-4618-b176-6b4188b86feb",
+              "fromField": "fileKeys"
+            }
+          ],
+          "targetHandle": "in:video",
+          "consumerShape": "scalar"
+        }
+      },
+      "batchField": "video",
+      "outputs": [
+        {
+          "sourceField": "audio",
+          "nodeType": "audioNode",
+          "dataField": "fileKeys",
+          "expandEach": false,
+          "itemValuePath": "file_key",
+          "downstreamDataNodeId": "b121a215-382c-43a5-a926-f7a26a16f7d0"
+        }
+      ],
+      "dependencies": [
+        "7303b8aa-7b72-4618-b176-6b4188b86feb"
+      ],
+      "level": 2,
+      "rawConfig": {
+        "fileKeys": [
+          "0988HxhcGBOQo1WCpuZ60.MP4"
+        ],
+        "pluginId": "tongflow-modal-ffmpeg"
+      }
+    },
+    {
+      "id": "4779f1ab-c4cc-4fdb-bb51-860978c3d98c",
+      "type": "mergeVideoAudioNode",
+      "feature": "merge-video-audio",
+      "pluginId": "tongflow-modal-ffmpeg",
+      "bindings": {
+        "video": {
+          "kind": "handle",
+          "sources": [
+            {
+              "fromNodeId": "ee0cbfa7-ef80-49e8-8648-5ecc021c1008",
+              "fromField": "fileKeys"
+            }
+          ],
+          "targetHandle": "in:video",
+          "consumerShape": "scalar"
+        },
+        "audio": {
+          "kind": "handle",
+          "sources": [
+            {
+              "fromNodeId": "b121a215-382c-43a5-a926-f7a26a16f7d0",
+              "fromField": "fileKeys"
+            }
+          ],
+          "targetHandle": "in:audio",
+          "consumerShape": "scalar"
+        }
+      },
+      "batchField": "video",
+      "outputs": [
+        {
+          "sourceField": "video",
+          "nodeType": "videoNode",
+          "dataField": "fileKeys",
+          "expandEach": false,
+          "itemValuePath": "file_key",
+          "downstreamDataNodeId": "6fe9830a-5b2a-42ed-80c4-6a9de4704ac6"
+        }
+      ],
+      "dependencies": [
+        "b121a215-382c-43a5-a926-f7a26a16f7d0",
+        "ee0cbfa7-ef80-49e8-8648-5ecc021c1008"
+      ],
+      "level": 4,
+      "rawConfig": {
+        "pluginId": "tongflow-modal-ffmpeg"
+      }
+    },
+    {
+      "id": "b6e66bc8-279c-4cca-ad66-661d90ba095a",
+      "type": "mergeVideoAudioNode",
+      "feature": "merge-video-audio",
+      "pluginId": "tongflow-modal-ffmpeg",
+      "bindings": {
+        "video": {
+          "kind": "handle",
+          "sources": [
+            {
+              "fromNodeId": "311934b5-484a-4fdf-81d4-52ba0f9c4349",
+              "fromField": "fileKeys"
+            }
+          ],
+          "targetHandle": "in:video",
+          "consumerShape": "scalar"
+        },
+        "audio": {
+          "kind": "handle",
+          "sources": [
+            {
+              "fromNodeId": "b121a215-382c-43a5-a926-f7a26a16f7d0",
+              "fromField": "fileKeys"
+            }
+          ],
+          "targetHandle": "in:audio",
+          "consumerShape": "scalar"
+        }
+      },
+      "batchField": "video",
+      "outputs": [
+        {
+          "sourceField": "video",
+          "nodeType": "videoNode",
+          "dataField": "fileKeys",
+          "expandEach": false,
+          "itemValuePath": "file_key",
+          "downstreamDataNodeId": "cea9d841-6f09-4f32-858b-1a6d5faaf307"
+        }
+      ],
+      "dependencies": [
+        "b121a215-382c-43a5-a926-f7a26a16f7d0",
+        "311934b5-484a-4fdf-81d4-52ba0f9c4349"
+      ],
+      "level": 4,
+      "rawConfig": {
+        "pluginId": "tongflow-modal-ffmpeg"
+      }
+    },
+    {
+      "id": "e140fe98-4e2c-4152-af50-3ca57989f2ec",
+      "type": "getFirstFrameNode",
+      "feature": "get-first-frame",
+      "pluginId": "tongflow-modal-ffmpeg",
+      "bindings": {
+        "video": {
+          "kind": "handle",
+          "sources": [
+            {
+              "fromNodeId": "cea9d841-6f09-4f32-858b-1a6d5faaf307",
+              "fromField": "fileKeys"
+            }
+          ],
+          "targetHandle": "in:video",
+          "consumerShape": "scalar"
+        }
+      },
+      "batchField": "video",
+      "outputs": [
+        {
+          "sourceField": "image",
+          "nodeType": "imageNode",
+          "dataField": "fileKeys",
+          "expandEach": false,
+          "itemValuePath": "file_key",
+          "downstreamDataNodeId": "6777f0ef-20b6-4ddd-9f81-58e26ff8becb"
+        }
+      ],
+      "dependencies": [
+        "cea9d841-6f09-4f32-858b-1a6d5faaf307"
+      ],
+      "level": 6,
+      "rawConfig": {
+        "fileKeys": [
+          "tasks/jTaD20Ahns619SgU6O42T/XU3hZhcjKDU0DkCvUdQPu.mp4"
+        ],
+        "pluginId": "tongflow-modal-ffmpeg"
+      }
+    },
+    {
+      "id": "fe5acff2-da4d-48f0-9c6e-49529abf2ba2",
+      "type": "getLastFrameNode",
+      "feature": "get-last-frame",
+      "pluginId": "tongflow-modal-ffmpeg",
+      "bindings": {
+        "video": {
+          "kind": "handle",
+          "sources": [
+            {
+              "fromNodeId": "cea9d841-6f09-4f32-858b-1a6d5faaf307",
+              "fromField": "fileKeys"
+            }
+          ],
+          "targetHandle": "in:video",
+          "consumerShape": "scalar"
+        }
+      },
+      "batchField": "video",
+      "outputs": [
+        {
+          "sourceField": "image",
+          "nodeType": "imageNode",
+          "dataField": "fileKeys",
+          "expandEach": false,
+          "itemValuePath": "file_key",
+          "downstreamDataNodeId": "15b11160-862a-4327-959e-42499713bcd0"
+        }
+      ],
+      "dependencies": [
+        "cea9d841-6f09-4f32-858b-1a6d5faaf307"
+      ],
+      "level": 6,
+      "rawConfig": {
+        "fileKeys": [
+          "tasks/jTaD20Ahns619SgU6O42T/XU3hZhcjKDU0DkCvUdQPu.mp4"
+        ],
+        "pluginId": "tongflow-modal-ffmpeg"
+      }
+    },
+    {
+      "id": "b5220511-4338-4623-b8ac-2642e5e54cc5",
+      "type": "imageImageGenVideoNode",
+      "feature": "image-image-gen-video",
+      "pluginId": "tongflow-modal-ltx",
+      "bindings": {
+        "text": {
+          "kind": "config",
+          "value": "变化"
+        },
+        "duration": {
+          "kind": "config",
+          "value": 5
+        },
+        "image": {
+          "kind": "handle",
+          "sources": [
+            {
+              "fromNodeId": "6777f0ef-20b6-4ddd-9f81-58e26ff8becb",
+              "fromField": "fileKeys"
+            }
+          ],
+          "targetHandle": "in:image",
+          "consumerShape": "scalar"
+        },
+        "end_image": {
+          "kind": "handle",
+          "sources": [
+            {
+              "fromNodeId": "15b11160-862a-4327-959e-42499713bcd0",
+              "fromField": "fileKeys"
+            }
+          ],
+          "targetHandle": "in:end_image",
+          "consumerShape": "scalar"
+        }
+      },
+      "outputs": [
+        {
+          "sourceField": "video",
+          "nodeType": "videoNode",
+          "dataField": "fileKeys",
+          "expandEach": false,
+          "itemValuePath": "file_key",
+          "downstreamDataNodeId": "f61395a4-c2d9-417c-bbc0-4ee6b99d2b54"
+        }
+      ],
+      "dependencies": [
+        "6777f0ef-20b6-4ddd-9f81-58e26ff8becb",
+        "15b11160-862a-4327-959e-42499713bcd0"
+      ],
+      "level": 8,
+      "rawConfig": {
+        "pluginId": "tongflow-modal-ltx",
+        "text": "变化",
+        "duration": 5
+      }
+    }
+  ],
+  "executionLevels": [
+    [
+      "55a03424-7f05-4618-88f1-9c6d24585747",
+      "8a7b93f7-009b-4a01-9ba0-b1cd6b28e0c9",
+      "6dc808be-9373-495c-bb76-740d05ac4bbb"
+    ],
+    [
+      "4779f1ab-c4cc-4fdb-bb51-860978c3d98c",
+      "b6e66bc8-279c-4cca-ad66-661d90ba095a"
+    ],
+    [
+      "e140fe98-4e2c-4152-af50-3ca57989f2ec",
+      "fe5acff2-da4d-48f0-9c6e-49529abf2ba2"
+    ],
+    [
+      "b5220511-4338-4623-b8ac-2642e5e54cc5"
+    ]
+  ],
+  "dataNodeEdges": [
+    {
+      "source": "f2929d60-e61a-48a5-8a94-86e002e399ab",
+      "target": "a0fa3e3f-20b5-4161-8859-3713e57c1ae8"
+    },
+    {
+      "source": "5cbb66ca-6af1-4ac2-b895-df4219ad0b59",
+      "target": "7303b8aa-7b72-4618-b176-6b4188b86feb"
+    },
+    {
+      "source": "a0fa3e3f-20b5-4161-8859-3713e57c1ae8",
+      "target": "55a03424-7f05-4618-88f1-9c6d24585747"
+    },
+    {
+      "source": "7303b8aa-7b72-4618-b176-6b4188b86feb",
+      "target": "55a03424-7f05-4618-88f1-9c6d24585747"
+    },
+    {
+      "source": "55a03424-7f05-4618-88f1-9c6d24585747",
+      "target": "ee0cbfa7-ef80-49e8-8648-5ecc021c1008"
+    },
+    {
+      "source": "a0fa3e3f-20b5-4161-8859-3713e57c1ae8",
+      "target": "8a7b93f7-009b-4a01-9ba0-b1cd6b28e0c9"
+    },
+    {
+      "source": "7303b8aa-7b72-4618-b176-6b4188b86feb",
+      "target": "8a7b93f7-009b-4a01-9ba0-b1cd6b28e0c9"
+    },
+    {
+      "source": "7303b8aa-7b72-4618-b176-6b4188b86feb",
+      "target": "6dc808be-9373-495c-bb76-740d05ac4bbb"
+    },
+    {
+      "source": "6dc808be-9373-495c-bb76-740d05ac4bbb",
+      "target": "b121a215-382c-43a5-a926-f7a26a16f7d0"
+    },
+    {
+      "source": "b121a215-382c-43a5-a926-f7a26a16f7d0",
+      "target": "4779f1ab-c4cc-4fdb-bb51-860978c3d98c"
+    },
+    {
+      "source": "ee0cbfa7-ef80-49e8-8648-5ecc021c1008",
+      "target": "4779f1ab-c4cc-4fdb-bb51-860978c3d98c"
+    },
+    {
+      "source": "4779f1ab-c4cc-4fdb-bb51-860978c3d98c",
+      "target": "6fe9830a-5b2a-42ed-80c4-6a9de4704ac6"
+    },
+    {
+      "source": "8a7b93f7-009b-4a01-9ba0-b1cd6b28e0c9",
+      "target": "311934b5-484a-4fdf-81d4-52ba0f9c4349"
+    },
+    {
+      "source": "b121a215-382c-43a5-a926-f7a26a16f7d0",
+      "target": "b6e66bc8-279c-4cca-ad66-661d90ba095a"
+    },
+    {
+      "source": "311934b5-484a-4fdf-81d4-52ba0f9c4349",
+      "target": "b6e66bc8-279c-4cca-ad66-661d90ba095a"
+    },
+    {
+      "source": "b6e66bc8-279c-4cca-ad66-661d90ba095a",
+      "target": "cea9d841-6f09-4f32-858b-1a6d5faaf307"
+    },
+    {
+      "source": "cea9d841-6f09-4f32-858b-1a6d5faaf307",
+      "target": "e140fe98-4e2c-4152-af50-3ca57989f2ec"
+    },
+    {
+      "source": "cea9d841-6f09-4f32-858b-1a6d5faaf307",
+      "target": "fe5acff2-da4d-48f0-9c6e-49529abf2ba2"
+    },
+    {
+      "source": "e140fe98-4e2c-4152-af50-3ca57989f2ec",
+      "target": "6777f0ef-20b6-4ddd-9f81-58e26ff8becb"
+    },
+    {
+      "source": "fe5acff2-da4d-48f0-9c6e-49529abf2ba2",
+      "target": "15b11160-862a-4327-959e-42499713bcd0"
+    },
+    {
+      "source": "6777f0ef-20b6-4ddd-9f81-58e26ff8becb",
+      "target": "b5220511-4338-4623-b8ac-2642e5e54cc5"
+    },
+    {
+      "source": "15b11160-862a-4327-959e-42499713bcd0",
+      "target": "b5220511-4338-4623-b8ac-2642e5e54cc5"
+    },
+    {
+      "source": "b5220511-4338-4623-b8ac-2642e5e54cc5",
+      "target": "f61395a4-c2d9-417c-bbc0-4ee6b99d2b54"
+    }
+  ],
+  "originalFlow": {
+    "nodes": [
+      {
+        "id": "f2929d60-e61a-48a5-8a94-86e002e399ab",
+        "type": "addImageNode",
+        "position": {
+          "x": 20737.595380301736,
+          "y": 3730.9931590591104
+        },
+        "origin": [
+          0.5,
+          0.5
+        ],
+        "data": {},
+        "measured": {
+          "width": 480,
+          "height": 318
+        },
+        "selected": false
+      },
+      {
+        "id": "a0fa3e3f-20b5-4161-8859-3713e57c1ae8",
+        "type": "imageNode",
+        "position": {
+          "x": 21227.595380301736,
+          "y": 3730.9931590591104
+        },
+        "origin": [
+          0.5,
+          0.5
+        ],
+        "data": {
+          "fileKeys": [
+            "IvPx-mj5dfXY9KYuZ57uc.jpg"
+          ]
+        },
+        "measured": {
+          "width": 344,
+          "height": 663
+        },
+        "selected": false
+      },
+      {
+        "id": "5cbb66ca-6af1-4ac2-b895-df4219ad0b59",
+        "type": "addVideoNode",
+        "position": {
+          "x": 21119.078690230017,
+          "y": 4413.648501307062
+        },
+        "origin": [
+          0.5,
+          0.5
+        ],
+        "data": {},
+        "measured": {
+          "width": 480,
+          "height": 318
+        },
+        "selected": false
+      },
+      {
+        "id": "7303b8aa-7b72-4618-b176-6b4188b86feb",
+        "type": "videoNode",
+        "position": {
+          "x": 21609.078690230017,
+          "y": 4413.648501307062
+        },
+        "origin": [
+          0.5,
+          0.5
+        ],
+        "data": {
+          "fileKeys": [
+            "0988HxhcGBOQo1WCpuZ60.MP4"
+          ]
+        },
+        "measured": {
+          "width": 256,
+          "height": 502
+        },
+        "selected": false
+      },
+      {
+        "id": "55a03424-7f05-4618-88f1-9c6d24585747",
+        "type": "videoImageGenVideoMoveNode",
+        "position": {
+          "x": 22091.935046093517,
+          "y": 3368.5902196005372
+        },
+        "origin": [
+          0.5,
+          0.5
+        ],
+        "data": {
+          "ids": [
+            "a0fa3e3f-20b5-4161-8859-3713e57c1ae8",
+            "7303b8aa-7b72-4618-b176-6b4188b86feb"
+          ],
+          "feature": "video-image-gen-video-move",
+          "duration": 5,
+          "attention_strength": 1,
+          "pluginId": "tongflow-modal-wan-animate",
+          "width": 576,
+          "height": 1024,
+          "text": "男人跳舞",
+          "prompt": {
+            "text": "男人跳舞",
+            "duration": 5,
+            "image": "IvPx-mj5dfXY9KYuZ57uc.jpg",
+            "video": "0988HxhcGBOQo1WCpuZ60.MP4"
+          }
+        },
+        "measured": {
+          "width": 480,
+          "height": 699
+        },
+        "selected": false,
+        "dragging": false
+      },
+      {
+        "id": "ee0cbfa7-ef80-49e8-8648-5ecc021c1008",
+        "type": "videoNode",
+        "position": {
+          "x": 22561.24535689668,
+          "y": 3600.8051280177983
+        },
+        "origin": [
+          0.5,
+          0.5
+        ],
+        "data": {
+          "fileKeys": [
+            "tasks/brqsUJzFrSUgvCiTP73Jx/W22wDWc6VpqHx8wOXFVg_.mp4"
+          ]
+        },
+        "measured": {
+          "width": 344,
+          "height": 663
+        },
+        "selected": false
+      },
+      {
+        "id": "8a7b93f7-009b-4a01-9ba0-b1cd6b28e0c9",
+        "type": "videoImageGenVideoMixNode",
+        "position": {
+          "x": 22086.00152352994,
+          "y": 4830.692164701077
+        },
+        "origin": [
+          0.5,
+          0.5
+        ],
+        "data": {
+          "ids": [
+            "a0fa3e3f-20b5-4161-8859-3713e57c1ae8",
+            "7303b8aa-7b72-4618-b176-6b4188b86feb"
+          ],
+          "feature": "video-image-gen-video-mix",
+          "pluginId": "tongflow-modal-wan-animate",
+          "text": "人物跳舞",
+          "prompt": {
+            "text": "人物跳舞",
+            "image": "IvPx-mj5dfXY9KYuZ57uc.jpg",
+            "video": "0988HxhcGBOQo1WCpuZ60.MP4"
+          }
+        },
+        "measured": {
+          "width": 480,
+          "height": 436
+        },
+        "selected": false,
+        "dragging": false
+      },
+      {
+        "id": "6dc808be-9373-495c-bb76-740d05ac4bbb",
+        "type": "extractAudioNode",
+        "position": {
+          "x": 22076.302061627244,
+          "y": 4258.100971323726
+        },
+        "origin": [
+          0.5,
+          0.5
+        ],
+        "data": {
+          "fileKeys": [
+            "0988HxhcGBOQo1WCpuZ60.MP4"
+          ],
+          "pluginId": "tongflow-modal-ffmpeg",
+          "feature": "extract-audio",
+          "prompt": {
+            "video": "0988HxhcGBOQo1WCpuZ60.MP4"
+          }
+        },
+        "measured": {
+          "width": 256,
+          "height": 200
+        },
+        "selected": false,
+        "dragging": false
+      },
+      {
+        "id": "b121a215-382c-43a5-a926-f7a26a16f7d0",
+        "type": "audioNode",
+        "position": {
+          "x": 22606.403890409703,
+          "y": 4292.323882799778
+        },
+        "origin": [
+          0.5,
+          0.5
+        ],
+        "data": {
+          "fileKeys": [
+            "tasks/GOZJxW7BnGuaNBjSzqlWs/xpndLhdhxoP534d5SWFEr.mp3"
+          ]
+        },
+        "measured": {
+          "width": 256,
+          "height": 116
+        },
+        "selected": false,
+        "dragging": false
+      },
+      {
+        "id": "4779f1ab-c4cc-4fdb-bb51-860978c3d98c",
+        "type": "mergeVideoAudioNode",
+        "position": {
+          "x": 23109.88789915523,
+          "y": 4041.769794302035
+        },
+        "origin": [
+          0.5,
+          0.5
+        ],
+        "data": {
+          "ids": [
+            "b121a215-382c-43a5-a926-f7a26a16f7d0",
+            "ee0cbfa7-ef80-49e8-8648-5ecc021c1008"
+          ],
+          "pluginId": "tongflow-modal-ffmpeg",
+          "feature": "merge-video-audio",
+          "prompt": {
+            "video": "tasks/brqsUJzFrSUgvCiTP73Jx/W22wDWc6VpqHx8wOXFVg_.mp4",
+            "audio": "tasks/GOZJxW7BnGuaNBjSzqlWs/xpndLhdhxoP534d5SWFEr.mp3"
+          }
+        },
+        "measured": {
+          "width": 256,
+          "height": 200
+        },
+        "selected": false
+      },
+      {
+        "id": "6fe9830a-5b2a-42ed-80c4-6a9de4704ac6",
+        "type": "videoNode",
+        "position": {
+          "x": 23729.428918849986,
+          "y": 3608.0348449576895
+        },
+        "origin": [
+          0.5,
+          0.5
+        ],
+        "data": {
+          "fileKeys": [
+            "tasks/xAZK-w42rAUZTHo83WM8G/uPVELmvWthC9MJfG3dZ2v.mp4"
+          ]
+        },
+        "measured": {
+          "width": 344,
+          "height": 663
+        },
+        "selected": false,
+        "dragging": false
+      },
+      {
+        "id": "311934b5-484a-4fdf-81d4-52ba0f9c4349",
+        "type": "videoNode",
+        "position": {
+          "x": 22576.00152352994,
+          "y": 4830.692164701077
+        },
+        "origin": [
+          0.5,
+          0.5
+        ],
+        "data": {
+          "fileKeys": [
+            "tasks/rqh2_SN0ISRA8dXNAOQlR/gxqPP9h78xEFSNTlEEk4G.mp4"
+          ]
+        },
+        "measured": {
+          "width": 256,
+          "height": 502
+        },
+        "selected": false
+      },
+      {
+        "id": "b6e66bc8-279c-4cca-ad66-661d90ba095a",
+        "type": "mergeVideoAudioNode",
+        "position": {
+          "x": 22984.403890409703,
+          "y": 4658.008023750428
+        },
+        "origin": [
+          0.5,
+          0.5
+        ],
+        "data": {
+          "ids": [
+            "b121a215-382c-43a5-a926-f7a26a16f7d0",
+            "311934b5-484a-4fdf-81d4-52ba0f9c4349"
+          ],
+          "pluginId": "tongflow-modal-ffmpeg",
+          "feature": "merge-video-audio",
+          "prompt": {
+            "video": "tasks/rqh2_SN0ISRA8dXNAOQlR/gxqPP9h78xEFSNTlEEk4G.mp4",
+            "audio": "tasks/GOZJxW7BnGuaNBjSzqlWs/xpndLhdhxoP534d5SWFEr.mp3"
+          }
+        },
+        "measured": {
+          "width": 256,
+          "height": 200
+        },
+        "selected": false
+      },
+      {
+        "id": "cea9d841-6f09-4f32-858b-1a6d5faaf307",
+        "type": "videoNode",
+        "position": {
+          "x": 23362.403890409703,
+          "y": 4658.008023750428
+        },
+        "origin": [
+          0.5,
+          0.5
+        ],
+        "data": {
+          "fileKeys": [
+            "tasks/jTaD20Ahns619SgU6O42T/XU3hZhcjKDU0DkCvUdQPu.mp4"
+          ]
+        },
+        "measured": {
+          "width": 256,
+          "height": 502
+        },
+        "selected": false
+      },
+      {
+        "id": "e140fe98-4e2c-4152-af50-3ca57989f2ec",
+        "type": "getFirstFrameNode",
+        "position": {
+          "x": 23740.403890409703,
+          "y": 4658.008023750428
+        },
+        "origin": [
+          0.5,
+          0.5
+        ],
+        "data": {
+          "fileKeys": [
+            "tasks/jTaD20Ahns619SgU6O42T/XU3hZhcjKDU0DkCvUdQPu.mp4"
+          ],
+          "pluginId": "tongflow-modal-ffmpeg",
+          "feature": "get-first-frame",
+          "prompt": {
+            "video": "tasks/jTaD20Ahns619SgU6O42T/XU3hZhcjKDU0DkCvUdQPu.mp4"
+          }
+        },
+        "measured": {
+          "width": 256,
+          "height": 200
+        },
+        "selected": false
+      },
+      {
+        "id": "fe5acff2-da4d-48f0-9c6e-49529abf2ba2",
+        "type": "getLastFrameNode",
+        "position": {
+          "x": 23746.237223743035,
+          "y": 4922.174690417095
+        },
+        "origin": [
+          0.5,
+          0.5
+        ],
+        "data": {
+          "fileKeys": [
+            "tasks/jTaD20Ahns619SgU6O42T/XU3hZhcjKDU0DkCvUdQPu.mp4"
+          ],
+          "pluginId": "tongflow-modal-ffmpeg",
+          "feature": "get-last-frame",
+          "prompt": {
+            "video": "tasks/jTaD20Ahns619SgU6O42T/XU3hZhcjKDU0DkCvUdQPu.mp4"
+          }
+        },
+        "measured": {
+          "width": 256,
+          "height": 200
+        },
+        "selected": false,
+        "dragging": false
+      },
+      {
+        "id": "6777f0ef-20b6-4ddd-9f81-58e26ff8becb",
+        "type": "imageNode",
+        "position": {
+          "x": 24118.403890409703,
+          "y": 4658.008023750428
+        },
+        "origin": [
+          0.5,
+          0.5
+        ],
+        "data": {
+          "fileKeys": [
+            "tasks/vqOVMbY6iv6gCyn71dKMX/cZsBGhWB8S9zCxSJiYtp9.png"
+          ]
+        },
+        "measured": {
+          "width": 256,
+          "height": 502
+        },
+        "selected": false
+      },
+      {
+        "id": "15b11160-862a-4327-959e-42499713bcd0",
+        "type": "imageNode",
+        "position": {
+          "x": 24108.68035984526,
+          "y": 5272.204128116953
+        },
+        "origin": [
+          0.5,
+          0.5
+        ],
+        "data": {
+          "fileKeys": [
+            "tasks/kBZxPX6hKt6ayFdbYpkRV/hxt_M552UuGQhkBMo5TfY.png"
+          ]
+        },
+        "measured": {
+          "width": 256,
+          "height": 502
+        },
+        "selected": false,
+        "dragging": false
+      },
+      {
+        "id": "b5220511-4338-4623-b8ac-2642e5e54cc5",
+        "type": "imageImageGenVideoNode",
+        "position": {
+          "x": 24960.436109250844,
+          "y": 4947.514964484471
+        },
+        "origin": [
+          0.5,
+          0.5
+        ],
+        "data": {
+          "ids": [
+            "6777f0ef-20b6-4ddd-9f81-58e26ff8becb",
+            "15b11160-862a-4327-959e-42499713bcd0"
+          ],
+          "pluginId": "tongflow-modal-ltx",
+          "feature": "image-image-gen-video",
+          "text": "变化",
+          "duration": 5,
+          "prompt": {
+            "text": "变化",
+            "duration": 5,
+            "image": "tasks/vqOVMbY6iv6gCyn71dKMX/cZsBGhWB8S9zCxSJiYtp9.png",
+            "end_image": "tasks/kBZxPX6hKt6ayFdbYpkRV/hxt_M552UuGQhkBMo5TfY.png"
+          }
+        },
+        "measured": {
+          "width": 480,
+          "height": 780
+        },
+        "selected": false,
+        "dragging": false
+      },
+      {
+        "id": "f61395a4-c2d9-417c-bbc0-4ee6b99d2b54",
+        "type": "videoNode",
+        "position": {
+          "x": 25450.436109250844,
+          "y": 4947.514964484471
+        },
+        "origin": [
+          0.5,
+          0.5
+        ],
+        "data": {
+          "fileKeys": [
+            "tasks/Aj282tUJuXm1prdt2iErA/INcis-9GTuQSxksBac_3y.mp4"
+          ]
+        },
+        "measured": {
+          "width": 320,
+          "height": 225
+        }
+      }
+    ],
+    "edges": [
+      {
+        "id": "929ef72a-d0d5-4be3-b53a-f689fa727783",
+        "source": "f2929d60-e61a-48a5-8a94-86e002e399ab",
+        "target": "a0fa3e3f-20b5-4161-8859-3713e57c1ae8",
+        "type": "custom-edge",
+        "targetHandle": "in:imageNode",
+        "selected": false
+      },
+      {
+        "id": "0da34bfc-3d0c-486c-83d6-00290b215477",
+        "source": "5cbb66ca-6af1-4ac2-b895-df4219ad0b59",
+        "target": "7303b8aa-7b72-4618-b176-6b4188b86feb",
+        "type": "custom-edge",
+        "targetHandle": "in:videoNode",
+        "selected": false
+      },
+      {
+        "id": "1da99e29-8188-40a2-9ccb-72570cc670f6",
+        "source": "a0fa3e3f-20b5-4161-8859-3713e57c1ae8",
+        "target": "55a03424-7f05-4618-88f1-9c6d24585747",
+        "type": "custom-edge",
+        "sourceHandle": "out:imageNode",
+        "targetHandle": "in:image",
+        "selected": false
+      },
+      {
+        "id": "b90a2ec0-10f5-4e16-a4f7-a081df2b2184",
+        "source": "7303b8aa-7b72-4618-b176-6b4188b86feb",
+        "target": "55a03424-7f05-4618-88f1-9c6d24585747",
+        "type": "custom-edge",
+        "sourceHandle": "out:videoNode",
+        "targetHandle": "in:video",
+        "selected": false
+      },
+      {
+        "id": "8a89d735-2f4d-4227-9007-a5843fa36708",
+        "source": "55a03424-7f05-4618-88f1-9c6d24585747",
+        "target": "ee0cbfa7-ef80-49e8-8648-5ecc021c1008",
+        "type": "custom-edge",
+        "sourceHandle": "out:video",
+        "targetHandle": "in:videoNode",
+        "selected": false
+      },
+      {
+        "id": "68f14fc6-34ce-441e-ad1b-cf97fca3daf3",
+        "source": "a0fa3e3f-20b5-4161-8859-3713e57c1ae8",
+        "target": "8a7b93f7-009b-4a01-9ba0-b1cd6b28e0c9",
+        "type": "custom-edge",
+        "sourceHandle": "out:imageNode",
+        "targetHandle": "in:image",
+        "selected": false
+      },
+      {
+        "id": "485edaeb-65b3-4c2c-ba61-5e6a6c6a1f8e",
+        "source": "7303b8aa-7b72-4618-b176-6b4188b86feb",
+        "target": "8a7b93f7-009b-4a01-9ba0-b1cd6b28e0c9",
+        "type": "custom-edge",
+        "sourceHandle": "out:videoNode",
+        "targetHandle": "in:video",
+        "selected": false
+      },
+      {
+        "id": "63238cba-e172-4a31-85a7-201b5ae596bc",
+        "source": "7303b8aa-7b72-4618-b176-6b4188b86feb",
+        "target": "6dc808be-9373-495c-bb76-740d05ac4bbb",
+        "type": "custom-edge",
+        "sourceHandle": "out:videoNode",
+        "targetHandle": "in:video",
+        "selected": false
+      },
+      {
+        "id": "a85f7662-52c1-46cd-9b50-d85212ce2f17",
+        "source": "6dc808be-9373-495c-bb76-740d05ac4bbb",
+        "target": "b121a215-382c-43a5-a926-f7a26a16f7d0",
+        "type": "custom-edge",
+        "sourceHandle": "out:audio",
+        "targetHandle": "in:audioNode",
+        "selected": false
+      },
+      {
+        "id": "2893ecc5-ae30-4f7a-b6eb-eeaccd3ab1b5",
+        "source": "b121a215-382c-43a5-a926-f7a26a16f7d0",
+        "target": "4779f1ab-c4cc-4fdb-bb51-860978c3d98c",
+        "type": "custom-edge",
+        "sourceHandle": "out:audioNode",
+        "targetHandle": "in:audio",
+        "selected": false
+      },
+      {
+        "id": "3abd751e-195d-48b4-a80f-a65e3db787cb",
+        "source": "ee0cbfa7-ef80-49e8-8648-5ecc021c1008",
+        "target": "4779f1ab-c4cc-4fdb-bb51-860978c3d98c",
+        "type": "custom-edge",
+        "sourceHandle": "out:videoNode",
+        "targetHandle": "in:video",
+        "selected": false
+      },
+      {
+        "id": "decfdfa5-b398-4fd2-a6be-4057f709c6dd",
+        "source": "4779f1ab-c4cc-4fdb-bb51-860978c3d98c",
+        "target": "6fe9830a-5b2a-42ed-80c4-6a9de4704ac6",
+        "type": "custom-edge",
+        "sourceHandle": "out:video",
+        "targetHandle": "in:videoNode",
+        "selected": false
+      },
+      {
+        "id": "050bd542-3c8f-448f-9291-9bb0053c10a7",
+        "source": "8a7b93f7-009b-4a01-9ba0-b1cd6b28e0c9",
+        "target": "311934b5-484a-4fdf-81d4-52ba0f9c4349",
+        "type": "custom-edge",
+        "sourceHandle": "out:video",
+        "targetHandle": "in:videoNode",
+        "selected": false
+      },
+      {
+        "id": "01115096-e412-4cfe-841c-a4bb8deb0316",
+        "source": "b121a215-382c-43a5-a926-f7a26a16f7d0",
+        "target": "b6e66bc8-279c-4cca-ad66-661d90ba095a",
+        "type": "custom-edge",
+        "sourceHandle": "out:audioNode",
+        "targetHandle": "in:audio",
+        "selected": false
+      },
+      {
+        "id": "15d16efd-8418-43d8-bbee-932b28d4d59e",
+        "source": "311934b5-484a-4fdf-81d4-52ba0f9c4349",
+        "target": "b6e66bc8-279c-4cca-ad66-661d90ba095a",
+        "type": "custom-edge",
+        "sourceHandle": "out:videoNode",
+        "targetHandle": "in:video",
+        "selected": false
+      },
+      {
+        "id": "2b16de2e-c443-4556-a885-58f52ef5773b",
+        "source": "b6e66bc8-279c-4cca-ad66-661d90ba095a",
+        "target": "cea9d841-6f09-4f32-858b-1a6d5faaf307",
+        "type": "custom-edge",
+        "sourceHandle": "out:video",
+        "targetHandle": "in:videoNode",
+        "selected": false
+      },
+      {
+        "id": "e7f3825a-d4be-4269-8553-dfcb3529bf83",
+        "source": "cea9d841-6f09-4f32-858b-1a6d5faaf307",
+        "target": "e140fe98-4e2c-4152-af50-3ca57989f2ec",
+        "type": "custom-edge",
+        "sourceHandle": "out:videoNode",
+        "targetHandle": "in:video",
+        "selected": false
+      },
+      {
+        "id": "33b41583-9491-4f6c-b22c-ca9ce4c020df",
+        "source": "cea9d841-6f09-4f32-858b-1a6d5faaf307",
+        "target": "fe5acff2-da4d-48f0-9c6e-49529abf2ba2",
+        "type": "custom-edge",
+        "sourceHandle": "out:videoNode",
+        "targetHandle": "in:video",
+        "selected": false
+      },
+      {
+        "id": "a00d388f-c9ee-4e63-8e08-eae9011405a8",
+        "source": "e140fe98-4e2c-4152-af50-3ca57989f2ec",
+        "target": "6777f0ef-20b6-4ddd-9f81-58e26ff8becb",
+        "type": "custom-edge",
+        "sourceHandle": "out:image",
+        "targetHandle": "in:imageNode",
+        "selected": false
+      },
+      {
+        "id": "8237db0d-b51d-4c84-af73-fb326f5776b6",
+        "source": "fe5acff2-da4d-48f0-9c6e-49529abf2ba2",
+        "target": "15b11160-862a-4327-959e-42499713bcd0",
+        "type": "custom-edge",
+        "sourceHandle": "out:image",
+        "targetHandle": "in:imageNode",
+        "selected": false
+      },
+      {
+        "id": "a07b5d84-bea8-4fb9-8fb9-186d41eb61f7",
+        "source": "6777f0ef-20b6-4ddd-9f81-58e26ff8becb",
+        "target": "b5220511-4338-4623-b8ac-2642e5e54cc5",
+        "type": "custom-edge",
+        "sourceHandle": "out:imageNode",
+        "targetHandle": "in:image",
+        "selected": false
+      },
+      {
+        "id": "9bdb4252-89e5-4b43-af18-851eefe664c5",
+        "source": "15b11160-862a-4327-959e-42499713bcd0",
+        "target": "b5220511-4338-4623-b8ac-2642e5e54cc5",
+        "type": "custom-edge",
+        "sourceHandle": "out:imageNode",
+        "targetHandle": "in:end_image",
+        "selected": false
+      },
+      {
+        "id": "e5e6fb6e-7766-444f-8e9b-b648a19d0cc6",
+        "source": "b5220511-4338-4623-b8ac-2642e5e54cc5",
+        "target": "f61395a4-c2d9-417c-bbc0-4ee6b99d2b54",
+        "type": "custom-edge",
+        "sourceHandle": "out:video",
+        "targetHandle": "in:videoNode"
+      }
+    ]
+  }
+}

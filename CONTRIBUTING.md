@@ -40,7 +40,8 @@ Please read [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md). Be respectful and construc
 4. **Set up Modal (for GPU inference)**
 
    ```bash
-   pnpm modal:setup
+   pip install modal
+   modal setup
    ```
 
 5. **Start the development server**

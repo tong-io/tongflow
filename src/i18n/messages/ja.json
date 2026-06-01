@@ -649,6 +649,7 @@
                 "audio": "音声",
                 "audios": "音声（{count}）",
                 "loading": "読み込み中...",
+                "unavailable": "コンテンツを読み込めません",
                 "more": "もっと見る",
                 "moreOptions": "その他のオプション",
                 "actions": "アクション",

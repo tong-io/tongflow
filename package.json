@@ -33,7 +33,7 @@
         "prebuild": "pnpm gen:abi",
         "build": "next build",
         "start": "next start",
-        "modal:setup": "node scripts/modal-setup.mjs",
+        "plugins:install": "node scripts/install-official-plugins.mjs",
         "db:generate": "drizzle-kit generate",
         "db:push": "drizzle-kit push",
         "db:studio": "drizzle-kit studio",

@@ -21,8 +21,8 @@ import {
     NodeHeaderMenuAction,
     NodeHeaderTitle,
 } from "../base/node-header";
-
 import { proportionalMediaNodeWidthPx } from "./media-node-max-width";
+import { ModalityPlaceholder } from "./modality-placeholder";
 
 type ImageNodeRfProps = RfDataNodeProps<"imageNode">;
 
@@ -166,6 +166,40 @@ const FullScreenWaterfallImageModal = ({
     return createPortal(content, document.body);
 };
 
+// Grid thumbnail that falls back to a neutral placeholder on load failure.
+const ImageGridThumb = ({
+    url,
+    index,
+    loadingLabel,
+}: {
+    url: string | undefined;
+    index: number;
+    loadingLabel: string;
+}) => {
+    const [errored, setErrored] = useState(false);
+
+    if (url && !errored) {
+        return (
+            <img
+                src={url}
+                alt={`Image ${index + 1}`}
+                className="h-full w-full object-cover"
+                onError={() => setErrored(true)}
+            />
+        );
+    }
+
+    if (errored) {
+        return <ModalityPlaceholder modality="image" variant="thumb" />;
+    }
+
+    return (
+        <div className="h-full w-full flex items-center justify-center bg-gray-300">
+            <div className="text-xs text-gray-500">{loadingLabel}</div>
+        </div>
+    );
+};
+
 const ImageNode = ({ selected, data }: ImageNodeRfProps) => {
     const t = useTranslations("Workspace.nodes.modal");
     const keys: string[] = data.fileKeys ?? [];
@@ -175,6 +209,7 @@ const ImageNode = ({ selected, data }: ImageNodeRfProps) => {
         width: number;
         height: number;
     } | null>(null);
+    const [imageError, setImageError] = useState(false);
 
     // Lazy-load one asset via async hook
     const { url: singleImageUrl } = useFileAsyncLoader(keys[0], {
@@ -190,9 +225,11 @@ const ImageNode = ({ selected, data }: ImageNodeRfProps) => {
     useEffect(() => {
         if (!singleImageUrl) {
             setImageDimensions(null);
+            setImageError(false);
             return;
         }
 
+        setImageError(false);
         const img = new Image();
         img.onload = () => {
             setImageDimensions({
@@ -202,6 +239,7 @@ const ImageNode = ({ selected, data }: ImageNodeRfProps) => {
         };
         img.onerror = () => {
             setImageDimensions(null);
+            setImageError(true);
         };
         img.src = singleImageUrl;
     }, [singleImageUrl]);
@@ -285,11 +323,14 @@ const ImageNode = ({ selected, data }: ImageNodeRfProps) => {
                 {isSingle ? (
                     // Single image display
                     <div className="relative w-full">
-                        {singleImageUrl ? (
+                        {imageError ? (
+                            <ModalityPlaceholder modality="image" />
+                        ) : singleImageUrl ? (
                             <img
                                 src={singleImageUrl}
                                 alt="Image content"
                                 className="w-full h-auto object-contain"
+                                onError={() => setImageError(true)}
                             />
                         ) : (
                             <div className="w-full bg-gray-200 flex items-center justify-center text-gray-500 py-16">
@@ -332,19 +373,11 @@ const ImageNode = ({ selected, data }: ImageNodeRfProps) => {
                                         key={key}
                                         className="relative aspect-square overflow-hidden rounded-md border border-gray-300 bg-gray-200 shadow-sm"
                                     >
-                                        {url ? (
-                                            <img
-                                                src={url}
-                                                alt={`Image ${index + 1}`}
-                                                className="h-full w-full object-cover"
-                                            />
-                                        ) : (
-                                            <div className="h-full w-full flex items-center justify-center bg-gray-300">
-                                                <div className="text-xs text-gray-500">
-                                                    {t("loading")}
-                                                </div>
-                                            </div>
-                                        )}
+                                        <ImageGridThumb
+                                            url={url}
+                                            index={index}
+                                            loadingLabel={t("loading")}
+                                        />
                                     </div>
                                 );
                             })}
