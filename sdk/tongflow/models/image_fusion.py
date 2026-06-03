@@ -10,8 +10,6 @@ class ImageFusionInput(BaseModel):
 
     text: str
     height: int | None = None
-    image: Asset | None = None
-    image2: Asset | None = None
     images: list[Asset] | None = None
     seed: int | None = None
     width: int | None = None

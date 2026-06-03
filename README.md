@@ -13,29 +13,15 @@
 
 **TongFlow** is an all-in-one AIGC studio for building AIGC workflows end to end with ease.
 
-## Core ideas
-
-- **All models**: AI models can be thought of as a **modality transform** (e.g. LLMs are text→text, image models are text→image, speech models are text→audio, and so on). TongFlow wraps each capability as a node.
-
-- **All modalities**: TongFlow supports almost every modality and file format that people actually ship over the web.
-
-- **Low barrier, high ceiling**: no complex AI parameters to learn, no manual node connecting; just three operations — **add**, **transform**, and **combine** — to arrange ideas freely. And by orchestrating AI models freely, you can generate unique creations and works of your own.
-
-- **Open ecosystem**: TongFlow's plugin-based design lets every platform package its own independent plugins, and we provide at least one official implementation plugin for each capability node (today's official plugins for open-source models run on [Modal](https://modal.com), since it offers users up to $30/month of free compute with cloud GPUs such as H100/A100). The core stays small, the ecosystem stays open — any platform can publish its own plugins.
+With TongFlow, you can expand your imagination and stretch your ideas with generative AI, just have a try now!
 
 ## Demo Examples
 
-| Scenario | Workflow | Result |
-| --- | --- | --- |
-| **Text → image → video**<br/>Generate images, then turn them into video. | <img src="docs/assets/demos/text2video-flow.png" width="280" alt="workflow" /> | <img src="docs/assets/demos/text2video-out.gif" width="200" alt="result" /> |
-| **Talking-head avatar**<br/>Script + digital-human visuals. | <img src="docs/assets/cover.png" width="280" alt="workflow" /> | <img src="docs/assets/demos/avatar-out.gif" width="200" alt="result" /> |
-| **E-commerce visuals**<br/>Blend multiple images or retouch product shots. | <img src="docs/assets/demos/ecommerce-flow.png" width="280" alt="workflow" /> | <img src="docs/assets/demos/ecommerce-out.png" width="200" alt="result" /> |
-| **AI music**<br/>Music from a text prompt. | <img src="docs/assets/demos/music-flow.png" width="280" alt="workflow" /> | <img src="docs/assets/demos/music-out.png" width="200" alt="result" /> |
-| **AI shorts / comics**<br/>Stories or episodes from descriptions. | <img src="docs/assets/demos/shorts-flow.png" width="280" alt="workflow" /> | <img src="docs/assets/demos/shorts-out.gif" width="200" alt="result" /> |
-
-> Screenshots are placeholders — drop the real images into [`docs/assets/demos/`](docs/assets/demos/) (`<slug>-flow.png` for the workflow, `<slug>-out.{png,gif}` for the result).
-
-With TongFlow, you can expand your imagination and stretch your ideas with generative AI, just have a try now!
+| Scenario<img width="160" height="1" /> | Workflow | Result |
+| :-- | :--: | :--: |
+| **Basic**<br/>Type text (Add), generate images (Transform), then blend them into one (Compose). | <img src="https://file.tongflow.com/public/demos/basic.png" width="420" alt="workflow" /> | <img src="https://file.tongflow.com/public/demos/basic_result.png" width="240" alt="result" /> |
+| **Intermediate**<br/>(Add topic → write script → generate speech) + (character description → generate image) → lip-synced video = talking-head avatar. | <img src="https://file.tongflow.com/public/demos/digitalhuman.png" width="420" alt="workflow" /> | <video src="https://file.tongflow.com/public/demos/digitalhuman.mp4" width="240"></video> |
+| **Advanced**<br/>Generate lyrics + song + characters + scenes + storyboard → produce a music video. | <img src="https://file.tongflow.com/public/demos/mv.png" width="420" alt="workflow" /> | <video src="https://file.tongflow.com/public/demos/mv.mp4" width="240"></video> |
 
 ## How To Start
 
@@ -46,10 +32,13 @@ You need **Node.js 20+**, **pnpm**, **Git**, and **Python 3.10+**.
 ```bash
 pnpm install
 pnpm plugins:install   # clone all official plugins into plugins/
-pnpm dev               # → http://localhost:3000
+pnpm start:prod        # builds once, then serves at http://localhost:3000
 ```
 
 Open **`http://localhost:3000`** and the canvas is live.
+
+> Use a different port with `pnpm start:prod -- -p 4000`. After pulling updates,
+> just re-run `pnpm start:prod` to rebuild.
 
 ### Step 2 — Set up Modal
 
@@ -62,9 +51,19 @@ modal setup   # opens your browser to authorize; writes the token to ~/.modal.to
 
 ### Step 3 — Run the example workflow
 
-On first open, the canvas is preloaded with an example — a short video pipeline (Wan-Animate + LTX + FFmpeg, all on Modal). Just flip the toggle to **Execute Mode** and hit the run button.
+On first open, the canvas is preloaded with an example — a cat and a mouse generated from text (Z-Image), fused into one photo (FLUX.2-klein), then animated into a short video (LTX), all on Modal. Just flip the toggle to **Execute Mode** and hit the run button.
 
 > To reload it later, use the workflow-name menu at the top → **Import JSON** → [`public/example.json`](public/example.json).
+
+## Core Concept
+
+- **All models**: AI models can be thought of as a **modality transform** (e.g. LLMs are text→text, image models are text→image, speech models are text→audio, and so on). TongFlow wraps each capability as a node.
+
+- **All modalities**: TongFlow supports almost every modality and file format that people actually ship over the web.
+
+- **Low barrier, high ceiling**: no complex AI parameters to learn, no manual node connecting; just three operations — **add**, **transform**, and **combine** — to arrange ideas freely. And by orchestrating AI models freely, you can generate unique creations and works of your own.
+
+- **Open ecosystem**: TongFlow's plugin-based design lets every platform package its own independent plugins, and we provide at least one official implementation plugin for each capability node (today's official plugins for open-source models run on [Modal](https://modal.com), since it offers users up to $30/month of free compute with cloud GPUs such as H100/A100). The core stays small, the ecosystem stays open — any platform can publish its own plugins.
 
 ## What’s Defined
 
@@ -257,16 +256,6 @@ If you like this project, a Star on GitHub helps a lot. Thank you.
   <img src="docs/assets/star.gif" alt="Star on GitHub" />
 </div>
 
-## Sponsors
-
-TongFlow is built in the open. If your team relies on it or you want to support
-ongoing development, **[sponsorship](SPONSORS.md)** funds maintenance and gets your
-logo here, with recognition and priority feedback.
-
-> Sponsorship is goodwill, not a license — it does **not** remove AGPL obligations.
-> To use TongFlow in a closed-source / SaaS product, see the [License](#license)
-> section below. Inquiries: **business@tongflow.com**.
-
 ## License
 
 TongFlow is **dual-licensed**:
@@ -279,9 +268,8 @@ TongFlow is **dual-licensed**:
   source-disclosure obligation, or that need warranties and platform support.
   Contact **business@tongflow.com**.
 
-The `sdk/` directory (the `tongflow` PyPI package) is separately licensed under
-**[Apache-2.0](sdk/LICENSE)** so that third-party plugins are not subject to
-copyleft. Contributions are covered by our [CLA](CLA.md).
+This covers the entire repository, including the `sdk/` directory (the `tongflow`
+PyPI package). Contributions are covered by our [CLA](CLA.md).
 
 ## Star History
 

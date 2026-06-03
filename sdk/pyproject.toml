@@ -4,12 +4,12 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "tongflow"
-version = "0.0.20"
+version = "0.0.21"
 description = "Tongflow plugin package (node contracts, deploy scan, ABI helpers)"
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = ["modal", "pydantic>=2.0", "typing_extensions>=4.12"]
-license = "Apache-2.0"
+license = "AGPL-3.0-only"
 authors = [{ name = "Tongflow contributors" }]
 keywords = ["tongflow", "modal", "plugin"]
 classifiers = [

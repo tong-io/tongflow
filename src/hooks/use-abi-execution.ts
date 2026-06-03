@@ -19,6 +19,7 @@ import {
     useNodeTaskUpdate,
     useTaskStore,
 } from "@/hooks/use-task";
+import { parseTargetHandleId } from "@/lib/abi/handle-introspect";
 import { resolveEdgeHandles } from "@/lib/abi/node-feature-registry";
 import { registerAbiNode, unregisterAbiNode } from "@/lib/abi/node-registry";
 import {
@@ -205,19 +206,36 @@ export function useAbiExecution<F extends NodeSlot>(
         if (!nodeId) return;
         const flowState = useFlow.getState();
         const targetType = flowState.nodes.find((n) => n.id === nodeId)?.type;
-        const broken = flowState.edges.filter(
-            (e) => e.target === nodeId && (!e.targetHandle || !e.sourceHandle),
-        );
-        if (broken.length === 0) return;
+        const spec = specRef.current;
+        // A targetHandle is stale if it points to a field that no longer
+        // classifies as a handle in the current spec — e.g. an ABI input was
+        // removed/renamed (`image`/`image2` → collapsed into `images`). Such
+        // edges still carry a non-null targetHandle, so the missing-handle
+        // check below would skip them, leaving the edge silently disconnected.
+        const isLiveTargetHandle = (handle: string | null | undefined) => {
+            const field = parseTargetHandleId(handle);
+            return !!field && spec.fields[field]?.kind === "handle";
+        };
+        const needsHealing = (e: (typeof flowState.edges)[number]) =>
+            e.target === nodeId &&
+            (!e.sourceHandle ||
+                !e.targetHandle ||
+                !isLiveTargetHandle(e.targetHandle));
+        if (!flowState.edges.some(needsHealing)) return;
         const usedTargetHandles = new Set<string>(
             flowState.edges
-                .filter((e) => e.target === nodeId && e.targetHandle)
+                .filter(
+                    (e) =>
+                        e.target === nodeId &&
+                        isLiveTargetHandle(e.targetHandle),
+                )
                 .map((e) => e.targetHandle as string),
         );
         let mutated = false;
         const patched = flowState.edges.map((edge) => {
             if (edge.target !== nodeId) return edge;
-            if (edge.targetHandle && edge.sourceHandle) return edge;
+            const liveTarget = isLiveTargetHandle(edge.targetHandle);
+            if (edge.sourceHandle && liveTarget) return edge;
             const sourceType = flowState.nodes.find(
                 (n) => n.id === edge.source,
             )?.type;
@@ -228,10 +246,15 @@ export function useAbiExecution<F extends NodeSlot>(
                 // Crucial: the resolved spec respects per-node `sourceSpec`
                 // overrides that promote bare-string ABI inputs (classified
                 // as config by topology) into handles — e.g. `gen-text.text`.
-                targetSpec: specRef.current,
+                targetSpec: spec,
             });
             if (!sourceHandle && !targetHandle) return edge;
-            if (targetHandle) usedTargetHandles.add(targetHandle);
+            // Keep an already-live targetHandle; otherwise adopt the resolved
+            // one (covers both missing and stale targetHandles).
+            const nextTargetHandle = liveTarget
+                ? edge.targetHandle
+                : targetHandle;
+            if (nextTargetHandle) usedTargetHandles.add(nextTargetHandle);
             mutated = true;
             return {
                 ...edge,
@@ -240,7 +263,7 @@ export function useAbiExecution<F extends NodeSlot>(
                     : sourceHandle
                       ? { sourceHandle }
                       : {}),
-                ...(edge.targetHandle
+                ...(liveTarget
                     ? {}
                     : targetHandle
                       ? { targetHandle }

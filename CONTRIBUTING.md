@@ -185,5 +185,6 @@ agree to the CLA: you keep full copyright of your contribution, and you grant
 tong-io the right to relicense it (including under the AGPL-3.0 and under
 commercial terms). Please read [CLA.md](CLA.md) before contributing.
 
-> Note: the `sdk/` directory (the `tongflow` PyPI package) is licensed under
-> **Apache-2.0**, not AGPL-3.0. The CLA still applies to contributions there.
+> Note: this applies to the whole repository, including the `sdk/` directory (the
+> `tongflow` PyPI package), which is licensed under **AGPL-3.0** like the rest of
+> the project.

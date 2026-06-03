@@ -139,40 +139,6 @@ const _slot_image_fusion_inputs = {
             type: "string",
             minLength: 1,
         },
-        image: {
-            type: "object",
-            required: ["bytesBase64"],
-            properties: {
-                bytesBase64: {
-                    type: "string",
-                    minLength: 1,
-                },
-                filename: {
-                    type: "string",
-                },
-                mime: {
-                    type: "string",
-                },
-            },
-            additionalProperties: false,
-        },
-        image2: {
-            type: "object",
-            required: ["bytesBase64"],
-            properties: {
-                bytesBase64: {
-                    type: "string",
-                    minLength: 1,
-                },
-                filename: {
-                    type: "string",
-                },
-                mime: {
-                    type: "string",
-                },
-            },
-            additionalProperties: false,
-        },
         images: {
             type: "array",
             items: {
@@ -280,26 +246,6 @@ const _slot_image_gen_text_inputs = {
             },
             additionalProperties: false,
         },
-        images: {
-            type: "array",
-            items: {
-                type: "object",
-                required: ["bytesBase64"],
-                properties: {
-                    bytesBase64: {
-                        type: "string",
-                        minLength: 1,
-                    },
-                    filename: {
-                        type: "string",
-                    },
-                    mime: {
-                        type: "string",
-                    },
-                },
-                additionalProperties: false,
-            },
-        },
     },
     additionalProperties: false,
 } as const;
@@ -348,43 +294,6 @@ const _slot_video_gen_text_inputs = {
         },
         top_k: {
             type: "integer",
-        },
-        image: {
-            type: "object",
-            required: ["bytesBase64"],
-            properties: {
-                bytesBase64: {
-                    type: "string",
-                    minLength: 1,
-                },
-                filename: {
-                    type: "string",
-                },
-                mime: {
-                    type: "string",
-                },
-            },
-            additionalProperties: false,
-        },
-        images: {
-            type: "array",
-            items: {
-                type: "object",
-                required: ["bytesBase64"],
-                properties: {
-                    bytesBase64: {
-                        type: "string",
-                        minLength: 1,
-                    },
-                    filename: {
-                        type: "string",
-                    },
-                    mime: {
-                        type: "string",
-                    },
-                },
-                additionalProperties: false,
-            },
         },
         video: {
             type: "object",
@@ -3590,12 +3499,6 @@ export const ABI_NODES = {
                     type: "string",
                     minLength: 1,
                 },
-                image: {
-                    $ref: "#/$defs/Asset",
-                },
-                image2: {
-                    $ref: "#/$defs/Asset",
-                },
                 images: {
                     type: "array",
                     items: {
@@ -3660,12 +3563,6 @@ export const ABI_NODES = {
                 image: {
                     $ref: "#/$defs/Asset",
                 },
-                images: {
-                    type: "array",
-                    items: {
-                        $ref: "#/$defs/Asset",
-                    },
-                },
             },
             additionalProperties: false,
         },
@@ -3711,15 +3608,6 @@ export const ABI_NODES = {
                 },
                 top_k: {
                     type: "integer",
-                },
-                image: {
-                    $ref: "#/$defs/Asset",
-                },
-                images: {
-                    type: "array",
-                    items: {
-                        $ref: "#/$defs/Asset",
-                    },
                 },
                 video: {
                     $ref: "#/$defs/Asset",

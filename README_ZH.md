@@ -13,29 +13,15 @@
 
 **TongFlow** 是一款一站式 AIGC 创作工作室，帮助你端到端构建多模态生成式 AI 工作流。
 
-## 核心理念
-
-- **全模型**: AI 模型可理解为**模态转换**（例如 LLM 是文本→文本，图像模型是文本→图像，语音模型是文本→音频等）。TongFlow 将每种能力封装为节点。
-
-- **全模态**: TongFlow 支持 Web 上实际流通的几乎所有模态与文件格式。
-
-- **低门槛，高可能性**: 无需学习复杂的AI参数，无需手动连接节点；只需**添加**、**转换**和**组合**三种操作，就能自由排列创意。同时，通过对AI模型的自由编排，可以生成独有的创意和作品。
-
-- **开放生态**: TongFlow 基于插件的设计，使得每个平台都可以封装独立的插件，官方将对每个能力节点提供至少一个实现插件（目前开源模型的官方插件基于[Modal](https://modal.com)平台，因为它为用户提供每月最多$30的免费算力额度，可使用 H100/A100 等云端 GPU）。核心精简，生态开放，任何平台都可发布自己的插件。
+用 TongFlow 释放想象力，借助生成式 AI 拓展你的创意边界！
 
 ## Demo 示例
 
-| 场景 | 工作流截图 | 输出结果 |
-| --- | --- | --- |
-| **文本 → 图像 → 视频**<br/>生成图像，再转成视频。 | <img src="docs/assets/demos/text2video-flow.png" width="280" alt="工作流" /> | <img src="docs/assets/demos/text2video-out.gif" width="200" alt="结果" /> |
-| **数字人**<br/>台词脚本 + 数字人形象。 | <img src="docs/assets/cover.png" width="280" alt="工作流" /> | <img src="docs/assets/demos/avatar-out.gif" width="200" alt="结果" /> |
-| **电商图片**<br/>多图融合或产品图修图。 | <img src="docs/assets/demos/ecommerce-flow.png" width="280" alt="工作流" /> | <img src="docs/assets/demos/ecommerce-out.png" width="200" alt="结果" /> |
-| **AI 音乐**<br/>从文本提示生成音乐。 | <img src="docs/assets/demos/music-flow.png" width="280" alt="工作流" /> | <img src="docs/assets/demos/music-out.png" width="200" alt="结果" /> |
-| **AI 短剧 / 漫画**<br/>从描述生成故事或剧集。 | <img src="docs/assets/demos/shorts-flow.png" width="280" alt="工作流" /> | <img src="docs/assets/demos/shorts-out.gif" width="200" alt="结果" /> |
-
-> 截图为占位 —— 把真实图片放进 [`docs/assets/demos/`](docs/assets/demos/) 即可（工作流用 `<slug>-flow.png`，结果用 `<slug>-out.{png,gif}`）。
-
-用 TongFlow 释放想象力，借助生成式 AI 拓展你的创意边界！
+| 场景<img width="160" height="1" /> | 工作流截图 | 输出结果 |
+| :-- | :--: | :--: |
+| **基本**<br/>输入文本（添加），生成图像（转换），再融合成一张（组合）。 | <img src="https://file.tongflow.com/public/demos/basic.png" width="420" alt="工作流" /> | <img src="https://file.tongflow.com/public/demos/basic_result.png" width="240" alt="结果" /> |
+| **中级**<br/>（添加主题 → 生成文案 → 生成语音） + （人物描述 → 生成图像） → 生成对口型视频 = 数字人口播。 | <img src="https://file.tongflow.com/public/demos/digitalhuman.png" width="420" alt="工作流" /> | <video src="https://file.tongflow.com/public/demos/digitalhuman.mp4" width="240"></video> |
+| **高级**<br/>生成歌词 + 生成歌曲 + 生成人物 + 生成场景 + 生成分镜 → 生成MV | <img src="https://file.tongflow.com/public/demos/mv.png" width="420" alt="工作流" /> | <video src="https://file.tongflow.com/public/demos/mv.mp4" width="240"></video> |
 
 ## 快速开始
 
@@ -46,10 +32,12 @@
 ```bash
 pnpm install
 pnpm plugins:install   # 克隆全部官方插件到 plugins/
-pnpm dev               # → http://localhost:3000
+pnpm start:prod        # 先构建一次,再启动于 http://localhost:3000
 ```
 
 打开 **`http://localhost:3000`**，画布已就绪。
+
+> 换端口：`pnpm start:prod -- -p 4000`。拉取更新后,重新跑 `pnpm start:prod` 即可重新构建。
 
 ### Step 2 — 配置 Modal
 
@@ -62,9 +50,21 @@ modal setup   # 打开浏览器授权;token 写入 ~/.modal.toml
 
 ### Step 3 — 运行示例工作流
 
-首次打开时，画布已预加载一个示例——一条短视频流水线（Wan-Animate + LTX + FFmpeg，均跑在 Modal 上）。只需把开关切到**执行模式**，点击运行按钮即可。
+首次打开时，画布已预加载一个示例——用文本生成一只猫和一只老鼠（Z-Image），融合成一张合影（FLUX.2-klein），再让画面动起来生成一段短视频（LTX），全部跑在 Modal 上。只需把开关切到**执行模式**，点击运行按钮即可。
 
 > 之后想重新加载它,用顶部的工作流名称菜单 → **导入 JSON** → [`public/example.json`](public/example.json)。
+
+## 核心概念
+
+- **全模型**: AI 模型可理解为**模态转换**（例如 LLM 是文本→文本，图像模型是文本→图像，语音模型是文本→音频等）。TongFlow 将每种能力封装为节点。
+
+- **全模态**: TongFlow 支持 Web 上实际流通的几乎所有模态与文件格式。
+
+- **低门槛，高可能性**: 无需学习复杂的AI参数，无需手动连接节点；只需**添加**、**转换**和**组合**三种操作，就能自由排列创意。同时，通过对AI模型的自由编排，可以生成独有的创意和作品。
+
+- **开放生态**: TongFlow 基于插件的设计，使得每个平台都可以封装独立的插件，官方将对每个能力节点提供至少一个实现插件
+
+> 目前官方插件基于[Modal](https://modal.com)平台实现，因为它为用户提供每月最多$30的免费算力额度，可使用 H100/A100 等云端 GPU）。核心精简，生态开放，任何平台都可发布自己的插件。
 
 ## 已实现功能
 
@@ -256,15 +256,6 @@ class Inference:
   <img src="docs/assets/star.gif" alt="Star on GitHub" />
 </div>
 
-## 赞助
-
-TongFlow 在开放环境中开发。如果你的团队依赖它,或愿意支持项目持续迭代,
-欢迎**[赞助](SPONSORS.md)** —— 赞助资助维护工作,并可在此展示你的 logo、获得鸣谢
-与优先反馈。
-
-> 赞助是支持与合作,**不是授权** —— 它**不会**免除 AGPL 义务。若要在闭源 / SaaS
-> 产品中使用 TongFlow,请见下方[授权协议](#授权协议)。洽询:**business@tongflow.com**。
-
 ## 授权协议
 
 TongFlow 采用 **双授权(dual-licensing)** 模式:
@@ -275,8 +266,8 @@ TongFlow 采用 **双授权(dual-licensing)** 模式:
   TongFlow 且**不愿公开源码**,或需要保证条款与平台技术支持的组织。
   价格面议,联系 **business@tongflow.com**。
 
-`sdk/` 目录(发布到 PyPI 的 `tongflow` 包)单独以 **[Apache-2.0](sdk/LICENSE)**
-授权,使第三方插件不受 copyleft 约束。贡献代码受 [CLA](CLA.md) 约束。
+以上授权覆盖整个仓库,包括 `sdk/` 目录(发布到 PyPI 的 `tongflow` 包)。
+贡献代码受 [CLA](CLA.md) 约束。
 
 ## Star 历史
 

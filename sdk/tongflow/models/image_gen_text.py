@@ -11,7 +11,6 @@ class ImageGenTextInput(BaseModel):
     text: str
     enable_thinking: bool | None = None
     image: Asset | None = None
-    images: list[Asset] | None = None
     max_new_tokens: int | None = None
     system: str | None = None
     temperature: float | None = None

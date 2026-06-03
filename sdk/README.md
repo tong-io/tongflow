@@ -72,7 +72,7 @@ Manual equivalent from `sdk/`: `python -m pip install build twine && python -m b
 
 ## License
 
-The `tongflow` SDK is licensed under **Apache-2.0** (see [`LICENSE`](LICENSE)), so
-third-party plugins are not subject to copyleft. The TongFlow **platform** (the
-rest of the repository) is dual-licensed under AGPL-3.0 / a commercial license —
-see [`COMMERCIAL-LICENSE.md`](../COMMERCIAL-LICENSE.md).
+The `tongflow` SDK is licensed under **AGPL-3.0** (see [`LICENSE`](LICENSE)), like
+the rest of the TongFlow project. The whole repository is dual-licensed under
+AGPL-3.0 / a commercial license — see
+[`COMMERCIAL-LICENSE.md`](../COMMERCIAL-LICENSE.md).
