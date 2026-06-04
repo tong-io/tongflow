@@ -1,39 +1,32 @@
-import { execFileSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
+import * as git from "isomorphic-git";
+import http from "isomorphic-git/http/node";
 
 // Official TongFlow plugins, cloned at runtime into the gitignored plugins/
 // directory. We track each repo's default branch (no pinned ref) so a plain
 // `git pull` always lands the latest — zero maintenance, no version bumps here.
-const ORG = "https://github.com/tong-io";
-const OFFICIAL_PLUGINS = [
-    // LLM (text-generation) plugins
-    "tongflow-llm-openrouter-free",
-    "tongflow-llm-gemini",
-    "tongflow-llm-openai",
-    // Modal (GPU/CPU) plugins
-    "tongflow-modal-ffmpeg",
-    "tongflow-modal-pyscenedetect",
-    "tongflow-modal-z-image",
-    "tongflow-modal-ernie-image",
-    "tongflow-modal-flux2-klein9b",
-    "tongflow-modal-ltx",
-    "tongflow-modal-infinitetalk",
-    "tongflow-modal-wan-animate",
-    "tongflow-modal-seedvr2",
-    "tongflow-modal-color-fix-lab",
-    "tongflow-modal-gemma4",
-    "tongflow-modal-qwen3asr",
-    "tongflow-modal-qwen3tts",
-    "tongflow-modal-whisper",
-    "tongflow-modal-ace-step",
-    "tongflow-modal-docling",
-    "tongflow-modal-paddle",
-    "tongflow-modal-crawl4ai",
-];
+// The canonical list lives in config/official-plugins.json so the in-app plugin
+// manager API (src/lib/plugins/official-plugins.server.ts) reads the same source.
+// Mirror src/lib/runtime/paths.server.ts so build-time seeding can target the
+// same relocated directories the packaged app uses.
+const resourcesDir = process.env.TONGFLOW_RESOURCES_DIR?.trim()
+    ? path.resolve(process.env.TONGFLOW_RESOURCES_DIR.trim())
+    : process.cwd();
+
+const manifest = JSON.parse(
+    fs.readFileSync(
+        path.join(resourcesDir, "config", "official-plugins.json"),
+        "utf8",
+    ),
+);
+const ORG = manifest.org;
+const OFFICIAL_PLUGINS = manifest.plugins;
 
 function pluginsDir() {
-    return path.join(process.cwd(), "plugins");
+    return process.env.TONGFLOW_PLUGINS_DIR?.trim()
+        ? path.resolve(process.env.TONGFLOW_PLUGINS_DIR.trim())
+        : path.join(process.cwd(), "plugins");
 }
 
 function gitUrl(id) {
@@ -41,21 +34,26 @@ function gitUrl(id) {
 }
 
 // Clone the plugin if missing, otherwise fast-forward it to the latest commit.
+// Uses isomorphic-git (pure JS) so no system git binary is required.
 // Returns "cloned" | "updated"; throws on git failure.
-function installOne(id) {
-    const dest = path.join(pluginsDir(), id);
-    if (fs.existsSync(dest)) {
-        execFileSync("git", ["pull", "--ff-only"], {
-            cwd: dest,
-            stdio: "inherit",
+async function installOne(id) {
+    const dir = path.join(pluginsDir(), id);
+    if (fs.existsSync(dir)) {
+        await git.pull({
+            fs,
+            http,
+            dir,
+            singleBranch: true,
+            fastForward: true,
+            author: { name: "tongflow", email: "tongflow@local" },
         });
         return "updated";
     }
-    execFileSync("git", ["clone", gitUrl(id), dest], { stdio: "inherit" });
+    await git.clone({ fs, http, dir, url: gitUrl(id), singleBranch: true });
     return "cloned";
 }
 
-function main() {
+async function main() {
     const requested = process.argv.slice(2);
     const targets = requested.length ? requested : OFFICIAL_PLUGINS;
 
@@ -76,7 +74,7 @@ function main() {
     const failed = [];
     for (const id of targets) {
         try {
-            const action = installOne(id);
+            const action = await installOne(id);
             console.log(`[install-plugins] ${action}: ${id}`);
         } catch (e) {
             const msg = e instanceof Error ? e.message : String(e);

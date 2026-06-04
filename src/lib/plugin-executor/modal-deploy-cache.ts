@@ -10,10 +10,11 @@ import {
     getModalPluginConfig,
     getPluginFileAbsolutePath,
 } from "@/lib/plugins/plugins-registry.server";
+import { dataDir } from "@/lib/runtime/paths.server";
 
 const execFileAsync = promisify(execFile);
 
-const CACHE_DIR = path.join(process.cwd(), ".tongflow", "cache");
+const CACHE_DIR = path.join(dataDir(), ".tongflow", "cache");
 const DEPLOY_FILE = path.join(CACHE_DIR, "modal-deploy.json");
 const DOWNLOAD_FILE = path.join(CACHE_DIR, "modal-download.json");
 

@@ -9,8 +9,9 @@ import path from "node:path";
 import { nanoid } from "nanoid";
 import { type NextRequest, NextResponse } from "next/server";
 import { logger } from "@/lib/logger";
+import { dataDir } from "@/lib/runtime/paths.server";
 
-const UPLOAD_DIR = path.resolve(process.cwd(), "data", "uploads");
+const UPLOAD_DIR = path.join(dataDir(), "uploads");
 
 export async function POST(request: NextRequest) {
     try {

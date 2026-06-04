@@ -7,8 +7,9 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { nanoid } from "nanoid";
+import { dataDir } from "@/lib/runtime/paths.server";
 
-const UPLOADS_DIR = path.resolve(process.cwd(), "data", "uploads");
+const UPLOADS_DIR = path.join(dataDir(), "uploads");
 
 /**
  * Read a file under `data/uploads/` by its fileKey (same as in {@link getFileUrl}).

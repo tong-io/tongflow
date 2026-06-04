@@ -1,4 +1,30 @@
 {
+    "Plugins": {
+        "title": "プラグイン",
+        "description": "公式プラグインをインストール、または Git URL から取得します。",
+        "official": "公式",
+        "custom": "Git URL",
+        "install": "インストール",
+        "update": "更新",
+        "emptyOfficial": "利用可能な公式プラグインがありません",
+        "customHint": "リポジトリ名は tongflow-modal-* または tongflow-llm-* の規約に従う必要があります。従わない場合は検出できません。",
+        "cloneButton": "クローンしてインストール",
+        "installSuccess": "{id} をインストールしました",
+        "updateSuccess": "{id} を更新しました",
+        "notRecognized": "{id} をクローンしましたが、スキャナーが認識できませんでした。ディレクトリ名と必要なファイルを確認してください。",
+        "openRepo": "GitHub で表示"
+    },
+    "Settings": {
+        "title": "設定",
+        "description": "プラグインに渡す環境変数（API キーなど）。必要なキーは各プラグインの README を参照してください。",
+        "keyPlaceholder": "KEY",
+        "valuePlaceholder": "値",
+        "addRow": "変数を追加",
+        "removeRow": "削除",
+        "toggleReveal": "値の表示 / 非表示",
+        "save": "保存",
+        "saved": "設定を保存しました"
+    },
     "Index": {
         "title": "新しいアイデア"
     },

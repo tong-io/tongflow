@@ -10,6 +10,7 @@ import type {
     PluginsRegistry,
 } from "@/lib/plugins/plugins-registry-schema";
 import { runPluginsScanner } from "@/lib/plugins/plugins-scanner.server";
+import { pluginsDir, resourcesDir } from "@/lib/runtime/paths.server";
 
 let cached: PluginsRegistry | null = null;
 let watcher: FSWatcher | null = null;
@@ -65,8 +66,8 @@ function ensureDevWatcher(): void {
     if (process.env.NODE_ENV === "production" || watcher) return;
     watcher = chokidar.watch(
         [
-            join(process.cwd(), "plugins", "**", "*.py"),
-            join(process.cwd(), "config", "tongflow.abi.json"),
+            join(pluginsDir(), "**", "*.py"),
+            join(resourcesDir(), "config", "tongflow.abi.json"),
         ],
         {
             ignoreInitial: true,
@@ -132,7 +133,7 @@ export function getPluginConfig(pluginId: string): PluginConfig | null {
 }
 
 /**
- * On-disk path to a file inside a plugin, e.g. `plugins/x/download.py`
+ * On-disk path to a file inside a plugin, e.g. `<pluginsDir>/x/download.py`
  */
 export function getPluginFileAbsolutePath(
     pluginId: string,
@@ -140,5 +141,5 @@ export function getPluginFileAbsolutePath(
 ): string | null {
     const c = getModalPluginConfig(pluginId);
     if (!c) return null;
-    return join(process.cwd(), c.localSubdir, fileRelative);
+    return join(pluginsDir(), c.localSubdir, fileRelative);
 }

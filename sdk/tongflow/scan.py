@@ -141,7 +141,6 @@ def _scan_methods_by_slot_in_dir(plugin_dir: Path) -> dict[str, str]:
 def scan(plugins_root: Path, abi_path: Path) -> dict[str, object]:
     abi = load_abi(abi_path)
     valid = abi.node_slots
-    rel_plugins = "plugins"
 
     node_plugin_map: dict[str, list[str]] = {}
     plugins: dict[str, dict[str, object]] = {}
@@ -232,7 +231,7 @@ def scan(plugins_root: Path, abi_path: Path) -> dict[str, object]:
                     "modal": {
                         "appName": plugin_id,
                         "clsName": dscan.cls_name,
-                        "localSubdir": f"{rel_plugins}/{plugin_id}",
+                        "localSubdir": plugin_id,
                         "deployFile": "deploy.py",
                         "downloadFile": "download.py",
                         "methodsByNodeSlot": mjson,
@@ -285,7 +284,7 @@ def scan(plugins_root: Path, abi_path: Path) -> dict[str, object]:
             "runners": {
                 "llm": {
                     "methodsByNodeSlot": llm_methods,
-                    "localSubdir": f"{rel_plugins}/{plugin_id}",
+                    "localSubdir": plugin_id,
                     "entryFile": "entry.py",
                 }
             },

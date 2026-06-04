@@ -5,6 +5,8 @@ import { delimiter, join } from "node:path";
 import type { NodeSlot } from "@/generated/abi";
 import { getLlmPluginConfig } from "@/lib/plugins/plugins-registry.server";
 import { resolvePythonLite } from "@/lib/plugins/python-lite";
+import { pluginsDir, resourcesDir } from "@/lib/runtime/paths.server";
+import { withStoredEnv } from "@/lib/settings/env-store.server";
 import type { PluginExecRequest, PluginExecResult } from "../types";
 
 function normalizePromptForNodeSlot(
@@ -59,18 +61,17 @@ export async function execLlmPlugin<S extends NodeSlot>(
         req.input as unknown as Record<string, unknown>,
     );
 
-    const pluginDir = join(process.cwd(), cfg.localSubdir);
+    const pluginDir = join(pluginsDir(), cfg.localSubdir);
     const entry = cfg.entryFile || "entry.py";
     const python = await resolvePythonLite();
-    const tongflowSdkDir = join(process.cwd(), "sdk");
+    const tongflowSdkDir = join(resourcesDir(), "sdk");
     const pythonPathParts = [
         tongflowSdkDir,
         process.env.PYTHONPATH?.trim(),
     ].filter((x): x is string => Boolean(x));
-    const pythonEnv = {
-        ...process.env,
+    const pythonEnv = withStoredEnv({
         PYTHONPATH: pythonPathParts.join(delimiter),
-    };
+    });
 
     const payload = {
         pluginId: req.pluginId,

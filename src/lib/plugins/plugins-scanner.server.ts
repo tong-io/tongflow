@@ -6,6 +6,7 @@ import {
     type PluginsRegistry,
     PluginsRegistrySchema,
 } from "@/lib/plugins/plugins-registry-schema";
+import { pluginsDir, resourcesDir } from "@/lib/runtime/paths.server";
 
 function pickPython(): string {
     const fromEnv = process.env.PYTHON?.trim() || process.env.PYTHON3?.trim();
@@ -14,7 +15,7 @@ function pickPython(): string {
 }
 
 function scannerEnv(): NodeJS.ProcessEnv {
-    const sdk = join(process.cwd(), "sdk");
+    const sdk = join(resourcesDir(), "sdk");
     const pythonPath = [sdk, process.env.PYTHONPATH?.trim()].filter(
         (x): x is string => Boolean(x),
     );
@@ -31,12 +32,12 @@ export function runPluginsScanner(): PluginsRegistry {
             "-m",
             "tongflow",
             "--root",
-            join(process.cwd(), "plugins"),
+            pluginsDir(),
             "--abi",
-            join(process.cwd(), "config", "tongflow.abi.json"),
+            join(resourcesDir(), "config", "tongflow.abi.json"),
         ],
         {
-            cwd: process.cwd(),
+            cwd: resourcesDir(),
             env: scannerEnv(),
             encoding: "utf8",
             maxBuffer: 32 * 1024 * 1024,

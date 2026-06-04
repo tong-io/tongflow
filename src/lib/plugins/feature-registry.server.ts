@@ -11,6 +11,7 @@ import {
     validateFeatureRegistryBundle,
 } from "@/lib/plugins/feature-registry-schema";
 import { loadPluginsRegistry } from "@/lib/plugins/plugins-registry.server";
+import { dataDir } from "@/lib/runtime/paths.server";
 import { TONGFLOW_ABI_NODES } from "@/lib/schema/tongflow-abi";
 
 function mergeBundles(
@@ -103,7 +104,7 @@ function loadMergedServerBundle(
 ): FeatureRegistryBundle {
     let merged = validateFeatureRegistryBundle(defaultBundle);
 
-    const localPath = join(process.cwd(), ".tongflow", "features.local.json");
+    const localPath = join(dataDir(), ".tongflow", "features.local.json");
     if (existsSync(localPath)) {
         try {
             const local = validateFeatureRegistryBundle(

@@ -1,4 +1,30 @@
 {
+    "Plugins": {
+        "title": "Plugins",
+        "description": "Install official plugins or clone one from a Git URL.",
+        "official": "Official",
+        "custom": "Git URL",
+        "install": "Install",
+        "update": "Update",
+        "emptyOfficial": "No official plugins available",
+        "customHint": "The repository name must follow the tongflow-modal-* or tongflow-llm-* convention, otherwise it cannot be detected.",
+        "cloneButton": "Clone & install",
+        "installSuccess": "Installed {id}",
+        "updateSuccess": "Updated {id}",
+        "notRecognized": "Cloned {id}, but the scanner did not recognize it — check the directory name and required files.",
+        "openRepo": "View on GitHub"
+    },
+    "Settings": {
+        "title": "Settings",
+        "description": "Environment variables passed to plugins (e.g. API keys). Each plugin's README documents the keys it needs.",
+        "keyPlaceholder": "KEY",
+        "valuePlaceholder": "value",
+        "addRow": "Add variable",
+        "removeRow": "Remove",
+        "toggleReveal": "Show / hide value",
+        "save": "Save",
+        "saved": "Settings saved"
+    },
     "Index": {
         "title": "New Idea"
     },

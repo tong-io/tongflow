@@ -5,6 +5,7 @@ import path, { delimiter } from "node:path";
 import { FunctionTimeoutError, ModalClient } from "modal";
 import { TaskStatus } from "@/constants/task-status";
 import type { NodeSlot } from "@/generated/abi";
+import { logger } from "@/lib/logger";
 import {
     requireModalTokenEnv,
     resolvePython,
@@ -21,9 +22,24 @@ import {
     getModalPluginConfig,
     getPluginFileAbsolutePath,
 } from "@/lib/plugins/plugins-registry.server";
-import { logger } from "@/lib/logger";
+import { resourcesDir } from "@/lib/runtime/paths.server";
+import { withStoredEnv } from "@/lib/settings/env-store.server";
 import { notifyTask } from "@/lib/task/emitter";
 import type { PluginExecRequest, PluginExecResult } from "../types";
+
+/**
+ * Build a Modal client using credentials from the env store (workspace settings
+ * dialog), falling back to the process environment. The Modal SDK only reads
+ * `MODAL_TOKEN_*` from `process.env` by default, so pass them explicitly.
+ */
+function newModalClient(): ModalClient {
+    const env = withStoredEnv();
+    const tokenId = env.MODAL_TOKEN_ID?.trim();
+    const tokenSecret = env.MODAL_TOKEN_SECRET?.trim();
+    return new ModalClient(
+        tokenId && tokenSecret ? { tokenId, tokenSecret } : undefined,
+    );
+}
 
 /** `modal run download` — must not hang forever if CLI or Hub stalls */
 const MODAL_DOWNLOAD_TIMEOUT_MS = parseEnvMs(
@@ -287,15 +303,14 @@ function runModalCli(
 }
 
 function pythonEnvWithTongflow(): NodeJS.ProcessEnv {
-    const tongflowSdkDir = path.join(process.cwd(), "sdk");
+    const tongflowSdkDir = path.join(resourcesDir(), "sdk");
     const pythonPathParts = [
         tongflowSdkDir,
         process.env.PYTHONPATH?.trim(),
     ].filter((x): x is string => Boolean(x));
-    return {
-        ...process.env,
+    return withStoredEnv({
         PYTHONPATH: pythonPathParts.join(delimiter),
-    };
+    });
 }
 
 async function runModalDeployPlugin(
@@ -401,7 +416,7 @@ export async function execModalPlugin<S extends NodeSlot>(
     }
     try {
         stage(`Modal: checking deployment (${cfg.appName}/${clsName})`);
-        const client = new ModalClient();
+        const client = newModalClient();
         await withTimeout(
             Promise.race([
                 client.cls.fromName(cfg.appName, clsName),
@@ -418,7 +433,7 @@ export async function execModalPlugin<S extends NodeSlot>(
 
     const invoke = async () => {
         stage(`Modal: invoking ${methodName}()`);
-        const client = new ModalClient();
+        const client = newModalClient();
         const cls = await withTimeout(
             Promise.race([
                 client.cls.fromName(cfg.appName, clsName),

@@ -6,8 +6,9 @@
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { type NextRequest, NextResponse } from "next/server";
+import { dataDir } from "@/lib/runtime/paths.server";
 
-const UPLOAD_DIR = path.resolve(process.cwd(), "data", "uploads");
+const UPLOAD_DIR = path.join(dataDir(), "uploads");
 
 const MIME_TYPES: Record<string, string> = {
     ".jpg": "image/jpeg",

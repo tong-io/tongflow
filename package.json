@@ -72,6 +72,7 @@
         "dotenv": "17.2.2",
         "drizzle-orm": "0.44.5",
         "drizzle-zod": "0.8.3",
+        "isomorphic-git": "^1.38.4",
         "lucide-react": "0.544.0",
         "masonic": "^4.1.0",
         "modal": "^0.7.3",

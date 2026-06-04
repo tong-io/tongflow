@@ -8,6 +8,8 @@
 import { spawn } from "node:child_process";
 import path, { delimiter } from "node:path";
 import { listModalRunnerDeployScriptsFromRegistry } from "@/lib/plugins/plugin-registry-deploy-scripts";
+import { resourcesDir } from "@/lib/runtime/paths.server";
+import { withStoredEnv } from "@/lib/settings/env-store.server";
 
 async function canRunModal(exe: string): Promise<boolean> {
     try {
@@ -30,19 +32,20 @@ async function canRunModal(exe: string): Promise<boolean> {
 }
 
 export function requireModalTokenEnv(): void {
-    const id = process.env.MODAL_TOKEN_ID?.trim();
-    const secret = process.env.MODAL_TOKEN_SECRET?.trim();
+    const env = withStoredEnv();
+    const id = env.MODAL_TOKEN_ID?.trim();
+    const secret = env.MODAL_TOKEN_SECRET?.trim();
     if (!id || !secret) {
         throw new Error(
             "Missing Modal credentials. Set MODAL_TOKEN_ID and MODAL_TOKEN_SECRET " +
-                "(e.g. in project .env for the process running `next dev` / `next start`).",
+                "in the workspace settings dialog (or project .env / process env).",
         );
     }
 }
 
 /** Deploy targets from the plugins registry (`runner: modal`). */
 export function listModalEntryFiles(): string[] {
-    return listModalRunnerDeployScriptsFromRegistry(process.cwd());
+    return listModalRunnerDeployScriptsFromRegistry();
 }
 
 /** Python that can run `python -m modal` (used by deploy and setup APIs). */
@@ -67,12 +70,11 @@ export async function resolvePython(): Promise<string> {
 }
 
 export function modalPluginPythonEnv(): NodeJS.ProcessEnv {
-    const sdk = path.join(process.cwd(), "sdk");
+    const sdk = path.join(resourcesDir(), "sdk");
     const pythonPath = [sdk, process.env.PYTHONPATH?.trim()].filter(Boolean);
-    return {
-        ...process.env,
+    return withStoredEnv({
         PYTHONPATH: pythonPath.join(delimiter),
-    };
+    });
 }
 
 /**

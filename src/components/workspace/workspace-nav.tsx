@@ -20,6 +20,8 @@ import {
     TooltipContent,
     TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { PluginsDialog } from "@/components/workspace/plugins-dialog";
+import { SettingsDialog } from "@/components/workspace/settings-dialog";
 
 const LOCALE_OPTIONS = [
     { code: "zh", label: "中文" },
@@ -139,6 +141,8 @@ function LocaleMenu() {
 export function WorkspaceNav() {
     return (
         <div className="flex items-center gap-2">
+            <PluginsDialog />
+            <SettingsDialog />
             <ThemeToggleButton />
             <LocaleMenu />
             <Button

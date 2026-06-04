@@ -1,4 +1,30 @@
 {
+    "Plugins": {
+        "title": "插件",
+        "description": "安装官方插件，或通过 Git 地址克隆插件。",
+        "official": "官方",
+        "custom": "Git 地址",
+        "install": "安装",
+        "update": "更新",
+        "emptyOfficial": "暂无官方插件",
+        "customHint": "仓库名需符合 tongflow-modal-* 或 tongflow-llm-* 约定，否则无法被识别。",
+        "cloneButton": "克隆并安装",
+        "installSuccess": "已安装 {id}",
+        "updateSuccess": "已更新 {id}",
+        "notRecognized": "已克隆 {id}，但扫描器未识别——请检查目录名和必需文件。",
+        "openRepo": "在 GitHub 上查看"
+    },
+    "Settings": {
+        "title": "设置",
+        "description": "传递给插件的环境变量（如 API Key）。各插件的 README 会说明它需要哪些 Key。",
+        "keyPlaceholder": "KEY",
+        "valuePlaceholder": "值",
+        "addRow": "添加变量",
+        "removeRow": "删除",
+        "toggleReveal": "显示 / 隐藏值",
+        "save": "保存",
+        "saved": "设置已保存"
+    },
     "Index": {
         "title": "新创意"
     },

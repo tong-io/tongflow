@@ -8,7 +8,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
-- GitHub Actions workflow to build and push the web image to GitHub Container Registry (`ghcr.io/tong-io/tongflow`).
 - Audio nodes: noise reduction (`denoise_audio`), speaker diarization (`separate_speaker`), voice/timbre replacement (`convert_voice`).
 - Video nodes: subtitle removal (`subtitle_remove`), watermark removal (`remove_watermark`).
 - Image-to-3D node (`image-gen-model`).
@@ -34,7 +33,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - Initial public release of TongFlow: multi-modal AIGC studio (Next.js + ReactFlow workspace).
-- Web app and Docker Compose path.
+- Web app and local self-host path.
 - Modal-based plugin workers, feature registry, and multilingual UI (EN / ZH / JA).
 
 [Unreleased]: https://github.com/tong-io/tongflow/compare/v0.1.0...HEAD

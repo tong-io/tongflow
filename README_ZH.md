@@ -25,6 +25,10 @@
 
 ## 快速开始
 
+> **桌面版：** 想一键安装？TongFlow 提供 macOS / Windows 桌面 app（Electron），
+> 自包含 Node.js 运行时与可移植 Python 环境，无需配置任何工具链。详见
+> [`desktop/`](desktop/README.md)。下面的步骤用于源码运行 / 自托管。
+
 ### Step 1 — 启动应用
 
 需要 **Node.js 20+**、**pnpm**、**Git**，以及 **Python 3.10+**。
@@ -41,12 +45,9 @@ pnpm start:prod        # 先构建一次,再启动于 http://localhost:3000
 
 ### Step 2 — 配置 Modal
 
-官方 GPU/CPU 插件跑在 [Modal](https://modal.com) 上（免费,含**每月 $30** GPU 额度）：
+官方 GPU/CPU 插件跑在 [Modal](https://modal.com) 上（免费,含**每月 $30** GPU 额度）。在 [modal.com/settings/tokens](https://modal.com/settings/tokens) 创建 token，然后在工作区右上角的**设置**（齿轮图标）对话框里填入 `MODAL_TOKEN_ID` 和 `MODAL_TOKEN_SECRET`。
 
-```bash
-pip install modal
-modal setup   # 打开浏览器授权;token 写入 ~/.modal.toml
-```
+> **插件凭据都在「设置」里。** TongFlow 不绑定任何平台、不硬编码任何 provider：设置对话框是一个通用的环境变量 key/value 编辑器（如 `MODAL_TOKEN_ID`、`OPENAI_API_KEY`），传给插件使用。各插件需要哪些 key 由它自己的 README 说明。值保存在本地，改动即时生效、无需重启。自托管时也可继续用项目 `.env`。
 
 ### Step 3 — 运行示例工作流
 

@@ -25,6 +25,11 @@ With TongFlow, you can expand your imagination and stretch your ideas with gener
 
 ## How To Start
 
+> **Desktop app:** prefer a one-click install? TongFlow ships as a macOS / Windows
+> desktop app (Electron) with a self-contained Node.js runtime and a portable
+> Python environment — no toolchain setup required. See [`desktop/`](desktop/README.md).
+> The steps below are for running from source / self-hosting.
+
 ### Step 1 — Start the app
 
 You need **Node.js 20+**, **pnpm**, **Git**, and **Python 3.10+**.
@@ -42,12 +47,9 @@ Open **`http://localhost:3000`** and the canvas is live.
 
 ### Step 2 — Set up Modal
 
-The official GPU/CPU plugins run on [Modal](https://modal.com) (free — it includes **$30/month** of GPU):
+The official GPU/CPU plugins run on [Modal](https://modal.com) (free — it includes **$30/month** of GPU). Create a token at [modal.com/settings/tokens](https://modal.com/settings/tokens), then add `MODAL_TOKEN_ID` and `MODAL_TOKEN_SECRET` in the workspace **Settings** dialog (the gear icon, top-right).
 
-```bash
-pip install modal
-modal setup   # opens your browser to authorize; writes the token to ~/.modal.toml
-```
+> **Plugin credentials live in Settings.** TongFlow is platform-agnostic and hardcodes no provider: the Settings dialog is a generic key/value editor for environment variables passed to plugins (e.g. `MODAL_TOKEN_ID`, `OPENAI_API_KEY`). Each plugin's README documents the keys it needs. Values are stored locally and take effect without a restart. A project `.env` still works as an alternative for self-hosting.
 
 ### Step 3 — Run the example workflow
 
