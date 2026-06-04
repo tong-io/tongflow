@@ -1,3 +1,6 @@
+
+
+
 <div align="center">
   <img src="public/logo.svg" alt="TongFlow" width="320" />
 
@@ -20,8 +23,11 @@
 | 场景<img width="160" height="1" /> | 工作流截图 | 输出结果 |
 | :-- | :--: | :--: |
 | **基本**<br/>输入文本（添加），生成图像（转换），再融合成一张（组合）。 | <img src="https://file.tongflow.com/public/demos/basic.png" width="420" alt="工作流" /> | <img src="https://file.tongflow.com/public/demos/basic_result.png" width="240" alt="结果" /> |
-| **中级**<br/>（添加主题 → 生成文案 → 生成语音） + （人物描述 → 生成图像） → 生成对口型视频 = 数字人口播。 | <img src="https://file.tongflow.com/public/demos/digitalhuman.png" width="420" alt="工作流" /> | <video src="https://file.tongflow.com/public/demos/digitalhuman.mp4" width="240"></video> |
-| **高级**<br/>生成歌词 + 生成歌曲 + 生成人物 + 生成场景 + 生成分镜 → 生成MV | <img src="https://file.tongflow.com/public/demos/mv.png" width="420" alt="工作流" /> | <video src="https://file.tongflow.com/public/demos/mv.mp4" width="240"></video> |
+| **中级**<br/>（添加主题 → 生成文案 → 生成语音） + （人物描述 → 生成图像） → 生成对口型视频 = 数字人口播。 | <img src="https://file.tongflow.com/public/demos/digitalhuman.png" width="420" alt="工作流" /> | [<video src="https://file.tongflow.com/public/demos/digitalhuman.mp4" width="240"></video>](https://github.com/user-attachments/assets/60e92850-2fed-4be6-94bd-57241cd214dc
+)
+ |
+| **高级**<br/>生成歌词 + 生成歌曲 + 生成人物 + 生成场景 + 生成分镜 → 生成MV | <img src="https://file.tongflow.com/public/demos/mv.png" width="420" alt="工作流" /> | [<video src="https://file.tongflow.com/public/demos/mv.mp4" width="240"></video>](https://github.com/user-attachments/assets/c76f0f15-74f7-4615-b785-1f5d7b472ca4
+) |
 
 ## 快速开始
 
