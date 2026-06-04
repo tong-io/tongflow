@@ -20,8 +20,8 @@ With TongFlow, you can expand your imagination and stretch your ideas with gener
 | Scenario<img width="160" height="1" /> | Workflow | Result |
 | :-- | :--: | :--: |
 | **Basic**<br/>Type text (Add), generate images (Transform), then blend them into one (Compose). | <img src="https://file.tongflow.com/public/demos/basic.png" width="420" alt="workflow" /> | <img src="https://file.tongflow.com/public/demos/basic_result.png" width="240" alt="result" /> |
-| **Intermediate**<br/>(Add topic → write script → generate speech) + (character description → generate image) → lip-synced video = talking-head avatar. | <img src="https://file.tongflow.com/public/demos/digitalhuman.png" width="420" alt="workflow" /> | <video src="https://file.tongflow.com/public/demos/digitalhuman.mp4" width="240"></video> |
-| **Advanced**<br/>Generate lyrics + song + characters + scenes + storyboard → produce a music video. | <img src="https://file.tongflow.com/public/demos/mv.png" width="420" alt="workflow" /> | <video src="https://file.tongflow.com/public/demos/mv.mp4" width="240"></video> |
+| **Intermediate**<br/>(Add topic → write script → generate speech) + (character description → generate image) → lip-synced video = talking-head avatar. | <img src="https://file.tongflow.com/public/demos/digitalhuman.png" width="420" alt="workflow" /> | <video src="https://github.com/user-attachments/assets/a803394d-0ccf-4023-9b06-5c1581345758" width="240"></video> |
+| **Advanced**<br/>Generate lyrics + song + characters + scenes + storyboard → produce a music video. | <img src="https://file.tongflow.com/public/demos/mv.png" width="420" alt="workflow" /> | <video src="https://github.com/user-attachments/assets/2bc71e3c-3ed6-48b2-81e7-82ad5976d801" width="240"></video> |
 
 ## How To Start
 
