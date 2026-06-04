@@ -49,6 +49,21 @@ is on `PATH`. If present, the first-run venv install runs fully offline; if
 absent, dependencies install from PyPI on first launch. Set
 `TONGFLOW_SKIP_WHEELS=1` to skip.
 
+## Release (GitHub Actions)
+
+Releases are built and published automatically by
+[`.github/workflows/desktop-release.yml`](../.github/workflows/desktop-release.yml).
+To cut one:
+
+1. Bump `version` in `desktop/package.json` (e.g. `0.1.0`).
+2. Tag and push: `git tag v0.1.0 && git push origin v0.1.0`.
+
+The workflow builds on three runners — macOS arm64 (`macos-14`), macOS x64
+(`macos-13`), and Windows x64 — fetches the matching runtimes, and has
+`electron-builder` publish the `dmg` / `nsis` artifacts plus the auto-update
+feeds to the GitHub Release `v<version>`. Builds are unsigned by default; add
+`CSC_LINK` / `CSC_KEY_PASSWORD` (+ Apple notarization secrets) to sign.
+
 ## Notes
 
 - Native modules (`better-sqlite3`, `sharp`) ship as node-ABI prebuilds inside

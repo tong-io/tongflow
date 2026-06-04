@@ -25,20 +25,18 @@ asar: true
 
 mac:
     category: public.app-category.graphics-design
+    # Arch is selected per CI runner (arm64 / x64) via the electron-builder CLI.
     target:
-        - target: dmg
-          arch:
-              - arm64
-              - x64
-    hardenedRuntime: true
+        - dmg
+    # Unsigned by default — set CSC_LINK / CSC_KEY_PASSWORD + notarize creds in CI
+    # to ship signed builds, then flip hardenedRuntime on.
+    hardenedRuntime: false
     gatekeeperAssess: false
     # entitlements: build/entitlements.mac.plist  # add when notarizing
 
 win:
     target:
-        - target: nsis
-          arch:
-              - x64
+        - nsis
 
 nsis:
     oneClick: false
