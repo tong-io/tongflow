@@ -32,7 +32,10 @@ const TextGenSpeechCloneNode = ({
     "textGenSpeechCloneNode"
 >) => {
     const t = useTranslations("Workspace.nodes");
-    const form = useAbiForm("text-gen-speech-clone", CLONE_TRANSFER_SOURCE_SPEC);
+    const form = useAbiForm(
+        "text-gen-speech-clone",
+        CLONE_TRANSFER_SOURCE_SPEC,
+    );
     const texts = data.texts ?? [];
 
     const refAudio = data.ref_audio as string | undefined;
@@ -61,9 +64,11 @@ const TextGenSpeechCloneNode = ({
         }
         const audio = new Audio(getFileUrl(refAudio));
         audioRef.current = audio;
-        audio.play().catch((err) =>
-            logger.error("Failed to play reference audio:", err),
-        );
+        audio
+            .play()
+            .catch((err) =>
+                logger.error("Failed to play reference audio:", err),
+            );
     }, [refAudio]);
 
     return (

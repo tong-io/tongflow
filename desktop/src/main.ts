@@ -1,6 +1,6 @@
 import { app, type BrowserWindow, dialog } from "electron";
-import { ensureUserDirs } from "./fs-setup";
 import { findFreePort } from "./free-port";
+import { ensureUserDirs } from "./fs-setup";
 import { ensurePythonEnv } from "./python-manager";
 import { startServer, stopServer } from "./server-manager";
 import { createMainWindow, createSplash, setSplashStatus } from "./window";

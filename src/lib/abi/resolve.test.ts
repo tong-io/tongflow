@@ -154,9 +154,9 @@ describe("resolve — collectHandleValues + buildPrompts", () => {
         });
         expect(prompts[0].text).toBe("scene");
         expect(promptMissingRequired(spec, prompts[0])).toBeUndefined();
-        expect(
-            promptMissingRequired(spec, { duration: 5, image: "fk1" }),
-        ).toBe("text");
+        expect(promptMissingRequired(spec, { duration: 5, image: "fk1" })).toBe(
+            "text",
+        );
     });
 
     it("buildPrompts reads config text on image-gen-video transfer", () => {

@@ -18,13 +18,13 @@ import type { TongflowPluginNodeProps } from "@/types/tongflow-flow";
 
 import { AbiNodeShell } from "../base/abi-node-shell";
 import { AspectRatioPicker } from "../base/aspect-ratio-picker";
-import { VideoDurationSlider } from "../base/video-duration-slider";
 import { NodeTextarea } from "../base/node-textarea";
+import { VideoDurationSlider } from "../base/video-duration-slider";
 
 // `text` is a config field on this transfer node (manual prompt). Image+audio
 // wired upstream uses `imageGenVideoComposeNode` (default handles).
-const IMAGE_GEN_VIDEO_TRANSFER_SOURCE_SPEC = NODE_TYPE_SOURCE_SPEC
-    .imageGenVideoNode as SourceSpec<"image-gen-video">;
+const IMAGE_GEN_VIDEO_TRANSFER_SOURCE_SPEC =
+    NODE_TYPE_SOURCE_SPEC.imageGenVideoNode as SourceSpec<"image-gen-video">;
 
 const ImageGenVideoNode = ({
     selected,
@@ -45,7 +45,8 @@ const ImageGenVideoNode = ({
         if (!nodeId) return false;
         return edges.some((edge) => {
             if (edge.target !== nodeId) return false;
-            if (parseTargetHandleId(edge.targetHandle) !== "image") return false;
+            if (parseTargetHandleId(edge.targetHandle) !== "image")
+                return false;
             const source = nodeLookup.get(edge.source);
             if (source?.type !== "imageNode") return false;
             const keys = coerceBaseNodeData(source.data).fileKeys;

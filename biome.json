@@ -10,12 +10,20 @@
         "includes": [
             "**",
             "!.next",
+            "!**/.next",
             "!out",
             "!build",
             "!node_modules",
+            "!**/node_modules",
             "!.venv",
             "!**/.venv",
-            "!**/.venv-*"
+            "!**/.venv-*",
+            "!desktop/dist",
+            "!desktop/release",
+            "!desktop/resources",
+            "!.tongflow",
+            "!.claude",
+            "!plugins"
         ]
     },
     "formatter": {

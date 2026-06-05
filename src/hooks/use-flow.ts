@@ -17,8 +17,8 @@ import {
 import { v4 } from "uuid";
 import { create } from "zustand";
 import {
-    resolveEdgeHandles,
     resolvedSpecForNodeType,
+    resolveEdgeHandles,
 } from "@/lib/abi/node-feature-registry";
 import { DATA_NODE_TYPES } from "@/lib/workflow/executable-workflow";
 
@@ -338,9 +338,8 @@ export const useFlow = create<FlowState>((set, get) => ({
         for (const { type, data = {} } of possibleNodes) {
             const bucket = existingChildrenByType.get(type);
             const cursor = reuseCursorByType.get(type) ?? 0;
-            const existingChild = bucket && cursor < bucket.length
-                ? bucket[cursor]
-                : undefined;
+            const existingChild =
+                bucket && cursor < bucket.length ? bucket[cursor] : undefined;
             if (existingChild) reuseCursorByType.set(type, cursor + 1);
 
             if (existingChild) {

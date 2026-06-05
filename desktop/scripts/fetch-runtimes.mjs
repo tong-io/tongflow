@@ -62,7 +62,10 @@ async function fetchNode() {
     if (isWin) {
         const name = `node-v${NODE_VERSION}-win-${arch}`;
         const zip = path.join(tmp, `${name}.zip`);
-        await download(`https://nodejs.org/dist/v${NODE_VERSION}/${name}.zip`, zip);
+        await download(
+            `https://nodejs.org/dist/v${NODE_VERSION}/${name}.zip`,
+            zip,
+        );
         extract(zip, tmp);
         fs.copyFileSync(
             path.join(tmp, name, "node.exe"),

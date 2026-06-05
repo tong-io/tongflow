@@ -263,11 +263,7 @@ export function useAbiExecution<F extends NodeSlot>(
                     : sourceHandle
                       ? { sourceHandle }
                       : {}),
-                ...(liveTarget
-                    ? {}
-                    : targetHandle
-                      ? { targetHandle }
-                      : {}),
+                ...(liveTarget ? {} : targetHandle ? { targetHandle } : {}),
             };
         });
         if (mutated) flowState.setEdges(patched);

@@ -39,9 +39,7 @@ export function VideoDurationSlider({
                 </div>
                 <Slider
                     value={[clamped]}
-                    onValueChange={([v]) =>
-                        onChange(clampVideoDuration(v))
-                    }
+                    onValueChange={([v]) => onChange(clampVideoDuration(v))}
                     min={VIDEO_DURATION_MIN}
                     max={VIDEO_DURATION_MAX}
                     step={1}

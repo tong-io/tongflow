@@ -179,7 +179,9 @@ export async function executeTask(taskId: string): Promise<void> {
             taskData.nodeSlot,
             taskData.prompt,
         );
-        logger.info(`[TaskRunner] task=${taskId} assets ready, invoking plugin`);
+        logger.info(
+            `[TaskRunner] task=${taskId} assets ready, invoking plugin`,
+        );
         const result = await executePlugin({
             pluginId: taskData.pluginId,
             nodeSlot: taskData.nodeSlot,

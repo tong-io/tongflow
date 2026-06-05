@@ -16,8 +16,8 @@ import { AbiNodeShell } from "../base/abi-node-shell";
 import { MediaThumbnail } from "../base/media-thumbnail";
 import { NodeTextarea } from "../base/node-textarea";
 
-const SPEECH_VIDEO_GEN_VIDEO_SOURCE_SPEC = NODE_TYPE_SOURCE_SPEC
-    .speechVideoGenVideoNode as SourceSpec<"speech-video-gen-video">;
+const SPEECH_VIDEO_GEN_VIDEO_SOURCE_SPEC =
+    NODE_TYPE_SOURCE_SPEC.speechVideoGenVideoNode as SourceSpec<"speech-video-gen-video">;
 
 const SpeechVideoGenVideoNode = ({
     selected,
@@ -61,8 +61,7 @@ const SpeechVideoGenVideoNode = ({
             Array.from(nodeLookup.values()),
             edges,
         );
-        const text =
-            typeof values.text === "string" ? values.text.trim() : "";
+        const text = typeof values.text === "string" ? values.text.trim() : "";
         const video =
             typeof values.video === "string" ? values.video : undefined;
         return {

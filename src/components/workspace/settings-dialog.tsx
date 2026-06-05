@@ -135,7 +135,6 @@ export function SettingsDialog() {
                     <div className="max-h-[55vh] space-y-2 overflow-y-auto pr-1">
                         {rows.map((row, index) => (
                             <div
-                                // biome-ignore lint/suspicious/noArrayIndexKey: rows are positional and editable
                                 key={index}
                                 className="flex items-center gap-2"
                             >

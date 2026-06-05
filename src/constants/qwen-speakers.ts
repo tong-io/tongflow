@@ -22,7 +22,12 @@ export const QWEN_SPEAKERS: QwenSpeaker[] = [
     { value: "Eric", gender: "male", langKey: "zh", language: "Chinese" },
     { value: "Ryan", gender: "male", langKey: "en", language: "English" },
     { value: "Aiden", gender: "male", langKey: "en", language: "English" },
-    { value: "Ono_Anna", gender: "female", langKey: "ja", language: "Japanese" },
+    {
+        value: "Ono_Anna",
+        gender: "female",
+        langKey: "ja",
+        language: "Japanese",
+    },
     { value: "Sohee", gender: "female", langKey: "ko", language: "Korean" },
 ];
 

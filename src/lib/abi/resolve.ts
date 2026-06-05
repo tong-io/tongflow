@@ -302,10 +302,7 @@ export function buildPrompts({
             } else if (f.kind === "handle") {
                 v = handleValues[field];
                 // Widget ⇄ input duality: upstream wins, manual config is fallback.
-                if (
-                    (v === undefined || v === null || v === "") &&
-                    f.manual
-                ) {
+                if ((v === undefined || v === null || v === "") && f.manual) {
                     v = configValues[field];
                 }
             } else if (f.kind === "config") {

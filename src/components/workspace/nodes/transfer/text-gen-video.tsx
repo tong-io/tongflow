@@ -21,11 +21,11 @@ import { coerceBaseNodeData } from "@/lib/workflow/flow-node-data";
 import type { TongflowPluginNodeProps } from "@/types/tongflow-flow";
 import { AbiNodeShell } from "../base/abi-node-shell";
 import { AspectRatioPicker } from "../base/aspect-ratio-picker";
-import { VideoDurationSlider } from "../base/video-duration-slider";
 import { NodeTextarea } from "../base/node-textarea";
+import { VideoDurationSlider } from "../base/video-duration-slider";
 
-const TEXT_GEN_VIDEO_SOURCE_SPEC = NODE_TYPE_SOURCE_SPEC
-    .textGenVideoNode as SourceSpec<"text-gen-video">;
+const TEXT_GEN_VIDEO_SOURCE_SPEC =
+    NODE_TYPE_SOURCE_SPEC.textGenVideoNode as SourceSpec<"text-gen-video">;
 
 const TextGenVideoNode = ({
     selected,
@@ -70,14 +70,7 @@ const TextGenVideoNode = ({
             if (typeof text === "string" && text.trim()) return [text];
         }
         return data.texts ?? [];
-    }, [
-        composeTextNode,
-        nodeId,
-        nodeLookup,
-        edges,
-        resolvedSpec,
-        data.texts,
-    ]);
+    }, [composeTextNode, nodeId, nodeLookup, edges, resolvedSpec, data.texts]);
 
     const hasUpstreamTexts = upstreamTexts.length > 0;
 

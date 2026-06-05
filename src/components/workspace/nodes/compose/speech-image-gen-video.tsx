@@ -21,8 +21,8 @@ import { AspectRatioPicker } from "../base/aspect-ratio-picker";
 import { MediaThumbnail } from "../base/media-thumbnail";
 import { NodeTextarea } from "../base/node-textarea";
 
-const AUDIO_IMAGE_GEN_VIDEO_SOURCE_SPEC = NODE_TYPE_SOURCE_SPEC
-    .speechImageGenVideoNode as SourceSpec<"audio-image-gen-video">;
+const AUDIO_IMAGE_GEN_VIDEO_SOURCE_SPEC =
+    NODE_TYPE_SOURCE_SPEC.speechImageGenVideoNode as SourceSpec<"audio-image-gen-video">;
 
 const SpeechImageGenVideoNode = ({
     selected,

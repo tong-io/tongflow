@@ -15,8 +15,8 @@ import type { TongflowPluginNodeProps } from "@/types/tongflow-flow";
 import { AbiNodeShell } from "../base/abi-node-shell";
 import { NodeTextarea } from "../base/node-textarea";
 
-const IMAGE_EDIT_SOURCE_SPEC = NODE_TYPE_SOURCE_SPEC
-    .imageGenImageNode as SourceSpec<"image-edit">;
+const IMAGE_EDIT_SOURCE_SPEC =
+    NODE_TYPE_SOURCE_SPEC.imageGenImageNode as SourceSpec<"image-edit">;
 
 const ImageGenImageNode = ({
     selected,
@@ -44,8 +44,7 @@ const ImageGenImageNode = ({
             Array.from(nodeLookup.values()),
             edges,
         );
-        const text =
-            typeof values.text === "string" ? values.text.trim() : "";
+        const text = typeof values.text === "string" ? values.text.trim() : "";
         const imageRaw = values.image;
         const imageKey = Array.isArray(imageRaw)
             ? typeof imageRaw[0] === "string"

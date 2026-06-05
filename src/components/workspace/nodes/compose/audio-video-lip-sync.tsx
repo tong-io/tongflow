@@ -16,13 +16,16 @@ import { AbiNodeShell } from "../base/abi-node-shell";
 import { MediaThumbnail } from "../base/media-thumbnail";
 import { NodeTextarea } from "../base/node-textarea";
 
-const AUDIO_VIDEO_LIP_SYNC_SOURCE_SPEC = NODE_TYPE_SOURCE_SPEC
-    .audioVideoLipSyncNode as SourceSpec<"audio-video-lip-sync">;
+const AUDIO_VIDEO_LIP_SYNC_SOURCE_SPEC =
+    NODE_TYPE_SOURCE_SPEC.audioVideoLipSyncNode as SourceSpec<"audio-video-lip-sync">;
 
 const AudioVideoLipSyncNode = ({
     selected,
     data,
-}: TongflowPluginNodeProps<"audio-video-lip-sync", "audioVideoLipSyncNode">) => {
+}: TongflowPluginNodeProps<
+    "audio-video-lip-sync",
+    "audioVideoLipSyncNode"
+>) => {
     const t = useTranslations("Workspace.nodes");
     const tActions = useTranslations("Workspace.nodes.actions");
     const form = useAbiForm(

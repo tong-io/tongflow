@@ -195,11 +195,13 @@ const TextGenMusicNode = ({ selected, data }: TextGenMusicNodeProps) => {
     const tagsLocal = (form.state.tags as string | undefined) ?? "";
     const lyricsLocal = (form.state.lyrics as string | undefined) ?? "";
     const tagsDisplay = tagsUpstream !== null ? tagsUpstream : tagsLocal;
-    const lyricsDisplay = lyricsUpstream !== null ? lyricsUpstream : lyricsLocal;
+    const lyricsDisplay =
+        lyricsUpstream !== null ? lyricsUpstream : lyricsLocal;
     const language = (form.state.language as string | undefined) ?? "zh";
     const keyscale =
         (form.state.keyscale as string | undefined) ?? DEFAULT_KEYSCALE;
-    const bpm = form.state.bpm == null ? String(DEFAULT_BPM) : String(form.state.bpm);
+    const bpm =
+        form.state.bpm == null ? String(DEFAULT_BPM) : String(form.state.bpm);
     const duration = (form.state.duration as number | undefined) ?? 30;
 
     // Persist non-ABI-required defaults so the workflow exporter / runtime

@@ -7,16 +7,16 @@ import { memo, useMemo } from "react";
 import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { useAbiForm } from "@/hooks/use-abi-form";
-import { collectHandleValues, resolveSpec } from "@/lib/abi/resolve";
 import { NODE_TYPE_SOURCE_SPEC } from "@/lib/abi/node-feature-registry";
+import { collectHandleValues, resolveSpec } from "@/lib/abi/resolve";
 import type { SourceSpec } from "@/lib/abi/sources";
 import type { TongflowPluginNodeProps } from "@/types/tongflow-flow";
 
 import { AbiNodeShell } from "../base/abi-node-shell";
 import { MediaThumbnail } from "../base/media-thumbnail";
 
-const SPEECH_TEXT_GEN_VIDEO_SOURCE_SPEC = NODE_TYPE_SOURCE_SPEC
-    .speechTextGenVideoNode as SourceSpec<"speech-text-gen-video">;
+const SPEECH_TEXT_GEN_VIDEO_SOURCE_SPEC =
+    NODE_TYPE_SOURCE_SPEC.speechTextGenVideoNode as SourceSpec<"speech-text-gen-video">;
 
 const SpeechTextGenVideoNode = ({
     selected,
@@ -60,8 +60,7 @@ const SpeechTextGenVideoNode = ({
             Array.from(nodeLookup.values()),
             edges,
         );
-        const text =
-            typeof values.text === "string" ? values.text.trim() : "";
+        const text = typeof values.text === "string" ? values.text.trim() : "";
         const audio =
             typeof values.audio === "string" ? values.audio : undefined;
         return {

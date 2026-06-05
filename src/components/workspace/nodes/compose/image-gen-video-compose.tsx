@@ -12,8 +12,8 @@ import {
     VIDEO_DURATION_DEFAULT,
 } from "@/constants/media-options";
 import { useAbiForm } from "@/hooks/use-abi-form";
-import { collectHandleValues, resolveSpec } from "@/lib/abi/resolve";
 import { NODE_TYPE_SOURCE_SPEC } from "@/lib/abi/node-feature-registry";
+import { collectHandleValues, resolveSpec } from "@/lib/abi/resolve";
 import type { SourceSpec } from "@/lib/abi/sources";
 import type { TongflowPluginNodeProps } from "@/types/tongflow-flow";
 
@@ -22,16 +22,13 @@ import { AspectRatioPicker } from "../base/aspect-ratio-picker";
 import { VideoDurationSlider } from "../base/video-duration-slider";
 
 /** Same ABI slot as transfer image-gen-video; both inputs from upstream handles. */
-const IMAGE_GEN_VIDEO_COMPOSE_SOURCE_SPEC = NODE_TYPE_SOURCE_SPEC
-    .imageGenVideoComposeNode as SourceSpec<"image-gen-video">;
+const IMAGE_GEN_VIDEO_COMPOSE_SOURCE_SPEC =
+    NODE_TYPE_SOURCE_SPEC.imageGenVideoComposeNode as SourceSpec<"image-gen-video">;
 
 const ImageGenVideoComposeNode = ({
     selected,
     data,
-}: TongflowPluginNodeProps<
-    "image-gen-video",
-    "imageGenVideoComposeNode"
->) => {
+}: TongflowPluginNodeProps<"image-gen-video", "imageGenVideoComposeNode">) => {
     const t = useTranslations("Workspace.nodes");
     const tActions = useTranslations("Workspace.nodes.actions");
     const form = useAbiForm(
@@ -59,8 +56,7 @@ const ImageGenVideoComposeNode = ({
             Array.from(nodeLookup.values()),
             edges,
         );
-        const text =
-            typeof values.text === "string" ? values.text.trim() : "";
+        const text = typeof values.text === "string" ? values.text.trim() : "";
         const images = Array.isArray(values.image) ? values.image : [];
         return {
             hasText: text.length > 0,

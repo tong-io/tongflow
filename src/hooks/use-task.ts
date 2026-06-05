@@ -583,7 +583,6 @@ export function useTaskSubscription(
  * Create a task and automatically attach SSE streaming.
  */
 export function useCreateTask(options?: TaskSubscriptionOptions) {
-    const t = useTranslations("Workspace.toast");
     const { setTask, trackTaskToNode } = useTaskStore();
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<Error | null>(null);

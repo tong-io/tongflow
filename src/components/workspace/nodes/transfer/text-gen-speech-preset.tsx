@@ -81,10 +81,7 @@ const TextGenSpeechPresetNode = ({
                     >
                         {t("common.voice")}：
                     </Label>
-                    <Select
-                        value={speaker}
-                        onValueChange={handleSpeakerChange}
-                    >
+                    <Select value={speaker} onValueChange={handleSpeakerChange}>
                         <SelectTrigger id="speaker-select" className="w-44 h-9">
                             <SelectValue />
                         </SelectTrigger>
