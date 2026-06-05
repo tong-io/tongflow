@@ -2,7 +2,7 @@
 //
 // next build (output: "standalone") only traces node_modules; the runtime fs
 // assets (drizzle migrations, config/, sdk/, public, static) must be copied in
-// by hand. We also stage the LLM plugins as first-run seeds.
+// by hand. Plugins are NOT bundled — the user installs them on demand in-app.
 //
 // Run AFTER `pnpm --dir <repo> build`. Invoked by `pnpm assemble`.
 
@@ -16,7 +16,6 @@ const desktopDir = path.resolve(here, "..");
 const repoRoot = path.resolve(desktopDir, "..");
 
 const appOut = path.join(desktopDir, "resources", "app");
-const seedOut = path.join(desktopDir, "resources", "seed-plugins");
 const wheelsOut = path.join(desktopDir, "resources", "wheels");
 
 function rmrf(p) {
@@ -60,33 +59,6 @@ function assembleApp() {
     copy(path.join(repoRoot, "drizzle"), path.join(appOut, "drizzle"));
     copy(path.join(repoRoot, "config"), path.join(appOut, "config"));
     copy(path.join(repoRoot, "sdk"), path.join(appOut, "sdk"));
-}
-
-function seedPlugins() {
-    rmrf(seedOut);
-    const pluginsDir = path.join(repoRoot, "plugins");
-    if (!fs.existsSync(pluginsDir)) {
-        console.warn(
-            "[assemble] no plugins/ dir — run `pnpm plugins:install` to seed LLM plugins",
-        );
-        return;
-    }
-    fs.mkdirSync(seedOut, { recursive: true });
-    let n = 0;
-    for (const entry of fs.readdirSync(pluginsDir, { withFileTypes: true })) {
-        // Only LLM plugins run locally and are safe to ship; Modal plugins are
-        // cloned on demand from the in-app plugin manager.
-        if (!entry.isDirectory() || !entry.name.startsWith("tongflow-llm-")) {
-            continue;
-        }
-        fs.cpSync(
-            path.join(pluginsDir, entry.name),
-            path.join(seedOut, entry.name),
-            { recursive: true },
-        );
-        n++;
-    }
-    console.log(`[assemble] seeded ${n} LLM plugin(s)`);
 }
 
 function buildWheelhouse() {
@@ -141,6 +113,5 @@ function buildWheelhouse() {
 
 assertBuilt();
 assembleApp();
-seedPlugins();
 buildWheelhouse();
 console.log("[assemble] done →", appOut);

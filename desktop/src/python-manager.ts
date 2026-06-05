@@ -1,4 +1,5 @@
 import fs from "node:fs";
+import path from "node:path";
 import {
     bundledPython,
     bundledUv,
@@ -37,15 +38,26 @@ function hasOfflineWheels(): boolean {
     }
 }
 
+// Written only after a fully successful dependency install. Guards against a
+// partial venv (created, but the install crashed/was killed) being treated as
+// ready on the next launch.
+function readyMarker(): string {
+    return path.join(venvDir(), ".tongflow-ready");
+}
+
 /**
  * Ensure a Python virtual environment exists in userData with the plugin
- * dependencies installed. Idempotent: returns immediately if already built.
- * Uses the bundled uv + python-build-standalone, so it never touches a
- * system Python. Returns the venv interpreter path.
+ * dependencies installed. Idempotent: returns immediately when a completed
+ * setup is detected (ready marker), otherwise (re)builds from scratch to
+ * recover from a partial/failed previous run. Uses the bundled uv +
+ * python-build-standalone, so it never touches a system Python.
  */
 export async function ensurePythonEnv(onLine: LogLine): Promise<string> {
     const py = venvPython();
-    if (fs.existsSync(py)) return py;
+    if (fs.existsSync(readyMarker()) && fs.existsSync(py)) return py;
+
+    // Recreate from scratch — a leftover partial venv has no deps installed.
+    fs.rmSync(venvDir(), { recursive: true, force: true });
 
     onLine("Creating Python environment…");
     await run(
@@ -64,6 +76,7 @@ export async function ensurePythonEnv(onLine: LogLine): Promise<string> {
     args.push(...INSTALL);
     await run(bundledUv(), args, {}, onLine);
 
+    fs.writeFileSync(readyMarker(), "ok");
     onLine("Python environment ready.");
     return py;
 }

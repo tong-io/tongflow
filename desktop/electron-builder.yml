@@ -26,6 +26,8 @@ asar: true
 mac:
     category: public.app-category.graphics-design
     # Arch is selected per CI runner (arm64 / x64) via the electron-builder CLI.
+    # Version-free name so /releases/latest/download/<name> stays a stable link.
+    artifactName: TongFlow-mac-${arch}.${ext}
     target:
         - dmg
     # Unsigned by default — set CSC_LINK / CSC_KEY_PASSWORD + notarize creds in CI
@@ -35,6 +37,8 @@ mac:
     # entitlements: build/entitlements.mac.plist  # add when notarizing
 
 win:
+    # Version-free name so /releases/latest/download/<name> stays a stable link.
+    artifactName: TongFlow-win-setup.${ext}
     target:
         - nsis
 

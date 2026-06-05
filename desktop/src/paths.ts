@@ -13,7 +13,6 @@ import { app } from "electron";
  *   resources/uv/          — bundled uv binary (manages the Python venv)
  *   resources/python/      — bundled python-build-standalone
  *   resources/wheels/      — optional offline wheelhouse for first-run pip install
- *   resources/seed-plugins/— LLM plugins seeded into userData on first run
  *
  * Writable per-user state lives under `app.getPath("userData")`:
  *   data/    — SQLite db + uploads (TONGFLOW_DATA_DIR)
@@ -55,10 +54,6 @@ export function bundledPython(): string {
 
 export function wheelsDir(): string {
     return path.join(resourcesRoot(), "wheels");
-}
-
-export function seedPluginsDir(): string {
-    return path.join(resourcesRoot(), "seed-plugins");
 }
 
 export function userDataDir(): string {

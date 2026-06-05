@@ -25,37 +25,49 @@ With TongFlow, you can expand your imagination and stretch your ideas with gener
 
 ## How To Start
 
-> **Desktop app:** prefer a one-click install? TongFlow ships as a macOS / Windows
-> desktop app (Electron) with a self-contained Node.js runtime and a portable
-> Python environment — no toolchain setup required. See [`desktop/`](desktop/README.md).
-> The steps below are for running from source / self-hosting.
+The fastest way to use TongFlow is the **desktop app** — a self-contained macOS / Windows build that bundles a Node.js runtime and a portable Python environment, so there's no toolchain to set up. (Prefer running from source? See [Run from source](#run-from-source).)
 
-### Step 1 — Start the app
+### Step 1 — Install the desktop app
 
-You need **Node.js 20+**, **pnpm**, **Git**, and **Python 3.10+**.
+Download the latest installer for your platform, install it, and open it. The first launch automatically sets up its Python environment.
 
-```bash
-pnpm install
-pnpm plugins:install   # clone all official plugins into plugins/
-pnpm start:prod        # builds once, then serves at http://localhost:3000
-```
+- **macOS (Apple Silicon):** [TongFlow-mac-arm64.dmg](https://github.com/tong-io/tongflow/releases/latest/download/TongFlow-mac-arm64.dmg)
+- **macOS (Intel):** [TongFlow-mac-x64.dmg](https://github.com/tong-io/tongflow/releases/latest/download/TongFlow-mac-x64.dmg)
+- **Windows:** [TongFlow-win-setup.exe](https://github.com/tong-io/tongflow/releases/latest/download/TongFlow-win-setup.exe)
 
-Open **`http://localhost:3000`** and the canvas is live.
+All builds are on the [Releases](https://github.com/tong-io/tongflow/releases/latest) page.
 
-> Use a different port with `pnpm start:prod -- -p 4000`. After pulling updates,
-> just re-run `pnpm start:prod` to rebuild.
+### Step 2 — Install plugins
 
-### Step 2 — Set up Modal
+The app ships with no plugins pre-installed. Open the **plugin manager** (the blocks icon, top-right) and install what you need — e.g. the official LLM plugins (OpenAI / Gemini / OpenRouter) and the Modal GPU/CPU plugins. Newly installed plugins are usable immediately, no restart.
 
-The official GPU/CPU plugins run on [Modal](https://modal.com) (free — it includes **$30/month** of GPU). Create a token at [modal.com/settings/tokens](https://modal.com/settings/tokens), then add `MODAL_TOKEN_ID` and `MODAL_TOKEN_SECRET` in the workspace **Settings** dialog (the gear icon, top-right).
+### Step 3 — Configure credentials
 
-> **Plugin credentials live in Settings.** TongFlow is platform-agnostic and hardcodes no provider: the Settings dialog is a generic key/value editor for environment variables passed to plugins (e.g. `MODAL_TOKEN_ID`, `OPENAI_API_KEY`). Each plugin's README documents the keys it needs. Values are stored locally and take effect without a restart. A project `.env` still works as an alternative for self-hosting.
+Open **Settings** (the gear icon, top-right) and add the environment variables your plugins need — e.g. `OPENAI_API_KEY`, or `MODAL_TOKEN_ID` / `MODAL_TOKEN_SECRET` for the Modal GPU/CPU plugins.
 
-### Step 3 — Run the example workflow
+> **Plugin credentials live in Settings.** TongFlow is platform-agnostic and hardcodes no provider: the Settings dialog is a generic key/value editor for environment variables passed to plugins. Each plugin's README documents the keys it needs. Values are stored locally and take effect without a restart.
+>
+> The official GPU/CPU plugins run on [Modal](https://modal.com) (free — it includes **$30/month** of GPU); create a token at [modal.com/settings/tokens](https://modal.com/settings/tokens).
+
+### Step 4 — Run the example workflow
 
 On first open, the canvas is preloaded with an example — a cat and a mouse generated from text (Z-Image), fused into one photo (FLUX.2-klein), then animated into a short video (LTX), all on Modal. Just flip the toggle to **Execute Mode** and hit the run button.
 
 > To reload it later, use the workflow-name menu at the top → **Import JSON** → [`public/example.json`](public/example.json).
+
+## Run from source
+
+Prefer to run the web app directly (development / self-hosting)? You need **Node.js 20+**, **pnpm**, **Git**, and **Python 3.10+**.
+
+```bash
+pnpm install
+pnpm plugins:install   # clone official plugins into plugins/
+pnpm start:prod        # builds once, then serves at http://localhost:3000
+```
+
+Open **`http://localhost:3000`** and the canvas is live. Install/configure plugins exactly as in Steps 2–4 above (credentials go in the in-app **Settings** dialog, or a project `.env` as an alternative).
+
+> Use a different port with `pnpm start:prod -- -p 4000`. After pulling updates, just re-run `pnpm start:prod` to rebuild. To build the desktop app yourself, see [`desktop/`](desktop/README.md).
 
 ## Core Concept
 

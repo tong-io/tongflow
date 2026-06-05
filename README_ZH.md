@@ -1,7 +1,7 @@
 <div align="center">
   <img src="public/logo.svg" alt="TongFlow" width="320" />
 
-  <h1>开源的多模态 AIGC 无限画布</h1>
+  <h1>开源的多模态GenAI工作流无限画布</h1>
   <p>
     <a href="https://github.com/tong-io/tongflow/stargazers"><img src="https://img.shields.io/github/stars/tong-io/tongflow?style=flat&logo=github" alt="GitHub Stars" /></a>
     <a href="https://github.com/tong-io/tongflow/blob/main/LICENSE"><img src="https://img.shields.io/badge/License-AGPL--3.0-blue.svg" alt="License" /></a>
@@ -11,9 +11,7 @@
   </p>
 </div>
 
-**TongFlow** 是一款一站式 AIGC 创作工作室，帮助你端到端构建多模态生成式 AI 工作流。
-
-用 TongFlow 释放想象力，借助生成式 AI 拓展你的创意边界！
+**TongFlow**是一款一站式AIGC工作室，帮助你端到端构建多模态生成式AI工作流。
 
 ## Demo 示例
 
@@ -23,37 +21,53 @@
 | **中级**<br/>（添加主题 → 生成文案 → 生成语音） + （人物描述 → 生成图像） → 生成对口型视频 = 数字人口播。 | <img src="https://file.tongflow.com/public/demos/digitalhuman.png" width="420" alt="工作流" /> | <video src="https://github.com/user-attachments/assets/a803394d-0ccf-4023-9b06-5c1581345758" width="240"></video>|
 | **高级**<br/>生成歌词 + 生成歌曲 + 生成人物 + 生成场景 + 生成分镜 → 生成MV | <img src="https://file.tongflow.com/public/demos/mv.png" width="420" alt="工作流" /> | <video src="https://github.com/user-attachments/assets/2bc71e3c-3ed6-48b2-81e7-82ad5976d801" width="240"></video> |
 
+用TongFlow借助生成式AI释放想创意！
+
 ## 快速开始
 
-> **桌面版：** 想一键安装？TongFlow 提供 macOS / Windows 桌面 app（Electron），
-> 自包含 Node.js 运行时与可移植 Python 环境，无需配置任何工具链。详见
-> [`desktop/`](desktop/README.md)。下面的步骤用于源码运行 / 自托管。
+我们提供TongFlow**桌面版**。（想从源码运行？见 [本地启动（pnpm）](#本地启动pnpm)。）
 
-### Step 1 — 启动应用
+### Step 1 — 安装桌面版
 
-需要 **Node.js 20+**、**pnpm**、**Git**，以及 **Python 3.10+**。
+下载对应平台的安装包，安装并打开。首次启动会自动准备好它的 Python 环境。
 
-```bash
-pnpm install
-pnpm plugins:install   # 克隆全部官方插件到 plugins/
-pnpm start:prod        # 先构建一次,再启动于 http://localhost:3000
-```
+- **macOS（Apple Silicon）：** [TongFlow-mac-arm64.dmg](https://github.com/tong-io/tongflow/releases/latest/download/TongFlow-mac-arm64.dmg)
+- **macOS（Intel）：** [TongFlow-mac-x64.dmg](https://github.com/tong-io/tongflow/releases/latest/download/TongFlow-mac-x64.dmg)
+- **Windows：** [TongFlow-win-setup.exe](https://github.com/tong-io/tongflow/releases/latest/download/TongFlow-win-setup.exe)
 
-打开 **`http://localhost:3000`**，画布已就绪。
+全部版本见 [Releases](https://github.com/tong-io/tongflow/releases/latest) 页面。
 
-> 换端口：`pnpm start:prod -- -p 4000`。拉取更新后,重新跑 `pnpm start:prod` 即可重新构建。
+### Step 2 — 安装插件
 
-### Step 2 — 配置 Modal
+app 默认不预装任何插件。打开**插件管理器**（右上角的方块图标），按需安装——比如官方 LLM 插件（OpenAI / Gemini / OpenRouter）和 Modal GPU/CPU 插件。新装的插件即时可用，无需重启。
 
-官方 GPU/CPU 插件跑在 [Modal](https://modal.com) 上（免费,含**每月 $30** GPU 额度）。在 [modal.com/settings/tokens](https://modal.com/settings/tokens) 创建 token，然后在工作区右上角的**设置**（齿轮图标）对话框里填入 `MODAL_TOKEN_ID` 和 `MODAL_TOKEN_SECRET`。
+### Step 3 — 配置凭据
 
-> **插件凭据都在「设置」里。** TongFlow 不绑定任何平台、不硬编码任何 provider：设置对话框是一个通用的环境变量 key/value 编辑器（如 `MODAL_TOKEN_ID`、`OPENAI_API_KEY`），传给插件使用。各插件需要哪些 key 由它自己的 README 说明。值保存在本地，改动即时生效、无需重启。自托管时也可继续用项目 `.env`。
+打开**设置**（右上角齿轮图标），填入插件需要的环境变量——比如 `OPENAI_API_KEY`，或 Modal GPU/CPU 插件用的 `MODAL_TOKEN_ID` / `MODAL_TOKEN_SECRET`。
 
-### Step 3 — 运行示例工作流
+> **插件凭据都在「设置」里。** TongFlow 不绑定任何平台、不硬编码任何 provider：设置对话框是一个通用的环境变量 key/value 编辑器，传给插件使用。各插件需要哪些 key 由它自己的 README 说明。值保存在本地，改动即时生效、无需重启。
+>
+> 官方 GPU/CPU 插件跑在 [Modal](https://modal.com) 上（免费,含**每月 $30** GPU 额度）；在 [modal.com/settings/tokens](https://modal.com/settings/tokens) 创建 token。
+
+### Step 4 — 运行示例工作流
 
 首次打开时，画布已预加载一个示例——用文本生成一只猫和一只老鼠（Z-Image），融合成一张合影（FLUX.2-klein），再让画面动起来生成一段短视频（LTX），全部跑在 Modal 上。只需把开关切到**执行模式**，点击运行按钮即可。
 
 > 之后想重新加载它,用顶部的工作流名称菜单 → **导入 JSON** → [`public/example.json`](public/example.json)。
+
+## 本地启动（pnpm）
+
+想直接跑网页应用（开发 / 自托管）？需要 **Node.js 20+**、**pnpm**、**Git**，以及 **Python 3.10+**。
+
+```bash
+pnpm install
+pnpm plugins:install   # 克隆官方插件到 plugins/
+pnpm start:prod        # 先构建一次,再启动于 http://localhost:3000
+```
+
+打开 **`http://localhost:3000`**，画布已就绪。插件的安装与配置同上面的 Step 2–4（凭据填在 app 内的**设置**对话框，或用项目 `.env`）。
+
+> 换端口：`pnpm start:prod -- -p 4000`。拉取更新后,重新跑 `pnpm start:prod` 即可重新构建。想自己打桌面包,见 [`desktop/`](desktop/README.md)。
 
 ## 核心概念
 
