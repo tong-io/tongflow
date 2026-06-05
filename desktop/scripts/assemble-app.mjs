@@ -96,15 +96,39 @@ function buildWheelhouse() {
         console.log("[assemble] skipping wheelhouse (TONGFLOW_SKIP_WHEELS=1)");
         return;
     }
+    // The bundled python (from `pnpm fetch-runtimes`) is used to download wheels
+    // for the exact target platform/arch. Skip if it isn't present yet.
+    const py =
+        process.platform === "win32"
+            ? path.join(desktopDir, "resources", "python", "python.exe")
+            : path.join(desktopDir, "resources", "python", "bin", "python3");
+    if (!fs.existsSync(py)) {
+        console.warn(
+            "[assemble] no bundled python (run `pnpm fetch-runtimes`) — " +
+                "skipping wheelhouse; first run will install online",
+        );
+        return;
+    }
+
     fs.mkdirSync(wheelsOut, { recursive: true });
-    const deps = ["openai", "google-genai", "modal", "requests"];
+    // Must match INSTALL in src/python-manager.ts. tongflow itself is imported
+    // from source via PYTHONPATH, so only its deps are needed here.
+    const deps = [
+        "modal",
+        "pydantic>=2.0",
+        "typing_extensions>=4.12",
+        "openai",
+        "google-genai",
+        "requests",
+    ];
     try {
-        console.log("[assemble] building tongflow wheel");
-        execSync(`uv build "${path.join(repoRoot, "sdk")}" -o "${wheelsOut}"`, {
-            stdio: "inherit",
-        });
+        // Download the full transitive closure for the target platform/arch
+        // using the bundled python's pip (no uv / network-PATH assumptions).
+        // Quote each spec: version markers like `pydantic>=2.0` contain `>`,
+        // which the shell would otherwise treat as a redirect.
+        const specs = deps.map((d) => `"${d}"`).join(" ");
         console.log("[assemble] downloading dependency wheels");
-        execSync(`uv pip download ${deps.join(" ")} -d "${wheelsOut}"`, {
+        execSync(`"${py}" -m pip download --dest "${wheelsOut}" ${specs}`, {
             stdio: "inherit",
         });
     } catch (e) {

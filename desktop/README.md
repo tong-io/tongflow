@@ -26,8 +26,11 @@ From the repo root, first build + seed the web app:
 
 ```bash
 pnpm install
-pnpm plugins:install          # seeds LLM plugins for the bundle
 pnpm build                    # produces .next/standalone
+# optional: pnpm plugins:install tongflow-llm-openai ...
+#   pre-seeds plugins into the bundle so the app ships with them. Requires
+#   access to the plugin repos. If skipped, the app ships with no plugins and
+#   the user installs them on demand via the in-app plugin manager.
 ```
 
 Then in `desktop/`:

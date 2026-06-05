@@ -134,16 +134,10 @@ async function fetchPython() {
         `https://github.com/astral-sh/python-build-standalone/releases/download/${PY_TAG}/${file}`,
         archive,
     );
-    extract(archive, tmp);
-    // Archive extracts to python/ — move its contents into resources/python.
-    const extracted = path.join(tmp, "python");
-    for (const entry of fs.readdirSync(extracted)) {
-        fs.cpSync(
-            path.join(extracted, entry),
-            path.join(out, entry),
-            { recursive: true },
-        );
-    }
+    // Extract straight into resources/ so the archive's top-level `python/` dir
+    // becomes resources/python with its RELATIVE symlinks intact. (Copying via
+    // fs.cpSync would resolve those symlinks to the temp path and break them.)
+    extract(archive, resourcesDir);
     console.log("[fetch] python ready");
 }
 

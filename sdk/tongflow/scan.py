@@ -44,6 +44,19 @@ def _detect_runner(plugin_dir: Path) -> tuple[str | None, str | None]:
     has_entry = entry.is_file()
     plugin_id = plugin_dir.name
 
+    # pluginId is case-sensitive and used as a key everywhere (Modal appName,
+    # localSubdir, node_plugin_map). A repo/dir name with uppercase letters would
+    # silently miss the lowercase prefix checks below and be reported as an
+    # "unknown prefix"; surface a clear rename hint instead.
+    lowered = plugin_id.lower()
+    if plugin_id != lowered and (
+        lowered.startswith("tongflow-modal-") or lowered.startswith("tongflow-llm-")
+    ):
+        return None, (
+            f"{plugin_dir}:1: pluginId must be all lowercase; "
+            f"fix: rename the plugin repo/dir to {lowered}"
+        )
+
     if plugin_id.startswith("tongflow-modal-gpu-") or plugin_id.startswith(
         "tongflow-modal-cpu-"
     ):

@@ -51,9 +51,6 @@ jobs:
             - name: Install web deps
               run: pnpm install --no-frozen-lockfile
 
-            - name: Seed official LLM plugins
-              run: pnpm plugins:install
-
             - name: Build Next standalone
               run: pnpm build
 

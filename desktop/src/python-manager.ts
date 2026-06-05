@@ -10,12 +10,20 @@ import { type LogLine, run } from "./proc";
 
 /**
  * Plugin runtime dependencies installed into the venv. The heavy ML libraries
- * run on Modal's cloud GPUs, so locally we only need the lightweight pieces:
- *   - tongflow: the SDK (pulls pydantic, which LLM plugin entry.py imports)
+ * run on Modal's cloud GPUs, so locally we only need the lightweight pieces.
+ * The `tongflow` SDK itself is imported from source via PYTHONPATH (set by the
+ * server), so we install its deps rather than the package:
+ *   - modal / pydantic / typing_extensions: tongflow SDK dependencies
  *   - openai / google-genai / requests: LLM plugin HTTP clients
- *   - modal: deploy/run the official Modal plugins
  */
-const INSTALL = ["tongflow", "openai", "google-genai", "modal", "requests"];
+const INSTALL = [
+    "modal",
+    "pydantic>=2.0",
+    "typing_extensions>=4.12",
+    "openai",
+    "google-genai",
+    "requests",
+];
 
 function hasOfflineWheels(): boolean {
     const dir = wheelsDir();
