@@ -2,6 +2,7 @@ import "server-only";
 
 import type { NodeSlot } from "@/generated/abi";
 import { getPluginConfig } from "@/lib/plugins/plugins-registry.server";
+import { convertAssetOutputsToFileRefs } from "./convert-modal-output-fileref";
 import type { PluginExecRequest, PluginExecResult } from "./types";
 
 export async function executePlugin<S extends NodeSlot = NodeSlot>(
@@ -10,16 +11,19 @@ export async function executePlugin<S extends NodeSlot = NodeSlot>(
     const cfg = getPluginConfig(req.pluginId);
     if (!cfg) throw new Error(`Unknown plugin: ${req.pluginId}`);
 
-    if (cfg.runner === "modal") {
-        const { execModalPlugin } = await import("./runners/modal");
-        return await execModalPlugin(req);
-    }
+    // One generic runner for every plugin: spawn the plugin's local entry and
+    // exchange ABI JSON. Where the work actually runs (local, Modal, another
+    // cloud) is the plugin's own concern.
+    const { execLlmPlugin } = await import("./runners/llm");
+    const raw = await execLlmPlugin(req);
 
-    if (cfg.runner === "llm") {
-        const { execLlmPlugin } = await import("./runners/llm");
-        return await execLlmPlugin(req);
-    }
-
-    // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-    throw new Error(`Unsupported runner: ${(cfg as any).runner}`);
+    // Persist any binary `Asset` outputs into `{file_key}` refs, uniformly for
+    // every plugin. ABI-driven (walks the slot's output schema for
+    // `$ref:FileRef`); a no-op for slots with no FileRef fields.
+    const converted = await convertAssetOutputsToFileRefs(
+        req.nodeSlot,
+        raw,
+        req.taskId,
+    );
+    return converted as PluginExecResult<S>;
 }

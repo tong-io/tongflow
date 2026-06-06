@@ -75,7 +75,6 @@
         "isomorphic-git": "^1.38.4",
         "lucide-react": "0.544.0",
         "masonic": "^4.1.0",
-        "modal": "^0.7.3",
         "nanoid": "5.1.6",
         "next": "15.4.7",
         "next-intl": "^4.6.1",

@@ -4,8 +4,6 @@ import { join } from "node:path";
 import chokidar, { type FSWatcher } from "chokidar";
 import { logger } from "@/lib/logger";
 import type {
-    LlmPluginConfig,
-    ModalPluginConfig,
     PluginConfig,
     PluginsRegistry,
 } from "@/lib/plugins/plugins-registry-schema";
@@ -111,35 +109,7 @@ export function getNodePluginIds(nodeSlot: string): string[] {
     return out;
 }
 
-export function getModalPluginConfig(
-    pluginId: string,
-): ModalPluginConfig | null {
-    const reg = loadPluginsRegistry();
-    const p = reg.plugins[pluginId];
-    if (!p || p.runner !== "modal") return null;
-    return p.runners.modal ?? null;
-}
-
-export function getLlmPluginConfig(pluginId: string): LlmPluginConfig | null {
-    const reg = loadPluginsRegistry();
-    const p = reg.plugins[pluginId];
-    if (!p || p.runner !== "llm") return null;
-    return p.runners.llm ?? null;
-}
-
 export function getPluginConfig(pluginId: string): PluginConfig | null {
     const reg = loadPluginsRegistry();
     return reg.plugins[pluginId] ?? null;
-}
-
-/**
- * On-disk path to a file inside a plugin, e.g. `<pluginsDir>/x/download.py`
- */
-export function getPluginFileAbsolutePath(
-    pluginId: string,
-    fileRelative: string,
-): string | null {
-    const c = getModalPluginConfig(pluginId);
-    if (!c) return null;
-    return join(pluginsDir(), c.localSubdir, fileRelative);
 }

@@ -7,7 +7,7 @@ from pathlib import Path
 
 from .abi import load_abi
 from ._ast_utils import extract_node_slot_decorators, looks_like_sdk_model_type
-from .parse_deploy import _slot_to_ident, parse_deploy_py, resolve_methods_by_slot
+from .parse_deploy import _slot_to_ident, parse_deploy_py
 
 SCANNER_VERSION = 1
 
@@ -83,28 +83,18 @@ def _detect_runner(plugin_dir: Path) -> tuple[str | None, str | None]:
             "fix: use tongflow-modal-<name> or tongflow-llm-<name>"
         )
 
-    if has_deploy and has_entry:
-        return None, (
-            f"{plugin_dir}:1: both deploy.py and entry.py exist; "
-            "fix: keep deploy.py for Modal or entry.py for LLM, not both"
-        )
     if not has_deploy and not has_entry:
         return None, (
             f"{plugin_dir}:1: missing deploy.py or entry.py; "
-            "fix: add deploy.py for Modal or entry.py for LLM"
+            "fix: add an entry.py, or a deploy.py for a Modal-backed plugin"
         )
 
-    if prefix_runner == "modal" and has_deploy:
-        return "modal", None
-    if prefix_runner == "llm" and has_entry:
-        return "llm", None
-
-    expected = "deploy.py" if prefix_runner == "modal" else "entry.py"
-    unexpected = "entry.py" if prefix_runner == "modal" else "deploy.py"
-    return None, (
-        f"{plugin_dir}:1: prefix says {prefix_runner} but found {unexpected}; "
-        f"fix: use {expected} or rename the plugin prefix"
-    )
+    # Every plugin runs the same way: the platform spawns the plugin's local
+    # entry and exchanges JSON. The runner is no longer an execution backend —
+    # a plugin with entry.py runs that file; a deploy.py plugin is bridged to
+    # its backend by the SDK (tongflow.modal_entry), needing no per-repo entry.
+    # "llm" is kept as the registry's single generic-runner tag.
+    return "llm", None
 
 
 def _scan_error(path: Path, reason: str, hint: str, line: int = 1) -> str:
@@ -161,100 +151,26 @@ def scan(plugins_root: Path, abi_path: Path) -> dict[str, object]:
 
     for pdir in _iter_plugin_dirs(plugins_root):
         plugin_id = pdir.name
-        runner, runner_error = _detect_runner(pdir)
+        _runner, runner_error = _detect_runner(pdir)
         if runner_error:
             errors.append({"pluginId": plugin_id, "message": runner_error})
             continue
 
-        if runner == "modal":
-            deploy = pdir / "deploy.py"
-
-            dscan, perr = parse_deploy_py(deploy)
-            if dscan is None or perr:
-                message = perr
-                if message and "; fix:" not in message:
-                    message = _scan_error(deploy, message, "fix deploy.py")
-                errors.append(
-                    {
-                        "pluginId": plugin_id,
-                        "message": message
-                        or _scan_error(deploy, "parse_deploy failed", "fix deploy.py"),
-                    }
-                )
-                continue
-
-            methods, merr = resolve_methods_by_slot(dscan, valid)
-            if merr or not methods:
-                message = merr
-                if message and "; fix:" not in message:
-                    message = _scan_error(
-                        deploy,
-                        message,
-                        "use a NodeSlots constant generated from the ABI",
-                    )
-                errors.append(
-                    {
-                        "pluginId": plugin_id,
-                        "message": message
-                        or _scan_error(
-                            deploy,
-                            "no methods for slots",
-                            "add @node_slot(NodeSlots.XXX) methods with Input/Output annotations",
-                        ),
-                    }
-                )
-                continue
-
-            # Enforce explicit SDK registration (decorators + annotations)
-            if not dscan.methods_by_slot:
-                errors.append(
-                    {
-                        "pluginId": plugin_id,
-                        "message": _scan_error(
-                            deploy,
-                            "SDK required",
-                            "use @node_slot(NodeSlots.XXX) and add type annotations",
-                        ),
-                    }
-                )
-                continue
-
-            ident_to_slot = {_slot_to_ident(s): s for s in valid}
-            cls_for_slot: dict[str, str] = {}
-            if dscan.cls_by_slot:
-                for ident, cname in dscan.cls_by_slot.items():
-                    abi_slot = ident_to_slot.get(ident)
-                    if abi_slot:
-                        cls_for_slot[abi_slot] = cname
-            mjson: dict[str, dict[str, object]] = {}
-            for slot, method in methods.items():
-                row: dict[str, object] = {"methodName": method}
-                if slot in cls_for_slot:
-                    row["clsName"] = cls_for_slot[slot]
-                mjson[slot] = row
-
-            for slot, _mn in methods.items():
-                node_plugin_map.setdefault(str(slot), [])
-                if plugin_id not in node_plugin_map[str(slot)]:
-                    node_plugin_map[str(slot)].append(plugin_id)
-
-            plugins[plugin_id] = {
-                "runner": "modal",
-                "runners": {
-                    "modal": {
-                        "appName": plugin_id,
-                        "clsName": dscan.cls_name,
-                        "localSubdir": plugin_id,
-                        "deployFile": "deploy.py",
-                        "downloadFile": "download.py",
-                        "methodsByNodeSlot": mjson,
-                    }
-                },
-            }
-            continue
-
-        # runner == llm
+        # Generic runner: the platform spawns the plugin's local entry and
+        # exchanges JSON. Handlers are discovered by scanning every .py file for
+        # @node_slot + SDK annotations.
         methods_by_ident = _scan_methods_by_slot_in_dir(pdir)
+        # A backend-bridged plugin (e.g. Modal) keeps its handlers as @app.cls
+        # methods in deploy.py — first arg `self`, so the module-level dir scan
+        # skips them. Fall back to the deploy parser for the slot list; the
+        # generic runner only needs *which* slots the plugin implements (it
+        # dispatches in-process via tongflow.modal_entry), not the method name.
+        is_bridged = False
+        if not methods_by_ident and (pdir / "deploy.py").is_file():
+            dscan, _derr = parse_deploy_py(pdir / "deploy.py")
+            if dscan and dscan.methods_by_slot:
+                methods_by_ident = dict(dscan.methods_by_slot)
+                is_bridged = True
         if not methods_by_ident:
             errors.append(
                 {
@@ -292,15 +208,15 @@ def scan(plugins_root: Path, abi_path: Path) -> dict[str, object]:
         if not llm_methods:
             continue
 
+        entry: dict[str, object] = (
+            {"entryModule": "tongflow.modal_entry"}
+            if is_bridged
+            else {"entryFile": "entry.py"}
+        )
         plugins[plugin_id] = {
-            "runner": "llm",
-            "runners": {
-                "llm": {
-                    "methodsByNodeSlot": llm_methods,
-                    "localSubdir": plugin_id,
-                    "entryFile": "entry.py",
-                }
-            },
+            "localSubdir": plugin_id,
+            "methodsByNodeSlot": llm_methods,
+            **entry,
         }
 
     # de-dupe lists, preserve order

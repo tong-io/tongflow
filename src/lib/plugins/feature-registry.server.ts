@@ -64,27 +64,12 @@ function featureDefinitionForSlot(nodeSlot: string): FeatureDefinition {
             `[feature-registry] nodePluginMap lists ${pid} for ${nodeSlot} but plugins.${pid} is missing`,
         );
     }
-    switch (p.runner) {
-        case "llm": {
-            return {
-                name: nodeSlot,
-                type: "llm",
-                function: pid,
-            };
-        }
-        case "modal": {
-            const appName = p.runners.modal?.appName ?? pid;
-            return {
-                name: nodeSlot,
-                type: "modal",
-                function: appName,
-            };
-        }
-        default: {
-            const r: never = p;
-            throw new Error(`[feature-registry] Unknown runner ${String(r)}`);
-        }
-    }
+    // One plugin kind, one runner. The implementing plugin id is the "function".
+    return {
+        name: nodeSlot,
+        type: "plugin",
+        function: pid,
+    };
 }
 
 function deriveBundleFromPluginsRegistry(): FeatureRegistryBundle {

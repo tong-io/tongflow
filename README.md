@@ -1,7 +1,7 @@
 <div align="center">
   <img src="public/logo.svg" alt="TongFlow" width="320" />
 
-  <h1>A OpenSource Multi-Modal AIGC Canvas</h1>
+  <h1>An OpenSource Multi-Modal AIGC Workflow Studio</h1>
   <p>
     <a href="https://github.com/tong-io/tongflow/stargazers"><img src="https://img.shields.io/github/stars/tong-io/tongflow?style=flat&logo=github" alt="GitHub stars" /></a>
     <a href="https://github.com/tong-io/tongflow/blob/main/LICENSE"><img src="https://img.shields.io/badge/License-AGPL--3.0-blue.svg" alt="License" /></a>
@@ -11,10 +11,6 @@
   </p>
 </div>
 
-**TongFlow** is an all-in-one AIGC studio for building AIGC workflows end to end with ease.
-
-With TongFlow, you can expand your imagination and stretch your ideas with generative AI, just have a try now!
-
 ## Demo Examples
 
 | Scenario<img width="160" height="1" /> | Workflow | Result |
@@ -23,13 +19,15 @@ With TongFlow, you can expand your imagination and stretch your ideas with gener
 | **Intermediate**<br/>(Add topic → write script → generate speech) + (character description → generate image) → lip-synced video = talking-head avatar. | <img src="https://file.tongflow.com/public/demos/digitalhuman.png" width="420" alt="workflow" /> | <video src="https://github.com/user-attachments/assets/a803394d-0ccf-4023-9b06-5c1581345758" width="240"></video> |
 | **Advanced**<br/>Generate lyrics + song + characters + scenes + storyboard → produce a music video. | <img src="https://file.tongflow.com/public/demos/mv.png" width="420" alt="workflow" /> | <video src="https://github.com/user-attachments/assets/2bc71e3c-3ed6-48b2-81e7-82ad5976d801" width="240"></video> |
 
+With TongFlow, you can expand your imagination and stretch your ideas with generative AI, just have a try now!
+
 ## How To Start
 
-The fastest way to use TongFlow is the **desktop app** — a self-contained macOS / Windows build that bundles a Node.js runtime and a portable Python environment, so there's no toolchain to set up. (Prefer running from source? See [Run from source](#run-from-source).)
+We provide a ready-to-run TongFlow **desktop app**.
 
 ### Step 1 — Install the desktop app
 
-Download the latest installer for your platform, install it, and open it. The first launch automatically sets up its Python environment.
+Download the installer for your platform, install it, and open it.
 
 - **macOS (Apple Silicon):** [TongFlow-mac-arm64.dmg](https://github.com/tong-io/tongflow/releases/latest/download/TongFlow-mac-arm64.dmg)
 - **macOS (Intel):** [TongFlow-mac-x64.dmg](https://github.com/tong-io/tongflow/releases/latest/download/TongFlow-mac-x64.dmg)
@@ -47,27 +45,11 @@ Open **Settings** (the gear icon, top-right) and add the environment variables y
 
 > **Plugin credentials live in Settings.** TongFlow is platform-agnostic and hardcodes no provider: the Settings dialog is a generic key/value editor for environment variables passed to plugins. Each plugin's README documents the keys it needs. Values are stored locally and take effect without a restart.
 >
-> The official GPU/CPU plugins run on [Modal](https://modal.com) (free — it includes **$30/month** of GPU); create a token at [modal.com/settings/tokens](https://modal.com/settings/tokens).
+> The official GPU/CPU plugins currently run on [Modal](https://modal.com) (Modal provides each user up to **$30/month** of GPU compute); create a token at [modal.com/settings/tokens](https://modal.com/settings/tokens). See each plugin's README for details.
 
 ### Step 4 — Run the example workflow
 
-On first open, the canvas is preloaded with an example — a cat and a mouse generated from text (Z-Image), fused into one photo (FLUX.2-klein), then animated into a short video (LTX), all on Modal. Just flip the toggle to **Execute Mode** and hit the run button.
-
-> To reload it later, use the workflow-name menu at the top → **Import JSON** → [`public/example.json`](public/example.json).
-
-## Run from source
-
-Prefer to run the web app directly (development / self-hosting)? You need **Node.js 20+**, **pnpm**, **Git**, and **Python 3.10+**.
-
-```bash
-pnpm install
-pnpm plugins:install   # clone official plugins into plugins/
-pnpm start:prod        # builds once, then serves at http://localhost:3000
-```
-
-Open **`http://localhost:3000`** and the canvas is live. Install/configure plugins exactly as in Steps 2–4 above (credentials go in the in-app **Settings** dialog, or a project `.env` as an alternative).
-
-> Use a different port with `pnpm start:prod -- -p 4000`. After pulling updates, just re-run `pnpm start:prod` to rebuild. To build the desktop app yourself, see [`desktop/`](desktop/README.md).
+On first open, the canvas is preloaded with an example. You can run it node by node, or switch to Execute Mode and hit the run button to run the whole thing in one click.
 
 ## Core Concept
 
@@ -77,7 +59,9 @@ Open **`http://localhost:3000`** and the canvas is live. Install/configure plugi
 
 - **Low barrier, high ceiling**: no complex AI parameters to learn, no manual node connecting; just three operations — **add**, **transform**, and **combine** — to arrange ideas freely. And by orchestrating AI models freely, you can generate unique creations and works of your own.
 
-- **Open ecosystem**: TongFlow's plugin-based design lets every platform package its own independent plugins, and we provide at least one official implementation plugin for each capability node (today's official plugins for open-source models run on [Modal](https://modal.com), since it offers users up to $30/month of free compute with cloud GPUs such as H100/A100). The core stays small, the ecosystem stays open — any platform can publish its own plugins.
+- **Open ecosystem**: TongFlow's plugin-based design lets every platform package its own independent plugins, and we provide at least one official implementation plugin for each capability node.
+
+> Today's official plugins run on [Modal](https://modal.com), since it offers users up to $30/month of free compute with cloud GPUs such as H100/A100. The core stays small, the ecosystem stays open — any platform can publish its own plugins.
 
 ## What’s Defined
 
@@ -160,9 +144,9 @@ Open **`http://localhost:3000`** and the canvas is live. Install/configure plugi
 
 ## Official plugins
 
-TongFlow runs on a **plugin ecosystem**. Every model / capability is an independently versioned package — Modal GPU/CPU workers as `tongflow-modal-*`, LLM API adapters as `tongflow-llm-*`. They live under [tong-io](https://github.com/tong-io) on GitHub and on PyPI, are cloned at runtime into the gitignored `plugins/` directory (via `pnpm plugins:install` or a plain `git clone`), and are picked up by the scanner on next start. See [docs/plugins.md](docs/plugins.md). Third parties can publish their own plugins the same way.
+TongFlow runs on a **plugin ecosystem**. TongFlow itself binds to no provider, cloud, or model — it only defines the slots (the contracts), and a plugin supplies the implementation, free to target any platform, any API, a hosted GPU cloud, or local compute. Each plugin is an independently versioned package; today they run either as a local adapter (`tongflow-llm-*`, spawned on the host) or on Modal (`tongflow-modal-*`, for hosted GPU/CPU) — but that's just where the code executes, not a limit on what it integrates. They live under [tong-io](https://github.com/tong-io) on GitHub and on PyPI, are cloned at runtime into the gitignored `plugins/` directory (via `pnpm plugins:install` or a plain `git clone`), and are picked up by the scanner on next start. See [docs/plugins.md](docs/plugins.md). Third parties can publish their own plugins the same way.
 
-The plugins below are the official ones maintained alongside this repo.
+The plugins below are the official ones maintained alongside this repo — **one implementation per slot** to get you running out of the box, not the only possible backends.
 
 ### LLM (text-generation) plugins
 
@@ -191,60 +175,42 @@ The plugins below are the official ones maintained alongside this repo.
 - [tongflow-modal-paddle](https://github.com/tong-io/tongflow-modal-paddle) — PaddleOCR document → text
 - [tongflow-modal-crawl4ai](https://github.com/tong-io/tongflow-modal-crawl4ai) — Crawl4AI URL / link → text
 
+## Run from source
+
+```bash
+pnpm install
+pnpm plugins:install   # clone official plugins into plugins/
+pnpm start:prod        # builds once, then serves at http://localhost:3000
+```
+
+Open **`http://localhost:3000`** and the canvas is live. Install/configure plugins exactly as in Steps 2–4 above (credentials go in the in-app **Settings** dialog, or a project `.env`).
+
 ## Custom plugins
 
-A plugin is a small Python package that implements one or more **node slots** — the typed capabilities the canvas exposes (`gen-text`, `image-gen`, `gen-video`, … the full list lives in [`config/tongflow.abi.json`](config/tongflow.abi.json) and the generated [`NodeSlots`](sdk/tongflow/node_slots.py)). Two kinds:
+### It all starts with the ABI
 
-- **`tongflow-llm-*`** — an API adapter (text / multimodal). A single `entry.py` with module-level functions.
-- **`tongflow-modal-*`** — a GPU/CPU worker that runs on [Modal](https://modal.com). A `deploy.py` defining a Modal app, plus an optional `download.py` for model weights.
+Every runnable node on the canvas is backed not by hard-wired code, but by a **contract**. That contract is [`config/tongflow.abi.json`](config/tongflow.abi.json) — TongFlow's ABI.
 
-The contract is the same for both: annotate a function/method with `@node_slot(...)` and type it with the generated input/output models. The [`@node_slot`](sdk/tongflow/slots.py) decorator marshals the incoming dict into a typed model and your returned model back to JSON — your code only ever sees typed objects, never raw dicts.
+The ABI defines *what capabilities exist* and *what each one's input and output look like*: `gen-text`, `image-gen`, `gen-video`, `asr`, `tts`, and so on. Each is a typed **node slot**. It describes only the **contract** — text in, image out, which fields are required — and says **nothing** about *who* fulfills it or *which model* does the work.
 
-**LLM plugin** — `plugins/tongflow-llm-myname/entry.py`:
+This contract is the single source of truth, and it generates code in two directions:
 
-```python
-from tongflow.node_slots import NodeSlots
-from tongflow.slots import node_slot
-from tongflow.models.gen_text import GenTextInput, GenTextOutput
+- toward the frontend, as TypeScript types that the canvas, the connection validator, and the workflow exporter all read directly;
+- toward plugins, as Python `*Input` / `*Output` models that plugin authors annotate against.
 
-@node_slot(NodeSlots.GEN_TEXT)
-def gen_text(input: GenTextInput) -> GenTextOutput:
-    answer = call_your_provider(input.text, input.userPrompt)
-    return GenTextOutput(success=True, text=answer)
-```
+So *capability* and *implementation* are cleanly separated: **the ABI is the stable product contract, and plugins are swappable implementations.** A single `image-gen` slot can have several competing plugins mounted at once, and the user switches between them on the node; adding a new model just means writing a plugin against an **existing** slot — not a single line of frontend changes. Only when you want a genuinely **new capability** do you first evolve the ABI (see [docs/plugins.md → Evolving the ABI](docs/plugins.md#8-evolving-the-abi)).
 
-**Modal plugin** — `plugins/tongflow-modal-myname/deploy.py`:
+### A plugin is "an implementation of a slot"
 
-```python
-import modal
-from tongflow import current_app
-from tongflow.node_slots import NodeSlots
-from tongflow.protocol import asset
-from tongflow.slots import node_slot
-from tongflow.models.image_gen import ImageGenInput, ImageGenOutput
+So a plugin's essence is simple: it's a small Python package that picks one or more node slots from the ABI and supplies the **how**.
 
-app = current_app(__file__)  # app name derived from the directory
-image = modal.Image.debian_slim().pip_install("tongflow==0.0.20", ...)  # pin must match the SDK
+We also ship the tongflow Python SDK. Following how the official plugins do it, you annotate your execution method with the ABI-generated types, and the SDK takes over the grunt work (marshalling the incoming dict back into a typed model, turning your return back into JSON, converting binary outputs into downstream-usable file refs) — your code only ever touches typed objects.
 
-@app.cls(image=image, gpu="L40S")
-class Inference:
-    @modal.method()
-    @node_slot(NodeSlots.IMAGE_GEN)
-    def image_gen(self, input: ImageGenInput) -> ImageGenOutput:
-        png = render(input.text)                       # your model
-        return ImageGenOutput(success=True, image=asset(png, mime="image/png"))
-```
+### Getting hands-on
 
-Binary outputs are wrapped with `asset(bytes, mime=...)`; the server turns them into downstream file refs automatically.
+Drop a finished plugin into `plugins/<package-name>/`, restart, and the scanner discovers it automatically — your node now lists it. Push it to GitHub and anyone can `git clone` it into their own `plugins/` to use it.
 
-**Steps:**
-
-1. `pip install tongflow==0.0.20` (the SDK ships the `NodeSlots` enum and every `*Input` / `*Output` model).
-2. Create `plugins/tongflow-{llm,modal}-<name>/` with `entry.py` / `deploy.py` as above.
-3. Restart — the scanner (`pnpm dev`) picks it up; your node now lists the new plugin. Modal plugins auto-deploy on first run.
-4. To share it, push the repo under any GitHub org and others install it with `git clone` into their `plugins/`.
-
-See [docs/plugins.md](docs/plugins.md) for the directory contract and [sdk/README.md](sdk/README.md) for publishing the package to PyPI.
+The full development flow — directory layout, how to write them, and concepts like the `@node_slot` decorator and the SDK — lives in [docs/plugins.md](docs/plugins.md).
 
 ## Contact
 
