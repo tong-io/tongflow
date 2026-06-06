@@ -19,7 +19,7 @@ function normalizePromptForNodeSlot(
     if (nodeSlot !== "combine-text") return input;
 
     // `combine_text` node sends `{ texts: string[], userPrompt?: string, ... }`.
-    // LLM text handlers expect `{ text: string, userPrompt?: string, ... }`.
+    // Text handlers expect `{ text: string, userPrompt?: string, ... }`.
     const texts = input.texts;
     if (Array.isArray(texts)) {
         const joined = texts.filter((x) => typeof x === "string").join("\n\n");
@@ -46,7 +46,7 @@ function tryParseAbiOutput(stdout: string): Record<string, unknown> | null {
     return null;
 }
 
-export async function execLlmPlugin<S extends NodeSlot>(
+export async function execPlugin<S extends NodeSlot>(
     req: PluginExecRequest<S>,
 ): Promise<PluginExecResult<S>> {
     const cfg = getPluginConfig(req.pluginId);
@@ -185,8 +185,8 @@ export async function execLlmPlugin<S extends NodeSlot>(
             // No JSON on stdout: hard runner failure (crash, exit before write, ...).
             const errMsg =
                 code === 0
-                    ? `LLM plugin produced non-JSON stdout: ${stdoutBuf.slice(0, 200)}`
-                    : `LLM plugin failed (exit=${code}). ${stderrText.trim()}`;
+                    ? `Plugin produced non-JSON stdout: ${stdoutBuf.slice(0, 200)}`
+                    : `Plugin failed (exit=${code}). ${stderrText.trim()}`;
             reject(new Error(errMsg));
         });
 

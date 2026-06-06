@@ -37,15 +37,13 @@
 
 ### Step 2 — 安装插件
 
-app 默认不预装任何插件。打开**插件管理器**（右上角的方块图标），按需安装——比如官方 LLM 插件（OpenAI / Gemini / OpenRouter）和 Modal GPU/CPU 插件。新装的插件即时可用，无需重启。
+app 默认不预装任何插件。打开**插件管理器**（右上角的方块图标），按需安装——比如官方 API 插件（OpenAI / Gemini / OpenRouter）和 GPU/CPU 插件。新装的插件即时可用，无需重启。
 
 ### Step 3 — 配置凭据
 
-打开**设置**（右上角齿轮图标），填入插件需要的环境变量——比如 `OPENAI_API_KEY`，或 Modal GPU/CPU 插件用的 `MODAL_TOKEN_ID` / `MODAL_TOKEN_SECRET`。
+打开**设置**（右上角齿轮图标），填入插件需要的环境变量——比如 API 插件用的 `OPENAI_API_KEY`，或 GPU/CPU 插件所需的凭据。
 
 > **插件凭据都在「设置」里。** TongFlow 不绑定任何平台、不硬编码任何 provider：设置对话框是一个通用的环境变量 key/value 编辑器，传给插件使用。各插件需要哪些 key 由它自己的 README 说明。值保存在本地，改动即时生效、无需重启。
->
-> 官方 GPU/CPU 插件目前基于 [Modal](https://modal.com)开发（Modal为每个用户每月最多提供**每月 $30** GPU使用额度）；您可在 [modal.com/settings/tokens](https://modal.com/settings/tokens) 创建 token。详细说明可阅读各个插件的readme文档。
 
 ### Step 4 — 运行示例工作流
 
@@ -59,9 +57,7 @@ app 默认不预装任何插件。打开**插件管理器**（右上角的方块
 
 - **低门槛，高可能性**: 无需学习复杂的AI参数，无需手动连接节点；只需**添加**、**转换**和**组合**三种操作，就能自由排列创意。同时，通过对AI模型的自由编排，可以生成独有的创意和作品。
 
-- **开放生态**: TongFlow 基于插件的设计，使得每个平台都可以封装独立的插件，官方将对每个能力节点提供至少一个实现插件
-
-> 目前官方插件基于[Modal](https://modal.com)平台实现，因为它为用户提供每月最多$30的免费算力额度，可使用 H100/A100 等云端 GPU）。核心精简，生态开放，任何平台都可发布自己的插件。
+- **开放生态**: TongFlow 基于插件的设计，使得每个平台都可以封装独立的插件，官方将对每个能力节点提供至少一个实现插件。核心精简，生态开放。
 
 ## 已实现功能
 
@@ -119,7 +115,6 @@ app 默认不预装任何插件。打开**插件管理器**（右上角的方块
 
 - ✅ **图像融合**: 将多张参考图融合或编辑为一张图。
 - ✅ **口型同步**: 音频 + 视频 → 视频（口型同步）；也支持音频 + 图片 → 视频、音频 + 文本 → 视频等变体。
-- ⬜ **声音克隆合成**: 文本 + 参考音频 → 克隆指定音色的语音（上方**语音合成 → 声音克隆**节点已覆盖该能力）。
 - ✅ **换角色**: 视频 + 参考（场景融合 / 角色替换），Animate Mix 风格生成。
 - ✅ **动作迁移**: 视频 + 参考（动作 / 重定向），Animate Move 风格生成。
 - ✅ **文本合并**: 将多个文本节点合并为一个。
@@ -144,17 +139,15 @@ app 默认不预装任何插件。打开**插件管理器**（右上角的方块
 
 ## 官方插件
 
-TongFlow 采用**插件生态**：TongFlow 本身不绑定任何厂商、云或模型——它只定义 slot（契约），具体实现由插件提供，插件可自由接入任意平台、任意 API、云端 GPU 或本地算力。每个插件都是独立版本的包；目前它们要么作为本地适配器运行（`tongflow-llm-*`，在宿主机上拉起），要么跑在 Modal 上（`tongflow-modal-*`，用于托管 GPU/CPU）——但这只是代码在哪执行，并不限制它能接入什么。它们托管在 GitHub 的 [tong-io](https://github.com/tong-io) 组织及 PyPI 上，运行时克隆到 gitignored 的 `plugins/` 目录（通过 `pnpm plugins:install` 或直接 `git clone`），扫描器在下次启动时自动识别。详见 [docs/plugins.md](docs/plugins.md)。第三方可以同样的方式发布自己的插件。
+> 官方 GPU/CPU 插件目前运行在 [Modal](https://modal.com) 上——每月最多 **$30** 免费 GPU 算力（H100/A100 等）。在**设置**里填入 `MODAL_TOKEN_ID` / `MODAL_TOKEN_SECRET`；可在 [modal.com/settings/tokens](https://modal.com/settings/tokens) 创建 token。任何其他平台都可以用同样方式发布自己的插件。
 
-下方列出的是随本仓库一同维护的官方插件——为每个 slot 提供**一个开箱即用的实现**，而非唯一可能的后端。
+### API 插件
 
-### LLM（文本生成）插件
+- [tongflow-api-openrouter-free](https://github.com/tong-io/tongflow-api-openrouter-free) — 默认 `gen_text` 路由，使用 OpenRouter 免费模型
+- [tongflow-api-gemini](https://github.com/tong-io/tongflow-api-gemini) — 基于 Google Gemini 的 `gen_text` 及多模态处理
+- [tongflow-api-openai](https://github.com/tong-io/tongflow-api-openai) — 基于 OpenAI 的 `gen_text`
 
-- [tongflow-llm-openrouter-free](https://github.com/tong-io/tongflow-llm-openrouter-free) — 默认 `gen_text` 路由，使用 OpenRouter 免费模型
-- [tongflow-llm-gemini](https://github.com/tong-io/tongflow-llm-gemini) — 基于 Google Gemini 的 `gen_text` 及多模态处理
-- [tongflow-llm-openai](https://github.com/tong-io/tongflow-llm-openai) — 基于 OpenAI 的 `gen_text`
-
-### Modal（GPU/CPU）插件
+### GPU/CPU 插件
 
 - [tongflow-modal-ffmpeg](https://github.com/tong-io/tongflow-modal-ffmpeg) — 转码、混流、媒体处理管线
 - [tongflow-modal-pyscenedetect](https://github.com/tong-io/tongflow-modal-pyscenedetect) — 镜头边界检测，用于分割片段
@@ -165,7 +158,6 @@ TongFlow 采用**插件生态**：TongFlow 本身不绑定任何厂商、云或�
 - [tongflow-modal-infinitetalk](https://github.com/tong-io/tongflow-modal-infinitetalk) — InfiniteTalk 音频驱动口型同步（音频 + 视频 → 数字人视频）
 - [tongflow-modal-wan-animate](https://github.com/tong-io/tongflow-modal-wan-animate) — Wan-Animate 换角色与动作迁移（视频 + 参考）
 - [tongflow-modal-seedvr2](https://github.com/tong-io/tongflow-modal-seedvr2) — SeedVR2 图像 / 视频超分辨率
-- [tongflow-modal-color-fix-lab](https://github.com/tong-io/tongflow-modal-color-fix-lab) — 图像 / 视频超分辨率（备选）
 - [tongflow-modal-gemma4](https://github.com/tong-io/tongflow-modal-gemma4) — Gemma-4 多模态文本（图像 / 视频理解）
 - [tongflow-modal-qwen3asr](https://github.com/tong-io/tongflow-modal-qwen3asr) — Qwen3 语音识别
 - [tongflow-modal-qwen3tts](https://github.com/tong-io/tongflow-modal-qwen3tts) — Qwen3 文字转语音
@@ -182,6 +174,8 @@ pnpm install
 pnpm plugins:install   # 克隆官方插件到 plugins/
 pnpm start:prod        # 先构建一次,再启动于 http://localhost:3000
 ```
+
+需要 **Node**（含 `pnpm`）以及 `PATH` 上有一个 **Python 3.10+** 解释器（可用 `PYTHON` 指定具体的那个）。插件以本地 Python 进程运行；TongFlow 会自动为它们创建隔离的 venv，并在首次使用时安装各插件的 `requirements.txt`——无需手动配置 Python。
 
 打开 **`http://localhost:3000`**，画布已就绪。插件的安装与配置同上面的 Step 2–4（凭据填在 app 内的**设置**对话框，或用项目 `.env`）。
 

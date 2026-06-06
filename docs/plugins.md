@@ -81,7 +81,7 @@ the SDK decorator + type annotations in your Python (the slot bindings — see
 The naming convention the scanner enforces:
 
 - The directory name must be **all lowercase**.
-- It must begin with `tongflow-llm-…` or `tongflow-modal-…`. **The prefix no longer selects an
+- It must begin with `tongflow-api-…` or `tongflow-modal-…`. **The prefix no longer selects an
   execution backend** — every plugin runs the same way (see [§5](#5-what-registers-a-handler)).
   It is now just a **label** shown in the node's plugin picker, a hint about where the work
   tends to run (a local/API adapter vs. hosted compute).

@@ -37,15 +37,13 @@ All builds are on the [Releases](https://github.com/tong-io/tongflow/releases/la
 
 ### Step 2 — Install plugins
 
-The app ships with no plugins pre-installed. Open the **plugin manager** (the blocks icon, top-right) and install what you need — e.g. the official LLM plugins (OpenAI / Gemini / OpenRouter) and the Modal GPU/CPU plugins. Newly installed plugins are usable immediately, no restart.
+The app ships with no plugins pre-installed. Open the **plugin manager** (the blocks icon, top-right) and install what you need — e.g. the official API plugins (OpenAI / Gemini / OpenRouter) and the GPU/CPU plugins. Newly installed plugins are usable immediately, no restart.
 
 ### Step 3 — Configure credentials
 
-Open **Settings** (the gear icon, top-right) and add the environment variables your plugins need — e.g. `OPENAI_API_KEY`, or `MODAL_TOKEN_ID` / `MODAL_TOKEN_SECRET` for the Modal GPU/CPU plugins.
+Open **Settings** (the gear icon, top-right) and add the environment variables your plugins need — e.g. `OPENAI_API_KEY` for the API plugins, or the credentials your GPU/CPU plugins require.
 
 > **Plugin credentials live in Settings.** TongFlow is platform-agnostic and hardcodes no provider: the Settings dialog is a generic key/value editor for environment variables passed to plugins. Each plugin's README documents the keys it needs. Values are stored locally and take effect without a restart.
->
-> The official GPU/CPU plugins currently run on [Modal](https://modal.com) (Modal provides each user up to **$30/month** of GPU compute); create a token at [modal.com/settings/tokens](https://modal.com/settings/tokens). See each plugin's README for details.
 
 ### Step 4 — Run the example workflow
 
@@ -59,9 +57,7 @@ On first open, the canvas is preloaded with an example. You can run it node by n
 
 - **Low barrier, high ceiling**: no complex AI parameters to learn, no manual node connecting; just three operations — **add**, **transform**, and **combine** — to arrange ideas freely. And by orchestrating AI models freely, you can generate unique creations and works of your own.
 
-- **Open ecosystem**: TongFlow's plugin-based design lets every platform package its own independent plugins, and we provide at least one official implementation plugin for each capability node.
-
-> Today's official plugins run on [Modal](https://modal.com), since it offers users up to $30/month of free compute with cloud GPUs such as H100/A100. The core stays small, the ecosystem stays open — any platform can publish its own plugins.
+- **Open ecosystem**: TongFlow's plugin-based design lets every platform package its own independent plugins, and we provide at least one official implementation plugin for each capability node. The core stays small, the ecosystem stays open.
 
 ## What’s Defined
 
@@ -119,7 +115,6 @@ On first open, the canvas is preloaded with an example. You can run it node by n
 
 - ✅ **Image fusion**: blend or edit multiple references into one image.
 - ✅ **Lip sync**: audio + video → video (lip-sync); also audio + image → video and audio + text → video variants.
-- ⬜ **Clone voice**: text + reference audio → speech with a cloned voice (the **Speech synthesis → voice clone** node above already covers this).
 - ✅ **Character swap**: video + reference (scene blend / character replacement), Animate Mix-style generation.
 - ✅ **Motion transfer**: video + reference (motion / retarget), Animate Move-style generation.
 - ✅ **Combine text**: merge multiple text nodes into one.
@@ -144,17 +139,15 @@ On first open, the canvas is preloaded with an example. You can run it node by n
 
 ## Official plugins
 
-TongFlow runs on a **plugin ecosystem**. TongFlow itself binds to no provider, cloud, or model — it only defines the slots (the contracts), and a plugin supplies the implementation, free to target any platform, any API, a hosted GPU cloud, or local compute. Each plugin is an independently versioned package; today they run either as a local adapter (`tongflow-llm-*`, spawned on the host) or on Modal (`tongflow-modal-*`, for hosted GPU/CPU) — but that's just where the code executes, not a limit on what it integrates. They live under [tong-io](https://github.com/tong-io) on GitHub and on PyPI, are cloned at runtime into the gitignored `plugins/` directory (via `pnpm plugins:install` or a plain `git clone`), and are picked up by the scanner on next start. See [docs/plugins.md](docs/plugins.md). Third parties can publish their own plugins the same way.
+> The official GPU/CPU plugins currently run on [Modal](https://modal.com) — up to **$30/month** of free GPU compute (H100/A100, etc.). Add `MODAL_TOKEN_ID` / `MODAL_TOKEN_SECRET` in **Settings**; create a token at [modal.com/settings/tokens](https://modal.com/settings/tokens). Any other platform can publish its own plugins the same way.
 
-The plugins below are the official ones maintained alongside this repo — **one implementation per slot** to get you running out of the box, not the only possible backends.
+### API plugins
 
-### LLM (text-generation) plugins
+- [tongflow-api-openrouter-free](https://github.com/tong-io/tongflow-api-openrouter-free) — default `gen_text` route via OpenRouter's free models
+- [tongflow-api-gemini](https://github.com/tong-io/tongflow-api-gemini) — Google Gemini for `gen_text` and other Gemini multimodal handlers
+- [tongflow-api-openai](https://github.com/tong-io/tongflow-api-openai) — OpenAI for `gen_text`
 
-- [tongflow-llm-openrouter-free](https://github.com/tong-io/tongflow-llm-openrouter-free) — default `gen_text` route via OpenRouter's free models
-- [tongflow-llm-gemini](https://github.com/tong-io/tongflow-llm-gemini) — Google Gemini for `gen_text` and other Gemini multimodal handlers
-- [tongflow-llm-openai](https://github.com/tong-io/tongflow-llm-openai) — OpenAI for `gen_text`
-
-### Modal (GPU/CPU) plugins
+### GPU/CPU plugins
 
 - [tongflow-modal-ffmpeg](https://github.com/tong-io/tongflow-modal-ffmpeg) — transcoding, muxing, media pipelines
 - [tongflow-modal-pyscenedetect](https://github.com/tong-io/tongflow-modal-pyscenedetect) — shot-boundary detection for splitting clips
@@ -165,7 +158,6 @@ The plugins below are the official ones maintained alongside this repo — **one
 - [tongflow-modal-infinitetalk](https://github.com/tong-io/tongflow-modal-infinitetalk) — InfiniteTalk audio-driven lip-sync (audio + video → talking-head video)
 - [tongflow-modal-wan-animate](https://github.com/tong-io/tongflow-modal-wan-animate) — Wan-Animate character swap & motion transfer (video + reference)
 - [tongflow-modal-seedvr2](https://github.com/tong-io/tongflow-modal-seedvr2) — SeedVR2 image / video super-resolution
-- [tongflow-modal-color-fix-lab](https://github.com/tong-io/tongflow-modal-color-fix-lab) — image / video upscaling (alternative)
 - [tongflow-modal-gemma4](https://github.com/tong-io/tongflow-modal-gemma4) — Gemma-4 multimodal text (image / video understanding)
 - [tongflow-modal-qwen3asr](https://github.com/tong-io/tongflow-modal-qwen3asr) — Qwen3 speech recognition
 - [tongflow-modal-qwen3tts](https://github.com/tong-io/tongflow-modal-qwen3tts) — Qwen3 text-to-speech
@@ -182,6 +174,8 @@ pnpm install
 pnpm plugins:install   # clone official plugins into plugins/
 pnpm start:prod        # builds once, then serves at http://localhost:3000
 ```
+
+Requires **Node** (with `pnpm`) and a **Python 3.10+** interpreter on your `PATH` (set `PYTHON` to point at a specific one). Plugins run as local Python processes; TongFlow provisions an isolated venv for them automatically and installs each plugin's `requirements.txt` on first use — no manual Python setup.
 
 Open **`http://localhost:3000`** and the canvas is live. Install/configure plugins exactly as in Steps 2–4 above (credentials go in the in-app **Settings** dialog, or a project `.env`).
 

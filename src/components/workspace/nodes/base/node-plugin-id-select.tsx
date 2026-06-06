@@ -17,7 +17,7 @@ import { NodePluginSelect } from "./node-plugin-select";
 export function pluginDisplayName(pluginId: string): string {
     const parts = pluginId.split("-").filter(Boolean);
     const semantic =
-        parts[0] === "tongflow" && (parts[1] === "modal" || parts[1] === "llm")
+        parts[0] === "tongflow" && (parts[1] === "modal" || parts[1] === "api")
             ? parts.slice(2)
             : parts;
     return semantic

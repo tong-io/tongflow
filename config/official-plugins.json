@@ -1,9 +1,9 @@
 {
     "org": "https://github.com/tong-io",
     "plugins": [
-        "tongflow-llm-openrouter-free",
-        "tongflow-llm-gemini",
-        "tongflow-llm-openai",
+        "tongflow-api-openrouter-free",
+        "tongflow-api-gemini",
+        "tongflow-api-openai",
         "tongflow-modal-ffmpeg",
         "tongflow-modal-pyscenedetect",
         "tongflow-modal-z-image",

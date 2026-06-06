@@ -120,7 +120,7 @@ def _input_model_cls(fn: Callable[..., object]) -> type[BaseModel] | None:
 def _is_method(fn: Callable[..., object]) -> bool:
     """True when `fn`'s first positional parameter is `self`/`cls`.
 
-    Modal plugins decorate class methods (`def slot(self, input)`); LLM plugins
+    Modal plugins decorate class methods (`def slot(self, input)`); API plugins
     decorate module-level functions (`def slot(input)`). The wrapper signature
     has to match so callers can invoke either form with a single `input` arg.
     """
@@ -140,7 +140,7 @@ def node_slot(*slots: str) -> Callable[[F], F]:
     - its input `dict` is converted to a Pydantic instance (recursively), and
     - a Pydantic return value is dumped back to dict for Modal.
 
-    Works for both class methods (Modal plugins) and module functions (LLM
+    Works for both class methods (Modal plugins) and module functions (API
     plugins) — the wrapper introspects the underlying signature at decoration
     time.
     """

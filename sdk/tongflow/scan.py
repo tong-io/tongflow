@@ -50,7 +50,7 @@ def _detect_runner(plugin_dir: Path) -> tuple[str | None, str | None]:
     # "unknown prefix"; surface a clear rename hint instead.
     lowered = plugin_id.lower()
     if plugin_id != lowered and (
-        lowered.startswith("tongflow-modal-") or lowered.startswith("tongflow-llm-")
+        lowered.startswith("tongflow-modal-") or lowered.startswith("tongflow-api-")
     ):
         return None, (
             f"{plugin_dir}:1: pluginId must be all lowercase; "
@@ -64,23 +64,23 @@ def _detect_runner(plugin_dir: Path) -> tuple[str | None, str | None]:
             f"{plugin_dir}:1: pluginId must not encode gpu/cpu; "
             "fix: use tongflow-modal-<semantic-name>"
         )
-    if plugin_id.startswith("tongflow-llm-gpu-") or plugin_id.startswith(
-        "tongflow-llm-cpu-"
+    if plugin_id.startswith("tongflow-api-gpu-") or plugin_id.startswith(
+        "tongflow-api-cpu-"
     ):
         return None, (
             f"{plugin_dir}:1: pluginId must not encode gpu/cpu; "
-            "fix: use tongflow-llm-<semantic-name>"
+            "fix: use tongflow-api-<semantic-name>"
         )
 
     prefix_runner: str | None = None
     if plugin_id.startswith("tongflow-modal-"):
         prefix_runner = "modal"
-    elif plugin_id.startswith("tongflow-llm-"):
-        prefix_runner = "llm"
+    elif plugin_id.startswith("tongflow-api-"):
+        prefix_runner = "api"
     else:
         return None, (
             f"{plugin_dir}:1: unknown pluginId prefix; "
-            "fix: use tongflow-modal-<name> or tongflow-llm-<name>"
+            "fix: use tongflow-modal-<name> or tongflow-api-<name>"
         )
 
     if not has_deploy and not has_entry:
@@ -93,8 +93,8 @@ def _detect_runner(plugin_dir: Path) -> tuple[str | None, str | None]:
     # entry and exchanges JSON. The runner is no longer an execution backend —
     # a plugin with entry.py runs that file; a deploy.py plugin is bridged to
     # its backend by the SDK (tongflow.modal_entry), needing no per-repo entry.
-    # "llm" is kept as the registry's single generic-runner tag.
-    return "llm", None
+    # "api" is kept as the registry's single generic-runner tag.
+    return "api", None
 
 
 def _scan_error(path: Path, reason: str, hint: str, line: int = 1) -> str:

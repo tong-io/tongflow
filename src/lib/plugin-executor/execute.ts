@@ -14,8 +14,8 @@ export async function executePlugin<S extends NodeSlot = NodeSlot>(
     // One generic runner for every plugin: spawn the plugin's local entry and
     // exchange ABI JSON. Where the work actually runs (local, Modal, another
     // cloud) is the plugin's own concern.
-    const { execLlmPlugin } = await import("./runners/llm");
-    const raw = await execLlmPlugin(req);
+    const { execPlugin } = await import("./runners/generic");
+    const raw = await execPlugin(req);
 
     // Persist any binary `Asset` outputs into `{file_key}` refs, uniformly for
     // every plugin. ABI-driven (walks the slot's output schema for

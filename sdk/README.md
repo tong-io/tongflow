@@ -31,15 +31,15 @@ For every plugin repository, these names must be identical:
 - git repository name
 
 Use `tongflow-modal-<semantic-name>` for Modal plugins and
-`tongflow-llm-<semantic-name>` for LLM plugins, such as
+`tongflow-api-<semantic-name>` for API plugins, such as
 `tongflow-modal-docling`, `tongflow-modal-qwen3asr`, or
-`tongflow-llm-openai`. Do not encode hardware details in the name, such as
+`tongflow-api-openai`. Do not encode hardware details in the name, such as
 `gpu` or `cpu`.
 
 Runner detection is prefix-based and validated against the entry files:
 
 - `tongflow-modal-*` with `deploy.py`: Modal plugin
-- `tongflow-llm-*` with `entry.py`: LLM plugin
+- `tongflow-api-*` with `entry.py`: API plugin
 - both files or neither file: scanner error
 
 Modal plugins should derive their app from the directory name:
