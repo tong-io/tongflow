@@ -35,9 +35,21 @@
 
 全部版本见 [Releases](https://github.com/tong-io/tongflow/releases/latest) 页面。
 
+首次打开时，画布已预加载一个示例工作流——接下来几步把它准备到可运行状态。
+
 ### Step 2 — 安装插件
 
-app 默认不预装任何插件。打开**插件管理器**（右上角的方块图标），按需安装——比如官方 API 插件（OpenAI / Gemini / OpenRouter）和 GPU/CPU 插件。新装的插件即时可用，无需重启。
+app 默认不预装任何插件。打开**插件管理器**（右上角的方块图标），按需安装。新装的插件即时可用，无需重启。
+
+要运行预加载的**示例工作流**（文本 → 图像 → 融合 → 视频），需安装以下三个插件：
+
+- [tongflow-modal-z-image](https://github.com/tong-io/tongflow-modal-z-image) — 文本生图
+- [tongflow-modal-flux2-klein9b](https://github.com/tong-io/tongflow-modal-flux2-klein9b) — 图像融合 / 混合
+- [tongflow-modal-ltx](https://github.com/tong-io/tongflow-modal-ltx) — 图生视频
+
+这些插件运行在 [Modal](https://modal.com) 上（每月最多 **$30** 免费 GPU 算力）。在**设置**里填入 `MODAL_TOKEN_ID` / `MODAL_TOKEN_SECRET`；可在 [modal.com/settings/tokens](https://modal.com/settings/tokens) 创建 token。任何其他平台都可以用同样方式发布自己的插件。
+
+在插件管理器里可浏览完整目录——官方 API 插件（OpenAI / Gemini / OpenRouter）以及其他 GPU/CPU 插件。
 
 ### Step 3 — 配置凭据
 
@@ -47,7 +59,7 @@ app 默认不预装任何插件。打开**插件管理器**（右上角的方块
 
 ### Step 4 — 运行示例工作流
 
-首次打开时，画布已预加载一个示例，您可以逐个节点执行，也可以切换到执行模式，点击运行按钮即可一键执行。
+逐个节点执行预加载的示例，也可以切换到执行模式，点击运行按钮即可一键执行。
 
 ## 核心概念
 
@@ -139,7 +151,7 @@ app 默认不预装任何插件。打开**插件管理器**（右上角的方块
 
 ## 官方插件
 
-> 官方 GPU/CPU 插件目前运行在 [Modal](https://modal.com) 上——每月最多 **$30** 免费 GPU 算力（H100/A100 等）。在**设置**里填入 `MODAL_TOKEN_ID` / `MODAL_TOKEN_SECRET`；可在 [modal.com/settings/tokens](https://modal.com/settings/tokens) 创建 token。任何其他平台都可以用同样方式发布自己的插件。
+> 官方 GPU/CPU 插件目前运行在 [Modal](https://modal.com) 上——每月最多 **$30** 免费 GPU 算力（H100/A100 等）。`MODAL_TOKEN_*` 的配置见 [Step 2](#step-2--安装插件)。任何其他平台都可以用同样方式发布自己的插件。
 
 ### API 插件
 
@@ -181,45 +193,26 @@ pnpm start:prod        # 先构建一次,再启动于 http://localhost:3000
 
 ## 自定义插件
 
-### 一切从 ABI 说起
+画布上每一个能跑的节点，背后都是一份**契约**——ABI（[`config/tongflow.abi.json`](config/tongflow.abi.json)），它定义「有哪些能力」以及「每个能力的输入输出长什么样」，而与「由谁实现」无关。一个插件就是一个小小的 Python 包，挑 ABI 里一个或多个槽，借助 tongflow Python SDK，用 ABI 生成的类型给出**怎么做**的那部分。
 
-画布上每一个能跑的节点，背后都不是一段写死的代码，而是一份**契约**。这份契约就是 [`config/tongflow.abi.json`](config/tongflow.abi.json)——TongFlow 的 ABI。
+完整的开发流程——ABI、`@node_slot` 装饰器、SDK、目录结构以及如何发布，请见 **[docs/plugins.md](docs/plugins.md)**。
 
-ABI 定义的是「有哪些能力」以及「每个能力的输入输出长什么样」：`gen-text`、`image-gen`、`gen-video`、`asr`、`tts`…… 每一个都是一个带类型的**节点槽（node slot）**。它只描述**契约本身**——文本进、图片出、需要哪些字段——而**完全不关心**这件事到底由谁、用什么模型来做。
+## 社区
 
-这份契约是唯一的真相来源，向两个方向生成代码：
-
-- 往前端，生成 TypeScript 类型，画布、连线校验、工作流导出器都直接读它；
-- 往插件，生成 Python 的 `*Input` / `*Output` 模型，供插件作者标注类型。
-
-于是「能力」和「实现」被彻底分开了：**ABI 是稳定的产品契约，插件是可替换的实现。** 同一个 `image-gen` 槽可以同时挂着好几个互相竞争的插件，用户在节点上自由切换；想接入一个新模型，只是针对某个**已有的槽**写一个插件，前端一行都不用动。只有要引入一种**全新的能力**时，才需要去演进 ABI（见 [docs/plugins.md → Evolving the ABI](docs/plugins.md#8-evolving-the-abi)）。
-
-### 插件就是「槽的实现」
-
-所以一个插件的本质很简单：它是一个小小的 Python 包，挑 ABI 里一个或多个节点槽，给出**怎么做**的那部分。
-
-我们配套开发了 tongflow python SDK, 你可以参考官方插件的使用方式，将 ABI 生成的类型通过注解标注到你的执行方法，剩下的脏活（把传入的 dict 还原成类型化模型、把你的返回转回 JSON、把二进制产物转成下游可用的文件引用）由 SDK 接手——你的代码自始至终只面对类型化对象。
-
-### 怎么动手
-
-写好的插件放进 `plugins/<package-name>/`，重启后扫描器会自动发现，对应节点上就能选到它；推到 GitHub，别人 `git clone` 进自己的 `plugins/` 就能用。
-
-完整的开发流程——目录结构、怎么写、以及`@node_slot` 装饰器、SDK等概念，请见 [docs/plugins.md](docs/plugins.md)。
-
-## 联系我们
-
-**社区：** 加入 **[Discord](https://discord.gg/K7V8az94Zf)** 或扫描下方**微信群**二维码。
+加入 **[Discord](https://discord.gg/K7V8az94Zf)** 或扫描下方**微信群**二维码。
 
 <div>
   <img src="docs/assets/qr.png" alt="微信群二维码" width="180" />
 </div>
 
-**商务合作：** 请联系 business@tongflow.com，我会尽快回复。
+## 商务合作
 
-- **开源模型发布者**：我可以集成你的模型，让用户流畅体验。
-- **企业用户**：我可以协助在本地 GPU 上部署、构建定制节点等。
-- **API 供应商 / 路由**：我可以接入你的 API。
-- **投资方**：欢迎探讨在 tongflow.com 云端 AI 工作室上的合作。
+商务合作请联系 business@tongflow.com。
+
+- **开源模型 owner**：我可以集成你的模型，让用户流畅体验。
+- **企业用户**：我可以协助在本地 GPU 上部署、构建定制节点和插件等。
+- **平台 / 路由**：我可以接入你的 API。
+- **VCs**：欢迎探讨在 [tongflow.com](https://tongflow.com) 云端 AI 工作室上的合作。
 
 ## 开源
 

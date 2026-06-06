@@ -35,9 +35,21 @@ Download the installer for your platform, install it, and open it.
 
 All builds are on the [Releases](https://github.com/tong-io/tongflow/releases/latest) page.
 
+On first open, the canvas is preloaded with an example workflow — the next steps get it ready to run.
+
 ### Step 2 — Install plugins
 
-The app ships with no plugins pre-installed. Open the **plugin manager** (the blocks icon, top-right) and install what you need — e.g. the official API plugins (OpenAI / Gemini / OpenRouter) and the GPU/CPU plugins. Newly installed plugins are usable immediately, no restart.
+The app ships with no plugins pre-installed. Open the **plugin manager** (the blocks icon, top-right) and install what you need. Newly installed plugins are usable immediately, no restart.
+
+To run the preloaded **example workflow** (text → image → fusion → video), install these three plugins:
+
+- [tongflow-modal-z-image](https://github.com/tong-io/tongflow-modal-z-image) — text-to-image
+- [tongflow-modal-flux2-klein9b](https://github.com/tong-io/tongflow-modal-flux2-klein9b) — image fusion / blending
+- [tongflow-modal-ltx](https://github.com/tong-io/tongflow-modal-ltx) — image-to-video
+
+These run on [Modal](https://modal.com) (up to **$30/month** of free GPU compute). Add `MODAL_TOKEN_ID` / `MODAL_TOKEN_SECRET` in **Settings**; create a token at [modal.com/settings/tokens](https://modal.com/settings/tokens). Any other platform can publish its own plugins the same way.
+
+Browse the full catalog — the official API plugins (OpenAI / Gemini / OpenRouter) and other GPU/CPU plugins — in the plugin manager.
 
 ### Step 3 — Configure credentials
 
@@ -47,7 +59,7 @@ Open **Settings** (the gear icon, top-right) and add the environment variables y
 
 ### Step 4 — Run the example workflow
 
-On first open, the canvas is preloaded with an example. You can run it node by node, or switch to Execute Mode and hit the run button to run the whole thing in one click.
+Run the preloaded example node by node, or switch to Execute Mode and hit the run button to run the whole thing in one click.
 
 ## Core Concept
 
@@ -139,7 +151,7 @@ On first open, the canvas is preloaded with an example. You can run it node by n
 
 ## Official plugins
 
-> The official GPU/CPU plugins currently run on [Modal](https://modal.com) — up to **$30/month** of free GPU compute (H100/A100, etc.). Add `MODAL_TOKEN_ID` / `MODAL_TOKEN_SECRET` in **Settings**; create a token at [modal.com/settings/tokens](https://modal.com/settings/tokens). Any other platform can publish its own plugins the same way.
+> The official GPU/CPU plugins currently run on [Modal](https://modal.com) — up to **$30/month** of free GPU compute (H100/A100, etc.). See [Step 2](#step-2--install-plugins) for the `MODAL_TOKEN_*` setup. Any other platform can publish its own plugins the same way.
 
 ### API plugins
 
@@ -181,46 +193,26 @@ Open **`http://localhost:3000`** and the canvas is live. Install/configure plugi
 
 ## Custom plugins
 
-### It all starts with the ABI
+Every runnable node is backed by a **contract** — the ABI ([`config/tongflow.abi.json`](config/tongflow.abi.json)) — that defines *what capabilities exist* and *what each one's input/output looks like*, independent of *who* implements it. A plugin is just a small Python package that picks one or more ABI slots and supplies the **how**, annotated against the ABI-generated types via the tongflow Python SDK.
 
-Every runnable node on the canvas is backed not by hard-wired code, but by a **contract**. That contract is [`config/tongflow.abi.json`](config/tongflow.abi.json) — TongFlow's ABI.
+The full development flow — the ABI, the `@node_slot` decorator, the SDK, directory layout, and how to publish — lives in **[docs/plugins.md](docs/plugins.md)**.
 
-The ABI defines *what capabilities exist* and *what each one's input and output look like*: `gen-text`, `image-gen`, `gen-video`, `asr`, `tts`, and so on. Each is a typed **node slot**. It describes only the **contract** — text in, image out, which fields are required — and says **nothing** about *who* fulfills it or *which model* does the work.
+## Community
 
-This contract is the single source of truth, and it generates code in two directions:
-
-- toward the frontend, as TypeScript types that the canvas, the connection validator, and the workflow exporter all read directly;
-- toward plugins, as Python `*Input` / `*Output` models that plugin authors annotate against.
-
-So *capability* and *implementation* are cleanly separated: **the ABI is the stable product contract, and plugins are swappable implementations.** A single `image-gen` slot can have several competing plugins mounted at once, and the user switches between them on the node; adding a new model just means writing a plugin against an **existing** slot — not a single line of frontend changes. Only when you want a genuinely **new capability** do you first evolve the ABI (see [docs/plugins.md → Evolving the ABI](docs/plugins.md#8-evolving-the-abi)).
-
-### A plugin is "an implementation of a slot"
-
-So a plugin's essence is simple: it's a small Python package that picks one or more node slots from the ABI and supplies the **how**.
-
-We also ship the tongflow Python SDK. Following how the official plugins do it, you annotate your execution method with the ABI-generated types, and the SDK takes over the grunt work (marshalling the incoming dict back into a typed model, turning your return back into JSON, converting binary outputs into downstream-usable file refs) — your code only ever touches typed objects.
-
-### Getting hands-on
-
-Drop a finished plugin into `plugins/<package-name>/`, restart, and the scanner discovers it automatically — your node now lists it. Push it to GitHub and anyone can `git clone` it into their own `plugins/` to use it.
-
-The full development flow — directory layout, how to write them, and concepts like the `@node_slot` decorator and the SDK — lives in [docs/plugins.md](docs/plugins.md).
-
-## Contact
-
-**For Community:** Join the community on **[Discord](https://discord.gg/K7V8az94Zf)** or scan the **WeChat group** QR code below.
+Join the community on **[Discord](https://discord.gg/K7V8az94Zf)** or scan the **WeChat group** QR code below.
 
 <div>
   <img src="docs/assets/qr.png" alt="WeChat group QR code" width="180" />
 </div>
 
+## Business
 
-**For Business:** Please contact business@tongflow.com. I’ll get back to you.
+For business inquiries, please contact business@tongflow.com.
 
-- **Open-source model publishers**: I can integrate your models so users can try them out smoothly.
-- **Enterprise**: I can help you deploy on your local GPU, build custom nodes, and more.
-- **API provider / router**: I can integrate your APIs.
-- **Investor**: I’m interested in partnering on tongflow.com, a cloud-hosted AI studio.
+- **Open-source model owners**: I can integrate your models so users can try them out smoothly.
+- **Enterprise**: I can help you deploy on your local GPU, build custom nodes and plugins, and more.
+- **Platform / router**: I can integrate your APIs.
+- **VCs**: I’m interested in partnering on [tongflow.com](https://tongflow.com), a cloud-hosted AI studio.
 
 ## Open-Source
 
