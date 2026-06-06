@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="public/logo.svg" alt="TongFlow" width="320" />
+  <img src="../public/logo.svg" alt="TongFlow" width="320" />
 
   <h1>开源的多模态GenAI工作流无限画布</h1>
   <p>
@@ -8,6 +8,9 @@
     <a href="https://github.com/tong-io/tongflow/actions/workflows/ci.yml"><img src="https://github.com/tong-io/tongflow/actions/workflows/ci.yml/badge.svg" alt="CI" /></a>
     <a href="https://discord.gg/K7V8az94Zf"><img src="https://img.shields.io/badge/Discord-加入-5865F2?logo=discord&logoColor=white" alt="Discord" /></a>
     <a href="https://github.com/tong-io/tongflow/releases"><img src="https://img.shields.io/github/v/release/tong-io/tongflow?logo=github" alt="最新版本" /></a>
+  </p>
+  <p>
+    <a href="../README.md">English</a> · <strong>简体中文</strong> · <a href="README_JA.md">日本語</a>
   </p>
 </div>
 
@@ -193,16 +196,16 @@ pnpm start:prod        # 先构建一次,再启动于 http://localhost:3000
 
 ## 自定义插件
 
-画布上每一个能跑的节点，背后都是一份**契约**——ABI（[`config/tongflow.abi.json`](config/tongflow.abi.json)），它定义「有哪些能力」以及「每个能力的输入输出长什么样」，而与「由谁实现」无关。一个插件就是一个小小的 Python 包，挑 ABI 里一个或多个槽，借助 tongflow Python SDK，用 ABI 生成的类型给出**怎么做**的那部分。
+画布上每一个能跑的节点，背后都是一份**契约**——ABI（[`config/tongflow.abi.json`](../config/tongflow.abi.json)），它定义「有哪些能力」以及「每个能力的输入输出长什么样」，而与「由谁实现」无关。一个插件就是一个小小的 Python 包，挑 ABI 里一个或多个槽，借助 tongflow Python SDK，用 ABI 生成的类型给出**怎么做**的那部分。
 
-完整的开发流程——ABI、`@node_slot` 装饰器、SDK、目录结构以及如何发布，请见 **[docs/plugins.md](docs/plugins.md)**。
+完整的开发流程——ABI、`@node_slot` 装饰器、SDK、目录结构以及如何发布，请见 **[docs/plugins.md](plugins.md)**。
 
 ## 社区
 
 加入 **[Discord](https://discord.gg/K7V8az94Zf)** 或扫描下方**微信群**二维码。
 
 <div>
-  <img src="docs/assets/qr.png" alt="微信群二维码" width="180" />
+  <img src="assets/qr.png" alt="微信群二维码" width="180" />
 </div>
 
 ## 商务合作
@@ -219,21 +222,21 @@ pnpm start:prod        # 先构建一次,再启动于 http://localhost:3000
 如果你喜欢这个项目，在 GitHub 上 Star 一下非常有帮助，感谢！
 
 <div align="center">
-  <img src="docs/assets/star.gif" alt="Star on GitHub" />
+  <img src="assets/star.gif" alt="Star on GitHub" />
 </div>
 
 ## 授权协议
 
 TongFlow 采用 **双授权(dual-licensing)** 模式:
 
-- **[AGPL-3.0](LICENSE)** —— 对个人、研究、开源项目,以及愿意遵守 AGPL(含第 13 条
+- **[AGPL-3.0](../LICENSE)** —— 对个人、研究、开源项目,以及愿意遵守 AGPL(含第 13 条
   网络/源码公开义务)的使用者**免费**。
-- **[商业授权](COMMERCIAL-LICENSE.md)** —— 面向希望在**闭源 / SaaS** 产品中使用
+- **[商业授权](../COMMERCIAL-LICENSE.md)** —— 面向希望在**闭源 / SaaS** 产品中使用
   TongFlow 且**不愿公开源码**,或需要保证条款与平台技术支持的组织。
   价格面议,联系 **business@tongflow.com**。
 
 以上授权覆盖整个仓库,包括 `sdk/` 目录(发布到 PyPI 的 `tongflow` 包)。
-贡献代码受 [CLA](CLA.md) 约束。
+贡献代码受 [CLA](../CLA.md) 约束。
 
 ## Star 历史
 
