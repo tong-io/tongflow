@@ -63,3 +63,33 @@
 
 - **One canonical knob per concept.** `duration` (seconds, user-facing) — never alongside `num_frames`/`frame_rate`. `text` (single string) — never alongside `texts` for the same handle role.
 - **Plugin internals don't belong in ABI inputs.** ABI inputs are the cross-plugin product contract; if a field only makes sense for one plugin, make it a plugin constant.
+
+## Commit / PR checklist
+
+Run before every commit; CI ([`.github/workflows/ci.yml`](.github/workflows/ci.yml)) re-checks lint, typecheck, build, and SDK tests on a clean checkout.
+
+- [ ] **Scope** is narrow; follows existing patterns. Code comments in **English only**. No secrets — only [`.env.example`](.env.example) (placeholders) is tracked; real values stay in gitignored `.env`.
+- [ ] **If the ABI changed** ([`config/tongflow.abi.json`](config/tongflow.abi.json)): ran `pnpm gen:abi` and committed [`src/generated/abi/index.ts`](src/generated/abi/index.ts). Kept the Python SDK models in sync (see "Cross-layer changes").
+- [ ] `pnpm lint:check` passes (Biome, `--error-on-warnings`). Use `pnpm lint` to auto-format.
+- [ ] `pnpm typecheck` passes (`tsc --noEmit`).
+- [ ] `pnpm build` passes (catches Next.js / server-boundary issues lint misses).
+- [ ] **If `sdk/` changed:** `cd sdk && pytest` passes.
+- [ ] Branch off `main` (never commit straight to `main`); Conventional Commit message (`feat:`/`fix:`/`chore:`…). PRs are covered by the [CLA](CLA.md).
+
+## Release checklist
+
+Two independently-versioned artifacts: the **PyPI `tongflow` SDK** and the **desktop app**. Release the SDK first whenever plugins depend on new types.
+
+**SDK → PyPI** (publishing convention also in [`sdk/README.md`](sdk/README.md)):
+
+- [ ] Bump the version in **both** [`sdk/pyproject.toml`](sdk/pyproject.toml) **and** [`sdk/tongflow/__init__.py`](sdk/tongflow/__init__.py) (`__version__`) — they **must match**; drift between them is a recurring bug.
+- [ ] If ABI/types changed, regenerate models ([`sdk/tongflow/gen_models.py`](sdk/tongflow/gen_models.py)) and confirm `cd sdk && pytest` passes.
+- [ ] Publish: `pnpm tongflow:publish` ([`scripts/publish-tongflow-pypi.sh`](scripts/publish-tongflow-pypi.sh) — needs `TWINE_USERNAME=__token__` + `TWINE_PASSWORD` in `.env`; dry-run to TestPyPI with `TONGFLOW_UPLOAD_TESTPYPI=1`).
+- [ ] Bump every Modal plugin's `pip_install("tongflow==X.Y.Z")` pin to the just-published version (see "Plugin authoring rules").
+
+**Desktop app + GitHub release:**
+
+- [ ] Update [`CHANGELOG.md`](CHANGELOG.md) (Keep a Changelog format) and the app version in [`package.json`](package.json) / [`desktop/package.json`](desktop/package.json) if they're cut.
+- [ ] Tag the release (`git tag vX.Y.Z`); [`.github/workflows/desktop-release.yml`](.github/workflows/desktop-release.yml) builds the macOS (arm64/x64) and Windows installers.
+- [ ] Publish a GitHub Release with the installers attached and the CHANGELOG entry as notes.
+- [ ] Note: root `package.json` stays `"private": true` — it is the app, not an npm library; never `npm publish` it.

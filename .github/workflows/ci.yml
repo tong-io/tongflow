@@ -76,3 +76,20 @@ jobs:
 
       - name: Build Next.js app
         run: pnpm build
+
+  sdk-tests:
+    name: SDK Tests (Python)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+
+      - name: Install SDK with test deps
+        run: pip install -e sdk pytest
+
+      - name: Run SDK tests
+        run: pytest
+        working-directory: sdk

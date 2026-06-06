@@ -16,7 +16,7 @@ from tongflow.node_slots import NodeSlots
 from tongflow import current_app
 ```
 
-In this monorepo, Modal `impl.py` / stub `deploy.py` images pin **`tongflow==0.0.5`** (PyPI). Bump the version string in those files when you publish a new release.
+In this monorepo, every Modal `deploy.py` and API `entry.py` pins **`tongflow==0.0.21`** (PyPI) — matching the version in [`pyproject.toml`](pyproject.toml). Bump that pin in every plugin when you publish a new release.
 
 ## Plugin identity
 
@@ -64,7 +64,7 @@ export TWINE_PASSWORD=pypi-xxxxxxxx   # https://pypi.org/manage/account/token/
 pnpm tongflow:publish
 ```
 
-This runs [`scripts/publish-tongflow-pypi.sh`](../../scripts/publish-tongflow-pypi.sh) (clean, `python -m build`, `twine check`, `twine upload`).
+This runs [`scripts/publish-tongflow-pypi.sh`](../scripts/publish-tongflow-pypi.sh) (clean, `python -m build`, `twine check`, `twine upload`).
 
 TestPyPI: `TONGFLOW_UPLOAD_TESTPYPI=1 pnpm tongflow:publish` (use a [TestPyPI token](https://test.pypi.org/manage/account/token/)).
 

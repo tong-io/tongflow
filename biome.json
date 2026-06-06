@@ -22,6 +22,8 @@
             "!desktop/release",
             "!desktop/resources",
             "!.tongflow",
+            "!**/.tongflow",
+            "!data",
             "!.claude",
             "!plugins"
         ]

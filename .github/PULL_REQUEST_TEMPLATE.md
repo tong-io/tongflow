@@ -14,7 +14,7 @@
 
 ## Checklist
 
-- [ ] I have read [CONTRIBUTING.md](../CONTRIBUTING.md)
+- [ ] I agree my contribution is covered by the [CLA](../CLA.md)
 - [ ] My branch is up to date with `main`
 - [ ] `pnpm typecheck` passes
 - [ ] `pnpm lint` (or `pnpm lint:check`) passes where applicable
