@@ -1,0 +1,8 @@
+node_modules/
+dist/
+release/
+resources/app/
+resources/node/
+resources/uv/
+resources/python/
+resources/wheels/

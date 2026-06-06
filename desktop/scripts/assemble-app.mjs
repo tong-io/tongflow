@@ -1,0 +1,117 @@
+// Assemble resources/app/ — the read-only bundle the packaged server runs from.
+//
+// next build (output: "standalone") only traces node_modules; the runtime fs
+// assets (drizzle migrations, config/, sdk/, public, static) must be copied in
+// by hand. Plugins are NOT bundled — the user installs them on demand in-app.
+//
+// Run AFTER `pnpm --dir <repo> build`. Invoked by `pnpm assemble`.
+
+import { execSync } from "node:child_process";
+import fs from "node:fs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+
+const here = path.dirname(fileURLToPath(import.meta.url));
+const desktopDir = path.resolve(here, "..");
+const repoRoot = path.resolve(desktopDir, "..");
+
+const appOut = path.join(desktopDir, "resources", "app");
+const wheelsOut = path.join(desktopDir, "resources", "wheels");
+
+function rmrf(p) {
+    fs.rmSync(p, { recursive: true, force: true });
+}
+function copy(from, to) {
+    if (!fs.existsSync(from)) {
+        throw new Error(`Missing build input: ${from}`);
+    }
+    fs.mkdirSync(path.dirname(to), { recursive: true });
+    fs.cpSync(from, to, { recursive: true });
+}
+
+function assertBuilt() {
+    const standalone = path.join(repoRoot, ".next", "standalone");
+    if (!fs.existsSync(path.join(standalone, "server.js"))) {
+        throw new Error(
+            "No .next/standalone/server.js — run `pnpm --dir .. build` first " +
+                "(ensure next.config has output: 'standalone').",
+        );
+    }
+}
+
+function assembleApp() {
+    console.log("[assemble] cleaning", appOut);
+    rmrf(appOut);
+
+    console.log("[assemble] copying Next standalone bundle");
+    copy(path.join(repoRoot, ".next", "standalone"), appOut);
+
+    console.log("[assemble] copying static + public");
+    copy(
+        path.join(repoRoot, ".next", "static"),
+        path.join(appOut, ".next", "static"),
+    );
+    if (fs.existsSync(path.join(repoRoot, "public"))) {
+        copy(path.join(repoRoot, "public"), path.join(appOut, "public"));
+    }
+
+    console.log("[assemble] copying runtime fs assets (drizzle/config/sdk)");
+    copy(path.join(repoRoot, "drizzle"), path.join(appOut, "drizzle"));
+    copy(path.join(repoRoot, "config"), path.join(appOut, "config"));
+    copy(path.join(repoRoot, "sdk"), path.join(appOut, "sdk"));
+}
+
+function buildWheelhouse() {
+    // Optional: a complete offline wheelhouse makes first-run pip install work
+    // without network. Best-effort — falls back to online install if skipped.
+    if (process.env.TONGFLOW_SKIP_WHEELS === "1") {
+        console.log("[assemble] skipping wheelhouse (TONGFLOW_SKIP_WHEELS=1)");
+        return;
+    }
+    // The bundled python (from `pnpm fetch-runtimes`) is used to download wheels
+    // for the exact target platform/arch. Skip if it isn't present yet.
+    const py =
+        process.platform === "win32"
+            ? path.join(desktopDir, "resources", "python", "python.exe")
+            : path.join(desktopDir, "resources", "python", "bin", "python3");
+    if (!fs.existsSync(py)) {
+        console.warn(
+            "[assemble] no bundled python (run `pnpm fetch-runtimes`) — " +
+                "skipping wheelhouse; first run will install online",
+        );
+        return;
+    }
+
+    fs.mkdirSync(wheelsOut, { recursive: true });
+    // Must match INSTALL in src/python-manager.ts. tongflow itself is imported
+    // from source via PYTHONPATH, so only its deps are needed here.
+    const deps = [
+        "modal",
+        "pydantic>=2.0",
+        "typing_extensions>=4.12",
+        "openai",
+        "google-genai",
+        "requests",
+    ];
+    try {
+        // Download the full transitive closure for the target platform/arch
+        // using the bundled python's pip (no uv / network-PATH assumptions).
+        // Quote each spec: version markers like `pydantic>=2.0` contain `>`,
+        // which the shell would otherwise treat as a redirect.
+        const specs = deps.map((d) => `"${d}"`).join(" ");
+        console.log("[assemble] downloading dependency wheels");
+        execSync(`"${py}" -m pip download --dest "${wheelsOut}" ${specs}`, {
+            stdio: "inherit",
+        });
+    } catch (e) {
+        console.warn(
+            "[assemble] wheelhouse build failed; first run will install online:",
+            e.message,
+        );
+    }
+}
+
+assertBuilt();
+assembleApp();
+buildWheelhouse();
+console.log("[assemble] done →", appOut);

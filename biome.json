@@ -1,0 +1,96 @@
+{
+    "$schema": "https://biomejs.dev/schemas/2.2.4/schema.json",
+    "vcs": {
+        "enabled": false,
+        "clientKind": "git",
+        "useIgnoreFile": false
+    },
+    "files": {
+        "ignoreUnknown": false,
+        "includes": [
+            "**",
+            "!.next",
+            "!**/.next",
+            "!out",
+            "!build",
+            "!node_modules",
+            "!**/node_modules",
+            "!.venv",
+            "!**/.venv",
+            "!**/.venv-*",
+            "!desktop/dist",
+            "!desktop/release",
+            "!desktop/resources",
+            "!.tongflow",
+            "!**/.tongflow",
+            "!data",
+            "!.claude",
+            "!plugins"
+        ]
+    },
+    "formatter": {
+        "enabled": true,
+        "indentStyle": "space",
+        "indentWidth": 4
+    },
+    "linter": {
+        "enabled": true,
+        "rules": {
+            "recommended": true,
+            "a11y": {
+                "noAutofocus": "off",
+                "noRedundantAlt": "off",
+                "noStaticElementInteractions": "off",
+                "noSvgWithoutTitle": "off",
+                "useButtonType": "off",
+                "useKeyWithClickEvents": "off",
+                "useMediaCaption": "off",
+                "useValidAnchor": "off"
+            },
+            "complexity": {
+                "useLiteralKeys": "off"
+            },
+            "correctness": {
+                "noNestedComponentDefinitions": "off",
+                "useExhaustiveDependencies": "off",
+                "useUniqueElementIds": "off"
+            },
+            "performance": {
+                "noImgElement": "off"
+            },
+            "style": {
+                "noNonNullAssertion": "off"
+            },
+            "suspicious": {
+                "noArrayIndexKey": "off",
+                "noExplicitAny": "off",
+                "useIterableCallbackReturn": "off"
+            }
+        }
+    },
+    "javascript": {
+        "formatter": {
+            "quoteStyle": "double"
+        }
+    },
+    "assist": {
+        "enabled": true,
+        "actions": {
+            "source": {
+                "organizeImports": "on"
+            }
+        }
+    },
+    "overrides": [
+        {
+            "includes": ["**/*.css"],
+            "linter": {
+                "rules": {
+                    "suspicious": {
+                        "noUnknownAtRules": "off"
+                    }
+                }
+            }
+        }
+    ]
+}

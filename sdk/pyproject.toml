@@ -1,0 +1,28 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "tongflow"
+version = "0.0.22"
+description = "Tongflow plugin package (node contracts, deploy scan, ABI helpers)"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = ["modal", "pydantic>=2.0", "typing_extensions>=4.12"]
+license = "AGPL-3.0-only"
+authors = [{ name = "Tongflow contributors" }]
+keywords = ["tongflow", "modal", "plugin"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Typing :: Typed",
+]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["tongflow*"]

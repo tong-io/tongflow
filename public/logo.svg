@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-2 -2 68 21" width="100%" height="100%" shape-rendering="crispEdges">
+  <defs>
+    <!-- All pixel blocks merged into one template so the pixel-style glow / stroke can be generated (t's horizontal width corrected to h5). -->
+    <path id="master_outline" d="
+      M40 0h2v12h-2Z M40 12h4v1h-4Z M2 2h2v2h-2Z M0 4h5v2h-5Z M2 6h2v6h-2Z M2 12h4v1h-4Z
+      M9 4h4v1h-4Z M8 5h6v1h-6Z M8 6h2v5h-2Z M12 6h2v5h-2Z M8 11h6v1h-6Z M9 12h4v1h-4Z
+      M47 4h4v1h-4Z M46 5h6v1h-6Z M46 6h2v5h-2Z M50 6h2v5h-2Z M46 11h6v1h-6Z M47 12h4v1h-4Z
+      M17 4h4v1h-4Z M16 5h6v1h-6Z M16 6h2v7h-2Z M20 6h2v7h-2Z M54 4h2v7h-2Z M58 4h2v7h-2Z 
+      M62 4h2v7h-2Z M54 11h10v1h-10Z M55 12h8v1h-8Z M35 0h2v1h-2Z M34 1h4v1h-4Z M34 2h2v2h-2Z 
+      M32 4h6v2h-6Z M34 6h2v7h-2Z M25 4h4v1h-4Z M24 5h6v1h-6Z M24 6h2v5h-2Z M28 6h2v5h-2Z 
+      M24 11h6v1h-6Z M25 12h5v1h-5Z M28 13h2v2h-2Z M24 15h6v1h-6Z M25 16h4v1h-4Z
+    " />
+  </defs>
+
+  <!-- Offsets in all 8 directions produce a perfectly thick pixel-style black / dark-purple outline. -->
+  <g fill="#1A0033">
+    <use href="#master_outline" x="-1" y="-1" />
+    <use href="#master_outline" x="0" y="-1" />
+    <use href="#master_outline" x="1" y="-1" />
+    <use href="#master_outline" x="-1" y="0" />
+    <use href="#master_outline" x="1" y="0" />
+    <use href="#master_outline" x="-1" y="1" />
+    <use href="#master_outline" x="0" y="1" />
+    <use href="#master_outline" x="1" y="1" />
+  </g>
+
+  <!-- t, l (blue) -->
+  <path fill="#0088FF" d="
+    M40 0h2v12h-2Z M40 12h4v1h-4Z M2 2h2v2h-2Z M0 4h5v2h-5Z 
+    M2 6h2v6h-2Z M2 12h4v1h-4Z
+  " />
+
+  <!-- o, o (magenta) -->
+  <path fill="#FF00FF" d="
+    M9 4h4v1h-4Z M8 5h6v1h-6Z M8 6h2v5h-2Z M12 6h2v5h-2Z 
+    M8 11h6v1h-6Z M9 12h4v1h-4Z M47 4h4v1h-4Z M46 5h6v1h-6Z 
+    M46 6h2v5h-2Z M50 6h2v5h-2Z M46 11h6v1h-6Z M47 12h4v1h-4Z
+  " />
+
+  <!-- n, w (bright yellow) -->
+  <path fill="#FFEA00" d="
+    M17 4h4v1h-4Z M16 5h6v1h-6Z M16 6h2v7h-2Z M20 6h2v7h-2Z 
+    M54 4h2v7h-2Z M58 4h2v7h-2Z M62 4h2v7h-2Z M54 11h10v1h-10Z 
+    M55 12h8v1h-8Z
+  " />
+
+  <!-- g, f (bright green) -->
+  <path fill="#85F224" d="
+    M35 0h2v1h-2Z M34 1h4v1h-4Z M34 2h2v2h-2Z M32 4h6v2h-6Z 
+    M34 6h2v7h-2Z M25 4h4v1h-4Z M24 5h6v1h-6Z M24 6h2v5h-2Z 
+    M28 6h2v5h-2Z M24 11h6v1h-6Z M25 12h5v1h-5Z M28 13h2v2h-2Z 
+    M24 15h6v1h-6Z M25 16h4v1h-4Z
+  " />
+</svg>
