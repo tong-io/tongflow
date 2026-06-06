@@ -42,6 +42,7 @@ __pycache__/
 *.pyo
 
 # runtime-installed plugin packages (see docs/plugins.md)
-plugins/
+# Anchored to repo root so it does NOT also ignore src/lib/plugins/.
+/plugins/
 
 .claude/
