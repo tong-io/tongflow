@@ -1,8 +1,15 @@
-"""Tongflow plugin convention + deploy scan (no per-repo JSON)."""
+"""Tongflow plugin convention + deploy scan (no per-repo JSON).
 
-from .modal_app import current_app
+Backend-neutral: this package imports no backend SDK (no ``modal``). A plugin
+that runs on a deploy-first backend marks its handler class with ``@deploy`` and
+ships its own local bridge (``entry.py``) that imports the backend lazily.
+"""
+
+from __future__ import annotations
+
+from .deploy_marker import deploy
 from .progress import progress
 
-__version__ = "0.0.22"
+__version__ = "0.0.23"
 
-__all__ = ["current_app", "progress"]
+__all__ = ["deploy", "progress"]

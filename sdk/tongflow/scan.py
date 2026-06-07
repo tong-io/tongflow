@@ -90,9 +90,9 @@ def _detect_runner(plugin_dir: Path) -> tuple[str | None, str | None]:
         )
 
     # Every plugin runs the same way: the platform spawns the plugin's local
-    # entry and exchanges JSON. The runner is no longer an execution backend —
-    # a plugin with entry.py runs that file; a deploy.py plugin is bridged to
-    # its backend by the SDK (tongflow.modal_entry), needing no per-repo entry.
+    # entry.py and exchanges JSON. A simple plugin's entry.py does the work; a
+    # deploy-first plugin's entry.py is a thin bridge that deploys (once) and
+    # invokes the remote backend, discovering slot->method from its own deploy.py.
     # "api" is kept as the registry's single generic-runner tag.
     return "api", None
 
@@ -156,21 +156,22 @@ def scan(plugins_root: Path, abi_path: Path) -> dict[str, object]:
             errors.append({"pluginId": plugin_id, "message": runner_error})
             continue
 
-        # Generic runner: the platform spawns the plugin's local entry and
-        # exchanges JSON. Handlers are discovered by scanning every .py file for
-        # @node_slot + SDK annotations.
+        # Every plugin is spawned the same way: the platform runs the plugin's
+        # local entry.py and exchanges JSON. Handlers are discovered by scanning
+        # every .py file for module-level @node_slot + SDK annotations.
         methods_by_ident = _scan_methods_by_slot_in_dir(pdir)
-        # A backend-bridged plugin (e.g. Modal) keeps its handlers as @app.cls
-        # methods in deploy.py — first arg `self`, so the module-level dir scan
-        # skips them. Fall back to the deploy parser for the slot list; the
-        # generic runner only needs *which* slots the plugin implements (it
-        # dispatches in-process via tongflow.modal_entry), not the method name.
-        is_bridged = False
+        # A deploy-first plugin keeps its handlers as methods on a @deploy-marked
+        # class in deploy.py — first arg `self`, so the module-level dir scan
+        # skips them. Fall back to the backend-neutral deploy parser (it matches
+        # tongflow's own @deploy marker, not any backend's class decorator). Such
+        # a plugin must be deployed before it can run, recorded as needsDeploy so
+        # the platform routes it through its entry.py deploy-then-invoke bridge.
+        needs_deploy = False
         if not methods_by_ident and (pdir / "deploy.py").is_file():
             dscan, _derr = parse_deploy_py(pdir / "deploy.py")
             if dscan and dscan.methods_by_slot:
                 methods_by_ident = dict(dscan.methods_by_slot)
-                is_bridged = True
+                needs_deploy = True
         if not methods_by_ident:
             errors.append(
                 {
@@ -208,15 +209,11 @@ def scan(plugins_root: Path, abi_path: Path) -> dict[str, object]:
         if not llm_methods:
             continue
 
-        entry: dict[str, object] = (
-            {"entryModule": "tongflow.modal_entry"}
-            if is_bridged
-            else {"entryFile": "entry.py"}
-        )
         plugins[plugin_id] = {
             "localSubdir": plugin_id,
             "methodsByNodeSlot": llm_methods,
-            **entry,
+            "entryFile": "entry.py",
+            "needsDeploy": needs_deploy,
         }
 
     # de-dupe lists, preserve order

@@ -21,13 +21,13 @@ export const PluginConfigSchema = z.object({
     /** nodeSlot -> handler that implements it (informational; the plugin
      * dispatches in-process by nodeSlot). */
     methodsByNodeSlot: z.record(z.string().min(1), PluginMethodSchema),
-    /** Generic runner executes `python <entryFile>` — for plugins that ship
-     * their own entry. */
+    /** Generic runner executes `python <entryFile>`; every plugin ships its
+     * own entry.py. */
     entryFile: z.string().min(1).optional(),
-    /** Or `python -m <entryModule>` — used by backend-bridged plugins whose
-     * handlers live elsewhere (e.g. `tongflow.modal_entry` for a `deploy.py`
-     * plugin). Exactly one of entryFile / entryModule is set. */
-    entryModule: z.string().min(1).optional(),
+    /** True when the plugin's class is marked `@deploy` (a deploy-first backend
+     * such as Modal): its entry.py deploys once before invoking. Informational —
+     * the deploy step lives inside the plugin's entry.py. */
+    needsDeploy: z.boolean().optional(),
 });
 
 export const PluginsRegistrySchema = z.object({

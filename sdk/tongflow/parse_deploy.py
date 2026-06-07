@@ -71,21 +71,25 @@ def _parse_methods_by_slot(cls: ast.ClassDef, tree: ast.Module) -> dict[str, str
     return out
 
 
-def _is_modal_app_cls_decorator(deco: ast.expr) -> bool:
-    """Match ``@app.cls(...)`` (``app`` must be a simple :class:`ast.Name`)."""
-    if not isinstance(deco, ast.Call):
-        return False
-    fn = deco.func
-    if not isinstance(fn, ast.Attribute) or fn.attr != "cls":
-        return False
-    return isinstance(fn.value, ast.Name)
+def _is_deploy_decorator(deco: ast.expr) -> bool:
+    """Match tongflow's backend-neutral ``@deploy`` marker.
+
+    Accepts a bare ``@deploy`` (``ast.Name``) or a qualified ``@tongflow.deploy``
+    (``ast.Attribute``). This is the SDK's own marker, so the scanner needs no
+    knowledge of any backend's class decorator (e.g. Modal's ``@app.cls``).
+    """
+    if isinstance(deco, ast.Name):
+        return deco.id == "deploy"
+    if isinstance(deco, ast.Attribute):
+        return deco.attr == "deploy"
+    return False
 
 
-def _parse_modal_app_classes(
+def _parse_deploy_classes(
     tree: ast.Module,
 ) -> tuple[dict[str, str], dict[str, str], frozenset[str], str | None]:
     """
-    Collect ``@node_slot`` methods from every class decorated with ``@app.cls``.
+    Collect ``@node_slot`` methods from every class decorated with ``@deploy``.
 
     Returns (methods_by_slot, cls_by_slot, public_method_names, error).
     Ident keys match :class:`DeployScan.methods_by_slot` (NodeSlots attribute names).
@@ -97,14 +101,14 @@ def _parse_modal_app_classes(
     for node in tree.body:
         if not isinstance(node, ast.ClassDef):
             continue
-        if not any(_is_modal_app_cls_decorator(d) for d in node.decorator_list):
+        if not any(_is_deploy_decorator(d) for d in node.decorator_list):
             continue
         all_names |= set(_parse_class_methods(node))
         mb = _parse_methods_by_slot(node, tree)
         for ident, method in mb.items():
             if ident in merged_mb:
                 return {}, {}, frozenset(), (
-                    f"Duplicate @node_slot({ident!r}) on multiple Modal classes "
+                    f"Duplicate @node_slot({ident!r}) on multiple @deploy classes "
                     f"({merged_cls.get(ident)!r} vs {node.name!r})"
                 )
             merged_mb[ident] = method
@@ -130,15 +134,15 @@ def parse_deploy_py(path: Path) -> tuple[DeployScan | None, str | None]:
     methods_by_slot: dict[str, str] = {}
     cls_by_slot: dict[str, str] = {}
 
-    modal_mb, modal_cls, modal_mnames, modal_err = _parse_modal_app_classes(tree)
-    if modal_err:
-        return None, f"{path}:1: {modal_err}; fix: keep one @node_slot implementation per slot"
+    dep_mb, dep_cls, dep_mnames, dep_err = _parse_deploy_classes(tree)
+    if dep_err:
+        return None, f"{path}:1: {dep_err}; fix: keep one @node_slot implementation per slot"
 
-    if modal_mb:
-        methods_by_slot = modal_mb
-        cls_by_slot = dict(modal_cls)
-        method_names = modal_mnames
-        cls_name = sorted(set(modal_cls.values()))[0]
+    if dep_mb:
+        methods_by_slot = dep_mb
+        cls_by_slot = dict(dep_cls)
+        method_names = dep_mnames
+        cls_name = sorted(set(dep_cls.values()))[0]
     else:
         for node in tree.body:
             if isinstance(node, ast.ClassDef) and node.name == "Inference":
@@ -162,7 +166,7 @@ def resolve_methods_by_slot(
     valid_slots: frozenset[str],
 ) -> tuple[dict[str, str] | None, str | None]:
     """
-    Build nodeSlot -> modal method name.
+    Build nodeSlot -> handler method name.
 
     1) Preferred: `@node_slot("...")` decorators on methods.
     2) Fallback: method names that match ABI slots (for legacy repos).

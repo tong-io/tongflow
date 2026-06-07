@@ -65,12 +65,10 @@ export async function execPlugin<S extends NodeSlot>(
     );
 
     const pluginDir = join(pluginsDir(), cfg.localSubdir);
-    // The plugin either ships its own entry file (`python <entryFile>`) or is
-    // bridged to its backend by an SDK module (`python -m <entryModule>`, e.g.
-    // tongflow.modal_entry for a deploy.py plugin).
-    const entryArgs = cfg.entryModule
-        ? ["-m", cfg.entryModule]
-        : [cfg.entryFile || "entry.py"];
+    // Every plugin ships its own local entry.py (`python entry.py`). For a
+    // deploy-first plugin (needsDeploy) that entry.py is a thin bridge that
+    // deploys once and invokes the remote backend.
+    const entryArgs = [cfg.entryFile || "entry.py"];
     // Provision the shared plugin venv (SDK + this plugin's requirements.txt)
     // and run the entry with it. Falls back to a bare interpreter on failure.
     const python = await ensurePluginPython(req.pluginId, pluginDir);
