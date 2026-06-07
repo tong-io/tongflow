@@ -6,6 +6,8 @@
         "custom": "Git URL",
         "install": "インストール",
         "update": "更新",
+        "upToDate": "最新です",
+        "checkUpdates": "更新を確認",
         "emptyOfficial": "利用可能な公式プラグインがありません",
         "customHint": "リポジトリ名は tongflow-modal-* または tongflow-api-* の規約に従う必要があります。従わない場合は検出できません。",
         "cloneButton": "クローンしてインストール",

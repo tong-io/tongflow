@@ -1,7 +1,10 @@
 import "server-only";
 
-import { existsSync, readFileSync } from "node:fs";
+import fs, { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
+import * as git from "isomorphic-git";
+import http from "isomorphic-git/http/node";
+import { logger } from "@/lib/logger";
 import { pluginsDir, resourcesDir } from "@/lib/runtime/paths.server";
 
 /**
@@ -59,4 +62,80 @@ export function listOfficialPlugins(): {
             installed: isPluginInstalled(id),
         })),
     };
+}
+
+/** Update status for one installed plugin, from comparing local vs remote HEAD. */
+export interface PluginUpdateInfo {
+    id: string;
+    localCommit: string | null;
+    remoteCommit: string | null;
+    /** True only when both commits are known and differ. */
+    hasUpdate: boolean;
+}
+
+/** Local HEAD commit of an installed plugin (read from its .git, no network). */
+async function localHeadCommit(id: string): Promise<string | null> {
+    try {
+        return await git.resolveRef({
+            fs,
+            dir: join(pluginsDir(), id),
+            ref: "HEAD",
+        });
+    } catch {
+        return null;
+    }
+}
+
+/** Remote default-branch HEAD commit (a single ls-remote, no clone). */
+async function remoteHeadCommit(
+    org: string,
+    id: string,
+): Promise<string | null> {
+    try {
+        const refs = await git.listServerRefs({
+            http,
+            url: officialGitUrl(org, id),
+            prefix: "HEAD",
+            symrefs: true,
+        });
+        return refs.find((r) => r.ref === "HEAD")?.oid ?? null;
+    } catch (e) {
+        // Network/auth failure: treat as "unknown" rather than surfacing an error
+        // — the user can still pull manually.
+        logger.warn(`[plugins] update check failed for ${id}: ${String(e)}`);
+        return null;
+    }
+}
+
+/** Compare local vs remote HEAD for one plugin. Not-installed -> no update. */
+export async function checkPluginUpdate(
+    org: string,
+    id: string,
+): Promise<PluginUpdateInfo> {
+    if (!isPluginInstalled(id)) {
+        return { id, localCommit: null, remoteCommit: null, hasUpdate: false };
+    }
+    const [localCommit, remoteCommit] = await Promise.all([
+        localHeadCommit(id),
+        remoteHeadCommit(org, id),
+    ]);
+    return {
+        id,
+        localCommit,
+        remoteCommit,
+        hasUpdate: Boolean(
+            localCommit && remoteCommit && localCommit !== remoteCommit,
+        ),
+    };
+}
+
+/** Check every installed official plugin in parallel (one ls-remote each). */
+export async function checkOfficialPluginUpdates(): Promise<
+    PluginUpdateInfo[]
+> {
+    const manifest = loadOfficialPluginManifest();
+    const installed = manifest.plugins.filter((id) => isPluginInstalled(id));
+    return Promise.all(
+        installed.map((id) => checkPluginUpdate(manifest.org, id)),
+    );
 }

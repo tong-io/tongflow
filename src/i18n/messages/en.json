@@ -6,6 +6,8 @@
         "custom": "Git URL",
         "install": "Install",
         "update": "Update",
+        "upToDate": "Up to date",
+        "checkUpdates": "Check for updates",
         "emptyOfficial": "No official plugins available",
         "customHint": "The repository name must follow the tongflow-modal-* or tongflow-api-* convention, otherwise it cannot be detected.",
         "cloneButton": "Clone & install",

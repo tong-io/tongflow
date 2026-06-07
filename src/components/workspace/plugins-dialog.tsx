@@ -1,6 +1,13 @@
 "use client";
 
-import { Blocks, Check, Download, Loader2 } from "lucide-react";
+import {
+    ArrowUpCircle,
+    Blocks,
+    Check,
+    Download,
+    Loader2,
+    RefreshCw,
+} from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useState } from "react";
 import toast from "react-hot-toast";
@@ -46,6 +53,18 @@ interface InstallResult {
     recognized: boolean;
 }
 
+interface PluginUpdateInfo {
+    id: string;
+    // null when the remote couldn't be read (offline / private repo) — the
+    // result is then inconclusive and must not be shown as "up to date".
+    remoteCommit: string | null;
+    hasUpdate: boolean;
+}
+
+interface UpdatesResponse {
+    updates: PluginUpdateInfo[];
+}
+
 export function PluginsDialog() {
     const t = useTranslations("Plugins");
     const [open, setOpen] = useState(false);
@@ -54,6 +73,10 @@ export function PluginsDialog() {
     const [plugins, setPlugins] = useState<OfficialPlugin[]>([]);
     // Per-plugin in-flight state, keyed by plugin id.
     const [busy, setBusy] = useState<Record<string, boolean>>({});
+    // Per-plugin update status: true = newer commit upstream, false = up to date,
+    // undefined = not checked yet / check failed.
+    const [updates, setUpdates] = useState<Record<string, boolean>>({});
+    const [checking, setChecking] = useState(false);
 
     const [gitUrl, setGitUrl] = useState("");
     const [cloning, setCloning] = useState(false);
@@ -73,9 +96,32 @@ export function PluginsDialog() {
         }
     }, []);
 
+    // Compare local vs remote HEAD for installed plugins (one ls-remote each).
+    const checkUpdates = useCallback(async () => {
+        setChecking(true);
+        try {
+            const data = await apiGet<UpdatesResponse>(
+                "/api/plugins/check-updates",
+            );
+            const map: Record<string, boolean> = {};
+            for (const u of data.updates) {
+                // Only record a conclusive result. An unreadable remote stays
+                // "unknown" (undefined) so the button remains a clickable
+                // manual-pull fallback rather than a disabled "up to date".
+                if (u.remoteCommit !== null) map[u.id] = u.hasUpdate;
+            }
+            setUpdates(map);
+        } catch (error) {
+            logger.error("Failed to check plugin updates:", error);
+        } finally {
+            setChecking(false);
+        }
+    }, []);
+
     useEffect(() => {
-        if (open) void fetchOfficial();
-    }, [open, fetchOfficial]);
+        if (!open) return;
+        void fetchOfficial().then(() => checkUpdates());
+    }, [open, fetchOfficial, checkUpdates]);
 
     const reportResult = useCallback(
         (result: InstallResult) => {
@@ -103,13 +149,14 @@ export function PluginsDialog() {
                 );
                 reportResult(result);
                 await fetchOfficial();
+                await checkUpdates();
             } catch (error) {
                 logger.error("Plugin install failed:", error);
             } finally {
                 setBusy((b) => ({ ...b, [id]: false }));
             }
         },
-        [reportResult, fetchOfficial],
+        [reportResult, fetchOfficial, checkUpdates],
     );
 
     const installCustom = useCallback(async () => {
@@ -168,6 +215,23 @@ export function PluginsDialog() {
                     </TabsList>
 
                     <TabsContent value="official">
+                        <div className="mb-1.5 flex justify-end">
+                            <Button
+                                type="button"
+                                variant="ghost"
+                                size="sm"
+                                disabled={checking || loading}
+                                onClick={checkUpdates}
+                                className="h-7 text-xs text-muted-foreground"
+                            >
+                                <RefreshCw
+                                    className={`h-3.5 w-3.5 ${checking ? "animate-spin" : ""}`}
+                                />
+                                <span className="ml-1">
+                                    {t("checkUpdates")}
+                                </span>
+                            </Button>
+                        </div>
                         <div className="max-h-[55vh] space-y-1.5 overflow-y-auto pr-1">
                             {loading ? (
                                 <div className="flex justify-center py-8">
@@ -198,25 +262,53 @@ export function PluginsDialog() {
                                             {p.runner}
                                         </Badge>
                                         {p.installed ? (
-                                            <Button
-                                                type="button"
-                                                variant="ghost"
-                                                size="sm"
-                                                disabled={busy[p.id]}
-                                                onClick={() =>
-                                                    installOfficial(p.id)
-                                                }
-                                                className="text-green-600 dark:text-green-500"
-                                            >
-                                                {busy[p.id] ? (
-                                                    <Loader2 className="h-4 w-4 animate-spin" />
-                                                ) : (
+                                            updates[p.id] === false ? (
+                                                <Button
+                                                    type="button"
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    disabled
+                                                    className="text-green-600 dark:text-green-500"
+                                                >
                                                     <Check className="h-4 w-4" />
-                                                )}
-                                                <span className="ml-1">
-                                                    {t("update")}
-                                                </span>
-                                            </Button>
+                                                    <span className="ml-1">
+                                                        {t("upToDate")}
+                                                    </span>
+                                                </Button>
+                                            ) : (
+                                                <Button
+                                                    type="button"
+                                                    variant={
+                                                        updates[p.id]
+                                                            ? "default"
+                                                            : "ghost"
+                                                    }
+                                                    size="sm"
+                                                    disabled={busy[p.id]}
+                                                    onClick={() =>
+                                                        installOfficial(p.id)
+                                                    }
+                                                    className={
+                                                        updates[p.id]
+                                                            ? "bg-amber-500 text-white hover:bg-amber-600"
+                                                            : "text-green-600 dark:text-green-500"
+                                                    }
+                                                >
+                                                    {busy[p.id] ||
+                                                    (checking &&
+                                                        updates[p.id] ===
+                                                            undefined) ? (
+                                                        <Loader2 className="h-4 w-4 animate-spin" />
+                                                    ) : updates[p.id] ? (
+                                                        <ArrowUpCircle className="h-4 w-4" />
+                                                    ) : (
+                                                        <Check className="h-4 w-4" />
+                                                    )}
+                                                    <span className="ml-1">
+                                                        {t("update")}
+                                                    </span>
+                                                </Button>
+                                            )
                                         ) : (
                                             <Button
                                                 type="button"
