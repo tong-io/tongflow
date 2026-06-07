@@ -1,7 +1,7 @@
 <div align="center">
   <img src="../public/logo.svg" alt="TongFlow" width="320" />
 
-  <h1>开源的多模态GenAI工作流无限画布</h1>
+  <h1>TongFlow：开源多模态 GenAI 工作流工作室</h1>
   <p>
     <a href="https://github.com/tong-io/tongflow/stargazers"><img src="https://img.shields.io/github/stars/tong-io/tongflow?style=flat&logo=github" alt="GitHub Stars" /></a>
     <a href="https://github.com/tong-io/tongflow/blob/main/LICENSE"><img src="https://img.shields.io/badge/License-AGPL--3.0-blue.svg" alt="License" /></a>
