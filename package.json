@@ -99,6 +99,7 @@
         "@types/react": "19",
         "@types/react-dom": "19",
         "drizzle-kit": "0.31.4",
+        "esbuild": "0.28.0",
         "json-schema-to-ts": "3.1.1",
         "tailwindcss": "4",
         "tsx": "4.20.5",
