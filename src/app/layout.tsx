@@ -21,8 +21,8 @@ export const metadata: Metadata = {
     description:
         "Open-source AI workflow editor — drag and drop to create AI workflows with an infinite canvas.",
     icons: {
-        icon: "/logo_icon.svg",
-        shortcut: "/logo_icon.svg",
+        icon: "/apple-touch-icon.png",
+        shortcut: "/apple-touch-icon.png",
         apple: "/apple-touch-icon.png",
     },
 };
