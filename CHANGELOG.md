@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Security
+- Upgrade Next.js 15.4.7 → 15.5.19 to patch CVE-2025-66478.
+
 ## [0.0.1] - 2026-06-07
 
 ### Added
