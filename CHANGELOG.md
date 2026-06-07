@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.0.1] - 2026-06-07
+
 ### Added
 - Audio nodes: noise reduction (`denoise_audio`), speaker diarization (`separate_speaker`), voice/timbre replacement (`convert_voice`).
 - Video nodes: subtitle removal (`subtitle_remove`), watermark removal (`remove_watermark`).
