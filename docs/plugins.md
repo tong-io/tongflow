@@ -91,10 +91,12 @@ The naming convention the scanner enforces:
 One entry point per plugin, by convention:
 
 - A **self-contained** plugin ships `entry.py` — the file the platform executes.
-- A **Modal-backed** plugin ships `deploy.py` (and, optionally, `download.py`) and needs **no
-  `entry.py`** — the SDK bridges it automatically (see [§5](#5-what-registers-a-handler)).
-- An optional **`requirements.txt`** lists the plugin's *local* Python dependencies; the
-  platform installs them automatically (see [§6](#6-local-dependencies--progress)).
+- A **Modal-backed** plugin ships `deploy.py` (handler class marked `@deploy`), a thin `entry.py`
+  bridge (identical across Modal plugins), a `requirements.txt` declaring `modal`, and optionally
+  `download.py` (see [§5](#5-what-registers-a-handler)).
+- A **`requirements.txt`** lists the plugin's *local* Python dependencies; the platform installs
+  them automatically (see [§6](#6-local-dependencies--progress)). Modal plugins use it to declare
+  `modal`.
 
 Beyond that, your code can be laid out however you like.
 
@@ -198,14 +200,18 @@ them across modules and import them into `entry.py` for dispatch. From inside `e
 reach anything — any API, an API router, your own backend, or local compute. Configuration (API
 keys, model names, endpoints) comes from **environment variables**, never the ABI.
 
-**Modal-backed (`deploy.py`, no `entry.py`).** Author it as normal Modal: a class whose methods
-carry **both** `@modal.method()` (outermost) and `@node_slot(NodeSlots.X)`, with the image
-(pinning `tongflow`), `current_app(__file__, …)`, GPU/memory/timeout/Secrets/Volumes on the
-class, `@modal.enter()` to load models once, and an optional `download.py` for weights. You do
-**not** write an entry — the SDK's `tongflow.modal_entry` is the entry the platform runs. It
-discovers which class/method serves the requested slot, deploys the app on demand (cached by
-`deploy.py` content), invokes the method remotely, and streams progress. Deploy-time knobs
-(model name, codecs, …) are module constants / env vars, never ABI fields.
+**Modal-backed (`deploy.py` + a bridge `entry.py`).** Author it as normal Modal: a class whose
+methods carry **both** `@modal.method()` (outermost) and `@node_slot(NodeSlots.X)`, with the
+image (pinning `tongflow`), `app = modal.App(Path(__file__).resolve().parent.name)`,
+GPU/memory/timeout/Secrets/Volumes on the class, `@modal.enter()` to load models once, and an
+optional `download.py` for weights. Mark the handler class with **`@deploy`** (tongflow's
+backend-neutral marker) so the scanner knows it must be deployed before it runs. Then ship a thin
+**`entry.py`** bridge — it's identical across Modal plugins, so copy it from any reference plugin:
+it AST-discovers which class/method serves the requested slot from your `deploy.py`, deploys the
+app on demand (cached by `deploy.py` content), invokes the method remotely, and streams progress.
+`modal` is imported lazily inside that bridge and declared in `requirements.txt` — the SDK itself
+no longer depends on it. Deploy-time knobs (model name, codecs, …) are module constants / env
+vars, never ABI fields.
 
 So a Modal plugin's deploy.py handlers (first arg `self`) are found by the scanner's deploy
 parser; an `entry.py` plugin's handlers are found by the per-file walk. Either way, the
@@ -229,8 +235,9 @@ If your plugin directory contains a `requirements.txt`, the platform installs it
 on first run, cached by content hash. The tongflow SDK (and its dependencies) are always
 present, so:
 
-- A **Modal-backed** plugin usually needs **no** `requirements.txt` — its heavy deps live in the
-  Modal image; locally it only needs the SDK (which brings `modal`).
+- A **Modal-backed** plugin's `requirements.txt` declares **`modal`** (the SDK is backend-neutral
+  and no longer pulls it in) — that's what its `entry.py` bridge imports locally. Its heavy ML
+  deps live in the Modal image, not here.
 - A **self-contained** plugin lists whatever its `entry.py` imports (an API client, etc.).
 
 Keep local requirements **thin**. The venv is shared across plugins, so a conflicting version

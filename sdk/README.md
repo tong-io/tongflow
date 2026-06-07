@@ -13,10 +13,14 @@ pip install tongflow
 ```python
 from tongflow.slots import node_slot
 from tongflow.node_slots import NodeSlots
-from tongflow import current_app
+from tongflow import deploy  # backend-neutral marker for deploy-first plugins
 ```
 
-In this monorepo, every Modal `deploy.py` and API `entry.py` pins **`tongflow==0.0.21`** (PyPI) — matching the version in [`pyproject.toml`](pyproject.toml). Bump that pin in every plugin when you publish a new release.
+The SDK is **backend-neutral**: it does not depend on `modal` (or any other
+backend) and ships no `modal` helper. A deploy-first plugin declares `modal`
+itself (in its `requirements.txt`) and pins the SDK in its image build.
+
+In this monorepo, every Modal `deploy.py` pins **`tongflow==0.0.23`** (PyPI) in its `pip_install`, matching the version in [`pyproject.toml`](pyproject.toml). Bump that pin in every plugin when you publish a new release.
 
 ## Plugin identity
 
@@ -36,18 +40,32 @@ Use `tongflow-modal-<semantic-name>` for Modal plugins and
 `tongflow-api-openai`. Do not encode hardware details in the name, such as
 `gpu` or `cpu`.
 
-Runner detection is prefix-based and validated against the entry files:
+Every plugin ships an `entry.py` that the platform runs. The prefix is just a
+label, not an execution backend:
 
-- `tongflow-modal-*` with `deploy.py`: Modal plugin
-- `tongflow-api-*` with `entry.py`: API plugin
-- both files or neither file: scanner error
+- `tongflow-api-*`: a self-contained `entry.py`.
+- `tongflow-modal-*`: a `deploy.py` whose handler class is marked `@deploy`,
+  plus a thin `entry.py` bridge (identical across Modal plugins — copy it from
+  any reference plugin) that deploys once and invokes the remote method, plus a
+  `requirements.txt` declaring `modal`.
+- neither `deploy.py` nor `entry.py`: scanner error.
 
-Modal plugins should derive their app from the directory name:
+A deploy-first plugin marks its handler class with `@deploy` and derives its
+Modal app name from the directory name (no SDK helper needed):
 
 ```python
-from tongflow import current_app
+import modal
+from pathlib import Path
+from tongflow import deploy
 
-app = current_app(__file__)
+app = modal.App(Path(__file__).resolve().parent.name)
+
+@deploy           # tongflow's backend-neutral marker; the scanner detects it
+@app.cls(...)
+class Inference:
+    @modal.method()
+    @node_slot(NodeSlots.GEN_TEXT)
+    def gen(self, input: GenTextInput) -> GenTextOutput: ...
 ```
 
 Future plugin-level metadata must be declared as top-level `UPPER_CASE`

@@ -19,12 +19,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - TTS expanded to three variants: preset style, voice clone (reference audio), instruction-driven.
 - TongFlow ABI JSON with codegen script (`pnpm gen:abi`) producing TypeScript types under `src/generated/abi/`.
 - Chinese README (`README_ZH.md`).
-
-### Removed
-- Nothing yet.
+- Plugin manager: detects available updates by comparing each installed plugin's local git HEAD against its remote, showing an "Update" / "Up to date" state with a manual "Check for updates" refresh.
+- SDK `@deploy` marker for deploy-first (Modal) plugins; the scanner detects it by AST instead of recognizing Modal's `@app.cls`.
 
 ### Changed
-- Nothing yet.
+- The `tongflow` SDK is now **backend-neutral**: it no longer depends on `modal` or recognizes Modal-specific syntax. Modal plugins build their app with `modal.App(Path(__file__).resolve().parent.name)`, mark their handler class `@deploy`, ship a thin `entry.py` bridge (which lazily imports `modal`), and declare `modal` in `requirements.txt`.
+
+### Removed
+- SDK `current_app` helper and the bundled `modal_entry` bridge (devolved into each plugin's `entry.py`); the `modal` dependency from the SDK.
 
 ### Fixed
 - Nothing yet.
