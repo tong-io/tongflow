@@ -918,7 +918,11 @@
     },
     "Errors": {
         "somethingWentWrong": "Something went wrong",
-        "tryAgain": "Try again"
+        "tryAgain": "Try again",
+        "details": "Details",
+        "copy": "Copy",
+        "copied": "Copied",
+        "close": "Close"
     },
     "Api": {
         "unknownError": "Unknown error",

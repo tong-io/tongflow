@@ -5,6 +5,7 @@ import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getMessages } from "next-intl/server";
 import { Toaster } from "react-hot-toast";
 import { ErrorBoundary } from "@/components/ui/error-boundary";
+import { TaskFailureToaster } from "@/components/workspace/task-failure-toaster";
 
 const geistSans = Geist({
     variable: "--font-geist-sans",
@@ -62,6 +63,7 @@ export default async function RootLayout({
                         <main>{children}</main>
                     </ErrorBoundary>
                     <Toaster position="top-center" />
+                    <TaskFailureToaster />
                 </NextIntlClientProvider>
             </body>
         </html>

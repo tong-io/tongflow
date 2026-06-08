@@ -832,7 +832,11 @@
     },
     "Errors": {
         "somethingWentWrong": "問題が発生しました",
-        "tryAgain": "再試行"
+        "tryAgain": "再試行",
+        "details": "詳細",
+        "copy": "コピー",
+        "copied": "コピーしました",
+        "close": "閉じる"
     },
     "Api": {
         "unknownError": "不明なエラー",

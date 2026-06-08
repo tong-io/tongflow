@@ -5,7 +5,7 @@
 
 import { useTranslations } from "next-intl";
 import { useCallback, useState } from "react";
-import toast from "react-hot-toast";
+import { showErrorToast } from "@/components/ui/error-toast";
 import { getPresignedUploadUrl, UploadValidationError } from "@/lib/api/upload";
 import { logger } from "@/lib/logger";
 
@@ -83,9 +83,9 @@ export function useUpload(options?: UseUploadOptions) {
                 setState((prev) => ({ ...prev, isUploading: false, error }));
 
                 if (err instanceof UploadValidationError) {
-                    toast.error(err.message);
+                    showErrorToast({ message: err.message });
                 } else {
-                    toast.error(t("failed"));
+                    showErrorToast({ message: t("failed") });
                 }
 
                 options?.onError?.(error);
@@ -173,9 +173,9 @@ export function useMultipleUpload(options?: UseMultipleUploadOptions) {
                 setState((prev) => ({ ...prev, isUploading: false, error }));
 
                 if (err instanceof UploadValidationError) {
-                    toast.error(err.message);
+                    showErrorToast({ message: err.message });
                 } else {
-                    toast.error(t("partialFailed"));
+                    showErrorToast({ message: t("partialFailed") });
                 }
 
                 options?.onError?.(error);

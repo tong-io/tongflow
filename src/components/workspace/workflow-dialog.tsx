@@ -22,6 +22,7 @@ import {
     DialogTitle,
     DialogTrigger,
 } from "@/components/ui/dialog";
+import { showErrorToast } from "@/components/ui/error-toast";
 import { Waterfall } from "@/components/ui/waterfall";
 import { useFlow } from "@/hooks/use-flow";
 import { listWorkflows, type Workflow } from "@/lib/api/workspace";
@@ -218,7 +219,7 @@ export function WorkflowDialog({ trigger }: WorkflowDialogProps) {
             setHasMore(pagination?.hasMore ?? false);
         } catch (error) {
             logger.error("Failed to load workflows:", error);
-            toast.error(t("loadFailed"));
+            showErrorToast({ message: t("loadFailed") });
         } finally {
             setLoading(false);
         }
@@ -280,7 +281,7 @@ export function WorkflowDialog({ trigger }: WorkflowDialogProps) {
                 toast.success(t("loadSuccess"));
             } catch (error) {
                 logger.error("Failed to load workflow:", error);
-                toast.error(t("loadFailed"));
+                showErrorToast({ message: t("loadFailed") });
             }
         },
         [t],

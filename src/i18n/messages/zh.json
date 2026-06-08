@@ -918,7 +918,11 @@
     },
     "Errors": {
         "somethingWentWrong": "出现错误",
-        "tryAgain": "重试"
+        "tryAgain": "重试",
+        "details": "详情",
+        "copy": "复制",
+        "copied": "已复制",
+        "close": "关闭"
     },
     "Api": {
         "unknownError": "未知错误",

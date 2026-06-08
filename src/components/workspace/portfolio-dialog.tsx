@@ -24,6 +24,7 @@ import {
     DialogTitle,
     DialogTrigger,
 } from "@/components/ui/dialog";
+import { showErrorToast } from "@/components/ui/error-toast";
 import { Waterfall } from "@/components/ui/waterfall";
 import {
     listMaterials,
@@ -68,7 +69,7 @@ function MaterialCard({
 
         const fileKey = data.content.fileKeys?.[0];
         if (!fileKey) {
-            toast.error(t("cannotDownload"));
+            showErrorToast({ message: t("cannotDownload") });
             return;
         }
 
@@ -88,7 +89,7 @@ function MaterialCard({
             toast.success(t("downloadSuccess"));
         } catch (error) {
             logger.error("Download failed:", error);
-            toast.error(t("operationFailed"));
+            showErrorToast({ message: t("operationFailed") });
         } finally {
             setIsDownloading(false);
         }
@@ -108,7 +109,7 @@ function MaterialCard({
             );
         } catch (error) {
             logger.error("Failed to toggle favorite:", error);
-            toast.error(t("operationFailed"));
+            showErrorToast({ message: t("operationFailed") });
         } finally {
             setIsToggling(false);
         }

@@ -17,6 +17,7 @@ import type { Edge, Node } from "@xyflow/react";
 import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
+import { showErrorToast } from "@/components/ui/error-toast";
 import {
     NodeStatus,
     TaskStatus,
@@ -388,7 +389,7 @@ export function useWorkflowExecution(
             : tempDescription;
 
         if (!effectiveName?.trim()) {
-            toast.error(t("enterWorkflowName"));
+            showErrorToast({ message: t("enterWorkflowName") });
             return;
         }
 
@@ -418,7 +419,7 @@ export function useWorkflowExecution(
             handleExecute(result.workflowId);
         } catch (error) {
             logger.error("[workflow-exec] Save failed:", error);
-            toast.error(t("saveFailed"));
+            showErrorToast({ message: t("saveFailed") });
         } finally {
             setIsSaving(false);
         }

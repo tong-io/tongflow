@@ -422,21 +422,10 @@ export function useTaskSubscription(
                             `[SSE] Task updated: ${internalTask.id} (${internalTask.status})`,
                         );
 
-                        // Toast on terminal outcomes
+                        // Toast on success; failures are surfaced globally by
+                        // TaskFailureToaster (persistent error toast).
                         if (taskStatus === "COMPLETED") {
                             toast.success(t("taskCompleted"));
-                        } else if (taskStatus === "FAILED") {
-                            const errorMsg =
-                                internalTask.error ||
-                                (message.data as Record<string, unknown>)
-                                    ?.error;
-                            toast.error(
-                                errorMsg
-                                    ? t("taskFailedWithMsg", {
-                                          error: String(errorMsg),
-                                      })
-                                    : t("taskFailed"),
-                            );
                         }
 
                         // Frontend backup: persist terminal status without saving materials
@@ -745,14 +734,6 @@ export function useBatchTaskManager(
 
                                 if (taskStatus === "COMPLETED") {
                                     toast.success(t("taskCompleted"));
-                                } else if (taskStatus === "FAILED") {
-                                    toast.error(
-                                        message.error
-                                            ? t("taskFailedWithMsg", {
-                                                  error: String(message.error),
-                                              })
-                                            : t("taskFailed"),
-                                    );
                                 } else if (taskStatus === "CANCELLED") {
                                     if (batchCancelTimeoutRef.current != null) {
                                         clearTimeout(

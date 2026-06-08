@@ -14,6 +14,7 @@ import { memo, useCallback, useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { showErrorToast } from "@/components/ui/error-toast";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useFileAsyncLoaderBatch } from "@/hooks/use-file-async-loader";
 import useFlow from "@/hooks/use-flow";
@@ -89,7 +90,7 @@ const MaterialItem = memo(
                 toast.success(t("deleteSuccess"));
             } catch (error) {
                 logger.error("Failed to delete material:", error);
-                toast.error(t("deleteFailed"));
+                showErrorToast({ message: t("deleteFailed") });
             } finally {
                 setIsDeleting(false);
             }

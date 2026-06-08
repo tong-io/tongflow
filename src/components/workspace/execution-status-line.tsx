@@ -141,7 +141,7 @@ export function ExecutionStatusLine() {
     if (state.phase === "failed") {
         return (
             <div
-                className="text-xs text-red-500 max-w-[260px] truncate text-center"
+                className="text-xs text-red-500 max-w-[320px] line-clamp-2 text-center"
                 title={state.errorMsg ?? undefined}
             >
                 {state.errorMsg

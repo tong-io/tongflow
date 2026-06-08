@@ -23,6 +23,7 @@ import {
     DialogHeader,
     DialogTitle,
 } from "@/components/ui/dialog";
+import { showErrorToast } from "@/components/ui/error-toast";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -118,7 +119,7 @@ export function WorkflowTitleMenu() {
     // Save the workflow
     const handleSave = async () => {
         if (!tempName.trim()) {
-            toast.error(t("enterName"));
+            showErrorToast({ message: t("enterName") });
             return;
         }
 
@@ -155,7 +156,7 @@ export function WorkflowTitleMenu() {
             setIsSaveAsMode(false);
         } catch (error) {
             logger.error("Save failed:", error);
-            toast.error(t("saveFailed"));
+            showErrorToast({ message: t("saveFailed") });
         } finally {
             setSaving(false);
         }
@@ -215,7 +216,7 @@ export function WorkflowTitleMenu() {
             toast.success(t("exportJsonSuccess"));
         } catch (e) {
             logger.error(e);
-            toast.error(t("exportJsonFailed"));
+            showErrorToast({ message: t("exportJsonFailed") });
         }
     };
 
@@ -237,7 +238,7 @@ export function WorkflowTitleMenu() {
             try {
                 parsed = JSON.parse(text);
             } catch {
-                toast.error(t("importJsonInvalid"));
+                showErrorToast({ message: t("importJsonInvalid") });
                 return;
             }
             let result: ParsedWorkflowImport;
@@ -246,9 +247,9 @@ export function WorkflowTitleMenu() {
             } catch (err) {
                 const msg = err instanceof Error ? err.message : "";
                 if (msg === WORKFLOW_IMPORT_NO_CANVAS) {
-                    toast.error(t("importJsonNoCanvas"));
+                    showErrorToast({ message: t("importJsonNoCanvas") });
                 } else {
-                    toast.error(t("importJsonInvalid"));
+                    showErrorToast({ message: t("importJsonInvalid") });
                 }
                 return;
             }
@@ -268,7 +269,7 @@ export function WorkflowTitleMenu() {
                 }),
             );
         } catch {
-            toast.error(t("importJsonReadFailed"));
+            showErrorToast({ message: t("importJsonReadFailed") });
         }
     };
 

@@ -1,5 +1,5 @@
 import toast from "react-hot-toast";
-
+import { showErrorToast } from "@/components/ui/error-toast";
 import { getClientTranslator } from "@/i18n/client";
 
 /**
@@ -117,7 +117,7 @@ export async function apiClient<T = unknown>(
     options: FetchOptions = {},
 ): Promise<T> {
     const {
-        showErrorToast = true,
+        showErrorToast: shouldShowErrorToast = true,
         showSuccessToast = false,
         successMessage,
         errorMessage,
@@ -164,8 +164,8 @@ export async function apiClient<T = unknown>(
                     response.status === 401
                         ? t("unauthorized")
                         : t("accessDenied");
-                if (showErrorToast) {
-                    toast.error(authErrorMsg);
+                if (shouldShowErrorToast) {
+                    showErrorToast({ message: authErrorMsg });
                     errorToastShown = true;
                 }
                 const error = new Error(authErrorMsg);
@@ -183,9 +183,9 @@ export async function apiClient<T = unknown>(
                     statusText: response.statusText,
                 });
 
-            if (showErrorToast) {
+            if (shouldShowErrorToast) {
                 // Backend error message is automatically shown in the toast
-                toast.error(errorMsg);
+                showErrorToast({ message: errorMsg });
                 errorToastShown = true; // Mark as shown
             }
 
@@ -205,8 +205,8 @@ export async function apiClient<T = unknown>(
         // Handle network errors and other errors
         if (error instanceof Error && error.name === "AbortError") {
             const msg = errorMessage || t("timedOut");
-            if (showErrorToast && !errorToastShown) {
-                toast.error(msg);
+            if (shouldShowErrorToast && !errorToastShown) {
+                showErrorToast({ message: msg });
                 errorToastShown = true;
             }
             throw new Error(msg);
@@ -219,8 +219,8 @@ export async function apiClient<T = unknown>(
 
         // Show a generic error message (only when no toast has been shown yet)
         const msg = errorMessage || getErrorMessage(error);
-        if (showErrorToast) {
-            toast.error(msg);
+        if (shouldShowErrorToast) {
+            showErrorToast({ message: msg });
         }
 
         throw error;
