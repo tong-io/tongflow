@@ -1,0 +1,1947 @@
+{
+    "version": 1,
+    "$defs": {
+        "Asset": {
+            "type": "object",
+            "required": ["bytesBase64"],
+            "properties": {
+                "bytesBase64": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "filename": {
+                    "type": "string"
+                },
+                "mime": {
+                    "type": "string"
+                }
+            },
+            "additionalProperties": false
+        },
+        "FileRef": {
+            "type": "object",
+            "required": ["file_key"],
+            "properties": {
+                "file_key": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "mime": {
+                    "type": "string"
+                },
+                "filename": {
+                    "type": "string"
+                }
+            },
+            "additionalProperties": false
+        },
+        "VideoRef": {
+            "type": "object",
+            "required": ["file_key"],
+            "properties": {
+                "file_key": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "mime": {
+                    "type": "string"
+                },
+                "filename": {
+                    "type": "string"
+                }
+            },
+            "additionalProperties": false
+        },
+        "AudioRef": {
+            "type": "object",
+            "required": ["file_key"],
+            "properties": {
+                "file_key": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "mime": {
+                    "type": "string"
+                },
+                "filename": {
+                    "type": "string"
+                }
+            },
+            "additionalProperties": false
+        },
+        "ImageRef": {
+            "type": "object",
+            "required": ["file_key"],
+            "properties": {
+                "file_key": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "mime": {
+                    "type": "string"
+                },
+                "filename": {
+                    "type": "string"
+                }
+            },
+            "additionalProperties": false
+        },
+        "ModelRef": {
+            "type": "object",
+            "required": ["file_key"],
+            "properties": {
+                "file_key": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "mime": {
+                    "type": "string"
+                },
+                "filename": {
+                    "type": "string"
+                }
+            },
+            "additionalProperties": false
+        }
+    },
+    "nodes": [
+        {
+            "nodeSlot": "gen-text",
+            "inputs": {
+                "type": "object",
+                "required": ["text"],
+                "properties": {
+                    "text": {
+                        "type": "string",
+                        "minLength": 1
+                    },
+                    "userPrompt": {
+                        "type": "string"
+                    }
+                },
+                "additionalProperties": false
+            },
+            "outputs": {
+                "type": "object",
+                "required": ["success"],
+                "properties": {
+                    "success": {
+                        "type": "boolean"
+                    },
+                    "error": {
+                        "type": "string"
+                    },
+                    "text": {
+                        "type": "string"
+                    }
+                },
+                "additionalProperties": false
+            }
+        },
+        {
+            "nodeSlot": "split-text",
+            "inputs": {
+                "type": "object",
+                "required": ["text"],
+                "properties": {
+                    "text": {
+                        "type": "string",
+                        "minLength": 1
+                    },
+                    "userPrompt": {
+                        "type": "string"
+                    }
+                },
+                "additionalProperties": false
+            },
+            "outputs": {
+                "type": "object",
+                "required": ["success"],
+                "properties": {
+                    "success": {
+                        "type": "boolean"
+                    },
+                    "error": {
+                        "type": "string"
+                    },
+                    "texts": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "x-expand-each": true
+                    }
+                },
+                "additionalProperties": false
+            }
+        },
+        {
+            "nodeSlot": "combine-text",
+            "inputs": {
+                "type": "object",
+                "required": ["texts"],
+                "properties": {
+                    "texts": {
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "minLength": 1
+                        }
+                    },
+                    "userPrompt": {
+                        "type": "string"
+                    }
+                },
+                "additionalProperties": false
+            },
+            "outputs": {
+                "type": "object",
+                "required": ["success"],
+                "properties": {
+                    "success": {
+                        "type": "boolean"
+                    },
+                    "error": {
+                        "type": "string"
+                    },
+                    "text": {
+                        "type": "string"
+                    }
+                },
+                "additionalProperties": false
+            }
+        },
+        {
+            "nodeSlot": "image-fusion",
+            "inputs": {
+                "type": "object",
+                "required": ["text"],
+                "properties": {
+                    "text": {
+                        "type": "string",
+                        "minLength": 1
+                    },
+                    "images": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/$defs/Asset"
+                        }
+                    },
+                    "seed": {
+                        "type": "integer"
+                    },
+                    "width": {
+                        "type": "integer"
+                    },
+                    "height": {
+                        "type": "integer"
+                    }
+                },
+                "additionalProperties": false
+            },
+            "outputs": {
+                "type": "object",
+                "required": ["success"],
+                "properties": {
+                    "success": {
+                        "type": "boolean"
+                    },
+                    "error": {
+                        "type": "string"
+                    },
+                    "image": {
+                        "$ref": "#/$defs/ImageRef"
+                    }
+                },
+                "additionalProperties": false
+            }
+        },
+        {
+            "nodeSlot": "image-gen-text",
+            "inputs": {
+                "type": "object",
+                "required": ["text"],
+                "properties": {
+                    "text": {
+                        "type": "string"
+                    },
+                    "system": {
+                        "type": "string"
+                    },
+                    "max_new_tokens": {
+                        "type": "integer"
+                    },
+                    "enable_thinking": {
+                        "type": "boolean"
+                    },
+                    "temperature": {
+                        "type": "number"
+                    },
+                    "top_p": {
+                        "type": "number"
+                    },
+                    "top_k": {
+                        "type": "integer"
+                    },
+                    "image": {
+                        "$ref": "#/$defs/Asset"
+                    }
+                },
+                "additionalProperties": false
+            },
+            "outputs": {
+                "type": "object",
+                "required": ["success"],
+                "properties": {
+                    "success": {
+                        "type": "boolean"
+                    },
+                    "error": {
+                        "type": "string"
+                    },
+                    "text": {
+                        "type": "string"
+                    }
+                },
+                "additionalProperties": false
+            }
+        },
+        {
+            "nodeSlot": "video-gen-text",
+            "inputs": {
+                "type": "object",
+                "required": ["text", "video"],
+                "properties": {
+                    "text": {
+                        "type": "string"
+                    },
+                    "system": {
+                        "type": "string"
+                    },
+                    "max_new_tokens": {
+                        "type": "integer"
+                    },
+                    "enable_thinking": {
+                        "type": "boolean"
+                    },
+                    "temperature": {
+                        "type": "number"
+                    },
+                    "top_p": {
+                        "type": "number"
+                    },
+                    "top_k": {
+                        "type": "integer"
+                    },
+                    "video": {
+                        "$ref": "#/$defs/Asset"
+                    }
+                },
+                "additionalProperties": false
+            },
+            "outputs": {
+                "type": "object",
+                "required": ["success"],
+                "properties": {
+                    "success": {
+                        "type": "boolean"
+                    },
+                    "error": {
+                        "type": "string"
+                    },
+                    "text": {
+                        "type": "string"
+                    }
+                },
+                "additionalProperties": false
+            }
+        },
+        {
+            "nodeSlot": "transcribe",
+            "inputs": {
+                "type": "object",
+                "required": ["audio"],
+                "properties": {
+                    "context": {
+                        "type": "string"
+                    },
+                    "language": {
+                        "type": "string"
+                    },
+                    "max_new_tokens": {
+                        "type": "number"
+                    },
+                    "audio": {
+                        "$ref": "#/$defs/Asset"
+                    }
+                },
+                "additionalProperties": false
+            },
+            "outputs": {
+                "type": "object",
+                "required": ["success"],
+                "properties": {
+                    "success": {
+                        "type": "boolean"
+                    },
+                    "error": {
+                        "type": "string"
+                    },
+                    "text": {
+                        "type": "string"
+                    }
+                },
+                "additionalProperties": false
+            }
+        },
+        {
+            "nodeSlot": "concat-videos",
+            "inputs": {
+                "type": "object",
+                "required": ["videos"],
+                "properties": {
+                    "videos": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/$defs/Asset"
+                        }
+                    }
+                },
+                "additionalProperties": false
+            },
+            "outputs": {
+                "type": "object",
+                "required": ["success"],
+                "properties": {
+                    "success": {
+                        "type": "boolean"
+                    },
+                    "error": {
+                        "type": "string"
+                    },
+                    "video": {
+                        "$ref": "#/$defs/VideoRef"
+                    }
+                },
+                "additionalProperties": false
+            }
+        },
+        {
+            "nodeSlot": "extract-audio",
+            "inputs": {
+                "type": "object",
+                "required": ["video"],
+                "properties": {
+                    "video": {
+                        "$ref": "#/$defs/Asset"
+                    }
+                },
+                "additionalProperties": false
+            },
+            "outputs": {
+                "type": "object",
+                "required": ["success"],
+                "properties": {
+                    "success": {
+                        "type": "boolean"
+                    },
+                    "error": {
+                        "type": "string"
+                    },
+                    "audio": {
+                        "$ref": "#/$defs/AudioRef"
+                    }
+                },
+                "additionalProperties": false
+            }
+        },
+        {
+            "nodeSlot": "remove-video-audio",
+            "inputs": {
+                "type": "object",
+                "required": ["video"],
+                "properties": {
+                    "video": {
+                        "$ref": "#/$defs/Asset"
+                    }
+                },
+                "additionalProperties": false
+            },
+            "outputs": {
+                "type": "object",
+                "required": ["success"],
+                "properties": {
+                    "success": {
+                        "type": "boolean"
+                    },
+                    "error": {
+                        "type": "string"
+                    },
+                    "video": {
+                        "$ref": "#/$defs/VideoRef"
+                    }
+                },
+                "additionalProperties": false
+            }
+        },
+        {
+            "nodeSlot": "merge-video-audio",
+            "inputs": {
+                "type": "object",
+                "required": ["video", "audio"],
+                "properties": {
+                    "video": {
+                        "$ref": "#/$defs/Asset"
+                    },
+                    "audio": {
+                        "$ref": "#/$defs/Asset"
+                    }
+                },
+                "additionalProperties": false
+            },
+            "outputs": {
+                "type": "object",
+                "required": ["success"],
+                "properties": {
+                    "success": {
+                        "type": "boolean"
+                    },
+                    "error": {
+                        "type": "string"
+                    },
+                    "video": {
+                        "$ref": "#/$defs/VideoRef"
+                    }
+                },
+                "additionalProperties": false
+            }
+        },
+        {
+            "nodeSlot": "audio-video-lip-sync",
+            "inputs": {
+                "type": "object",
+                "required": ["video", "audio"],
+                "properties": {
+                    "audio": {
+                        "$ref": "#/$defs/Asset"
+                    },
+                    "text": {
+                        "type": "string"
+                    },
+                    "seed": {
+                        "type": "number"
+                    },
+                    "video": {
+                        "$ref": "#/$defs/Asset"
+                    }
+                },
+                "additionalProperties": false
+            },
+            "outputs": {
+                "type": "object",
+                "required": ["success"],
+                "properties": {
+                    "success": {
+                        "type": "boolean"
+                    },
+                    "error": {
+                        "type": "string"
+                    },
+                    "video": {
+                        "$ref": "#/$defs/VideoRef"
+                    }
+                },
+                "additionalProperties": false
+            }
+        },
+        {
+            "nodeSlot": "get-first-frame",
+            "inputs": {
+                "type": "object",
+                "required": ["video"],
+                "properties": {
+                    "video": {
+                        "$ref": "#/$defs/Asset"
+                    }
+                },
+                "additionalProperties": false
+            },
+            "outputs": {
+                "type": "object",
+                "required": ["success"],
+                "properties": {
+                    "success": {
+                        "type": "boolean"
+                    },
+                    "error": {
+                        "type": "string"
+                    },
+                    "image": {
+                        "$ref": "#/$defs/ImageRef"
+                    }
+                },
+                "additionalProperties": false
+            }
+        },
+        {
+            "nodeSlot": "get-last-frame",
+            "inputs": {
+                "type": "object",
+                "required": ["video"],
+                "properties": {
+                    "video": {
+                        "$ref": "#/$defs/Asset"
+                    }
+                },
+                "additionalProperties": false
+            },
+            "outputs": {
+                "type": "object",
+                "required": ["success"],
+                "properties": {
+                    "success": {
+                        "type": "boolean"
+                    },
+                    "error": {
+                        "type": "string"
+                    },
+                    "image": {
+                        "$ref": "#/$defs/ImageRef"
+                    }
+                },
+                "additionalProperties": false
+            }
+        },
+        {
+            "nodeSlot": "parse-document",
+            "inputs": {
+                "type": "object",
+                "required": ["document"],
+                "properties": {
+                    "document": {
+                        "$ref": "#/$defs/Asset"
+                    }
+                },
+                "additionalProperties": false
+            },
+            "outputs": {
+                "type": "object",
+                "required": ["success"],
+                "properties": {
+                    "success": {
+                        "type": "boolean"
+                    },
+                    "error": {
+                        "type": "string"
+                    },
+                    "text": {
+                        "type": "string"
+                    }
+                },
+                "additionalProperties": false
+            }
+        },
+        {
+            "nodeSlot": "split-video",
+            "inputs": {
+                "type": "object",
+                "required": ["video"],
+                "properties": {
+                    "video": {
+                        "$ref": "#/$defs/Asset"
+                    },
+                    "threshold": {
+                        "type": "number"
+                    }
+                },
+                "additionalProperties": false
+            },
+            "outputs": {
+                "type": "object",
+                "required": ["success"],
+                "properties": {
+                    "success": {
+                        "type": "boolean"
+                    },
+                    "error": {
+                        "type": "string"
+                    },
+                    "video_parts": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/$defs/VideoRef"
+                        }
+                    }
+                },
+                "additionalProperties": false
+            }
+        },
+        {
+            "nodeSlot": "link",
+            "inputs": {
+                "type": "object",
+                "required": ["url"],
+                "properties": {
+                    "url": {
+                        "type": "string",
+                        "minLength": 1
+                    }
+                },
+                "additionalProperties": false
+            },
+            "outputs": {
+                "type": "object",
+                "required": ["success"],
+                "properties": {
+                    "success": {
+                        "type": "boolean"
+                    },
+                    "error": {
+                        "type": "string"
+                    },
+                    "mainText": {
+                        "type": "string"
+                    },
+                    "thinking": {
+                        "type": "string"
+                    },
+                    "image": {
+                        "$ref": "#/$defs/ImageRef"
+                    },
+                    "video": {
+                        "$ref": "#/$defs/VideoRef"
+                    },
+                    "audio": {
+                        "$ref": "#/$defs/AudioRef"
+                    },
+                    "extractedTexts": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "additionalProperties": false
+            }
+        },
+        {
+            "nodeSlot": "image-gen",
+            "inputs": {
+                "type": "object",
+                "required": [],
+                "properties": {
+                    "text": {
+                        "type": "string",
+                        "minLength": 1
+                    },
+                    "width": {
+                        "type": "integer"
+                    },
+                    "height": {
+                        "type": "integer"
+                    },
+                    "seed": {
+                        "type": "integer"
+                    }
+                },
+                "additionalProperties": false
+            },
+            "outputs": {
+                "type": "object",
+                "required": ["success"],
+                "properties": {
+                    "success": {
+                        "type": "boolean"
+                    },
+                    "error": {
+                        "type": "string"
+                    },
+                    "image": {
+                        "$ref": "#/$defs/ImageRef"
+                    }
+                },
+                "additionalProperties": false
+            }
+        },
+        {
+            "nodeSlot": "gen-music",
+            "inputs": {
+                "type": "object",
+                "required": [],
+                "properties": {
+                    "text": {
+                        "type": "string",
+                        "minLength": 1
+                    },
+                    "lyrics": {
+                        "type": "string"
+                    },
+                    "tags": {
+                        "type": "string"
+                    },
+                    "language": {
+                        "type": "string"
+                    },
+                    "keyscale": {
+                        "type": "string"
+                    },
+                    "bpm": {
+                        "type": "number"
+                    },
+                    "songTitle": {
+                        "type": "string"
+                    },
+                    "duration": {
+                        "type": "number"
+                    },
+                    "seed": {
+                        "type": "integer"
+                    }
+                },
+                "additionalProperties": false
+            },
+            "outputs": {
+                "type": "object",
+                "required": ["success"],
+                "properties": {
+                    "success": {
+                        "type": "boolean"
+                    },
+                    "error": {
+                        "type": "string"
+                    },
+                    "audio": {
+                        "$ref": "#/$defs/AudioRef"
+                    }
+                },
+                "additionalProperties": false
+            }
+        },
+        {
+            "nodeSlot": "text-gen-speech-preset",
+            "inputs": {
+                "type": "object",
+                "required": ["text"],
+                "properties": {
+                    "text": {
+                        "type": "string",
+                        "minLength": 1
+                    },
+                    "language": {
+                        "type": "string"
+                    },
+                    "speaker": {
+                        "type": "string"
+                    },
+                    "instruct": {
+                        "type": "string"
+                    },
+                    "max_new_tokens": {
+                        "type": "integer"
+                    }
+                },
+                "additionalProperties": false
+            },
+            "outputs": {
+                "type": "object",
+                "required": ["success"],
+                "properties": {
+                    "success": {
+                        "type": "boolean"
+                    },
+                    "error": {
+                        "type": "string"
+                    },
+                    "audio": {
+                        "$ref": "#/$defs/AudioRef"
+                    }
+                },
+                "additionalProperties": false
+            }
+        },
+        {
+            "nodeSlot": "image-gen-video",
+            "inputs": {
+                "type": "object",
+                "required": ["text", "image", "duration"],
+                "properties": {
+                    "duration": {
+                        "type": "number"
+                    },
+                    "text": {
+                        "type": "string"
+                    },
+                    "seed": {
+                        "type": "number"
+                    },
+                    "height": {
+                        "type": "integer"
+                    },
+                    "width": {
+                        "type": "integer"
+                    },
+                    "enhance_prompt": {
+                        "type": "boolean"
+                    },
+                    "image": {
+                        "$ref": "#/$defs/Asset"
+                    },
+                    "image_frame_idx": {
+                        "type": "integer"
+                    },
+                    "image_strength": {
+                        "type": "number"
+                    }
+                },
+                "additionalProperties": false
+            },
+            "outputs": {
+                "type": "object",
+                "required": ["success"],
+                "properties": {
+                    "success": {
+                        "type": "boolean"
+                    },
+                    "error": {
+                        "type": "string"
+                    },
+                    "video": {
+                        "$ref": "#/$defs/VideoRef"
+                    }
+                },
+                "additionalProperties": false
+            }
+        },
+        {
+            "nodeSlot": "image-edit",
+            "inputs": {
+                "type": "object",
+                "required": ["text", "image"],
+                "properties": {
+                    "text": {
+                        "type": "string",
+                        "minLength": 1
+                    },
+                    "image": {
+                        "$ref": "#/$defs/Asset"
+                    },
+                    "seed": {
+                        "type": "integer"
+                    },
+                    "match_input_size": {
+                        "type": "boolean"
+                    },
+                    "width": {
+                        "type": "integer"
+                    },
+                    "height": {
+                        "type": "integer"
+                    }
+                },
+                "additionalProperties": false
+            },
+            "outputs": {
+                "type": "object",
+                "required": ["success"],
+                "properties": {
+                    "success": {
+                        "type": "boolean"
+                    },
+                    "error": {
+                        "type": "string"
+                    },
+                    "image": {
+                        "$ref": "#/$defs/ImageRef"
+                    }
+                },
+                "additionalProperties": false
+            }
+        },
+        {
+            "nodeSlot": "image-upscale",
+            "inputs": {
+                "type": "object",
+                "required": ["image"],
+                "properties": {
+                    "image": {
+                        "$ref": "#/$defs/Asset"
+                    },
+                    "resolution": {
+                        "type": "string"
+                    },
+                    "seed": {
+                        "type": "integer"
+                    }
+                },
+                "additionalProperties": false
+            },
+            "outputs": {
+                "type": "object",
+                "required": ["success"],
+                "properties": {
+                    "success": {
+                        "type": "boolean"
+                    },
+                    "error": {
+                        "type": "string"
+                    },
+                    "image": {
+                        "$ref": "#/$defs/ImageRef"
+                    }
+                },
+                "additionalProperties": false
+            }
+        },
+        {
+            "nodeSlot": "video-upscale",
+            "inputs": {
+                "type": "object",
+                "required": ["video"],
+                "properties": {
+                    "video": {
+                        "$ref": "#/$defs/Asset"
+                    },
+                    "resolution": {
+                        "type": "string"
+                    },
+                    "seed": {
+                        "type": "integer"
+                    }
+                },
+                "additionalProperties": false
+            },
+            "outputs": {
+                "type": "object",
+                "required": ["success"],
+                "properties": {
+                    "success": {
+                        "type": "boolean"
+                    },
+                    "error": {
+                        "type": "string"
+                    },
+                    "video": {
+                        "$ref": "#/$defs/VideoRef"
+                    }
+                },
+                "additionalProperties": false
+            }
+        },
+        {
+            "nodeSlot": "image-describe",
+            "inputs": {
+                "type": "object",
+                "required": ["image"],
+                "properties": {
+                    "text": {
+                        "type": "string"
+                    },
+                    "userPrompt": {
+                        "type": "string"
+                    },
+                    "image": {
+                        "$ref": "#/$defs/Asset"
+                    }
+                },
+                "additionalProperties": false
+            },
+            "outputs": {
+                "type": "object",
+                "required": ["success"],
+                "properties": {
+                    "success": {
+                        "type": "boolean"
+                    },
+                    "error": {
+                        "type": "string"
+                    },
+                    "text": {
+                        "type": "string"
+                    }
+                },
+                "additionalProperties": false
+            }
+        },
+        {
+            "nodeSlot": "video-describe",
+            "inputs": {
+                "type": "object",
+                "required": ["video"],
+                "properties": {
+                    "text": {
+                        "type": "string"
+                    },
+                    "userPrompt": {
+                        "type": "string"
+                    },
+                    "video": {
+                        "$ref": "#/$defs/Asset"
+                    }
+                },
+                "additionalProperties": false
+            },
+            "outputs": {
+                "type": "object",
+                "required": ["success"],
+                "properties": {
+                    "success": {
+                        "type": "boolean"
+                    },
+                    "error": {
+                        "type": "string"
+                    },
+                    "text": {
+                        "type": "string"
+                    }
+                },
+                "additionalProperties": false
+            }
+        },
+        {
+            "nodeSlot": "audio-image-gen-video",
+            "inputs": {
+                "type": "object",
+                "required": ["image", "audio"],
+                "properties": {
+                    "text": {
+                        "type": "string"
+                    },
+                    "height": {
+                        "type": "integer"
+                    },
+                    "width": {
+                        "type": "integer"
+                    },
+                    "image": {
+                        "$ref": "#/$defs/Asset"
+                    },
+                    "audio": {
+                        "$ref": "#/$defs/Asset"
+                    }
+                },
+                "additionalProperties": false
+            },
+            "outputs": {
+                "type": "object",
+                "required": ["success"],
+                "properties": {
+                    "success": {
+                        "type": "boolean"
+                    },
+                    "error": {
+                        "type": "string"
+                    },
+                    "video": {
+                        "$ref": "#/$defs/VideoRef"
+                    }
+                },
+                "additionalProperties": false
+            }
+        },
+        {
+            "nodeSlot": "speech-text-gen-video",
+            "inputs": {
+                "type": "object",
+                "required": ["text", "audio"],
+                "properties": {
+                    "text": {
+                        "type": "string"
+                    },
+                    "seed": {
+                        "type": "number"
+                    },
+                    "height": {
+                        "type": "integer"
+                    },
+                    "width": {
+                        "type": "integer"
+                    },
+                    "enhance_prompt": {
+                        "type": "boolean"
+                    },
+                    "image": {
+                        "$ref": "#/$defs/Asset"
+                    },
+                    "image_frame_idx": {
+                        "type": "integer"
+                    },
+                    "image_strength": {
+                        "type": "number"
+                    },
+                    "audio": {
+                        "$ref": "#/$defs/Asset"
+                    },
+                    "audio_start_time": {
+                        "type": "number"
+                    },
+                    "duration": {
+                        "type": "number"
+                    }
+                },
+                "additionalProperties": false
+            },
+            "outputs": {
+                "type": "object",
+                "required": ["success"],
+                "properties": {
+                    "success": {
+                        "type": "boolean"
+                    },
+                    "error": {
+                        "type": "string"
+                    },
+                    "video": {
+                        "$ref": "#/$defs/VideoRef"
+                    }
+                },
+                "additionalProperties": false
+            }
+        },
+        {
+            "nodeSlot": "video-image-gen-video-mix",
+            "inputs": {
+                "type": "object",
+                "required": ["image", "video"],
+                "properties": {
+                    "text": {
+                        "type": "string"
+                    },
+                    "image": {
+                        "$ref": "#/$defs/Asset"
+                    },
+                    "video": {
+                        "$ref": "#/$defs/Asset"
+                    }
+                },
+                "additionalProperties": false
+            },
+            "outputs": {
+                "type": "object",
+                "required": ["success"],
+                "properties": {
+                    "success": {
+                        "type": "boolean"
+                    },
+                    "error": {
+                        "type": "string"
+                    },
+                    "video": {
+                        "$ref": "#/$defs/VideoRef"
+                    }
+                },
+                "additionalProperties": false
+            }
+        },
+        {
+            "nodeSlot": "video-image-gen-video-move",
+            "inputs": {
+                "type": "object",
+                "required": ["image", "video"],
+                "properties": {
+                    "text": {
+                        "type": "string"
+                    },
+                    "duration": {
+                        "type": "number"
+                    },
+                    "seed": {
+                        "type": "number"
+                    },
+                    "height": {
+                        "type": "integer"
+                    },
+                    "width": {
+                        "type": "integer"
+                    },
+                    "enhance_prompt": {
+                        "type": "boolean"
+                    },
+                    "image": {
+                        "$ref": "#/$defs/Asset"
+                    },
+                    "video": {
+                        "$ref": "#/$defs/Asset"
+                    },
+                    "attention_strength": {
+                        "type": "number"
+                    }
+                },
+                "additionalProperties": false
+            },
+            "outputs": {
+                "type": "object",
+                "required": ["success"],
+                "properties": {
+                    "success": {
+                        "type": "boolean"
+                    },
+                    "error": {
+                        "type": "string"
+                    },
+                    "video": {
+                        "$ref": "#/$defs/VideoRef"
+                    }
+                },
+                "additionalProperties": false
+            }
+        },
+        {
+            "nodeSlot": "image-image-gen-video",
+            "inputs": {
+                "type": "object",
+                "required": ["text", "image", "end_image"],
+                "properties": {
+                    "text": {
+                        "type": "string"
+                    },
+                    "duration": {
+                        "type": "number"
+                    },
+                    "seed": {
+                        "type": "number"
+                    },
+                    "height": {
+                        "type": "integer"
+                    },
+                    "width": {
+                        "type": "integer"
+                    },
+                    "enhance_prompt": {
+                        "type": "boolean"
+                    },
+                    "image": {
+                        "$ref": "#/$defs/Asset"
+                    },
+                    "image_strength": {
+                        "type": "number"
+                    },
+                    "end_image": {
+                        "$ref": "#/$defs/Asset"
+                    }
+                },
+                "additionalProperties": false
+            },
+            "outputs": {
+                "type": "object",
+                "required": ["success"],
+                "properties": {
+                    "success": {
+                        "type": "boolean"
+                    },
+                    "error": {
+                        "type": "string"
+                    },
+                    "video": {
+                        "$ref": "#/$defs/VideoRef"
+                    }
+                },
+                "additionalProperties": false
+            }
+        },
+        {
+            "nodeSlot": "text-gen-video",
+            "inputs": {
+                "type": "object",
+                "required": ["text", "duration"],
+                "properties": {
+                    "text": {
+                        "type": "string"
+                    },
+                    "duration": {
+                        "type": "number"
+                    },
+                    "seed": {
+                        "type": "number"
+                    },
+                    "height": {
+                        "type": "integer"
+                    },
+                    "width": {
+                        "type": "integer"
+                    },
+                    "enhance_prompt": {
+                        "type": "boolean"
+                    }
+                },
+                "additionalProperties": false
+            },
+            "outputs": {
+                "type": "object",
+                "required": ["success"],
+                "properties": {
+                    "success": {
+                        "type": "boolean"
+                    },
+                    "error": {
+                        "type": "string"
+                    },
+                    "video": {
+                        "$ref": "#/$defs/VideoRef"
+                    }
+                },
+                "additionalProperties": false
+            }
+        },
+        {
+            "nodeSlot": "image-gen-model",
+            "inputs": {
+                "type": "object",
+                "required": ["image"],
+                "properties": {
+                    "text": {
+                        "type": "string",
+                        "minLength": 1
+                    },
+                    "width": {
+                        "type": "integer"
+                    },
+                    "height": {
+                        "type": "integer"
+                    },
+                    "seed": {
+                        "type": "integer"
+                    },
+                    "image": {
+                        "$ref": "#/$defs/Asset"
+                    }
+                },
+                "additionalProperties": false
+            },
+            "outputs": {
+                "type": "object",
+                "required": ["success"],
+                "properties": {
+                    "success": {
+                        "type": "boolean"
+                    },
+                    "error": {
+                        "type": "string"
+                    },
+                    "model": {
+                        "$ref": "#/$defs/ModelRef"
+                    }
+                },
+                "additionalProperties": false
+            }
+        },
+        {
+            "nodeSlot": "speech-video-gen-video",
+            "inputs": {
+                "type": "object",
+                "required": ["video", "text"],
+                "properties": {
+                    "text": {
+                        "type": "string",
+                        "minLength": 1
+                    },
+                    "video": {
+                        "$ref": "#/$defs/Asset"
+                    },
+                    "enhance_prompt": {
+                        "type": "boolean"
+                    },
+                    "reference_strength": {
+                        "type": "number"
+                    },
+                    "seed": {
+                        "type": "number"
+                    }
+                },
+                "additionalProperties": false
+            },
+            "outputs": {
+                "type": "object",
+                "required": ["success"],
+                "properties": {
+                    "success": {
+                        "type": "boolean"
+                    },
+                    "error": {
+                        "type": "string"
+                    },
+                    "video": {
+                        "$ref": "#/$defs/VideoRef"
+                    }
+                },
+                "additionalProperties": false
+            }
+        },
+        {
+            "nodeSlot": "text-gen-speech-clone",
+            "inputs": {
+                "type": "object",
+                "required": ["text", "ref_audio"],
+                "properties": {
+                    "text": {
+                        "type": "string",
+                        "minLength": 1
+                    },
+                    "ref_audio": {
+                        "$ref": "#/$defs/Asset"
+                    },
+                    "language": {
+                        "type": "string"
+                    },
+                    "ref_text": {
+                        "type": "string"
+                    },
+                    "x_vector_only": {
+                        "type": "boolean"
+                    },
+                    "max_new_tokens": {
+                        "type": "integer"
+                    }
+                },
+                "additionalProperties": false
+            },
+            "outputs": {
+                "type": "object",
+                "required": ["success"],
+                "properties": {
+                    "success": {
+                        "type": "boolean"
+                    },
+                    "error": {
+                        "type": "string"
+                    },
+                    "audio": {
+                        "$ref": "#/$defs/AudioRef"
+                    }
+                },
+                "additionalProperties": false
+            }
+        },
+        {
+            "nodeSlot": "transcribe-timestamp",
+            "inputs": {
+                "type": "object",
+                "required": ["audio"],
+                "properties": {
+                    "context": {
+                        "type": "string"
+                    },
+                    "language": {
+                        "type": "string"
+                    },
+                    "max_new_tokens": {
+                        "type": "number"
+                    },
+                    "audio": {
+                        "$ref": "#/$defs/Asset"
+                    }
+                },
+                "additionalProperties": false
+            },
+            "outputs": {
+                "type": "object",
+                "required": ["success"],
+                "properties": {
+                    "success": {
+                        "type": "boolean"
+                    },
+                    "error": {
+                        "type": "string"
+                    },
+                    "text": {
+                        "type": "string"
+                    },
+                    "time_stamps": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "required": ["start", "end", "text"],
+                            "properties": {
+                                "start": {
+                                    "type": "number"
+                                },
+                                "end": {
+                                    "type": "number"
+                                },
+                                "text": {
+                                    "type": "string"
+                                }
+                            },
+                            "additionalProperties": false
+                        }
+                    }
+                },
+                "additionalProperties": false
+            }
+        },
+        {
+            "nodeSlot": "text-gen-speech-instruct",
+            "inputs": {
+                "type": "object",
+                "required": ["text"],
+                "properties": {
+                    "text": {
+                        "type": "string",
+                        "minLength": 1
+                    },
+                    "language": {
+                        "type": "string"
+                    },
+                    "instruct": {
+                        "type": "string"
+                    },
+                    "max_new_tokens": {
+                        "type": "integer"
+                    }
+                },
+                "additionalProperties": false
+            },
+            "outputs": {
+                "type": "object",
+                "required": ["success"],
+                "properties": {
+                    "success": {
+                        "type": "boolean"
+                    },
+                    "error": {
+                        "type": "string"
+                    },
+                    "audio": {
+                        "$ref": "#/$defs/AudioRef"
+                    }
+                },
+                "additionalProperties": false
+            }
+        },
+        {
+            "nodeSlot": "drop-video",
+            "inputs": {
+                "type": "object",
+                "required": ["videos"],
+                "properties": {
+                    "query": {
+                        "type": "string"
+                    },
+                    "videos": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/$defs/Asset"
+                        }
+                    }
+                },
+                "additionalProperties": false
+            },
+            "outputs": {
+                "type": "object",
+                "required": ["success"],
+                "properties": {
+                    "success": {
+                        "type": "boolean"
+                    },
+                    "error": {
+                        "type": "string"
+                    },
+                    "clips": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/$defs/VideoRef"
+                        }
+                    }
+                },
+                "additionalProperties": false
+            }
+        },
+        {
+            "nodeSlot": "arrange-group",
+            "inputs": {
+                "type": "object",
+                "required": [],
+                "properties": {
+                    "items": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "required": [],
+                            "properties": {
+                                "text": {
+                                    "type": "string"
+                                },
+                                "id": {
+                                    "type": "string"
+                                }
+                            },
+                            "additionalProperties": false
+                        }
+                    },
+                    "infos": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {},
+                            "additionalProperties": true
+                        }
+                    },
+                    "query": {
+                        "type": "string"
+                    },
+                    "groupCount": {
+                        "type": "integer"
+                    },
+                    "duplicatable": {
+                        "type": "boolean"
+                    },
+                    "images": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/$defs/Asset"
+                        }
+                    },
+                    "fileKeys": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/$defs/Asset"
+                        }
+                    }
+                },
+                "additionalProperties": false
+            },
+            "outputs": {
+                "type": "object",
+                "required": ["success"],
+                "properties": {
+                    "success": {
+                        "type": "boolean"
+                    },
+                    "error": {
+                        "type": "string"
+                    },
+                    "groups": {
+                        "type": "array",
+                        "items": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/$defs/VideoRef"
+                            }
+                        },
+                        "x-expand-each": true
+                    }
+                },
+                "additionalProperties": false
+            }
+        },
+        {
+            "nodeSlot": "separate_speaker",
+            "inputs": {
+                "type": "object",
+                "required": ["audio"],
+                "properties": {
+                    "audio": {
+                        "$ref": "#/$defs/Asset"
+                    }
+                },
+                "additionalProperties": false
+            },
+            "outputs": {
+                "type": "object",
+                "required": ["success"],
+                "properties": {
+                    "success": {
+                        "type": "boolean"
+                    },
+                    "error": {
+                        "type": "string"
+                    },
+                    "outputKeys": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/$defs/AudioRef"
+                        },
+                        "x-expand-each": true
+                    }
+                },
+                "additionalProperties": false
+            }
+        },
+        {
+            "nodeSlot": "separate_audio_track",
+            "inputs": {
+                "type": "object",
+                "required": ["audio"],
+                "properties": {
+                    "audio": {
+                        "$ref": "#/$defs/Asset"
+                    }
+                },
+                "additionalProperties": false
+            },
+            "outputs": {
+                "type": "object",
+                "required": ["success"],
+                "properties": {
+                    "success": {
+                        "type": "boolean"
+                    },
+                    "error": {
+                        "type": "string"
+                    },
+                    "file_key": {
+                        "$ref": "#/$defs/AudioRef"
+                    }
+                },
+                "additionalProperties": false
+            }
+        },
+        {
+            "nodeSlot": "denoise_audio",
+            "inputs": {
+                "type": "object",
+                "required": ["fileKey"],
+                "properties": {
+                    "fileKey": {
+                        "$ref": "#/$defs/Asset"
+                    }
+                },
+                "additionalProperties": false
+            },
+            "outputs": {
+                "type": "object",
+                "required": ["success"],
+                "properties": {
+                    "success": {
+                        "type": "boolean"
+                    },
+                    "error": {
+                        "type": "string"
+                    },
+                    "audio": {
+                        "$ref": "#/$defs/AudioRef"
+                    }
+                },
+                "additionalProperties": false
+            }
+        },
+        {
+            "nodeSlot": "convert_voice",
+            "inputs": {
+                "type": "object",
+                "required": ["sourceKey", "targetKey"],
+                "properties": {
+                    "sourceKey": {
+                        "$ref": "#/$defs/Asset"
+                    },
+                    "targetKey": {
+                        "type": "string"
+                    }
+                },
+                "additionalProperties": false
+            },
+            "outputs": {
+                "type": "object",
+                "required": ["success"],
+                "properties": {
+                    "success": {
+                        "type": "boolean"
+                    },
+                    "error": {
+                        "type": "string"
+                    },
+                    "audio": {
+                        "$ref": "#/$defs/AudioRef"
+                    }
+                },
+                "additionalProperties": false
+            }
+        },
+        {
+            "nodeSlot": "remove_watermark",
+            "inputs": {
+                "type": "object",
+                "required": ["fileKey"],
+                "properties": {
+                    "fileKey": {
+                        "$ref": "#/$defs/Asset"
+                    }
+                },
+                "additionalProperties": false
+            },
+            "outputs": {
+                "type": "object",
+                "required": ["success"],
+                "properties": {
+                    "success": {
+                        "type": "boolean"
+                    },
+                    "error": {
+                        "type": "string"
+                    },
+                    "video": {
+                        "$ref": "#/$defs/VideoRef"
+                    }
+                },
+                "additionalProperties": false
+            }
+        },
+        {
+            "nodeSlot": "subtitle_remove",
+            "inputs": {
+                "type": "object",
+                "required": ["fileKey"],
+                "properties": {
+                    "fileKey": {
+                        "$ref": "#/$defs/Asset"
+                    }
+                },
+                "additionalProperties": false
+            },
+            "outputs": {
+                "type": "object",
+                "required": ["success"],
+                "properties": {
+                    "success": {
+                        "type": "boolean"
+                    },
+                    "error": {
+                        "type": "string"
+                    },
+                    "video": {
+                        "$ref": "#/$defs/VideoRef"
+                    }
+                },
+                "additionalProperties": false
+            }
+        },
+        {
+            "nodeSlot": "text-audio-gen-speech",
+            "inputs": {
+                "type": "object",
+                "required": ["text", "audio"],
+                "properties": {
+                    "text": {
+                        "type": "string",
+                        "minLength": 1
+                    },
+                    "audio": {
+                        "$ref": "#/$defs/Asset"
+                    },
+                    "emotion": {
+                        "type": "string"
+                    },
+                    "style": {
+                        "type": "string"
+                    }
+                },
+                "additionalProperties": false
+            },
+            "outputs": {
+                "type": "object",
+                "required": ["success"],
+                "properties": {
+                    "success": {
+                        "type": "boolean"
+                    },
+                    "error": {
+                        "type": "string"
+                    },
+                    "audio": {
+                        "$ref": "#/$defs/AudioRef"
+                    }
+                },
+                "additionalProperties": false
+            }
+        }
+    ]
+}

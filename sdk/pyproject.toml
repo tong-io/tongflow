@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "tongflow"
-version = "0.0.23"
+version = "0.0.24"
 description = "Tongflow plugin package (node contracts, deploy scan, ABI helpers)"
 readme = "README.md"
 requires-python = ">=3.10"
@@ -26,3 +26,8 @@ classifiers = [
 [tool.setuptools.packages.find]
 where = ["."]
 include = ["tongflow*"]
+
+[tool.setuptools.package-data]
+# Bundle the ABI so a pip-installed tongflow can run workflows standalone.
+# Kept in sync by `pnpm gen:abi` (see scripts/gen-abi-types.ts).
+tongflow = ["_data/tongflow.abi.json"]

@@ -254,6 +254,15 @@ try {
         throw new Error(`biome check --write failed for ${rel}`);
     }
     console.log(`Wrote ${rel}`);
+
+    // Bundle the ABI with the Python SDK so a pip-installed `tongflow` can run
+    // workflows standalone (tongflow.engine reads it via abi_schema). Keeping
+    // the copy in this step prevents the bundled ABI from drifting.
+    const sdkAbiDir = path.join(repoRoot, "sdk", "tongflow", "_data");
+    const sdkAbiPath = path.join(sdkAbiDir, "tongflow.abi.json");
+    fs.mkdirSync(sdkAbiDir, { recursive: true });
+    fs.copyFileSync(abiPath, sdkAbiPath);
+    console.log(`Wrote ${path.relative(repoRoot, sdkAbiPath)}`);
 } catch (e) {
     console.error("gen-abi-types failed:", e);
     process.exit(1);

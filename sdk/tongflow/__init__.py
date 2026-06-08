@@ -8,8 +8,9 @@ ships its own local bridge (``entry.py``) that imports the backend lazily.
 from __future__ import annotations
 
 from .deploy_marker import deploy
+from .engine import run_workflow
 from .progress import progress
 
-__version__ = "0.0.23"
+__version__ = "0.0.24"
 
-__all__ = ["deploy", "progress"]
+__all__ = ["deploy", "progress", "run_workflow"]

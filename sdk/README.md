@@ -22,6 +22,58 @@ itself (in its `requirements.txt`) and pins the SDK in its image build.
 
 In this monorepo, every Modal `deploy.py` pins **`tongflow==0.0.23`** (PyPI) in its `pip_install`, matching the version in [`pyproject.toml`](pyproject.toml). Bump that pin in every plugin when you publish a new release.
 
+## Run a workflow as an embedded engine
+
+The SDK can also **execute** a workflow exported from the TongFlow canvas, so
+TongFlow can be embedded as an execution engine in any Python app — no running
+desktop app required. Export `*.executable.json` from the canvas menu
+("Export Executable"), then:
+
+```python
+from tongflow import run_workflow
+
+result = run_workflow(
+    "my-flow.executable.json",
+    inputs={"input_ab12cd34": {"texts": ["a cute cat"]}},  # keyed by WorkflowInput.name
+    auto_install=True,         # clone missing plugins + provision a shared venv
+)
+print(result["status"])           # "success" | "failed"
+# inline mode (default): binary outputs come back as {bytesBase64, mime, filename}
+print(result["outputs"])          # {nodeId -> ABI output}
+print(result["outputs_by_name"])  # {output name -> [values]}
+```
+
+`run_workflow` interprets the exported plan (already topologically sorted, with
+resolved bindings and output routes), materializes asset inputs, spawns each
+plugin's local `entry.py`, and returns each node's output. With
+`auto_install=True` it collects the `pluginId`s the workflow needs, clones any
+that are missing (`{org}/{pluginId}.git`, default org `https://github.com/tong-io`;
+override per plugin via `plugin_git_urls=`), and installs `tongflow` (from PyPI)
+plus each plugin's `requirements.txt` into a shared venv. It stays
+backend-neutral — a deploy-first plugin's `entry.py` still deploys-once and
+invokes its remote backend.
+
+### Where it writes to disk
+
+Running a workflow touches the disk in a few places. Defaults follow the desktop
+app's per-user directory so the SDK and the app **share** plugins/venv and the
+SDK does **not** pollute your working directory:
+
+| What | Default location | Override |
+|---|---|---|
+| Cloned plugins | `<user-data>/plugins` | `plugins_dir=` / `TONGFLOW_PLUGINS_DIR` |
+| Shared plugin venv | `<user-data>/data/.tongflow/plugin-venv` | `data_dir=` / `TONGFLOW_DATA_DIR` |
+| Binary outputs | **none by default** (kept in memory) | see below |
+
+`<user-data>` is `~/Library/Application Support/TongFlow` (macOS),
+`%APPDATA%\TongFlow` (Windows), or `$XDG_DATA_HOME/TongFlow` (Linux).
+
+**Outputs are inline by default** (`inline_outputs=True`): node outputs and
+intermediate assets stay in memory, and binary results come back as
+`{bytesBase64, mime, filename}` — nothing is written for them. Pass
+`inline_outputs=False` (optionally with `out_dir=`) to spill binaries to disk and
+get `file_key` paths instead. Cloning plugins and the venv always require disk.
+
 ## Plugin identity
 
 Plugin Python source is the single source of truth. The scanner derives plugin
