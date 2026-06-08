@@ -50,7 +50,7 @@ function pythonIsModern(exe: string): boolean {
 }
 
 /** First interpreter that runs AND is >= 3.10 (the SDK's minimum). */
-function resolveBasePython(): string | null {
+export function resolveBasePython(): string | null {
     const candidates = [
         process.env.PYTHON?.trim(),
         "python3.13",

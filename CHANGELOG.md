@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- Python SDK `run_workflow`: execute an exported workflow as an embedded engine (`tongflow.engine`), no running desktop app required. Auto-discovers/clones missing plugins, provisions a shared venv, and (by default) keeps outputs inline in memory. SDK published to PyPI as `tongflow==0.0.24`.
+- Canvas export split into "Export Workflow" (`.workflow.json`, with canvas, re-importable) and "Export Executable" (`.executable.json`, lean plan for `run_workflow`).
+
+### Changed
+- Workflow execution is now unified on the single SDK engine: the app delegates workflow runs to `python -m tongflow.engine` over NDJSON, removing the duplicate in-process TypeScript runner.
+
 ### Security
 - Upgrade Next.js 15.4.7 → 15.5.19 to patch CVE-2025-66478.
 
