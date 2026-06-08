@@ -195,6 +195,8 @@
             "saveSuccess": "保存しました！",
             "saveFailed": "保存に失敗しました。もう一度お試しください",
             "exportJson": "JSON をエクスポート",
+            "exportWorkflow": "ワークフローをエクスポート",
+            "exportExecutable": "実行可能ファイルをエクスポート",
             "importJson": "JSON をインポート",
             "importJsonInvalid": "解析できません：JSON が無効か形式が違います。",
             "importJsonNoCanvas": "キャンバスデータがありません（originalFlow、flow、または nodes/edges が必要です）。",

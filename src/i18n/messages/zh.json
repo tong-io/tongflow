@@ -195,6 +195,8 @@
             "saveSuccess": "保存成功！",
             "saveFailed": "保存失败，请重试",
             "exportJson": "导出 JSON",
+            "exportWorkflow": "导出工作流",
+            "exportExecutable": "导出可执行文件",
             "importJson": "导入 JSON",
             "importJsonInvalid": "无法解析：不是有效的 JSON 或结构不正确。",
             "importJsonNoCanvas": "该文件缺少画布数据（需要 originalFlow、flow 或根级 nodes/edges）。",

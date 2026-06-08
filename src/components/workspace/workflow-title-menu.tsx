@@ -189,13 +189,18 @@ export function WorkflowTitleMenu() {
         }
     };
 
-    const handleExportJson = () => {
+    // Export two flavors:
+    //  - workflow:   includes `originalFlow` (the canvas) so it can be
+    //    re-imported and edited. File suffix `.workflow.json`.
+    //  - executable: omits `originalFlow` — a lean execution plan for the
+    //    Python SDK `run_workflow`. File suffix `.executable.json`.
+    const exportToFile = (includeOriginalFlow: boolean, suffix: string) => {
         setMenuOpen(false);
         try {
             const executable = exportWorkflow(nodes, edges, {
                 name: workflowName,
                 description: workflowDescription || "",
-                includeOriginalFlow: true,
+                includeOriginalFlow,
             });
             const text = JSON.stringify(executable, null, 2);
             const blob = new Blob([text], {
@@ -204,7 +209,7 @@ export function WorkflowTitleMenu() {
             const url = URL.createObjectURL(blob);
             const a = document.createElement("a");
             a.href = url;
-            a.download = `${safeWorkflowFileName(workflowName)}.workflow.json`;
+            a.download = `${safeWorkflowFileName(workflowName)}.${suffix}.json`;
             a.click();
             URL.revokeObjectURL(url);
             toast.success(t("exportJsonSuccess"));
@@ -213,6 +218,9 @@ export function WorkflowTitleMenu() {
             toast.error(t("exportJsonFailed"));
         }
     };
+
+    const handleExportWorkflow = () => exportToFile(true, "workflow");
+    const handleExportExecutable = () => exportToFile(false, "executable");
 
     const openImportJsonPicker = () => {
         setMenuOpen(false);
@@ -304,11 +312,18 @@ export function WorkflowTitleMenu() {
                             {t("saveAs")}
                         </div>
                         <div
-                            onClick={handleExportJson}
+                            onClick={handleExportWorkflow}
                             className="flex items-center px-3 py-2 text-sm cursor-pointer hover:bg-gray-100 dark:hover:bg-zinc-800"
                         >
                             <Download className="mr-2 h-4 w-4" />
-                            {t("exportJson")}
+                            {t("exportWorkflow")}
+                        </div>
+                        <div
+                            onClick={handleExportExecutable}
+                            className="flex items-center px-3 py-2 text-sm cursor-pointer hover:bg-gray-100 dark:hover:bg-zinc-800"
+                        >
+                            <Download className="mr-2 h-4 w-4" />
+                            {t("exportExecutable")}
                         </div>
                         <div
                             onClick={openImportJsonPicker}
