@@ -16,13 +16,10 @@ import { NodePluginSelect } from "./node-plugin-select";
 
 export function pluginDisplayName(pluginId: string): string {
     const parts = pluginId.split("-").filter(Boolean);
-    const semantic =
-        parts[0] === "tongflow" && (parts[1] === "modal" || parts[1] === "api")
-            ? parts.slice(2)
-            : parts;
-    return semantic
-        .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
-        .join(" ");
+    // Strip only the leading vendor prefix, keep the type segment
+    // (e.g. "tongflow-api-openai" -> "api-openai").
+    const semantic = parts[0] === "tongflow" ? parts.slice(1) : parts;
+    return semantic.join("-");
 }
 
 type NodePluginIdSelectProps = {

@@ -99,6 +99,13 @@ export function useAbiForm<F extends NodeSlot>(
     const dataRef = useRef(data);
     dataRef.current = data;
 
+    // Mirror of `state` so set/patch can compute the next value without a
+    // functional updater. Writing to the flow store inside a setState updater
+    // would run during render and trip React's "setState while rendering"
+    // warning (the flow store is shared with other components, e.g. SmartIsland).
+    const stateRef = useRef(state);
+    stateRef.current = state;
+
     // Sync inbound data changes (e.g. undo, programmatic edit) into local state.
     useEffect(() => {
         setState(pickConfig(spec, data));
@@ -118,22 +125,20 @@ export function useAbiForm<F extends NodeSlot>(
             field: K,
             value: ConfigState<F>[K],
         ) => {
-            setState((prev) => {
-                const next = { ...prev, [field]: value };
-                writeBack(next);
-                return next;
-            });
+            const next = { ...stateRef.current, [field]: value };
+            stateRef.current = next;
+            setState(next);
+            writeBack(next);
         },
         [writeBack],
     );
 
     const patch = useCallback(
         (partial: ConfigState<F>) => {
-            setState((prev) => {
-                const next = { ...prev, ...partial };
-                writeBack(next);
-                return next;
-            });
+            const next = { ...stateRef.current, ...partial };
+            stateRef.current = next;
+            setState(next);
+            writeBack(next);
         },
         [writeBack],
     );
