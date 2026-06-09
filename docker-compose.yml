@@ -1,0 +1,29 @@
+# Self-host TongFlow web with Docker Compose.
+#   docker compose up -d   →   http://localhost:3000
+#
+# Uses the prebuilt GHCR image by default. To build locally instead, comment out
+# `image:` and uncomment `build: .`.
+#
+# All API keys are optional — you can also set them in-app under Settings
+# (persisted to /data/settings.json). Pass them here via a .env file or shell env.
+
+services:
+  tongflow:
+    image: ghcr.io/tong-io/tongflow:latest
+    # build: .
+    ports:
+      - "3000:3000"
+    volumes:
+      - tongflow-data:/data
+      - tongflow-plugins:/plugins
+    environment:
+      MODAL_TOKEN_ID: ${MODAL_TOKEN_ID:-}
+      MODAL_TOKEN_SECRET: ${MODAL_TOKEN_SECRET:-}
+      OPENROUTER_API_KEY: ${OPENROUTER_API_KEY:-}
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+    restart: unless-stopped
+
+volumes:
+  tongflow-data:
+  tongflow-plugins:

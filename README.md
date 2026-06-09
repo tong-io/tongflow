@@ -195,6 +195,28 @@ Requires **Node** (with `pnpm`) and a **Python 3.10+** interpreter on your `PATH
 
 Open **`http://localhost:3000`** and the canvas is live. Install/configure plugins exactly as in Steps 2–4 above (credentials go in the in-app **Settings** dialog, or a project `.env`).
 
+## Run with Docker
+
+A self-host image is published to GHCR — no Node/Python/pnpm setup required:
+
+```bash
+docker run -d -p 3000:3000 \
+  -v tongflow-data:/data -v tongflow-plugins:/plugins \
+  ghcr.io/tong-io/tongflow:latest
+```
+
+Then open **`http://localhost:3000`**. Or with Compose (clones this repo's [`docker-compose.yml`](docker-compose.yml)):
+
+```bash
+docker compose up -d
+```
+
+To build the image yourself instead of pulling: `docker build -t tongflow .`
+
+**Data & credentials.** Everything writable lives in the `/data` volume (SQLite db, uploads, settings). API keys are optional — set them in the in-app **Settings** dialog, or pass them at launch (`-e OPENROUTER_API_KEY=…`); supported keys: `OPENROUTER_API_KEY`, `GEMINI_API_KEY`, `OPENAI_API_KEY`, `MODAL_TOKEN_ID` / `MODAL_TOKEN_SECRET`.
+
+**Plugins.** The image ships no plugins — install them from the in-app plugin manager (first install needs network access to GitHub). On first run, a plugin provisions a shared Python venv under `/data/.tongflow/plugin-venv` (installs the SDK + the plugin's `requirements.txt` from PyPI), so the first run is slower and needs network. Modal-backed plugins additionally need a Modal token.
+
 ## Custom plugins
 
 Every runnable node is backed by a **contract** — the ABI ([`config/tongflow.abi.json`](config/tongflow.abi.json)) — that defines *what capabilities exist* and *what each one's input/output looks like*, independent of *who* implements it. A plugin is just a small Python package that picks one or more ABI slots and supplies the **how**, annotated against the ABI-generated types via the tongflow Python SDK.
