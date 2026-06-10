@@ -33,6 +33,10 @@
     "Navigation": {
         "toggleTheme": "テーマ切り替え",
         "language": "言語",
+        "workflows": "マイワークフロー",
+        "tasks": "マイタスク",
+        "portfolio": "マイポートフォリオ",
+        "community": "Discord に参加",
         "myTasks": "マイタスク",
         "noTasks": "タスクがありません",
         "noMore": "これ以上タスクはありません",

@@ -27,6 +27,9 @@ export function ModeSwitch({ onChange }: ModeSwitchProps) {
     const workspaceMode = useTaskStore((state) => state.workspaceMode);
     const setWorkspaceMode = useTaskStore((state) => state.setWorkspaceMode);
     const [mounted, setMounted] = useState(false);
+    // Control the tooltip via hover/focus so toggling the switch (a pointer-down
+    // on the trigger) doesn't dismiss it the way Radix's default behavior does.
+    const [tooltipOpen, setTooltipOpen] = useState(false);
 
     useEffect(() => {
         setMounted(true);
@@ -55,9 +58,15 @@ export function ModeSwitch({ onChange }: ModeSwitchProps) {
     const isExecuteMode = workspaceMode === "execute";
 
     return (
-        <Tooltip>
+        <Tooltip open={tooltipOpen}>
             <TooltipTrigger asChild>
-                <div className="flex items-center gap-1.5 p-2 rounded-xl bg-background/80 backdrop-blur-md border border-border/50 dark:border-gray-500/60 transition-all duration-300 hover:border-border dark:hover:border-gray-400/70 cursor-pointer">
+                <div
+                    className="flex items-center gap-1.5 p-2 rounded-xl bg-background/80 backdrop-blur-md border border-border/50 dark:border-gray-500/60 transition-all duration-300 hover:border-border dark:hover:border-gray-400/70 cursor-pointer"
+                    onPointerEnter={() => setTooltipOpen(true)}
+                    onPointerLeave={() => setTooltipOpen(false)}
+                    onFocus={() => setTooltipOpen(true)}
+                    onBlur={() => setTooltipOpen(false)}
+                >
                     <Sparkles
                         className={`size-4 transition-all duration-200 ${
                             !isExecuteMode

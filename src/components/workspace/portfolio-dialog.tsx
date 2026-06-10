@@ -25,6 +25,11 @@ import {
     DialogTrigger,
 } from "@/components/ui/dialog";
 import { showErrorToast } from "@/components/ui/error-toast";
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { Waterfall } from "@/components/ui/waterfall";
 import {
     listMaterials,
@@ -401,9 +406,11 @@ function FilterButton({
 
 interface PortfolioDialogProps {
     trigger?: React.ReactNode;
+    /** Optional tooltip shown when hovering the (custom) trigger. */
+    tooltip?: string;
 }
 
-export function PortfolioDialog({ trigger }: PortfolioDialogProps) {
+export function PortfolioDialog({ trigger, tooltip }: PortfolioDialogProps) {
     const t = useTranslations("portfolio");
     const [open, setOpen] = useState(false);
     const [materials, setMaterials] = useState<Material[]>([]);
@@ -455,7 +462,16 @@ export function PortfolioDialog({ trigger }: PortfolioDialogProps) {
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             {trigger ? (
-                <DialogTrigger asChild>{trigger}</DialogTrigger>
+                tooltip ? (
+                    <Tooltip>
+                        <TooltipTrigger asChild>
+                            <DialogTrigger asChild>{trigger}</DialogTrigger>
+                        </TooltipTrigger>
+                        <TooltipContent side="bottom">{tooltip}</TooltipContent>
+                    </Tooltip>
+                ) : (
+                    <DialogTrigger asChild>{trigger}</DialogTrigger>
+                )
             ) : (
                 <DialogTrigger asChild>
                     <Button

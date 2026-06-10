@@ -15,6 +15,11 @@ import {
     SheetHeader,
     SheetTitle,
 } from "@/components/ui/sheet";
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { PortfolioDialog } from "@/components/workspace/portfolio-dialog";
 import { WorkflowDialog } from "@/components/workspace/workflow-dialog";
 import { listTasks, type Task } from "@/lib/api/task";
@@ -89,10 +94,12 @@ export function WorkspaceLeftNav() {
             <div className="flex items-center gap-2">
                 {/* Workflow button */}
                 <WorkflowDialog
+                    tooltip={t("workflows")}
                     trigger={
                         <Button
                             variant="ghost"
                             size="icon"
+                            aria-label={t("workflows")}
                             className="h-10 w-10 rounded-xl bg-white border border-gray-100 hover:bg-gray-50 dark:bg-zinc-800 dark:border-zinc-700 dark:text-zinc-200 dark:hover:bg-zinc-700 transition-all duration-200"
                         >
                             <Workflow className="h-5 w-5 text-gray-600 dark:text-gray-200" />
@@ -101,21 +108,29 @@ export function WorkspaceLeftNav() {
                 />
 
                 {/* Task button */}
-                <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => setIsTaskSheetOpen(true)}
-                    className="h-10 w-10 rounded-xl bg-white border border-gray-100 hover:bg-gray-50 dark:bg-zinc-800 dark:border-zinc-700 dark:text-zinc-200 dark:hover:bg-zinc-700 transition-all duration-200"
-                >
-                    <Zap className="h-5 w-5 text-gray-600 dark:text-gray-200" />
-                </Button>
+                <Tooltip>
+                    <TooltipTrigger asChild>
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => setIsTaskSheetOpen(true)}
+                            aria-label={t("tasks")}
+                            className="h-10 w-10 rounded-xl bg-white border border-gray-100 hover:bg-gray-50 dark:bg-zinc-800 dark:border-zinc-700 dark:text-zinc-200 dark:hover:bg-zinc-700 transition-all duration-200"
+                        >
+                            <Zap className="h-5 w-5 text-gray-600 dark:text-gray-200" />
+                        </Button>
+                    </TooltipTrigger>
+                    <TooltipContent side="bottom">{t("tasks")}</TooltipContent>
+                </Tooltip>
 
                 {/* Portfolio button */}
                 <PortfolioDialog
+                    tooltip={t("portfolio")}
                     trigger={
                         <Button
                             variant="ghost"
                             size="icon"
+                            aria-label={t("portfolio")}
                             className="h-10 w-10 rounded-xl bg-white border border-gray-100 hover:bg-gray-50 dark:bg-zinc-800 dark:border-zinc-700 dark:text-zinc-200 dark:hover:bg-zinc-700 transition-all duration-200"
                         >
                             <FolderOpen className="h-5 w-5 text-gray-600 dark:text-gray-200" />

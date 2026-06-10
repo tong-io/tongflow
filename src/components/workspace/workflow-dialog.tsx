@@ -23,6 +23,11 @@ import {
     DialogTrigger,
 } from "@/components/ui/dialog";
 import { showErrorToast } from "@/components/ui/error-toast";
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { Waterfall } from "@/components/ui/waterfall";
 import { useFlow } from "@/hooks/use-flow";
 import { listWorkflows, type Workflow } from "@/lib/api/workspace";
@@ -198,9 +203,11 @@ const WorkflowCard = memo(function WorkflowCard({
 
 interface WorkflowDialogProps {
     trigger?: React.ReactNode;
+    /** Optional tooltip shown when hovering the (custom) trigger. */
+    tooltip?: string;
 }
 
-export function WorkflowDialog({ trigger }: WorkflowDialogProps) {
+export function WorkflowDialog({ trigger, tooltip }: WorkflowDialogProps) {
     const t = useTranslations("Workspace.dialog");
     const [open, setOpen] = useState(false);
     const [workflows, setWorkflows] = useState<Workflow[]>([]);
@@ -299,7 +306,16 @@ export function WorkflowDialog({ trigger }: WorkflowDialogProps) {
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             {trigger ? (
-                <DialogTrigger asChild>{trigger}</DialogTrigger>
+                tooltip ? (
+                    <Tooltip>
+                        <TooltipTrigger asChild>
+                            <DialogTrigger asChild>{trigger}</DialogTrigger>
+                        </TooltipTrigger>
+                        <TooltipContent side="bottom">{tooltip}</TooltipContent>
+                    </Tooltip>
+                ) : (
+                    <DialogTrigger asChild>{trigger}</DialogTrigger>
+                )
             ) : (
                 <DialogTrigger asChild>
                     <Button

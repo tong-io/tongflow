@@ -108,18 +108,22 @@ function LocaleMenu() {
 
     return (
         <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-                <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon"
-                    className={navBtnClass}
-                    title={t("language")}
-                    aria-label={t("language")}
-                >
-                    <Globe className="h-5 w-5" />
-                </Button>
-            </DropdownMenuTrigger>
+            <Tooltip>
+                <TooltipTrigger asChild>
+                    <DropdownMenuTrigger asChild>
+                        <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            className={navBtnClass}
+                            aria-label={t("language")}
+                        >
+                            <Globe className="h-5 w-5" />
+                        </Button>
+                    </DropdownMenuTrigger>
+                </TooltipTrigger>
+                <TooltipContent side="bottom">{t("language")}</TooltipContent>
+            </Tooltip>
             <DropdownMenuContent align="end" className="min-w-[140px]">
                 {LOCALE_OPTIONS.map((opt) => (
                     <DropdownMenuItem
@@ -139,23 +143,32 @@ function LocaleMenu() {
 }
 
 export function WorkspaceNav() {
+    const t = useTranslations("Navigation");
     return (
         <div className="flex items-center gap-2">
             <PluginsDialog />
             <SettingsDialog />
             <ThemeToggleButton />
             <LocaleMenu />
-            <Button
-                variant="ghost"
-                size="icon"
-                onClick={() =>
-                    window.open("https://discord.gg/K7V8az94Zf", "_blank")
-                }
-                className={navBtnClass}
-                aria-label="Discord"
-            >
-                <DiscordIcon className="h-5 w-5" />
-            </Button>
+            <Tooltip>
+                <TooltipTrigger asChild>
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() =>
+                            window.open(
+                                "https://discord.gg/K7V8az94Zf",
+                                "_blank",
+                            )
+                        }
+                        className={navBtnClass}
+                        aria-label={t("community")}
+                    >
+                        <DiscordIcon className="h-5 w-5" />
+                    </Button>
+                </TooltipTrigger>
+                <TooltipContent side="bottom">{t("community")}</TooltipContent>
+            </Tooltip>
         </div>
     );
 }

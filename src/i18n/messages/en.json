@@ -33,6 +33,10 @@
     "Navigation": {
         "toggleTheme": "Toggle theme",
         "language": "Language",
+        "workflows": "My Workflows",
+        "tasks": "My Tasks",
+        "portfolio": "My Portfolio",
+        "community": "Join our Discord",
         "myTasks": "My Tasks",
         "noTasks": "No tasks yet",
         "noMore": "No more tasks",

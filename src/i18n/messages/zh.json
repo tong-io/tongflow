@@ -33,6 +33,10 @@
     "Navigation": {
         "toggleTheme": "切换主题",
         "language": "语言",
+        "workflows": "我的工作流",
+        "tasks": "我的任务",
+        "portfolio": "我的作品集",
+        "community": "加入 Discord 社区",
         "myTasks": "我的任务",
         "noTasks": "暂无任务",
         "noMore": "没有更多了",
