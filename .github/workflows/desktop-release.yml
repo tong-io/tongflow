@@ -28,7 +28,9 @@ jobs:
                     - os: macos-14 # Apple Silicon
                       arch: arm64
                       flag: "--mac --arm64"
-                    - os: macos-13 # Intel
+                    # macos-13 was GitHub's last x64 macOS image and is retired
+                    # (jobs queue forever); macos-15-intel is its replacement.
+                    - os: macos-15-intel # Intel
                       arch: x64
                       flag: "--mac --x64"
                     - os: windows-latest
