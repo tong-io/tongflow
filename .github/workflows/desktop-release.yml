@@ -71,6 +71,13 @@ jobs:
                   pnpm build:main
                   pnpm assemble
 
+            # Boot the assembled bundle with the bundled Node and require a
+            # non-5xx "/" before packaging — a broken bundle (dangling
+            # symlinks, version skew) must fail the release, not ship.
+            - name: Smoke-test assembled app
+              working-directory: desktop
+              run: pnpm smoke
+
             - name: Package & publish to GitHub Release
               working-directory: desktop
               run: pnpm exec electron-builder ${{ matrix.flag }} --publish always

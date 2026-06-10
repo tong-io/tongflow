@@ -7,12 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.0.2] - 2026-06-10
+
 ### Added
 - Python SDK `run_workflow`: execute an exported workflow as an embedded engine (`tongflow.engine`), no running desktop app required. Auto-discovers/clones missing plugins, provisions a shared venv, and (by default) keeps outputs inline in memory. SDK published to PyPI as `tongflow==0.0.24`.
 - Canvas export split into "Export Workflow" (`.workflow.json`, with canvas, re-importable) and "Export Executable" (`.executable.json`, lean plan for `run_workflow`).
+- Desktop: crash diagnostics — main-process and server logs persist to `userData/logs/tongflow.log`, startup failures show the log tail and log path, and load/renderer/server crashes render an in-window diagnostic page instead of a black screen.
+- Desktop release CI: smoke-test the assembled bundle (boot it with the bundled Node, require a non-5xx home page) before packaging.
 
 ### Changed
 - Workflow execution is now unified on the single SDK engine: the app delegates workflow runs to `python -m tongflow.engine` over NDJSON, removing the duplicate in-process TypeScript runner.
+
+### Fixed
+- Desktop packaging shipped pnpm symlinks pointing into the build machine's filesystem, leaving every distributed install broken (black screen — all pages 500). The assembler now hoists `node_modules` into a flat, symlink-free layout and fails the build if any symlink leaks into the bundle.
+- Desktop bundles no longer include dev-machine state (SQLite database, uploads, installed plugins, `sdk/.venv`), shrinking the macOS dmg from over 1 GB to ~200 MB.
+- The desktop shell no longer treats a 5xx response as "server ready".
 
 ### Security
 - Upgrade Next.js 15.4.7 → 15.5.19 to patch CVE-2025-66478.

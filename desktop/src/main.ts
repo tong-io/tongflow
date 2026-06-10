@@ -1,9 +1,15 @@
 import { app, type BrowserWindow, dialog } from "electron";
 import { findFreePort } from "./free-port";
 import { ensureUserDirs } from "./fs-setup";
+import { initLogFile, logFilePath, logLine, recentLogs } from "./logging";
 import { ensurePythonEnv } from "./python-manager";
 import { startServer, stopServer } from "./server-manager";
-import { createMainWindow, createSplash, setSplashStatus } from "./window";
+import {
+    createMainWindow,
+    createSplash,
+    setSplashStatus,
+    showErrorPage,
+} from "./window";
 
 let mainWindow: BrowserWindow | null = null;
 let splash: BrowserWindow | null = null;
@@ -23,11 +29,12 @@ if (!app.requestSingleInstanceLock()) {
 }
 
 async function boot(): Promise<void> {
+    initLogFile();
     splash = createSplash();
 
     const log = (line: string) => {
-        // Surface key progress on the splash and keep a full trace in the console.
-        console.log(line);
+        // Surface key progress on the splash and keep a full trace on disk.
+        logLine(line);
         setSplashStatus(splash, line);
     };
 
@@ -39,7 +46,7 @@ async function boot(): Promise<void> {
 
         const port = await findFreePort();
         log("Starting TongFlow server…");
-        await startServer(port, (line) => console.log(line));
+        await startServer(port, logLine, onServerCrash);
 
         mainWindow = createMainWindow(`http://127.0.0.1:${port}`);
         mainWindow.on("closed", () => {
@@ -56,6 +63,17 @@ async function boot(): Promise<void> {
     }
 }
 
+/** Server died after a successful start: show the failure instead of a dead UI. */
+function onServerCrash(code: number | null): void {
+    const message = `TongFlow server exited unexpectedly (code ${code})`;
+    logLine(`[tongflow] ${message}`);
+    if (mainWindow && !mainWindow.isDestroyed()) {
+        showErrorPage(mainWindow, "TongFlow server stopped", message);
+    } else {
+        fatal(new Error(message));
+    }
+}
+
 /** electron-updater is optional; only runs in packaged builds with a feed. */
 async function maybeCheckForUpdates(): Promise<void> {
     if (!app.isPackaged) return;
@@ -69,9 +87,16 @@ async function maybeCheckForUpdates(): Promise<void> {
 
 function fatal(err: unknown): void {
     const message = err instanceof Error ? err.message : String(err);
-    console.error("[tongflow] fatal:", err);
+    logLine(`[tongflow] fatal: ${message}`);
     if (splash && !splash.isDestroyed()) splash.close();
-    dialog.showErrorBox("TongFlow failed to start", message);
+    // Include the log tail + log path so a distributed build produces an
+    // actionable report, not just a one-line message.
+    dialog.showErrorBox(
+        "TongFlow failed to start",
+        `${message}\n\nFull log: ${logFilePath()}\n\nRecent log output:\n${
+            recentLogs(30) || "(no log output captured)"
+        }`,
+    );
     app.quit();
 }
 
