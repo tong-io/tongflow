@@ -79,7 +79,7 @@ export interface ExecutableNode {
     type: string;
     /** ABI feature identifier (slot) */
     feature: string;
-    /** Plugin implementation chosen on the canvas (`tongflow-modal-*`). */
+    /** Plugin implementation chosen on the canvas (`tongflow-<runner>-*`). */
     pluginId: string;
     /** Node display name (used for mobile execution progress display) */
     label?: string;

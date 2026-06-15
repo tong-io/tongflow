@@ -11,7 +11,6 @@ import {
 import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useState } from "react";
 import toast from "react-hot-toast";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
     Dialog,
@@ -34,11 +33,8 @@ import { logger } from "@/lib/logger";
 const navBtnClass =
     "h-10 w-10 rounded-xl bg-white border border-gray-100 hover:bg-gray-50 text-gray-500 hover:text-gray-900 dark:bg-zinc-800 dark:border-zinc-700 dark:text-gray-400 dark:hover:text-white dark:hover:bg-zinc-700 transition-all duration-200";
 
-type Runner = "modal" | "api";
-
 interface OfficialPlugin {
     id: string;
-    runner: Runner;
     installed: boolean;
 }
 
@@ -258,9 +254,6 @@ export function PluginsDialog() {
                                                 {p.id}
                                             </a>
                                         </div>
-                                        <Badge variant="secondary">
-                                            {p.runner}
-                                        </Badge>
                                         {p.installed ? (
                                             updates[p.id] === false ? (
                                                 <Button
@@ -343,7 +336,7 @@ export function PluginsDialog() {
                             <Input
                                 value={gitUrl}
                                 onChange={(e) => setGitUrl(e.target.value)}
-                                placeholder="https://github.com/org/tongflow-modal-foo.git"
+                                placeholder="https://github.com/org/tongflow-api-foo.git"
                                 onKeyDown={(e) => {
                                     if (e.key === "Enter" && !cloning)
                                         void installCustom();

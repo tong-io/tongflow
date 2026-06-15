@@ -2,7 +2,7 @@ import "server-only";
 
 import type { NodeSlot } from "@/generated/abi";
 import { getPluginConfig } from "@/lib/plugins/plugins-registry.server";
-import { convertAssetOutputsToFileRefs } from "./convert-modal-output-fileref";
+import { convertAssetOutputsToFileRefs } from "./convert-output-fileref";
 import type { PluginExecRequest, PluginExecResult } from "./types";
 
 export async function executePlugin<S extends NodeSlot = NodeSlot>(

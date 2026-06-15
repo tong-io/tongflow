@@ -12,26 +12,6 @@ import { notifyTask } from "@/lib/task/emitter";
 import { parseProgressLine } from "../progress-protocol";
 import type { PluginExecRequest, PluginExecResult } from "../types";
 
-function normalizePromptForNodeSlot(
-    nodeSlot: string,
-    input: Record<string, unknown>,
-): Record<string, unknown> {
-    if (nodeSlot !== "combine-text") return input;
-
-    // `combine_text` node sends `{ texts: string[], userPrompt?: string, ... }`.
-    // Text handlers expect `{ text: string, userPrompt?: string, ... }`.
-    const texts = input.texts;
-    if (Array.isArray(texts)) {
-        const joined = texts.filter((x) => typeof x === "string").join("\n\n");
-        return {
-            ...input,
-            text: joined,
-            texts: undefined,
-        };
-    }
-    return input;
-}
-
 function tryParseAbiOutput(stdout: string): Record<string, unknown> | null {
     const trimmed = stdout.trim();
     if (!trimmed) return null;
@@ -59,10 +39,7 @@ export async function execPlugin<S extends NodeSlot>(
         );
     }
 
-    const prompt = normalizePromptForNodeSlot(
-        req.nodeSlot,
-        req.input as unknown as Record<string, unknown>,
-    );
+    const prompt = req.input as unknown as Record<string, unknown>;
 
     const pluginDir = join(pluginsDir(), cfg.localSubdir);
     // Every plugin ships its own local entry.py (`python entry.py`). For a

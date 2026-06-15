@@ -48,20 +48,6 @@ def parse_progress_line(line: str) -> Optional[dict[str, Any]]:
     return out
 
 
-def _normalize_prompt(node_slot: str, prompt: dict[str, Any]) -> dict[str, Any]:
-    """Mirror ``normalizePromptForNodeSlot``: combine-text joins texts -> text."""
-    if node_slot != "combine-text":
-        return prompt
-    texts = prompt.get("texts")
-    if isinstance(texts, list):
-        joined = "\n\n".join(x for x in texts if isinstance(x, str))
-        out = dict(prompt)
-        out["text"] = joined
-        out.pop("texts", None)
-        return out
-    return prompt
-
-
 def _try_parse_abi_output(stdout: str) -> Optional[dict[str, Any]]:
     trimmed = stdout.strip()
     if not trimmed:
@@ -86,7 +72,6 @@ def invoke_plugin(
     env_extra: Optional[dict[str, str]] = None,
     on_progress: Optional[ProgressCb] = None,
 ) -> dict[str, Any]:
-    prompt = _normalize_prompt(node_slot, prompt)
     payload = json.dumps(
         {
             "pluginId": plugin_id,

@@ -6,7 +6,7 @@
 
 ## Directory conventions
 
-- **`src/lib/`** = business code, organized by domain subdirectory (`abi/`, `task/`, `workflow/`, `plugin-executor/`, `plugins/`, `modal/`, `file/`, `upload/`, `schema/`, `api/`). May hold state, perform I/O, or be server-only.
+- **`src/lib/`** = business code, organized by domain subdirectory (`abi/`, `task/`, `workflow/`, `plugin-executor/`, `plugins/`, `file/`, `upload/`, `schema/`, `api/`, `runtime/`, `settings/`). May hold state, perform I/O, or be server-only. (Drizzle DB schema lives separately under [`src/db/`](src/db/), e.g. the `tasks` table in [`src/db/workspace.schema.ts`](src/db/workspace.schema.ts).)
 - **`src/utils/`** = pure helpers only (no I/O, no business concepts, ≤ a few small files). Anything stateful or domain-aware belongs in `src/lib/`.
 - **Server-only files** are suffixed `.server.ts` and live under a domain subdir (e.g. [`src/lib/plugins/plugins-registry.server.ts`](src/lib/plugins/plugins-registry.server.ts)).
 - **Node component subdirectories** under [`src/components/workspace/nodes/`](src/components/workspace/nodes/):
@@ -40,7 +40,7 @@
 **Generated Pydantic model conventions** ([`sdk/tongflow/gen_models.py`](sdk/tongflow/gen_models.py)):
 - `class FooInput(BaseModel)` + `model_config = ConfigDict(extra="forbid")` per slot, per direction.
 - Required field: `field: T` (no default). Optional: `field: T | None = None`.
-- Input `$ref: Asset` → `Asset`. **Output `$ref: <X>Ref` → `Asset`** — plugins emit `bytesBase64`; the server's [`convertAssetOutputsToFileRefs`](src/lib/plugin-executor/convert-modal-output-fileref.ts) post-processes those into `{file_key}` for downstream nodes.
+- Input `$ref: Asset` → `Asset`. **Output `$ref: <X>Ref` → `Asset`** — plugins emit `bytesBase64`; the server's [`convertAssetOutputsToFileRefs`](src/lib/plugin-executor/convert-output-fileref.ts) post-processes those into `{file_key}` for downstream nodes.
 - `Asset` / `*Ref` themselves are hand-maintained BaseModels in [`sdk/tongflow/models/asset.py`](sdk/tongflow/models/asset.py); the generator does not overwrite that file.
 
 **`@node_slot` decorator** ([`sdk/tongflow/slots.py`](sdk/tongflow/slots.py)) is the only chokepoint: it introspects the slot method's first parameter, deep-`model_construct`s the incoming dict into a `BaseModel` instance (recursively for nested `$ref` fields, no validation), and on return `model_dump(mode="json")`s a `BaseModel` back to a dict for the backend. Plugin code never sees or produces a raw `dict`.
@@ -56,7 +56,7 @@
 
 ## Wire / persistence shape
 
-- **Create-task API body:** `{feature, pluginId, prompt, nodeId}`. `pluginId` is top-level, **not** nested in `prompt`. `prompt` carries only ABI business fields. See [`src/app/api/task/create/route.ts`](src/app/api/task/create/route.ts).
+- **Create-task API body:** `{feature, pluginId, prompt, nodeId, workflowId?}`. `pluginId` is top-level, **not** nested in `prompt`. `prompt` carries only ABI business fields. See [`src/app/api/task/create/route.ts`](src/app/api/task/create/route.ts).
 - **`tasks` table:** `feature`, `plugin_id`, `prompt` (JSON, business fields only) live in separate columns. Don't reintroduce a `routing.pluginId` envelope inside `prompt`.
 - **Workflow exporter:** [`ExecutableNode.pluginId`](src/lib/workflow/executable-workflow.ts) is a top-level field. Workflow `callApi(node, params)` reads it directly.
 

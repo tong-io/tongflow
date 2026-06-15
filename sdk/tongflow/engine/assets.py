@@ -7,7 +7,7 @@ Two schema-driven passes that mirror the server:
   ``file_key`` / ``data:`` URL / http(s) URL / ``mem://`` handle into
   ``{bytesBase64, mime?, filename?}``.
 - :func:`convert_asset_outputs_to_file_refs` — translate
-  ``convert-modal-output-fileref.ts``: walk a slot's output schema for
+  ``convert-output-fileref.ts``: walk a slot's output schema for
   ``$ref: FileRef`` (single + array) and hand any ``bytesBase64`` the plugin
   returned to the :class:`~tongflow.engine.store.AssetStore`, replacing it with
   ``{file_key, mime?, filename?}``. The store decides memory vs disk.

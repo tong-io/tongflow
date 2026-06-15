@@ -6,7 +6,7 @@ module loads `tongflow.abi.json` and offers small schema predicates that mirror
 the server-side TypeScript helpers byte-for-byte:
 
 - ``schema_is_asset``  -> ``prepare-asset-input.server.ts`` (`#/$defs/Asset`)
-- ``schema_is_file_ref`` -> ``convert-modal-output-fileref.ts`` (FileRef family)
+- ``schema_is_file_ref`` -> ``convert-output-fileref.ts`` (FileRef family)
 """
 
 from __future__ import annotations

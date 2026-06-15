@@ -17,11 +17,8 @@ export interface OfficialPluginManifest {
     plugins: string[];
 }
 
-export type PluginRunner = "modal" | "api";
-
 export interface OfficialPluginInfo {
     id: string;
-    runner: PluginRunner;
     installed: boolean;
 }
 
@@ -44,11 +41,6 @@ export function isPluginInstalled(id: string): boolean {
     return existsSync(join(pluginsDir(), id));
 }
 
-/** Derive the runner from the naming convention (tongflow-modal-* / tongflow-api-*). */
-export function runnerFromId(id: string): PluginRunner {
-    return id.startsWith("tongflow-api-") ? "api" : "modal";
-}
-
 export function listOfficialPlugins(): {
     org: string;
     plugins: OfficialPluginInfo[];
@@ -58,7 +50,6 @@ export function listOfficialPlugins(): {
         org: manifest.org,
         plugins: manifest.plugins.map((id) => ({
             id,
-            runner: runnerFromId(id),
             installed: isPluginInstalled(id),
         })),
     };

@@ -3,15 +3,6 @@
 import { useEffect } from "react";
 import { create } from "zustand";
 
-export type ModalPluginPayload = {
-    appName: string;
-    clsName: string;
-    localSubdir: string;
-    deployFile: string;
-    downloadFile: string;
-    methodsByNodeSlot: Record<string, { methodName: string }>;
-};
-
 export type PluginsRegistryPayload = {
     version: 1;
     generatedAt: string;

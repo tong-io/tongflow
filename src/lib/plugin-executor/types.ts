@@ -16,5 +16,3 @@ export type PluginExecResult<S extends NodeSlot = NodeSlot> = SlotOutput<S> & {
     file_key?: string;
     error?: string;
 };
-
-export type PluginRunner = "modal" | "api";

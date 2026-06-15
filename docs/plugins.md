@@ -150,7 +150,7 @@ Binary media crosses the wire as an `Asset`
 - **Inputs** with a binary `$ref` arrive as `Asset` (already materialized — your plugin sees
   bytes, never a storage key).
 - **Outputs** are also produced as `Asset` (you emit bytes). The server's
-  [`convertAssetOutputsToFileRefs`](../src/lib/plugin-executor/convert-modal-output-fileref.ts)
+  [`convertAssetOutputsToFileRefs`](../src/lib/plugin-executor/convert-output-fileref.ts)
   uploads them and rewrites them into `{file_key}` refs for downstream nodes. You never deal
   with storage yourself.
 

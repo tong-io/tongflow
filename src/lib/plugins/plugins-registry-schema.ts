@@ -16,7 +16,7 @@ export const PluginMethodSchema = z.object({
 });
 
 export const PluginConfigSchema = z.object({
-    /** Relative to repo root, e.g. `plugins/tongflow-modal-qwen3asr` */
+    /** Relative to repo root, e.g. `plugins/tongflow-<runner>-foo` */
     localSubdir: z.string().min(1),
     /** nodeSlot -> handler that implements it (informational; the plugin
      * dispatches in-process by nodeSlot). */

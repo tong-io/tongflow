@@ -41,6 +41,11 @@ __pycache__/
 *.pyc
 *.pyo
 
+# Python test/tooling caches
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+
 # runtime-installed plugin packages (see docs/plugins.md)
 # Anchored to repo root so it does NOT also ignore src/lib/plugins/.
 # Keep the directory itself tracked via .gitkeep, but ignore everything in it.
