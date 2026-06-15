@@ -1,0 +1,28 @@
+{
+    "name": "tongflow-desktop",
+    "version": "0.1.0",
+    "description": "TongFlow desktop app (Electron shell around the Next.js standalone server + portable Python).",
+    "author": "tong-io",
+    "license": "AGPL-3.0-only",
+    "private": true,
+    "main": "dist/main.js",
+    "scripts": {
+        "build:main": "tsc -p tsconfig.json",
+        "assemble": "node scripts/assemble-app.mjs",
+        "fetch-runtimes": "node scripts/fetch-runtimes.mjs",
+        "smoke": "node scripts/smoke-test-app.mjs",
+        "start": "pnpm build:main && electron .",
+        "dist": "pnpm build:main && pnpm assemble && electron-builder",
+        "dist:mac": "pnpm build:main && pnpm assemble && electron-builder --mac",
+        "dist:win": "pnpm build:main && pnpm assemble && electron-builder --win"
+    },
+    "dependencies": {
+        "electron-updater": "6.3.9"
+    },
+    "devDependencies": {
+        "@types/node": "20.19.13",
+        "electron": "33.2.0",
+        "electron-builder": "25.1.8",
+        "typescript": "5"
+    }
+}

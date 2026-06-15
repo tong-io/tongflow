@@ -1,0 +1,50 @@
+# dependencies
+node_modules/
+
+# next.js
+.next/
+out/
+
+# production
+build/
+
+# env files
+.env
+.env.*
+!.env.example
+.envrc
+.env*.local
+.dev.vars
+
+# data
+data/
+
+# runtime-generated artifacts (build-time from ABI / plugin scan)
+.tongflow/
+
+# local feature registry overrides (see docs/feature-registry.md)
+.tongflow/features.local.json
+
+# private commercial/legal documents (contracts, order forms, signed agreements)
+legal/
+
+# misc
+.DS_Store
+*.tsbuildinfo
+next-env.d.ts
+
+# local Python venv (optional, e.g. pip install modal)
+.venv/
+
+# Python bytecode
+__pycache__/
+*.pyc
+*.pyo
+
+# runtime-installed plugin packages (see docs/plugins.md)
+# Anchored to repo root so it does NOT also ignore src/lib/plugins/.
+# Keep the directory itself tracked via .gitkeep, but ignore everything in it.
+/plugins/*
+!/plugins/.gitkeep
+
+.claude/

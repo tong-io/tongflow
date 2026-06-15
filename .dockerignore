@@ -1,0 +1,39 @@
+# Build context for the web (Next.js standalone) Docker image.
+# Keep this lean: the builder runs `pnpm install` + `pnpm build` from source,
+# so source dirs (src/, config/, scripts/, sdk/, drizzle/, public/) must stay in.
+
+# Node / Next build artifacts (rebuilt inside the image)
+node_modules
+.next
+out
+build
+*.tsbuildinfo
+next-env.d.ts
+
+# Runtime data dirs (never bake host state into the image)
+data
+plugins
+.tongflow
+
+# Electron desktop app — its own node_modules + Electron runtime are hundreds of MB
+desktop
+
+# Repo meta the build doesn't need
+.git
+.github
+docs
+
+# Python local artifacts
+.venv
+**/__pycache__
+*.pyc
+sdk/tongflow.egg-info
+sdk/dist
+
+# Secrets — only the placeholder example is allowed
+.env
+.env.*
+!.env.example
+
+# Misc
+.DS_Store

@@ -1,0 +1,54 @@
+appId: io.tongflow.desktop
+productName: TongFlow
+copyright: Copyright © TongFlow
+
+directories:
+    output: release
+    buildResources: build
+
+# The compiled main process + runtime deps go inside the asar.
+files:
+    - dist/**/*
+    - package.json
+    - "!**/*.map"
+
+# Bundled runtimes & the Next standalone app are copied verbatim into
+# Contents/Resources/ (kept OUTSIDE the asar so binaries stay executable and
+# native modules load). Populated by scripts/assemble-app.mjs + fetch-runtimes.mjs.
+extraResources:
+    - from: resources
+      to: .
+      filter:
+          - "**/*"
+
+asar: true
+
+mac:
+    category: public.app-category.graphics-design
+    # Arch is selected per CI runner (arm64 / x64) via the electron-builder CLI.
+    # Version-free name so /releases/latest/download/<name> stays a stable link.
+    artifactName: TongFlow-mac-${arch}.${ext}
+    target:
+        - dmg
+    # Unsigned by default — set CSC_LINK / CSC_KEY_PASSWORD + notarize creds in CI
+    # to ship signed builds, then flip hardenedRuntime on.
+    hardenedRuntime: false
+    gatekeeperAssess: false
+    # entitlements: build/entitlements.mac.plist  # add when notarizing
+
+win:
+    # Version-free name so /releases/latest/download/<name> stays a stable link.
+    artifactName: TongFlow-win-setup.${ext}
+    target:
+        - nsis
+
+nsis:
+    oneClick: false
+    perMachine: false
+    allowToChangeInstallationDirectory: true
+
+# Configure a real feed (e.g. GitHub Releases) to enable electron-updater.
+publish:
+    provider: github
+    owner: tong-io
+    repo: tongflow

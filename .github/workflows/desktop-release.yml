@@ -1,0 +1,91 @@
+name: Desktop Release
+
+# Cut a release by pushing a tag that matches the desktop app version, e.g.:
+#   (bump desktop/package.json "version" to 0.1.0 first)
+#   git tag v0.1.0 && git push origin v0.1.0
+# electron-builder publishes the dmg / nsis artifacts (and update feeds) to the
+# GitHub Release named v<version>.
+on:
+    push:
+        tags:
+            - "v*"
+    workflow_dispatch:
+
+# Serialize jobs so the per-arch macOS builds don't race on latest-mac.yml.
+concurrency:
+    group: desktop-release-${{ github.ref }}
+
+permissions:
+    contents: write
+
+jobs:
+    build:
+        strategy:
+            max-parallel: 1
+            fail-fast: false
+            matrix:
+                include:
+                    - os: macos-14 # Apple Silicon
+                      arch: arm64
+                      flag: "--mac --arm64"
+                    # macos-13 was GitHub's last x64 macOS image and is retired
+                    # (jobs queue forever); macos-15-intel is its replacement.
+                    - os: macos-15-intel # Intel
+                      arch: x64
+                      flag: "--mac --x64"
+                    - os: windows-latest
+                      arch: x64
+                      flag: "--win --x64"
+        runs-on: ${{ matrix.os }}
+        steps:
+            - uses: actions/checkout@v4
+
+            - uses: pnpm/action-setup@v4
+              with:
+                  version: 10
+
+            - uses: actions/setup-node@v4
+              with:
+                  node-version: 20
+                  cache: pnpm
+
+            # --- Build the web app (Next standalone bundle) ---
+            - name: Install web deps
+              run: pnpm install --no-frozen-lockfile
+
+            - name: Build Next standalone
+              run: pnpm build
+
+            # --- Build + package the desktop app ---
+            - name: Install desktop deps
+              working-directory: desktop
+              run: pnpm install --no-frozen-lockfile
+
+            - name: Fetch bundled runtimes (node + uv + python)
+              working-directory: desktop
+              run: pnpm fetch-runtimes
+              env:
+                  TONGFLOW_TARGET_ARCH: ${{ matrix.arch }}
+
+            - name: Compile main process + assemble resources
+              working-directory: desktop
+              run: |
+                  pnpm build:main
+                  pnpm assemble
+
+            # Boot the assembled bundle with the bundled Node and require a
+            # non-5xx "/" before packaging — a broken bundle (dangling
+            # symlinks, version skew) must fail the release, not ship.
+            - name: Smoke-test assembled app
+              working-directory: desktop
+              run: pnpm smoke
+
+            - name: Package & publish to GitHub Release
+              working-directory: desktop
+              run: pnpm exec electron-builder ${{ matrix.flag }} --publish always
+              env:
+                  GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+                  # Unsigned builds. To sign macOS, add CSC_LINK / CSC_KEY_PASSWORD
+                  # (and APPLE_ID / APPLE_APP_SPECIFIC_PASSWORD / APPLE_TEAM_ID to
+                  # notarize), then set CSC_IDENTITY_AUTO_DISCOVERY to true.
+                  CSC_IDENTITY_AUTO_DISCOVERY: "false"

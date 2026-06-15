@@ -1,0 +1,350 @@
+{
+    "version": "6",
+    "dialect": "sqlite",
+    "id": "0943e841-c635-4c6b-85c6-fa05a9cf3533",
+    "prevId": "00000000-0000-0000-0000-000000000000",
+    "tables": {
+        "materials": {
+            "name": "materials",
+            "columns": {
+                "id": {
+                    "name": "id",
+                    "type": "integer",
+                    "primaryKey": true,
+                    "notNull": true,
+                    "autoincrement": true
+                },
+                "task_id": {
+                    "name": "task_id",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false,
+                    "autoincrement": false
+                },
+                "workflow_id": {
+                    "name": "workflow_id",
+                    "type": "integer",
+                    "primaryKey": false,
+                    "notNull": false,
+                    "autoincrement": false
+                },
+                "name": {
+                    "name": "name",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "autoincrement": false
+                },
+                "type": {
+                    "name": "type",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "autoincrement": false
+                },
+                "content": {
+                    "name": "content",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "autoincrement": false
+                },
+                "thumbnail": {
+                    "name": "thumbnail",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false,
+                    "autoincrement": false
+                },
+                "is_favorite": {
+                    "name": "is_favorite",
+                    "type": "integer",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "autoincrement": false,
+                    "default": false
+                },
+                "is_cover": {
+                    "name": "is_cover",
+                    "type": "integer",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "autoincrement": false,
+                    "default": false
+                },
+                "created_at": {
+                    "name": "created_at",
+                    "type": "integer",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "autoincrement": false,
+                    "default": "(cast((julianday('now') - 2440587.5)*86400000 as integer))"
+                },
+                "updated_at": {
+                    "name": "updated_at",
+                    "type": "integer",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "autoincrement": false,
+                    "default": "(cast((julianday('now') - 2440587.5)*86400000 as integer))"
+                },
+                "deleted": {
+                    "name": "deleted",
+                    "type": "integer",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "autoincrement": false,
+                    "default": false
+                }
+            },
+            "indexes": {
+                "materials_deleted_idx": {
+                    "name": "materials_deleted_idx",
+                    "columns": ["deleted"],
+                    "isUnique": false
+                },
+                "materials_type_deleted_idx": {
+                    "name": "materials_type_deleted_idx",
+                    "columns": ["type", "deleted"],
+                    "isUnique": false
+                },
+                "materials_task_id_idx": {
+                    "name": "materials_task_id_idx",
+                    "columns": ["task_id"],
+                    "isUnique": false
+                },
+                "materials_workflow_id_idx": {
+                    "name": "materials_workflow_id_idx",
+                    "columns": ["workflow_id"],
+                    "isUnique": false
+                }
+            },
+            "foreignKeys": {
+                "materials_workflow_id_workflows_id_fk": {
+                    "name": "materials_workflow_id_workflows_id_fk",
+                    "tableFrom": "materials",
+                    "tableTo": "workflows",
+                    "columnsFrom": ["workflow_id"],
+                    "columnsTo": ["id"],
+                    "onDelete": "set null",
+                    "onUpdate": "no action"
+                }
+            },
+            "compositePrimaryKeys": {},
+            "uniqueConstraints": {},
+            "checkConstraints": {}
+        },
+        "tasks": {
+            "name": "tasks",
+            "columns": {
+                "id": {
+                    "name": "id",
+                    "type": "text",
+                    "primaryKey": true,
+                    "notNull": true,
+                    "autoincrement": false
+                },
+                "workflow_id": {
+                    "name": "workflow_id",
+                    "type": "integer",
+                    "primaryKey": false,
+                    "notNull": false,
+                    "autoincrement": false
+                },
+                "node_id": {
+                    "name": "node_id",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "autoincrement": false
+                },
+                "feature": {
+                    "name": "feature",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "autoincrement": false
+                },
+                "plugin_id": {
+                    "name": "plugin_id",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "autoincrement": false,
+                    "default": "''"
+                },
+                "prompt": {
+                    "name": "prompt",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "autoincrement": false
+                },
+                "status": {
+                    "name": "status",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "autoincrement": false,
+                    "default": "'pending'"
+                },
+                "progress": {
+                    "name": "progress",
+                    "type": "integer",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "autoincrement": false,
+                    "default": 0
+                },
+                "result": {
+                    "name": "result",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false,
+                    "autoincrement": false
+                },
+                "error": {
+                    "name": "error",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false,
+                    "autoincrement": false
+                },
+                "created_at": {
+                    "name": "created_at",
+                    "type": "integer",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "autoincrement": false,
+                    "default": "(cast((julianday('now') - 2440587.5)*86400000 as integer))"
+                },
+                "updated_at": {
+                    "name": "updated_at",
+                    "type": "integer",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "autoincrement": false,
+                    "default": "(cast((julianday('now') - 2440587.5)*86400000 as integer))"
+                }
+            },
+            "indexes": {
+                "tasks_status_idx": {
+                    "name": "tasks_status_idx",
+                    "columns": ["status"],
+                    "isUnique": false
+                },
+                "tasks_created_idx": {
+                    "name": "tasks_created_idx",
+                    "columns": ["created_at"],
+                    "isUnique": false
+                }
+            },
+            "foreignKeys": {
+                "tasks_workflow_id_workflows_id_fk": {
+                    "name": "tasks_workflow_id_workflows_id_fk",
+                    "tableFrom": "tasks",
+                    "tableTo": "workflows",
+                    "columnsFrom": ["workflow_id"],
+                    "columnsTo": ["id"],
+                    "onDelete": "set null",
+                    "onUpdate": "no action"
+                }
+            },
+            "compositePrimaryKeys": {},
+            "uniqueConstraints": {},
+            "checkConstraints": {}
+        },
+        "workflows": {
+            "name": "workflows",
+            "columns": {
+                "id": {
+                    "name": "id",
+                    "type": "integer",
+                    "primaryKey": true,
+                    "notNull": true,
+                    "autoincrement": true
+                },
+                "name": {
+                    "name": "name",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "autoincrement": false
+                },
+                "description": {
+                    "name": "description",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false,
+                    "autoincrement": false
+                },
+                "flow": {
+                    "name": "flow",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "autoincrement": false
+                },
+                "executable": {
+                    "name": "executable",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false,
+                    "autoincrement": false
+                },
+                "cover": {
+                    "name": "cover",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false,
+                    "autoincrement": false
+                },
+                "created_at": {
+                    "name": "created_at",
+                    "type": "integer",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "autoincrement": false,
+                    "default": "(cast((julianday('now') - 2440587.5)*86400000 as integer))"
+                },
+                "updated_at": {
+                    "name": "updated_at",
+                    "type": "integer",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "autoincrement": false,
+                    "default": "(cast((julianday('now') - 2440587.5)*86400000 as integer))"
+                },
+                "deleted": {
+                    "name": "deleted",
+                    "type": "integer",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "autoincrement": false,
+                    "default": false
+                }
+            },
+            "indexes": {
+                "workflows_deleted_idx": {
+                    "name": "workflows_deleted_idx",
+                    "columns": ["deleted"],
+                    "isUnique": false
+                }
+            },
+            "foreignKeys": {},
+            "compositePrimaryKeys": {},
+            "uniqueConstraints": {},
+            "checkConstraints": {}
+        }
+    },
+    "views": {},
+    "enums": {},
+    "_meta": {
+        "schemas": {},
+        "tables": {},
+        "columns": {}
+    },
+    "internal": {
+        "indexes": {}
+    }
+}

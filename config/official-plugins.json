@@ -1,0 +1,25 @@
+{
+    "org": "https://github.com/tong-io",
+    "plugins": [
+        "tongflow-api-openrouter-free",
+        "tongflow-api-gemini",
+        "tongflow-api-openai",
+        "tongflow-modal-ffmpeg",
+        "tongflow-modal-pyscenedetect",
+        "tongflow-modal-z-image",
+        "tongflow-modal-ernie-image",
+        "tongflow-modal-flux2-klein9b",
+        "tongflow-modal-ltx",
+        "tongflow-modal-infinitetalk",
+        "tongflow-modal-wan-animate",
+        "tongflow-modal-seedvr2",
+        "tongflow-modal-gemma4",
+        "tongflow-modal-qwen3asr",
+        "tongflow-modal-qwen3tts",
+        "tongflow-modal-whisper",
+        "tongflow-modal-ace-step",
+        "tongflow-modal-docling",
+        "tongflow-modal-paddle",
+        "tongflow-modal-crawl4ai"
+    ]
+}

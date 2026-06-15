@@ -1,0 +1,4 @@
+# GitHub funding config — shows a "Sponsor" button on the repo.
+# Uncomment / set `github:` once GitHub Sponsors is enabled for the account.
+# github: [tong-io]
+custom: ["mailto:business@tongflow.com"]
