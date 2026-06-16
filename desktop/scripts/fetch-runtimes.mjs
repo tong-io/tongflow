@@ -8,8 +8,10 @@
 //   resources/uv/{uv|uv.exe}
 //   resources/python/{bin/python3 | python.exe}
 //
-// Versions are pinned; bump deliberately. Node major must match the ABI of the
-// prebuilt better-sqlite3 / sharp inside the Next standalone bundle.
+// Versions are pinned; bump deliberately. assemble-app.mjs re-fetches
+// better-sqlite3's native binary for this Node's ABI, so the builder's own Node
+// version need not match — but keeping CI's Node aligned with NODE_VERSION
+// avoids a rebuild and keeps dev/build/runtime on one major.
 
 import { execSync } from "node:child_process";
 import fs from "node:fs";
@@ -17,7 +19,7 @@ import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
-const NODE_VERSION = "20.18.1";
+const NODE_VERSION = "24.12.0";
 const UV_VERSION = "0.5.11";
 const PY_TAG = "20241219"; // python-build-standalone release tag
 const PY_VERSION = "3.12.8";
