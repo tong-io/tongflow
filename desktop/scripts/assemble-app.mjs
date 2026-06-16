@@ -143,7 +143,13 @@ function assembleApp() {
             path.join(standalone, d),
         ),
     );
-    copy(standalone, appOut, (src) => !skip.has(src));
+    // `next build` (output: standalone) copies the project's .env files into
+    // .next/standalone/.env, and server.js auto-loads them into process.env at
+    // startup — baking the build machine's local environment into the app. The
+    // packaged app reads all configuration from the in-app settings store
+    // (env-store.server.ts), so strip every .env* from the bundle.
+    const isEnvFile = (p) => /^\.env(\.|$)/.test(path.basename(p));
+    copy(standalone, appOut, (src) => !skip.has(src) && !isEnvFile(src));
 
     console.log("[assemble] hoisting node_modules to a flat layout");
     hoistNodeModules(topNM, path.join(appOut, "node_modules"));
@@ -161,6 +167,86 @@ function assembleApp() {
     copy(path.join(repoRoot, "drizzle"), path.join(appOut, "drizzle"));
     copy(path.join(repoRoot, "config"), path.join(appOut, "config"));
     copySdk(path.join(repoRoot, "sdk"), path.join(appOut, "sdk"));
+}
+
+// prebuild-install lives in the repo's node_modules; pnpm nests it in the
+// virtual store, so locate it by scanning rather than bare require.resolve.
+function findPrebuildInstallBin() {
+    const candidates = [
+        path.join(repoRoot, "node_modules", "prebuild-install", "bin.js"),
+    ];
+    const pnpmDir = path.join(repoRoot, "node_modules", ".pnpm");
+    if (fs.existsSync(pnpmDir)) {
+        for (const name of fs.readdirSync(pnpmDir)) {
+            if (name.startsWith("prebuild-install@")) {
+                candidates.push(
+                    path.join(
+                        pnpmDir,
+                        name,
+                        "node_modules",
+                        "prebuild-install",
+                        "bin.js",
+                    ),
+                );
+            }
+        }
+    }
+    const found = candidates.find((p) => fs.existsSync(p));
+    if (!found) {
+        throw new Error(
+            "prebuild-install not found in node_modules — cannot rebuild better-sqlite3.",
+        );
+    }
+    return found;
+}
+
+/**
+ * The Next standalone trace ships better-sqlite3's prebuilt native binary for
+ * the ABI of whatever Node ran `next build` (e.g. a dev machine's Node 24). But
+ * the packaged app runs server.js with the *bundled* Node (pinned in
+ * fetch-runtimes), so a mismatched NODE_MODULE_VERSION makes every SQLite call
+ * throw ERR_DLOPEN_FAILED at runtime ("compiled against a different Node.js
+ * version"). Re-fetch the prebuilt binary for the bundled Node's ABI so the
+ * build is correct regardless of the builder's Node version.
+ *
+ * Only better-sqlite3 needs this: sharp is N-API / ABI-stable across Node
+ * majors. Host-arch builds only — reading the bundled Node version execs it
+ * (the release model selects arch per CI runner anyway).
+ */
+function rebuildBetterSqlite3() {
+    const pkgDir = path.join(appOut, "node_modules", "better-sqlite3");
+    if (!fs.existsSync(pkgDir)) {
+        console.log(
+            "[assemble] better-sqlite3 not in bundle — skipping native rebuild",
+        );
+        return;
+    }
+    const nodeBin = path.join(
+        desktopDir,
+        "resources",
+        "node",
+        process.platform === "win32" ? "node.exe" : "node",
+    );
+    if (!fs.existsSync(nodeBin)) {
+        throw new Error(
+            `Bundled Node not found at ${nodeBin} — run \`pnpm fetch-runtimes\` first.`,
+        );
+    }
+    const nodeVersion = execSync(`"${nodeBin}" -v`, { encoding: "utf8" })
+        .trim()
+        .replace(/^v/, "");
+
+    const prebuildInstall = findPrebuildInstallBin();
+    console.log(
+        `[assemble] rebuilding better-sqlite3 for bundled Node v${nodeVersion}`,
+    );
+    // prebuild-install is a pure-JS downloader: run it with the builder's Node
+    // but target the bundled Node's runtime/ABI. It overwrites the wrong-ABI
+    // binary under the package's build/Release with the correct prebuild.
+    execSync(
+        `"${process.execPath}" "${prebuildInstall}" --runtime node --target ${nodeVersion}`,
+        { cwd: pkgDir, stdio: "inherit" },
+    );
 }
 
 function buildWheelhouse() {
@@ -223,6 +309,7 @@ function buildWheelhouse() {
 
 assertBuilt();
 assembleApp();
+rebuildBetterSqlite3();
 assertNoSymlinks(appOut);
 buildWheelhouse();
 console.log("[assemble] done →", appOut);
