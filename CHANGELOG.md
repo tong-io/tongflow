@@ -7,9 +7,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.1] - 2026-06-16
+
+### Fixed
+
+- Installed plugins now appear in node pickers without reloading the app, and
+  the plugin manager recovers from a directory left behind by an interrupted or
+  failed clone instead of treating it as already installed.
+- Packaged desktop app: rebuild `better-sqlite3`'s native binary for the bundled
+  Node runtime during packaging, fixing `ERR_DLOPEN_FAILED` errors (e.g. "Failed
+  to save workflow") when the build machine's Node differs from the bundled one.
+- Exclude `.env` files from the packaged app bundle; the desktop app reads all
+  configuration from the in-app settings store.
+
+### Changed
+
+- Bundled Node runtime and CI upgraded to Node 24.
+
 ## [0.1.0] - 2026-06-16
 
 First public open-source release of TongFlow.
 
-[Unreleased]: https://github.com/tong-io/tongflow/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/tong-io/tongflow/compare/v0.1.1...HEAD
+[0.1.1]: https://github.com/tong-io/tongflow/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/tong-io/tongflow/releases/tag/v0.1.0
