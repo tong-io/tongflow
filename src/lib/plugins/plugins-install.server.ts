@@ -76,8 +76,15 @@ async function cloneOrPull(
     gitUrl: string,
 ): Promise<"cloned" | "updated"> {
     const dir = join(pluginsDir(), id);
+    // A leftover directory without a .git is the corpse of an interrupted/failed
+    // earlier clone: it can never be pulled and the scanner ignores it. Wipe it
+    // so we clone fresh instead of erroring (or silently doing nothing) forever.
+    if (existsSync(dir) && !existsSync(join(dir, ".git"))) {
+        fs.rmSync(dir, { recursive: true, force: true });
+    }
+    const cloning = !existsSync(dir);
     try {
-        if (existsSync(dir)) {
+        if (!cloning) {
             await git.pull({
                 fs,
                 http,
@@ -97,6 +104,13 @@ async function cloneOrPull(
         });
         return "cloned";
     } catch (e) {
+        // A failed clone leaves a partial/empty dir that would poison every
+        // future attempt (dir exists, but no usable checkout). Remove it so the
+        // next install starts clean. Don't touch a pre-existing checkout whose
+        // pull merely failed (e.g. transient network) — it's still usable.
+        if (cloning) {
+            fs.rmSync(dir, { recursive: true, force: true });
+        }
         const msg = e instanceof Error ? e.message : String(e);
         throw new PluginInstallError(`git failed: ${msg}`, 500);
     }

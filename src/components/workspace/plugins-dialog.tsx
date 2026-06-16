@@ -27,6 +27,7 @@ import {
     TooltipContent,
     TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { refreshPluginsRegistry } from "@/hooks/use-plugins-registry";
 import { apiGet, apiPost } from "@/lib/api/client";
 import { logger } from "@/lib/logger";
 
@@ -127,6 +128,10 @@ export function PluginsDialog() {
                     : t("installSuccess", { id: result.id });
             if (result.recognized) {
                 toast.success(msg);
+                // The node-facing registry store caches the registry once on
+                // load; refresh it so newly installed/updated plugins appear in
+                // node pickers without a full app reload.
+                void refreshPluginsRegistry();
             } else {
                 toast(t("notRecognized", { id: result.id }), { icon: "⚠️" });
             }

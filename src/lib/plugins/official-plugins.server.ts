@@ -36,9 +36,15 @@ export function officialGitUrl(org: string, id: string): string {
     return `${org}/${id}.git`;
 }
 
-/** A plugin is "installed" once its directory exists under the plugins dir. */
+/**
+ * A plugin is "installed" once it has a real git checkout under the plugins dir.
+ * We check for `.git` rather than the directory alone: an interrupted/failed
+ * clone leaves an empty (or partial) directory behind, and treating that as
+ * "installed" would hide the install button forever while the scanner ignores
+ * the empty dir — the node then reports "no implementation" with no way to fix.
+ */
 export function isPluginInstalled(id: string): boolean {
-    return existsSync(join(pluginsDir(), id));
+    return existsSync(join(pluginsDir(), id, ".git"));
 }
 
 export function listOfficialPlugins(): {
