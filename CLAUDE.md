@@ -54,6 +54,13 @@
 - **Pin tongflow.** Every `deploy.py`'s `pip_install("tongflow==X.Y.Z")` must match [`sdk/pyproject.toml`](sdk/pyproject.toml).
 - **Backend-neutral SDK.** The SDK never imports `modal`. A deploy-first plugin marks its `@app.cls` handler class with **`@deploy`** (the scanner detects it by AST via [`parse_deploy.py`](sdk/tongflow/parse_deploy.py)), constructs `app = modal.App(Path(__file__).resolve().parent.name)` directly (the `current_app` helper was removed), ships a thin `entry.py` bridge that lazily imports `modal`, and lists `modal` in `requirements.txt`. Don't reintroduce a `modal` SDK dependency or `current_app`.
 
+## Registering an official plugin
+
+- **Source of truth:** [`config/official-plugins.json`](config/official-plugins.json) is the only file the plugins scanner reads; adding the plugin id there is what actually registers it (the scanner AST-discovers its `@deploy` / `@node_slot`).
+- **The READMEs are hand-maintained and silently drift.** Registering a plugin does **not** update the docs. When you add one, also edit **all three** READMEs ([`README.md`](README.md), [`docs/README_ZH.md`](docs/README_ZH.md), [`docs/README_JA.md`](docs/README_JA.md)):
+  - the **Official plugins** list (**GPU/CPU plugins** or **API plugins**) — one entry, ordered to match `official-plugins.json`;
+  - the **capability matrix** — flip the node from ⬜ to ✅ if this is the first official plugin for that ABI slot (e.g. TripoSplat made `image-gen-model` / "Image → 3D" available).
+
 ## Wire / persistence shape
 
 - **Create-task API body:** `{feature, pluginId, prompt, nodeId, workflowId?}`. `pluginId` is top-level, **not** nested in `prompt`. `prompt` carries only ABI business fields. See [`src/app/api/task/create/route.ts`](src/app/api/task/create/route.ts).
