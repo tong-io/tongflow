@@ -59,6 +59,33 @@ const _fitCameraToSelection = (
     controls.update();
 };
 
+// Object-space bounds that also work for a Gaussian-splat SplatMesh. A SplatMesh
+// has no traversable triangle geometry, so Box3.setFromObject returns empty;
+// fall back to expanding over splat centers via Spark's forEachSplat.
+type SplatLike = {
+    forEachSplat?: (
+        cb: (
+            index: number,
+            center: THREE.Vector3,
+            scales: THREE.Vector3,
+            quaternion: THREE.Quaternion,
+            opacity: number,
+            color: THREE.Color,
+        ) => void,
+    ) => void;
+};
+const computeObjectBounds = (model: THREE.Object3D): THREE.Box3 => {
+    const box = new THREE.Box3().setFromObject(model);
+    if (!box.isEmpty()) return box;
+    const splat = model as unknown as SplatLike;
+    if (typeof splat.forEachSplat === "function") {
+        splat.forEachSplat((_i, center) => {
+            box.expandByPoint(center);
+        });
+    }
+    return box;
+};
+
 // Naive fit + center helper
 const autoScaleAndCenter = (
     model: THREE.Object3D,
@@ -66,11 +93,9 @@ const autoScaleAndCenter = (
     containerWidth: number,
     containerHeight: number,
 ) => {
-    const box = new THREE.Box3().setFromObject(model);
-    // Some objects (e.g. a Gaussian-splat SplatMesh) expose no traversable
-    // geometry bounds; setFromObject then yields an empty box whose center is
-    // NaN, which would push the model off-screen. Leave it at its native
-    // transform in that case.
+    const box = computeObjectBounds(model);
+    // No derivable bounds (e.g. an empty/!forEachSplat object): leave the model
+    // at its native transform rather than computing a NaN center.
     if (box.isEmpty()) return;
     const size = box.getSize(new THREE.Vector3());
     const center = box.getCenter(new THREE.Vector3());
@@ -122,6 +147,8 @@ const FullScreen3DModal = ({
     const cameraRef = useRef<THREE.PerspectiveCamera | null>(null);
     const modelRef = useRef<THREE.Object3D | null>(null);
     const animationIdRef = useRef<number | null>(null);
+    // Re-arm the on-demand render loop from outside setupScene (e.g. reset view).
+    const requestRenderRef = useRef<((frames?: number) => void) | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const { url } = useFileAsyncLoader(fileKey, { priority: "high" });
@@ -163,7 +190,9 @@ const FullScreen3DModal = ({
                     alpha: true,
                 });
                 renderer.setSize(width, height);
-                renderer.setPixelRatio(window.devicePixelRatio);
+                // Cap DPR: at native retina (2–3x) Spark sorts/draws 4–9x the
+                // splats per frame, which pegs the GPU. 2 is plenty for preview.
+                renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
                 renderer.outputColorSpace = THREE.SRGBColorSpace; // Respect sRGB color space
                 rendererRef.current = renderer;
 
@@ -203,6 +232,16 @@ const FullScreen3DModal = ({
                 const rotation = { x: 0, y: 0 };
                 const targetRotation = { x: 0, y: 0 };
 
+                // On-demand rendering: only draw when something changed. A frame
+                // budget is armed on load/interaction and decremented per drawn
+                // frame; when it hits 0 the loop idles (no GPU work). The warmup
+                // budget also lets Spark's async splat sort converge after load.
+                let renderBudget = 120;
+                const requestRender = (frames = 90) => {
+                    renderBudget = Math.max(renderBudget, frames);
+                };
+                requestRenderRef.current = requestRender;
+
                 // Pointer listeners
                 const pointerdownHandler = (e: any) => {
                     // Ignore UI chrome outside WebGL canvas
@@ -211,6 +250,7 @@ const FullScreen3DModal = ({
                     e.preventDefault();
                     isDragging = true;
                     previousMousePosition = { x: e.clientX, y: e.clientY };
+                    requestRender();
                 };
 
                 const pointermoveHandler = (e: any) => {
@@ -230,6 +270,7 @@ const FullScreen3DModal = ({
                     );
 
                     previousMousePosition = { x: e.clientX, y: e.clientY };
+                    requestRender();
                 };
 
                 const pointerupHandler = (e: any) => {
@@ -252,6 +293,7 @@ const FullScreen3DModal = ({
                     const distance = camera.position.length();
                     if (distance < 1) camera.position.setLength(1);
                     if (distance > 100) camera.position.setLength(100);
+                    requestRender();
                 };
 
                 // Attach pointer observers
@@ -339,20 +381,27 @@ const FullScreen3DModal = ({
                     targetRotation.y = modelRef.current.rotation.y;
                 }
 
-                // requestAnimationFrame driver
+                // requestAnimationFrame driver (renders only while armed)
                 const animate = () => {
                     animationIdRef.current = requestAnimationFrame(animate);
 
                     if (modelRef.current) {
                         const easing = 0.1;
-                        rotation.x += (targetRotation.x - rotation.x) * easing;
-                        rotation.y += (targetRotation.y - rotation.y) * easing;
-
-                        modelRef.current.rotation.x = rotation.x;
-                        modelRef.current.rotation.y = rotation.y;
+                        const dx = targetRotation.x - rotation.x;
+                        const dy = targetRotation.y - rotation.y;
+                        if (Math.abs(dx) > 1e-4 || Math.abs(dy) > 1e-4) {
+                            rotation.x += dx * easing;
+                            rotation.y += dy * easing;
+                            modelRef.current.rotation.x = rotation.x;
+                            modelRef.current.rotation.y = rotation.y;
+                            requestRender(2);
+                        }
                     }
 
-                    renderer.render(scene, camera);
+                    if (renderBudget > 0) {
+                        renderBudget--;
+                        renderer.render(scene, camera);
+                    }
                 };
                 animate();
 
@@ -369,6 +418,7 @@ const FullScreen3DModal = ({
                     cameraRef.current.aspect = newWidth / newHeight;
                     cameraRef.current.updateProjectionMatrix();
                     rendererRef.current.setSize(newWidth, newHeight);
+                    requestRender();
                 });
 
                 if (mountRef.current) {
@@ -464,6 +514,7 @@ const FullScreen3DModal = ({
             if (modelRef.current) {
                 modelRef.current.rotation.set(0, 0, 0);
             }
+            requestRenderRef.current?.();
         }
     };
 
@@ -639,6 +690,14 @@ const MiniModelPreview = ({
                 const rotation = { x: 0, y: 0 };
                 const targetRotation = { x: 0, y: 0 };
 
+                // On-demand rendering budget (see fullscreen viewer for rationale).
+                // Critical here: an idle node preview must not render 262k splats
+                // every frame forever, or several model nodes together stall the PC.
+                let renderBudget = 120;
+                const requestRender = (frames = 90) => {
+                    renderBudget = Math.max(renderBudget, frames);
+                };
+
                 // Event Handlers
                 const onPointerDown = (e: PointerEvent) => {
                     if (e.target !== renderer.domElement) return;
@@ -649,6 +708,7 @@ const MiniModelPreview = ({
                     previousMousePosition = { x: e.clientX, y: e.clientY };
                     (renderer.domElement as HTMLElement).style.cursor =
                         "grabbing";
+                    requestRender();
                 };
 
                 const onPointerMove = (e: PointerEvent) => {
@@ -667,6 +727,7 @@ const MiniModelPreview = ({
                     );
 
                     previousMousePosition = { x: e.clientX, y: e.clientY };
+                    requestRender();
                 };
 
                 const onPointerUp = (e: PointerEvent) => {
@@ -753,18 +814,26 @@ const MiniModelPreview = ({
                     modelHolder.current.rotation.y = rotation.y;
                 }
 
-                // Animation Loop
+                // Animation Loop (renders only while armed; idles otherwise)
                 const animate = () => {
                     animationIdRef.current = requestAnimationFrame(animate);
 
                     if (modelRef.current) {
                         const easing = 0.1;
-                        rotation.x += (targetRotation.x - rotation.x) * easing;
-                        rotation.y += (targetRotation.y - rotation.y) * easing;
-                        modelRef.current.rotation.x = rotation.x;
-                        modelRef.current.rotation.y = rotation.y;
+                        const dx = targetRotation.x - rotation.x;
+                        const dy = targetRotation.y - rotation.y;
+                        if (Math.abs(dx) > 1e-4 || Math.abs(dy) > 1e-4) {
+                            rotation.x += dx * easing;
+                            rotation.y += dy * easing;
+                            modelRef.current.rotation.x = rotation.x;
+                            modelRef.current.rotation.y = rotation.y;
+                            requestRender(2);
+                        }
                     }
-                    renderer.render(scene, camera);
+                    if (renderBudget > 0) {
+                        renderBudget--;
+                        renderer.render(scene, camera);
+                    }
                 };
                 animate();
                 setIsLoading(false);
