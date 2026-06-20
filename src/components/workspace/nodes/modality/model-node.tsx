@@ -149,12 +149,9 @@ const FullScreen3DModal = ({
     const animationIdRef = useRef<number | null>(null);
     // Re-arm the on-demand render loop from outside setupScene (e.g. reset view).
     const requestRenderRef = useRef<((frames?: number) => void) | null>(null);
-    // OrbitControls instance (typed loosely; imported dynamically).
+    // Camera-controls instance (typed loosely; imported dynamically).
     const controlsRef = useRef<{
-        target: THREE.Vector3;
-        update: () => boolean;
         reset: () => void;
-        saveState: () => void;
         dispose: () => void;
     } | null>(null);
     const [isLoading, setIsLoading] = useState(true);
@@ -244,22 +241,6 @@ const FullScreen3DModal = ({
                 };
                 requestRenderRef.current = requestRender;
 
-                // Standard orbit controls: left-drag orbits the camera around the
-                // model (full top-to-bottom, no ±90° lock), wheel zooms, right-drag
-                // pans. Damped for a smooth feel; redraws on demand via "change".
-                const { OrbitControls } = await import(
-                    "three/examples/jsm/controls/OrbitControls.js"
-                );
-                const controls = new OrbitControls(camera, renderer.domElement);
-                controls.enableDamping = true;
-                controls.dampingFactor = 0.08;
-                controls.rotateSpeed = 0.9;
-                controls.zoomToCursor = true;
-                controls.minDistance = 0.5;
-                controls.maxDistance = 100;
-                controls.addEventListener("change", () => requestRender(2));
-                controlsRef.current = controls;
-
                 // Keep gestures from bubbling to page scroll behind the modal.
                 const canvas = renderer.domElement;
                 const stopProp = (e: Event) => e.stopPropagation();
@@ -320,19 +301,37 @@ const FullScreen3DModal = ({
                 }
 
                 // Autoscale + center the model at the origin and position the
-                // camera; OrbitControls then orbits around that origin.
+                // camera before constructing the controls (Arcball captures the
+                // current camera pose as its "home" / reset baseline).
                 if (modelRef.current) {
                     autoScaleAndCenter(modelRef.current, camera, width, height);
                 }
-                controls.target.set(0, 0, 0);
-                controls.update();
+
+                // Virtual-trackball controls: grab-and-tumble in ANY direction
+                // with no pole/gimbal lock (unlike OrbitControls' fixed up-axis),
+                // wheel zooms, right-drag pans. Fires "change" (incl. during its
+                // own damping) so we can render on demand; no per-frame update().
+                const { ArcballControls } = await import(
+                    "three/examples/jsm/controls/ArcballControls.js"
+                );
+                const controls = new ArcballControls(
+                    camera,
+                    renderer.domElement,
+                    scene,
+                );
+                controls.enableAnimations = true;
+                controls.cursorZoom = true;
+                controls.minDistance = 0.5;
+                controls.maxDistance = 100;
+                controls.setGizmosVisible(false);
+                controls.addEventListener("change", () => requestRender(2));
                 controls.saveState(); // baseline for "reset view"
+                controlsRef.current = controls;
+                requestRender();
 
                 // requestAnimationFrame driver (renders only while armed).
                 const animate = () => {
                     animationIdRef.current = requestAnimationFrame(animate);
-                    // update() returns true while damping is still settling.
-                    if (controls.update()) requestRender(2);
                     if (renderBudget > 0) {
                         renderBudget--;
                         renderer.render(scene, camera);
@@ -598,23 +597,9 @@ const MiniModelPreview = ({
                     renderBudget = Math.max(renderBudget, frames);
                 };
 
-                // Standard orbit controls (drag to orbit, wheel to zoom; full
-                // top-to-bottom range, damped). Same scheme as the fullscreen
-                // viewer so the two feel identical.
-                const { OrbitControls } = await import(
-                    "three/examples/jsm/controls/OrbitControls.js"
-                );
-                const controls = new OrbitControls(camera, renderer.domElement);
-                controls.enableDamping = true;
-                controls.dampingFactor = 0.08;
-                controls.rotateSpeed = 0.9;
-                controls.zoomToCursor = true;
-                controls.minDistance = 0.5;
-                controls.maxDistance = 100;
-                controls.addEventListener("change", () => requestRender(2));
-
                 // Keep drag/zoom inside the node: stop the gestures from bubbling
                 // to React Flow (which would pan/zoom the canvas or drag the node).
+                // The ArcballControls instance is created later (after framing).
                 const canvas = renderer.domElement;
                 canvas.style.cursor = "grab";
                 const stopProp = (e: Event) => e.stopPropagation();
@@ -671,19 +656,36 @@ const MiniModelPreview = ({
                         height,
                     );
                 }
-                // Orbit around the model origin; nudge to a pleasant elevated
-                // 3/4 view as the default framing.
+                // Nudge to a pleasant elevated 3/4 view before constructing the
+                // controls (Arcball captures this camera pose as its home).
                 const dist = camera.position.length() || 12;
                 camera.position
                     .set(dist * 0.7, dist * 0.45, dist * 0.7)
                     .setLength(dist);
-                controls.target.set(0, 0, 0);
-                controls.update();
+                camera.lookAt(0, 0, 0);
+
+                // Virtual-trackball controls: free tumble in any direction, no
+                // pole lock. Same scheme as the fullscreen viewer. Fires "change"
+                // (incl. during damping), driving on-demand rendering.
+                const { ArcballControls } = await import(
+                    "three/examples/jsm/controls/ArcballControls.js"
+                );
+                const controls = new ArcballControls(
+                    camera,
+                    renderer.domElement,
+                    scene,
+                );
+                controls.enableAnimations = true;
+                controls.cursorZoom = true;
+                controls.minDistance = 0.5;
+                controls.maxDistance = 100;
+                controls.setGizmosVisible(false);
+                controls.addEventListener("change", () => requestRender(2));
+                requestRender();
 
                 // Animation Loop (renders only while armed; idles otherwise)
                 const animate = () => {
                     animationIdRef.current = requestAnimationFrame(animate);
-                    if (controls.update()) requestRender(2);
                     if (renderBudget > 0) {
                         renderBudget--;
                         renderer.render(scene, camera);
