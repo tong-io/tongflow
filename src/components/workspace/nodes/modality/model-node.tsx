@@ -149,6 +149,14 @@ const FullScreen3DModal = ({
     const animationIdRef = useRef<number | null>(null);
     // Re-arm the on-demand render loop from outside setupScene (e.g. reset view).
     const requestRenderRef = useRef<((frames?: number) => void) | null>(null);
+    // OrbitControls instance (typed loosely; imported dynamically).
+    const controlsRef = useRef<{
+        target: THREE.Vector3;
+        update: () => boolean;
+        reset: () => void;
+        saveState: () => void;
+        dispose: () => void;
+    } | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const { url } = useFileAsyncLoader(fileKey, { priority: "high" });
@@ -226,12 +234,6 @@ const FullScreen3DModal = ({
                 backLight.position.set(0, 5, -5);
                 scene.add(backLight);
 
-                // Orbit / drag damping state
-                let isDragging = false;
-                let previousMousePosition = { x: 0, y: 0 };
-                const rotation = { x: 0, y: 0 };
-                const targetRotation = { x: 0, y: 0 };
-
                 // On-demand rendering: only draw when something changed. A frame
                 // budget is armed on load/interaction and decremented per drawn
                 // frame; when it hits 0 the loop idles (no GPU work). The warmup
@@ -242,81 +244,26 @@ const FullScreen3DModal = ({
                 };
                 requestRenderRef.current = requestRender;
 
-                // Pointer listeners
-                const pointerdownHandler = (e: any) => {
-                    // Ignore UI chrome outside WebGL canvas
-                    if (e.target !== renderer.domElement) return;
-                    e.stopPropagation();
-                    e.preventDefault();
-                    isDragging = true;
-                    previousMousePosition = { x: e.clientX, y: e.clientY };
-                    requestRender();
-                };
+                // Standard orbit controls: left-drag orbits the camera around the
+                // model (full top-to-bottom, no ±90° lock), wheel zooms, right-drag
+                // pans. Damped for a smooth feel; redraws on demand via "change".
+                const { OrbitControls } = await import(
+                    "three/examples/jsm/controls/OrbitControls.js"
+                );
+                const controls = new OrbitControls(camera, renderer.domElement);
+                controls.enableDamping = true;
+                controls.dampingFactor = 0.08;
+                controls.rotateSpeed = 0.9;
+                controls.zoomToCursor = true;
+                controls.minDistance = 0.5;
+                controls.maxDistance = 100;
+                controls.addEventListener("change", () => requestRender(2));
+                controlsRef.current = controls;
 
-                const pointermoveHandler = (e: any) => {
-                    if (!isDragging || !modelRef.current) return;
-                    e.stopPropagation();
-                    e.preventDefault();
-
-                    const deltaX = e.clientX - previousMousePosition.x;
-                    const deltaY = e.clientY - previousMousePosition.y;
-
-                    targetRotation.y += deltaX * 0.01;
-                    targetRotation.x += deltaY * 0.01;
-                    // Clamp polar orbit extremes
-                    targetRotation.x = Math.max(
-                        -Math.PI / 2,
-                        Math.min(Math.PI / 2, targetRotation.x),
-                    );
-
-                    previousMousePosition = { x: e.clientX, y: e.clientY };
-                    requestRender();
-                };
-
-                const pointerupHandler = (e: any) => {
-                    e.stopPropagation();
-                    isDragging = false;
-                };
-
-                const pointerleaveHandler = (e: any) => {
-                    e.stopPropagation();
-                    isDragging = false;
-                };
-
-                const wheelHandler = (e: any) => {
-                    if (e.target !== renderer.domElement) return;
-                    e.preventDefault();
-                    e.stopPropagation();
-                    const scrollDelta = e.deltaY > 0 ? 1.1 : 0.9;
-                    camera.position.multiplyScalar(scrollDelta);
-                    // Clamp dollying distance
-                    const distance = camera.position.length();
-                    if (distance < 1) camera.position.setLength(1);
-                    if (distance > 100) camera.position.setLength(100);
-                    requestRender();
-                };
-
-                // Attach pointer observers
+                // Keep gestures from bubbling to page scroll behind the modal.
                 const canvas = renderer.domElement;
-                canvas.addEventListener(
-                    "pointerdown",
-                    pointerdownHandler,
-                    true,
-                );
-                window.addEventListener(
-                    "pointermove",
-                    pointermoveHandler,
-                    true,
-                ); // Window-level listeners for smoother drags outside canvas bounds
-                window.addEventListener("pointerup", pointerupHandler, true);
-                canvas.addEventListener(
-                    "pointerleave",
-                    pointerleaveHandler,
-                    true,
-                );
-                canvas.addEventListener("wheel", wheelHandler, {
-                    passive: false,
-                });
+                const stopProp = (e: Event) => e.stopPropagation();
+                canvas.addEventListener("wheel", stopProp, { passive: false });
 
                 // Stream chosen loader path
                 const extension = fileExtension.toLowerCase();
@@ -372,32 +319,20 @@ const FullScreen3DModal = ({
                     throw loadErr;
                 }
 
-                // Autoscale after parse completes
+                // Autoscale + center the model at the origin and position the
+                // camera; OrbitControls then orbits around that origin.
                 if (modelRef.current) {
                     autoScaleAndCenter(modelRef.current, camera, width, height);
-
-                    // Seed inertia target quaternion
-                    targetRotation.x = modelRef.current.rotation.x;
-                    targetRotation.y = modelRef.current.rotation.y;
                 }
+                controls.target.set(0, 0, 0);
+                controls.update();
+                controls.saveState(); // baseline for "reset view"
 
-                // requestAnimationFrame driver (renders only while armed)
+                // requestAnimationFrame driver (renders only while armed).
                 const animate = () => {
                     animationIdRef.current = requestAnimationFrame(animate);
-
-                    if (modelRef.current) {
-                        const easing = 0.1;
-                        const dx = targetRotation.x - rotation.x;
-                        const dy = targetRotation.y - rotation.y;
-                        if (Math.abs(dx) > 1e-4 || Math.abs(dy) > 1e-4) {
-                            rotation.x += dx * easing;
-                            rotation.y += dy * easing;
-                            modelRef.current.rotation.x = rotation.x;
-                            modelRef.current.rotation.y = rotation.y;
-                            requestRender(2);
-                        }
-                    }
-
+                    // update() returns true while damping is still settling.
+                    if (controls.update()) requestRender(2);
                     if (renderBudget > 0) {
                         renderBudget--;
                         renderer.render(scene, camera);
@@ -431,30 +366,10 @@ const FullScreen3DModal = ({
                 // Dispose geometries + textures
                 return () => {
                     resizeObserver.disconnect();
-                    window.removeEventListener(
-                        "pointermove",
-                        pointermoveHandler,
-                        true,
-                    );
-                    window.removeEventListener(
-                        "pointerup",
-                        pointerupHandler,
-                        true,
-                    );
-                    if (canvas) {
-                        canvas.removeEventListener(
-                            "pointerdown",
-                            pointerdownHandler,
-                            true,
-                        );
-                        canvas.removeEventListener(
-                            "pointerleave",
-                            pointerleaveHandler,
-                            true,
-                        );
-                        canvas.removeEventListener("wheel", wheelHandler);
-                    }
-
+                    canvas.removeEventListener("wheel", stopProp);
+                    controls.dispose();
+                    controlsRef.current = null;
+                    requestRenderRef.current = null;
                     if (animationIdRef.current) {
                         cancelAnimationFrame(animationIdRef.current);
                     }
@@ -504,18 +419,9 @@ const FullScreen3DModal = ({
     }, [url, setupScene]);
 
     const handleResetView = () => {
-        if (modelRef.current && cameraRef.current && mountRef.current) {
-            autoScaleAndCenter(
-                modelRef.current,
-                cameraRef.current,
-                mountRef.current.clientWidth,
-                mountRef.current.clientHeight,
-            );
-            if (modelRef.current) {
-                modelRef.current.rotation.set(0, 0, 0);
-            }
-            requestRenderRef.current?.();
-        }
+        // Restore the camera/target baseline captured after initial framing.
+        controlsRef.current?.reset();
+        requestRenderRef.current?.();
     };
 
     const handleDownload = () => {
@@ -684,12 +590,6 @@ const MiniModelPreview = ({
                 cameraLight.position.set(0, 0, 1);
                 camera.add(cameraLight);
 
-                // Interaction state
-                let isDragging = false;
-                let previousMousePosition = { x: 0, y: 0 };
-                const rotation = { x: 0, y: 0 };
-                const targetRotation = { x: 0, y: 0 };
-
                 // On-demand rendering budget (see fullscreen viewer for rationale).
                 // Critical here: an idle node preview must not render 262k splats
                 // every frame forever, or several model nodes together stall the PC.
@@ -698,62 +598,28 @@ const MiniModelPreview = ({
                     renderBudget = Math.max(renderBudget, frames);
                 };
 
-                // Event Handlers
-                const onPointerDown = (e: PointerEvent) => {
-                    if (e.target !== renderer.domElement) return;
-                    // CRITICAL: Stop propagation to prevent React Flow from dragging the node
-                    e.stopPropagation();
-                    e.preventDefault();
-                    isDragging = true;
-                    previousMousePosition = { x: e.clientX, y: e.clientY };
-                    (renderer.domElement as HTMLElement).style.cursor =
-                        "grabbing";
-                    requestRender();
-                };
+                // Standard orbit controls (drag to orbit, wheel to zoom; full
+                // top-to-bottom range, damped). Same scheme as the fullscreen
+                // viewer so the two feel identical.
+                const { OrbitControls } = await import(
+                    "three/examples/jsm/controls/OrbitControls.js"
+                );
+                const controls = new OrbitControls(camera, renderer.domElement);
+                controls.enableDamping = true;
+                controls.dampingFactor = 0.08;
+                controls.rotateSpeed = 0.9;
+                controls.zoomToCursor = true;
+                controls.minDistance = 0.5;
+                controls.maxDistance = 100;
+                controls.addEventListener("change", () => requestRender(2));
 
-                const onPointerMove = (e: PointerEvent) => {
-                    if (!isDragging) return;
-                    e.stopPropagation();
-                    e.preventDefault();
-
-                    const deltaX = e.clientX - previousMousePosition.x;
-                    const deltaY = e.clientY - previousMousePosition.y;
-
-                    targetRotation.y += deltaX * 0.01;
-                    targetRotation.x += deltaY * 0.01;
-                    targetRotation.x = Math.max(
-                        -Math.PI / 2,
-                        Math.min(Math.PI / 2, targetRotation.x),
-                    );
-
-                    previousMousePosition = { x: e.clientX, y: e.clientY };
-                    requestRender();
-                };
-
-                const onPointerUp = (e: PointerEvent) => {
-                    if (isDragging) {
-                        e.stopPropagation();
-                        isDragging = false;
-                        (renderer.domElement as HTMLElement).style.cursor =
-                            "grab";
-                    }
-                };
-
-                const onWheel = (e: WheelEvent) => {
-                    if (e.target !== renderer.domElement) return;
-                    // Prevent zooming the flow canvas
-                    e.stopPropagation();
-                    // Optional: Implement zoom for mini preview if needed, but might be too cluttered
-                    // For now, just stop propagation
-                };
-
-                // Attach events
+                // Keep drag/zoom inside the node: stop the gestures from bubbling
+                // to React Flow (which would pan/zoom the canvas or drag the node).
                 const canvas = renderer.domElement;
                 canvas.style.cursor = "grab";
-                canvas.addEventListener("pointerdown", onPointerDown);
-                window.addEventListener("pointermove", onPointerMove); // Window for smooth drag outside
-                window.addEventListener("pointerup", onPointerUp);
-                canvas.addEventListener("wheel", onWheel, { passive: false });
+                const stopProp = (e: Event) => e.stopPropagation();
+                canvas.addEventListener("pointerdown", stopProp);
+                canvas.addEventListener("wheel", stopProp, { passive: false });
 
                 // Load Model
                 const ext = fileExtension.toLowerCase();
@@ -804,32 +670,20 @@ const MiniModelPreview = ({
                         width,
                         height,
                     );
-
-                    // Initial nice angle
-                    targetRotation.x = -0.2;
-                    targetRotation.y = 0.5;
-                    rotation.x = -0.2;
-                    rotation.y = 0.5;
-                    modelHolder.current.rotation.x = rotation.x;
-                    modelHolder.current.rotation.y = rotation.y;
                 }
+                // Orbit around the model origin; nudge to a pleasant elevated
+                // 3/4 view as the default framing.
+                const dist = camera.position.length() || 12;
+                camera.position
+                    .set(dist * 0.7, dist * 0.45, dist * 0.7)
+                    .setLength(dist);
+                controls.target.set(0, 0, 0);
+                controls.update();
 
                 // Animation Loop (renders only while armed; idles otherwise)
                 const animate = () => {
                     animationIdRef.current = requestAnimationFrame(animate);
-
-                    if (modelRef.current) {
-                        const easing = 0.1;
-                        const dx = targetRotation.x - rotation.x;
-                        const dy = targetRotation.y - rotation.y;
-                        if (Math.abs(dx) > 1e-4 || Math.abs(dy) > 1e-4) {
-                            rotation.x += dx * easing;
-                            rotation.y += dy * easing;
-                            modelRef.current.rotation.x = rotation.x;
-                            modelRef.current.rotation.y = rotation.y;
-                            requestRender(2);
-                        }
-                    }
+                    if (controls.update()) requestRender(2);
                     if (renderBudget > 0) {
                         renderBudget--;
                         renderer.render(scene, camera);
@@ -842,10 +696,9 @@ const MiniModelPreview = ({
                 cleanup = () => {
                     if (animationIdRef.current)
                         cancelAnimationFrame(animationIdRef.current);
-                    canvas.removeEventListener("pointerdown", onPointerDown);
-                    window.removeEventListener("pointermove", onPointerMove);
-                    window.removeEventListener("pointerup", onPointerUp);
-                    canvas.removeEventListener("wheel", onWheel);
+                    canvas.removeEventListener("pointerdown", stopProp);
+                    canvas.removeEventListener("wheel", stopProp);
+                    controls.dispose();
                     disposeSplat(sceneRef.current, modelRef.current);
                     renderer.dispose();
                 };
