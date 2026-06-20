@@ -148,7 +148,7 @@ app 默认不预装任何插件。打开**插件管理器**（右上角的方块
 
 ### 其他
 
-- ⬜ **图像 → 3D**: 从单张图像生成 3D 模型。
+- ✅ **图像 → 3D**: 从单张图像生成 3D 模型。
 - ✅ **文档 → 文本**: 从文档中提取纯文本。
 - ✅ **链接 → 文本**: 将页面内容转换为文本。
 
@@ -184,6 +184,8 @@ app 默认不预装任何插件。打开**插件管理器**（右上角的方块
 - [tongflow-modal-ltx](https://github.com/tong-io/tongflow-modal-ltx) — LTX-2.3 文本 / 图像生视频
 - [tongflow-modal-infinitetalk](https://github.com/tong-io/tongflow-modal-infinitetalk) — InfiniteTalk 音频驱动口型同步（音频 + 视频 → 数字人视频）
 - [tongflow-modal-wan-animate](https://github.com/tong-io/tongflow-modal-wan-animate) — Wan-Animate 换角色与动作迁移（视频 + 参考）
+- [tongflow-modal-scail2](https://github.com/tong-io/tongflow-modal-scail2) — SCAIL-2 可控角色动画（角色图 + 驱动视频；与 wan-animate 相同的两个槽位）
+- [tongflow-modal-triposplat](https://github.com/tong-io/tongflow-modal-triposplat) — TripoSplat 单图生成 3D 高斯泼溅
 - [tongflow-modal-seedvr2](https://github.com/tong-io/tongflow-modal-seedvr2) — SeedVR2 图像 / 视频超分辨率
 - [tongflow-modal-gemma4](https://github.com/tong-io/tongflow-modal-gemma4) — Gemma-4 多模态文本（图像 / 视频理解）
 - [tongflow-modal-qwen3asr](https://github.com/tong-io/tongflow-modal-qwen3asr) — Qwen3 语音识别

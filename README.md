@@ -156,7 +156,7 @@ Run the preloaded example node by node, or switch to Execute Mode and hit the ru
 
 ### Other
 
-- ⬜ **Image → 3D**: single-view 3D model from an image.
+- ✅ **Image → 3D**: single-view 3D model from an image.
 - ✅ **Document → text**: extract plain text from documents.
 - ✅ **Link → text**: turn page content into text.
 
@@ -192,6 +192,8 @@ Run the preloaded example node by node, or switch to Execute Mode and hit the ru
 - [tongflow-modal-ltx](https://github.com/tong-io/tongflow-modal-ltx) — LTX-2.3 text / image-to-video
 - [tongflow-modal-infinitetalk](https://github.com/tong-io/tongflow-modal-infinitetalk) — InfiniteTalk audio-driven lip-sync (audio + video → talking-head video)
 - [tongflow-modal-wan-animate](https://github.com/tong-io/tongflow-modal-wan-animate) — Wan-Animate character swap & motion transfer (video + reference)
+- [tongflow-modal-scail2](https://github.com/tong-io/tongflow-modal-scail2) — SCAIL-2 controlled character animation (image + driving video; same two slots as wan-animate)
+- [tongflow-modal-triposplat](https://github.com/tong-io/tongflow-modal-triposplat) — TripoSplat single image → 3D Gaussian splat
 - [tongflow-modal-seedvr2](https://github.com/tong-io/tongflow-modal-seedvr2) — SeedVR2 image / video super-resolution
 - [tongflow-modal-gemma4](https://github.com/tong-io/tongflow-modal-gemma4) — Gemma-4 multimodal text (image / video understanding)
 - [tongflow-modal-qwen3asr](https://github.com/tong-io/tongflow-modal-qwen3asr) — Qwen3 speech recognition

@@ -148,7 +148,7 @@ TongFlowで生成AIを活用し、創造力を解き放とう！
 
 ### その他
 
-- ⬜ **画像 → 3D**: 1枚の画像から3Dモデルを生成。
+- ✅ **画像 → 3D**: 1枚の画像から3Dモデルを生成。
 - ✅ **ドキュメント → テキスト**: ドキュメントからプレーンテキストを抽出。
 - ✅ **リンク → テキスト**: ページの内容をテキストに変換。
 
@@ -184,6 +184,8 @@ TongFlowで生成AIを活用し、創造力を解き放とう！
 - [tongflow-modal-ltx](https://github.com/tong-io/tongflow-modal-ltx) — LTX-2.3 テキスト / 画像から動画生成
 - [tongflow-modal-infinitetalk](https://github.com/tong-io/tongflow-modal-infinitetalk) — InfiniteTalk 音声駆動リップシンク（音声 + 動画 → デジタルヒューマン動画）
 - [tongflow-modal-wan-animate](https://github.com/tong-io/tongflow-modal-wan-animate) — Wan-Animate キャラクター置換とモーション転送（動画 + 参照）
+- [tongflow-modal-scail2](https://github.com/tong-io/tongflow-modal-scail2) — SCAIL-2 制御可能なキャラクターアニメーション（画像 + 駆動動画；wan-animate と同じ 2 スロット）
+- [tongflow-modal-triposplat](https://github.com/tong-io/tongflow-modal-triposplat) — TripoSplat 1 枚の画像から 3D ガウシアンスプラット
 - [tongflow-modal-seedvr2](https://github.com/tong-io/tongflow-modal-seedvr2) — SeedVR2 画像 / 動画の超解像
 - [tongflow-modal-gemma4](https://github.com/tong-io/tongflow-modal-gemma4) — Gemma-4 マルチモーダルテキスト（画像 / 動画理解）
 - [tongflow-modal-qwen3asr](https://github.com/tong-io/tongflow-modal-qwen3asr) — Qwen3 音声認識
