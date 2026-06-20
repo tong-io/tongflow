@@ -53,6 +53,9 @@ importers:
       '@radix-ui/react-tooltip':
         specifier: 1.2.8
         version: 1.2.8(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
+      '@sparkjsdev/spark':
+        specifier: 2.1.0
+        version: 2.1.0(three@0.183.2)
       '@types/three':
         specifier: 0.183.1
         version: 0.183.1
@@ -1703,6 +1706,11 @@ packages:
 
   '@schummar/icu-type-parser@1.21.5':
     resolution: {integrity: sha512-bXHSaW5jRTmke9Vd0h5P7BtWZG9Znqb8gSDxZnxaGSJnGwPLDPfS+3g0BKzeWqzgZPsIVZkM7m2tbo18cm5HBw==}
+
+  '@sparkjsdev/spark@2.1.0':
+    resolution: {integrity: sha512-BRw+MuMzx0B3K8fDLQygt2OHEhYUV+41RX7btq9pZ3rCVrq42o57jW34VAIvC7JO/84DJh/1AutACV9ym6BfVg==}
+    peerDependencies:
+      three: '>=0.180.0'
 
   '@standard-schema/spec@1.1.0':
     resolution: {integrity: sha512-l2aFy5jALhniG5HgqrD6jXLi/rUWrKvqN/qJx6yoJsgKhblVd+iqqU4RCXavm/jPityDo5TCvKMnpjKnOriy0w==}
@@ -4305,6 +4313,11 @@ snapshots:
   '@rolldown/pluginutils@1.0.0-rc.17': {}
 
   '@schummar/icu-type-parser@1.21.5': {}
+
+  '@sparkjsdev/spark@2.1.0(three@0.183.2)':
+    dependencies:
+      fflate: 0.8.2
+      three: 0.183.2
 
   '@standard-schema/spec@1.1.0': {}
 

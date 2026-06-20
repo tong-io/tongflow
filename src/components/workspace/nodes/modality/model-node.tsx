@@ -24,18 +24,6 @@ import { ModalityPlaceholder } from "./modality-placeholder";
 
 type ModelNodeRfProps = RfDataNodeProps<"modelNode">;
 
-// Spark must stay dynamic (browser-only entry)
-// Spark WASM currently breaks Next build — disabled
-// Production can load Spark via CDN chunk
-const _SplatMesh: any = null;
-
-// Spark bootstrap — disabled for now
-async function _initSparkIfNeeded() {
-    // Spark WASM module disabled due to Next.js webpack compatibility issues
-    // Prefer CDN bundle in production
-    logger.debug("Gaussian Splatting support requires separate CDN loading");
-}
-
 // Frame camera to bound the mesh
 const _fitCameraToSelection = (
     camera: THREE.PerspectiveCamera,
@@ -79,6 +67,11 @@ const autoScaleAndCenter = (
     containerHeight: number,
 ) => {
     const box = new THREE.Box3().setFromObject(model);
+    // Some objects (e.g. a Gaussian-splat SplatMesh) expose no traversable
+    // geometry bounds; setFromObject then yields an empty box whose center is
+    // NaN, which would push the model off-screen. Leave it at its native
+    // transform in that case.
+    if (box.isEmpty()) return;
     const size = box.getSize(new THREE.Vector3());
     const center = box.getCenter(new THREE.Vector3());
 
@@ -298,7 +291,13 @@ const FullScreen3DModal = ({
                         extension === ".ksplat" ||
                         extension === ".sog"
                     ) {
-                        await loadSplat(url, scene, modelRef);
+                        await loadSplat(
+                            url,
+                            scene,
+                            modelRef,
+                            renderer,
+                            extension,
+                        );
                     } else if (extension === ".fbx") {
                         await loadFBX(url, scene, modelRef);
                     } else if (extension === ".stl") {
@@ -409,6 +408,7 @@ const FullScreen3DModal = ({
                     if (animationIdRef.current) {
                         cancelAnimationFrame(animationIdRef.current);
                     }
+                    disposeSplat(sceneRef.current, modelRef.current);
                     renderer.dispose();
                 };
             } catch (err) {
@@ -725,7 +725,7 @@ const MiniModelPreview = ({
                         ext === ".ksplat" ||
                         ext === ".sog"
                     )
-                        await loadSplat(url, scene, modelHolder);
+                        await loadSplat(url, scene, modelHolder, renderer, ext);
                     else if (ext === ".igs" || ext === ".iges")
                         await loadIGES(url, scene, modelHolder);
                     else if (ext === ".step" || ext === ".stp")
@@ -777,6 +777,7 @@ const MiniModelPreview = ({
                     window.removeEventListener("pointermove", onPointerMove);
                     window.removeEventListener("pointerup", onPointerUp);
                     canvas.removeEventListener("wheel", onWheel);
+                    disposeSplat(sceneRef.current, modelRef.current);
                     renderer.dispose();
                 };
             } catch (err) {
@@ -887,27 +888,67 @@ async function loadOBJ(
 }
 
 // Loader: Gaussian splat payload
+// Name of the per-scene SparkRenderer (one drives sorting/compositing for all
+// SplatMeshes in a scene; reused across loads).
+const SPARK_RENDERER_NAME = "__spark_renderer__";
+
+// Loader: Gaussian Splatting (.ply / .spz / .splat / .ksplat / .sog) via SparkJS.
+// Spark is imported dynamically so its WASM module is never evaluated during SSR
+// or build — only client-side when a splat is actually viewed (paired with the
+// `url: false` webpack parser tweak in next.config.ts).
 async function loadSplat(
-    _url: string,
+    url: string,
     scene: THREE.Scene,
     modelRef: React.MutableRefObject<THREE.Object3D | null>,
+    renderer: THREE.WebGLRenderer,
+    ext: string,
 ): Promise<void> {
-    // Gaussian Splatting support is temporarily disabled due to WASM compatibility issues
-    // Create a placeholder geometry to show in the scene
-    const geometry = new THREE.SphereGeometry(1, 32, 32);
-    const material = new THREE.MeshPhongMaterial({
-        color: 0x64b5f6,
-        emissive: 0x2196f3,
-        shininess: 100,
-    });
-    const mesh = new THREE.Mesh(geometry, material);
+    const { SparkRenderer, SplatMesh, SplatFileType } = await import(
+        "@sparkjsdev/spark"
+    );
 
+    // Install a SparkRenderer into the scene once; the existing
+    // renderer.render(scene, camera) loop drives it via onBeforeRender.
+    if (!scene.getObjectByName(SPARK_RENDERER_NAME)) {
+        const spark = new SparkRenderer({ renderer });
+        spark.name = SPARK_RENDERER_NAME;
+        scene.add(spark);
+    }
+
+    // .ply / .spz / .sog auto-detect from content; .splat / .ksplat need an
+    // explicit fileType (they carry no self-describing header). Inferred from
+    // the enum members via a ternary — SplatFileType is a dynamic-import value
+    // binding and can't be used in a type-annotation position.
+    const lower = ext.toLowerCase();
+    const fileType =
+        lower === ".ply"
+            ? SplatFileType.PLY
+            : lower === ".spz"
+              ? SplatFileType.SPZ
+              : lower === ".splat"
+                ? SplatFileType.SPLAT
+                : lower === ".ksplat"
+                  ? SplatFileType.KSPLAT
+                  : undefined;
+
+    const mesh = new SplatMesh(fileType ? { url, fileType } : { url });
+    // Wait for decode so downstream framing (autoScaleAndCenter) sees real bounds.
+    await mesh.initialized;
     scene.add(mesh);
     modelRef.current = mesh;
+}
 
-    logger.debug(
-        "Gaussian Splatting (.splat, .spz) files require separate CDN loading. Showing placeholder.",
-    );
+// Dispose a SplatMesh + its scene's SparkRenderer (best-effort; both expose
+// dispose()). Called from each viewer's teardown.
+function disposeSplat(
+    scene: THREE.Scene | null,
+    model: THREE.Object3D | null,
+): void {
+    (model as { dispose?: () => void } | null)?.dispose?.();
+    const spark = scene?.getObjectByName(SPARK_RENDERER_NAME) as
+        | (THREE.Object3D & { dispose?: () => void })
+        | undefined;
+    spark?.dispose?.();
 }
 
 // Loader: Autodesk FBX

@@ -63,6 +63,7 @@
         "@radix-ui/react-switch": "1.2.6",
         "@radix-ui/react-tabs": "1.1.13",
         "@radix-ui/react-tooltip": "1.2.8",
+        "@sparkjsdev/spark": "2.1.0",
         "@types/three": "0.183.1",
         "@xyflow/react": "12.9.0",
         "better-sqlite3": "12.2.0",
