@@ -8,6 +8,7 @@ const FILE_REF_REFS = new Set([
     "#/$defs/ImageRef",
     "#/$defs/VideoRef",
     "#/$defs/AudioRef",
+    "#/$defs/ModelRef",
 ]);
 
 function schemaIsFileRef(schema: unknown): boolean {
@@ -27,7 +28,9 @@ function mimeToExt(mime: string): string | null {
         "audio/mpeg": "mp3",
         "audio/x-wav": "wav",
         "audio/flac": "flac",
-        "application/octet-stream": "bin",
+        // Note: generic binary (application/octet-stream) is intentionally NOT
+        // mapped — it carries no real extension, so we defer to the filename
+        // (e.g. a 3D model's `.splat` / `.ply`) and only fall back to `.bin`.
     };
     return map[m] ?? null;
 }
