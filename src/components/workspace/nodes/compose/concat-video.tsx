@@ -1,34 +1,61 @@
+import type { Edge } from "@xyflow/react";
+import { useNodeId, useStore } from "@xyflow/react";
 import { Video } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { memo } from "react";
+import { memo, useMemo } from "react";
 
 import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { useAbiForm } from "@/hooks/use-abi-form";
+import { collectHandleValues, resolveSpec } from "@/lib/abi/resolve";
 import { collectAll } from "@/lib/abi/sources";
 import type { TongflowPluginNodeProps } from "@/types/tongflow-flow";
 
 import { AbiNodeShell } from "../base/abi-node-shell";
 import { MediaThumbnail } from "../base/media-thumbnail";
 
+const CONCAT_VIDEO_SOURCE_SPEC = { videos: collectAll() };
+
 const ConcatVideoNode = ({
     selected,
     data,
 }: TongflowPluginNodeProps<"concat-videos", "concatVideoNode">) => {
     const t = useTranslations("Workspace.nodes");
-    const form = useAbiForm("concat-videos", {
-        // Concat all upstream videoNodes' fileKeys into the `videos` array.
-        videos: collectAll(),
-    });
+    const form = useAbiForm("concat-videos", CONCAT_VIDEO_SOURCE_SPEC);
 
-    // The displayed list comes from form state if present (set after exec)
-    // or remains empty in the editor view; runtime concat-collects from edges.
-    const videoFileKeys = (data.fileKeys ?? []) as string[];
+    const nodeId = useNodeId();
+    const nodeLookup = useStore((state) => state.nodeLookup);
+    const edges = useStore((state) => state.edges as Edge[]);
+
+    const resolvedSpec = useMemo(
+        () => resolveSpec("concat-videos", CONCAT_VIDEO_SOURCE_SPEC),
+        [],
+    );
+
+    // Collect upstream video fileKeys from incoming edges so the editor view
+    // reflects connections live (both manual drags and compose-created edges),
+    // not just `data.fileKeys` populated after execution.
+    const videoFileKeys = useMemo(() => {
+        const collected = nodeId
+            ? collectHandleValues(
+                  nodeId,
+                  resolvedSpec,
+                  Array.from(nodeLookup.values()),
+                  edges,
+              ).videos
+            : undefined;
+        if (Array.isArray(collected) && collected.length > 0) {
+            return collected.filter(
+                (key): key is string => typeof key === "string",
+            );
+        }
+        return (data.fileKeys ?? []) as string[];
+    }, [nodeId, resolvedSpec, nodeLookup, edges, data.fileKeys]);
 
     return (
         <AbiNodeShell
             feature="concat-videos"
-            sourceSpec={{ videos: collectAll() }}
+            sourceSpec={CONCAT_VIDEO_SOURCE_SPEC}
             form={form}
             selected={selected}
             className="min-w-[480px]"
