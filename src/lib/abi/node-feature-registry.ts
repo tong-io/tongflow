@@ -112,7 +112,7 @@ export const NODE_TYPE_SOURCE_SPEC: Partial<
     },
     imageGenImageNode: {
         image: handle({ nodeType: "imageNode" }),
-        text: handle({ nodeType: "textNode", path: "texts[0]" }),
+        text: handle({ nodeType: "textNode", path: "texts[0]", manual: true }),
     },
     speechTextGenVideoNode: {
         text: handle({ nodeType: "textNode", path: "texts[0]" }),
