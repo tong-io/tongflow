@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.3] - 2026-06-22
+
+### Added
+
+- Official plugin **Unlimited-OCR** (`tongflow-modal-unlimited-ocr`) — Baidu's
+  Unlimited-OCR for long-horizon document / PDF → text on the `parse-document`
+  slot, a GPU alternative to Docling and PaddleOCR.
+
 ## [0.1.2] - 2026-06-20
 
 ### Added

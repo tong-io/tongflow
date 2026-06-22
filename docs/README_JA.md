@@ -194,6 +194,7 @@ TongFlowで生成AIを活用し、創造力を解き放とう！
 - [tongflow-modal-ace-step](https://github.com/tong-io/tongflow-modal-ace-step) — ACE-Step テキストから音楽生成
 - [tongflow-modal-docling](https://github.com/tong-io/tongflow-modal-docling) — Docling ドキュメント → テキスト
 - [tongflow-modal-paddle](https://github.com/tong-io/tongflow-modal-paddle) — PaddleOCR ドキュメント → テキスト
+- [tongflow-modal-unlimited-ocr](https://github.com/tong-io/tongflow-modal-unlimited-ocr) — Unlimited-OCR 長文ドキュメント / PDF → テキスト
 - [tongflow-modal-crawl4ai](https://github.com/tong-io/tongflow-modal-crawl4ai) — Crawl4AI URL / リンク → テキスト
 - [tongflow-modal-scrapling](https://github.com/tong-io/tongflow-modal-scrapling) — Scrapling ステルスブラウザ URL / リンク → テキスト
 
