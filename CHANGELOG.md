@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.4] - 2026-06-25
+
+### Fixed
+
+- Plugins no longer crash on a non-UTF-8 system locale (notably Windows
+  Simplified-Chinese, whose ANSI code page is GBK / cp936). A spawned Python's
+  stdout/stderr defaulted to the system locale, so a plugin printing a
+  non-ASCII character — such as the `✓` emitted while downloading model
+  weights — raised `UnicodeEncodeError: 'gbk' codec can't encode character`
+  and surfaced as "downloading weights failed (exit 1)". Every Python spawn
+  site now forces UTF-8 mode (`PYTHONUTF8=1`).
+
 ## [0.1.3] - 2026-06-22
 
 ### Added
