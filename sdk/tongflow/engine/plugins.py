@@ -23,6 +23,7 @@ from pathlib import Path
 from typing import Any, Callable, Optional
 
 from ..scan import scan
+from ._subproc import utf8_env
 
 DEFAULT_ORG = "https://github.com/tong-io"
 
@@ -58,6 +59,9 @@ def _clone_plugin(plugin_id: str, url: str, plugins_dir: Path, log: LogCb) -> No
         ["git", "clone", "--depth", "1", url, str(dest)],
         capture_output=True,
         text=True,
+        encoding="utf-8",
+        errors="replace",
+        env=utf8_env(),
     )
     if r.returncode != 0:
         raise RuntimeError(
@@ -126,7 +130,15 @@ def _write_marker(venv_dir: Path, name: str, value: str) -> None:
 
 
 def _run(cmd: list[str], cwd: Path) -> tuple[int, str]:
-    r = subprocess.run(cmd, cwd=str(cwd), capture_output=True, text=True)
+    r = subprocess.run(
+        cmd,
+        cwd=str(cwd),
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        errors="replace",
+        env=utf8_env(),
+    )
     return r.returncode, (r.stdout + r.stderr)
 
 

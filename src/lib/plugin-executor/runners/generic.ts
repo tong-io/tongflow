@@ -6,6 +6,7 @@ import { TaskStatus } from "@/constants/task-status";
 import type { NodeSlot } from "@/generated/abi";
 import { ensurePluginPython } from "@/lib/plugins/plugin-python-env.server";
 import { getPluginConfig } from "@/lib/plugins/plugins-registry.server";
+import { PYTHON_UTF8_ENV } from "@/lib/plugins/python-lite";
 import { pluginsDir, resourcesDir } from "@/lib/runtime/paths.server";
 import { withStoredEnv } from "@/lib/settings/env-store.server";
 import { notifyTask } from "@/lib/task/emitter";
@@ -55,6 +56,7 @@ export async function execPlugin<S extends NodeSlot>(
         process.env.PYTHONPATH?.trim(),
     ].filter((x): x is string => Boolean(x));
     const pythonEnv = withStoredEnv({
+        ...PYTHON_UTF8_ENV,
         PYTHONPATH: pythonPathParts.join(delimiter),
     });
 

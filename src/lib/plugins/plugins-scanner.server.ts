@@ -6,6 +6,7 @@ import {
     type PluginsRegistry,
     PluginsRegistrySchema,
 } from "@/lib/plugins/plugins-registry-schema";
+import { PYTHON_UTF8_ENV } from "@/lib/plugins/python-lite";
 import { pluginsDir, resourcesDir } from "@/lib/runtime/paths.server";
 
 function pickPython(): string {
@@ -21,6 +22,7 @@ function scannerEnv(): NodeJS.ProcessEnv {
     );
     return {
         ...process.env,
+        ...PYTHON_UTF8_ENV,
         PYTHONPATH: pythonPath.join(delimiter),
     };
 }

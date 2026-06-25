@@ -20,6 +20,7 @@ from pathlib import Path
 from typing import Any, Callable, Optional
 
 from ..progress import PROGRESS_SENTINEL
+from ._subproc import utf8_env
 
 ProgressCb = Callable[[dict[str, Any]], None]
 
@@ -81,7 +82,7 @@ def invoke_plugin(
         }
     )
 
-    env = os.environ.copy()
+    env = utf8_env()
     python_path_parts = [str(sdk_root)]
     if env.get("PYTHONPATH"):
         python_path_parts.append(env["PYTHONPATH"])
@@ -97,6 +98,8 @@ def invoke_plugin(
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
         text=True,
+        encoding="utf-8",
+        errors="replace",
     )
 
     stderr_log: list[str] = []

@@ -11,7 +11,7 @@ import {
 import { getDb, tasks } from "@/db";
 import { logger } from "@/lib/logger";
 import { resolveBasePython } from "@/lib/plugins/plugin-python-env.server";
-import { resolvePythonLite } from "@/lib/plugins/python-lite";
+import { PYTHON_UTF8_ENV, resolvePythonLite } from "@/lib/plugins/python-lite";
 import { dataDir, pluginsDir, resourcesDir } from "@/lib/runtime/paths.server";
 import { withStoredEnv } from "@/lib/settings/env-store.server";
 import {
@@ -146,6 +146,7 @@ export async function executeWorkflowViaEngine(
         };
 
         const env = withStoredEnv({
+            ...PYTHON_UTF8_ENV,
             PYTHONPATH: [sdkDir, process.env.PYTHONPATH?.trim()]
                 .filter((x): x is string => Boolean(x))
                 .join(delimiter),

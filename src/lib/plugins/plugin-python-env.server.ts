@@ -5,7 +5,7 @@ import { createHash } from "node:crypto";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { logger } from "@/lib/logger";
-import { resolvePythonLite } from "@/lib/plugins/python-lite";
+import { PYTHON_UTF8_ENV, resolvePythonLite } from "@/lib/plugins/python-lite";
 import { dataDir, resourcesDir } from "@/lib/runtime/paths.server";
 
 /**
@@ -72,7 +72,11 @@ function runCmd(
     cwd: string,
 ): Promise<{ code: number; out: string }> {
     return new Promise((resolve) => {
-        const child = spawn(exe, args, { cwd, windowsHide: true });
+        const child = spawn(exe, args, {
+            cwd,
+            windowsHide: true,
+            env: { ...process.env, ...PYTHON_UTF8_ENV },
+        });
         let out = "";
         child.stdout?.on("data", (b: Buffer) => {
             out += String(b);
