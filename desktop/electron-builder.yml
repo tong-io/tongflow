@@ -52,3 +52,8 @@ publish:
     provider: github
     owner: tong-io
     repo: tongflow
+    # Publish the GitHub Release directly instead of electron-builder's default
+    # `draft` (which required a manual "Publish release" click and silently left
+    # builds unreleased — e.g. the v0.1.3 draft). A pushed `vX.Y.Z` tag now ships
+    # a public release immediately, which electron-updater also needs to see.
+    releaseType: release
