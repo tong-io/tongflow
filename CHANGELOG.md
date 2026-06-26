@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [0.1.5] - 2026-06-26
+## [0.1.6] - 2026-06-26
 
 ### Added
 
@@ -15,6 +15,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   alongside the aspect-ratio picker. The chosen width/height is the aspect
   ratio's base (1K) dimensions scaled by the tier, persisted directly to the
   existing `width`/`height` ABI fields (no new contract field).
+
+### Fixed
+
+- Desktop release pipeline no longer fails to publish under GitHub's immutable
+  releases. Per-arch installers are uploaded to a draft release and the draft
+  is published once after all assets are attached, instead of publishing
+  immediately and 422-ing on subsequent asset uploads. (Supersedes 0.1.5,
+  which never shipped a usable release.)
 
 ## [0.1.4] - 2026-06-25
 
