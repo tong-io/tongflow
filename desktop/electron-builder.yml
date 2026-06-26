@@ -52,8 +52,12 @@ publish:
     provider: github
     owner: tong-io
     repo: tongflow
-    # Publish the GitHub Release directly instead of electron-builder's default
-    # `draft` (which required a manual "Publish release" click and silently left
-    # builds unreleased — e.g. the v0.1.3 draft). A pushed `vX.Y.Z` tag now ships
-    # a public release immediately, which electron-updater also needs to see.
-    releaseType: release
+    # Upload assets to a DRAFT release first. A published GitHub Release is
+    # immutable the moment it goes public (repo "Immutable releases"), so
+    # electron-builder's per-arch asset uploads 422 with "Cannot upload assets
+    # to an immutable release" once the release is published. Drafts stay
+    # mutable, so all three arch jobs append their dmg/nsis/blockmap/update-feed
+    # assets to the same draft; the workflow's final `publish` job then flips it
+    # to public once (`gh release edit --draft=false`) — automated, no manual
+    # click, and electron-updater still sees a public release.
+    releaseType: draft
