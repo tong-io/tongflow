@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.5] - 2026-06-26
+
+### Added
+
+- Image generation nodes gain a **resolution tier** picker (1K / 2K / 4K)
+  alongside the aspect-ratio picker. The chosen width/height is the aspect
+  ratio's base (1K) dimensions scaled by the tier, persisted directly to the
+  existing `width`/`height` ABI fields (no new contract field).
+
 ## [0.1.4] - 2026-06-25
 
 ### Fixed

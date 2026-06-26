@@ -10,12 +10,26 @@ export interface Duration {
     label: string;
 }
 
+export interface ResolutionTier {
+    value: string;
+    label: string;
+    scale: number;
+}
+
 export const IMAGE_ASPECT_RATIOS: AspectRatio[] = [
     { value: "9:16", label: "portrait", width: 720, height: 1280 },
     { value: "16:9", label: "landscape", width: 1280, height: 720 },
     { value: "1:1", label: "square", width: 1024, height: 1024 },
     { value: "4:3", label: "standard", width: 1024, height: 768 },
     { value: "3:4", label: "verticalStandard", width: 768, height: 1024 },
+];
+
+// Resolution tiers scale an aspect ratio's base (1K) dimensions. The picked
+// width/height = ratio base × tier scale; there is no separate ABI field.
+export const IMAGE_RESOLUTION_TIERS: ResolutionTier[] = [
+    { value: "1k", label: "1K", scale: 1 },
+    { value: "2k", label: "2K", scale: 2 },
+    { value: "4k", label: "4K", scale: 4 },
 ];
 
 export const VIDEO_ASPECT_RATIOS: AspectRatio[] = [
