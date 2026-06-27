@@ -42,7 +42,7 @@ export function AspectRatioPicker({
                                 size="sm"
                                 onClick={() => onChange(ratio)}
                                 className={cn(
-                                    "h-auto py-2 px-1 flex flex-row items-center gap-1 text-xs transition-all",
+                                    "h-auto min-w-0 py-2 px-1 flex flex-row items-center gap-1 text-xs whitespace-normal transition-all",
                                     isSelected
                                         ? "bg-primary text-primary-foreground shadow-md"
                                         : "hover:bg-accent hover:text-accent-foreground",
@@ -58,7 +58,7 @@ export function AspectRatioPicker({
                                     style={iconSize}
                                 />
                                 <div className="flex flex-col items-start min-w-0">
-                                    <span className="text-xs font-medium leading-tight truncate">
+                                    <span className="text-xs font-medium leading-tight wrap-break-word text-left">
                                         {t(`options.${ratio.label}`)}
                                     </span>
                                     <span className="text-xs opacity-70 leading-tight">

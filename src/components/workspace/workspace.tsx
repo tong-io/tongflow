@@ -5,19 +5,37 @@
  * ReactFlow canvas managing nodes and edges
  */
 
-import type { Connection, Edge, IsValidConnection, Node } from "@xyflow/react";
+import type {
+    Connection,
+    Edge,
+    FinalConnectionState,
+    IsValidConnection,
+    Node,
+    OnReconnect,
+} from "@xyflow/react";
 import {
     Background,
     Controls,
     Panel,
     ReactFlow,
     ReactFlowProvider,
+    reconnectEdge,
     useReactFlow,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import { useLocale, useTranslations } from "next-intl";
 import { useCallback, useEffect, useState } from "react";
 import { useShallow } from "zustand/react/shallow";
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { usePreloadFeatures } from "@/hooks/use-features";
 import type { FlowState } from "@/hooks/use-flow";
 import { useFlow } from "@/hooks/use-flow";
@@ -63,15 +81,60 @@ function WorkspaceInner({
 
     const isValidConnection = useCallback<IsValidConnection<Edge>>(
         (connection) => {
-            const { nodes, edges } = useFlow.getState();
+            const { nodes, edges, reconnectingEdgeId } = useFlow.getState();
             return isValidFlowConnection(
                 connection as Connection,
                 nodes,
                 edges,
+                reconnectingEdgeId ?? undefined,
             );
         },
         [],
     );
+
+    const tEdges = useTranslations("Workspace.edges");
+    // Edge whose endpoint was dropped on empty canvas → confirm deletion.
+    const [pendingDeleteEdgeId, setPendingDeleteEdgeId] = useState<
+        string | null
+    >(null);
+
+    // Manual edge creation is disabled (handles set isConnectableStart=false).
+    // Users may only reconnect an existing edge's endpoint to another handle;
+    // isValidConnection above enforces the ABI contract on the new endpoint.
+    const onReconnectStart = useCallback((_event: unknown, edge: Edge) => {
+        useFlow.getState().setReconnectingEdgeId(edge.id);
+    }, []);
+
+    const onReconnect = useCallback<OnReconnect<Edge>>(
+        (oldEdge, newConnection) => {
+            const { edges, setEdges } = useFlow.getState();
+            setEdges(reconnectEdge(oldEdge, newConnection, edges));
+        },
+        [],
+    );
+
+    const onReconnectEnd = useCallback(
+        (
+            _event: MouseEvent | TouchEvent,
+            edge: Edge,
+            _handleType: unknown,
+            connectionState: FinalConnectionState,
+        ) => {
+            useFlow.getState().setReconnectingEdgeId(null);
+            // Dropped on empty canvas (no target handle) → ask to delete.
+            if (!connectionState.toHandle) {
+                setPendingDeleteEdgeId(edge.id);
+            }
+        },
+        [],
+    );
+
+    const confirmDeleteEdge = useCallback(() => {
+        if (!pendingDeleteEdgeId) return;
+        const { edges, setEdges } = useFlow.getState();
+        setEdges(edges.filter((e) => e.id !== pendingDeleteEdgeId));
+        setPendingDeleteEdgeId(null);
+    }, [pendingDeleteEdgeId]);
 
     // Listen for theme changes
     useEffect(() => {
@@ -293,12 +356,26 @@ function WorkspaceInner({
                 onEdgesChange={onEdgesChange}
                 onConnect={onConnect}
                 isValidConnection={isValidConnection}
+                // Manual new connections are disabled at the handle level
+                // (isConnectableStart={false}); users may only reconnect an
+                // existing edge's endpoint, validated by isValidConnection.
+                onReconnect={onReconnect}
+                onReconnectStart={onReconnectStart}
+                onReconnectEnd={onReconnectEnd}
                 nodeTypes={NODE_TYPES}
                 edgeTypes={EDGE_TYPES}
                 defaultEdgeOptions={{
                     type: "custom-edge",
                     selectable: false,
                     focusable: false,
+                }}
+                // While reconnecting, ReactFlow hides the original edge and
+                // shows this connection-line preview following the cursor.
+                // Match the custom-edge style so it stays visible/cursor-tracked.
+                connectionLineStyle={{
+                    strokeWidth: 3,
+                    stroke: "#94a3b8",
+                    strokeLinecap: "round",
                 }}
                 onSelectionChange={onSelectionChange}
                 onNodeDoubleClick={handleNodeDoubleClick}
@@ -330,6 +407,32 @@ function WorkspaceInner({
             <div className="absolute right-4 bottom-5 z-10">
                 <ModeSwitch />
             </div>
+
+            <AlertDialog
+                open={pendingDeleteEdgeId !== null}
+                onOpenChange={(open) => {
+                    if (!open) setPendingDeleteEdgeId(null);
+                }}
+            >
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>
+                            {tEdges("deleteConfirmTitle")}
+                        </AlertDialogTitle>
+                        <AlertDialogDescription>
+                            {tEdges("deleteConfirmDescription")}
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel>
+                            {tEdges("cancel")}
+                        </AlertDialogCancel>
+                        <AlertDialogAction onClick={confirmDeleteEdge}>
+                            {tEdges("delete")}
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </div>
     );
 }

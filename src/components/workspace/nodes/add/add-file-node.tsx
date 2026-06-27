@@ -132,7 +132,12 @@ const AddFileNode = ({ selected, data }: NodeProps) => {
             isInputNode
             showPluginSelect={false}
         >
-            <Handle type="source" position={Position.Right} id="out:fileNode" />
+            <Handle
+                type="source"
+                position={Position.Right}
+                id="out:fileNode"
+                isConnectableStart={false}
+            />
             <div className="p-4 space-y-2">
                 <Tabs
                     value={activeTab}

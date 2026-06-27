@@ -48,6 +48,12 @@
         }
     },
     "Workspace": {
+        "edges": {
+            "deleteConfirmTitle": "删除连线？",
+            "deleteConfirmDescription": "这条连线没有连接到任何节点，是否删除它？",
+            "delete": "删除",
+            "cancel": "取消"
+        },
         "handles": {
             "text": "文本",
             "image": "图片",

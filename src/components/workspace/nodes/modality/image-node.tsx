@@ -274,11 +274,13 @@ const ImageNode = ({ selected, data }: ImageNodeRfProps) => {
                     type="target"
                     position={Position.Left}
                     id="in:imageNode"
+                    isConnectableStart={false}
                 />
                 <Handle
                     type="source"
                     position={Position.Right}
                     id="out:imageNode"
+                    isConnectableStart={false}
                 />
                 <NodeHeader>
                     <NodeHeaderIcon>

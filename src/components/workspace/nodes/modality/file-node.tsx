@@ -168,8 +168,18 @@ const FileNode = ({ selected, data }: FileNodeRfProps) => {
 
     return (
         <BaseNodeShell selected={selected} count={count}>
-            <Handle type="target" position={Position.Left} id="in:fileNode" />
-            <Handle type="source" position={Position.Right} id="out:fileNode" />
+            <Handle
+                type="target"
+                position={Position.Left}
+                id="in:fileNode"
+                isConnectableStart={false}
+            />
+            <Handle
+                type="source"
+                position={Position.Right}
+                id="out:fileNode"
+                isConnectableStart={false}
+            />
             <NodeHeader>
                 <NodeHeaderIcon>
                     <FileIcon />

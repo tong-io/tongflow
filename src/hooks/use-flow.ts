@@ -98,6 +98,9 @@ export interface FlowState {
     onConnect: OnConnect;
     setNodes: (nodes: Node[]) => void;
     setEdges: (edges: Edge[]) => void;
+    /** Id of the edge currently being reconnected (excluded from validation). */
+    reconnectingEdgeId: string | null;
+    setReconnectingEdgeId: (id: string | null) => void;
     expands: (nodeId: string | null, possibleNodes: PossibleNode[]) => string[];
     compose: (newNode: { type: string; data: unknown }) => string;
     updates: (nodeId: string, data: Record<string, unknown>) => void;
@@ -124,6 +127,7 @@ export const useFlow = create<FlowState>((set, get) => ({
     // Multi-select compose mode tracking
     comboMode: false,
     comboSelectedIds: new Set<string>(),
+    reconnectingEdgeId: null,
 
     nodeCreatedCallbacks: new Set(),
     onNodeCreated: (callback) => {
@@ -195,6 +199,7 @@ export const useFlow = create<FlowState>((set, get) => ({
         set({ edges });
         debouncedSaveEdges(edges);
     },
+    setReconnectingEdgeId: (id) => set({ reconnectingEdgeId: id }),
     updates: (nodeId: string, data: Record<string, unknown>) => {
         const newNodes = get().nodes.map((node) => {
             if (node.id === nodeId) {

@@ -48,6 +48,12 @@
         }
     },
     "Workspace": {
+        "edges": {
+            "deleteConfirmTitle": "Delete connection?",
+            "deleteConfirmDescription": "This connection isn't attached to any node. Delete it?",
+            "delete": "Delete",
+            "cancel": "Cancel"
+        },
         "handles": {
             "text": "Text",
             "image": "Image",

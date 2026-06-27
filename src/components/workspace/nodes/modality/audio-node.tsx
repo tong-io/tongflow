@@ -229,11 +229,13 @@ const AudioNode = ({ selected, data }: AudioNodeRfProps) => {
                     type="target"
                     position={Position.Left}
                     id="in:audioNode"
+                    isConnectableStart={false}
                 />
                 <Handle
                     type="source"
                     position={Position.Right}
                     id="out:audioNode"
+                    isConnectableStart={false}
                 />
                 <NodeHeader>
                     <NodeHeaderIcon>

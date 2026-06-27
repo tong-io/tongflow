@@ -1237,11 +1237,13 @@ const ModelNode = ({ selected, data }: ModelNodeRfProps) => {
                     type="target"
                     position={Position.Left}
                     id="in:modelNode"
+                    isConnectableStart={false}
                 />
                 <Handle
                     type="source"
                     position={Position.Right}
                     id="out:modelNode"
+                    isConnectableStart={false}
                 />
                 <NodeHeader>
                     <NodeHeaderIcon>
@@ -1261,11 +1263,13 @@ const ModelNode = ({ selected, data }: ModelNodeRfProps) => {
                     type="target"
                     position={Position.Left}
                     id="in:modelNode"
+                    isConnectableStart={false}
                 />
                 <Handle
                     type="source"
                     position={Position.Right}
                     id="out:modelNode"
+                    isConnectableStart={false}
                 />
                 <NodeHeader>
                     <NodeHeaderIcon>
