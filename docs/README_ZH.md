@@ -172,7 +172,7 @@ app 默认不预装任何插件。打开**插件管理器**（右上角的方块
 
 - [tongflow-api-openrouter-free](https://github.com/tong-io/tongflow-api-openrouter-free) — 默认 `gen_text` 路由，使用 OpenRouter 免费模型
 - [tongflow-api-gemini](https://github.com/tong-io/tongflow-api-gemini) — 基于 Google Gemini 的 `gen_text` 及多模态处理
-- [tongflow-api-openai](https://github.com/tong-io/tongflow-api-openai) — 基于 OpenAI 的 `gen_text`
+- [tongflow-api-openai](https://github.com/tong-io/tongflow-api-openai) — 基于 OpenAI 的 `gen_text` 及图像生成 / 编辑 / 融合（`gpt-image-2`）
 
 ### GPU/CPU 插件
 

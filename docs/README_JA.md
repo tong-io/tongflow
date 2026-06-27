@@ -172,7 +172,7 @@ TongFlowで生成AIを活用し、創造力を解き放とう！
 
 - [tongflow-api-openrouter-free](https://github.com/tong-io/tongflow-api-openrouter-free) — デフォルトの `gen_text` ルート、OpenRouter の無料モデルを使用
 - [tongflow-api-gemini](https://github.com/tong-io/tongflow-api-gemini) — Google Gemini ベースの `gen_text` およびマルチモーダル処理
-- [tongflow-api-openai](https://github.com/tong-io/tongflow-api-openai) — OpenAI ベースの `gen_text`
+- [tongflow-api-openai](https://github.com/tong-io/tongflow-api-openai) — OpenAI ベースの `gen_text` および画像生成 / 編集 / 融合（`gpt-image-2`）
 
 ### GPU/CPU プラグイン
 

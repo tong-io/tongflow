@@ -180,7 +180,7 @@ Run the preloaded example node by node, or switch to Execute Mode and hit the ru
 
 - [tongflow-api-openrouter-free](https://github.com/tong-io/tongflow-api-openrouter-free) — default `gen_text` route via OpenRouter's free models
 - [tongflow-api-gemini](https://github.com/tong-io/tongflow-api-gemini) — Google Gemini for `gen_text` and other Gemini multimodal handlers
-- [tongflow-api-openai](https://github.com/tong-io/tongflow-api-openai) — OpenAI for `gen_text`
+- [tongflow-api-openai](https://github.com/tong-io/tongflow-api-openai) — OpenAI for `gen_text` and image generation / editing / fusion (`gpt-image-2`)
 
 ### GPU/CPU plugins
 
