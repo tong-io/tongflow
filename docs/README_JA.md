@@ -125,8 +125,9 @@ TongFlowで生成AIを活用し、創造力を解き放とう！
 - ✅ **動画理解**: 動画から要約や説明を生成。
 - ✅ **動画超解像**: より高解像度の動画を出力。
 - ✅ **最初/最後のフレームを抽出**: フレームを画像として抽出。
-- ⬜ **字幕除去**: 動画から字幕を消去。
-- ⬜ **ウォーターマーク除去**: 動画からウォーターマークを除去。
+- ✅ **動画編集**: テキスト指示で動画を編集。
+- ✅ **字幕除去**: 動画から字幕を消去。
+- ✅ **ウォーターマーク除去**: 動画からウォーターマークを除去。
 
 #### 音声
 
@@ -185,6 +186,7 @@ TongFlowで生成AIを活用し、創造力を解き放とう！
 - [tongflow-modal-infinitetalk](https://github.com/tong-io/tongflow-modal-infinitetalk) — InfiniteTalk 音声駆動リップシンク（音声 + 画像 / 動画 → デジタルヒューマン動画）
 - [tongflow-modal-wan-animate](https://github.com/tong-io/tongflow-modal-wan-animate) — Wan-Animate キャラクター置換とモーション転送（動画 + 参照）
 - [tongflow-modal-scail2](https://github.com/tong-io/tongflow-modal-scail2) — SCAIL-2 制御可能なキャラクターアニメーション（画像 + 駆動動画；wan-animate と同じ 2 スロット）
+- [tongflow-modal-bernini](https://github.com/tong-io/tongflow-modal-bernini) — Bernini-R 1.3B 統合動画レンダラー（テキスト/画像 → 画像/動画、動画編集、字幕 / ウォーターマーク除去）
 - [tongflow-modal-triposplat](https://github.com/tong-io/tongflow-modal-triposplat) — TripoSplat 1 枚の画像から 3D ガウシアンスプラット
 - [tongflow-modal-seedvr2](https://github.com/tong-io/tongflow-modal-seedvr2) — SeedVR2 画像 / 動画の超解像
 - [tongflow-modal-gemma4](https://github.com/tong-io/tongflow-modal-gemma4) — Gemma-4 マルチモーダルテキスト（画像 / 動画理解）

@@ -146,6 +146,7 @@
             "firstFrame": "首帧截图",
             "lastFrame": "尾帧截图",
             "editImage": "编辑图片",
+            "editVideo": "编辑视频",
             "parseDocument": "解析文档",
             "mergeGroup": "合为一组",
             "imageFusion": "图片融合",
@@ -406,6 +407,7 @@
                 "separateAudio": "音视频分离",
                 "imageGenText": "反推描述",
                 "imageGenImage": "图片编辑",
+                "videoEdit": "视频编辑",
                 "imageGenModel": "图片生成3D模型",
                 "imageUpscale": "高清放大",
                 "separateTrack": "人声提取",
@@ -458,6 +460,7 @@
                 "extractAudio": "开始分离",
                 "describeImage": "描述图片",
                 "editImage": "编辑图片",
+                "editVideo": "编辑视频",
                 "generate3DModel": "生成3D模型",
                 "imageUpscale": "高清放大",
                 "extractVocals": "提取人声",
@@ -731,6 +734,12 @@
                 "editInstruction": "编辑指令",
                 "fromUpstream": "（来自上游节点）",
                 "editPlaceholder": "输入图片编辑指令，例如：提高对比度、调整色温为暖色、增强细节等"
+            },
+            "videoEdit": {
+                "editInstruction": "编辑指令",
+                "fromUpstream": "（来自上游节点）",
+                "editPlaceholder": "输入视频编辑指令，例如：去除字幕、应用水彩风格、将天空替换为日落",
+                "connectTextVideo": "请连接文本节点与视频节点"
             },
             "compose": {
                 "loading": "加载中...",

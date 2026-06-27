@@ -73,6 +73,7 @@ import TextGenSpeechInstructNode from "./nodes/transfer/text-gen-speech-instruct
 import TextGenSpeechPresetNode from "./nodes/transfer/text-gen-speech-preset";
 import GenTextNode from "./nodes/transfer/text-gen-text";
 import TextGenVideoNode from "./nodes/transfer/text-gen-video";
+import VideoEditNode from "./nodes/transfer/video-edit";
 import VideoGenTextNode from "./nodes/transfer/video-gen-text";
 import VideoGenTextSpeechRecognizeNode from "./nodes/transfer/video-gen-text-speech-recognize";
 import VideoUpscaleNode from "./nodes/transfer/video-upscale";
@@ -116,6 +117,7 @@ export const NODE_TYPES: NodeTypes = {
     textGenSpeechInstructNode: TextGenSpeechInstructNode,
     removeVideoSubtitleNode: RemoveVideoSubtitleNode,
     videoUpscaleNode: VideoUpscaleNode,
+    videoEditNode: VideoEditNode,
     removeWatermarkNode: RemoveWatermarkNode,
     extractAudioNode: ExtractAudioNode,
     removeVideoAudioNode: RemoveVideoAudioNode,
@@ -204,6 +206,7 @@ export const NODE_CATEGORIES = {
         "removeVideoSubtitleNode",
         "removeWatermarkNode",
         "videoUpscaleNode",
+        "videoEditNode",
         "extractAudioNode",
         "removeVideoAudioNode",
         "denoiseAudioSubtitleNode",

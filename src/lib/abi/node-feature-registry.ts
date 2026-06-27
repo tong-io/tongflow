@@ -45,6 +45,7 @@ export const NODE_TYPE_TO_ABI_FEATURE: Readonly<Record<string, NodeSlot>> = {
     textGenSpeechInstructNode: "text-gen-speech-instruct",
     removeVideoSubtitleNode: "subtitle_remove",
     videoUpscaleNode: "video-upscale",
+    videoEditNode: "video-edit",
     removeWatermarkNode: "remove_watermark",
     extractAudioNode: "extract-audio",
     removeVideoAudioNode: "remove-video-audio",
@@ -112,6 +113,10 @@ export const NODE_TYPE_SOURCE_SPEC: Partial<
     },
     imageGenImageNode: {
         image: handle({ nodeType: "imageNode" }),
+        text: handle({ nodeType: "textNode", path: "texts[0]", manual: true }),
+    },
+    videoEditNode: {
+        video: handle({ nodeType: "videoNode" }),
         text: handle({ nodeType: "textNode", path: "texts[0]", manual: true }),
     },
     speechTextGenVideoNode: {

@@ -1511,6 +1511,76 @@ const _slot_video_upscale_outputs = {
 } as const;
 export type VideoUpscaleOutput = FromSchema<typeof _slot_video_upscale_outputs>;
 
+const _slot_video_edit_inputs = {
+    type: "object",
+    required: ["text", "video"],
+    properties: {
+        text: {
+            type: "string",
+            minLength: 1,
+        },
+        video: {
+            type: "object",
+            required: ["bytesBase64"],
+            properties: {
+                bytesBase64: {
+                    type: "string",
+                    minLength: 1,
+                },
+                filename: {
+                    type: "string",
+                },
+                mime: {
+                    type: "string",
+                },
+            },
+            additionalProperties: false,
+        },
+        seed: {
+            type: "integer",
+        },
+        width: {
+            type: "integer",
+        },
+        height: {
+            type: "integer",
+        },
+    },
+    additionalProperties: false,
+} as const;
+export type VideoEditInput = FromSchema<typeof _slot_video_edit_inputs>;
+const _slot_video_edit_outputs = {
+    type: "object",
+    required: ["success"],
+    properties: {
+        success: {
+            type: "boolean",
+        },
+        error: {
+            type: "string",
+        },
+        video: {
+            type: "object",
+            required: ["file_key"],
+            properties: {
+                file_key: {
+                    type: "string",
+                    minLength: 1,
+                },
+                mime: {
+                    type: "string",
+                },
+                filename: {
+                    type: "string",
+                },
+            },
+            additionalProperties: false,
+        },
+    },
+    additionalProperties: false,
+} as const;
+export type VideoEditOutput = FromSchema<typeof _slot_video_edit_outputs>;
+
 const _slot_image_describe_inputs = {
     type: "object",
     required: ["image"],
@@ -3149,6 +3219,7 @@ export type NodeSlot =
     | "image-edit"
     | "image-upscale"
     | "video-upscale"
+    | "video-edit"
     | "image-describe"
     | "video-describe"
     | "audio-image-gen-video"
@@ -3198,6 +3269,7 @@ export type SlotInputsMap = {
     "image-edit": ImageEditInput;
     "image-upscale": ImageUpscaleInput;
     "video-upscale": VideoUpscaleInput;
+    "video-edit": VideoEditInput;
     "image-describe": ImageDescribeInput;
     "video-describe": VideoDescribeInput;
     "audio-image-gen-video": AudioImageGenVideoInput;
@@ -3247,6 +3319,7 @@ export type SlotOutputsMap = {
     "image-edit": ImageEditOutput;
     "image-upscale": ImageUpscaleOutput;
     "video-upscale": VideoUpscaleOutput;
+    "video-edit": VideoEditOutput;
     "image-describe": ImageDescribeOutput;
     "video-describe": VideoDescribeOutput;
     "audio-image-gen-video": AudioImageGenVideoOutput;
@@ -4263,6 +4336,47 @@ export const ABI_NODES = {
                     type: "string",
                 },
                 seed: {
+                    type: "integer",
+                },
+            },
+            additionalProperties: false,
+        },
+        outputs: {
+            type: "object",
+            required: ["success"],
+            properties: {
+                success: {
+                    type: "boolean",
+                },
+                error: {
+                    type: "string",
+                },
+                video: {
+                    $ref: "#/$defs/VideoRef",
+                },
+            },
+            additionalProperties: false,
+        },
+    },
+    "video-edit": {
+        inputs: {
+            type: "object",
+            required: ["text", "video"],
+            properties: {
+                text: {
+                    type: "string",
+                    minLength: 1,
+                },
+                video: {
+                    $ref: "#/$defs/Asset",
+                },
+                seed: {
+                    type: "integer",
+                },
+                width: {
+                    type: "integer",
+                },
+                height: {
                     type: "integer",
                 },
             },

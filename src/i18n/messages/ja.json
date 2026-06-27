@@ -146,6 +146,7 @@
             "firstFrame": "最初のフレーム",
             "lastFrame": "最後のフレーム",
             "editImage": "画像編集",
+            "editVideo": "動画編集",
             "parseDocument": "ドキュメント解析",
             "mergeGroup": "グループ化",
             "imageFusion": "画像合成",
@@ -406,6 +407,7 @@
                 "separateAudio": "映像・音声の分離",
                 "imageGenText": "画像説明",
                 "imageGenImage": "画像編集",
+                "videoEdit": "動画編集",
                 "imageGenModel": "画像から3Dモデル",
                 "imageUpscale": "HD高画質化",
                 "separateTrack": "ボーカル抽出",
@@ -458,6 +460,7 @@
                 "extractAudio": "分離を開始",
                 "describeImage": "画像を説明",
                 "editImage": "画像を編集",
+                "editVideo": "動画を編集",
                 "generate3DModel": "3Dモデルを生成",
                 "imageUpscale": "HD高画質化",
                 "extractVocals": "ボーカルを抽出",
@@ -645,6 +648,12 @@
                 "editInstruction": "編集指示",
                 "fromUpstream": "（上流ノードから）",
                 "editPlaceholder": "画像編集の指示を入力してください。例：コントラストを上げる、色温度を暖色に調整、ディテールを強調"
+            },
+            "videoEdit": {
+                "editInstruction": "編集指示",
+                "fromUpstream": "（上流ノードから）",
+                "editPlaceholder": "動画編集の指示を入力してください。例：字幕を除去、水彩風スタイルを適用、空を夕焼けに変更",
+                "connectTextVideo": "テキストノードと動画ノードを接続してください"
             },
             "compose": {
                 "loading": "読み込み中...",

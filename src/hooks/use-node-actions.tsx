@@ -761,6 +761,15 @@ export function useNodeActions(args: UseNodeActionsArgs): UseNodeActionsResult {
                                     ]),
                             },
                             {
+                                text: t("editVideo"),
+                                id: "video-edit",
+                                nodeType: "videoEditNode",
+                                onClick: () =>
+                                    expands(id, [
+                                        { type: "videoEditNode", data },
+                                    ]),
+                            },
+                            {
                                 text: t("extractAudioTrack"),
                                 id: "extract-audio-track",
                                 nodeType: "extractAudioNode",

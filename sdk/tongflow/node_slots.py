@@ -35,7 +35,6 @@ class NodeSlots:
     PARSE_DOCUMENT: Final[str] = 'parse-document'
     SPLIT_VIDEO: Final[str] = 'split-video'
     LINK: Final[str] = 'link'
-    GEN_VIDEO: Final[str] = 'gen-video'
     IMAGE_GEN: Final[str] = 'image-gen'
     GEN_MUSIC: Final[str] = 'gen-music'
     TEXT_GEN_SPEECH_PRESET: Final[str] = 'text-gen-speech-preset'
@@ -43,11 +42,11 @@ class NodeSlots:
     IMAGE_EDIT: Final[str] = 'image-edit'
     IMAGE_UPSCALE: Final[str] = 'image-upscale'
     VIDEO_UPSCALE: Final[str] = 'video-upscale'
+    VIDEO_EDIT: Final[str] = 'video-edit'
     IMAGE_DESCRIBE: Final[str] = 'image-describe'
     VIDEO_DESCRIBE: Final[str] = 'video-describe'
     AUDIO_IMAGE_GEN_VIDEO: Final[str] = 'audio-image-gen-video'
     SPEECH_TEXT_GEN_VIDEO: Final[str] = 'speech-text-gen-video'
-    SPEECH_IMAGE_VIDEO_GEN_VIDEO: Final[str] = 'speech-image-video-gen-video'
     VIDEO_IMAGE_GEN_VIDEO_MIX: Final[str] = 'video-image-gen-video-mix'
     VIDEO_IMAGE_GEN_VIDEO_MOVE: Final[str] = 'video-image-gen-video-move'
     IMAGE_IMAGE_GEN_VIDEO: Final[str] = 'image-image-gen-video'
@@ -57,10 +56,15 @@ class NodeSlots:
     TEXT_GEN_SPEECH_CLONE: Final[str] = 'text-gen-speech-clone'
     TRANSCRIBE_TIMESTAMP: Final[str] = 'transcribe-timestamp'
     TEXT_GEN_SPEECH_INSTRUCT: Final[str] = 'text-gen-speech-instruct'
-    VIDEO_IMAGE_MOVE_ANIMAL: Final[str] = 'video-image-move-animal'
-    WAN_ANIMATE_MIX: Final[str] = 'wan-animate-mix'
     DROP_VIDEO: Final[str] = 'drop-video'
     ARRANGE_GROUP: Final[str] = 'arrange-group'
+    SEPARATE_SPEAKER: Final[str] = 'separate_speaker'
+    SEPARATE_AUDIO_TRACK: Final[str] = 'separate_audio_track'
+    DENOISE_AUDIO: Final[str] = 'denoise_audio'
+    CONVERT_VOICE: Final[str] = 'convert_voice'
+    REMOVE_WATERMARK: Final[str] = 'remove_watermark'
+    SUBTITLE_REMOVE: Final[str] = 'subtitle_remove'
+    TEXT_AUDIO_GEN_SPEECH: Final[str] = 'text-audio-gen-speech'
 
 
 ALL_NODE_SLOTS: Final[tuple[str, ...]] = (
@@ -81,7 +85,6 @@ ALL_NODE_SLOTS: Final[tuple[str, ...]] = (
     'parse-document',
     'split-video',
     'link',
-    'gen-video',
     'image-gen',
     'gen-music',
     'text-gen-speech-preset',
@@ -89,11 +92,11 @@ ALL_NODE_SLOTS: Final[tuple[str, ...]] = (
     'image-edit',
     'image-upscale',
     'video-upscale',
+    'video-edit',
     'image-describe',
     'video-describe',
     'audio-image-gen-video',
     'speech-text-gen-video',
-    'speech-image-video-gen-video',
     'video-image-gen-video-mix',
     'video-image-gen-video-move',
     'image-image-gen-video',
@@ -103,9 +106,14 @@ ALL_NODE_SLOTS: Final[tuple[str, ...]] = (
     'text-gen-speech-clone',
     'transcribe-timestamp',
     'text-gen-speech-instruct',
-    'video-image-move-animal',
-    'wan-animate-mix',
     'drop-video',
     'arrange-group',
+    'separate_speaker',
+    'separate_audio_track',
+    'denoise_audio',
+    'convert_voice',
+    'remove_watermark',
+    'subtitle_remove',
+    'text-audio-gen-speech',
 )
 

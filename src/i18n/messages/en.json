@@ -146,6 +146,7 @@
             "firstFrame": "First Frame",
             "lastFrame": "Last Frame",
             "editImage": "Edit Image",
+            "editVideo": "Edit Video",
             "parseDocument": "Parse Document",
             "mergeGroup": "Merge Group",
             "imageFusion": "Image Fusion",
@@ -406,6 +407,7 @@
                 "separateAudio": "Split Audio & Video",
                 "imageGenText": "Image Description",
                 "imageGenImage": "Image Edit",
+                "videoEdit": "Video Edit",
                 "imageGenModel": "Image to 3D Model",
                 "imageUpscale": "HD Upscale",
                 "separateTrack": "Vocal Extract",
@@ -458,6 +460,7 @@
                 "extractAudio": "Start Split",
                 "describeImage": "Describe Image",
                 "editImage": "Edit Image",
+                "editVideo": "Edit Video",
                 "generate3DModel": "Generate 3D Model",
                 "imageUpscale": "HD Upscale",
                 "extractVocals": "Extract Vocals",
@@ -731,6 +734,12 @@
                 "editInstruction": "Edit Instruction",
                 "fromUpstream": "(from upstream node)",
                 "editPlaceholder": "Enter image edit instructions, e.g.: increase contrast, adjust color temperature to warm, enhance details"
+            },
+            "videoEdit": {
+                "editInstruction": "Edit Instruction",
+                "fromUpstream": "(from upstream node)",
+                "editPlaceholder": "Enter video edit instructions, e.g.: remove subtitles, apply a watercolor style, change the sky to sunset",
+                "connectTextVideo": "Connect a text node and a video node"
             },
             "compose": {
                 "loading": "Loading...",

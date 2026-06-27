@@ -125,8 +125,9 @@ app 默认不预装任何插件。打开**插件管理器**（右上角的方块
 - ✅ **视频理解**: 从视频生成摘要或描述。
 - ✅ **视频超分**: 输出更高分辨率的视频。
 - ✅ **提取首帧 / 尾帧**: 将帧提取为图片。
-- ⬜ **去字幕**: 从视频中清除字幕。
-- ⬜ **去水印**: 从视频中去除水印。
+- ✅ **视频编辑**: 根据文本指令编辑视频。
+- ✅ **去字幕**: 从视频中清除字幕。
+- ✅ **去水印**: 从视频中去除水印。
 
 #### 音频
 
@@ -185,6 +186,7 @@ app 默认不预装任何插件。打开**插件管理器**（右上角的方块
 - [tongflow-modal-infinitetalk](https://github.com/tong-io/tongflow-modal-infinitetalk) — InfiniteTalk 音频驱动口型同步（音频 + 图片 / 视频 → 数字人视频）
 - [tongflow-modal-wan-animate](https://github.com/tong-io/tongflow-modal-wan-animate) — Wan-Animate 换角色与动作迁移（视频 + 参考）
 - [tongflow-modal-scail2](https://github.com/tong-io/tongflow-modal-scail2) — SCAIL-2 可控角色动画（角色图 + 驱动视频；与 wan-animate 相同的两个槽位）
+- [tongflow-modal-bernini](https://github.com/tong-io/tongflow-modal-bernini) — Bernini-R 1.3B 统一视频渲染器（文/图 → 图/视频、视频编辑、去字幕 / 去水印）
 - [tongflow-modal-triposplat](https://github.com/tong-io/tongflow-modal-triposplat) — TripoSplat 单图生成 3D 高斯泼溅
 - [tongflow-modal-seedvr2](https://github.com/tong-io/tongflow-modal-seedvr2) — SeedVR2 图像 / 视频超分辨率
 - [tongflow-modal-gemma4](https://github.com/tong-io/tongflow-modal-gemma4) — Gemma-4 多模态文本（图像 / 视频理解）

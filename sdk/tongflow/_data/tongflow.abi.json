@@ -1028,6 +1028,48 @@
             }
         },
         {
+            "nodeSlot": "video-edit",
+            "inputs": {
+                "type": "object",
+                "required": ["text", "video"],
+                "properties": {
+                    "text": {
+                        "type": "string",
+                        "minLength": 1
+                    },
+                    "video": {
+                        "$ref": "#/$defs/Asset"
+                    },
+                    "seed": {
+                        "type": "integer"
+                    },
+                    "width": {
+                        "type": "integer"
+                    },
+                    "height": {
+                        "type": "integer"
+                    }
+                },
+                "additionalProperties": false
+            },
+            "outputs": {
+                "type": "object",
+                "required": ["success"],
+                "properties": {
+                    "success": {
+                        "type": "boolean"
+                    },
+                    "error": {
+                        "type": "string"
+                    },
+                    "video": {
+                        "$ref": "#/$defs/VideoRef"
+                    }
+                },
+                "additionalProperties": false
+            }
+        },
+        {
             "nodeSlot": "image-describe",
             "inputs": {
                 "type": "object",

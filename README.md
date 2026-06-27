@@ -133,8 +133,9 @@ Run the preloaded example node by node, or switch to Execute Mode and hit the ru
 - ✅ **Video understanding**: summaries or descriptions from video.
 - ✅ **Video upscaling**: higher-resolution output.
 - ✅ **Extract first / last frame**: grab a frame as an image.
-- ⬜ **Subtitle removal**: clean subtitles from a video.
-- ⬜ **Watermark removal**: remove watermarks from a video.
+- ✅ **Video editing**: edit a video from a text instruction.
+- ✅ **Subtitle removal**: clean subtitles from a video.
+- ✅ **Watermark removal**: remove watermarks from a video.
 
 #### Audio
 
@@ -193,6 +194,7 @@ Run the preloaded example node by node, or switch to Execute Mode and hit the ru
 - [tongflow-modal-infinitetalk](https://github.com/tong-io/tongflow-modal-infinitetalk) — InfiniteTalk audio-driven lip-sync (audio + image / video → talking-head video)
 - [tongflow-modal-wan-animate](https://github.com/tong-io/tongflow-modal-wan-animate) — Wan-Animate character swap & motion transfer (video + reference)
 - [tongflow-modal-scail2](https://github.com/tong-io/tongflow-modal-scail2) — SCAIL-2 controlled character animation (image + driving video; same two slots as wan-animate)
+- [tongflow-modal-bernini](https://github.com/tong-io/tongflow-modal-bernini) — Bernini-R 1.3B unified video renderer (text/image → image/video, video editing, subtitle / watermark removal)
 - [tongflow-modal-triposplat](https://github.com/tong-io/tongflow-modal-triposplat) — TripoSplat single image → 3D Gaussian splat
 - [tongflow-modal-seedvr2](https://github.com/tong-io/tongflow-modal-seedvr2) — SeedVR2 image / video super-resolution
 - [tongflow-modal-gemma4](https://github.com/tong-io/tongflow-modal-gemma4) — Gemma-4 multimodal text (image / video understanding)
