@@ -7,6 +7,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.7] - 2026-06-27
+
+### Changed
+
+- Canvas edges are no longer created by dragging from a handle. Handles set
+  `isConnectableStart={false}`, so connections are created only via the
+  operation panel (expands/compose). Users can still **reconnect** an existing
+  edge's endpoint to another node.
+
+### Added
+
+- Reconnecting an edge endpoint is validated against the ABI contract: the
+  upstream modality must match the target handle, single-value (non-array)
+  input handles accept only one edge, `add` nodes fan out to a single edge,
+  and modality nodes can't feed each other.
+- Dropping a dragged edge endpoint on empty canvas prompts to delete the
+  connection. The reconnect preview line matches the edge style so it stays
+  visible and tracks the cursor.
+
+### Fixed
+
+- Aspect-ratio picker labels no longer overflow their button in English; long
+  labels wrap onto multiple lines instead of clipping past the border.
+
 ## [0.1.6] - 2026-06-26
 
 ### Added

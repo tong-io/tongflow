@@ -1,6 +1,6 @@
 {
     "name": "tongflow-desktop",
-    "version": "0.1.6",
+    "version": "0.1.7",
     "description": "TongFlow desktop app (Electron shell around the Next.js standalone server + portable Python).",
     "author": "tong-io",
     "license": "AGPL-3.0-only",
