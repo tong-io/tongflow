@@ -7,6 +7,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.8] - 2026-06-28
+
+### Added
+
+- **Doubao Seedance 2.0** official API plugin (`tongflow-api-bytedance`):
+  Volcengine Ark video generation covering text → video, image → video,
+  first/last-frame video, and image + audio → video.
+- **Images → Video** node — free multi-image reference fusion: connect several
+  reference images plus a prompt to generate a new video (Seedance multimodal
+  reference). Backed by a new `images-gen-video` ABI slot, reachable from the
+  smart-island compose menu when 2–9 image nodes (optionally plus one text
+  node) are selected.
+- **Video editing** node (`video-edit` ABI slot) and the **Bernini-R** unified
+  renderer plugin (`tongflow-modal-bernini`).
+
+### Fixed
+
+- Image Fusion: a prompt fed from an upstream text node is now actually used at
+  execution. Previously the node displayed the upstream text but refused to run
+  with "required input text is empty"; the text handle is now wired into the
+  ABI prompt (upstream edge wins, the manual textarea is the fallback).
+
 ## [0.1.7] - 2026-06-27
 
 ### Changed
