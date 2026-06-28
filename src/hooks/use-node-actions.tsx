@@ -18,6 +18,9 @@ import { useMemo } from "react";
 import { cn } from "@/lib/utils";
 import type { BaseNodeData } from "@/types/nodes";
 
+// Seedance multimodal reference (images → video) accepts up to 9 images.
+const MAX_IMAGES_GEN_VIDEO = 9;
+
 interface ButtonConfig {
     text: string;
     onClick: () => void;
@@ -166,6 +169,18 @@ export function useNodeActions(args: UseNodeActionsArgs): UseNodeActionsResult {
                             data: { ids },
                         }),
                 });
+
+                if (types.length <= MAX_IMAGES_GEN_VIDEO) {
+                    buttons.push({
+                        text: t("imagesGenVideo"),
+                        id: "images-gen-video",
+                        onClick: () =>
+                            compose({
+                                type: "imagesGenVideoNode",
+                                data: { ids },
+                            }),
+                    });
+                }
 
                 if (types.length === 2) {
                     buttons.push({
@@ -350,21 +365,29 @@ export function useNodeActions(args: UseNodeActionsArgs): UseNodeActionsResult {
             (counts.imageNode ?? 0) <= 14 &&
             counts.textNode === 1
         ) {
-            return (
-                <ActionItem
-                    buttons={[
-                        {
-                            text: t("imageFusion"),
-                            id: "image-fusion",
-                            onClick: () =>
-                                compose({
-                                    type: "imageFusionNode",
-                                    data: { ids },
-                                }),
-                        },
-                    ]}
-                />
-            );
+            const buttons: ButtonConfig[] = [
+                {
+                    text: t("imageFusion"),
+                    id: "image-fusion",
+                    onClick: () =>
+                        compose({
+                            type: "imageFusionNode",
+                            data: { ids },
+                        }),
+                },
+            ];
+            if ((counts.imageNode ?? 0) <= MAX_IMAGES_GEN_VIDEO) {
+                buttons.push({
+                    text: t("imagesGenVideo"),
+                    id: "images-gen-video",
+                    onClick: () =>
+                        compose({
+                            type: "imagesGenVideoNode",
+                            data: { ids },
+                        }),
+                });
+            }
+            return <ActionItem buttons={buttons} />;
         }
         // Image + text
         if (counts.imageNode === 1 && counts.textNode === 1) {

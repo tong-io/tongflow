@@ -122,6 +122,7 @@ TongFlowで生成AIを活用し、創造力を解き放とう！
 - ✅ **動画生成**: テキストから動画を生成。
 - ✅ **画像から動画**: 静止画を動かす。
 - ✅ **最初/最後のフレームから動画**: 2枚のキーフレームを補間してクリップを生成。
+- ✅ **複数画像から動画**: 複数の参照画像とテキストを融合して新しい動画を生成。
 - ✅ **動画理解**: 動画から要約や説明を生成。
 - ✅ **動画超解像**: より高解像度の動画を出力。
 - ✅ **最初/最後のフレームを抽出**: フレームを画像として抽出。
@@ -174,6 +175,7 @@ TongFlowで生成AIを活用し、創造力を解き放とう！
 - [tongflow-api-openrouter-free](https://github.com/tong-io/tongflow-api-openrouter-free) — デフォルトの `gen_text` ルート、OpenRouter の無料モデルを使用
 - [tongflow-api-gemini](https://github.com/tong-io/tongflow-api-gemini) — Google Gemini ベースの `gen_text` およびマルチモーダル処理
 - [tongflow-api-openai](https://github.com/tong-io/tongflow-api-openai) — OpenAI ベースの `gen_text` および画像生成 / 編集 / 融合（`gpt-image-2`）
+- [tongflow-api-bytedance](https://github.com/tong-io/tongflow-api-bytedance) — Volcengine Ark（Doubao Seedance 2.0）ベースのテキスト / 画像 / 音声 → 動画
 
 ### GPU/CPU プラグイン
 
@@ -183,6 +185,7 @@ TongFlowで生成AIを活用し、創造力を解き放とう！
 - [tongflow-modal-ernie-image](https://github.com/tong-io/tongflow-modal-ernie-image) — ERNIE Image テキストから画像生成（代替）
 - [tongflow-modal-flux2-klein9b](https://github.com/tong-io/tongflow-modal-flux2-klein9b) — FLUX.2 Klein 9B マルチ参照融合と画像編集
 - [tongflow-modal-ltx](https://github.com/tong-io/tongflow-modal-ltx) — LTX-2.3 テキスト / 画像から動画生成
+- [tongflow-modal-fastwan](https://github.com/tong-io/tongflow-modal-fastwan) — FastWan-QAD-FP8 高速テキストから動画生成（3 ステップ蒸留 Wan2.1-1.3B）
 - [tongflow-modal-infinitetalk](https://github.com/tong-io/tongflow-modal-infinitetalk) — InfiniteTalk 音声駆動リップシンク（音声 + 画像 / 動画 → デジタルヒューマン動画）
 - [tongflow-modal-wan-animate](https://github.com/tong-io/tongflow-modal-wan-animate) — Wan-Animate キャラクター置換とモーション転送（動画 + 参照）
 - [tongflow-modal-scail2](https://github.com/tong-io/tongflow-modal-scail2) — SCAIL-2 制御可能なキャラクターアニメーション（画像 + 駆動動画；wan-animate と同じ 2 スロット）

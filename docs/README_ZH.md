@@ -122,6 +122,7 @@ app 默认不预装任何插件。打开**插件管理器**（右上角的方块
 - ✅ **视频生成**: 从文本生成视频。
 - ✅ **图生视频**: 将静态图像动态化。
 - ✅ **首尾帧视频**: 用两张关键帧插值生成片段。
+- ✅ **多图生视频**: 多图参考融合——若干参考图加文本生成全新视频。
 - ✅ **视频理解**: 从视频生成摘要或描述。
 - ✅ **视频超分**: 输出更高分辨率的视频。
 - ✅ **提取首帧 / 尾帧**: 将帧提取为图片。
@@ -174,6 +175,7 @@ app 默认不预装任何插件。打开**插件管理器**（右上角的方块
 - [tongflow-api-openrouter-free](https://github.com/tong-io/tongflow-api-openrouter-free) — 默认 `gen_text` 路由，使用 OpenRouter 免费模型
 - [tongflow-api-gemini](https://github.com/tong-io/tongflow-api-gemini) — 基于 Google Gemini 的 `gen_text` 及多模态处理
 - [tongflow-api-openai](https://github.com/tong-io/tongflow-api-openai) — 基于 OpenAI 的 `gen_text` 及图像生成 / 编辑 / 融合（`gpt-image-2`）
+- [tongflow-api-bytedance](https://github.com/tong-io/tongflow-api-bytedance) — 基于火山方舟（豆包 Seedance 2.0）的 文 / 图 / 音 → 视频
 
 ### GPU/CPU 插件
 
@@ -183,6 +185,7 @@ app 默认不预装任何插件。打开**插件管理器**（右上角的方块
 - [tongflow-modal-ernie-image](https://github.com/tong-io/tongflow-modal-ernie-image) — ERNIE Image 文本生图（备选）
 - [tongflow-modal-flux2-klein9b](https://github.com/tong-io/tongflow-modal-flux2-klein9b) — FLUX.2 Klein 9B 多参考融合与图像编辑
 - [tongflow-modal-ltx](https://github.com/tong-io/tongflow-modal-ltx) — LTX-2.3 文本 / 图像生视频
+- [tongflow-modal-fastwan](https://github.com/tong-io/tongflow-modal-fastwan) — FastWan-QAD-FP8 极速文生视频（3 步蒸馏 Wan2.1-1.3B）
 - [tongflow-modal-infinitetalk](https://github.com/tong-io/tongflow-modal-infinitetalk) — InfiniteTalk 音频驱动口型同步（音频 + 图片 / 视频 → 数字人视频）
 - [tongflow-modal-wan-animate](https://github.com/tong-io/tongflow-modal-wan-animate) — Wan-Animate 换角色与动作迁移（视频 + 参考）
 - [tongflow-modal-scail2](https://github.com/tong-io/tongflow-modal-scail2) — SCAIL-2 可控角色动画（角色图 + 驱动视频；与 wan-animate 相同的两个槽位）

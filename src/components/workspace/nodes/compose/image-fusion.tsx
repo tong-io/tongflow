@@ -11,7 +11,8 @@ import {
     IMAGE_ASPECT_RATIOS,
 } from "@/constants/media-options";
 import { useAbiForm } from "@/hooks/use-abi-form";
-import { collectAll } from "@/lib/abi/sources";
+import { NODE_TYPE_SOURCE_SPEC } from "@/lib/abi/node-feature-registry";
+import type { SourceSpec } from "@/lib/abi/sources";
 import { cn } from "@/lib/utils";
 import { coerceBaseNodeData } from "@/lib/workflow/flow-node-data";
 import type { TongflowPluginNodeProps } from "@/types/tongflow-flow";
@@ -27,12 +28,20 @@ const resolutions = [
     { value: "4K", key: "res4K", label: "4K" },
 ];
 
+// `images` collects every connected image edge. `text` may come from an upstream
+// textNode (via the auto-rendered `in:text` handle) or be typed manually — the
+// upstream edge wins, the textarea value is the fallback (`manual: true`).
+// Defined centrally in NODE_TYPE_SOURCE_SPEC so compose-time edge creation
+// assigns the correct `in:text` targetHandle (matching sibling compose nodes).
+const sourceSpec =
+    NODE_TYPE_SOURCE_SPEC.imageFusionNode as SourceSpec<"image-fusion">;
+
 const ImageFusionNode = ({
     selected,
     data,
 }: TongflowPluginNodeProps<"image-fusion", "imageFusionNode">) => {
     const t = useTranslations("Workspace.nodes");
-    const form = useAbiForm("image-fusion", { images: collectAll() });
+    const form = useAbiForm("image-fusion", sourceSpec);
 
     const ids = data.ids ?? [];
     const fromNodes = useNodesData(ids);
@@ -89,7 +98,7 @@ const ImageFusionNode = ({
     return (
         <AbiNodeShell
             feature="image-fusion"
-            sourceSpec={{ images: collectAll() }}
+            sourceSpec={sourceSpec}
             form={form}
             selected={selected}
             className="min-w-[480px]"

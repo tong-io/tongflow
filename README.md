@@ -130,6 +130,7 @@ Run the preloaded example node by node, or switch to Execute Mode and hit the ru
 - ✅ **Video generation**: video from text.
 - ✅ **Image-to-video**: animate a still into motion.
 - ✅ **First/last-frame video**: two key images to interpolate a clip.
+- ✅ **Images → video**: multi-image reference fusion — several reference images plus text into a new video.
 - ✅ **Video understanding**: summaries or descriptions from video.
 - ✅ **Video upscaling**: higher-resolution output.
 - ✅ **Extract first / last frame**: grab a frame as an image.
@@ -182,6 +183,7 @@ Run the preloaded example node by node, or switch to Execute Mode and hit the ru
 - [tongflow-api-openrouter-free](https://github.com/tong-io/tongflow-api-openrouter-free) — default `gen_text` route via OpenRouter's free models
 - [tongflow-api-gemini](https://github.com/tong-io/tongflow-api-gemini) — Google Gemini for `gen_text` and other Gemini multimodal handlers
 - [tongflow-api-openai](https://github.com/tong-io/tongflow-api-openai) — OpenAI for `gen_text` and image generation / editing / fusion (`gpt-image-2`)
+- [tongflow-api-bytedance](https://github.com/tong-io/tongflow-api-bytedance) — Volcengine Ark (Doubao Seedance 2.0) for text/image/audio → video
 
 ### GPU/CPU plugins
 
@@ -191,6 +193,7 @@ Run the preloaded example node by node, or switch to Execute Mode and hit the ru
 - [tongflow-modal-ernie-image](https://github.com/tong-io/tongflow-modal-ernie-image) — ERNIE Image text-to-image (alternative)
 - [tongflow-modal-flux2-klein9b](https://github.com/tong-io/tongflow-modal-flux2-klein9b) — FLUX.2 Klein 9B multi-reference fusion / image editing
 - [tongflow-modal-ltx](https://github.com/tong-io/tongflow-modal-ltx) — LTX-2.3 text / image-to-video
+- [tongflow-modal-fastwan](https://github.com/tong-io/tongflow-modal-fastwan) — FastWan-QAD-FP8 fast text-to-video (3-step distilled Wan2.1-1.3B)
 - [tongflow-modal-infinitetalk](https://github.com/tong-io/tongflow-modal-infinitetalk) — InfiniteTalk audio-driven lip-sync (audio + image / video → talking-head video)
 - [tongflow-modal-wan-animate](https://github.com/tong-io/tongflow-modal-wan-animate) — Wan-Animate character swap & motion transfer (video + reference)
 - [tongflow-modal-scail2](https://github.com/tong-io/tongflow-modal-scail2) — SCAIL-2 controlled character animation (image + driving video; same two slots as wan-animate)
