@@ -263,7 +263,7 @@
                 "pluginRegistryLoadError": "プラグイン登録情報を読み込めませんでした：{message}",
                 "pluginSelectPlaceholder": "リポジトリを選択…",
                 "missingImplTitle": "実装が未選択",
-                "missingImplDescription": "実行前に、このノードのプラグイン実装を選択してください。"
+                "missingImplDescription": "このノードに利用可能なプラグインがインストールされていません（または未選択です）。実行前に、プラグインマネージャーからインストールするか、インストール済みのプラグインを選択してください。"
             },
             "common": {
                 "enterInstructions": "指示を入力してください...",

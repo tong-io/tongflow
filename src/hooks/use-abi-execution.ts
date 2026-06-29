@@ -13,6 +13,7 @@ import { useNodeId, useReactFlow, useStore, useStoreApi } from "@xyflow/react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { NodeSlot } from "@/generated/abi";
 import useFlow from "@/hooks/use-flow";
+import { usePluginsRegistry } from "@/hooks/use-plugins-registry";
 import {
     type Task,
     useBatchTaskManager,
@@ -287,6 +288,9 @@ export function useAbiExecution<F extends NodeSlot>(
 
     const { pluginOptions, resolveActivePluginId } =
         useNodePluginResolver(feature);
+    // The scanned registry only contains installed plugins; `isLoaded` lets the
+    // run() guard distinguish "registry not fetched yet" from "nothing installed".
+    const { isLoaded: pluginsRegistryLoaded } = usePluginsRegistry();
 
     const handleTaskUpdate = useCallback(
         async (task: Task) => {
@@ -397,6 +401,14 @@ export function useAbiExecution<F extends NodeSlot>(
             setMissingPluginOpen(true);
             return;
         }
+        // The registry only contains installed plugins, so an id absent from the
+        // installed set is not installed (e.g. a saved workflow referencing a
+        // plugin that was never installed here). Only enforce once the registry
+        // has loaded — before that the server-side check is the backstop.
+        if (pluginsRegistryLoaded && !pluginOptions.includes(pluginId)) {
+            setMissingPluginOpen(true);
+            return;
+        }
 
         updateNodeData(nodeId, {
             feature,
@@ -422,6 +434,8 @@ export function useAbiExecution<F extends NodeSlot>(
         updateNodeData,
         createBatchTasks,
         resolveActivePluginId,
+        pluginOptions,
+        pluginsRegistryLoaded,
         transformPrompts,
     ]);
 

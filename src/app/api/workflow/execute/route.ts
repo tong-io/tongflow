@@ -10,6 +10,7 @@ import { getDb } from "@/db";
 import { tasks, workflows } from "@/db/schema";
 import { logger } from "@/lib/logger";
 import { getFeatureByName } from "@/lib/plugins/feature-registry.server";
+import { getPluginConfig } from "@/lib/plugins/plugins-registry.server";
 import type { ExecutableWorkflow } from "@/lib/workflow/executable-workflow";
 
 const DEFAULT_CONCURRENT_TASKS = 3;
@@ -109,6 +110,40 @@ export async function POST(request: NextRequest) {
             workflow.executableNodes?.map((n) => `${n.id}(${n.feature})`),
         );
         logger.debug(`${"=".repeat(60)}\n`);
+
+        // Pre-flight: the scanned registry only contains installed plugins, so a
+        // node whose plugin isn't installed would fail mid-run with a generic
+        // error. Reject before creating the task with a clear, actionable list.
+        const missing: { nodeId: string; feature: string; pluginId: string }[] =
+            [];
+        for (const node of workflow.executableNodes ?? []) {
+            const pid = (node.pluginId ?? "").trim();
+            if (!pid || !getPluginConfig(pid)) {
+                missing.push({
+                    nodeId: node.id,
+                    feature: node.feature,
+                    pluginId: pid,
+                });
+            }
+        }
+        if (missing.length > 0) {
+            const list = missing
+                .map(
+                    (m) =>
+                        `${m.feature}${m.pluginId ? ` (${m.pluginId})` : ""}`,
+                )
+                .join(", ");
+            const message = `Cannot run workflow: ${missing.length} node(s) have no installed plugin: ${list}. Install them from the plugin manager.`;
+            return NextResponse.json(
+                {
+                    error: message,
+                    message,
+                    code: "PLUGIN_NOT_INSTALLED",
+                    missing,
+                },
+                { status: 400 },
+            );
+        }
 
         const featureMap: Record<string, { type: string; function: string }> =
             {};

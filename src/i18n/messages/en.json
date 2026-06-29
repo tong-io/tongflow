@@ -263,7 +263,7 @@
                 "pluginRegistryLoadError": "Could not load the plugin registry: {message}",
                 "pluginSelectPlaceholder": "Select a repo…",
                 "missingImplTitle": "Missing Implementation",
-                "missingImplDescription": "Please select a plugin implementation in this node before running."
+                "missingImplDescription": "No plugin is installed for this node (or none is selected). Install one from the plugin manager, or pick an installed plugin, before running."
             },
             "common": {
                 "enterInstructions": "Enter instructions...",
