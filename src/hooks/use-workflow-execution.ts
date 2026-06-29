@@ -176,9 +176,11 @@ export function useWorkflowExecution(
                         .catch(() => ({}))) as {
                         code?: string;
                         error?: string;
+                        message?: string;
                     };
                     throw new Error(
-                        errorData.error ||
+                        errorData.message ||
+                            errorData.error ||
                             `API request failed: ${response.status}`,
                     );
                 }
@@ -363,6 +365,15 @@ export function useWorkflowExecution(
             } catch (error) {
                 logger.error("[workflow-exec] Execution failed:", error);
                 setWorkflowExecutionStatus("failed");
+                // The pre-flight 400 (e.g. uninstalled plugins) and the
+                // concurrent-limit 429 reach here; surface them so the failure
+                // isn't silently swallowed.
+                showErrorToast({
+                    message:
+                        error instanceof Error
+                            ? error.message
+                            : tToast("taskFailed"),
+                });
             }
         },
         [
@@ -372,6 +383,7 @@ export function useWorkflowExecution(
             closeEventSource,
             setNodeExecutionStatus,
             setWorkflowExecutionStatus,
+            tToast,
         ],
     );
 

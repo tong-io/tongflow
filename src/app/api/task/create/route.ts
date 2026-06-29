@@ -4,6 +4,7 @@ import { getDb } from "@/db";
 import { tasks } from "@/db/schema";
 import { ABI_NODES, type NodeSlot } from "@/generated/abi";
 import { logger } from "@/lib/logger";
+import { getPluginConfig } from "@/lib/plugins/plugins-registry.server";
 import { getAbiNodeBySlot } from "@/lib/schema/tongflow-abi";
 
 function isAbiNodeSlot(s: string): s is NodeSlot {
@@ -79,6 +80,20 @@ export async function POST(request: NextRequest) {
                     error: "Node slot is inconsistent with the generated ABI; contact an administrator",
                 },
                 { status: 500 },
+            );
+        }
+
+        // The scanned registry only contains installed plugins. Reject up front
+        // when the plugin isn't installed so the user gets a clear, actionable
+        // message instead of a generic "Task execution failed" at runtime.
+        if (!getPluginConfig(trimmedPluginId)) {
+            return NextResponse.json(
+                {
+                    error: `Plugin not installed: ${trimmedPluginId}. Install it from the plugin manager before running this node.`,
+                    code: "PLUGIN_NOT_INSTALLED",
+                    pluginId: trimmedPluginId,
+                },
+                { status: 400 },
             );
         }
 
