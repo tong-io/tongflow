@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.9] - 2026-06-30
+
+### Added
+
+- **Korean (`ko`) locale** — full UI translation, joining the existing
+  English / Chinese / Japanese languages.
+- Registered the **Boogu-Image** official plugin (`tongflow-modal-boogu`).
+
+### Fixed
+
+- Execution feedback is now cleared when a node's plugin is not installed,
+  instead of leaving a stale error on the node.
+
 ## [0.1.8] - 2026-06-28
 
 ### Added
