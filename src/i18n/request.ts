@@ -20,6 +20,8 @@ export default getRequestConfig(async () => {
                 locale = "en";
             } else if (acceptLanguage?.toLowerCase().startsWith("ja")) {
                 locale = "ja";
+            } else if (acceptLanguage?.toLowerCase().startsWith("ko")) {
+                locale = "ko";
             }
         } catch (e) {
             logger.error("Error detecting locale from headers", e);
@@ -27,7 +29,7 @@ export default getRequestConfig(async () => {
     }
 
     // Validate locale
-    if (!["en", "zh", "ja"].includes(locale)) locale = "zh";
+    if (!["en", "zh", "ja", "ko"].includes(locale)) locale = "zh";
 
     return {
         locale,

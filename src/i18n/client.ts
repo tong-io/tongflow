@@ -12,9 +12,10 @@ import { createTranslator } from "next-intl";
 
 import enMessages from "@/i18n/messages/en.json";
 import jaMessages from "@/i18n/messages/ja.json";
+import koMessages from "@/i18n/messages/ko.json";
 import zhMessages from "@/i18n/messages/zh.json";
 
-type AppLocale = "en" | "zh" | "ja";
+type AppLocale = "en" | "zh" | "ja" | "ko";
 
 // Loose typing: createTranslator's strict shape inference collapses to `never`
 // across our locale union, so we surface a looser `(key, vars?) => string`
@@ -23,6 +24,7 @@ const messagesByLocale: Record<AppLocale, Record<string, unknown>> = {
     en: enMessages,
     zh: zhMessages,
     ja: jaMessages,
+    ko: koMessages,
 };
 
 function readCookieLocale(): AppLocale {
