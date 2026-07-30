@@ -279,6 +279,8 @@ export function WorkflowDialog({ trigger, tooltip }: WorkflowDialogProps) {
 
                 useFlow.getState().setNodes(flowData.nodes);
                 useFlow.getState().setEdges(flowData.edges);
+                // Switching workflows must not allow undoing into the old one
+                useFlow.getState().clearHistory();
                 useFlow.getState().setWorkflowName(workflow.name);
                 useFlow
                     .getState()

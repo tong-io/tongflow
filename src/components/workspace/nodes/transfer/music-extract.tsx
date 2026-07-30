@@ -59,7 +59,8 @@ const MusicExtractNode = ({
     // Persist the default so the workflow exporter / runtime sees the same
     // value the user sees in the UI.
     useEffect(() => {
-        if (form.state.track == null) form.set("track", DEFAULT_TRACK);
+        if (form.state.track == null)
+            form.set("track", DEFAULT_TRACK, { history: false });
     }, [form.state.track, form.set]);
 
     return (

@@ -198,6 +198,8 @@ export function WorkflowTitleMenu() {
     };
 
     const confirmClear = () => {
+        // One undoable entry for the whole clear
+        useFlow.getState().commitHistory();
         setNodes([]);
         setEdges([]);
         setWorkflowName(tIndex("title"));
@@ -270,6 +272,8 @@ export function WorkflowTitleMenu() {
                 }
                 return;
             }
+            // One undoable entry for the whole import
+            useFlow.getState().commitHistory();
             setNodes(result.nodes);
             setEdges(result.edges);
             if (result.name?.trim()) {

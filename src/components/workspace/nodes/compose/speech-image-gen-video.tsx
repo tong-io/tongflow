@@ -83,7 +83,7 @@ const SpeechImageGenVideoNode = ({
 
     useEffect(() => {
         if (form.state.width === undefined && form.state.height === undefined) {
-            form.patch({ width: 1024, height: 576 });
+            form.patch({ width: 1024, height: 576 }, { history: false });
         }
     }, [form.state.width, form.state.height, form.patch]);
 

@@ -178,6 +178,8 @@
         "restart": "Restart to update"
     },
     "Navigation": {
+        "undo": "Undo",
+        "redo": "Redo",
         "toggleTheme": "Toggle theme",
         "language": "Language",
         "workflows": "My Workflows",

@@ -178,6 +178,8 @@
         "restart": "再起動して更新"
     },
     "Navigation": {
+        "undo": "元に戻す",
+        "redo": "やり直す",
         "toggleTheme": "テーマ切り替え",
         "language": "言語",
         "workflows": "マイワークフロー",

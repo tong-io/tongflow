@@ -178,6 +178,8 @@
         "restart": "重启并更新"
     },
     "Navigation": {
+        "undo": "撤销",
+        "redo": "重做",
         "toggleTheme": "切换主题",
         "language": "语言",
         "workflows": "我的工作流",

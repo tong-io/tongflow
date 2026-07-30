@@ -40,7 +40,9 @@ export function NodePluginModelSelect({
     // useNodePluginResolver.
     useEffect(() => {
         if (resolved === current) return;
-        updates(id, { ...data, pluginModel: resolved });
+        // Programmatic normalization — must not create (or invalidate) undo
+        // history, or it re-fires after every undo and breaks the chain.
+        updates(id, { ...data, pluginModel: resolved }, { history: false });
     }, [id, data, current, resolved, updates]);
 
     const options = useMemo(

@@ -37,13 +37,17 @@ export interface UseAbiFormReturn<F extends NodeSlot> {
     spec: ResolvedSpec;
     /** Current config snapshot (handle-fed fields are excluded). */
     state: ConfigState<F>;
-    /** Set a single field. */
+    /**
+     * Set a single field. Pass `{ history: false }` for programmatic writes
+     * (e.g. mount-time defaults) so they stay out of undo history.
+     */
     set: <K extends keyof ConfigState<F>>(
         field: K,
         value: ConfigState<F>[K],
+        opts?: { history?: boolean },
     ) => void;
-    /** Merge a partial patch. */
-    patch: (partial: ConfigState<F>) => void;
+    /** Merge a partial patch. Same `history` semantics as `set`. */
+    patch: (partial: ConfigState<F>, opts?: { history?: boolean }) => void;
     /** Bind a callback-style control: returns `{ value, onChange(value) }`. */
     bind: <K extends keyof ConfigState<F>>(
         field: K,
@@ -113,9 +117,9 @@ export function useAbiForm<F extends NodeSlot>(
     }, [data]);
 
     const writeBack = useCallback(
-        (next: ConfigState<F>) => {
+        (next: ConfigState<F>, opts?: { history?: boolean }) => {
             if (!nodeId) return;
-            flowUpdates(nodeId, { ...(dataRef.current ?? {}), ...next });
+            flowUpdates(nodeId, { ...(dataRef.current ?? {}), ...next }, opts);
         },
         [nodeId, flowUpdates],
     );
@@ -124,21 +128,22 @@ export function useAbiForm<F extends NodeSlot>(
         <K extends keyof ConfigState<F>>(
             field: K,
             value: ConfigState<F>[K],
+            opts?: { history?: boolean },
         ) => {
             const next = { ...stateRef.current, [field]: value };
             stateRef.current = next;
             setState(next);
-            writeBack(next);
+            writeBack(next, opts);
         },
         [writeBack],
     );
 
     const patch = useCallback(
-        (partial: ConfigState<F>) => {
+        (partial: ConfigState<F>, opts?: { history?: boolean }) => {
             const next = { ...stateRef.current, ...partial };
             stateRef.current = next;
             setState(next);
-            writeBack(next);
+            writeBack(next, opts);
         },
         [writeBack],
     );

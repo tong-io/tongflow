@@ -178,6 +178,8 @@
         "restart": "다시 시작하여 업데이트"
     },
     "Navigation": {
+        "undo": "실행 취소",
+        "redo": "다시 실행",
         "toggleTheme": "테마 전환",
         "language": "언어",
         "workflows": "내 워크플로",

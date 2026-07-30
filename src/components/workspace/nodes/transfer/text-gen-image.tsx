@@ -54,10 +54,13 @@ const TextGenImageNode = ({ selected, data }: TextGenImageNodeProps) => {
     // shows (otherwise the plugin falls back to its own default resolution).
     useEffect(() => {
         if (form.state.width === undefined || form.state.height === undefined)
-            form.patch({
-                width: DEFAULT_RATIO.width * DEFAULT_TIER.scale,
-                height: DEFAULT_RATIO.height * DEFAULT_TIER.scale,
-            });
+            form.patch(
+                {
+                    width: DEFAULT_RATIO.width * DEFAULT_TIER.scale,
+                    height: DEFAULT_RATIO.height * DEFAULT_TIER.scale,
+                },
+                { history: false },
+            );
     }, [form.state.width, form.state.height, form.patch]);
 
     const applySize = useCallback(

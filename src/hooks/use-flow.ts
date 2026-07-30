@@ -21,6 +21,12 @@ import {
     resolveEdgeHandles,
 } from "@/lib/abi/node-feature-registry";
 import { DATA_NODE_TYPES } from "@/lib/workflow/executable-workflow";
+import {
+    currentFocusGeneration,
+    type FlowSnapshot,
+    pushSnapshot,
+    snapshotFlow,
+} from "@/lib/workflow/flow-history";
 
 // True when React Flow reports a persisted data/input node type
 function isDataNode(nodeType: string): boolean {
@@ -54,6 +60,16 @@ const debouncedSaveNodes = createDebounce((nodes: Node[]) => {
 const debouncedSaveEdges = createDebounce((edges: Edge[]) => {
     localStorage.setItem("edges", JSON.stringify(edges));
 }, 500);
+
+// Coalescing tracker for history commits: repeated commits with the same
+// source are skipped while the focused element stays the same, so a typing
+// burst in one form field becomes a single undo entry.
+const lastCommit = { source: "", focusGen: -1 };
+
+function resetCommitTracker() {
+    lastCommit.source = "";
+    lastCommit.focusGen = -1;
+}
 
 // Persist workflow meta (title, ids, notes)
 const debouncedSaveWorkflowMeta = createDebounce(
@@ -103,7 +119,23 @@ export interface FlowState {
     setReconnectingEdgeId: (id: string | null) => void;
     expands: (nodeId: string | null, possibleNodes: PossibleNode[]) => string[];
     compose: (newNode: { type: string; data: unknown }) => string;
-    updates: (nodeId: string, data: Record<string, unknown>) => void;
+    updates: (
+        nodeId: string,
+        data: Record<string, unknown>,
+        opts?: { history?: boolean },
+    ) => void;
+
+    // Undo/redo history (snapshots of { nodes, edges })
+    historyPast: FlowSnapshot[];
+    historyFuture: FlowSnapshot[];
+    /**
+     * Snapshot the current state onto the past stack and clear the future
+     * stack. Commits with the same `source` coalesce while focus stays put.
+     */
+    commitHistory: (source?: string) => void;
+    undo: () => void;
+    redo: () => void;
+    clearHistory: () => void;
     addNode: (
         node: PossibleNode,
         position?: { x: number; y: number },
@@ -129,6 +161,65 @@ export const useFlow = create<FlowState>((set, get) => ({
     comboSelectedIds: new Set<string>(),
     reconnectingEdgeId: null,
 
+    historyPast: [],
+    historyFuture: [],
+    commitHistory: (source) => {
+        const focusGen = currentFocusGeneration();
+        if (
+            source &&
+            source === lastCommit.source &&
+            focusGen === lastCommit.focusGen
+        ) {
+            // Same source within the same focus session — coalesce
+            return;
+        }
+        lastCommit.source = source ?? "";
+        lastCommit.focusGen = focusGen;
+        const { nodes, edges, historyPast } = get();
+        set({
+            historyPast: pushSnapshot(historyPast, snapshotFlow(nodes, edges)),
+            historyFuture: [],
+        });
+    },
+    undo: () => {
+        const { historyPast, historyFuture, nodes, edges } = get();
+        const previous = historyPast[historyPast.length - 1];
+        if (!previous) return;
+        resetCommitTracker();
+        set({
+            nodes: previous.nodes,
+            edges: previous.edges,
+            historyPast: historyPast.slice(0, -1),
+            historyFuture: historyFuture.concat(snapshotFlow(nodes, edges)),
+            selectedNodes: [],
+            comboMode: false,
+            comboSelectedIds: new Set(),
+        });
+        debouncedSaveNodes(previous.nodes);
+        debouncedSaveEdges(previous.edges);
+    },
+    redo: () => {
+        const { historyPast, historyFuture, nodes, edges } = get();
+        const next = historyFuture[historyFuture.length - 1];
+        if (!next) return;
+        resetCommitTracker();
+        set({
+            nodes: next.nodes,
+            edges: next.edges,
+            historyPast: pushSnapshot(historyPast, snapshotFlow(nodes, edges)),
+            historyFuture: historyFuture.slice(0, -1),
+            selectedNodes: [],
+            comboMode: false,
+            comboSelectedIds: new Set(),
+        });
+        debouncedSaveNodes(next.nodes);
+        debouncedSaveEdges(next.edges);
+    },
+    clearHistory: () => {
+        resetCommitTracker();
+        set({ historyPast: [], historyFuture: [] });
+    },
+
     nodeCreatedCallbacks: new Set(),
     onNodeCreated: (callback) => {
         const callbacks = get().nodeCreatedCallbacks;
@@ -153,6 +244,15 @@ export const useFlow = create<FlowState>((set, get) => ({
         });
     },
     onNodesChange: (changes) => {
+        // Only removals commit history here; position changes stream per-frame
+        // during drags and are captured once via onNodeDragStart instead.
+        // React Flow's keyboard delete emits edge and node removals as two
+        // synchronous callbacks — the shared "remove" source coalesces them
+        // into one entry, and the microtask reset keeps the next delete fresh.
+        if (changes.some((c) => c.type === "remove")) {
+            get().commitHistory("remove");
+            queueMicrotask(resetCommitTracker);
+        }
         const nodes = applyNodeChanges(changes, get().nodes);
         let edges = get().edges;
         const removedIds: string[] = [];
@@ -175,6 +275,10 @@ export const useFlow = create<FlowState>((set, get) => ({
         debouncedSaveEdges(edges);
     },
     onEdgesChange: (changes) => {
+        if (changes.some((c) => c.type === "remove")) {
+            get().commitHistory("remove");
+            queueMicrotask(resetCommitTracker);
+        }
         const edges = applyEdgeChanges(changes, get().edges);
         set({
             edges: edges,
@@ -182,6 +286,7 @@ export const useFlow = create<FlowState>((set, get) => ({
         debouncedSaveEdges(edges);
     },
     onConnect: (connection) => {
+        get().commitHistory();
         const edges = addEdge(
             { ...connection, type: "custom-edge" },
             get().edges,
@@ -200,7 +305,10 @@ export const useFlow = create<FlowState>((set, get) => ({
         debouncedSaveEdges(edges);
     },
     setReconnectingEdgeId: (id) => set({ reconnectingEdgeId: id }),
-    updates: (nodeId: string, data: Record<string, unknown>) => {
+    updates: (nodeId, data, opts) => {
+        if (opts?.history !== false) {
+            get().commitHistory(`update:${nodeId}`);
+        }
         const newNodes = get().nodes.map((node) => {
             if (node.id === nodeId) {
                 return {
@@ -216,6 +324,7 @@ export const useFlow = create<FlowState>((set, get) => ({
         debouncedSaveNodes(newNodes);
     },
     addNode: (node: PossibleNode, position?: { x: number; y: number }) => {
+        get().commitHistory();
         const { nodes } = get();
 
         let defaultX = 100;
@@ -260,6 +369,7 @@ export const useFlow = create<FlowState>((set, get) => ({
         return nodeId;
     },
     removeNode: (nodeId: string) => {
+        get().commitHistory();
         const { nodes, edges } = get();
         const newNodes = nodes.filter((node) => node.id !== nodeId);
         const newEdges = edges.filter(
@@ -280,6 +390,7 @@ export const useFlow = create<FlowState>((set, get) => ({
         if (!currNode) {
             return [];
         }
+        get().commitHistory();
 
         // Track whether upstream node emits persistent artifacts
         const sourceIsDataNode = isDataNode(currNode.type ?? "");
@@ -413,6 +524,7 @@ export const useFlow = create<FlowState>((set, get) => ({
         return ids;
     },
     compose: ({ type, data }: { type: string; data: unknown }) => {
+        get().commitHistory();
         const { comboSelectedIds, nodes, edges } = get();
         const nodeId = v4();
 

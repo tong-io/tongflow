@@ -183,7 +183,8 @@ export function useAbiExecution<F extends NodeSlot>(
             if (!needsSync) return;
 
             hasSyncedRef.current = true;
-            flowUpdates(nodeId, { ...data, feature });
+            // Programmatic normalization — keep it out of undo history
+            flowUpdates(nodeId, { ...data, feature }, { history: false });
         });
         return () => {
             cancelled = true;

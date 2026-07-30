@@ -249,7 +249,9 @@ export const NodeHeaderMenuAction = forwardRef<
                 nodes,
                 setNodes,
                 setEdges,
+                commitHistory,
             } = useFlow.getState();
+            commitHistory();
             const descendants = getDescendantNodeIds(id, curEdges);
             const toRemove = new Set([id, ...descendants]);
             setNodes(nodes.filter((node) => !toRemove.has(node.id)));
@@ -271,7 +273,9 @@ export const NodeHeaderMenuAction = forwardRef<
                 nodes,
                 setNodes,
                 setEdges,
+                commitHistory,
             } = useFlow.getState();
+            commitHistory();
             const descendants = getDescendantNodeIds(id, curEdges);
             setNodes(nodes.filter((node) => !descendants.has(node.id)));
             setEdges(
