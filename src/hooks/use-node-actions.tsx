@@ -127,7 +127,9 @@ export function useNodeActions(args: UseNodeActionsArgs): UseNodeActionsResult {
 
         // Multiple video nodes (with optional single text)
         if (
-            !types.some((type) => type !== "videoNode" && type !== "textNode") &&
+            !types.some(
+                (type) => type !== "videoNode" && type !== "textNode",
+            ) &&
             (counts.videoNode ?? 0) > 1
         ) {
             const videoButtons: ButtonConfig[] = [
@@ -146,13 +148,22 @@ export function useNodeActions(args: UseNodeActionsArgs): UseNodeActionsResult {
                     onClick: () =>
                         compose({
                             type: "concatVideoComposeNode",
-                            data: { ids: ids.filter((id) => nodes.find((n) => n.id === id)?.type === "videoNode") },
+                            data: {
+                                ids: ids.filter(
+                                    (id) =>
+                                        nodes.find((n) => n.id === id)?.type ===
+                                        "videoNode",
+                                ),
+                            },
                         }),
                 },
             ];
 
             // Refs-gen-video supports up to 3 videos + optional text
-            if ((counts.videoNode ?? 0) <= MAX_REFS_VIDEOS && (counts.textNode ?? 0) <= 1) {
+            if (
+                (counts.videoNode ?? 0) <= MAX_REFS_VIDEOS &&
+                (counts.textNode ?? 0) <= 1
+            ) {
                 videoButtons.push({
                     text: t("refsGenVideo"),
                     id: "refs-gen-video",
@@ -168,7 +179,9 @@ export function useNodeActions(args: UseNodeActionsArgs): UseNodeActionsResult {
         }
         // Multiple image nodes (with optional single text)
         if (
-            !types.some((type) => type !== "imageNode" && type !== "textNode") &&
+            !types.some(
+                (type) => type !== "imageNode" && type !== "textNode",
+            ) &&
             (counts.imageNode ?? 0) > 1
         ) {
             const buttons: ButtonConfig[] = [
@@ -193,7 +206,13 @@ export function useNodeActions(args: UseNodeActionsArgs): UseNodeActionsResult {
                     onClick: () =>
                         compose({
                             type: "imageFusionNode",
-                            data: { ids: ids.filter((id) => nodes.find((n) => n.id === id)?.type === "imageNode") },
+                            data: {
+                                ids: ids.filter(
+                                    (id) =>
+                                        nodes.find((n) => n.id === id)?.type ===
+                                        "imageNode",
+                                ),
+                            },
                         }),
                 });
 
@@ -204,7 +223,13 @@ export function useNodeActions(args: UseNodeActionsArgs): UseNodeActionsResult {
                         onClick: () =>
                             compose({
                                 type: "imagesGenVideoNode",
-                                data: { ids: ids.filter((id) => nodes.find((n) => n.id === id)?.type === "imageNode") },
+                                data: {
+                                    ids: ids.filter(
+                                        (id) =>
+                                            nodes.find((n) => n.id === id)
+                                                ?.type === "imageNode",
+                                    ),
+                                },
                             }),
                     });
                 }
@@ -216,13 +241,22 @@ export function useNodeActions(args: UseNodeActionsArgs): UseNodeActionsResult {
                         onClick: () =>
                             compose({
                                 type: "imageImageGenVideoNode",
-                                data: { ids: ids.filter((id) => nodes.find((n) => n.id === id)?.type === "imageNode") },
+                                data: {
+                                    ids: ids.filter(
+                                        (id) =>
+                                            nodes.find((n) => n.id === id)
+                                                ?.type === "imageNode",
+                                    ),
+                                },
                             }),
                     });
                 }
 
                 // Refs-gen-video supports up to 9 images + optional text
-                if (imageCount <= MAX_REFS_IMAGES && (counts.textNode ?? 0) <= 1) {
+                if (
+                    imageCount <= MAX_REFS_IMAGES &&
+                    (counts.textNode ?? 0) <= 1
+                ) {
                     buttons.push({
                         text: t("refsGenVideo"),
                         id: "refs-gen-video",
