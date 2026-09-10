@@ -208,6 +208,7 @@ TongFlow **桌面版**是一个轻量（约 10 MB）的壳应用，直接加载�
 - [tongflow-modal-seedvr2](https://github.com/tong-io/tongflow-modal-seedvr2) — SeedVR2 图像 / 视频超分辨率
 - [tongflow-modal-gemma4](https://github.com/tong-io/tongflow-modal-gemma4) — Gemma-4 多模态文本（图像 / 视频理解）
 - [tongflow-modal-qwen38](https://github.com/tong-io/tongflow-modal-qwen38) — Qwen3.8-27B 多模态文本（文本生成、图像 / 视频理解；备选）
+- [tongflow-modal-spark-x25](https://github.com/tong-io/tongflow-modal-spark-x25) — 星火 Spark-X2.5-4B（讯飞）端侧模型，原生 1M 上下文：文本生成 / 合并文本（纯文本；备选）
 - [tongflow-modal-qwen3asr](https://github.com/tong-io/tongflow-modal-qwen3asr) — Qwen3 语音识别
 - [tongflow-modal-qwen3tts](https://github.com/tong-io/tongflow-modal-qwen3tts) — Qwen3 文字转语音
 - [tongflow-modal-indextts2](https://github.com/tong-io/tongflow-modal-indextts2) — IndexTTS-2.5 情感文字转语音：零样本声音克隆（备选）+ 参考音色的情感语音合成
