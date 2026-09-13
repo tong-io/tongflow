@@ -234,6 +234,7 @@ Google または WeChat でサインインすれば、すぐに創作を始め�
 - [tongflow-modal-ace-step](https://github.com/tong-io/tongflow-modal-ace-step) — ACE-Step 1.5 音楽スイート：テキストから音楽（sft / base / turbo 選択可）、リペイント、カバー、ステム抽出、トラック追加、編曲補完、音楽ブリーフ、音楽理解
 - [tongflow-modal-levo](https://github.com/tong-io/tongflow-modal-levo) — LeVo 2 / SongGeneration テキストから音楽生成（多言語・商用グレード）
 - [tongflow-modal-minimax-music3](https://github.com/tong-io/tongflow-modal-minimax-music3) — MiniMax-Music3 11B 楽曲生成：歌詞 + 説明 → ボーカル入り完全楽曲（最長約 5 分、32 kHz ステレオ）
+- [tongflow-modal-yue2](https://github.com/tong-io/tongflow-modal-yue2) — YuE2 楽曲生成：スタイル + 歌詞 → 編集できる楽譜 → ボーカル入り完全楽曲（48 kHz ステレオ）。SheetSage2 で採譜してカバーも可能（重みは CC BY-NC 4.0、非商用のみ）
 - [tongflow-modal-sam-audio](https://github.com/tong-io/tongflow-modal-sam-audio) — SAM-Audio テキスト指示による音源分離：ノイズ除去、ボーカル分離、自由記述での任意サウンド抽出（「背景のピアノ」）
 - [tongflow-modal-docling](https://github.com/tong-io/tongflow-modal-docling) — Docling ドキュメント → テキスト
 - [tongflow-modal-paddle](https://github.com/tong-io/tongflow-modal-paddle) — PaddleOCR ドキュメント → テキスト
