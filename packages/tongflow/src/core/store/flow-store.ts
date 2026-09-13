@@ -85,7 +85,16 @@ export interface FlowCoreState {
      */
     expands: (nodeId: string | null, possibleNodes: PossibleNode[]) => string[];
     /** Create a node fed by every combo-selected node; returns the new id. */
-    compose: (newNode: { type: string; data: unknown }) => string;
+    /**
+     * Create a node from the combo selection and wire every selected node into
+     * it. `sourceOrder` overrides the selection order used to assign handles
+     * (sources are matched to target fields in ABI input order).
+     */
+    compose: (newNode: {
+        type: string;
+        data: unknown;
+        sourceOrder?: string[];
+    }) => string;
     /** Replace a node's `data`. `history: false` skips the undo snapshot. */
     updates: (
         nodeId: string,
@@ -617,7 +626,7 @@ export function createFlowSlice(
             }
             return ids;
         },
-        compose: ({ type, data }) => {
+        compose: ({ type, data, sourceOrder }) => {
             get().commitHistory();
             const { comboSelectedIds, nodes, edges } = get();
             const nodeId = createId();
@@ -677,7 +686,15 @@ export function createFlowSlice(
             // multi-source combos (e.g. video + image) wire to distinct handle
             // fields instead of all stacking on the same handle.
             const usedTargetHandles = new Set<string>();
-            const newEdges: Edge[] = Array.from(comboSelectedIds)
+            const orderedIds = sourceOrder
+                ? [
+                      ...sourceOrder.filter((id) => comboSelectedIds.has(id)),
+                      ...Array.from(comboSelectedIds).filter(
+                          (id) => !sourceOrder.includes(id),
+                      ),
+                  ]
+                : Array.from(comboSelectedIds);
+            const newEdges: Edge[] = orderedIds
                 .map((id) => {
                     const node = nodes.find((n) => n.id === id);
                     if (!node) return null;

@@ -78,6 +78,13 @@ function asBaseData(data: unknown): BaseNodeData {
     return (data as BaseNodeData | undefined) ?? {};
 }
 
+// Section tags ("[Verse]", "[Chorus]") or several lines mark a text as lyrics
+// rather than a one-line style prompt.
+function looksLikeLyrics(text: string): boolean {
+    if (/^\s*\[[^\]\n]+\]\s*$/m.test(text)) return true;
+    return text.split("\n").filter((line) => line.trim()).length >= 4;
+}
+
 interface UseNodeActionsArgs {
     nodes: Node[];
     selectedNodes: Node[];
@@ -87,7 +94,11 @@ interface UseNodeActionsArgs {
         nodeId: string | null,
         possibleNodes: Array<{ type: string; data?: Record<string, unknown> }>,
     ) => string[];
-    compose: (newNode: { type: string; data: unknown }) => string;
+    compose: (newNode: {
+        type: string;
+        data: unknown;
+        sourceOrder?: string[];
+    }) => string;
     t: (key: string) => string;
 }
 
@@ -270,6 +281,73 @@ export function useNodeActions(args: UseNodeActionsArgs): UseNodeActionsResult {
             }
 
             return <ActionItem buttons={buttons} />;
+        }
+        // Audio + two texts (style prompt + lyrics): cover the audio, or use it
+        // as the reference for a new song. Which text is the lyrics is read
+        // from content, so click order doesn't matter; sourceOrder then wires
+        // each text to the matching handle (fields are matched in ABI order).
+        if (
+            counts.audioNode === 1 &&
+            counts.textNode === 2 &&
+            types.length === 3
+        ) {
+            const audioId = ids.find(
+                (id) => nodes.find((n) => n.id === id)?.type === "audioNode",
+            );
+            const textIds = ids.filter(
+                (id) => nodes.find((n) => n.id === id)?.type === "textNode",
+            );
+            const textOf = (id: string) =>
+                (
+                    asBaseData(nodes.find((n) => n.id === id)?.data).texts ?? []
+                ).join("\n");
+            const lyricsIndex =
+                looksLikeLyrics(textOf(textIds[1])) &&
+                !looksLikeLyrics(textOf(textIds[0]))
+                    ? 1
+                    : 0;
+            const lyricsId = textIds[lyricsIndex];
+            const styleId = textIds[1 - lyricsIndex];
+            if (audioId && lyricsId && styleId) {
+                return (
+                    <ActionItem
+                        buttons={[
+                            {
+                                text: t("coverMusic"),
+                                id: "cover-music",
+                                nodeType: "musicCoverNode",
+                                // music-cover order: audio, ref_audio, text, lyrics
+                                onClick: () =>
+                                    compose({
+                                        type: "musicCoverNode",
+                                        data: {},
+                                        sourceOrder: [
+                                            audioId,
+                                            styleId,
+                                            lyricsId,
+                                        ],
+                                    }),
+                            },
+                            {
+                                text: t("generateMusic"),
+                                id: "generate-music",
+                                nodeType: "textGenMusicNode",
+                                // gen-music order: lyrics, tags, ..., ref_audio
+                                onClick: () =>
+                                    compose({
+                                        type: "textGenMusicNode",
+                                        data: { ids },
+                                        sourceOrder: [
+                                            lyricsId,
+                                            styleId,
+                                            audioId,
+                                        ],
+                                    }),
+                            },
+                        ]}
+                    />
+                );
+            }
         }
         // Multiple text nodes
         if ((counts.textNode ?? 0) > 1) {
