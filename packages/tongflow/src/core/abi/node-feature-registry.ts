@@ -161,6 +161,16 @@ export const NODE_TYPE_SOURCE_SPEC: Partial<
         video: handle({ nodeType: "videoNode" }),
         text: handle({ nodeType: "textNode", path: "texts[0]", manual: true }),
     },
+    // Style prompt + lyrics can come from upstream text nodes (e.g. the
+    // island's audio + two texts combo) or be typed into the node.
+    musicCoverNode: {
+        text: handle({ nodeType: "textNode", path: "texts[0]", manual: true }),
+        lyrics: handle({
+            nodeType: "textNode",
+            path: "texts[0]",
+            manual: true,
+        }),
+    },
     textGenSpeechCloneComposeNode: {
         text: batchOn({ nodeType: "textNode", path: "texts" }),
     },

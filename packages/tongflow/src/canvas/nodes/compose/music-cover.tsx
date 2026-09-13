@@ -16,6 +16,21 @@ import { NodeTextarea } from "../base/node-textarea";
 
 const DEFAULT_STRENGTH = 0.8;
 
+function UpstreamTextPreview({ label, text }: { label: string; text: string }) {
+    return (
+        <Card className="p-3">
+            <div className="space-y-2">
+                <Label className="text-sm font-medium text-muted-foreground">
+                    {label}
+                </Label>
+                <div className="text-sm text-foreground p-2 bg-background rounded border border-border/50 line-clamp-4 whitespace-pre-line">
+                    {text}
+                </div>
+            </div>
+        </Card>
+    );
+}
+
 const MusicCoverNode = ({
     selected,
     data,
@@ -26,23 +41,49 @@ const MusicCoverNode = ({
     const nodeId = useNodeId();
     const edges = useStore((state) => state.edges as Edge[]);
 
-    const { audioSourceId, refAudioSourceId } = useMemo(() => {
-        if (!nodeId) return { audioSourceId: null, refAudioSourceId: null };
-        let audioSrc: string | null = null;
-        let refAudioSrc: string | null = null;
-        for (const e of edges) {
-            if (e.target !== nodeId) continue;
-            if (e.targetHandle === "in:audio") audioSrc = e.source;
-            else if (e.targetHandle === "in:ref_audio") refAudioSrc = e.source;
-        }
-        return { audioSourceId: audioSrc, refAudioSourceId: refAudioSrc };
-    }, [edges, nodeId]);
+    const { audioSourceId, refAudioSourceId, textSourceId, lyricsSourceId } =
+        useMemo(() => {
+            const ids = {
+                audioSourceId: null as string | null,
+                refAudioSourceId: null as string | null,
+                textSourceId: null as string | null,
+                lyricsSourceId: null as string | null,
+            };
+            if (!nodeId) return ids;
+            for (const e of edges) {
+                if (e.target !== nodeId) continue;
+                if (e.targetHandle === "in:audio") ids.audioSourceId = e.source;
+                else if (e.targetHandle === "in:ref_audio")
+                    ids.refAudioSourceId = e.source;
+                else if (e.targetHandle === "in:text")
+                    ids.textSourceId = e.source;
+                else if (e.targetHandle === "in:lyrics")
+                    ids.lyricsSourceId = e.source;
+            }
+            return ids;
+        }, [edges, nodeId]);
 
     const upstreamIds = useMemo(
-        () => [audioSourceId, refAudioSourceId].filter((v): v is string => !!v),
-        [audioSourceId, refAudioSourceId],
+        () =>
+            [
+                audioSourceId,
+                refAudioSourceId,
+                textSourceId,
+                lyricsSourceId,
+            ].filter((v): v is string => !!v),
+        [audioSourceId, refAudioSourceId, textSourceId, lyricsSourceId],
     );
     const upstreamNodes = useNodesData(upstreamIds);
+
+    // An upstream text edge wins over the typed value (manual handle).
+    const upstreamText = (sourceId: string | null) => {
+        if (!sourceId) return undefined;
+        const n = upstreamNodes.find((u) => u.id === sourceId);
+        if (!n || n.type !== "textNode") return undefined;
+        return coerceBaseNodeData(n.data).texts?.[0] ?? "";
+    };
+    const promptFromUpstream = upstreamText(textSourceId);
+    const lyricsFromUpstream = upstreamText(lyricsSourceId);
 
     const audioKey = useMemo(() => {
         if (!audioSourceId) return undefined;
@@ -115,19 +156,33 @@ const MusicCoverNode = ({
                         </div>
                     </div>
                 </Card>
-                <NodeTextarea
-                    label={t("musicTasks.promptLabel")}
-                    icon={MessageSquare}
-                    placeholder={t("musicTasks.promptPlaceholder")}
-                    {...form.bind("text")}
-                    rows={3}
-                />
-                <NodeTextarea
-                    label={t("musicTasks.lyricsLabel")}
-                    placeholder={t("musicTasks.lyricsPlaceholder")}
-                    {...form.bind("lyrics")}
-                    rows={2}
-                />
+                {promptFromUpstream !== undefined ? (
+                    <UpstreamTextPreview
+                        label={t("musicTasks.promptLabel")}
+                        text={promptFromUpstream}
+                    />
+                ) : (
+                    <NodeTextarea
+                        label={t("musicTasks.promptLabel")}
+                        icon={MessageSquare}
+                        placeholder={t("musicTasks.promptPlaceholder")}
+                        {...form.bind("text")}
+                        rows={3}
+                    />
+                )}
+                {lyricsFromUpstream !== undefined ? (
+                    <UpstreamTextPreview
+                        label={t("musicTasks.lyricsLabel")}
+                        text={lyricsFromUpstream}
+                    />
+                ) : (
+                    <NodeTextarea
+                        label={t("musicTasks.lyricsLabel")}
+                        placeholder={t("musicTasks.lyricsPlaceholder")}
+                        {...form.bind("lyrics")}
+                        rows={2}
+                    />
+                )}
                 <Card className="p-3">
                     <div className="space-y-2">
                         <div className="flex items-center justify-between">
