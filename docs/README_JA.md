@@ -226,6 +226,7 @@ Google または WeChat でサインインすれば、すぐに創作を始め�
 - [tongflow-modal-seedvr2](https://github.com/tong-io/tongflow-modal-seedvr2) — SeedVR2 画像 / 動画の超解像
 - [tongflow-modal-gemma4](https://github.com/tong-io/tongflow-modal-gemma4) — Gemma-4 マルチモーダルテキスト（画像 / 動画理解）
 - [tongflow-modal-qwen38](https://github.com/tong-io/tongflow-modal-qwen38) — Qwen3.8-27B マルチモーダルテキスト（テキスト生成、画像 / 動画理解；代替）
+- [tongflow-modal-spark-x25](https://github.com/tong-io/tongflow-modal-spark-x25) — Spark-X2.5-4B（iFlytek）オンデバイス LLM、ネイティブ 1M トークンコンテキスト：テキスト生成 / テキスト結合（テキストのみ；代替）
 - [tongflow-modal-qwen3asr](https://github.com/tong-io/tongflow-modal-qwen3asr) — Qwen3 音声認識
 - [tongflow-modal-qwen3tts](https://github.com/tong-io/tongflow-modal-qwen3tts) — Qwen3 テキストから音声
 - [tongflow-modal-indextts2](https://github.com/tong-io/tongflow-modal-indextts2) — IndexTTS-2.5 感情表現テキスト読み上げ：ゼロショット音声クローン（代替）+ 参照音声による感情制御音声合成
