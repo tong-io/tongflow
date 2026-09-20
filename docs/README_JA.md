@@ -210,7 +210,7 @@ Google または WeChat でサインインすれば、すぐに創作を始め�
 - [tongflow-modal-ernie-image](https://github.com/tong-io/tongflow-modal-ernie-image) — ERNIE Image テキストから画像生成（代替）
 - [tongflow-modal-krea2](https://github.com/tong-io/tongflow-modal-krea2) — Krea 2 Turbo テキストから画像生成（オープンウェイト 12B、8 ステップ、最大 2K）
 - [tongflow-modal-flux2-klein9b](https://github.com/tong-io/tongflow-modal-flux2-klein9b) — FLUX.2 Klein 9B マルチ参照融合と画像編集
-- [tongflow-modal-qwen-image-edit](https://github.com/tong-io/tongflow-modal-qwen-image-edit) — Qwen-Image-Edit-2511 指示ベースの画像編集とマルチ画像融合（ヘッドレス ComfyUI、fp8 + 8ステップ）
+- [tongflow-modal-qwen-image-edit](https://github.com/tong-io/tongflow-modal-qwen-image-edit) — Qwen-Image 2.1：テキスト → 画像、指示ベースの画像編集、マルチ画像融合（最大 10 枚の参照画像）、背景除去（透過 PNG）（ヘッドレス ComfyUI、int8。重みは Qwen Research License、非商用のみ）
 - [tongflow-modal-boogu](https://github.com/tong-io/tongflow-modal-boogu) — Boogu-Image-0.1（fp8）テキストから画像生成（高密度な多言語テキスト）と単一参照画像編集
 - [tongflow-modal-infinitetalk](https://github.com/tong-io/tongflow-modal-infinitetalk) — InfiniteTalk 音声駆動リップシンク（音声 + 画像 / 動画 → デジタルヒューマン動画）
 - [tongflow-modal-wan-animate](https://github.com/tong-io/tongflow-modal-wan-animate) — Wan-Animate キャラクター置換とモーション転送（動画 + 参照）
