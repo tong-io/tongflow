@@ -173,8 +173,8 @@ TongFlow **桌面版**是一个轻量（约 10 MB）的壳应用，直接加载�
 - ✅ **图像融合**: 将多张参考图融合或编辑为一张图。
 - ✅ **口型同步**: 音频 + 视频 → 视频（口型同步）；也支持音频 + 图片 → 视频、音频 + 文本 → 视频等变体。
 - ✅ **情感语音**: 文本 + 参考音色 → 用该音色朗读，支持情感控制。
-- ✅ **换角色**: 视频 + 参考（场景融合 / 角色替换），Animate Mix 风格生成。
-- ✅ **动作迁移**: 视频 + 参考（动作 / 重定向），Animate Move 风格生成。
+- ✅ **换角色**: 视频 + 参考（场景融合 / 角色替换）。
+- ✅ **动作迁移**: 角色图 + 驱动视频，端到端（免姿态提取）。
 - ✅ **文本合并**: 将多个文本节点合并为一个。
 - ✅ **拼接片段**: 将多个视频首尾相接。
 - ✅ **音视频合并**: 合并为单个文件。
@@ -226,8 +226,8 @@ TongFlow **桌面版**是一个轻量（约 10 MB）的壳应用，直接加载�
 - [tongflow-modal-qwen-image-edit](https://github.com/tong-io/tongflow-modal-qwen-image-edit) — Qwen-Image 2.1：文生图、指令式图像编辑、多图融合（最多 10 张参考图）与透明背景抠图（无头 ComfyUI，int8；权重 Qwen Research License，仅限非商用）
 - [tongflow-modal-boogu](https://github.com/tong-io/tongflow-modal-boogu) — Boogu-Image-0.1（fp8）文本生图（密集中英文字）与单图编辑
 - [tongflow-modal-infinitetalk](https://github.com/tong-io/tongflow-modal-infinitetalk) — InfiniteTalk 音频驱动口型同步（音频 + 图片 / 视频 → 数字人视频）
-- [tongflow-modal-wan-animate](https://github.com/tong-io/tongflow-modal-wan-animate) — Wan-Animate 换角色与动作迁移（视频 + 参考）
-- [tongflow-modal-scail2](https://github.com/tong-io/tongflow-modal-scail2) — SCAIL-2 可控角色动画（角色图 + 驱动视频；与 wan-animate 相同的两个槽位）
+- [tongflow-modal-wan-animate](https://github.com/tong-io/tongflow-modal-wan-animate) — Wan-Animate-2 端到端角色动画（角色图 + 驱动视频，免姿态提取）
+- [tongflow-modal-scail2](https://github.com/tong-io/tongflow-modal-scail2) — SCAIL-2 可控角色动画（角色图 + 驱动视频），以及换角色
 - [tongflow-modal-minimax-h3](https://github.com/tong-io/tongflow-modal-minimax-h3) — MiniMax-H3 33B 视频生成，原生立体声（文生 / 首尾帧 / 多图 / 全模态参考）
 - [tongflow-modal-bernini](https://github.com/tong-io/tongflow-modal-bernini) — Bernini-R 1.3B 统一视频渲染器（文/图 → 图/视频、视频编辑、去字幕 / 去水印）
 - [tongflow-modal-sam3](https://github.com/tong-io/tongflow-modal-sam3) — SAM 3 / SAM 3.1 文本引导抠像：按描述抠出图像中某概念的全部实例（透明 PNG），或在视频中全程跟踪（绿幕输出）

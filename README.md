@@ -173,8 +173,8 @@ Every node below is a capability from the ABI, grouped by the four operations. M
 - ✅ **Image fusion**: blend or edit multiple references into one image.
 - ✅ **Lip sync**: audio + video → video (lip-sync); also audio + image → video and audio + text → video variants.
 - ✅ **Emotive speech**: text + voice reference → speech in that voice, with emotion control.
-- ✅ **Character swap**: video + reference (scene blend / character replacement), Animate Mix-style generation.
-- ✅ **Motion transfer**: video + reference (motion / retarget), Animate Move-style generation.
+- ✅ **Character swap**: video + reference (scene blend / character replacement).
+- ✅ **Motion transfer**: character image + driving video, end-to-end (no pose extraction).
 - ✅ **Combine text**: merge multiple text nodes into one.
 - ✅ **Concatenate clips**: join multiple videos end to end.
 - ✅ **Mux audio + video**: merge into one file.
@@ -226,8 +226,8 @@ Aggregators — one key, many third-party models across labs:
 - [tongflow-modal-qwen-image-edit](https://github.com/tong-io/tongflow-modal-qwen-image-edit) — Qwen-Image 2.1: text-to-image, instruction editing, multi-image fusion (up to 10 references) and transparent background removal (headless ComfyUI, int8; weights Qwen Research Licence, non-commercial)
 - [tongflow-modal-boogu](https://github.com/tong-io/tongflow-modal-boogu) — Boogu-Image-0.1 (fp8) text-to-image (dense bilingual text) & single-reference image editing
 - [tongflow-modal-infinitetalk](https://github.com/tong-io/tongflow-modal-infinitetalk) — InfiniteTalk audio-driven lip-sync (audio + image / video → talking-head video)
-- [tongflow-modal-wan-animate](https://github.com/tong-io/tongflow-modal-wan-animate) — Wan-Animate character swap & motion transfer (video + reference)
-- [tongflow-modal-scail2](https://github.com/tong-io/tongflow-modal-scail2) — SCAIL-2 controlled character animation (image + driving video; same two slots as wan-animate)
+- [tongflow-modal-wan-animate](https://github.com/tong-io/tongflow-modal-wan-animate) — Wan-Animate-2 end-to-end character animation (character image + driving video, no pose extraction)
+- [tongflow-modal-scail2](https://github.com/tong-io/tongflow-modal-scail2) — SCAIL-2 controlled character animation (image + driving video), and character swap
 - [tongflow-modal-minimax-h3](https://github.com/tong-io/tongflow-modal-minimax-h3) — MiniMax-H3 33B video generation with native stereo audio (text / first- & last-frame / multi-image / omni-reference)
 - [tongflow-modal-bernini](https://github.com/tong-io/tongflow-modal-bernini) — Bernini-R 1.3B unified video renderer (text/image → image/video, video editing, subtitle / watermark removal)
 - [tongflow-modal-sam3](https://github.com/tong-io/tongflow-modal-sam3) — SAM 3 / SAM 3.1 text-guided matting: cut every instance of a described concept out of an image (transparent PNG) or track it through a video (green-screen matte)
