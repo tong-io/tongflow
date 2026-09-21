@@ -203,6 +203,7 @@ Google または WeChat でサインインすれば、すぐに創作を始め�
 - [tongflow-api-bytedance](https://github.com/tong-io/tongflow-api-bytedance) — ByteDance Volcengine Ark、ノードごとの**モデルピッカー**：Doubao テキスト・視覚、Seedream 画像生成/編集/融合、Seedance テキスト / 画像 / 音声 → 動画
 - [tongflow-api-xai](https://github.com/tong-io/tongflow-api-xai) — xAI Grok、ノードごとの**モデルピッカー**：`gen_text`（Grok 4.x）、画像理解、Grok Imagine テキスト→画像
 - [tongflow-api-runway](https://github.com/tong-io/tongflow-api-runway) — Runway Dev 統合 API、ノードごとの**モデルピッカー**：動画（Gen-4.5、Gen-4 Turbo、Aleph 編集、Act-Two、Seedance、Veo）、画像（GPT Image 2、Seedream 5、Gemini image 3）、ElevenLabs TTS
+- [tongflow-api-metaso](https://github.com/tong-io/tongflow-api-metaso) — [Metaso（秘塔科技）](https://metaso.cn/minimax-h3/?s=TongFlow)がホストする MiniMax H3 動画生成：テキスト / 画像 → 動画、768P は 0.09 元/秒、2K は 0.15 元/秒。OpenAI 互換の Videos API 経由
 
 ### ルーター / 集約プラグイン
 

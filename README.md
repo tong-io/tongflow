@@ -203,6 +203,7 @@ First-party providers (a lab's own models):
 - [tongflow-api-bytedance](https://github.com/tong-io/tongflow-api-bytedance) — ByteDance Volcengine Ark with a per-node **model picker**: Doubao text & vision, Seedream image gen/edit/fusion, Seedance text/image/audio → video
 - [tongflow-api-xai](https://github.com/tong-io/tongflow-api-xai) — xAI Grok with a per-node **model picker**: `gen_text` (Grok 4.x), image understanding, and Grok Imagine text-to-image
 - [tongflow-api-runway](https://github.com/tong-io/tongflow-api-runway) — Runway Dev unified API with a per-node **model picker**: video (Gen-4.5, Gen-4 Turbo, Aleph edit, Act-Two, Seedance, Veo), image (GPT Image 2, Seedream 5, Gemini image 3) and ElevenLabs TTS
+- [tongflow-api-metaso](https://github.com/tong-io/tongflow-api-metaso) — MiniMax H3 video generation hosted by [Metaso](https://metaso.cn/minimax-h3/?s=TongFlow): text / image → video at ¥0.09/s (768P) or ¥0.15/s (2K), through an OpenAI-compatible Videos API
 
 ### Router plugins
 
