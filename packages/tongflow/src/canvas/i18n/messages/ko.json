@@ -116,6 +116,7 @@
             "separateAudio": "보컬 분리",
             "separateSpeaker": "화자 분리",
             "separateSound": "소리 추출",
+            "speakWithStyle": "감정 음성 생성",
             "denoise": "노이즈 제거",
             "convertVoice": "음성 교체",
             "filter": "필터",

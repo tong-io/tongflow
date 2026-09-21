@@ -116,6 +116,7 @@
             "separateAudio": "人声分离",
             "separateSpeaker": "说话人分离",
             "separateSound": "提取声音",
+            "speakWithStyle": "按情绪配音",
             "denoise": "降噪",
             "convertVoice": "人声替换",
             "filter": "筛选",

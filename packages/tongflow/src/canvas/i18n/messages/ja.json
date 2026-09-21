@@ -116,6 +116,7 @@
             "separateAudio": "ボーカル分離",
             "separateSpeaker": "話者分離",
             "separateSound": "音を抽出",
+            "speakWithStyle": "感情付き音声",
             "denoise": "ノイズ除去",
             "convertVoice": "音声置換",
             "filter": "フィルター",
