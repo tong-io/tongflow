@@ -203,6 +203,7 @@ TongFlow **桌面版**是一个轻量（约 10 MB）的壳应用，直接加载�
 - [tongflow-api-bytedance](https://github.com/tong-io/tongflow-api-bytedance) — 火山方舟，按节点**模型选择**：豆包文本与视觉、Seedream 图像生成/编辑/融合、Seedance 文 / 图 / 音 → 视频
 - [tongflow-api-xai](https://github.com/tong-io/tongflow-api-xai) — xAI Grok，按节点**模型选择**：`gen_text`（Grok 4.x）、图像理解、Grok Imagine 文生图
 - [tongflow-api-runway](https://github.com/tong-io/tongflow-api-runway) — Runway Dev 统一 API，按节点**模型选择**：视频（Gen-4.5、Gen-4 Turbo、Aleph 编辑、Act-Two、Seedance、Veo）、图像（GPT Image 2、Seedream 5、Gemini image 3）与 ElevenLabs TTS
+- [tongflow-api-metaso](https://github.com/tong-io/tongflow-api-metaso) — [秘塔科技](https://metaso.cn/minimax-h3/?s=TongFlow)托管的 MiniMax H3 视频生成：文/图生视频，768P 0.09 元/秒、2K 0.15 元/秒，走 OpenAI 兼容的 Videos 接口
 
 ### 中转 / 聚合插件
 

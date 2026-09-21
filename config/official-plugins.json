@@ -13,6 +13,7 @@
         "tongflow-router-replicate",
         "tongflow-router-fal",
         "tongflow-api-runway",
+        "tongflow-api-metaso",
         "tongflow-modal-ffmpeg",
         "tongflow-modal-pyscenedetect",
         "tongflow-modal-z-image",
