@@ -24,6 +24,19 @@ Text, images, audio, video and 3D are your materials. Decide how they transform 
 
 Open-source core · Your models · Self-hostable · [tongflow.com](https://www.tongflow.com) · [Open the canvas](https://app.tongflow.com)
 
+## Sponsors
+
+<table>
+  <tr>
+    <td width="190" align="center">
+      <a href="https://metaso.cn/minimax-h3/?s=TongFlow" target="_blank" rel="noopener noreferrer"><img src="docs/assets/sponsor-metaso.png" width="163" alt="Metaso / 秘塔科技"></a>
+    </td>
+    <td>
+      <strong>MiniMax H3 video generation API — Metaso (秘塔科技)</strong> Metaso runs MiniMax H3 video generation at <strong>¥0.09/second for 768P and ¥0.15/second for 2K</strong>. Native 2K, synced audio and picture, an <strong>OpenAI-compatible</strong> API, and <strong>ComfyUI</strong> support — no GPU to deploy yourself. 🎁 Sign up through the <a href="https://metaso.cn/minimax-h3/?s=TongFlow" target="_blank" rel="noopener noreferrer">TongFlow link</a> to claim bonus credits and a partner discount.
+    </td>
+  </tr>
+</table>
+
 ## Demo Examples
 
 | Workflow | Result |
