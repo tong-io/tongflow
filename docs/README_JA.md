@@ -199,7 +199,7 @@ Google または WeChat でサインインすれば、すぐに創作を始め�
 
 - [tongflow-api-gemini](https://github.com/tong-io/tongflow-api-gemini) — Google Gemini、ノードごとの**モデルピッカー**：テキスト、視覚、画像（Nano Banana / Imagen 4）、Veo 動画、TTS、文字起こし
 - [tongflow-api-openai](https://github.com/tong-io/tongflow-api-openai) — OpenAI、ノードごとの**モデルピッカー**：`gen_text`、画像生成/編集/融合（`gpt-image-2`）、視覚、ドキュメント OCR、Whisper 文字起こし、TTS
-- [tongflow-api-deepseek](https://github.com/tong-io/tongflow-api-deepseek) — DeepSeek V4（`flash` / `pro`、ストリーミング**思考**バブル付き）ベースの `gen_text` およびテキストツール
+- [tongflow-api-deepseek](https://github.com/tong-io/tongflow-api-deepseek) — DeepSeek、ノードごとの**モデルピッカー**（V4.1 Flash / V4 Pro、ストリーミング**思考**バブル付き）：`gen_text` およびテキストツール、Flash は画像理解も
 - [tongflow-api-bytedance](https://github.com/tong-io/tongflow-api-bytedance) — ByteDance Volcengine Ark、ノードごとの**モデルピッカー**：Doubao テキスト・視覚、Seedream 画像生成/編集/融合、Seedance テキスト / 画像 / 音声 → 動画
 - [tongflow-api-xai](https://github.com/tong-io/tongflow-api-xai) — xAI Grok、ノードごとの**モデルピッカー**：`gen_text`（Grok 4.x）、画像理解、Grok Imagine テキスト→画像
 - [tongflow-api-runway](https://github.com/tong-io/tongflow-api-runway) — Runway Dev 統合 API、ノードごとの**モデルピッカー**：動画（Gen-4.5、Gen-4 Turbo、Aleph 編集、Act-Two、Seedance、Veo）、画像（GPT Image 2、Seedream 5、Gemini image 3）、ElevenLabs TTS

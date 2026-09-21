@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- **DeepSeek plugin follows V4.1 Flash** — DeepSeek collapsed V4 Flash and its
+  experimental vision variant into a single `deepseek-flash` id (1M context,
+  native image understanding) on 2026-09-10 and only routes the old ids
+  temporarily. The plugin's model picker now lists `deepseek-flash` (default)
+  and `deepseek-v4-pro`, maps the retired ids itself so saved workflows keep
+  running, and serves the **Image → text** and **Describe image** slots on
+  Flash with an **Image detail** knob under Advanced.
+
 ## [0.3.5] - 2026-09-10
 
 ### Added
