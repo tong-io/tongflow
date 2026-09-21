@@ -24,6 +24,19 @@
 
 オープンソース · モデルを選べる · セルフホスト対応 · [tongflow.com](https://www.tongflow.com/ja) · [キャンバスを開く](https://app.tongflow.com)
 
+## スポンサー
+
+<table>
+  <tr>
+    <td width="190" align="center">
+      <a href="https://metaso.cn/minimax-h3/?s=TongFlow" target="_blank" rel="noopener noreferrer"><img src="assets/sponsor-metaso.png" width="163" alt="Metaso / 秘塔科技"></a>
+    </td>
+    <td>
+      <strong>MiniMax H3 動画生成 API｜秘塔科技（Metaso）</strong> 秘塔科技の MiniMax H3 動画生成は <strong>768P が 0.09 元/秒、2K が 0.15 元/秒</strong>。ネイティブ 2K と音声同期に対応し、API は <strong>OpenAI 互換</strong>、<strong>ComfyUI</strong> からも使えます。GPU を自分で用意する必要はありません。 🎁 <a href="https://metaso.cn/minimax-h3/?s=TongFlow" target="_blank" rel="noopener noreferrer">TongFlow 専用リンク</a>から登録すると、無料クレジットと特典を受け取れます。
+    </td>
+  </tr>
+</table>
+
 ## Demo デモ
 
 | ワークフローのスクリーンショット | 出力結果 |
