@@ -199,7 +199,7 @@ TongFlow **桌面版**是一个轻量（约 10 MB）的壳应用，直接加载�
 
 - [tongflow-api-gemini](https://github.com/tong-io/tongflow-api-gemini) — Google Gemini，按节点**模型选择**：文本、视觉、图像（Nano Banana / Imagen 4）、Veo 视频、TTS 与转写
 - [tongflow-api-openai](https://github.com/tong-io/tongflow-api-openai) — OpenAI，按节点**模型选择**：`gen_text`、图像生成/编辑/融合（`gpt-image-2`）、视觉、文档 OCR、Whisper 转写与 TTS
-- [tongflow-api-deepseek](https://github.com/tong-io/tongflow-api-deepseek) — 基于 DeepSeek V4（`flash` / `pro`，带流式**思考**气泡）的 `gen_text` 及文本工具
+- [tongflow-api-deepseek](https://github.com/tong-io/tongflow-api-deepseek) — DeepSeek，节点上可切**模型**（V4.1 Flash / V4 Pro，带流式**思考**气泡）：`gen_text` 及文本工具，Flash 还能看图
 - [tongflow-api-bytedance](https://github.com/tong-io/tongflow-api-bytedance) — 火山方舟，按节点**模型选择**：豆包文本与视觉、Seedream 图像生成/编辑/融合、Seedance 文 / 图 / 音 → 视频
 - [tongflow-api-xai](https://github.com/tong-io/tongflow-api-xai) — xAI Grok，按节点**模型选择**：`gen_text`（Grok 4.x）、图像理解、Grok Imagine 文生图
 - [tongflow-api-runway](https://github.com/tong-io/tongflow-api-runway) — Runway Dev 统一 API，按节点**模型选择**：视频（Gen-4.5、Gen-4 Turbo、Aleph 编辑、Act-Two、Seedance、Veo）、图像（GPT Image 2、Seedream 5、Gemini image 3）与 ElevenLabs TTS
