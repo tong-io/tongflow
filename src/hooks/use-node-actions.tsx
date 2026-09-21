@@ -3,31 +3,32 @@
 /**
  * Node action menu hook
  *
- * Produces the contextual action toolbar (e.g. "split", "generate video", "fuse images")
- * shown above selected nodes. Splits its output into two render slots:
+ * Produces the contextual action toolbar (e.g. "split", "generate video",
+ * "fuse images") shown above selected nodes. Splits its output into two render
+ * slots:
  *  - `comboActions`: for multi-select / combo-mode combinations (N→1 etc.)
  *  - `singleActions`: for a single selected node
  *
  * The caller (smart-island) decides which slot to render based on `comboMode`.
  * Returns `null` for both when no actionable combination applies.
+ *
+ * Which ABI nodes a selection can reach is derived from the ABI itself by
+ * `nodeActionsForSelection` — this file only turns those candidates into
+ * buttons and keeps the handful of actions the ABI knows nothing about
+ * (grouping several nodes into one, splitting a group back apart).
  */
 
 import type { Node } from "@xyflow/react";
 import type { ReactNode } from "react";
 import { useMemo } from "react";
-import type { BaseNodeData } from "tongflow";
+import {
+    type BaseNodeData,
+    isModalityNode,
+    type NodeActionCandidate,
+    nodeActionsForSelection,
+    type SelectionCounts,
+} from "tongflow";
 import { cn } from "tongflow/canvas";
-
-// Seedance multimodal reference (images → video) accepts up to 9 images.
-const MAX_IMAGES_GEN_VIDEO = 9;
-
-// Omni-reference (refs-gen-video) caps, matching MiniMax-H3 Ref2VA: up to 9
-// images, 3 video clips, 3 audio clips, 12 reference files total. Audio cannot
-// be the sole reference — it must accompany an image or video.
-const MAX_REFS_IMAGES = 9;
-const MAX_REFS_VIDEOS = 3;
-const MAX_REFS_AUDIOS = 3;
-const MAX_REFS_TOTAL = 12;
 
 interface ButtonConfig {
     text: string;
@@ -85,6 +86,37 @@ function looksLikeLyrics(text: string): boolean {
     return text.split("\n").filter((line) => line.trim()).length >= 4;
 }
 
+/** A grouped node holds several files (or several texts) in one node. */
+function isGroup(data: BaseNodeData): boolean {
+    return (data.fileKeys?.length ?? 0) > 1 || (data.texts?.length ?? 0) > 1;
+}
+
+function tally(nodes: Node[]): SelectionCounts {
+    const counts: SelectionCounts = {};
+    for (const node of nodes) {
+        if (!isModalityNode(node.type)) continue;
+        const key = node.type as keyof SelectionCounts;
+        counts[key] = (counts[key] ?? 0) + 1;
+    }
+    return counts;
+}
+
+/**
+ * Several node types share one label — `image-gen-video`, `audio-image-gen-video`
+ * and `speech-text-gen-video` all read as "generate video". Keep the
+ * lowest-ordered one so the toolbar doesn't show the same word three times.
+ */
+function dedupeByLabel(
+    candidates: NodeActionCandidate[],
+): NodeActionCandidate[] {
+    const seen = new Set<string>();
+    return candidates.filter((c) => {
+        if (seen.has(c.label)) return false;
+        seen.add(c.label);
+        return true;
+    });
+}
+
 interface UseNodeActionsArgs {
     nodes: Node[];
     selectedNodes: Node[];
@@ -113,1283 +145,145 @@ export function useNodeActions(args: UseNodeActionsArgs): UseNodeActionsResult {
 
     const comboActions = useMemo<ReactNode | null>(() => {
         const ids = Array.from(comboSelectedIds);
-        const types: string[] = ids
-            .map((id) => nodes.find((n) => n.id === id)?.type)
-            .filter((type): type is string => typeof type === "string");
+        const selected = ids
+            .map((id) => nodes.find((n) => n.id === id))
+            .filter((n): n is Node => !!n && isModalityNode(n.type));
+        if (selected.length < 2) return null;
 
-        const counts: Record<string, number> = types.reduce(
-            (acc, type) => {
-                acc[type] = (acc[type] ?? 0) + 1;
-                return acc;
-            },
-            {} as Record<string, number>,
-        );
+        const counts = tally(selected);
+        const buttons: ButtonConfig[] = [];
 
-        const collectFileKeys = () =>
-            ids.flatMap((id) => {
-                const node = nodes.find((n) => n.id === id);
-                return asBaseData(node?.data).fileKeys ?? [];
+        // Not an ABI action: fold same-modality nodes into one grouped node.
+        const distinctTypes = new Set(selected.map((n) => n.type));
+        if (distinctTypes.size === 1) {
+            const type = selected[0]?.type;
+            const isText = type === "textNode";
+            buttons.push({
+                text: t("mergeGroup"),
+                id: "merge-group",
+                onClick: () =>
+                    compose({
+                        type: type as string,
+                        data: isText
+                            ? {
+                                  texts: selected.flatMap(
+                                      (n) => asBaseData(n.data).texts ?? [],
+                                  ),
+                              }
+                            : {
+                                  fileKeys: selected.flatMap(
+                                      (n) => asBaseData(n.data).fileKeys ?? [],
+                                  ),
+                              },
+                    }),
             });
-        const collectTexts = () =>
-            ids.flatMap((id) => {
-                const node = nodes.find((n) => n.id === id);
-                return asBaseData(node?.data).texts ?? [];
+        }
+
+        // An audio reference plus a style prompt and lyrics: which text is
+        // which is read from content, so click order doesn't matter, and
+        // sourceOrder then wires each text to the matching handle.
+        const musicOrder = musicSourceOrder(selected);
+
+        for (const candidate of dedupeByLabel(
+            nodeActionsForSelection(counts),
+        )) {
+            buttons.push({
+                text: t(candidate.label),
+                id: candidate.nodeType,
+                nodeType: candidate.nodeType,
+                onClick: () =>
+                    compose({
+                        type: candidate.nodeType,
+                        data: { ids },
+                        sourceOrder: musicOrder?.[candidate.nodeType],
+                    }),
             });
+        }
 
-        // Multiple video nodes (with optional single text)
-        if (
-            !types.some(
-                (type) => type !== "videoNode" && type !== "textNode",
-            ) &&
-            (counts.videoNode ?? 0) > 1
-        ) {
-            const videoButtons: ButtonConfig[] = [
-                {
-                    text: t("mergeGroup"),
-                    id: "merge-group",
-                    onClick: () =>
-                        compose({
-                            type: "videoNode",
-                            data: { fileKeys: collectFileKeys() },
-                        }),
-                },
-                {
-                    text: t("concat"),
-                    id: "concat-video",
-                    onClick: () =>
-                        compose({
-                            type: "concatVideoComposeNode",
-                            data: {
-                                ids: ids.filter(
-                                    (id) =>
-                                        nodes.find((n) => n.id === id)?.type ===
-                                        "videoNode",
-                                ),
-                            },
-                        }),
-                },
-            ];
-
-            // Refs-gen-video supports up to 3 videos + optional text
-            if (
-                (counts.videoNode ?? 0) <= MAX_REFS_VIDEOS &&
-                (counts.textNode ?? 0) <= 1
-            ) {
-                videoButtons.push({
-                    text: t("refsGenVideo"),
-                    id: "refs-gen-video",
-                    onClick: () =>
-                        compose({
-                            type: "refsGenVideoNode",
-                            data: { ids },
-                        }),
-                });
-            }
-
-            return <ActionItem buttons={videoButtons} />;
-        }
-        // Multiple image nodes (with optional single text)
-        if (
-            !types.some(
-                (type) => type !== "imageNode" && type !== "textNode",
-            ) &&
-            (counts.imageNode ?? 0) > 1
-        ) {
-            const buttons: ButtonConfig[] = [
-                {
-                    text: t("mergeGroup"),
-                    id: "merge-group",
-                    onClick: () =>
-                        compose({
-                            type: "imageNode",
-                            data: { fileKeys: collectFileKeys() },
-                        }),
-                },
-            ];
-
-            const imageCount = counts.imageNode ?? 0;
-
-            // Gemini 3 Pro supports up to 14 reference images
-            if (imageCount >= 2 && imageCount <= 14) {
-                buttons.push({
-                    text: t("imageFusion"),
-                    id: "image-fusion",
-                    onClick: () =>
-                        compose({
-                            type: "imageFusionNode",
-                            data: {
-                                ids: ids.filter(
-                                    (id) =>
-                                        nodes.find((n) => n.id === id)?.type ===
-                                        "imageNode",
-                                ),
-                            },
-                        }),
-                });
-
-                if (imageCount <= MAX_IMAGES_GEN_VIDEO) {
-                    buttons.push({
-                        text: t("imagesGenVideo"),
-                        id: "images-gen-video",
-                        onClick: () =>
-                            compose({
-                                type: "imagesGenVideoNode",
-                                data: {
-                                    ids: ids.filter(
-                                        (id) =>
-                                            nodes.find((n) => n.id === id)
-                                                ?.type === "imageNode",
-                                    ),
-                                },
-                            }),
-                    });
-                }
-
-                if (imageCount === 2 && (counts.textNode ?? 0) === 0) {
-                    buttons.push({
-                        text: t("firstLastFrameVideo"),
-                        id: "first-last-frame-video",
-                        onClick: () =>
-                            compose({
-                                type: "imageImageGenVideoNode",
-                                data: {
-                                    ids: ids.filter(
-                                        (id) =>
-                                            nodes.find((n) => n.id === id)
-                                                ?.type === "imageNode",
-                                    ),
-                                },
-                            }),
-                    });
-                }
-
-                // Refs-gen-video supports up to 9 images + optional text
-                if (
-                    imageCount <= MAX_REFS_IMAGES &&
-                    (counts.textNode ?? 0) <= 1
-                ) {
-                    buttons.push({
-                        text: t("refsGenVideo"),
-                        id: "refs-gen-video",
-                        onClick: () =>
-                            compose({
-                                type: "refsGenVideoNode",
-                                data: { ids },
-                            }),
-                    });
-                }
-            }
-
-            return <ActionItem buttons={buttons} />;
-        }
-        // Audio + two texts (style prompt + lyrics): cover the audio, or use it
-        // as the reference for a new song. Which text is the lyrics is read
-        // from content, so click order doesn't matter; sourceOrder then wires
-        // each text to the matching handle (fields are matched in ABI order).
-        if (
-            counts.audioNode === 1 &&
-            counts.textNode === 2 &&
-            types.length === 3
-        ) {
-            const audioId = ids.find(
-                (id) => nodes.find((n) => n.id === id)?.type === "audioNode",
-            );
-            const textIds = ids.filter(
-                (id) => nodes.find((n) => n.id === id)?.type === "textNode",
-            );
-            const textOf = (id: string) =>
-                (
-                    asBaseData(nodes.find((n) => n.id === id)?.data).texts ?? []
-                ).join("\n");
-            const lyricsIndex =
-                looksLikeLyrics(textOf(textIds[1])) &&
-                !looksLikeLyrics(textOf(textIds[0]))
-                    ? 1
-                    : 0;
-            const lyricsId = textIds[lyricsIndex];
-            const styleId = textIds[1 - lyricsIndex];
-            if (audioId && lyricsId && styleId) {
-                return (
-                    <ActionItem
-                        buttons={[
-                            {
-                                text: t("coverMusic"),
-                                id: "cover-music",
-                                nodeType: "musicCoverNode",
-                                // music-cover order: audio, ref_audio, text, lyrics
-                                onClick: () =>
-                                    compose({
-                                        type: "musicCoverNode",
-                                        data: {},
-                                        sourceOrder: [
-                                            audioId,
-                                            styleId,
-                                            lyricsId,
-                                        ],
-                                    }),
-                            },
-                            {
-                                text: t("generateMusic"),
-                                id: "generate-music",
-                                nodeType: "textGenMusicNode",
-                                // gen-music order: lyrics, tags, ..., ref_audio
-                                onClick: () =>
-                                    compose({
-                                        type: "textGenMusicNode",
-                                        data: { ids },
-                                        sourceOrder: [
-                                            lyricsId,
-                                            styleId,
-                                            audioId,
-                                        ],
-                                    }),
-                            },
-                        ]}
-                    />
-                );
-            }
-        }
-        // Multiple text nodes
-        if ((counts.textNode ?? 0) > 1) {
-            const textButtons: ButtonConfig[] = [
-                {
-                    text: t("mergeGroup"),
-                    id: "merge-group",
-                    onClick: () =>
-                        compose({
-                            type: "textNode",
-                            data: { texts: collectTexts() },
-                        }),
-                },
-                {
-                    text: t("rewriteText"),
-                    id: "text-rewrite",
-                    onClick: () =>
-                        compose({
-                            type: "textsGenTextNode",
-                            data: { ids },
-                        }),
-                },
-            ];
-            // gen-music has exactly two text handles (lyrics + tags): the two
-            // selected texts wire to in:lyrics / in:tags via resolveEdgeHandles.
-            if (counts.textNode === 2) {
-                textButtons.push({
-                    text: t("generateMusic"),
-                    id: "generate-music",
-                    nodeType: "textGenMusicNode",
-                    onClick: () =>
-                        compose({
-                            type: "textGenMusicNode",
-                            data: { ids },
-                        }),
-                });
-            }
-            return (
-                <ActionItem
-                    buttons={[
-                        ...textButtons,
-                        {
-                            text: t("textToSpeechClone"),
-                            id: "text-to-speech-clone",
-                            onClick: () => {
-                                const anchor = selectedNodes[0];
-                                if (!anchor) return;
-                                expands(
-                                    anchor.id,
-                                    selectedNodes.map((node) => ({
-                                        type: "textGenSpeechCloneNode",
-                                        data: asBaseData(node.data),
-                                    })),
-                                );
-                            },
-                        },
-                        {
-                            text: t("textToSpeechPreset"),
-                            id: "text-to-speech-preset",
-                            onClick: () => {
-                                const anchor = selectedNodes[0];
-                                if (!anchor) return;
-                                expands(
-                                    anchor.id,
-                                    selectedNodes.map((node) => ({
-                                        type: "textGenSpeechPresetNode",
-                                        data: asBaseData(node.data),
-                                    })),
-                                );
-                            },
-                        },
-                        {
-                            text: t("textToSpeechInstruct"),
-                            id: "text-to-speech-instruct",
-                            onClick: () => {
-                                const anchor = selectedNodes[0];
-                                if (!anchor) return;
-                                expands(
-                                    anchor.id,
-                                    selectedNodes.map((node) => ({
-                                        type: "textGenSpeechInstructNode",
-                                        data: asBaseData(node.data),
-                                    })),
-                                );
-                            },
-                        },
-                    ]}
-                />
-            );
-        }
-        // Multiple audio nodes
-        if (!types.some((type) => type !== "audioNode") && types.length > 1) {
-            return (
-                <ActionItem
-                    buttons={[
-                        {
-                            text: t("mergeGroup"),
-                            id: "merge-group",
-                            onClick: () =>
-                                compose({
-                                    type: "audioNode",
-                                    data: { fileKeys: collectFileKeys() },
-                                }),
-                        },
-                    ]}
-                />
-            );
-        }
-        // Video + image
-        if (counts.videoNode === 1 && counts.imageNode === 1) {
-            return (
-                <ActionItem
-                    buttons={[
-                        {
-                            text: t("videoTransfer"),
-                            id: "video-transfer",
-                            onClick: () =>
-                                compose({
-                                    type: "videoImageGenVideoMoveNode",
-                                    data: { ids },
-                                }),
-                        },
-                        {
-                            text: t("characterReplace"),
-                            id: "character-replace",
-                            onClick: () =>
-                                compose({
-                                    type: "videoImageGenVideoMixNode",
-                                    data: { ids },
-                                }),
-                        },
-                        {
-                            text: t("refsGenVideo"),
-                            id: "refs-gen-video",
-                            onClick: () =>
-                                compose({
-                                    type: "refsGenVideoNode",
-                                    data: { ids },
-                                }),
-                        },
-                    ]}
-                />
-            );
-        }
-        // Video + audio
-        if (counts.videoNode === 1 && counts.audioNode === 1) {
-            return (
-                <ActionItem
-                    buttons={[
-                        {
-                            text: t("lipSync"),
-                            id: "lip-sync",
-                            onClick: () =>
-                                compose({
-                                    type: "audioVideoLipSyncNode",
-                                    data: { ids },
-                                }),
-                        },
-                        {
-                            text: t("merge"),
-                            id: "merge-video-audio",
-                            onClick: () =>
-                                compose({
-                                    type: "mergeVideoAudioNode",
-                                    data: { ids },
-                                }),
-                        },
-                        {
-                            text: t("refsGenVideo"),
-                            id: "refs-gen-video",
-                            onClick: () =>
-                                compose({
-                                    type: "refsGenVideoNode",
-                                    data: { ids },
-                                }),
-                        },
-                    ]}
-                />
-            );
-        }
-        // Image + audio
-        if (counts.imageNode === 1 && counts.audioNode === 1) {
-            return (
-                <ActionItem
-                    buttons={[
-                        {
-                            text: t("generateVideo"),
-                            id: "generate-video",
-                            onClick: () =>
-                                compose({
-                                    type: "speechImageGenVideoNode",
-                                    data: { ids },
-                                }),
-                        },
-                        {
-                            text: t("refsGenVideo"),
-                            id: "refs-gen-video",
-                            onClick: () =>
-                                compose({
-                                    type: "refsGenVideoNode",
-                                    data: { ids },
-                                }),
-                        },
-                    ]}
-                />
-            );
-        }
-        // Text + single media (image / video / audio)
-        if (counts.textNode === 1 && types.length === 2) {
-            if (counts.imageNode === 1) {
-                return (
-                    <ActionItem
-                        buttons={[
-                            {
-                                text: t("refsGenVideo"),
-                                id: "refs-gen-video",
-                                onClick: () =>
-                                    compose({
-                                        type: "refsGenVideoNode",
-                                        data: { ids },
-                                    }),
-                            },
-                        ]}
-                    />
-                );
-            }
-            if (counts.videoNode === 1) {
-                return (
-                    <ActionItem
-                        buttons={[
-                            {
-                                text: t("refsGenVideo"),
-                                id: "refs-gen-video",
-                                onClick: () =>
-                                    compose({
-                                        type: "refsGenVideoNode",
-                                        data: { ids },
-                                    }),
-                            },
-                        ]}
-                    />
-                );
-            }
-            if (counts.audioNode === 1) {
-                return (
-                    <ActionItem
-                        buttons={[
-                            {
-                                text: t("refsGenVideo"),
-                                id: "refs-gen-video",
-                                onClick: () =>
-                                    compose({
-                                        type: "refsGenVideoNode",
-                                        data: { ids },
-                                    }),
-                            },
-                        ]}
-                    />
-                );
-            }
-        }
-        // Mixed media references (image/video/audio, optional single text) that
-        // no dedicated pairing above matched → omni-reference video generation.
-        {
-            const imageCount = counts.imageNode ?? 0;
-            const videoCount = counts.videoNode ?? 0;
-            const audioCount = counts.audioNode ?? 0;
-            const mediaCount = imageCount + videoCount + audioCount;
-            const otherCount =
-                types.length - mediaCount - (counts.textNode ?? 0);
-            if (
-                otherCount === 0 &&
-                (counts.textNode ?? 0) <= 1 &&
-                // Pure-image selections keep their dedicated branches below
-                // (image fusion / images-gen-video).
-                videoCount + audioCount > 0 &&
-                mediaCount >= 2 &&
-                mediaCount <= MAX_REFS_TOTAL &&
-                imageCount <= MAX_REFS_IMAGES &&
-                videoCount <= MAX_REFS_VIDEOS &&
-                audioCount <= MAX_REFS_AUDIOS &&
-                audioCount < mediaCount
-            ) {
-                return (
-                    <ActionItem
-                        buttons={[
-                            {
-                                text: t("refsGenVideo"),
-                                id: "refs-gen-video",
-                                onClick: () =>
-                                    compose({
-                                        type: "refsGenVideoNode",
-                                        data: { ids },
-                                    }),
-                            },
-                        ]}
-                    />
-                );
-            }
-        }
-        // Multiple images + one text (2-14 image fusion w/ prompt)
-        if (
-            (counts.imageNode ?? 0) >= 2 &&
-            (counts.imageNode ?? 0) <= 14 &&
-            counts.textNode === 1
-        ) {
-            const buttons: ButtonConfig[] = [
-                {
-                    text: t("imageFusion"),
-                    id: "image-fusion",
-                    onClick: () =>
-                        compose({
-                            type: "imageFusionNode",
-                            data: { ids },
-                        }),
-                },
-            ];
-            if ((counts.imageNode ?? 0) <= MAX_IMAGES_GEN_VIDEO) {
-                buttons.push({
-                    text: t("imagesGenVideo"),
-                    id: "images-gen-video",
-                    onClick: () =>
-                        compose({
-                            type: "imagesGenVideoNode",
-                            data: { ids },
-                        }),
-                });
-            }
-            return <ActionItem buttons={buttons} />;
-        }
-        // Image + text
-        if (counts.imageNode === 1 && counts.textNode === 1) {
-            return (
-                <ActionItem
-                    buttons={[
-                        {
-                            text: t("editImage"),
-                            id: "image-edit",
-                            onClick: () =>
-                                compose({
-                                    type: "imageGenImageNode",
-                                    data: { ids },
-                                }),
-                        },
-                        {
-                            text: t("generateVideo"),
-                            id: "generate-video",
-                            nodeType: "imageGenVideoComposeNode",
-                            onClick: () =>
-                                compose({
-                                    type: "imageGenVideoComposeNode",
-                                    data: { ids },
-                                }),
-                        },
-                    ]}
-                />
-            );
-        }
-        // Text + audio
-        if (counts.textNode === 1 && counts.audioNode === 1) {
-            return (
-                <ActionItem
-                    buttons={[
-                        {
-                            text: t("cloneVoice"),
-                            id: "clone-voice",
-                            onClick: () =>
-                                compose({
-                                    type: "textGenSpeechCloneComposeNode",
-                                    data: { ids },
-                                }),
-                        },
-                        {
-                            text: t("generateVideo"),
-                            onClick: () =>
-                                compose({
-                                    type: "speechTextGenVideoNode",
-                                    data: { ids },
-                                }),
-                        },
-                    ]}
-                />
-            );
-        }
-        // Text + video → LipDub (reference video + target dialogue in prompt)
-        if (counts.textNode === 1 && counts.videoNode === 1) {
-            return (
-                <ActionItem
-                    buttons={[
-                        {
-                            text: t("lipDub"),
-                            id: "lip-dub",
-                            onClick: () =>
-                                compose({
-                                    type: "speechVideoGenVideoNode",
-                                    data: { ids },
-                                }),
-                        },
-                    ]}
-                />
-            );
-        }
-        return null;
-    }, [nodes, selectedNodes, comboSelectedIds, expands, compose, t]);
+        return buttons.length > 0 ? <ActionItem buttons={buttons} /> : null;
+    }, [nodes, comboSelectedIds, compose, t]);
 
     const singleActions = useMemo<ReactNode | null>(() => {
         if (selectedNodes.length !== 1) return null;
         const node = selectedNodes[0];
-        if (!node) return null;
+        if (!node?.type || !isModalityNode(node.type)) return null;
         const { type, id } = node;
         const data = asBaseData(node.data);
+        const group = isGroup(data);
 
-        switch (type) {
-            case "textNode": {
-                // Multi-text actions
-                if ((data.texts?.length ?? 0) > 1) {
-                    return (
-                        <ActionItem
-                            buttons={[
-                                {
-                                    text: t("split"),
-                                    id: "split",
-                                    onClick: () =>
-                                        expands(
-                                            id,
-                                            (data.texts ?? []).map((text) => ({
-                                                type: "textNode",
-                                                data: { texts: [text] },
-                                            })),
-                                        ),
-                                },
-                                {
-                                    text: t("textToSpeechClone"),
-                                    id: "generate-audio-clone",
-                                    onClick: () =>
-                                        expands(id, [
-                                            {
-                                                type: "textGenSpeechCloneNode",
-                                                data,
-                                            },
-                                        ]),
-                                },
-                                {
-                                    text: t("textToSpeechPreset"),
-                                    id: "generate-audio-preset",
-                                    onClick: () =>
-                                        expands(id, [
-                                            {
-                                                type: "textGenSpeechPresetNode",
-                                                data,
-                                            },
-                                        ]),
-                                },
-                                {
-                                    text: t("textToSpeechInstruct"),
-                                    id: "generate-audio-instruct",
-                                    onClick: () =>
-                                        expands(id, [
-                                            {
-                                                type: "textGenSpeechInstructNode",
-                                                data,
-                                            },
-                                        ]),
-                                },
-                            ]}
-                        />
-                    );
-                }
-                // Single text actions
-                return (
-                    <ActionItem
-                        buttons={[
-                            {
-                                text: t("splitText"),
-                                id: "split-text",
-                                nodeType: "splitTextNode",
-                                onClick: () =>
-                                    expands(id, [
-                                        { type: "splitTextNode", data },
-                                    ]),
-                            },
-                            {
-                                text: t("generateText"),
-                                id: "generate-text",
-                                nodeType: "genTextNode",
-                                onClick: () =>
-                                    expands(id, [
-                                        { type: "genTextNode", data },
-                                    ]),
-                            },
-                            {
-                                text: t("generateImage"),
-                                id: "generate-image",
-                                nodeType: "textGenImageNode",
-                                onClick: () =>
-                                    expands(id, [
-                                        { type: "textGenImageNode", data },
-                                    ]),
-                            },
-                            {
-                                text: t("generateMusic"),
-                                id: "generate-music",
-                                nodeType: "textGenMusicNode",
-                                onClick: () =>
-                                    expands(id, [
-                                        { type: "textGenMusicNode", data },
-                                    ]),
-                            },
-                            {
-                                text: t("textToSpeechClone"),
-                                id: "generate-audio-clone",
-                                onClick: () =>
-                                    expands(id, [
-                                        {
-                                            type: "textGenSpeechCloneNode",
-                                            data,
-                                        },
-                                    ]),
-                            },
-                            {
-                                text: t("textToSpeechPreset"),
-                                id: "generate-audio-preset",
-                                onClick: () =>
-                                    expands(id, [
-                                        {
-                                            type: "textGenSpeechPresetNode",
-                                            data,
-                                        },
-                                    ]),
-                            },
-                            {
-                                text: t("textToSpeechInstruct"),
-                                id: "generate-audio-instruct",
-                                onClick: () =>
-                                    expands(id, [
-                                        {
-                                            type: "textGenSpeechInstructNode",
-                                            data,
-                                        },
-                                    ]),
-                            },
-                            {
-                                text: t("generateVideo"),
-                                id: "generate-video-node",
-                                nodeType: "textGenVideoNode",
-                                onClick: () =>
-                                    expands(id, [
-                                        { type: "textGenVideoNode", data },
-                                    ]),
-                            },
-                            {
-                                text: t("musicBrief"),
-                                id: "music-brief",
-                                nodeType: "musicBriefNode",
-                                onClick: () =>
-                                    expands(id, [
-                                        { type: "musicBriefNode", data },
-                                    ]),
-                            },
-                        ]}
-                    />
-                );
-            }
+        const buttons: ButtonConfig[] = [];
 
-            case "audioNode": {
-                const audioGroupButtons: ButtonConfig[] =
-                    (data.fileKeys?.length ?? 0) > 1
-                        ? [
-                              {
-                                  text: t("split"),
-                                  id: "split",
-                                  onClick: () =>
-                                      expands(
-                                          id,
-                                          (data.fileKeys ?? []).map(
-                                              (fileKey) => ({
-                                                  type: "audioNode",
-                                                  data: { fileKeys: [fileKey] },
-                                              }),
-                                          ),
-                                      ),
-                              },
-                          ]
-                        : [];
-
-                return (
-                    <ActionItem
-                        buttons={[
-                            {
-                                text: t("describeReverse"),
-                                id: "desc-audio",
-                                nodeType: "audioDescribeNode",
-                                onClick: () =>
-                                    expands(id, [
-                                        { type: "audioDescribeNode", data },
-                                    ]),
-                            },
-                            {
-                                text: t("speechRecognize"),
-                                nodeType: "audioGenTextSpeechRecognizeNode",
-                                onClick: () =>
-                                    expands(id, [
-                                        {
-                                            type: "audioGenTextSpeechRecognizeNode",
-                                            data,
-                                        },
-                                    ]),
-                            },
-                            {
-                                text: t("generateVideo"),
-                                nodeType: "speechGenVideoNode",
-                                onClick: () =>
-                                    expands(id, [
-                                        { type: "speechGenVideoNode", data },
-                                    ]),
-                            },
-                            {
-                                text: t("separateAudio"),
-                                id: "separate-audio",
-                                nodeType: "separateAudioTrackNode",
-                                onClick: () =>
-                                    expands(id, [
-                                        {
-                                            type: "separateAudioTrackNode",
-                                            data,
-                                        },
-                                    ]),
-                            },
-                            {
-                                text: t("separateSpeaker"),
-                                id: "separate-speaker",
-                                nodeType: "separateSpeakerNode",
-                                onClick: () =>
-                                    expands(id, [
-                                        { type: "separateSpeakerNode", data },
-                                    ]),
-                            },
-                            {
-                                text: t("separateSound"),
-                                id: "separate-sound",
-                                nodeType: "separateSoundNode",
-                                onClick: () =>
-                                    expands(id, [
-                                        { type: "separateSoundNode", data },
-                                    ]),
-                            },
-                            {
-                                text: t("denoise"),
-                                id: "denoise-audio",
-                                nodeType: "denoiseAudioSubtitleNode",
-                                onClick: () =>
-                                    expands(id, [
-                                        {
-                                            type: "denoiseAudioSubtitleNode",
-                                            data,
-                                        },
-                                    ]),
-                            },
-                            {
-                                text: t("convertVoice"),
-                                id: "convert-voice",
-                                nodeType: "convertVoiceNode",
-                                onClick: () =>
-                                    expands(id, [
-                                        { type: "convertVoiceNode", data },
-                                    ]),
-                            },
-                            {
-                                text: t("repaintMusic"),
-                                id: "repaint-music",
-                                nodeType: "musicRepaintNode",
-                                onClick: () =>
-                                    expands(id, [
-                                        { type: "musicRepaintNode", data },
-                                    ]),
-                            },
-                            {
-                                text: t("coverMusic"),
-                                id: "cover-music",
-                                nodeType: "musicCoverNode",
-                                onClick: () =>
-                                    expands(id, [
-                                        { type: "musicCoverNode", data },
-                                    ]),
-                            },
-                            {
-                                text: t("extractStem"),
-                                id: "extract-stem",
-                                nodeType: "musicExtractNode",
-                                onClick: () =>
-                                    expands(id, [
-                                        { type: "musicExtractNode", data },
-                                    ]),
-                            },
-                            {
-                                text: t("addTrack"),
-                                id: "add-track",
-                                nodeType: "musicLegoNode",
-                                onClick: () =>
-                                    expands(id, [
-                                        { type: "musicLegoNode", data },
-                                    ]),
-                            },
-                            {
-                                text: t("completeMusic"),
-                                id: "complete-music",
-                                nodeType: "musicCompleteNode",
-                                onClick: () =>
-                                    expands(id, [
-                                        { type: "musicCompleteNode", data },
-                                    ]),
-                            },
-                            ...audioGroupButtons,
-                        ]}
-                    />
-                );
-            }
-
-            case "videoNode": {
-                const groupButtons: ButtonConfig[] =
-                    (data.fileKeys?.length ?? 0) > 1
-                        ? [
-                              {
-                                  text: t("split"),
-                                  id: "split",
-                                  onClick: () =>
-                                      expands(
-                                          id,
-                                          (data.fileKeys ?? []).map(
-                                              (fileKey) => ({
-                                                  type: "videoNode",
-                                                  data: { fileKeys: [fileKey] },
-                                              }),
-                                          ),
-                                      ),
-                              },
-                              {
-                                  text: t("filter"),
-                                  id: "video-filter",
-                                  onClick: () =>
-                                      expands(id, [
-                                          { type: "dropVideoNode", data },
-                                      ]),
-                              },
-                              {
-                                  text: t("arrange"),
-                                  id: "arrange-node",
-                                  onClick: () =>
-                                      expands(id, [
-                                          { type: "arrangeNode", data },
-                                      ]),
-                              },
-                              {
-                                  text: t("concat"),
-                                  id: "concat-video",
-                                  onClick: () =>
-                                      expands(id, [
-                                          { type: "concatVideoNode", data },
-                                      ]),
-                              },
-                          ]
-                        : [];
-
-                return (
-                    <ActionItem
-                        buttons={[
-                            {
-                                text: t("describeReverse"),
-                                id: "desc-video",
-                                nodeType: "videoGenTextNode",
-                                onClick: () =>
-                                    expands(id, [
-                                        { type: "videoGenTextNode", data },
-                                    ]),
-                            },
-                            {
-                                text: t("speechRecognize"),
-                                id: "speech-recognize",
-                                nodeType: "videoGenTextSpeechRecognizeNode",
-                                onClick: () =>
-                                    expands(id, [
-                                        {
-                                            type: "videoGenTextSpeechRecognizeNode",
-                                            data,
-                                        },
-                                    ]),
-                            },
-                            {
-                                text: t("upscale"),
-                                id: "upscale-video",
-                                nodeType: "videoUpscaleNode",
-                                onClick: () =>
-                                    expands(id, [
-                                        { type: "videoUpscaleNode", data },
-                                    ]),
-                            },
-                            {
-                                text: t("captureMotion"),
-                                id: "video-gen-model",
-                                nodeType: "videoGenModelNode",
-                                onClick: () =>
-                                    expands(id, [
-                                        { type: "videoGenModelNode", data },
-                                    ]),
-                            },
-                            {
-                                text: t("editVideo"),
-                                id: "video-edit",
-                                nodeType: "videoEditNode",
-                                onClick: () =>
-                                    expands(id, [
-                                        { type: "videoEditNode", data },
-                                    ]),
-                            },
-                            {
-                                text: t("extractAudioTrack"),
-                                id: "extract-audio-track",
-                                nodeType: "extractAudioNode",
-                                onClick: () =>
-                                    expands(id, [
-                                        { type: "extractAudioNode", data },
-                                    ]),
-                            },
-                            {
-                                text: t("removeVideoAudio"),
-                                id: "remove-video-audio",
-                                nodeType: "removeVideoAudioNode",
-                                onClick: () =>
-                                    expands(id, [
-                                        {
-                                            type: "removeVideoAudioNode",
-                                            data,
-                                        },
-                                    ]),
-                            },
-                            {
-                                text: t("slice"),
-                                id: "split-video",
-                                nodeType: "splitVideoNode",
-                                onClick: () =>
-                                    expands(id, [
-                                        { type: "splitVideoNode", data },
-                                    ]),
-                            },
-                            {
-                                text: t("firstFrame"),
-                                id: "first-frame",
-                                nodeType: "getFirstFrameNode",
-                                onClick: () =>
-                                    expands(id, [
-                                        { type: "getFirstFrameNode", data },
-                                    ]),
-                            },
-                            {
-                                text: t("lastFrame"),
-                                id: "last-frame",
-                                nodeType: "getLastFrameNode",
-                                onClick: () =>
-                                    expands(id, [
-                                        { type: "getLastFrameNode", data },
-                                    ]),
-                            },
-                            ...groupButtons,
-                        ]}
-                    />
-                );
-            }
-
-            case "imageNode": {
-                const imageGroupButtons: ButtonConfig[] =
-                    (data.fileKeys?.length ?? 0) > 1
-                        ? [
-                              {
-                                  text: t("split"),
-                                  id: "split",
-                                  onClick: () =>
-                                      expands(
-                                          id,
-                                          (data.fileKeys ?? []).map(
-                                              (fileKey) => ({
-                                                  type: "imageNode",
-                                                  data: { fileKeys: [fileKey] },
-                                              }),
-                                          ),
-                                      ),
-                              },
-                          ]
-                        : [];
-
-                return (
-                    <ActionItem
-                        buttons={[
-                            {
-                                text: t("describeReverse"),
-                                id: "desc-image",
-                                nodeType: "imageGenTextNode",
-                                onClick: () =>
-                                    expands(id, [
-                                        { type: "imageGenTextNode", data },
-                                    ]),
-                            },
-                            {
-                                text: t("generateVideo"),
-                                id: "generate-video",
-                                nodeType: "imageGenVideoNode",
-                                onClick: () =>
-                                    expands(id, [
-                                        { type: "imageGenVideoNode", data },
-                                    ]),
-                            },
-                            {
-                                text: t("editImage"),
-                                id: "image-edit",
-                                nodeType: "imageGenImageNode",
-                                onClick: () =>
-                                    expands(id, [
-                                        { type: "imageGenImageNode", data },
-                                    ]),
-                            },
-                            {
-                                text: t("upscale"),
-                                id: "image-upscale",
-                                nodeType: "imageGenImageUpscaleNode",
-                                onClick: () =>
-                                    expands(id, [
-                                        {
-                                            type: "imageGenImageUpscaleNode",
-                                            data,
-                                        },
-                                    ]),
-                            },
-                            {
-                                text: t("generate3D"),
-                                id: "generate-3d",
-                                nodeType: "imageGenModelNode",
-                                onClick: () =>
-                                    expands(id, [
-                                        { type: "imageGenModelNode", data },
-                                    ]),
-                            },
-                            {
-                                text: t("detectPose"),
-                                id: "image-pose",
-                                nodeType: "imagePoseNode",
-                                onClick: () =>
-                                    expands(id, [
-                                        { type: "imagePoseNode", data },
-                                    ]),
-                            },
-                            {
-                                text: t("segmentBody"),
-                                id: "image-body-seg",
-                                nodeType: "imageBodySegNode",
-                                onClick: () =>
-                                    expands(id, [
-                                        { type: "imageBodySegNode", data },
-                                    ]),
-                            },
-                            {
-                                text: t("estimateNormal"),
-                                id: "image-normal",
-                                nodeType: "imageNormalNode",
-                                onClick: () =>
-                                    expands(id, [
-                                        { type: "imageNormalNode", data },
-                                    ]),
-                            },
-                            {
-                                text: t("extractForeground"),
-                                id: "image-matting",
-                                nodeType: "imageMattingNode",
-                                onClick: () =>
-                                    expands(id, [
-                                        { type: "imageMattingNode", data },
-                                    ]),
-                            },
-                            ...imageGroupButtons,
-                        ]}
-                    />
-                );
-            }
-
-            case "fileNode":
-                return (
-                    <ActionItem
-                        buttons={[
-                            {
-                                text: t("parseDocument"),
-                                id: "parse-doc",
-                                onClick: () =>
-                                    expands(id, [
-                                        { type: "fileGenTextNode", data },
-                                    ]),
-                            },
-                        ]}
-                    />
-                );
-
-            case "linkNode":
-                return (
-                    <ActionItem
-                        buttons={[
-                            {
-                                text: t("extractContent"),
-                                id: "extract-content",
-                                onClick: () =>
-                                    expands(id, [
-                                        { type: "linkGenTextNode", data },
-                                    ]),
-                            },
-                        ]}
-                    />
-                );
-
-            case "modelNode":
-                return (
-                    <ActionItem
-                        buttons={[
-                            {
-                                text: t("describeReverse"),
-                                id: "desc-model",
-                                onClick: () =>
-                                    expands(id, [
-                                        { type: "imageGenTextNode", data },
-                                    ]),
-                            },
-                            {
-                                text: t("generateVideo"),
-                                id: "generate-video",
-                                onClick: () =>
-                                    expands(id, [
-                                        { type: "imageGenVideoNode", data },
-                                    ]),
-                            },
-                        ]}
-                    />
-                );
-
-            default:
-                return null;
+        // Not an ABI action: break a grouped node back into one node per file.
+        if (group) {
+            const parts: Array<{
+                type: string;
+                data: Record<string, unknown>;
+            }> =
+                type === "textNode"
+                    ? (data.texts ?? []).map((text) => ({
+                          type,
+                          data: { texts: [text] },
+                      }))
+                    : (data.fileKeys ?? []).map((fileKey) => ({
+                          type,
+                          data: { fileKeys: [fileKey] },
+                      }));
+            buttons.push({
+                text: t("split"),
+                id: "split",
+                onClick: () => expands(id, parts),
+            });
         }
+
+        const candidates = dedupeByLabel(
+            nodeActionsForSelection({ [type]: 1 } as SelectionCounts, {
+                group,
+            }),
+        );
+        for (const candidate of candidates) {
+            buttons.push({
+                text: t(candidate.label),
+                id: candidate.nodeType,
+                nodeType: candidate.nodeType,
+                onClick: () =>
+                    expands(id, [{ type: candidate.nodeType, data }]),
+            });
+        }
+
+        return buttons.length > 0 ? <ActionItem buttons={buttons} /> : null;
     }, [selectedNodes, expands, t]);
 
     return { comboActions, singleActions };
+}
+
+/**
+ * For an audio node plus a style prompt and lyrics, the per-node-type
+ * `sourceOrder` that wires each selected node to the right handle (fields are
+ * matched in ABI order). `undefined` when the selection isn't that shape.
+ */
+function musicSourceOrder(
+    selected: Node[],
+): Record<string, string[]> | undefined {
+    const audios = selected.filter((n) => n.type === "audioNode");
+    const texts = selected.filter((n) => n.type === "textNode");
+    if (audios.length !== 1 || texts.length !== 2) return undefined;
+    if (selected.length !== 3) return undefined;
+
+    const textOf = (node: Node) =>
+        (asBaseData(node.data).texts ?? []).join("\n");
+    const lyricsIndex =
+        looksLikeLyrics(textOf(texts[1] as Node)) &&
+        !looksLikeLyrics(textOf(texts[0] as Node))
+            ? 1
+            : 0;
+    const audioId = (audios[0] as Node).id;
+    const lyricsId = (texts[lyricsIndex] as Node).id;
+    const styleId = (texts[1 - lyricsIndex] as Node).id;
+
+    return {
+        // music-cover order: audio, ref_audio, text, lyrics
+        musicCoverNode: [audioId, styleId, lyricsId],
+        // gen-music order: lyrics, tags, ..., ref_audio
+        textGenMusicNode: [lyricsId, styleId, audioId],
+    };
 }

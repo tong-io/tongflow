@@ -116,6 +116,7 @@
             "separateAudio": "Separate Vocals",
             "separateSpeaker": "Speaker Separation",
             "separateSound": "Extract Sound",
+            "speakWithStyle": "Speak with Style",
             "denoise": "Denoise",
             "convertVoice": "Voice Replacement",
             "filter": "Filter",
