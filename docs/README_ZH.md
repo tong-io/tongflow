@@ -37,10 +37,10 @@
   </tr>
   <tr>
     <td width="190" align="center">
-      <a href="https://infistar.cc/register?ref_source=tongflow" target="_blank" rel="noopener noreferrer"><img src="assets/sponsor-infistar.png" width="96" alt="Infistar / 无限星河AI"></a>
+      <a href="https://www.infistar.cc/register?aff=Y8S76PTA&amp;ref_source=link" target="_blank" rel="noopener noreferrer"><img src="assets/sponsor-infistar.png" width="96" alt="Infistar / 无限星河AI"></a>
     </td>
     <td>
-      <strong>一个 Key 跑通整块画布｜无限星河AI（Infistar）</strong> 兼容 OpenAI 协议的聚合网关：一个 Key、一份余额覆盖画布上的文本、图像、视频与转写节点 —— GPT-6、Claude Opus 5、Gemini 3 Pro、Grok、DeepSeek，以及国产模型最全的一条线（通义千问、智谱 GLM、豆包、MiniMax、Kimi、阶跃星辰）；出图有 GPT Image 2.5、Seedream 5、Qwen-Image，视频有 Wan、Seedance。<strong>图片低至 0.06 元/张。</strong>装上 <a href="https://github.com/tong-io/tongflow-router-infistar">tongflow-router-infistar</a> 插件即可使用。🎁 通过 <a href="https://infistar.cc/register?ref_source=tongflow" target="_blank" rel="noopener noreferrer">TongFlow 专属链接</a>注册，领 5 美元体验额度。
+      <strong>一个 Key 跑通整块画布｜无限星河AI（Infistar）</strong> 兼容 OpenAI 协议的聚合网关：一个 Key、一份余额覆盖画布上的文本、图像、视频与转写节点 —— GPT-6、Claude Opus 5、Gemini 3 Pro、Grok、DeepSeek，以及国产模型最全的一条线（通义千问、智谱 GLM、豆包、MiniMax、Kimi、阶跃星辰）；出图有 GPT Image 2.5、Seedream 5、Qwen-Image，视频有 Wan、Seedance。<strong>图片低至 0.06 元/张。</strong>装上 <a href="https://github.com/tong-io/tongflow-router-infistar">tongflow-router-infistar</a> 插件即可使用。🎁 通过 <a href="https://www.infistar.cc/register?aff=Y8S76PTA&amp;ref_source=link" target="_blank" rel="noopener noreferrer">TongFlow 专属链接</a>注册，领 5 美元体验额度。
     </td>
   </tr>
 </table>
