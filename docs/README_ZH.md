@@ -35,6 +35,14 @@
       <strong>MiniMax H3 视频生成 API｜秘塔科技</strong> 秘塔科技提供高性价比的 MiniMax H3 视频生成服务：<strong>768P 仅 0.09 元/秒，2K 仅 0.15 元/秒</strong>。支持原生 2K、音画同步，API 兼容 <strong>OpenAI 协议</strong>，同时支持 <strong>ComfyUI</strong>，无需自行部署 GPU。 🎁 通过 <a href="https://metaso.cn/minimax-h3/?s=TongFlow" target="_blank" rel="noopener noreferrer">TongFlow 专属链接注册</a>，即可领取赠送额度及专属优惠。
     </td>
   </tr>
+  <tr>
+    <td width="190" align="center">
+      <a href="https://infistar.cc/register?ref_source=tongflow" target="_blank" rel="noopener noreferrer"><img src="assets/sponsor-infistar.png" width="96" alt="Infistar / 无限星河AI"></a>
+    </td>
+    <td>
+      <strong>一个 Key 跑通整块画布｜无限星河AI（Infistar）</strong> 兼容 OpenAI 协议的聚合网关：一个 Key、一份余额覆盖画布上的文本、图像、视频与转写节点 —— GPT-6、Claude Opus 5、Gemini 3 Pro、Grok、DeepSeek，以及国产模型最全的一条线（通义千问、智谱 GLM、豆包、MiniMax、Kimi、阶跃星辰）；出图有 GPT Image 2.5、Seedream 5、Qwen-Image，视频有 Wan、Seedance。<strong>图片低至 0.06 元/张。</strong>装上 <a href="https://github.com/tong-io/tongflow-router-infistar">tongflow-router-infistar</a> 插件即可使用。🎁 通过 <a href="https://infistar.cc/register?ref_source=tongflow" target="_blank" rel="noopener noreferrer">TongFlow 专属链接</a>注册，领 5 美元体验额度。
+    </td>
+  </tr>
 </table>
 
 ## Demo 示例

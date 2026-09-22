@@ -35,6 +35,14 @@ Open-source core · Your models · Self-hostable · [tongflow.com](https://www.t
       <strong>MiniMax H3 video generation API — Metaso (秘塔科技)</strong> Metaso runs MiniMax H3 video generation at <strong>¥0.09/second for 768P and ¥0.15/second for 2K</strong>. Native 2K, synced audio and picture, an <strong>OpenAI-compatible</strong> API, and <strong>ComfyUI</strong> support — no GPU to deploy yourself. 🎁 Sign up through the <a href="https://metaso.cn/minimax-h3/?s=TongFlow" target="_blank" rel="noopener noreferrer">TongFlow link</a> to claim bonus credits and a partner discount.
     </td>
   </tr>
+  <tr>
+    <td width="190" align="center">
+      <a href="https://infistar.cc/register?ref_source=tongflow" target="_blank" rel="noopener noreferrer"><img src="docs/assets/sponsor-infistar.png" width="96" alt="Infistar / 无限星河AI"></a>
+    </td>
+    <td>
+      <strong>One key for the whole canvas — Infistar (无限星河AI)</strong> An OpenAI-compatible gateway: one key and one balance cover the canvas's text, image, video and transcription nodes — GPT-6, Claude Opus 5, Gemini 3 Pro, Grok and DeepSeek alongside the broadest Chinese lineup (Qwen, GLM, Doubao, MiniMax, Kimi, StepFun), plus GPT Image 2.5, Seedream 5 and Qwen-Image for stills and Wan / Seedance for video. <strong>Images from ¥0.06 each.</strong> Use it through the <a href="https://github.com/tong-io/tongflow-router-infistar">tongflow-router-infistar</a> plugin. 🎁 Sign up through the <a href="https://infistar.cc/register?ref_source=tongflow" target="_blank" rel="noopener noreferrer">TongFlow link</a> for $5 of trial credit.
+    </td>
+  </tr>
 </table>
 
 ## Demo Examples

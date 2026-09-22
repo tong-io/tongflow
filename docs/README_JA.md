@@ -35,6 +35,14 @@
       <strong>MiniMax H3 動画生成 API｜秘塔科技（Metaso）</strong> 秘塔科技の MiniMax H3 動画生成は <strong>768P が 0.09 元/秒、2K が 0.15 元/秒</strong>。ネイティブ 2K と音声同期に対応し、API は <strong>OpenAI 互換</strong>、<strong>ComfyUI</strong> からも使えます。GPU を自分で用意する必要はありません。 🎁 <a href="https://metaso.cn/minimax-h3/?s=TongFlow" target="_blank" rel="noopener noreferrer">TongFlow 専用リンク</a>から登録すると、無料クレジットと特典を受け取れます。
     </td>
   </tr>
+  <tr>
+    <td width="190" align="center">
+      <a href="https://infistar.cc/register?ref_source=tongflow" target="_blank" rel="noopener noreferrer"><img src="assets/sponsor-infistar.png" width="96" alt="Infistar / 无限星河AI"></a>
+    </td>
+    <td>
+      <strong>キャンバス全体をひとつの Key で｜Infistar（无限星河AI）</strong> OpenAI 互換のゲートウェイです。Key ひとつ・残高ひとつで、キャンバスのテキスト / 画像 / 動画 / 文字起こしノードをまかなえます。GPT-6、Claude Opus 5、Gemini 3 Pro、Grok、DeepSeek に加えて、中国系モデルの品揃えが厚いのが特徴です（Qwen、GLM、Doubao、MiniMax、Kimi、StepFun）。画像は GPT Image 2.5、Seedream 5、Qwen-Image、動画は Wan / Seedance。<strong>画像は 1 枚 0.06 元から。</strong><a href="https://github.com/tong-io/tongflow-router-infistar">tongflow-router-infistar</a> プラグインから利用できます。🎁 <a href="https://infistar.cc/register?ref_source=tongflow" target="_blank" rel="noopener noreferrer">TongFlow 専用リンク</a>から登録すると 5 ドル分のお試しクレジットがもらえます。
+    </td>
+  </tr>
 </table>
 
 ## Demo デモ
