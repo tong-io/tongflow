@@ -12,6 +12,7 @@
         "tongflow-api-xai",
         "tongflow-router-replicate",
         "tongflow-router-fal",
+        "tongflow-router-infistar",
         "tongflow-api-runway",
         "tongflow-api-metaso",
         "tongflow-modal-ffmpeg",

@@ -215,6 +215,7 @@ Aggregators — one key, many third-party models across labs:
 - [tongflow-router-apimart](https://github.com/tong-io/tongflow-router-apimart) — APIMart gateway with a per-node **model picker**: image gen/edit (Z-Image, Seedream, Nano Banana, GPT-Image), text/image → video (Kling, VEO3, Sora2, Seedance), `gen_text` (GPT-5, Claude, Gemini), Whisper transcription and TTS
 - [tongflow-router-replicate](https://github.com/tong-io/tongflow-router-replicate) — Replicate with a per-node **model picker** across the catalog: text, vision, image gen/edit/fusion/upscale/matting, text/image → video, transcription, TTS / voice clone, music, and image → 3D (FLUX, Seedream, Veo, Kling, Whisper, Hunyuan3D…)
 - [tongflow-router-fal](https://github.com/tong-io/tongflow-router-fal) — fal.ai with a per-node **model picker**: image (gen/edit/fusion/upscale/matting/pose/normal/seg), video (text/image → video, first-last frame, talking-head, lip-sync, upscale), audio (transcription, TTS, voice clone, music, source separation) and image → 3D
+- [tongflow-router-infistar](https://github.com/tong-io/tongflow-router-infistar) — Infistar (无限星河AI) gateway with a per-node **model picker** that also lists the **key's own model list**: `gen_text` / text tools (GPT-5.6, Claude, Gemini, Qwen, DeepSeek, GLM, Kimi, Doubao, MiniMax, Grok), image understanding, image gen/edit/fusion (GPT Image 2, Qwen-Image, Seedream, Wan), text / image → video (Wan 3.0, Seedance, MiniMax H3) and transcription
 
 ### GPU/CPU plugins
 
