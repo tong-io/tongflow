@@ -215,6 +215,7 @@ Google または WeChat でサインインすれば、すぐに創作を始め�
 - [tongflow-router-apimart](https://github.com/tong-io/tongflow-router-apimart) — APIMart ゲートウェイ。ノード上で**モデルを選択**可能：画像生成 / 編集（Z-Image、Seedream、Nano Banana、GPT-Image）、テキスト / 画像 → 動画（Kling、VEO3、Sora2、Seedance）、`gen_text`（GPT-5、Claude、Gemini）、Whisper 文字起こしと TTS
 - [tongflow-router-replicate](https://github.com/tong-io/tongflow-router-replicate) — Replicate、ノードごとの**モデルピッカー**でカタログ全体をカバー：テキスト、視覚、画像 生成/編集/融合/アップスケール/切り抜き、テキスト / 画像 → 動画、文字起こし、TTS / ボイスクローン、音楽、画像 → 3D（FLUX、Seedream、Veo、Kling、Whisper、Hunyuan3D…）
 - [tongflow-router-fal](https://github.com/tong-io/tongflow-router-fal) — fal.ai、ノードごとの**モデルピッカー**：画像（生成/編集/融合/アップスケール/切り抜き/ポーズ/法線/セグメンテーション）、動画（テキスト / 画像 → 動画、最初・最後フレーム、トーキングヘッド、リップシンク、アップスケール）、音声（文字起こし、TTS、ボイスクローン、音楽、音源分離）、画像 → 3D
+- [tongflow-router-infistar](https://github.com/tong-io/tongflow-router-infistar) — Infistar（无限星河AI）ゲートウェイ、ノードごとの**モデルピッカー**（**キー自身のモデル一覧**も表示）：`gen_text` とテキストツール（GPT-5.6、Claude、Gemini、Qwen、DeepSeek、GLM、Kimi、Doubao、MiniMax、Grok）、画像理解、画像の生成/編集/融合（GPT Image 2、Qwen-Image、Seedream、Wan）、テキスト / 画像 → 動画（Wan 3.0、Seedance、MiniMax H3）、音声文字起こし
 
 ### GPU/CPU プラグイン
 
