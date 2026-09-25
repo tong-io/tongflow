@@ -156,6 +156,7 @@ TongFlow **桌面版**是一个轻量（约 10 MB）的壳应用，直接加载�
 #### 音频
 
 - ✅ **音乐生成**: 从文本生成音乐，可选参考音频引导。
+- ✅ **音频生成**：一段描述一次生成人声、音效和环境声，可选参考音色。
 - ✅ **音频理解**: 用文字描述一段音频（音乐 / 语音 / 环境音）。
 - ✅ **音乐重绘**: 重新生成歌曲中指定的时间段。
 - ✅ **音乐翻唱**: 按描述或参考曲目改编歌曲风格。
@@ -212,6 +213,7 @@ TongFlow **桌面版**是一个轻量（约 10 MB）的壳应用，直接加载�
 - [tongflow-api-xai](https://github.com/tong-io/tongflow-api-xai) — xAI Grok，按节点**模型选择**：`gen_text`（Grok 4.x）、图像理解、Grok Imagine 文生图
 - [tongflow-api-runway](https://github.com/tong-io/tongflow-api-runway) — Runway Dev 统一 API，按节点**模型选择**：视频（Gen-4.5、Gen-4 Turbo、Aleph 编辑、Act-Two、Seedance、Veo）、图像（GPT Image 2、Seedream 5、Gemini image 3）与 ElevenLabs TTS
 - [tongflow-api-metaso](https://github.com/tong-io/tongflow-api-metaso) — [秘塔科技](https://metaso.cn/minimax-h3/?s=TongFlow)托管的 MiniMax H3 视频生成：文/图生视频，768P 0.09 元/秒、2K 0.15 元/秒，走 OpenAI 兼容的 Videos 接口
+- [tongflow-api-qwen-audio](https://github.com/tong-io/tongflow-api-qwen-audio) — 阿里百炼上的千问 Qwen-Audio-3.1：TTS-Next 一次生成人声、音效和环境声（声音克隆、按描述定制音色、情感语音也走它），TTS-Flash 预设音色，ASR-Flash 语音识别（带时间戳和说话人标签）
 
 ### 中转 / 聚合插件
 

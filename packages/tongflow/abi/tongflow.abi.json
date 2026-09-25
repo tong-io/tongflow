@@ -929,6 +929,45 @@
             }
         },
         {
+            "nodeSlot": "text-gen-audio",
+            "inputs": {
+                "type": "object",
+                "required": ["text"],
+                "properties": {
+                    "text": {
+                        "type": "string",
+                        "minLength": 1
+                    },
+                    "ref_audios": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/$defs/Asset"
+                        }
+                    },
+                    "seed": {
+                        "type": "integer"
+                    }
+                },
+                "additionalProperties": false
+            },
+            "outputs": {
+                "type": "object",
+                "required": ["success"],
+                "properties": {
+                    "success": {
+                        "type": "boolean"
+                    },
+                    "error": {
+                        "type": "string"
+                    },
+                    "audio": {
+                        "$ref": "#/$defs/AudioRef"
+                    }
+                },
+                "additionalProperties": false
+            }
+        },
+        {
             "nodeSlot": "text-gen-speech-preset",
             "inputs": {
                 "type": "object",

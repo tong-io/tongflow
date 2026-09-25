@@ -156,6 +156,7 @@ Google または WeChat でサインインすれば、すぐに創作を始め�
 #### 音声
 
 - ✅ **音楽生成**: テキストから音楽を生成。参照音声による誘導にも対応。
+- ✅ **オーディオ生成**: 1 つのプロンプトから話し声・効果音・環境音を一度に生成。参照ボイスも指定可能。
 - ✅ **音声理解**: 音声クリップ（音楽・スピーチ・環境音）をテキストで説明。
 - ✅ **音楽リペイント**: 曲の指定区間を再生成。
 - ✅ **音楽カバー**: 説明文や参照曲でスタイルを変えて再構成。
@@ -212,6 +213,7 @@ Google または WeChat でサインインすれば、すぐに創作を始め�
 - [tongflow-api-xai](https://github.com/tong-io/tongflow-api-xai) — xAI Grok、ノードごとの**モデルピッカー**：`gen_text`（Grok 4.x）、画像理解、Grok Imagine テキスト→画像
 - [tongflow-api-runway](https://github.com/tong-io/tongflow-api-runway) — Runway Dev 統合 API、ノードごとの**モデルピッカー**：動画（Gen-4.5、Gen-4 Turbo、Aleph 編集、Act-Two、Seedance、Veo）、画像（GPT Image 2、Seedream 5、Gemini image 3）、ElevenLabs TTS
 - [tongflow-api-metaso](https://github.com/tong-io/tongflow-api-metaso) — [Metaso（秘塔科技）](https://metaso.cn/minimax-h3/?s=TongFlow)がホストする MiniMax H3 動画生成：テキスト / 画像 → 動画、768P は 0.09 元/秒、2K は 0.15 元/秒。OpenAI 互換の Videos API 経由
+- [tongflow-api-qwen-audio](https://github.com/tong-io/tongflow-api-qwen-audio) — Alibaba Model Studio 上の Qwen-Audio-3.1：TTS-Next が話し声・効果音・環境音を一度に生成（ボイスクローン、説明からの声づくり、感情付き音声もこれで対応）、TTS-Flash のプリセットボイス、ASR-Flash の文字起こし（タイムスタンプと話者ラベル付き）
 
 ### ルーター / 集約プラグイン
 

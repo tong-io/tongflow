@@ -1382,6 +1382,75 @@ const _slot_gen_music_outputs = {
 } as const;
 export type GenMusicOutput = FromSchema<typeof _slot_gen_music_outputs>;
 
+const _slot_text_gen_audio_inputs = {
+    type: "object",
+    required: ["text"],
+    properties: {
+        text: {
+            type: "string",
+            minLength: 1,
+        },
+        ref_audios: {
+            type: "array",
+            items: {
+                type: "object",
+                required: ["bytesBase64"],
+                properties: {
+                    bytesBase64: {
+                        type: "string",
+                        minLength: 1,
+                    },
+                    filename: {
+                        type: "string",
+                    },
+                    mime: {
+                        type: "string",
+                    },
+                },
+                additionalProperties: false,
+            },
+        },
+        seed: {
+            type: "integer",
+        },
+    },
+    additionalProperties: false,
+} as const;
+export type TextGenAudioInput = FromSchema<typeof _slot_text_gen_audio_inputs>;
+const _slot_text_gen_audio_outputs = {
+    type: "object",
+    required: ["success"],
+    properties: {
+        success: {
+            type: "boolean",
+        },
+        error: {
+            type: "string",
+        },
+        audio: {
+            type: "object",
+            required: ["file_key"],
+            properties: {
+                file_key: {
+                    type: "string",
+                    minLength: 1,
+                },
+                mime: {
+                    type: "string",
+                },
+                filename: {
+                    type: "string",
+                },
+            },
+            additionalProperties: false,
+        },
+    },
+    additionalProperties: false,
+} as const;
+export type TextGenAudioOutput = FromSchema<
+    typeof _slot_text_gen_audio_outputs
+>;
+
 const _slot_text_gen_speech_preset_inputs = {
     type: "object",
     required: ["text"],
@@ -4297,6 +4366,7 @@ export type NodeSlot =
     | "link"
     | "image-gen"
     | "gen-music"
+    | "text-gen-audio"
     | "text-gen-speech-preset"
     | "image-gen-video"
     | "image-edit"
@@ -4362,6 +4432,7 @@ export type SlotInputsMap = {
     link: LinkInput;
     "image-gen": ImageGenInput;
     "gen-music": GenMusicInput;
+    "text-gen-audio": TextGenAudioInput;
     "text-gen-speech-preset": TextGenSpeechPresetInput;
     "image-gen-video": ImageGenVideoInput;
     "image-edit": ImageEditInput;
@@ -4427,6 +4498,7 @@ export type SlotOutputsMap = {
     link: LinkOutput;
     "image-gen": ImageGenOutput;
     "gen-music": GenMusicOutput;
+    "text-gen-audio": TextGenAudioOutput;
     "text-gen-speech-preset": TextGenSpeechPresetOutput;
     "image-gen-video": ImageGenVideoOutput;
     "image-edit": ImageEditOutput;
@@ -5367,6 +5439,44 @@ export const ABI_NODES = {
                 },
                 ref_audio: {
                     $ref: "#/$defs/Asset",
+                },
+            },
+            additionalProperties: false,
+        },
+        outputs: {
+            type: "object",
+            required: ["success"],
+            properties: {
+                success: {
+                    type: "boolean",
+                },
+                error: {
+                    type: "string",
+                },
+                audio: {
+                    $ref: "#/$defs/AudioRef",
+                },
+            },
+            additionalProperties: false,
+        },
+    },
+    "text-gen-audio": {
+        inputs: {
+            type: "object",
+            required: ["text"],
+            properties: {
+                text: {
+                    type: "string",
+                    minLength: 1,
+                },
+                ref_audios: {
+                    type: "array",
+                    items: {
+                        $ref: "#/$defs/Asset",
+                    },
+                },
+                seed: {
+                    type: "integer",
                 },
             },
             additionalProperties: false,

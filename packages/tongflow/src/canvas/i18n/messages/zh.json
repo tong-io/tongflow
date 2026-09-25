@@ -71,7 +71,7 @@
             "saveSuccess": "保存成功！",
             "saveFailed": "保存失败，请重试",
             "generateVideo": "生成视频",
-            "generateAudio": "生成语音",
+            "generateAudio": "生成音频",
             "generateText": "生成文本",
             "generateImage": "生成图片",
             "generateMusic": "生成音乐",
@@ -446,7 +446,8 @@
                 "musicExtract": "分离音轨",
                 "musicLego": "添加乐轨",
                 "musicComplete": "补全编曲",
-                "musicBrief": "音乐企划"
+                "musicBrief": "音乐企划",
+                "textGenAudio": "文本生成音频"
             },
             "options": {
                 "portrait": "竖屏",
@@ -957,6 +958,12 @@
             "separateSound": {
                 "textLabel": "要提取的声音",
                 "textPlaceholder": "如:狗叫、钢琴、背景里的警笛"
+            },
+            "textGenAudio": {
+                "voiceReference": "参考音色",
+                "promptLabel": "音频描述",
+                "promptPlaceholder": "把整段场景写出来：谁在说话、怎么说，背景环境，音效。台词用引号，例如：@voice1 说：“今天天气真好。”窗外下着小雨。",
+                "hint": "一次生成人声、音效和环境声。最多连 3 段音频作参考音色，点一下就把 @voice1…@voice3 插进描述里。"
             }
         }
     },

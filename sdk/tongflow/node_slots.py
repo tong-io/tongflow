@@ -39,6 +39,7 @@ class NodeSlots:
     LINK: Final[str] = 'link'
     IMAGE_GEN: Final[str] = 'image-gen'
     GEN_MUSIC: Final[str] = 'gen-music'
+    TEXT_GEN_AUDIO: Final[str] = 'text-gen-audio'
     TEXT_GEN_SPEECH_PRESET: Final[str] = 'text-gen-speech-preset'
     IMAGE_GEN_VIDEO: Final[str] = 'image-gen-video'
     IMAGE_EDIT: Final[str] = 'image-edit'
@@ -104,6 +105,7 @@ ALL_NODE_SLOTS: Final[tuple[str, ...]] = (
     'link',
     'image-gen',
     'gen-music',
+    'text-gen-audio',
     'text-gen-speech-preset',
     'image-gen-video',
     'image-edit',

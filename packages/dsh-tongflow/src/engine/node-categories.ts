@@ -61,6 +61,7 @@ export const NODE_TYPE_CATEGORY: Readonly<Record<string, NodeCategory>> = {
     genTextNode: "transfer",
     textGenImageNode: "transfer",
     textGenMusicNode: "transfer",
+    textGenAudioNode: "transfer",
     textGenSpeechCloneNode: "transfer",
     textGenSpeechPresetNode: "transfer",
     textGenSpeechInstructNode: "transfer",

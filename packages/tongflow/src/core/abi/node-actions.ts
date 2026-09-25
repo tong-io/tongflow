@@ -93,6 +93,7 @@ export const NODE_ACTION_META: Readonly<Record<string, NodeActionMeta>> = {
         order: 130,
         limits: { textNode: [1, 2] },
     },
+    textGenAudioNode: { label: "generateAudio", order: 135 },
     textGenSpeechCloneNode: { label: "textToSpeechClone", order: 140 },
     textGenSpeechPresetNode: { label: "textToSpeechPreset", order: 150 },
     textGenSpeechInstructNode: { label: "textToSpeechInstruct", order: 160 },

@@ -15,6 +15,7 @@
         "tongflow-router-infistar",
         "tongflow-api-runway",
         "tongflow-api-metaso",
+        "tongflow-api-qwen-audio",
         "tongflow-modal-ffmpeg",
         "tongflow-modal-pyscenedetect",
         "tongflow-modal-z-image",

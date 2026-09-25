@@ -56,6 +56,7 @@ const NODE_SIZE_TABLE: Record<string, NodeSize> = {
     imageFusionNode: { w: 480, h: 780 },
     refsGenVideoNode: { w: 480, h: 780 },
     textGenMusicNode: { w: 520, h: 480 },
+    textGenAudioNode: { w: 480, h: 480 },
     musicExtractNode: { w: 420, h: 400 },
 };
 
