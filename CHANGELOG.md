@@ -14,6 +14,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   the capability matrix. Connect a recording and a short reference clip; the
   recording comes back in the reference's voice. A **Singing mode** under
   Advanced keeps the melody (44.1 kHz) with optional pitch shift.
+- **Text → audio node (`text-gen-audio`)** — a new ABI slot for unified
+  audio generation: one prompt renders speech, sound effects and ambience in
+  a single pass, and every connected audio clip becomes a reference voice the
+  prompt addresses as `@voice1`, `@voice2`, …. Ships in SDK 0.3.4.
+- **Qwen Audio plugin** (`tongflow-api-qwen-audio`) — Alibaba Qwen-Audio-3.1
+  on Model Studio. TTS-Next serves the new text → audio node and also backs
+  voice clone, voice-from-description and emotive speech (reference clips go
+  inline, no enrollment); TTS-Flash serves preset voices; ASR-Flash serves
+  transcription, with speaker labels on the timestamped variant.
 
 ### Changed
 

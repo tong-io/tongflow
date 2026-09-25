@@ -446,7 +446,8 @@
                 "musicExtract": "Extract Stem",
                 "musicLego": "Add Track",
                 "musicComplete": "Complete Arrangement",
-                "musicBrief": "Music Brief"
+                "musicBrief": "Music Brief",
+                "textGenAudio": "Text to Audio"
             },
             "options": {
                 "portrait": "Portrait",
@@ -957,6 +958,12 @@
             "separateSound": {
                 "textLabel": "Sound to isolate",
                 "textPlaceholder": "e.g. dog barking, piano, sirens in the background"
+            },
+            "textGenAudio": {
+                "voiceReference": "Reference voices",
+                "promptLabel": "Audio prompt",
+                "promptPlaceholder": "Describe the whole scene: who speaks and how, background ambience, sound effects. Quote the lines, e.g. @voice1 says: \"It's sunny today.\" Rain patters on the window.",
+                "hint": "One pass renders speech, sound effects and ambience together. Connect up to 3 audio clips as reference voices and click one to insert @voice1…@voice3."
             }
         }
     },

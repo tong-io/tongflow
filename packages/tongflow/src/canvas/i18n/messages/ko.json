@@ -446,7 +446,8 @@
                 "musicExtract": "스템 추출",
                 "musicLego": "트랙 추가",
                 "musicComplete": "편곡 완성",
-                "musicBrief": "음악 브리프"
+                "musicBrief": "음악 브리프",
+                "textGenAudio": "텍스트로 오디오 생성"
             },
             "options": {
                 "portrait": "세로",
@@ -957,6 +958,12 @@
             "separateSound": {
                 "textLabel": "추출할 소리",
                 "textPlaceholder": "예: 개 짖는 소리, 피아노, 배경 사이렌"
+            },
+            "textGenAudio": {
+                "voiceReference": "참조 음색",
+                "promptLabel": "오디오 설명",
+                "promptPlaceholder": "장면 전체를 적어 주세요. 누가 어떻게 말하는지, 배경 소리, 효과음까지. 대사는 따옴표로 묶어요. 예: @voice1이 말한다: \"오늘 날씨 좋다.\" 창밖에 가랑비가 내린다.",
+                "hint": "말소리, 효과음, 배경음을 한 번에 만들어요. 참조 음색으로 오디오를 최대 3개까지 연결하고, 누르면 @voice1…@voice3이 설명에 들어가요."
             }
         }
     },

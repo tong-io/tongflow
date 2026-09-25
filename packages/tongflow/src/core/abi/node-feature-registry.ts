@@ -48,6 +48,7 @@ export const NODE_TYPE_TO_ABI_FEATURE: Readonly<Record<string, NodeSlot>> = {
     imageGenImageUpscaleNode: "image-upscale",
     textGenImageNode: "image-gen",
     textGenMusicNode: "gen-music",
+    textGenAudioNode: "text-gen-audio",
     textGenSpeechCloneNode: "text-gen-speech-clone",
     textGenSpeechCloneComposeNode: "text-gen-speech-clone",
     imageGenVideoComposeNode: "image-gen-video",
@@ -239,6 +240,12 @@ export const NODE_TYPE_SOURCE_SPEC: Partial<
     textGenMusicNode: {
         tags: handle({ nodeType: "textNode", path: "texts[0]" }),
         lyrics: handle({ nodeType: "textNode", path: "texts[0]" }),
+    },
+    // Scene prompt from an upstream text node or typed in the node; every
+    // connected audio clip is a reference voice (@voice1, @voice2, …).
+    textGenAudioNode: {
+        text: handle({ nodeType: "textNode", path: "texts[0]", manual: true }),
+        ref_audios: collectAll({ nodeType: "audioNode" }),
     },
     textGenSpeechCloneNode: {
         text: batchOn({ nodeType: "textNode", path: "texts" }),

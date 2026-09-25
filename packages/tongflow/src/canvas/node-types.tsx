@@ -81,6 +81,7 @@ import RemoveWatermarkNode from "./nodes/transfer/remove-watermark";
 import SeparateAudioTrackNode from "./nodes/transfer/separate-audio-track";
 import SeparateSpeakerNode from "./nodes/transfer/separate-speaker";
 import SpeechGenVideoNode from "./nodes/transfer/speech-gen-video";
+import TextGenAudioNode from "./nodes/transfer/text-gen-audio";
 import TextGenImageNode from "./nodes/transfer/text-gen-image";
 import TextGenMusicNode from "./nodes/transfer/text-gen-music";
 import TextGenSpeechCloneNode from "./nodes/transfer/text-gen-speech-clone";
@@ -133,6 +134,7 @@ export const NODE_TYPES: NodeTypes = {
     genTextNode: GenTextNode,
     textGenImageNode: TextGenImageNode,
     textGenMusicNode: TextGenMusicNode,
+    textGenAudioNode: TextGenAudioNode,
     textGenSpeechCloneNode: TextGenSpeechCloneNode,
     textGenSpeechCloneComposeNode: TextGenSpeechCloneComposeNode,
     textGenSpeechPresetNode: TextGenSpeechPresetNode,
@@ -239,6 +241,7 @@ export const NODE_CATEGORIES = {
         "genTextNode",
         "textGenImageNode",
         "textGenMusicNode",
+        "textGenAudioNode",
         "textGenSpeechCloneNode",
         "textGenSpeechPresetNode",
         "textGenSpeechInstructNode",

@@ -71,7 +71,7 @@
             "saveSuccess": "保存しました！",
             "saveFailed": "保存に失敗しました。もう一度お試しください",
             "generateVideo": "動画生成",
-            "generateAudio": "音声生成",
+            "generateAudio": "オーディオ生成",
             "generateText": "テキスト生成",
             "generateImage": "画像生成",
             "generateMusic": "音楽生成",
@@ -446,7 +446,8 @@
                 "musicExtract": "ステム抽出",
                 "musicLego": "トラック追加",
                 "musicComplete": "編曲補完",
-                "musicBrief": "音楽ブリーフ"
+                "musicBrief": "音楽ブリーフ",
+                "textGenAudio": "テキストからオーディオ"
             },
             "options": {
                 "portrait": "縦向き",
@@ -469,7 +470,7 @@
                 "describeVideo": "動画を説明",
                 "recognizeSpeech": "音声を認識",
                 "generateMusic": "音楽を生成",
-                "generateAudio": "音声を生成",
+                "generateAudio": "オーディオを生成",
                 "startReplace": "置換を開始",
                 "startDenoise": "ノイズ除去を開始",
                 "parseDocument": "ドキュメントを解析",
@@ -871,6 +872,12 @@
             "separateSound": {
                 "textLabel": "抽出したい音",
                 "textPlaceholder": "例:犬の鳴き声、ピアノ、背景のサイレン"
+            },
+            "textGenAudio": {
+                "voiceReference": "参照ボイス",
+                "promptLabel": "オーディオの説明",
+                "promptPlaceholder": "場面をまるごと書きます：誰がどう話すか、背景の環境音、効果音。セリフは引用符で囲みます。例：@voice1 が言う：「今日はいい天気だね。」窓の外で小雨が降っている。",
+                "hint": "話し声・効果音・環境音を一度に生成します。参照ボイスとして音声を最大 3 本つなぎ、クリックすると @voice1…@voice3 が挿入されます。"
             }
         }
     },
