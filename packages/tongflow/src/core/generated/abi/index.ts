@@ -3718,9 +3718,9 @@ export type DenoiseAudioOutput = FromSchema<typeof _slot_denoise_audio_outputs>;
 
 const _slot_convert_voice_inputs = {
     type: "object",
-    required: ["sourceKey", "targetKey"],
+    required: ["audio", "ref_audio"],
     properties: {
-        sourceKey: {
+        audio: {
             type: "object",
             required: ["bytesBase64"],
             properties: {
@@ -3737,8 +3737,22 @@ const _slot_convert_voice_inputs = {
             },
             additionalProperties: false,
         },
-        targetKey: {
-            type: "string",
+        ref_audio: {
+            type: "object",
+            required: ["bytesBase64"],
+            properties: {
+                bytesBase64: {
+                    type: "string",
+                    minLength: 1,
+                },
+                filename: {
+                    type: "string",
+                },
+                mime: {
+                    type: "string",
+                },
+            },
+            additionalProperties: false,
         },
     },
     additionalProperties: false,
@@ -6729,13 +6743,13 @@ export const ABI_NODES = {
     convert_voice: {
         inputs: {
             type: "object",
-            required: ["sourceKey", "targetKey"],
+            required: ["audio", "ref_audio"],
             properties: {
-                sourceKey: {
+                audio: {
                     $ref: "#/$defs/Asset",
                 },
-                targetKey: {
-                    type: "string",
+                ref_audio: {
+                    $ref: "#/$defs/Asset",
                 },
             },
             additionalProperties: false,

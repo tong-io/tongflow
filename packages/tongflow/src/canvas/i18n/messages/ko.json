@@ -382,11 +382,7 @@
                 "referenceTextPlaceholder": "선택 사항: 참조 오디오의 전사본 — 복제 품질을 향상시킵니다",
                 "referenceTextCloneHint": "빠른 x-vector 복제는 비워 두고, 더 높은 품질의 ICL 복제를 위해서는 참조 전사본을 붙여넣으세요",
                 "language": "언어",
-                "inputText": "입력 텍스트",
-                "voiceOptions": {
-                    "female": "여성 목소리",
-                    "male": "남성 목소리"
-                }
+                "inputText": "입력 텍스트"
             },
             "titles": {
                 "imageGenVideo": "이미지-비디오",
@@ -761,15 +757,9 @@
                 "audioPromptPlaceholder": "오디오 더빙 프롬프트 입력"
             },
             "convertVoice": {
-                "voiceLabel": "음성:",
-                "selectVoice": "음성 선택",
-                "previewVoice": "음성 미리듣기",
-                "uploadVoice": "음성 업로드",
-                "recordVoice": "음성 녹음",
-                "recordAudio": "오디오 녹음",
-                "recordHint": "여기에서 오디오를 녹음할 수 있습니다.",
-                "recordNeedImpl": "오디오 녹음 기능 구현이 필요합니다",
-                "done": "완료"
+                "sourceAudio": "원본 오디오",
+                "referenceVoice": "참고 목소리",
+                "connectHint": "바꿀 오디오와 참고할 목소리 오디오를 연결하세요"
             },
             "removeWatermark": {
                 "hint": "Sora 비디오 워터마크를 자동으로 감지하고 제거합니다"

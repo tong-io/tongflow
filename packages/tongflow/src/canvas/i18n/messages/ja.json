@@ -382,11 +382,7 @@
                 "referenceTextPlaceholder": "任意：参照音声の書き起こしテキスト。クローン品質の向上に役立ちます",
                 "referenceTextCloneHint": "空欄の場合は x-vector クローン。転写テキストを入力すると ICL 高品質クローンになります",
                 "language": "言語",
-                "inputText": "テキスト入力",
-                "voiceOptions": {
-                    "female": "女性の声",
-                    "male": "男性の声"
-                }
+                "inputText": "テキスト入力"
             },
             "titles": {
                 "imageGenVideo": "画像から動画",
@@ -675,15 +671,9 @@
                 "audioPromptPlaceholder": "音声吹き替えのプロンプトを入力"
             },
             "convertVoice": {
-                "voiceLabel": "音声：",
-                "selectVoice": "音声を選択",
-                "previewVoice": "音声をプレビュー",
-                "uploadVoice": "音声をアップロード",
-                "recordVoice": "音声を録音",
-                "recordAudio": "音声を録音",
-                "recordHint": "ここで音声を録音できます。",
-                "recordNeedImpl": "音声録音機能は実装が必要です",
-                "done": "完了"
+                "sourceAudio": "元の音声",
+                "referenceVoice": "参考ボイス",
+                "connectHint": "変換したい音声と、参考にする声の音声をつないでください"
             },
             "removeWatermark": {
                 "hint": "Sora動画の透かしを自動検出して削除"

@@ -40,6 +40,7 @@
         "tongflow-modal-qwen3asr",
         "tongflow-modal-qwen3tts",
         "tongflow-modal-indextts2",
+        "tongflow-modal-seed-vc",
         "tongflow-modal-whisper",
         "tongflow-modal-moss-transcribe-diarize",
         "tongflow-modal-ace-step",
