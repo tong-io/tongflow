@@ -2316,13 +2316,13 @@
             "nodeSlot": "convert_voice",
             "inputs": {
                 "type": "object",
-                "required": ["sourceKey", "targetKey"],
+                "required": ["audio", "ref_audio"],
                 "properties": {
-                    "sourceKey": {
+                    "audio": {
                         "$ref": "#/$defs/Asset"
                     },
-                    "targetKey": {
-                        "type": "string"
+                    "ref_audio": {
+                        "$ref": "#/$defs/Asset"
                     }
                 },
                 "additionalProperties": false

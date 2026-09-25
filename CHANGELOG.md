@@ -7,7 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **Voice / timbre replacement works** — new official plugin
+  `tongflow-modal-seed-vc` (Seed-VC, zero-shot) fills the last empty node in
+  the capability matrix. Connect a recording and a short reference clip; the
+  recording comes back in the reference's voice. A **Singing mode** under
+  Advanced keeps the melody (44.1 kHz) with optional pitch shift.
+
 ### Changed
+
+- **`convert_voice` ABI** — inputs are now `audio` + `ref_audio` (both
+  assets) instead of `sourceKey` + a preset-voice filename `targetKey`. The
+  node drops its placeholder voice list and unfinished upload / record
+  buttons; both inputs come in over edges. Python SDK 0.3.4 carries the new
+  model.
 
 - **DeepSeek plugin follows V4.1 Flash** — DeepSeek collapsed V4 Flash and its
   experimental vision variant into a single `deepseek-flash` id (1M context,

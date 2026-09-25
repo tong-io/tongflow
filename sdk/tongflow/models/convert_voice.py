@@ -8,8 +8,8 @@ from .asset import Asset, AudioRef, FileRef, ImageRef, ModelRef, VideoRef
 class ConvertVoiceInput(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
-    sourceKey: Asset
-    targetKey: str
+    audio: Asset
+    ref_audio: Asset
 
 class ConvertVoiceOutput(BaseModel):
     model_config = ConfigDict(extra="forbid")

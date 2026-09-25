@@ -382,11 +382,7 @@
                 "referenceTextPlaceholder": "可选：参考音频的转写文本，有助于提升克隆质量",
                 "referenceTextCloneHint": "不填则使用 x-vector 快速克隆；填写参考音频转写文本可启用更高质量的 ICL 克隆",
                 "language": "语言",
-                "inputText": "输入文本",
-                "voiceOptions": {
-                    "female": "普通女声",
-                    "male": "普通男声"
-                }
+                "inputText": "输入文本"
             },
             "titles": {
                 "imageGenVideo": "图片生成视频",
@@ -761,15 +757,9 @@
                 "audioPromptPlaceholder": "输入音频配音提示词"
             },
             "convertVoice": {
-                "voiceLabel": "音色：",
-                "selectVoice": "请选择音色",
-                "previewVoice": "试听当前音色",
-                "uploadVoice": "上传音色",
-                "recordVoice": "录制音色",
-                "recordAudio": "录制音频",
-                "recordHint": "您可以在这里录制音频。",
-                "recordNeedImpl": "音频录制功能需要实现",
-                "done": "完成"
+                "sourceAudio": "源音频",
+                "referenceVoice": "参考音色",
+                "connectHint": "连上要换声的音频，再连一段参考音色"
             },
             "removeWatermark": {
                 "hint": "自动识别并去除 Sora 视频水印"

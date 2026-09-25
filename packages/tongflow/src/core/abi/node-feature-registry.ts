@@ -197,7 +197,12 @@ export const NODE_TYPE_SOURCE_SPEC: Partial<
     audioGenTextSpeechRecognizeNode: { audio: batchOn() },
     concatVideoComposeNode: { videos: collectAll() },
     concatVideoNode: { videos: collectAll() },
-    convertVoiceNode: { sourceKey: batchOn({ nodeType: "audioNode" }) },
+    // Source speech fans out (one conversion per clip); the reference voice
+    // is a single clip shared by every run.
+    convertVoiceNode: {
+        audio: batchOn({ nodeType: "audioNode" }),
+        ref_audio: handle({ nodeType: "audioNode" }),
+    },
     denoiseAudioSubtitleNode: { fileKey: batchOn({ nodeType: "audioNode" }) },
     dropVideoNode: { videos: collectAll() },
     extractAudioNode: { video: batchOn() },

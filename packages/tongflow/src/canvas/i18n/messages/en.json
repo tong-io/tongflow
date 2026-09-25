@@ -382,11 +382,7 @@
                 "referenceTextPlaceholder": "Optional: transcript of the reference audio — improves clone quality",
                 "referenceTextCloneHint": "Leave empty for fast x-vector clone; paste the reference transcript for higher-quality ICL clone",
                 "language": "Language",
-                "inputText": "Input Text",
-                "voiceOptions": {
-                    "female": "Female Voice",
-                    "male": "Male Voice"
-                }
+                "inputText": "Input Text"
             },
             "titles": {
                 "imageGenVideo": "Image to Video",
@@ -761,15 +757,9 @@
                 "audioPromptPlaceholder": "Enter audio dubbing prompt"
             },
             "convertVoice": {
-                "voiceLabel": "Voice:",
-                "selectVoice": "Select Voice",
-                "previewVoice": "Preview Voice",
-                "uploadVoice": "Upload Voice",
-                "recordVoice": "Record Voice",
-                "recordAudio": "Record Audio",
-                "recordHint": "You can record audio here.",
-                "recordNeedImpl": "Audio recording feature needs implementation",
-                "done": "Done"
+                "sourceAudio": "Source audio",
+                "referenceVoice": "Reference voice",
+                "connectHint": "Connect the audio to convert and a reference voice clip"
             },
             "removeWatermark": {
                 "hint": "Automatically detect and remove Sora video watermarks"

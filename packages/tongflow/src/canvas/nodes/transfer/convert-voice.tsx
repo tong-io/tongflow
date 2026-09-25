@@ -1,210 +1,117 @@
-import { Atom, Mic, Upload } from "lucide-react";
-import type { ReactNode } from "react";
-import { memo, useState } from "react";
+import type { Edge } from "@xyflow/react";
+import { useNodeId, useStore } from "@xyflow/react";
+import { Atom, Mic, Music } from "lucide-react";
+import { memo, useMemo } from "react";
 import { useTranslations } from "use-intl";
 import type { RfDataNodeProps } from "../../../core";
-import { logger } from "../../../core";
+import { collectHandleValues } from "../../../core";
 import { useAbiForm } from "../../hooks/use-abi-form";
-import { Button } from "../../ui/button";
+import { useNodeAbiSpec } from "../../hooks/use-node-abi-spec";
 import { Card } from "../../ui/card";
-import {
-    Dialog,
-    DialogClose,
-    DialogContent,
-    DialogDescription,
-    DialogFooter,
-    DialogHeader,
-    DialogTitle,
-    DialogTrigger,
-} from "../../ui/dialog";
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from "../../ui/select";
+import { Label } from "../../ui/label";
 
 import { AbiNodeShell } from "../base/abi-node-shell";
+import { MediaThumbnail } from "../base/media-thumbnail";
 
 type ConvertVoiceRfProps = RfDataNodeProps<"convertVoiceNode">;
 
-const VOICE_OPTIONS = [
-    { key: "female", value: "zh_famale_1.wav" },
-    { key: "male", value: "zh_male_1.wav" },
-];
+const firstKey = (value: unknown): string | undefined => {
+    const v = Array.isArray(value) ? value[0] : value;
+    return typeof v === "string" && v ? v : undefined;
+};
 
 const ConvertVoiceNode = ({ selected, data }: ConvertVoiceRfProps) => {
     const t = useTranslations("Workspace.nodes");
     const form = useAbiForm("convert_voice");
-    const fileKeys = data.fileKeys;
 
-    const [extraSpeakers, setExtraSpeakers] = useState<
-        { key: string; value: string }[]
-    >([]);
-    const speakers = [...VOICE_OPTIONS, ...extraSpeakers];
+    const nodeId = useNodeId();
+    const nodeLookup = useStore((state) => state.nodeLookup);
+    const edges = useStore((state) => state.edges as Edge[]);
 
-    const targetKey = (form.state.targetKey as string) ?? "zh_famale_1.wav";
+    const resolvedSpec = useNodeAbiSpec("convert_voice");
+
+    const { sourceKey, refKey } = useMemo(() => {
+        if (!nodeId) return { sourceKey: undefined, refKey: undefined };
+        const values = collectHandleValues(
+            nodeId,
+            resolvedSpec,
+            Array.from(nodeLookup.values()),
+            edges,
+        );
+        return {
+            sourceKey: firstKey(values.audio),
+            refKey: firstKey(values.ref_audio),
+        };
+    }, [nodeId, resolvedSpec, nodeLookup, edges]);
 
     return (
         <AbiNodeShell
             feature="convert_voice"
             form={form}
             selected={selected}
+            className="min-w-[360px]"
             data={data}
             title={t("titles.convertVoice")}
             icon={<Atom className="h-5 w-5" />}
             executeLabel={t("actions.startReplace")}
-            executeDisabled={!fileKeys?.length}
+            executeDisabled={!sourceKey || !refKey}
         >
-            <Card
-                className="mx-4 mb-4 p-4 nodrag"
-                onPointerDown={(e) => e.stopPropagation()}
-            >
-                <div className="mb-4 flex flex-wrap items-center gap-3">
-                    <label
-                        htmlFor="voice-select"
-                        className="text-sm text-muted-foreground whitespace-nowrap"
-                    >
-                        {t("convertVoice.voiceLabel")}
-                    </label>
-                    <Select
-                        value={targetKey}
-                        onValueChange={(value) => form.set("targetKey", value)}
-                    >
-                        <SelectTrigger id="voice-select" className="w-36 h-9">
-                            <SelectValue
-                                placeholder={t("convertVoice.selectVoice")}
-                            />
-                        </SelectTrigger>
-                        <SelectContent>
-                            {speakers.map((opt) => (
-                                <SelectItem key={opt.value} value={opt.value}>
-                                    {opt.key
-                                        ? t(`common.voiceOptions.${opt.key}`)
-                                        : opt.value}
-                                </SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
-                    <SpeakerVoiceUploader
-                        trigger={
-                            <Button
-                                variant="outline"
-                                size="icon"
-                                className="ml-1"
-                                title={t("convertVoice.uploadVoice")}
-                            >
-                                <Upload className="w-4 h-4" />
-                            </Button>
-                        }
-                        onChange={(key) => {
-                            setExtraSpeakers((prev) => [
-                                ...prev,
-                                { key: "", value: key },
-                            ]);
-                        }}
-                    />
-                    <SpeakerVoiceRecorder
-                        trigger={
-                            <Button
-                                variant="outline"
-                                size="icon"
-                                className="ml-1"
-                                title={t("convertVoice.recordVoice")}
-                            >
-                                <Mic className="w-4 h-4" />
-                            </Button>
-                        }
-                        onChange={(key) => {
-                            setExtraSpeakers((prev) => [
-                                ...prev,
-                                { key: "", value: key },
-                            ]);
-                        }}
-                    />
-                </div>
-            </Card>
+            <div className="p-4">
+                <Card className="p-3">
+                    <div className="space-y-2">
+                        <Label className="text-sm font-medium text-muted-foreground">
+                            {t("compose.inputData")}
+                        </Label>
+                        <div className="flex gap-4">
+                            {sourceKey ? (
+                                <MediaThumbnail
+                                    fileKey={sourceKey}
+                                    label={t("convertVoice.sourceAudio")}
+                                    type="audio"
+                                />
+                            ) : (
+                                <div className="flex flex-col items-center gap-1.5">
+                                    <div className="relative w-16 h-16 rounded-md border-2 border-gray-300 overflow-hidden bg-gray-100">
+                                        <div className="flex items-center justify-center h-full w-full bg-orange-50">
+                                            <Music className="w-6 h-6 text-orange-600" />
+                                        </div>
+                                    </div>
+                                    <div className="px-1.5 py-0.5 bg-orange-100 text-orange-700 text-xs font-medium rounded">
+                                        {t("convertVoice.sourceAudio")}
+                                    </div>
+                                </div>
+                            )}
+                            {refKey ? (
+                                <MediaThumbnail
+                                    fileKey={refKey}
+                                    label={t("convertVoice.referenceVoice")}
+                                    type="audio"
+                                />
+                            ) : (
+                                <div className="flex flex-col items-center gap-1.5">
+                                    <div className="relative w-16 h-16 rounded-md border-2 border-gray-300 overflow-hidden bg-gray-100">
+                                        <div className="flex items-center justify-center h-full w-full bg-blue-50">
+                                            <Mic className="w-6 h-6 text-blue-600" />
+                                        </div>
+                                    </div>
+                                    <div className="px-1.5 py-0.5 bg-blue-100 text-blue-700 text-xs font-medium rounded">
+                                        {t("convertVoice.referenceVoice")}
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                        {(!sourceKey || !refKey) && (
+                            <p className="text-xs text-red-500">
+                                {t("convertVoice.connectHint")}
+                            </p>
+                        )}
+                    </div>
+                </Card>
+            </div>
         </AbiNodeShell>
     );
 };
 
+ConvertVoiceNode.displayName = "ConvertVoiceNode";
+
 export default memo(ConvertVoiceNode);
-
-const SpeakerVoiceUploader = ({
-    trigger,
-    onChange: _onChange,
-}: {
-    trigger: ReactNode;
-    onChange: (key: string) => void;
-}) => {
-    const [_uploaded, setUploaded] = useState<boolean>(false);
-
-    const doUpload = async (files: File[]) => {
-        logger.debug("Uploading files:", files);
-        setUploaded(true);
-    };
-
-    return (
-        <div>
-            <label className="cursor-pointer">
-                <input
-                    type="file"
-                    multiple
-                    hidden
-                    onChange={(e) => {
-                        const files = Array.from(e.target.files || []);
-                        if (files.length > 0) {
-                            doUpload(files);
-                        }
-                    }}
-                />
-                {trigger}
-            </label>
-        </div>
-    );
-};
-
-export const SpeakerVoiceRecorder = ({
-    trigger,
-    onChange: _onChange,
-}: {
-    trigger: ReactNode;
-    onChange: (key: string) => void;
-}) => {
-    const t = useTranslations("Workspace.nodes.convertVoice");
-    const [file, _setFile] = useState<File>();
-
-    const onFinish = async () => {
-        if (!file) return;
-        logger.debug("Recording file:", file);
-    };
-
-    return (
-        <Dialog>
-            <DialogTrigger asChild>{trigger}</DialogTrigger>
-            <DialogContent className="sm:max-w-md">
-                <DialogHeader>
-                    <DialogTitle>{t("recordAudio")}</DialogTitle>
-                    <DialogDescription>{t("recordHint")}</DialogDescription>
-                </DialogHeader>
-                <div className={"overflow-auto scroll-smooth w-80 max-h-80"}>
-                    <p className="text-sm text-gray-500">
-                        {t("recordNeedImpl")}
-                    </p>
-                </div>
-                <DialogFooter className="sm:justify-start">
-                    <DialogClose asChild>
-                        <Button
-                            type="button"
-                            variant="secondary"
-                            onClick={() => onFinish()}
-                        >
-                            {t("done")}
-                        </Button>
-                    </DialogClose>
-                </DialogFooter>
-            </DialogContent>
-        </Dialog>
-    );
-};
