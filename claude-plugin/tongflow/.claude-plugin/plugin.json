@@ -9,11 +9,5 @@
     "homepage": "https://github.com/tong-io/tongflow/tree/main/claude-plugin/tongflow#readme",
     "repository": "https://github.com/tong-io/tongflow",
     "license": "AGPL-3.0-only",
-    "keywords": [
-        "tongflow",
-        "aigc",
-        "media",
-        "workflow",
-        "mcp"
-    ]
+    "keywords": ["tongflow", "aigc", "media", "workflow", "mcp"]
 }
