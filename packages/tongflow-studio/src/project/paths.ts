@@ -6,10 +6,18 @@
 import { homedir } from "node:os";
 import { isAbsolute, join, relative, resolve, sep } from "node:path";
 
-/** Studio data root: the configured path, else `$TONGFLOW_STUDIO_ROOT`, else `~/.tongflow/studio`. */
+/**
+ * Studio data root: the configured path, else `$TONGFLOW_STUDIO_ROOT`, else
+ * `~/.tongflow/studio`. A leading `~` is the home directory: the value often
+ * comes from a JSON settings file, where no shell has expanded it.
+ */
 export function resolveStudioRoot(configured?: string): string {
     const root = configured?.trim() || process.env.TONGFLOW_STUDIO_ROOT?.trim();
-    return root ? resolve(root) : join(homedir(), ".tongflow", "studio");
+    if (!root) return join(homedir(), ".tongflow", "studio");
+    if (root === "~") return homedir();
+    return resolve(
+        /^~[/\\]/.test(root) ? join(homedir(), root.slice(2)) : root,
+    );
 }
 
 export interface StudioPaths {
