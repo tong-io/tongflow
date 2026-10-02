@@ -1,7 +1,7 @@
 import { createRequire } from "node:module";
 import { dirname, resolve as resolvePath } from "node:path";
 import { defineConfig, type UserConfig } from "tsdown";
-import { cssInjectPlugin, dedupePlugin } from "./build/client-plugins.ts";
+import { cssInjectPlugin, dedupePlugin } from "./bundler/client-plugins.ts";
 
 /**
  * Two builds:

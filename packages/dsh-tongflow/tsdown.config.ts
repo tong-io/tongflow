@@ -4,7 +4,7 @@ import { defineConfig, type UserConfig } from "tsdown";
 import {
     cssInjectPlugin,
     dedupePlugin,
-} from "../tongflow-studio/build/client-plugins.ts";
+} from "../tongflow-studio/bundler/client-plugins.ts";
 
 /**
  * Two artifacts, one package:
