@@ -41,7 +41,7 @@ const en = {
     orGitUrl: "or a git URL",
     apiKeys: "API keys / tokens",
     apiKeysHint:
-        "Stored in the studio's env.json (0600) and passed to plugin processes. Keys already present in the dsh process environment or cordis config count as set.",
+        "Stored in the studio's env.json (0600) and passed to plugin processes. Keys already present in the host process environment or its config count as set.",
     set: "set",
     notSet: "not set",
     replace: "•••••• (replace)",
@@ -125,7 +125,7 @@ const zh: Record<UiKey, string> = {
     orGitUrl: "或 git 地址",
     apiKeys: "API 密钥 / 令牌",
     apiKeysHint:
-        "保存在工作室的 env.json(0600),运行插件时注入。dsh 进程环境或 cordis 配置里已有的密钥也算已设置。",
+        "保存在工作室的 env.json(0600),运行插件时注入。宿主进程环境或其配置里已有的密钥也算已设置。",
     set: "已设置",
     notSet: "未设置",
     replace: "•••••• (替换)",

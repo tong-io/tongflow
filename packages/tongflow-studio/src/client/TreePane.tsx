@@ -1,5 +1,5 @@
 import { useState } from "react";
-import type { TreeNode } from "tongflow-studio/shared";
+import type { TreeNode } from "../shared/types.ts";
 
 const ICONS: Record<TreeNode["kind"], string> = {
     folder: "📁",

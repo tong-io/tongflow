@@ -1,4 +1,4 @@
-/** Same-origin client for the plugin's HTTP routes (`/tongflow/…`). */
+/** Same-origin client for the studio's HTTP routes (`/tongflow/…`). */
 import type {
     OutputInfo,
     PluginConfirmation,
@@ -8,7 +8,7 @@ import type {
     TreeNode,
     WorkflowFileMeta,
     WorkflowSummary,
-} from "tongflow-studio/shared";
+} from "../shared/types.ts";
 
 export const PREFIX = "/tongflow";
 

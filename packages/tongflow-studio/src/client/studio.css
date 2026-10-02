@@ -1,4 +1,4 @@
-/* dsh-tongflow Studio — scoped under .tfs-root; palette follows dsh's alias tokens with fallbacks. */
+/* TongFlow Studio — scoped under .tfs-root; the palette follows the host's `--dsw-alias-*` tokens (dsh's names) with fallbacks. */
 .tfs-root {
     --tfs-bg: var(--dsw-alias-bg-base, #fff);
     --tfs-bg-1: var(--dsw-alias-bg-layer-1, #f6f7f9);
