@@ -40,7 +40,6 @@
         "desktop",
         "packages/*/dist",
         "packages/dsh-tongflow",
-        "packages/tongflow-studio",
-        "claude-plugin"
+        "packages/tongflow-studio"
     ]
 }

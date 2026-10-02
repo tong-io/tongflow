@@ -343,7 +343,7 @@ The split is the point: the agent designs the project and writes the plan, brief
 /plugin install tongflow@tongflow
 ```
 
-Then ask for what you want to make. The plugin gives Claude TongFlow's tools and its working method. Say "open the studio" and Claude hands you a local web page with the project's folder tree, previews, the canvas, the runs and your plugin keys. A run that costs money always stops at a confirmation dialog first.
+Then ask for what you want to make. The plugin gives Claude TongFlow's tools and its working method. Say "open the studio" and Claude hands you a local web page with the project's folder tree, previews, the canvas, the runs and your plugin keys. Claude asks you before any run that costs money.
 
 ### Any MCP client
 
