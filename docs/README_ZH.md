@@ -57,7 +57,7 @@
 
 ## 快速开始
 
-TongFlow 有三种用法，共用同一个开源内核：**TongFlow 云版**（桌面版，或在浏览器里打开 [app.tongflow.com](https://app.tongflow.com)）、**自行部署**（[从源代码](#从源代码启动)或[用 Docker](#用-docker-启动)），以及**与 Agent 一起构建**（[`tongflow` npm 包](../packages/tongflow/README.md)或 [dsh 插件](#装进你自己的-agentdsh-插件)）。
+TongFlow 有三种用法，共用同一个开源内核：**TongFlow 云版**（桌面版，或在浏览器里打开 [app.tongflow.com](https://app.tongflow.com)）、**自行部署**（[从源代码](#从源代码启动)或[用 Docker](#用-docker-启动)），以及**与 Agent 一起构建**（[`tongflow` npm 包](../packages/tongflow/README.md)或者把 TongFlow [装进 Claude Code、任何 MCP 客户端或 dsh](#装进你自己的-agent)）。
 
 TongFlow **桌面版**是一个轻量（约 10 MB）的壳应用，直接加载云端工作室 **[app.tongflow.com](https://app.tongflow.com)** ——安装、登录，即可开始创作。云端工作室也可以直接在浏览器里打开。
 
@@ -97,7 +97,7 @@ TongFlow **桌面版**是一个轻量（约 10 MB）的壳应用，直接加载�
 - **结果，也是新的起点。** 材料拥有独立节点。上传的图和生成的图，都能进入下一个兼容的操作。从已有结果继续分支，不必从头再来。
 - **能力在前，模型在后。** 工作流分别记录「这一步做什么」和「由哪个插件执行」。切换兼容实现时，周围的流程结构原样保留。
 - **四种基本操作。** 添加、转换、组合、拆分与批量。理解、生成和处理用的是同一套节点和连接规则，生成只是其中一种操作。
-- **人与 Agent，共用一种结构。** 画布、导出器与 Agent 工具使用同一份节点注册表。可以在画布上搭，也可以通过 `tongflow` 包构图；DSH 集成让 Agent 生成的工作流可以打开、编辑、再跑一遍。
+- **人与 Agent，共用一种结构。** 画布、导出器与 Agent 工具使用同一份节点注册表。可以在画布上搭，也可以通过 `tongflow` 包构图；在 Claude Code、MCP 客户端或 dsh 里，Agent 生成的工作流都可以打开、编辑、再跑一遍。
 - **开放生态。** ABI 只定义每个能力的输入输出契约，不关心由谁实现。任何平台都能用同样的方式发布插件；下方的官方插件几乎覆盖了功能表里的每个节点。
 
 延伸阅读：[把不同模态，接成工作流：TongFlow 的设计起点](https://www.tongflow.com/zh/blog/tongflow-why-modality-first)。
@@ -330,9 +330,30 @@ docker compose up -d
 
 逐个节点执行预加载的示例，也可以切换到执行模式，点击运行按钮即可一键执行。
 
-## 装进你自己的 agent（dsh 插件）
+## 装进你自己的 agent
 
-TongFlow 也可以**跑在你自己的 agent 里**，作为 [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness) 的插件——不用装桌面 app，也不用自己起服务：
+TongFlow 也可以**跑在你自己的 agent 里**——不用装桌面 app，也不用自己起服务。
+
+分工是这么设计的：agent 负责搭项目、把计划、设定和提示词写成普通文件；TongFlow 负责生成，而每一个生成出来的东西都来自一个存好的 `.tongflow.json` 工作流，就放在它的产物旁边——所以你随时可以在画布上打开它、改一改、再跑一遍。这里没有「生成一张图」这种工具，也没有项目模板。
+
+### Claude Code
+
+```
+/plugin marketplace add tong-io/tongflow
+/plugin install tongflow@tongflow
+```
+
+装好后直接说你想做什么。插件把 TongFlow 的工具和工作方法交给 Claude。说一句「打开 studio」，Claude 会给你一个本地网页：项目的文件树、预览、画布、运行记录，还有填插件密钥的地方。要花钱的运行，一定会先停在确认框上等你点。
+
+### 任何支持 MCP 的客户端
+
+```json
+{ "mcpServers": { "tongflow": { "command": "npx", "args": ["-y", "tongflow-studio", "mcp"] } } }
+```
+
+同一套工具、同一个 Studio 网页，凡是支持 MCP 的 agent 都能接。
+
+### DeepSeek Harness（dsh）
 
 ```sh
 npx @deepseek-ai/dsh@next plugin --profile web add dsh-tongflow
@@ -341,9 +362,7 @@ npx @deepseek-ai/dsh@next web
 
 然后开一个会话，**第一条消息以 `@tongflow` 开头**。这个会话就变成 Studio——聊天、项目的文件树、预览 / 编辑器 / 画布，加一个运行记录抽屉——agent 也就拿到了 TongFlow 的那套工具。其他会话还是原来的 dsh，不受影响。
 
-分工是这么设计的：agent 负责搭项目、把计划、设定和提示词写成普通文件；TongFlow 负责生成，而每一个生成出来的东西都来自一个存好的 `.tongflow.json` 工作流，就放在它的产物旁边——所以你随时可以在画布上打开它、改一改、再跑一遍。这里没有「生成一张图」这种工具，也没有项目模板。插件首次使用时会自己建 Python venv 并克隆官方插件，画布上的节点和插件目录跟线上版一样全。
-
-环境要求和配置项见 **[packages/dsh-tongflow/README.md](../packages/dsh-tongflow/README.md)**。
+三种方式首次使用时都会自己建 Python venv 并克隆官方插件，画布上的节点和插件目录跟线上版一样全。环境要求和配置项见 **[packages/tongflow-studio/README.md](../packages/tongflow-studio/README.md)**（Claude Code、MCP）和 **[packages/dsh-tongflow/README.md](../packages/dsh-tongflow/README.md)**（dsh）。
 
 ## 自定义插件
 

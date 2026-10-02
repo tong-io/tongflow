@@ -57,7 +57,7 @@ Every output stays on the canvas as a material: branch from a generated image, f
 
 ## How To Start
 
-There are three ways to use TongFlow, all sharing the same open-source core: **TongFlow Cloud** (the desktop app or [app.tongflow.com](https://app.tongflow.com) in a browser), **self-host** ([from source](#run-from-source) or [with Docker](#run-with-docker)), or **build with an agent** (the [`tongflow` npm package](packages/tongflow/README.md) or the [dsh plugin](#use-it-inside-an-agent-dsh-plugin)).
+There are three ways to use TongFlow, all sharing the same open-source core: **TongFlow Cloud** (the desktop app or [app.tongflow.com](https://app.tongflow.com) in a browser), **self-host** ([from source](#run-from-source) or [with Docker](#run-with-docker)), or **build with an agent** (the [`tongflow` npm package](packages/tongflow/README.md) or TongFlow [inside Claude Code, any MCP client or dsh](#use-it-inside-an-agent)).
 
 The TongFlow **desktop app** is a lightweight (~10 MB) shell around the cloud studio at **[app.tongflow.com](https://app.tongflow.com)** — install it, sign in, and start creating. The cloud studio also runs in any modern browser.
 
@@ -97,7 +97,7 @@ A modality is a form of information: text, image, audio, video, 3D, document, UR
 - **Every result is a new beginning.** Materials have their own nodes. An uploaded image and a generated image can both feed the next compatible operation. Branch out from a result instead of starting over.
 - **Choose a capability, then a model.** A workflow records what a step does separately from the plugin that runs it. Switch compatible implementations while keeping the surrounding structure.
 - **Four operations.** Add, transform, combine, split & batch. Understanding, generating and processing fit into the same system; generation is one kind of operation.
-- **A shared structure for people and agents.** The canvas, exporter and agent tools use the same node registry. Build visually or through the `tongflow` package; the DSH integration lets an agent create workflows you can open, edit and run again.
+- **A shared structure for people and agents.** The canvas, exporter and agent tools use the same node registry. Build visually or through the `tongflow` package; inside Claude Code, an MCP client or dsh, an agent creates workflows you can open, edit and run again.
 - **Open ecosystem.** The ABI defines each capability's input/output contract independent of who implements it. Any platform can publish plugins the same way, and the official plugins below cover nearly every node in the matrix.
 
 Read more: [Why TongFlow starts with modalities](https://www.tongflow.com/en/blog/tongflow-why-modality-first).
@@ -330,9 +330,30 @@ Open **Settings** (the gear icon, top-right) and add the environment variables y
 
 Run the preloaded example node by node, or switch to Execute Mode and hit the run button to run the whole thing in one click.
 
-## Use it inside an agent (dsh plugin)
+## Use it inside an agent
 
-TongFlow also runs **inside your own agent**, as a plugin for [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness) — no desktop app, no server of your own:
+TongFlow also runs **inside your own agent** — no desktop app, no server of your own.
+
+The split is the point: the agent designs the project and writes the plan, briefs and prompts as ordinary files; TongFlow generates, and every generated asset comes from a saved `.tongflow.json` workflow sitting next to its outputs — so you can open it on the canvas, change it and run it again. There is no "generate an image" tool and no project template.
+
+### Claude Code
+
+```
+/plugin marketplace add tong-io/tongflow
+/plugin install tongflow@tongflow
+```
+
+Then ask for what you want to make. The plugin gives Claude TongFlow's tools and its working method. Say "open the studio" and Claude hands you a local web page with the project's folder tree, previews, the canvas, the runs and your plugin keys. A run that costs money always stops at a confirmation dialog first.
+
+### Any MCP client
+
+```json
+{ "mcpServers": { "tongflow": { "command": "npx", "args": ["-y", "tongflow-studio", "mcp"] } } }
+```
+
+The same tools and the same Studio page, for any agent that speaks MCP.
+
+### DeepSeek Harness (dsh)
 
 ```sh
 npx @deepseek-ai/dsh@next plugin --profile web add dsh-tongflow
@@ -341,9 +362,7 @@ npx @deepseek-ai/dsh@next web
 
 Then start a session whose **first message begins with `@tongflow`**. That session turns into the Studio — chat, the project's folder tree, preview / editor / the canvas, and a runs drawer — and the agent gets TongFlow's tools. Any other session stays plain dsh.
 
-The split is the point: the agent designs the project and writes the plan, briefs and prompts as ordinary files; TongFlow generates, and every generated asset comes from a saved `.tongflow.json` workflow sitting next to its outputs — so you can open it on the canvas, change it and run it again. There is no "generate an image" tool and no project template. The plugin provisions its own Python venv and clones the official plugins on first use, so the canvas offers the same catalog as the hosted app.
-
-Requirements and configuration: **[packages/dsh-tongflow/README.md](packages/dsh-tongflow/README.md)**.
+Each of them provisions its own Python venv and clones the official plugins on first use, so the canvas offers the same catalog as the hosted app. Requirements and configuration: **[packages/tongflow-studio/README.md](packages/tongflow-studio/README.md)** (Claude Code, MCP) and **[packages/dsh-tongflow/README.md](packages/dsh-tongflow/README.md)** (dsh).
 
 ## Custom plugins
 
