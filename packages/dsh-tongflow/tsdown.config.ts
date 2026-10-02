@@ -1,8 +1,10 @@
-import { readFile } from "node:fs/promises";
 import { createRequire } from "node:module";
 import { dirname, resolve as resolvePath } from "node:path";
-import { fileURLToPath } from "node:url";
 import { defineConfig, type UserConfig } from "tsdown";
+import {
+    cssInjectPlugin,
+    dedupePlugin,
+} from "../tongflow-studio/bundler/client-plugins.ts";
 
 /**
  * Two artifacts, one package:
@@ -46,79 +48,7 @@ const INLINE_SAFE =
     /^@deepseek-ai\/dsh-(host-apiproxy|session|llm|tools|brand)(\/|$)/;
 const VENDORED_LIBRARY = /^@deepseek-ai\/(cosmokit|schemastery)(\/|$)/;
 
-const CSS_VIRTUAL_PREFIX = "\0dsh-tongflow-css:";
-const CSS_VIRTUAL_SUFFIX = ".mjs";
-
 const require = createRequire(import.meta.url);
-
-/**
- * pnpm installs one copy of a package per peer set; `tongflow/canvas` (react 19
- * set) and our own code (react 18 set) would otherwise bundle two copies of
- * use-intl / @xyflow/react / zustand and their React contexts would not match.
- * Resolve every import of these packages from THIS package's own dependency
- * tree, honouring their exports maps.
- */
-function dedupePlugin(names: readonly string[]) {
-    return {
-        name: "dsh-tongflow-dedupe",
-        resolveId(source: string) {
-            const hit = names.find(
-                (n) => source === n || source.startsWith(`${n}/`),
-            );
-            if (!hit) return null;
-            return fileURLToPath(import.meta.resolve(source));
-        },
-    };
-}
-
-/**
- * Turn `import "x.css"` into a JS module that injects the stylesheet as a
- * `<style data-plugin="dsh-tongflow">` tag when the factory executes. Bare
- * package specifiers (e.g. `@xyflow/react/dist/style.css`) resolve through
- * Node so we do not depend on tsdown's own CSS pipeline.
- */
-function cssInjectPlugin() {
-    return {
-        name: "dsh-tongflow-css-inject",
-        resolveId(source: string, importer: string | undefined) {
-            if (!source.endsWith(".css")) return null;
-            let abs: string;
-            if (source.startsWith(".") || source.startsWith("/")) {
-                abs = importer
-                    ? resolvePath(dirname(importer), source)
-                    : source;
-            } else {
-                abs = require.resolve(source);
-            }
-            return CSS_VIRTUAL_PREFIX + abs + CSS_VIRTUAL_SUFFIX;
-        },
-        async load(
-            this: { addWatchFile(id: string): void },
-            virtualId: string,
-        ) {
-            if (!virtualId.startsWith(CSS_VIRTUAL_PREFIX)) return null;
-            const fileId = virtualId.slice(
-                CSS_VIRTUAL_PREFIX.length,
-                -CSS_VIRTUAL_SUFFIX.length,
-            );
-            this.addWatchFile(fileId);
-            const css = await readFile(fileId, "utf8");
-            const tagId = `${PACKAGE_ID}/${fileId.split("/").slice(-2).join("/")}`;
-            return [
-                `const css = ${JSON.stringify(css)};`,
-                `const tagId = ${JSON.stringify(tagId)};`,
-                "if (typeof document !== 'undefined' && document.querySelector('style[data-plugin-css=' + JSON.stringify(tagId) + ']') === null) {",
-                "  const tag = document.createElement('style');",
-                `  tag.dataset.plugin = ${JSON.stringify(PACKAGE_ID)};`,
-                "  tag.dataset.pluginCss = tagId;",
-                "  tag.textContent = css;",
-                "  document.head.appendChild(tag);",
-                "}",
-                "export default css;",
-            ].join("\n");
-        },
-    };
-}
 
 const host: UserConfig = {
     name: PACKAGE_ID,
@@ -189,13 +119,13 @@ const client: UserConfig = {
                 );
             },
         },
-        cssInjectPlugin(),
-        dedupePlugin([
-            "use-intl",
-            "@xyflow/react",
-            "zustand",
-            "react-hot-toast",
-        ]),
+        cssInjectPlugin(PACKAGE_ID, (s) => require.resolve(s)),
+        // Resolved from THIS package's dependency tree, so the Studio UI
+        // inlined from tongflow-studio shares one copy of each with the canvas.
+        dedupePlugin(
+            ["use-intl", "@xyflow/react", "zustand", "react-hot-toast"],
+            (s) => import.meta.resolve(s),
+        ),
     ],
     outputOptions: {
         entryFileNames: "client.js",

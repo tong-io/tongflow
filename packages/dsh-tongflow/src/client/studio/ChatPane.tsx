@@ -10,7 +10,7 @@ import type {} from "@deepseek-ai/dsh-client-ui-conversation/client";
 import type {} from "@deepseek-ai/dsh-client-ui-session/client";
 import type { PropsRuntime } from "@deepseek-ai/dsh-client-ui-slots";
 import { useEffect, useMemo, useRef } from "react";
-import { useT } from "./common.tsx";
+import { useT } from "tongflow-studio/client";
 
 export type ChatPaneProps = Pick<
     PropsRuntime<"conversation.view">,

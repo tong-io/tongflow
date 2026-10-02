@@ -3,8 +3,8 @@ import type {
     PluginConfirmation,
     RunEvent,
     RunSummary,
-} from "tongflow-studio/shared";
-import { studio, subscribeRun } from "../api.ts";
+} from "../shared/types.ts";
+import { studio, subscribeRun } from "./api.ts";
 import { useAsync, useT } from "./common.tsx";
 
 /* ---------------- run panel ---------------- */

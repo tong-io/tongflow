@@ -1,7 +1,7 @@
 import { createContext, useContext, useEffect, useState } from "react";
-import type { Modality } from "tongflow-studio/shared";
-import { fileUrl } from "../api.ts";
-import { makeT, type T } from "../i18n.ts";
+import type { Modality } from "../shared/types.ts";
+import { fileUrl } from "./api.ts";
+import { makeT, type T } from "./i18n.ts";
 
 export const TContext = createContext<T>(makeT("en"));
 export function useT(): T {

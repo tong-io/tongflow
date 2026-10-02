@@ -46,6 +46,10 @@ export interface McpServerOptions {
     version: string;
     /** Standing instructions the client puts in front of its model. */
     instructions: string;
+    /** The session this connection is; keys the working project its calls share. Default: a fresh id. */
+    sessionId?: string;
+    /** Tools of this server alone, listed after the studio's. */
+    extraTools?: ToolSpec[];
     input?: Readable;
     output?: Writable;
     log?: Logger;
@@ -57,10 +61,13 @@ export function serveMcp(options: McpServerOptions): Promise<void> {
     const output = options.output ?? process.stdout;
     const log = options.log ?? (() => undefined);
     const tools = new Map<string, ToolSpec>(
-        allTools(options.env).map((t) => [t.name, t]),
+        [...allTools(options.env), ...(options.extraTools ?? [])].map((t) => [
+            t.name,
+            t,
+        ]),
     );
     // One connection is one session: the working project is remembered across its calls.
-    const sessionId = `mcp-${randomUUID().slice(0, 8)}`;
+    const sessionId = options.sessionId ?? mcpSessionId();
     const running = new Map<RequestId, AbortController>();
 
     const send = (message: Record<string, unknown>) => {
@@ -200,6 +207,11 @@ export function serveMcp(options: McpServerOptions): Promise<void> {
             resolve();
         });
     });
+}
+
+/** A fresh session id for one MCP connection. */
+export function mcpSessionId(): string {
+    return `mcp-${randomUUID().slice(0, 8)}`;
 }
 
 class RpcError extends Error {

@@ -17,8 +17,17 @@ export {
     routePrefix,
 } from "./http/routes.ts";
 export { STUDIO_LANGUAGE, STUDIO_RULES } from "./instructions.ts";
-export { type McpServerOptions, serveMcp } from "./mcp/server.ts";
+export {
+    type McpServerOptions,
+    mcpSessionId,
+    serveMcp,
+} from "./mcp/server.ts";
 export { isInsideProject, resolveStudioRoot } from "./project/paths.ts";
+export {
+    type StudioServer,
+    type StudioServerOptions,
+    serveStudio,
+} from "./serve.ts";
 export { getSessionProject, setSessionProject } from "./session-projects.ts";
 export { type Logger, Studio, type StudioOptions } from "./studio.ts";
 export { allTools } from "./tools/index.ts";

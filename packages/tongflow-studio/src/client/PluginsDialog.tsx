@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { studio } from "../api.ts";
+import { studio } from "./api.ts";
 import { Modal, useAsync, useT } from "./common.tsx";
 
 interface EnvRow {

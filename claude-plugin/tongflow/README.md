@@ -12,6 +12,7 @@ Then ask for what you want to make — "make a 30-second product ad for …" —
 What the plugin adds:
 
 - **the `tongflow_*` tools**, from the [`tongflow-studio`](../../packages/tongflow-studio) MCP server (started with `npx`; see its README for requirements, configuration and where plugin API keys go);
+- **the Studio page**: ask Claude for it ("open the studio") and it gives a local link — folder tree, previews, the workflow canvas, runs, and the Plugins & keys dialog where you paste API keys.
 - **the `tongflow-studio` skill**: the working method — one workflow per asset, outputs beside it, a composition at every folder level, and a billing question before every paid run.
 - **a billing dialog** ([`hooks/register.ts`](hooks/register.ts), a function-hooks mod): a run or a perceive call that carries `user_confirmed: true` is always put to Claude Code's permission prompt, even when the tool is allow-listed — so the yes is yours, not the model's. A status line shows the workflow while it runs.
 

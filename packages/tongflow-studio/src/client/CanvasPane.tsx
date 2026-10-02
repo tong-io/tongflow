@@ -18,7 +18,7 @@ import {
 } from "tongflow/canvas";
 import { canvasMessages, isCanvasLocale } from "tongflow/canvas/messages";
 import { IntlProvider } from "use-intl";
-import { fileUrl, PREFIX, studio, type WorkflowDoc } from "../api.ts";
+import { fileUrl, PREFIX, studio, type WorkflowDoc } from "./api.ts";
 
 export interface CanvasPaneProps {
     pid: string;

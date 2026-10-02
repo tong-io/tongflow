@@ -6,11 +6,11 @@
 dsh (harness) ── tools / jobs / skills / webServer / attachments
       │
       ▼
-dsh-tongflow host (Node) — the adapter           dsh-tongflow client (browser)
-  index.ts ─ Studio + routes on dsh's webServer    Studio overlay (sidebar 🎬)
-  tools.ts ─ ToolSpec → defineTool; a call gets    tree · preview / editor · runs drawer
-             the session, attachments, jobs, llm   CanvasPane = tongflow/canvas
-  activation.ts ─ studio sessions only             talks to /tongflow/p/:pid/api/*
+dsh-tongflow host (Node) — the adapter           dsh-tongflow client (browser) — the adapter
+  index.ts ─ Studio + routes on dsh's webServer    StudioView = StudioShell + dsh's chat column,
+  tools.ts ─ ToolSpec → defineTool; a call gets      session cwd, dark-mode and height sync
+             the session, attachments, jobs, llm   StudioModeWatcher ─ studio sessions only
+  activation.ts ─ studio sessions only
   skills/ ─ the working method (markdown)
       │
       ▼
@@ -21,6 +21,8 @@ tongflow-studio (host-neutral, inlined into lib/index.js at build)
   http/ ─ /tongflow/* as one node:http handler (JSON, SSE, Range)
   engine/ ─ python -m tongflow engine (NDJSON) → ingest → numbered outputs + runs log
   mcp/ ─ the same tools as an MCP server (`tongflow-studio mcp`), for hosts without a plugin API
+  client/ ─ StudioShell: tree · preview / editor · runs drawer · CanvasPane = tongflow/canvas,
+            talking to /tongflow/p/:pid/api/*; also built as a page of its own (serve.ts)
       │
       ▼
 TongFlow SDK (PyPI) + plugins (~/.dsh/tongflow/plugins), each in the engine's shared venv
