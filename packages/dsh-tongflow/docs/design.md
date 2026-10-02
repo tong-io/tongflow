@@ -6,17 +6,27 @@
 dsh (harness) ── tools / jobs / skills / webServer / attachments
       │
       ▼
-dsh-tongflow host (Node)                       dsh-tongflow client (browser)
-  Studio ─ config, paths, python venv            Studio overlay (sidebar 🎬)
-  StudioApi ─ projects, tree, workflows,           tree · preview / editor · runs drawer
-              outputs, runs, plugins               CanvasPane = tongflow/canvas
-  tools/ ─ tongflow_* (defineTool)                 talks to /tongflow/p/:pid/api/*
-  http/ ─ /tongflow/* (JSON, SSE, Range)
+dsh-tongflow host (Node) — the adapter           dsh-tongflow client (browser)
+  index.ts ─ Studio + routes on dsh's webServer    Studio overlay (sidebar 🎬)
+  tools.ts ─ ToolSpec → defineTool; a call gets    tree · preview / editor · runs drawer
+             the session, attachments, jobs, llm   CanvasPane = tongflow/canvas
+  activation.ts ─ studio sessions only             talks to /tongflow/p/:pid/api/*
+  skills/ ─ the working method (markdown)
+      │
+      ▼
+tongflow-studio (host-neutral, inlined into lib/index.js at build)
+  Studio ─ config, paths, python venv
+  StudioApi ─ projects, tree, workflows, outputs, runs, plugins
+  tools/ ─ tongflow_* as ToolSpec (name, parameters, execute(args, call))
+  http/ ─ /tongflow/* as one node:http handler (JSON, SSE, Range)
   engine/ ─ python -m tongflow engine (NDJSON) → ingest → numbered outputs + runs log
+  mcp/ ─ the same tools as an MCP server (`tongflow-studio mcp`), for hosts without a plugin API
       │
       ▼
 TongFlow SDK (PyPI) + plugins (~/.dsh/tongflow/plugins), each in the engine's shared venv
 ```
+
+Paths below (`engine/…`, `project/…`) are relative to [`packages/tongflow-studio/src`](../../tongflow-studio/src).
 
 ## Invariants
 

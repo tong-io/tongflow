@@ -1,6 +1,6 @@
+import type { Context } from "@deepseek-ai/cordis";
 import { describe, expect, it } from "vitest";
-import { modelTakesImages } from "../src/tools/run-tools.ts";
-import type { ToolEnv } from "../src/tools/support.ts";
+import { modelTakesImages } from "../src/tools.ts";
 
 /**
  * `tongflow_look` degrades to a describe slot only for a model that is known
@@ -17,12 +17,10 @@ interface Case {
     expected: boolean;
 }
 
-function env(llm: unknown): ToolEnv {
+function ctx(llm: unknown): Context {
     return {
-        ctx: { get: (key: string) => (key === "llm" ? llm : undefined) },
-        studio: {},
-        api: {},
-    } as unknown as ToolEnv;
+        get: (key: string) => (key === "llm" ? llm : undefined),
+    } as unknown as Context;
 }
 
 function exec(options: Case["options"]) {
@@ -92,7 +90,7 @@ const cases: Case[] = [
 describe("modelTakesImages", () => {
     for (const c of cases) {
         it(`${c.name} → ${c.expected}`, async () => {
-            expect(await modelTakesImages(env(c.llm), exec(c.options))).toBe(
+            expect(await modelTakesImages(ctx(c.llm), exec(c.options))).toBe(
                 c.expected,
             );
         });

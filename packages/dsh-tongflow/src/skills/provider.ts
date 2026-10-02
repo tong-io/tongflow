@@ -2,7 +2,7 @@
  * Packaged skills: the studio working method, shipped as markdown under
  * `<package>/skills/`.
  */
-import { readdir, readFile } from "node:fs/promises";
+import { readdir, readFile, stat } from "node:fs/promises";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import type { Context } from "@deepseek-ai/cordis";
@@ -11,11 +11,18 @@ import type {
     SkillDefinition,
     SkillProvider,
 } from "@deepseek-ai/dsh-skill";
-import { isDir } from "../util/fsx.ts";
 
 const PROVIDER = "dsh-tongflow";
 /** Below user/project skills (100–500) so a project can override the packaged method. */
 const RANK = 620;
+
+async function isDir(path: string): Promise<boolean> {
+    try {
+        return (await stat(path)).isDirectory();
+    } catch {
+        return false;
+    }
+}
 
 async function skillsRoot(): Promise<string> {
     const here = dirname(fileURLToPath(import.meta.url));

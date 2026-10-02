@@ -39,6 +39,7 @@
         "node_modules",
         "desktop",
         "packages/*/dist",
-        "packages/dsh-tongflow"
+        "packages/dsh-tongflow",
+        "packages/tongflow-studio"
     ]
 }

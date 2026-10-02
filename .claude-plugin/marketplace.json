@@ -1,0 +1,14 @@
+{
+    "name": "tongflow",
+    "owner": {
+        "name": "tong-io",
+        "url": "https://github.com/tong-io"
+    },
+    "plugins": [
+        {
+            "name": "tongflow",
+            "source": "./claude-plugin/tongflow",
+            "description": "TongFlow media studio for Claude Code: the tongflow_* tools (MCP) and the studio working method (skill)."
+        }
+    ]
+}

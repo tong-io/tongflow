@@ -7,8 +7,9 @@
 # `workspace:^` and every consumer install fails with
 # ERR_PNPM_WORKSPACE_PKG_NOT_FOUND (dsh-tongflow@0.1.1, issue #157).
 #
-#   packages/tongflow      npm "tongflow"      tag  npm-vX.Y.Z
-#   packages/dsh-tongflow  npm "dsh-tongflow"  tag  dsh-npm-vX.Y.Z
+#   packages/tongflow         npm "tongflow"         tag  npm-vX.Y.Z
+#   packages/dsh-tongflow     npm "dsh-tongflow"     tag  dsh-npm-vX.Y.Z
+#   packages/tongflow-studio  npm "tongflow-studio"  tag  studio-npm-vX.Y.Z
 #
 # One-time setup on npmjs.com → package → Settings → Trusted Publisher:
 # GitHub Actions, owner `tong-io`, repository `tongflow`, workflow filename
@@ -20,13 +21,13 @@ name: npm publish
 
 on:
   push:
-    tags: ["npm-v*", "dsh-npm-v*"]
+    tags: ["npm-v*", "dsh-npm-v*", "studio-npm-v*"]
   workflow_dispatch:
     inputs:
       package:
         description: "Which package"
         type: choice
-        options: [tongflow, dsh-tongflow]
+        options: [tongflow, dsh-tongflow, tongflow-studio]
         default: tongflow
       dry_run:
         description: "Build + pack only, do not publish"
@@ -43,8 +44,9 @@ jobs:
     runs-on: ubuntu-latest
     environment: npm
     env:
-      # dsh-npm-v* tags publish packages/dsh-tongflow; npm-v* tags publish packages/tongflow.
-      PKG_DIR: ${{ (github.ref_type == 'tag' && startsWith(github.ref_name, 'dsh-npm-v')) && 'packages/dsh-tongflow' || (github.event_name == 'workflow_dispatch' && inputs.package == 'dsh-tongflow') && 'packages/dsh-tongflow' || 'packages/tongflow' }}
+      # dsh-npm-v* tags publish packages/dsh-tongflow, studio-npm-v* tags
+      # packages/tongflow-studio, npm-v* tags packages/tongflow.
+      PKG_DIR: ${{ (github.ref_type == 'tag' && startsWith(github.ref_name, 'dsh-npm-v')) && 'packages/dsh-tongflow' || (github.ref_type == 'tag' && startsWith(github.ref_name, 'studio-npm-v')) && 'packages/tongflow-studio' || (github.event_name == 'workflow_dispatch' && inputs.package != 'tongflow') && format('packages/{0}', inputs.package) || 'packages/tongflow' }}
     steps:
       - uses: actions/checkout@v4
 
@@ -71,6 +73,7 @@ jobs:
         run: |
           PKG_VERSION="$(node -p "require('./package.json').version")"
           TAG_VERSION="${GITHUB_REF_NAME#dsh-npm-v}"
+          TAG_VERSION="${TAG_VERSION#studio-npm-v}"
           TAG_VERSION="${TAG_VERSION#npm-v}"
           if [ "$PKG_VERSION" != "$TAG_VERSION" ]; then
             echo "tag $GITHUB_REF_NAME does not match package.json version $PKG_VERSION" >&2

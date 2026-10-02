@@ -8,7 +8,7 @@ import type {
     TreeNode,
     WorkflowFileMeta,
     WorkflowSummary,
-} from "../shared/types.ts";
+} from "tongflow-studio/shared";
 
 export const PREFIX = "/tongflow";
 

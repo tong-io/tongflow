@@ -8,7 +8,7 @@ import { defineConfig, type UserConfig } from "tsdown";
  * Two artifacts, one package:
  *
  *  - `lib/index.js`  — the host (Node) half: a Cordis plugin the dsh Loader
- *    imports by package name (`main`). ESM, deps external.
+ *    imports by package name (`main`). ESM, deps external, the studio inlined.
  *  - `lib/client.js` — the browser half: a CJS closure-factory bundle in the
  *    exact shape dsh's client module loader expects
  *    (`window.__ModuleLoader__.load({ id, factory: (require) => {...} })`).
@@ -128,12 +128,15 @@ const host: UserConfig = {
     platform: "node",
     target: "es2022",
     fixedExtension: false,
-    dts: true,
+    // `eager`: the studio's sources are inlined from the workspace, and their
+    // declarations are only emitted when the whole program is built up front.
+    dts: { eager: true },
     sourcemap: false,
     clean: true,
     // Node half: `tongflow` core + dsh peers resolve from the profile's
     // node_modules (peers fall through to the installation via dsh's flat
-    // module fallback), so keep them external.
+    // module fallback), so keep them external. `tongflow-studio` (the
+    // host-neutral studio, a workspace devDependency) is inlined.
     external: [/^@deepseek-ai\//, /^tongflow(\/|$)/],
 };
 

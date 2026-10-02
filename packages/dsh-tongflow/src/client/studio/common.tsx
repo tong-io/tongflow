@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useState } from "react";
-import type { Modality } from "../../shared/types.ts";
+import type { Modality } from "tongflow-studio/shared";
 import { fileUrl } from "../api.ts";
 import { makeT, type T } from "../i18n.ts";
 
