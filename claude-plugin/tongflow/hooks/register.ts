@@ -32,7 +32,9 @@ export const register: Register = (on) => {
             return verdict;
         return {
             decision: "ask",
-            reason: `TongFlow: ${target(input)} runs a paid plugin (an API key or Modal GPU time) and bills you.`,
+            // The flag says the model holds the user's yes, not what the run
+            // costs: only the studio knows which plugins a workflow uses.
+            reason: `TongFlow: run ${target(input)}? A paid plugin (an API key or Modal GPU time) bills you.`,
         };
     });
 

@@ -70,7 +70,15 @@ export function RunPanel({
                     if (event.type === "ingested" || event.type === "error")
                         onChanged();
                 },
-                () => onChanged(),
+                () => {
+                    // The last frame was sent with the last event, while the
+                    // run was still settling: read where it actually ended.
+                    void studio
+                        .run(s.runId)
+                        .then(setRun)
+                        .catch(() => undefined);
+                    onChanged();
+                },
             );
         } catch (e) {
             setLog([`✗ ${e instanceof Error ? e.message : String(e)}`]);
