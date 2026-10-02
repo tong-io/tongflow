@@ -9,10 +9,9 @@ import type { Context } from "@deepseek-ai/cordis";
 import type { Agent } from "@deepseek-ai/dsh-agent";
 import type {} from "@deepseek-ai/dsh-skill";
 import type {} from "@deepseek-ai/dsh-system-prompt";
+import type { Studio, ToolEnv } from "tongflow-studio";
 import { registerSkills } from "./skills/provider.ts";
-import type { Studio } from "./studio.ts";
-import { registerTools } from "./tools/index.ts";
-import type { ToolEnv } from "./tools/support.ts";
+import { registerTools } from "./tools.ts";
 
 export const TRIGGER = "@tongflow";
 
@@ -50,7 +49,7 @@ function firstLoggedUserText(agent: Agent): string | undefined {
 
 export interface ActivationOptions {
     studio: Studio;
-    env: Omit<ToolEnv, "ctx">;
+    env: ToolEnv;
     systemSection: string;
 }
 
@@ -69,7 +68,7 @@ export function installActivation(
         if (activated.has(agent)) return;
         activated.add(agent);
         const actx = agent.ctx;
-        registerTools(actx, { ...options.env, ctx: actx });
+        registerTools(actx, options.env);
         actx.inject(["systemPrompt"], (pctx) => {
             pctx.effect(
                 () =>

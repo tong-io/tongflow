@@ -1,29 +1,20 @@
 /** Plugin configuration (cordis.yml row `config`), validated by schemastery at load. */
+import { homedir } from "node:os";
+import { join, resolve } from "node:path";
 import z from "@deepseek-ai/schemastery";
-import { DEFAULT_TONGFLOW_SDK_VERSION } from "./engine/bootstrap.ts";
-import { OFFICIAL_ORG } from "./engine/registry.ts";
+import {
+    DEFAULT_TONGFLOW_SDK_VERSION,
+    OFFICIAL_ORG,
+    type StudioConfig,
+} from "tongflow-studio";
 
-export interface Config {
-    /** Studio data root; default `<DSH_HOME>/tongflow` (projects, venv, plugins, data). */
-    studioRoot?: string;
-    /** Python ≥ 3.10 used to create the studio venv; auto-detected when empty. */
-    pythonPath?: string;
-    /** pip requirement installed into the studio venv (e.g. `tongflow==0.3.0` or `-e /path/to/sdk`). */
-    sdkSpec: string;
-    /** Git organisation official plugins are cloned from. */
-    pluginOrg: string;
-    /** Plugin id → git URL overrides (community / private plugins). */
-    pluginGitUrls: Record<string, string>;
-    /** Environment passed to every plugin process (API keys, Modal tokens). Prefer credentials over literal values. */
-    env: Record<string, string>;
-    /** Upper bound on simultaneously running workflows. */
-    maxConcurrentRuns: number;
-    /** URL prefix the plugin's HTTP routes mount under. */
-    httpPrefix: string;
-    /** UI locale for the embedded canvas (en / zh / ja / ko). */
-    locale: string;
-    /** Clone every official plugin at start so the canvas offers the full catalog (shallow clones; keys / deploys only at run time). */
-    autoInstallOfficial: boolean;
+/** The studio's own config; `studioRoot` defaults to `<DSH_HOME>/tongflow` here. */
+export type Config = StudioConfig;
+
+/** `$DSH_HOME`, else `~/.dsh` (mirrors dsh's own resolution). */
+export function resolveDshHome(): string {
+    const env = process.env.DSH_HOME;
+    return env?.trim() ? resolve(env) : join(homedir(), ".dsh");
 }
 
 export const Config: z<Config> = z.object({

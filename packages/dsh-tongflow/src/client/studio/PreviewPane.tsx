@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
-import type { OutputInfo, TreeNode } from "../../shared/types.ts";
-import { modalityOfExt } from "../../shared/types.ts";
+import type { OutputInfo, TreeNode } from "tongflow-studio/shared";
+import { modalityOfExt } from "tongflow-studio/shared";
 import { fileUrl, studio } from "../api.ts";
 import { CanvasPane } from "./CanvasPane.tsx";
 import { fmtBytes, fmtTime, Modal, Thumb, useAsync, useT } from "./common.tsx";

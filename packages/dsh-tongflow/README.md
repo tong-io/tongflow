@@ -10,6 +10,8 @@ Three layers, never mixed up:
 | **the agent** | creativity: the plan, the folder structure, briefs, scripts, prompts, review notes — plain files |
 | **TongFlow** | deterministic generation: every image / voice / music / video / 3D asset is produced by **running a saved workflow file** (`<name>.tongflow.json`) through the TongFlow engine and its plugins |
 
+The studio itself is host-neutral — [`tongflow-studio`](../tongflow-studio) holds the projects, the engine runner and the `tongflow_*` tools, and serves the same tools as an MCP server (and a [Claude Code plugin](../../claude-plugin/tongflow)). This package is the dsh adapter: it adds the Studio panel and the embedded canvas.
+
 There is deliberately no "generate an image" tool and no project template. The agent studies what the user wants to make (with web research when useful), proposes a folder structure, writes it down, and then — for every asset — creates a workflow file where that asset belongs, runs it, reviews the result, and builds the next stage on it. Users open the same `.tongflow.json` on the embedded canvas, tweak it, and re-run; they can also reorganize the folders by hand at any time.
 
 ## Install
@@ -76,7 +78,7 @@ A run that uses a paid plugin spends the user's money — a paid API key, or GPU
 
 ### Workflows follow TongFlow's grammar
 
-`tongflow_node_catalog` opens with the node grammar — `add/` widgets (canvas only), `modality/` data nodes, and the four executable categories `transfer/` (1 → 1), `compose/` (N → 1), `decompose/` (1 → N), `batch/` (N → 1) — then lists every node type by category with its ABI slot, wires (`batch` / `collect` flags), config fields, outputs and installed plugins, all read from the ABI registry. The patch tool (`apply_graph_patch` from the `tongflow` package) validates each step against the same registry, so a workflow the agent saves is one the exporter and the canvas accept. The category table lives in [`src/engine/node-categories.ts`](src/engine/node-categories.ts) and a test keeps it in step with `packages/tongflow/src/canvas/node-types.tsx`.
+`tongflow_node_catalog` opens with the node grammar — `add/` widgets (canvas only), `modality/` data nodes, and the four executable categories `transfer/` (1 → 1), `compose/` (N → 1), `decompose/` (1 → N), `batch/` (N → 1) — then lists every node type by category with its ABI slot, wires (`batch` / `collect` flags), config fields, outputs and installed plugins, all read from the ABI registry. The patch tool (`apply_graph_patch` from the `tongflow` package) validates each step against the same registry, so a workflow the agent saves is one the exporter and the canvas accept. The category table lives in [`tongflow-studio`'s `src/engine/node-categories.ts`](../tongflow-studio/src/engine/node-categories.ts) and a test keeps it in step with `packages/tongflow/src/canvas/node-types.tsx`.
 
 ## Agent tools
 

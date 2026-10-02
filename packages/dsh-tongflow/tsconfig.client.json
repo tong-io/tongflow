@@ -20,10 +20,6 @@
             "react-dom": ["./node_modules/@types/react-dom"]
         }
     },
-    "include": [
-        "src/client/**/*.ts",
-        "src/client/**/*.tsx",
-        "src/shared/**/*.ts"
-    ],
+    "include": ["src/client/**/*.ts", "src/client/**/*.tsx"],
     "exclude": ["lib", "node_modules"]
 }

@@ -1,0 +1,13 @@
+{
+    "name": "tongflow",
+    "version": "0.1.0",
+    "description": "TongFlow media studio: plan a project as plain folders, make every image / voice / music / video / 3D asset by running a saved TongFlow workflow next to its outputs.",
+    "author": {
+        "name": "tong-io",
+        "url": "https://github.com/tong-io"
+    },
+    "homepage": "https://github.com/tong-io/tongflow/tree/main/claude-plugin/tongflow#readme",
+    "repository": "https://github.com/tong-io/tongflow",
+    "license": "AGPL-3.0-only",
+    "keywords": ["tongflow", "aigc", "media", "workflow", "mcp"]
+}

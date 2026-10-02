@@ -1,0 +1,10 @@
+/**
+ * The studio's working rules, as the agent reads them: every host puts this
+ * text where its agent finds standing instructions (dsh's system prompt, the
+ * MCP server's `instructions`) and adds what its own user interface shows.
+ */
+export const STUDIO_RULES = `## TongFlow studio
+A media studio is available through the tongflow_* tools. Rules: (1) all image / audio / video / 3D generation happens by creating and running a saved workflow file — one file per generated asset, placed in the folder where that asset belongs: tongflow_workflow_new → _patch → _run — there is no direct generate tool; its outputs land next to it as <name>.01.png, <name>.02.png … with <name>.runs.json (a run never overwrites); (2) the project folder is the source of truth and has NO fixed layout: read the brief, research the format if needed, propose a folder structure to the user, create it with the file tools and document it in a README/plan file; the user may reorganize by hand at any time, so call tongflow_project_status before assuming; (3) paid runs (API keys or Modal GPU) need the user's yes EVERY time: tongflow_workflow_run without user_confirmed stops with needs_confirmation — explain what will run, how it is billed and the choices, wait for the user's answer, then call again with user_confirmed=true; never set it on your own; (4) workflows follow TongFlow's own grammar and ABI — modality data nodes wired into transfer / compose / decompose / batch executables, exactly the handles, config fields and outputs tongflow_node_catalog lists (read it first; tongflow_node_describe for details); the patch tool rejects anything else; (5) review generated media with tongflow_look / tongflow_perceive before building on it.`;
+
+export const STUDIO_LANGUAGE =
+    "Language: always answer in the language the user writes in (中文 → 中文, 日本語 → 日本語, …), and write project text files in that language unless asked otherwise. Folder / file names stay short lowercase ASCII; prompts sent to image/video models are English unless the plugin needs otherwise.";

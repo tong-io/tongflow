@@ -1,0 +1,65 @@
+{
+    "name": "tongflow-studio",
+    "version": "0.1.0",
+    "description": "TongFlow's media studio for agents: projects as plain folders, one TongFlow workflow per generated asset stored next to its outputs, deterministic media generation — served as an MCP server.",
+    "author": "tong-io",
+    "license": "AGPL-3.0-only",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/tong-io/tongflow",
+        "directory": "packages/tongflow-studio"
+    },
+    "homepage": "https://github.com/tong-io/tongflow/tree/main/packages/tongflow-studio#readme",
+    "keywords": [
+        "tongflow",
+        "mcp",
+        "mcp-server",
+        "aigc",
+        "workflow",
+        "agent"
+    ],
+    "type": "module",
+    "bin": {
+        "tongflow-studio": "./dist/cli.js"
+    },
+    "exports": {
+        ".": "./src/index.ts",
+        "./shared": "./src/shared/types.ts",
+        "./package.json": "./package.json"
+    },
+    "publishConfig": {
+        "exports": {
+            ".": {
+                "types": "./dist/index.d.ts",
+                "default": "./dist/index.js"
+            },
+            "./shared": {
+                "types": "./dist/shared.d.ts",
+                "default": "./dist/shared.js"
+            },
+            "./package.json": "./package.json"
+        }
+    },
+    "engines": {
+        "node": "^22.19.0 || >=24.0.0"
+    },
+    "files": [
+        "dist",
+        "README.md",
+        "LICENSE"
+    ],
+    "scripts": {
+        "build": "pnpm typecheck && tsdown",
+        "test": "vitest run",
+        "typecheck": "tsc --noEmit -p tsconfig.json"
+    },
+    "dependencies": {
+        "tongflow": "workspace:^"
+    },
+    "devDependencies": {
+        "@types/node": "20.19.13",
+        "tsdown": "0.22.14",
+        "typescript": "5",
+        "vitest": "4.1.5"
+    }
+}

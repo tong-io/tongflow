@@ -4,7 +4,7 @@ import type {} from "@deepseek-ai/dsh-client-ui-conversation/client";
 import type {} from "@deepseek-ai/dsh-client-ui-session/client";
 import type { PropsRuntime } from "@deepseek-ai/dsh-client-ui-slots";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import type { ProjectSummary, TreeNode } from "../../shared/types.ts";
+import type { ProjectSummary, TreeNode } from "tongflow-studio/shared";
 import { studio } from "../api.ts";
 import { makeT } from "../i18n.ts";
 import { ChatPane } from "./ChatPane.tsx";
