@@ -343,7 +343,7 @@ TongFlow 也可以**跑在你自己的 agent 里**——不用装桌面 app，�
 /plugin install tongflow@tongflow
 ```
 
-装好后直接说你想做什么。插件把 TongFlow 的工具和工作方法交给 Claude。说一句「打开 studio」，Claude 会给你一个本地网页：项目的文件树、预览、画布、运行记录，还有填插件密钥的地方。要花钱的运行，一定会先停在确认框上等你点。
+装好后直接说你想做什么。插件把 TongFlow 的工具和工作方法交给 Claude。说一句「打开 studio」，Claude 会给你一个本地网页：项目的文件树、预览、画布、运行记录，还有填插件密钥的地方。要花钱的运行，Claude 每次都会先问你。
 
 ### 任何支持 MCP 的客户端
 
