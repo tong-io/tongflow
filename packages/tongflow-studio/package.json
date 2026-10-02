@@ -1,6 +1,6 @@
 {
     "name": "tongflow-studio",
-    "version": "0.1.0",
+    "version": "0.1.1",
     "description": "TongFlow's media studio for agents: projects as plain folders, one TongFlow workflow per generated asset stored next to its outputs, deterministic media generation — served as an MCP server with a Studio web page.",
     "author": "tong-io",
     "license": "AGPL-3.0-only",

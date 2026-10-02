@@ -25,6 +25,10 @@ export interface StudioShellProps {
     locale: string;
     /** The host session: the Studio follows the project its agent works in. */
     sessionId?: string;
+    /** Open on this project instead of the last one; a destination someone asked for is not followed away from. */
+    project?: string;
+    /** Open this file or workflow of `project` (a project key) once its tree has loaded. */
+    file?: string;
     /** The session's working directory: inside a project folder, that project is selected. */
     cwd?: string;
     /** A chat column, drawn left of the tree. */
@@ -57,8 +61,9 @@ function StudioBody(props: StudioShellProps) {
     const { openProject, locale, cwd, chat, onClose } = props;
     const projects = useAsync(() => studio.projects(), []);
     const health = useAsync(() => studio.health(), []);
+    const pinned = props.project;
     const [pid, setPid] = useState<string | undefined>(
-        () => localStorage.getItem(LS_KEY) ?? undefined,
+        () => pinned ?? localStorage.getItem(LS_KEY) ?? undefined,
     );
     const [selected, setSelected] = useState<TreeNode | undefined>();
     const [drawer, setDrawer] = useState<DrawerState>(undefined);
@@ -100,12 +105,12 @@ function StudioBody(props: StudioShellProps) {
 
     // Follow the session's workspace when it is a studio project.
     useEffect(() => {
-        if (!cwd || !projects.data) return;
+        if (pinned || !cwd || !projects.data) return;
         const match = projects.data.find(
             (p) => cwd === p.root || cwd.startsWith(`${p.root}/`),
         );
         if (match && match.id !== pid) setPid(match.id);
-    }, [cwd, projects.data]);
+    }, [pinned, cwd, projects.data]);
     useEffect(() => {
         if (pid) localStorage.setItem(LS_KEY, pid);
     }, [pid]);
@@ -133,7 +138,7 @@ function StudioBody(props: StudioShellProps) {
     // Follow the project the session's agent is working in (its tool calls set it).
     const sessionId = props.sessionId;
     useEffect(() => {
-        if (!sessionId) return;
+        if (pinned || !sessionId) return;
         let alive = true;
         const check = () =>
             studio
@@ -157,7 +162,16 @@ function StudioBody(props: StudioShellProps) {
             alive = false;
             clearInterval(timer);
         };
-    }, [sessionId, projects.reload]);
+    }, [pinned, sessionId, projects.reload]);
+
+    // Open the file the link asked for, once: after that the selection is the user's.
+    const wanted = useRef(props.file);
+    useEffect(() => {
+        if (!wanted.current || !tree.data) return;
+        const node = findNode(tree.data, wanted.current);
+        wanted.current = undefined;
+        if (node) setSelected(node);
+    }, [tree.data]);
 
     const onSelect = (n: TreeNode) => {
         setSelected(n);
@@ -362,6 +376,15 @@ function StudioBody(props: StudioShellProps) {
             ) : null}
         </div>
     );
+}
+
+function findNode(nodes: TreeNode[], key: string): TreeNode | undefined {
+    for (const node of nodes) {
+        if (node.key === key && node.kind !== "folder") return node;
+        const inside = node.children && findNode(node.children, key);
+        if (inside) return inside;
+    }
+    return undefined;
 }
 
 function NewProjectDialog({

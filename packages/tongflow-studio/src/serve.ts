@@ -6,7 +6,9 @@
  * It listens on the loopback interface only and still asks for a token: the
  * routes read and write project files and plugin API keys, and any other
  * process — or web page — on this machine can reach a local port. The link
- * the user opens carries the token once; it is exchanged for a cookie.
+ * the user opens carries the token once; it is exchanged for a cookie. A
+ * client that is not a browser (the Claude Code panel) sends the same token
+ * as a bearer credential instead.
  */
 import { randomBytes, timingSafeEqual } from "node:crypto";
 import { createReadStream } from "node:fs";
@@ -76,7 +78,11 @@ export async function serveStudio(
             res.end();
             return;
         }
-        if (!same(cookieValue(req, cookie()) ?? "", token))
+        const bearer = /^Bearer (.+)$/.exec(req.headers.authorization ?? "");
+        if (
+            !same(cookieValue(req, cookie()) ?? "", token) &&
+            !same(bearer?.[1] ?? "", token)
+        )
             return plain(
                 res,
                 401,

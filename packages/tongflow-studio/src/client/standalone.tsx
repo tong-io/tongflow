@@ -1,12 +1,16 @@
 /**
  * The Studio as a page of its own, served by `serve.ts`: no host around it,
  * so no chat column — the conversation happens in the agent host, and the
- * page follows the project that session's agent works in (`?session=`).
+ * page follows the project that session's agent works in (`?session=`). A
+ * link may instead name where to open: `?project=<id>&file=<key>`.
  */
 import { createRoot } from "react-dom/client";
 import { StudioShell } from "./StudioShell.tsx";
 
-const session = new URLSearchParams(location.search).get("session");
+const query = new URLSearchParams(location.search);
+const session = query.get("session");
+const project = query.get("project");
+const file = query.get("file");
 const locale = (navigator.language || "en").split("-")[0];
 
 // The canvas and the page palette key their dark scheme on `html.dark`.
@@ -22,5 +26,7 @@ if (root)
         <StudioShell
             locale={locale}
             {...(session ? { sessionId: session } : {})}
+            {...(project ? { project } : {})}
+            {...(file ? { file } : {})}
         />,
     );

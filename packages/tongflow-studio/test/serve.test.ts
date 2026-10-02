@@ -73,6 +73,18 @@ describe("serveStudio", () => {
         ).toBe(401);
     });
 
+    it("takes the token as a bearer credential from a client that is not a browser", async () => {
+        const token = new URL(server.url()).searchParams.get("token");
+        const ok = await get("/tongflow/projects", {
+            authorization: `Bearer ${token}`,
+        });
+        expect(ok.status).toBe(200);
+        const bad = await get("/tongflow/projects", {
+            authorization: "Bearer nope",
+        });
+        expect(bad.status).toBe(401);
+    });
+
     it("names its cookie after its port, so two studios do not share one", () => {
         expect(cookie.startsWith(`tongflow_studio_${server.port}=`)).toBe(true);
     });

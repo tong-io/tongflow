@@ -48,3 +48,12 @@ test("the studio's other tools are left alone", async ($, on) => {
     });
     expect(verdict.decision).toBe("allow");
 });
+
+test("the page link is always allowed: opening the panel never raises a dialog", async ($, on) => {
+    on("tool.check", () => ({ decision: "ask" }));
+    const verdict = await $.tool.check({
+        tool: "mcp__plugin_tongflow_studio__tongflow_studio_page",
+        input: {},
+    });
+    expect(verdict.decision).toBe("allow");
+});

@@ -37,9 +37,9 @@ Requirements: Node ≥ 22.19, **Python ≥ 3.10** on `PATH`, `git`, and `ffmpeg`
 
 ## The Studio page
 
-The MCP server also serves the Studio as a web page on a loopback port: the project's folder tree with previews, the workflow canvas (edit a workflow, run a node by hand), the runs drawer, uploads, and the **Plugins & keys** dialog. Ask the agent for it — the `tongflow_studio_page` tool returns the link — and it follows the project the agent is working in.
+The MCP server also serves the Studio as a web page on a loopback port: the project's folder tree with previews, the workflow canvas (edit a workflow, run a node by hand), the runs drawer, uploads, and the **Plugins & keys** dialog. Ask the agent for it — the `tongflow_studio_page` tool returns the link — and it follows the project the agent is working in. A link can also name where to open: `tongflow_studio_page({ project, file })` (or `?project=<id>&file=<path>` on the link) opens that file previewed, or that workflow on the canvas.
 
-The page reads and writes your project files and API keys, so it is not open to whatever else runs on the machine: it listens on `127.0.0.1` only, the link carries an access token (a new one each time the server starts) that is exchanged for a cookie, requests under any other host name are refused, and state-changing requests from another origin are refused.
+The page reads and writes your project files and API keys, so it is not open to whatever else runs on the machine: it listens on `127.0.0.1` only, the link carries an access token (a new one each time the server starts) that is exchanged for a cookie (a client that is not a browser sends it as `Authorization: Bearer`), requests under any other host name are refused, and state-changing requests from another origin are refused.
 
 `tongflow-studio serve` runs the page without an agent and prints its link.
 

@@ -46,15 +46,30 @@ function mcpView(studio: Studio, hasPage: boolean): string {
 }
 
 /** The one tool that belongs to this server rather than to the studio: the link to its own web page. */
-function pageTool(url: string): ToolSpec {
+function pageTool(link: (query: Record<string, string>) => string): ToolSpec {
     return tool({
         name: "tongflow_studio_page",
         description:
-            "The Studio web page of this studio: the project's folder tree with previews, the workflow canvas (edit and run a node by hand), the runs drawer, and the Plugins & keys dialog. Returns its link, which follows the project you are working in. " +
-            "Give the link to the user when they want to look at results, edit a workflow on the canvas, upload files or set an API key. The link opens on this machine only and carries an access token: pass it on as it is.",
-        parameters: {},
-        async execute() {
-            return { url };
+            "The Studio web page of this studio: the project's folder tree with previews, the workflow canvas (edit and run a node by hand), the runs drawer, and the Plugins & keys dialog. Returns its link. Without arguments the page follows the project you are working in; with `project` (and `file`) it opens on that project, with that file previewed or that workflow on the canvas. " +
+            "Give the link to the user when they want to look at a result, edit a workflow on the canvas, upload files or set an API key — name the file so the page opens on it. The link opens on this machine only and carries an access token: pass it on as it is.",
+        parameters: {
+            project: {
+                type: "string",
+                description: "Project id to open the page on.",
+            },
+            file: {
+                type: "string",
+                description:
+                    "Project-relative path of a file or workflow of that project to open, e.g. 'characters/mei/mei_ref.02.png' or 'characters/mei/mei_ref.tongflow.json'. Needs `project`.",
+            },
+        },
+        async execute(args) {
+            return {
+                url: link({
+                    ...(args.project ? { project: args.project } : {}),
+                    ...(args.project && args.file ? { file: args.file } : {}),
+                }),
+            };
         },
     });
 }
@@ -100,7 +115,10 @@ async function mcp(): Promise<void> {
         process.env.TONGFLOW_STUDIO_HTTP === "0"
             ? undefined
             : await serveStudio({ env, webDir: WEB_DIR, port: portFromEnv() })
-                  .then((server) => server.url({ session: sessionId }))
+                  .then(
+                      (server) => (query: Record<string, string>) =>
+                          server.url({ session: sessionId, ...query }),
+                  )
                   .catch((error: unknown) => {
                       log(
                           `tongflow-studio: Studio page not served: ${error instanceof Error ? error.message : String(error)}`,
