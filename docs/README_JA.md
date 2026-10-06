@@ -278,19 +278,19 @@ pnpm start:prod        # 一度ビルドしてから http://localhost:3000 で�
 
 **Node**（`pnpm` を含む）と、`PATH` 上に **Python 3.10+** インタープリタが必要です（`PYTHON` で特定のものを指定可能）。プラグインはローカルのPythonプロセスとして実行されます。TongFlow は自動的に各プラグイン用の隔離された venv を作成し、初回利用時に各プラグインの `requirements.txt` をインストールします——Pythonの手動設定は不要です。
 
-**`http://localhost:3000`** を開けば、キャンバスがすぐに使えます。その後は[セルフホストのセットアップ](#セルフホストのセットアッププラグインと認証情報)に従って設定してください（認証情報はアプリ内の**設定**ダイアログ、またはプロジェクトの `.env` に入力）。
+**`http://localhost:3000`** を開けば、キャンバスがすぐに使えます。サーバーは localhost からのアクセスにだけ応答します。別のマシンから使うには `TONGFLOW_AUTH_TOKEN` を設定し、`-H 0.0.0.0` で起動して、`http://<ホスト>:3000/?token=<トークン>` を一度開いてください。その後は[セルフホストのセットアップ](#セルフホストのセットアッププラグインと認証情報)に従って設定してください（認証情報はアプリ内の**設定**ダイアログ、またはプロジェクトの `.env` に入力）。
 
 ## Docker で起動
 
 セルフホスト用イメージが GHCR に公開されています——Node/Python/pnpm のセットアップは不要です：
 
 ```bash
-docker run -d -p 3000:3000 \
+docker run -d -p 127.0.0.1:3000:3000 \
   -v tongflow-data:/data -v tongflow-plugins:/plugins \
   ghcr.io/tong-io/tongflow:latest
 ```
 
-その後 **`http://localhost:3000`** を開きます。または Compose で（本リポジトリの [`docker-compose.yml`](../docker-compose.yml) をクローンします）：
+コンテナはログにログイン用リンク（`http://localhost:3000/?token=…`）を出力します。`docker logs <コンテナ>` で確認し、一度開いてください。トークンはデータボリュームに自動生成されます。自分で決める場合は `-e TONGFLOW_AUTH_TOKEN=…` を指定します。または Compose で（本リポジトリの [`docker-compose.yml`](../docker-compose.yml) をクローンします）：
 
 ```bash
 docker compose up -d

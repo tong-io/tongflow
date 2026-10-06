@@ -278,19 +278,19 @@ pnpm start:prod        # builds once, then serves at http://localhost:3000
 
 Requires **Node** (with `pnpm`) and a **Python 3.10+** interpreter on your `PATH` (set `PYTHON` to point at a specific one). Plugins run as local Python processes; TongFlow provisions an isolated venv for them automatically and installs each plugin's `requirements.txt` on first use — no manual Python setup.
 
-Open **`http://localhost:3000`** and the canvas is live. Then follow [Self-host setup](#self-host-setup-plugins--credentials) (credentials go in the in-app **Settings** dialog, or a project `.env`).
+Open **`http://localhost:3000`** and the canvas is live. The server only answers on localhost; to reach it from another machine, set `TONGFLOW_AUTH_TOKEN`, start it with `-H 0.0.0.0`, and open `http://<host>:3000/?token=<token>` once. Then follow [Self-host setup](#self-host-setup-plugins--credentials) (credentials go in the in-app **Settings** dialog, or a project `.env`).
 
 ## Run with Docker
 
 A self-host image is published to GHCR — no Node/Python/pnpm setup required:
 
 ```bash
-docker run -d -p 3000:3000 \
+docker run -d -p 127.0.0.1:3000:3000 \
   -v tongflow-data:/data -v tongflow-plugins:/plugins \
   ghcr.io/tong-io/tongflow:latest
 ```
 
-Then open **`http://localhost:3000`**. Or with Compose (clones this repo's [`docker-compose.yml`](docker-compose.yml)):
+The container prints a login link (`http://localhost:3000/?token=…`) to its logs — open it once (`docker logs <container>`); the token is generated into the data volume, or set your own with `-e TONGFLOW_AUTH_TOKEN=…`. Or with Compose (clones this repo's [`docker-compose.yml`](docker-compose.yml)):
 
 ```bash
 docker compose up -d
