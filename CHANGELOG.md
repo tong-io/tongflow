@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.6] - 2026-10-06
+
+### Security
+
+- **Self-hosted servers now require an access token.** Every page and API
+  route goes through a token check (`TONGFLOW_AUTH_TOKEN`). Without a token
+  the server only answers on localhost, and `pnpm dev` / `pnpm start` listen
+  on `127.0.0.1`. Earlier versions answered plugin install, task and
+  settings requests from any network client — upgrade if your server is
+  reachable from other machines.
+- **Docker image starts with a token.** When `TONGFLOW_AUTH_TOKEN` is not
+  set, the container generates one into `/data/auth-token` and prints the
+  login link (`http://localhost:3000/?token=…`) to its logs; open it once.
+  Compose and the README now publish the port on `127.0.0.1` only.
+
 ### Added
 
 - **Voice / timbre replacement works** — new official plugin

@@ -1,6 +1,6 @@
 {
     "name": "tongflow-app",
-    "version": "0.3.5",
+    "version": "0.3.6",
     "description": "TongFlow — the open-source Modality-First GenAI Platform: AI workflows across text, image, audio, video and 3D",
     "author": "tong-io",
     "keywords": [
