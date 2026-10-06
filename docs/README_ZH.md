@@ -278,19 +278,19 @@ pnpm start:prod        # 先构建一次,再启动于 http://localhost:3000
 
 需要 **Node**（含 `pnpm`）以及 `PATH` 上有一个 **Python 3.10+** 解释器（可用 `PYTHON` 指定具体的那个）。插件以本地 Python 进程运行；TongFlow 会自动为它们创建隔离的 venv，并在首次使用时安装各插件的 `requirements.txt`——无需手动配置 Python。
 
-打开 **`http://localhost:3000`**，画布已就绪。然后按照[自托管配置](#自托管配置插件与凭据)完成设置（凭据填在 app 内的**设置**对话框，或用项目 `.env`）。
+打开 **`http://localhost:3000`**，画布已就绪。服务默认只响应本机;想从别的机器访问,先设置 `TONGFLOW_AUTH_TOKEN`,用 `-H 0.0.0.0` 启动,再打开一次 `http://<主机>:3000/?token=<token>`。然后按照[自托管配置](#自托管配置插件与凭据)完成设置（凭据填在 app 内的**设置**对话框，或用项目 `.env`）。
 
 ## 用 Docker 启动
 
 GHCR 上已发布自托管镜像——无需配置 Node/Python/pnpm：
 
 ```bash
-docker run -d -p 3000:3000 \
+docker run -d -p 127.0.0.1:3000:3000 \
   -v tongflow-data:/data -v tongflow-plugins:/plugins \
   ghcr.io/tong-io/tongflow:latest
 ```
 
-然后打开 **`http://localhost:3000`**。或者用 Compose（会克隆本仓库的 [`docker-compose.yml`](../docker-compose.yml)）：
+容器会在日志里打印一个登录链接(`http://localhost:3000/?token=…`),用 `docker logs <容器>` 找到后打开一次即可;token 自动生成并保存在数据卷里,也可以用 `-e TONGFLOW_AUTH_TOKEN=…` 自己指定。或者用 Compose（会克隆本仓库的 [`docker-compose.yml`](../docker-compose.yml)）：
 
 ```bash
 docker compose up -d

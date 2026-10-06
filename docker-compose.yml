@@ -1,5 +1,5 @@
 # Self-host TongFlow web with Docker Compose.
-#   docker compose up -d   →   http://localhost:3000
+#   docker compose up -d   →   the login link is in `docker compose logs tongflow`
 #
 # Uses the prebuilt GHCR image by default. To build locally instead, comment out
 # `image:` and uncomment `build: .`.
@@ -12,11 +12,13 @@ services:
     image: ghcr.io/tong-io/tongflow:latest
     # build: .
     ports:
-      - "3000:3000"
+      - "127.0.0.1:3000:3000"
     volumes:
       - tongflow-data:/data
       - tongflow-plugins:/plugins
     environment:
+      # Access token; when empty the container generates one into /data/auth-token.
+      TONGFLOW_AUTH_TOKEN: ${TONGFLOW_AUTH_TOKEN:-}
       MODAL_TOKEN_ID: ${MODAL_TOKEN_ID:-}
       MODAL_TOKEN_SECRET: ${MODAL_TOKEN_SECRET:-}
       OPENROUTER_API_KEY: ${OPENROUTER_API_KEY:-}

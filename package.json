@@ -30,10 +30,10 @@
     },
     "scripts": {
         "predev": "pnpm gen:abi",
-        "dev": "next dev",
+        "dev": "next dev -H 127.0.0.1",
         "prebuild": "pnpm gen:abi",
         "build": "next build",
-        "start": "next start",
+        "start": "next start -H 127.0.0.1",
         "start:prod": "pnpm build && pnpm start",
         "plugins:install": "node scripts/install-official-plugins.mjs",
         "db:generate": "drizzle-kit generate",

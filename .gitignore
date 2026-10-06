@@ -59,7 +59,6 @@ __pycache__/
 # the open-source defaults). They must never be committed here.
 /src/ext/
 /src/app/(ext)/
-/src/middleware.ts
 /src/instrumentation.ts
 
 # Cloud shell build artifacts for serverless targets (linked in at build

@@ -58,5 +58,8 @@ COPY --from=builder /app/sdk ./sdk
 # /data: SQLite db + uploads + settings.json + plugin venv. /plugins: installed plugins.
 VOLUME ["/data", "/plugins"]
 
+COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
+
 EXPOSE 3000
+ENTRYPOINT ["docker-entrypoint.sh"]
 CMD ["node", "server.js"]
