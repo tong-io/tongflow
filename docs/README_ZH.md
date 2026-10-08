@@ -238,6 +238,7 @@ TongFlow **桌面版**是一个轻量（约 10 MB）的壳应用，直接加载�
 - [tongflow-modal-qwen-image-edit](https://github.com/tong-io/tongflow-modal-qwen-image-edit) — Qwen-Image 2.1：文生图、指令式图像编辑、多图融合（最多 10 张参考图）与透明背景抠图（无头 ComfyUI，int8；权重 Qwen Research License，仅限非商用）
 - [tongflow-modal-boogu](https://github.com/tong-io/tongflow-modal-boogu) — Boogu-Image-0.1（fp8）文本生图（密集中英文字）与单图编辑
 - [tongflow-modal-infinitetalk](https://github.com/tong-io/tongflow-modal-infinitetalk) — InfiniteTalk 音频驱动口型同步（音频 + 图片 / 视频 → 数字人视频）
+- [tongflow-modal-longcat-avatar](https://github.com/tong-io/tongflow-modal-longcat-avatar) — LongCat-Video-Avatar 1.5（美团）音频驱动数字人：人像 + 语音 → 口型同步视频，Whisper 音频编码、8 步蒸馏，最长 60 秒（备选）
 - [tongflow-modal-wan-animate](https://github.com/tong-io/tongflow-modal-wan-animate) — Wan-Animate-2 端到端角色动画（角色图 + 驱动视频，免姿态提取）
 - [tongflow-modal-scail2](https://github.com/tong-io/tongflow-modal-scail2) — SCAIL-2 可控角色动画（角色图 + 驱动视频），以及换角色
 - [tongflow-modal-minimax-h3](https://github.com/tong-io/tongflow-modal-minimax-h3) — MiniMax-H3 33B 视频生成，原生立体声（文生 / 首尾帧 / 多图 / 全模态参考）

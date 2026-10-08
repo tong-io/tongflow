@@ -238,6 +238,7 @@ Google または WeChat でサインインすれば、すぐに創作を始め�
 - [tongflow-modal-qwen-image-edit](https://github.com/tong-io/tongflow-modal-qwen-image-edit) — Qwen-Image 2.1：テキスト → 画像、指示ベースの画像編集、マルチ画像融合（最大 10 枚の参照画像）、背景除去（透過 PNG）（ヘッドレス ComfyUI、int8。重みは Qwen Research License、非商用のみ）
 - [tongflow-modal-boogu](https://github.com/tong-io/tongflow-modal-boogu) — Boogu-Image-0.1（fp8）テキストから画像生成（高密度な多言語テキスト）と単一参照画像編集
 - [tongflow-modal-infinitetalk](https://github.com/tong-io/tongflow-modal-infinitetalk) — InfiniteTalk 音声駆動リップシンク（音声 + 画像 / 動画 → デジタルヒューマン動画）
+- [tongflow-modal-longcat-avatar](https://github.com/tong-io/tongflow-modal-longcat-avatar) — LongCat-Video-Avatar 1.5（Meituan）音声駆動のトーキング動画：人物画像 + 音声 → リップシンク動画、Whisper 音声エンコーダ・8 ステップ蒸留、最長 60 秒（代替）
 - [tongflow-modal-wan-animate](https://github.com/tong-io/tongflow-modal-wan-animate) — Wan-Animate-2 エンドツーエンドのキャラクターアニメーション（キャラクター画像 + 駆動動画、姿勢抽出なし）
 - [tongflow-modal-scail2](https://github.com/tong-io/tongflow-modal-scail2) — SCAIL-2 制御可能なキャラクターアニメーション（画像 + 駆動動画）とキャラクター置換
 - [tongflow-modal-minimax-h3](https://github.com/tong-io/tongflow-modal-minimax-h3) — MiniMax-H3 33B 動画生成、ネイティブステレオ音声（テキスト / 最初と最後のフレーム / 複数画像 / マルチ参照）
