@@ -238,6 +238,7 @@ Aggregators — one key, many third-party models across labs:
 - [tongflow-modal-qwen-image-edit](https://github.com/tong-io/tongflow-modal-qwen-image-edit) — Qwen-Image 2.1: text-to-image, instruction editing, multi-image fusion (up to 10 references) and transparent background removal (headless ComfyUI, int8; weights Qwen Research Licence, non-commercial)
 - [tongflow-modal-boogu](https://github.com/tong-io/tongflow-modal-boogu) — Boogu-Image-0.1 (fp8) text-to-image (dense bilingual text) & single-reference image editing
 - [tongflow-modal-infinitetalk](https://github.com/tong-io/tongflow-modal-infinitetalk) — InfiniteTalk audio-driven lip-sync (audio + image / video → talking-head video)
+- [tongflow-modal-longcat-avatar](https://github.com/tong-io/tongflow-modal-longcat-avatar) — LongCat-Video-Avatar 1.5 (Meituan) audio-driven talking video: portrait + speech → lip-synced video, Whisper audio encoder, 8-step distilled, up to 60 s (alternative)
 - [tongflow-modal-wan-animate](https://github.com/tong-io/tongflow-modal-wan-animate) — Wan-Animate-2 end-to-end character animation (character image + driving video, no pose extraction)
 - [tongflow-modal-scail2](https://github.com/tong-io/tongflow-modal-scail2) — SCAIL-2 controlled character animation (image + driving video), and character swap
 - [tongflow-modal-minimax-h3](https://github.com/tong-io/tongflow-modal-minimax-h3) — MiniMax-H3 33B video generation with native stereo audio (text / first- & last-frame / multi-image / omni-reference)
