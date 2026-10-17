@@ -10,9 +10,9 @@
     <a href="https://discord.gg/K7V8az94Zf"><img src="https://img.shields.io/badge/Discord-join-5865F2?logo=discord&logoColor=white" alt="Discord" /></a>
     <a href="https://github.com/tong-io/tongflow/releases"><img src="https://img.shields.io/github/v/release/tong-io/tongflow?logo=github" alt="Latest Release" /></a>
   </p>
-  <p>
-    <video src="https://github.com/user-attachments/assets/946592d3-2e48-4948-aaa4-4b6ab3156209"></video>
-  <p>
+
+https://github.com/user-attachments/assets/946592d3-2e48-4948-aaa4-4b6ab3156209
+
   <p>
     <strong>English</strong> · <a href="docs/README_ZH.md">简体中文</a> · <a href="docs/README_JA.md">日本語</a>
   </p>
