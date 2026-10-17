@@ -11,7 +11,7 @@
     <a href="https://github.com/tong-io/tongflow/releases"><img src="https://img.shields.io/github/v/release/tong-io/tongflow?logo=github" alt="最新リリース" /></a>
   </p>
   <p>
-    <video src="https://github.com/user-attachments/assets/407a7e7b-2d44-4c90-8016-33d0a9f5e7d5"></video>
+    <video src="https://github.com/user-attachments/assets/20b280d2-6d65-4167-96b0-e844963bc94e"></video>
   <p>
   <p>
     <a href="../README.md">English</a> · <a href="README_ZH.md">简体中文</a> · <strong>日本語</strong>
