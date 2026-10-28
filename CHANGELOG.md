@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- **Unlimited-OCR plugin moves to Unlimited OCR 2** — Baidu released
+  `baidu/Unlimited-OCR-2` (MIT) on 2026-10-27. Its sparse attention keeps
+  per-step cost flat as documents grow and its context is 128K (v1: 32K), so
+  long PDFs are parsed in 48-page windows with ~2.4K output tokens per page
+  instead of v1's ~270, which cut dense pages short. The plugin also strips
+  the model's grounding markup from the Markdown. Same `parse-document` slot
+  and node; the new weights download on first use.
+
 ## [0.3.6] - 2026-10-06
 
 ### Security
