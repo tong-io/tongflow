@@ -372,6 +372,12 @@ npx @deepseek-ai/dsh@next web
 
 完整的开发流程——ABI、`@node_slot` 装饰器、SDK、目录结构以及如何发布，请见 **[docs/plugins.md](plugins.md)**。
 
+### 非官方插件
+
+用法和官方插件一样，只是默认不装，多半是模型许可证的原因。想装的话，把 git 地址贴进 Studio 的 **插件与密钥** 对话框；自己部署的话，直接 `git clone` 到 `plugins/` 下面。
+
+- [tongflow-modal-minimax-h3-image](https://github.com/tong-io/tongflow-modal-minimax-h3-image) — MiniMax-H3-Image 33.1B，跑在你自己的 Modal 上（B200）：文生图、改图、多图融合（最多 16 张参考图），6 步出图，最高约 2000 万像素。⚠️ 权重许可证不覆盖美国、欧盟、英国和韩国，拿它给别人提供服务还要 MiniMax 书面授权，用之前先看[许可证](https://huggingface.co/MiniMaxAI/MiniMax-H3-Image/blob/main/LICENSE)。
+
 ## 社区
 
 加入 **[Discord](https://discord.gg/K7V8az94Zf)** 或扫描下方**微信群**二维码。
