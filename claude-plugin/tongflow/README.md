@@ -1,6 +1,8 @@
 # TongFlow for Claude Code
 
-A media studio inside Claude Code: Claude plans a project as plain folders, and makes every image / voice / music / video / 3D asset by running a saved TongFlow workflow that sits next to its outputs.
+**TongFlow for agents: your agent builds and runs TongFlow workflows. Each run is recorded, and people can open, edit and rerun the result.**
+
+Inside Claude Code, Claude plans a project as plain folders, and makes every image / voice / music / video / 3D asset by running a saved TongFlow workflow that sits next to its outputs.
 
 ```
 /plugin marketplace add tong-io/tongflow

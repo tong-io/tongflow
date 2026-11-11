@@ -1,9 +1,10 @@
 # tongflow
 
-**The Python SDK for [TongFlow](https://tongflow.com)** — the open-source Modality-First GenAI Platform.
+**The Python SDK for [TongFlow](https://www.tongflow.com)** — the Agent-Human-Friendly, Modality-First, Enterprise-Level GenAI Workflow Platform.
 
-- 🌐 Cloud studio & homepage: **https://tongflow.com**
-- 📦 Source, desktop app & docs: **https://github.com/tong-io/tongflow**
+- 🌐 Website: **https://www.tongflow.com**
+- ▶️ Try it online: **https://app.tongflow.com**
+- 📦 Source, desktop app & docs: **https://github.com/tong-io/tongflow** (developer guide: [docs/developers.md](https://github.com/tong-io/tongflow/blob/main/docs/developers.md))
 
 `pip install tongflow` gives you the `tongflow` import package. It has two uses:
 

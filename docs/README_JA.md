@@ -1,7 +1,11 @@
 <div align="center">
-  <img src="../public/logo.svg" alt="TongFlow" width="320" />
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="../public/brand/tongflow-wordmark-white.svg" />
+    <img src="../public/brand/tongflow-wordmark.svg" alt="TongFlow" width="320" />
+  </picture>
 
-  <h1>TongFlow — オープンソースの Modality-First GenAI プラットフォーム</h1>
+  <h1>TongFlow — 人とAIエージェントが協働する、モダリティファーストの企業向け生成AIワークフロープラットフォーム</h1>
+  <p>AGPL-3.0のオープンソースです。商用ライセンスもご用意しています。</p>
   <p>
     <a href="https://github.com/tong-io/tongflow/stargazers"><img src="https://img.shields.io/github/stars/tong-io/tongflow?style=flat&logo=github" alt="GitHub Stars" /></a>
     <a href="https://github.com/tong-io/tongflow/blob/main/LICENSE"><img src="https://img.shields.io/badge/License-AGPL--3.0-blue.svg" alt="License" /></a>
@@ -10,19 +14,10 @@
     <a href="https://discord.gg/K7V8az94Zf"><img src="https://img.shields.io/badge/Discord-参加-5865F2?logo=discord&logoColor=white" alt="Discord" /></a>
     <a href="https://github.com/tong-io/tongflow/releases"><img src="https://img.shields.io/github/v/release/tong-io/tongflow?logo=github" alt="最新リリース" /></a>
   </p>
-
-https://github.com/user-attachments/assets/20b280d2-6d65-4167-96b0-e844963bc94e
-
   <p>
     <a href="../README.md">English</a> · <a href="README_ZH.md">简体中文</a> · <strong>日本語</strong>
   </p>
 </div>
-
-**テキストも、音声も、その先も。ひとつのワークフローに。**
-
-テキスト、画像、音声、動画、3D。どんな処理をつなぎ、何を作るかは、あなた次第。各ステップで使うモデルも選べます。得られた結果は、そのまま次のデータになります。
-
-オープンソース · モデルを選べる · セルフホスト対応 · [tongflow.com](https://www.tongflow.com/ja) · [キャンバスを開く](https://app.tongflow.com)
 
 ## スポンサー
 
@@ -32,7 +27,7 @@ https://github.com/user-attachments/assets/20b280d2-6d65-4167-96b0-e844963bc94e
       <a href="https://metaso.cn/minimax-h3/?s=TongFlow" target="_blank" rel="noopener noreferrer"><img src="assets/sponsor-metaso.png" width="163" alt="Metaso / 秘塔科技"></a>
     </td>
     <td>
-      <strong>MiniMax H3 動画生成 API｜秘塔科技（Metaso）</strong> 秘塔科技の MiniMax H3 動画生成は <strong>768P が 0.09 元/秒、2K が 0.15 元/秒</strong>。ネイティブ 2K と音声同期に対応し、API は <strong>OpenAI 互換</strong>、<strong>ComfyUI</strong> からも使えます。GPU を自分で用意する必要はありません。 🎁 <a href="https://metaso.cn/minimax-h3/?s=TongFlow" target="_blank" rel="noopener noreferrer">TongFlow 専用リンク</a>から登録すると、無料クレジットと特典を受け取れます。
+      <strong><a href="https://metaso.cn/minimax-h3/?s=TongFlow" target="_blank" rel="noopener noreferrer">秘塔科技（Metaso）</a></strong>：OpenAI互換のAPIで使える動画生成サービスです。ComfyUIからも使えます。
     </td>
   </tr>
   <tr>
@@ -40,376 +35,109 @@ https://github.com/user-attachments/assets/20b280d2-6d65-4167-96b0-e844963bc94e
       <a href="https://www.infistar.cc/register?aff=Y8S76PTA&amp;ref_source=link" target="_blank" rel="noopener noreferrer"><img src="assets/sponsor-infistar.png" width="96" alt="Infistar / 无限星河AI"></a>
     </td>
     <td>
-      <strong>キャンバス全体をひとつの Key で｜Infistar（无限星河AI）</strong> OpenAI 互換のゲートウェイです。Key ひとつ・残高ひとつで、キャンバスのテキスト / 画像 / 動画 / 文字起こしノードをまかなえます。GPT-6、Claude Opus 5、Gemini 3 Pro、Grok、DeepSeek に加えて、中国系モデルの品揃えが厚いのが特徴です（Qwen、GLM、Doubao、MiniMax、Kimi、StepFun）。画像は GPT Image 2.5、Seedream 5、Qwen-Image、動画は Wan / Seedance。<strong>画像は 1 枚 0.06 元から。</strong><a href="https://github.com/tong-io/tongflow-router-infistar">tongflow-router-infistar</a> プラグインから利用できます。🎁 <a href="https://www.infistar.cc/register?aff=Y8S76PTA&amp;ref_source=link" target="_blank" rel="noopener noreferrer">TongFlow 専用リンク</a>から登録すると 5 ドル分のお試しクレジットがもらえます。
+      <strong><a href="https://www.infistar.cc/register?aff=Y8S76PTA&amp;ref_source=link" target="_blank" rel="noopener noreferrer">无限星河AI（Infistar）</a></strong>：OpenAI互換のモデルゲートウェイです。1つのキーで、キャンバス上のテキスト・画像・動画・文字起こしのノードを使えます。
     </td>
   </tr>
 </table>
 
-## Demo デモ
+## 4つの課題
 
-| ワークフローのスクリーンショット | 出力結果 |
-| :--: | :--: |
-| **基本** — テキストを入力（追加）し、画像を生成（変換）、さらに1枚に融合（結合）。<br/><img src="https://file.tongflow.com/public/demos/basic.png" width="620" alt="ワークフロー" /> | <img src="https://file.tongflow.com/public/demos/basic_result.png" width="200" alt="結果" /> |
-| **中級** — （テーマ追加 → 台本生成 → 音声生成） + （人物の説明 → 画像生成） → リップシンク動画を生成 = デジタルヒューマンのナレーション。<br/><img src="https://file.tongflow.com/public/demos/digitalhuman.png" width="620" alt="ワークフロー" /> | <video src="https://github.com/user-attachments/assets/a803394d-0ccf-4023-9b06-5c1581345758" width="200"></video> |
-| **上級** — 歌詞生成 + 楽曲生成 + 人物生成 + シーン生成 + 絵コンテ生成 → MV生成<br/><img src="https://file.tongflow.com/public/demos/mv.png" width="620" alt="ワークフロー" /> | <video src="https://github.com/user-attachments/assets/2bc71e3c-3ed6-48b2-81e7-82ad5976d801" width="200"></video> |
+- **AIエージェント**：どのように作業したのか、説明できない。
+- **現場の社員**：チャット欄で一問一答するだけで終わってしまう。
+- **業務の素材**：画像、文書、音声、動画が、それぞれ別のツールに分かれている。
+- **管理者**：誰が使い、いくらかかり、データがどこへ行ったのか、把握できない。
 
-各ステップの出力はキャンバスに残り、次のデータになります。生成した画像から分岐する、文字起こしを次の処理に渡す、あるノードのモデルだけ差し替える——まわりのワークフローはそのままです。
+## 4つの強み
 
-## クイックスタート
+### AIエージェント対応 `Agent-Friendly`
 
-TongFlow の使い方は3つ。どれも同じオープンソースのコアを共有します。**TongFlow クラウド**（デスクトップ版、またはブラウザで [app.tongflow.com](https://app.tongflow.com)）、**セルフホスト**（[ソースコードから](#ソースコードから起動)または [Docker で](#docker-で起動)）、**エージェントと組み立てる**（[`tongflow` npm パッケージ](../packages/tongflow/README.md)または [Claude Code・MCP クライアント・dsh に組み込む](#自分のエージェントに組み込む)）。
+**AIエージェントはフローの中で作業し、各ステップが記録されます。**
 
-TongFlow **デスクトップ版**は、クラウドスタジオ **[app.tongflow.com](https://app.tongflow.com)** を直接読み込む軽量（約 10 MB）のシェルアプリです——インストールしてサインインすれば、すぐに創作を始められます。クラウドスタジオはブラウザから直接開くこともできます。
+- AIエージェントと人が、同じツールでフローを組み立てます。
+- AIエージェントの成果物はフローのファイルです。人が開いて、修正し、もう一度実行できます。
+- 実行のたびに実行履歴が残ります。費用のかかる実行の前には、人の承認を求めます。
 
-### Step 1 — デスクトップ版をインストール
+個別対応として、重要なステップでの人による確認と、リモートのMCPサーバーもご用意しています。
 
-対応プラットフォームのインストーラーをダウンロードし、インストールして起動します。
+**結果**：AIエージェントの成果物を、確認・追跡できます。
 
-- **macOS（Universal — Apple Silicon / Intel 共通）：** [TongFlow-mac-universal.dmg](https://github.com/tong-io/tongflow/releases/latest/download/TongFlow-mac-universal.dmg)
-- **Windows：** [TongFlow-win-x64.msi](https://github.com/tong-io/tongflow/releases/latest/download/TongFlow-win-x64.msi)
+### 現場で使える `Human-Friendly`
 
-すべてのバージョンは [Releases](https://github.com/tong-io/tongflow/releases/latest) ページを参照してください。
+**コードを書かなくても、現場の知見をフローにできます。**
 
-> **macOS をお使いの方へ：** インストーラーはまだ Apple の公証（notarization）を受けていないため、初回起動時に Gatekeeper にブロックされます（「"TongFlow"は壊れているため開けません」と表示されます）。アプリを「アプリケーション」フォルダに移動した後、ターミナルで以下のコマンドを一度実行すると正常に開けます：
->
-> ```bash
-> xattr -cr /Applications/TongFlow.app
-> ```
->
-> インストーラーは必ずこのページから直接ダウンロードしてください——WeChat などのチャットアプリ経由で転送されたファイルは、リネームや隔離フラグの再付与が行われる場合があります。
+- 3つの操作：追加・変換・組み合わせ。
+- 各ステップの結果はキャンバスに残り、途中の結果から続けられます。
+- フローは繰り返し使えます。素材を入れ替えて再実行したり、同僚に渡したりできます。
 
-### Step 2 — サインインして創作を開始
+**結果**：社員がAIを使いこなせるようになります。
 
-Google または WeChat でサインインすれば、すぐに創作を始められます——プラグインと実行はクラウド側で管理されます。
+### モダリティファースト `Modality-First`
 
-> **完全ローカル・アカウント不要の TongFlow をお望みですか？** セルフホストをご利用ください——[ソースコードから起動](#ソースコードから起動)または [Docker で起動](#docker-で起動)を参照し、[セルフホストのセットアップ](#セルフホストのセットアッププラグインと認証情報)に従って設定してください。（v0.1.13 以前のデスクトップ版は完全なローカルランタイムを同梱していました。それらのインストーラーは [Releases](https://github.com/tong-io/tongflow/releases) ページに残っています。）
+**素材と結果から考え、モデルは最後に選びます。**
 
-## Modality-First：モダリティから考える
+- テキスト、画像、音声、動画、3D、文書、リンクの7つのモダリティが、1つのキャンバス上でつながります。
+- 機能とモデルを分けているため、各ステップの実装を入れ替えられます。
+- 60以上の機能と50以上の公式プラグインがあり、商用API、モデルゲートウェイ、オープンモデルを使えます。
 
-モダリティとは、テキスト、画像、音声、動画、3D、ドキュメント、URL といった情報の形態のこと。TongFlow では、それらをワークフローの基本単位にしています。まず何ができるかを考え、モデル選びはその次に。ひとつのステップは、3つの別々の判断でできています。
+**結果**：モデルを替えても、フローはそのままです。
 
-| | 問い | 例 |
-| :-- | :-- | :-- |
-| **データ** | 手元には何がある？ | ドキュメント、写真、録音、アイデア。 |
-| **機能** | 次に何ができる？ | 理解、生成、変換、組み合わせ、分割。 |
-| **実行** | どのモデルに任せる？ | そのステップに対応するプラグインとモデルを選ぶ。 |
+### エンタープライズ対応 `Enterprise-Level`
 
-- **結果が、次の起点になる。** データは独立したノードとして存在します。アップロードした画像も、生成した画像も、対応する次の処理へ。得られた結果から新しい方向に進めます。
-- **機能とモデルを分けて考える。** ステップの役割と、それを実行するプラグインを別々に記録します。対応する実装に切り替えても、周囲のワークフロー構造はそのままです。
-- **基本操作は4つ。** 追加、変換、組み合わせ、分割・一括処理。理解も生成も加工も、同じノードと接続ルールで扱います。生成は、その中のひとつの操作です。
-- **人もエージェントも、同じ構造で。** キャンバス、エクスポーター、エージェント用ツールは共通のノード定義を使います。画面でも `tongflow` パッケージでも構築でき、Claude Code、MCP クライアント、dsh のどれでも、エージェントが作ったワークフローを開いて編集し、もう一度実行できます。
-- **オープンなエコシステム。** ABI は各機能の入出力の契約だけを定め、誰が実装するかは問いません。どのプラットフォームも同じ方法でプラグインを公開でき、下記の公式プラグインは機能一覧のほぼすべてのノードをカバーしています。
+**見える、管理できる、あとから確認できる。**
 
-続きを読む：[TongFlow がモダリティから考える理由](https://www.tongflow.com/ja/blog/tongflow-why-modality-first)
+- お客様ご自身の環境に導入できます。
+- 実行履歴に、フロー、各ステップ、使ったプラグインとモデル、入力と出力、時刻を記録します。
+- コアはオープンソースです。モデルと計算資源は、お客様ご自身の契約で使います。
 
-## 実装済み機能
+**個別対応**（プライベート導入の際に、お客様の要件に合わせて開発・提供します。）：
 
-以下の各ノードは ABI の機能に対応し、4つの基本操作ごとにまとめています。データ（テキスト、画像、音声、動画、3D、ドキュメント、URL）が、それらをつなぐノードです。
+1. アカウントと認証の連携（統合認証、シングルサインオン）
+2. 段階的な権限管理
+3. 有料実行の承認（申請・承認・実行）
+4. 実行ログと監査：人・フロー・期間ごとの検索とエクスポート
+5. MCPサーバー（URLで利用できるリモートサーバー）
+6. 重要なステップでの人による確認
+7. ローカルモデルや自社の計算資源との接続、データを社内環境の外に出さない運用
 
-> ✅ = すぐに使える（公式プラグインあり）· ⬜ = キャンバスにノードはあるが、公式プラグインは未提供（計画中）。
+**結果**：プライベート導入により、AIを組織で管理できるようになります。
 
-### 追加
+## 導入と活用
 
-- ✅ **テキスト入力**: 文字を入力してテキストノードを追加。
-- ✅ **画像を追加**: ローカルファイルを選択して画像ノードを追加。
-- ✅ **写真を撮影**: デバイスのカメラで撮影して画像ノードを追加。
-- ✅ **スケッチを追加**: キャンバス上に描画して画像ノードを追加。
-- ✅ **音声を追加**: ローカルの音声ファイルを選択して音声ノードを追加。
-- ✅ **録音**: マイクで録音して音声ノードを追加。
-- ✅ **動画を追加**: ローカルの動画ファイルを選択して動画ノードを追加。
-- ✅ **動画を録画**: カメラで録画して動画ノードを追加。
-- ✅ **ドキュメントを追加**: ローカルファイルを選択してドキュメントノードを追加。
-- ✅ **リンクを追加**: リンクからページを取得し、テキスト・画像・音声・動画ノードを追加。
-- ✅ **3Dモデルを追加**: ローカルのモデルファイルを選択して3Dモデルノードを追加。
+**活用の場面**
 
-### 変換
+- **製造業の現場**：点検の写真と口述メモから、点検報告書の下書きを作ります。
+- **自治体・企業の事務**：会議の録音から、議事録とお知らせ文の下書きを作ります。
+- **マーケティングと新商品の展開**：商品画像と訴求ポイントから、文案、イメージ画像、ナレーション、短い動画を作ります。
+- **海外向け資料・研修資料の多言語化**：資料、音声、動画を複数の言語に展開します。
 
-#### テキスト
+**アプリモード**：組み立てたフローをフォームにして、より多くの人に使ってもらえます。スマートフォンのブラウザでも開けます。
 
-- ✅ **生成 / 書き換え**: プロンプトに基づいて文章を作成または編集。
+**2つの使い方**
 
-#### 画像
+- **セルフホスト**：ソースコードまたはDockerで導入します。AGPL-3.0のオープンソースで、商用ライセンスもあります。[開発者向けドキュメント（英語）](developers.md)をご覧ください。
+- **プライベート導入**：お客様の環境に専用の生成AIワークフロープラットフォームを構築し、個別対応の各項目を要件に合わせて提供します。[導入のご相談](https://www.tongflow.com/ja/contact)。
 
-- ✅ **画像生成**: テキストから画像を生成。
-- ✅ **画像編集**: 部分的な再描画、編集、または指示に基づく描き直し。
-- ✅ **画像理解**: 画像から説明・質問応答・キャプションを生成。
-- ✅ **画像超解像**: 拡大してより鮮明なディテールを得る。
-- ✅ **ポーズ検出**: 308 キーポイントの全身スケルトンオーバーレイ（身体・両手・顔）。
-- ✅ **身体部位セグメンテーション**: 29 クラスの人体パーシング。
-- ✅ **表面法線**: ピクセル単位の法線マップ——人物にもシーン全体にも対応。
-- ✅ **前景マッティング**: 人物や顕著な被写体を透過 PNG として切り抜き。
-
-#### 動画
-
-- ✅ **動画生成**: テキストから動画を生成。
-- ✅ **画像から動画**: 静止画を動かす。
-- ✅ **最初/最後のフレームから動画**: 2枚のキーフレームを補間してクリップを生成。
-- ✅ **複数画像から動画**: 複数の参照画像とテキストを融合して新しい動画を生成。
-- ✅ **マルチ参照から動画**: 画像・動画・音声の参照を組み合わせ（テキスト付き）、ステレオ音声入りの動画を一度に生成。
-- ✅ **動画理解**: 動画から要約や説明を生成。
-- ✅ **動画超解像**: より高解像度の動画を出力。
-- ✅ **最初/最後のフレームを抽出**: フレームを画像として抽出。
-- ✅ **動画編集**: テキスト指示で動画を編集。
-- ✅ **字幕除去**: 動画から字幕を消去。
-- ✅ **ウォーターマーク除去**: 動画からウォーターマークを除去。
-
-#### 音声
-
-- ✅ **音楽生成**: テキストから音楽を生成。参照音声による誘導にも対応。
-- ✅ **オーディオ生成**: 1 つのプロンプトから話し声・効果音・環境音を一度に生成。参照ボイスも指定可能。
-- ✅ **音声理解**: 音声クリップ（音楽・スピーチ・環境音）をテキストで説明。
-- ✅ **音楽リペイント**: 曲の指定区間を再生成。
-- ✅ **音楽カバー**: 説明文や参照曲でスタイルを変えて再構成。
-- ✅ **トラック追加 / 編曲補完**: 既存ミックスに新しいトラックを生成、または不足パートを補完。
-- ✅ **音楽ブリーフ**: 一文のアイデア → 歌詞・スタイルタグ・BPM・キー・長さ。
-- ✅ **音声合成**: テキストから音声へ——プリセットスタイル、声のクローン（参照音声）、または指示駆動。
-- ✅ **音声認識**: 音声または動画中の発話を文字起こし。
-- ✅ **ノイズ除去**: 音声のノイズを除去。
-- ✅ **話者分離**: 話者ごとに音声を分離。
-- ✅ **音色変換**: 話し声や歌声を、参照音声の声色に置き換える。
-- ✅ **マルチトラック / ボーカル・伴奏分離**: ボーカル・ドラム・ベース・ギターなど 12 種のステムを分離。
-- ✅ **オープン語彙の音源分離**: 任意の音を言葉で指定（「犬の鳴き声」）し、その音とそれ以外の 2 トラックに分割。
-
-#### 3D・ドキュメント・リンク
-
-- ✅ **画像 → 3D**: 1枚の画像から3Dモデルを生成。
-- ✅ **動画 → モーションキャプチャ**: 単眼動画からスケルタルアニメーション（身体 + 指 + 表情チャンネル、GLB）。
-- ✅ **ドキュメント → テキスト**: ドキュメントからプレーンテキストを抽出。
-- ✅ **リンク → テキスト**: ページの内容をテキストに変換。
-
-### 結合
-
-- ✅ **画像融合**: 複数の参照画像を1枚に融合または編集。
-- ✅ **リップシンク**: 音声 + 動画 → 動画（リップシンク）。音声 + 画像 → 動画、音声 + テキスト → 動画などのバリエーションにも対応。
-- ✅ **感情音声**: テキスト + 参照音声 → その声で読み上げ、感情制御に対応。
-- ✅ **キャラクター置換**: 動画 + 参照（シーン融合 / キャラクター置換）。
-- ✅ **モーション転送**: キャラクター画像 + 駆動動画によるエンドツーエンド生成（姿勢抽出なし）。
-- ✅ **テキスト結合**: 複数のテキストノードを1つに結合。
-- ✅ **クリップ連結**: 複数の動画を前後につなげる。
-- ✅ **音声・映像の結合**: 1つのファイルに統合。
-
-### 分割・一括処理
-
-- ✅ **ショット単位で分割**: 長い動画をシーンごとに分割。
-- ✅ **音声・映像の分離**: 動画を独立した映像トラックと音声トラックに分離。
-- ✅ **音声トラックを抽出**: 音声を独立したアセットとして書き出す。
-- ✅ **長文を分割**: 長い段落をブロックに分割。
-- ✅ **テキストブロックの結合 / 整理**: 断片を結合（自動結合オプション利用可）。
-- ✅ **クリップのフィルタ / 破棄**: ルールまたは手動選択で不要なクリップを破棄。
-- ✅ **整列とバッチグループ化**: テキストやクリップのバッチをグループ化して整列し、下流処理に渡す。
-
-## 公式プラグイン
-
-> 公式のGPU/CPUプラグインは現在 [Modal](https://modal.com) 上で動作しています——毎月最大 **$30** 分の無料GPU演算（H100/A100など）。`MODAL_TOKEN_*` の設定は[セルフホストのセットアップ](#セルフホストのセットアッププラグインと認証情報)を参照してください。他のどのプラットフォームでも同じ方法で自分のプラグインを公開できます。
-
-### API プラグイン
-
-ファーストパーティ（各ラボ自身のモデル）：
-
-- [tongflow-api-gemini](https://github.com/tong-io/tongflow-api-gemini) — Google Gemini、ノードごとの**モデルピッカー**：テキスト、視覚、画像（Nano Banana / Imagen 4）、Veo 動画、TTS、文字起こし
-- [tongflow-api-openai](https://github.com/tong-io/tongflow-api-openai) — OpenAI、ノードごとの**モデルピッカー**：`gen_text`、画像生成/編集/融合（`gpt-image-2`）、視覚、ドキュメント OCR、Whisper 文字起こし、TTS
-- [tongflow-api-deepseek](https://github.com/tong-io/tongflow-api-deepseek) — DeepSeek、ノードごとの**モデルピッカー**（V4.1 Flash / V4 Pro、ストリーミング**思考**バブル付き）：`gen_text` およびテキストツール、Flash は画像理解も
-- [tongflow-api-bytedance](https://github.com/tong-io/tongflow-api-bytedance) — ByteDance Volcengine Ark、ノードごとの**モデルピッカー**：Doubao テキスト・視覚、Seedream 画像生成/編集/融合、Seedance テキスト / 画像 / 音声 → 動画
-- [tongflow-api-xai](https://github.com/tong-io/tongflow-api-xai) — xAI Grok、ノードごとの**モデルピッカー**：`gen_text`（Grok 4.x）、画像理解、Grok Imagine テキスト→画像
-- [tongflow-api-runway](https://github.com/tong-io/tongflow-api-runway) — Runway Dev 統合 API、ノードごとの**モデルピッカー**：動画（Gen-4.5、Gen-4 Turbo、Aleph 編集、Act-Two、Seedance、Veo）、画像（GPT Image 2、Seedream 5、Gemini image 3）、ElevenLabs TTS
-- [tongflow-api-metaso](https://github.com/tong-io/tongflow-api-metaso) — [Metaso（秘塔科技）](https://metaso.cn/minimax-h3/?s=TongFlow)がホストする MiniMax H3 動画生成：テキスト / 画像 → 動画、768P は 0.09 元/秒、2K は 0.15 元/秒。OpenAI 互換の Videos API 経由
-- [tongflow-api-qwen-audio](https://github.com/tong-io/tongflow-api-qwen-audio) — Alibaba Model Studio 上の Qwen-Audio-3.1：TTS-Next が話し声・効果音・環境音を一度に生成（ボイスクローン、説明からの声づくり、感情付き音声もこれで対応）、TTS-Flash のプリセットボイス、ASR-Flash の文字起こし（タイムスタンプと話者ラベル付き）
-
-### ルーター / 集約プラグイン
-
-1 つの key で複数ラボのモデルを転送：
-
-- [tongflow-router-openrouter](https://github.com/tong-io/tongflow-router-openrouter) — OpenRouter、ノードごとの**モデルピッカー**：`gen_text`（デフォルト無料、GPT-5.5 / Claude / Gemini / Grok / DeepSeek も選択可）、視覚 / 音声理解、画像生成/編集、文字起こし
-- [tongflow-router-cometapi](https://github.com/tong-io/tongflow-router-cometapi) — CometAPI 集約ゲートウェイ、ノードごとの**モデルピッカー**に加えて **CometAPI のモデルカタログをライブ取得**：`gen_text` / テキストツール（GPT-5.5、Claude、Gemini、DeepSeek、Grok、Qwen、Kimi）、画像 / 動画 / 音声理解、画像生成/編集/融合（GPT Image 2、Seedream）、テキスト / 画像 → 動画（Sora 2、Veo 3.1、Seedance、Wan、MiniMax、HappyHorse、Vidu）、動画編集（Omni）、TTS と Whisper 文字起こし
-- [tongflow-router-toapis](https://github.com/tong-io/tongflow-router-toapis) — ToAPIs 集約ゲートウェイ、ノードごとの**モデルピッカー**付き：`gen_text` / テキストツール（GPT-5.6、Claude、Gemini、DeepSeek、Qwen、GLM、Kimi、MiniMax）、画像理解、画像生成/編集/融合（GPT Image 2、Seedream 5、Gemini Image、Flux 2、Grok）、テキスト / 画像 / 最初・最後フレーム / マルチモーダル参照 → 動画（Sora 2、Veo 3.1、Seedance 2、Kling、MiniMax H3、Wan、HappyHorse、Vidu）、動画編集（HappyHorse）、**キーごとのモデル一覧をライブ取得**
-- [tongflow-router-apimart](https://github.com/tong-io/tongflow-router-apimart) — APIMart ゲートウェイ。ノード上で**モデルを選択**可能：画像生成 / 編集（Z-Image、Seedream、Nano Banana、GPT-Image）、テキスト / 画像 → 動画（Kling、VEO3、Sora2、Seedance）、`gen_text`（GPT-5、Claude、Gemini）、Whisper 文字起こしと TTS
-- [tongflow-router-replicate](https://github.com/tong-io/tongflow-router-replicate) — Replicate、ノードごとの**モデルピッカー**でカタログ全体をカバー：テキスト、視覚、画像 生成/編集/融合/アップスケール/切り抜き、テキスト / 画像 → 動画、文字起こし、TTS / ボイスクローン、音楽、画像 → 3D（FLUX、Seedream、Veo、Kling、Whisper、Hunyuan3D…）
-- [tongflow-router-fal](https://github.com/tong-io/tongflow-router-fal) — fal.ai、ノードごとの**モデルピッカー**：画像（生成/編集/融合/アップスケール/切り抜き/ポーズ/法線/セグメンテーション）、動画（テキスト / 画像 → 動画、最初・最後フレーム、トーキングヘッド、リップシンク、アップスケール）、音声（文字起こし、TTS、ボイスクローン、音楽、音源分離）、画像 → 3D
-- [tongflow-router-infistar](https://github.com/tong-io/tongflow-router-infistar) — Infistar（无限星河AI）ゲートウェイ、ノードごとの**モデルピッカー**（**キー自身のモデル一覧**も表示）：`gen_text` とテキストツール（GPT-5.6、Claude、Gemini、Qwen、DeepSeek、GLM、Kimi、Doubao、MiniMax、Grok）、画像理解、画像の生成/編集/融合（GPT Image 2、Qwen-Image、Seedream、Wan）、テキスト / 画像 → 動画（Wan 3.0、Seedance、MiniMax H3）、音声文字起こし
-
-### GPU/CPU プラグイン
-
-- [tongflow-modal-ffmpeg](https://github.com/tong-io/tongflow-modal-ffmpeg) — トランスコード、ミキシング、メディア処理パイプライン
-- [tongflow-modal-pyscenedetect](https://github.com/tong-io/tongflow-modal-pyscenedetect) — ショット境界の検出、クリップ分割用
-- [tongflow-modal-z-image](https://github.com/tong-io/tongflow-modal-z-image) — Z-Image テキストから画像生成
-- [tongflow-modal-ernie-image](https://github.com/tong-io/tongflow-modal-ernie-image) — ERNIE Image テキストから画像生成（代替）
-- [tongflow-modal-krea2](https://github.com/tong-io/tongflow-modal-krea2) — Krea 2 Turbo テキストから画像生成（オープンウェイト 12B、8 ステップ、最大 2K）
-- [tongflow-modal-moss-image](https://github.com/tong-io/tongflow-modal-moss-image) — MOSS-Image（OpenMOSS）5B テキストから画像生成：中国語・英語の密な文字描画、最大 4K トークンのプロンプト、文字や物体をボックスで配置できる JSON レイアウト（代替）
-- [tongflow-modal-flux2-klein9b](https://github.com/tong-io/tongflow-modal-flux2-klein9b) — FLUX.2 Klein 9B マルチ参照融合と画像編集
-- [tongflow-modal-qwen-image-edit](https://github.com/tong-io/tongflow-modal-qwen-image-edit) — Qwen-Image 2.1：テキスト → 画像、指示ベースの画像編集、マルチ画像融合（最大 10 枚の参照画像）、背景除去（透過 PNG）（ヘッドレス ComfyUI、int8。重みは Qwen Research License、非商用のみ）
-- [tongflow-modal-boogu](https://github.com/tong-io/tongflow-modal-boogu) — Boogu-Image-0.1（fp8）テキストから画像生成（高密度な多言語テキスト）と単一参照画像編集
-- [tongflow-modal-infinitetalk](https://github.com/tong-io/tongflow-modal-infinitetalk) — InfiniteTalk 音声駆動リップシンク（音声 + 画像 / 動画 → デジタルヒューマン動画）
-- [tongflow-modal-longcat-avatar](https://github.com/tong-io/tongflow-modal-longcat-avatar) — LongCat-Video-Avatar 1.5（Meituan）音声駆動のトーキング動画：人物画像 + 音声 → リップシンク動画、Whisper 音声エンコーダ・8 ステップ蒸留、最長 60 秒（代替）
-- [tongflow-modal-wan-animate](https://github.com/tong-io/tongflow-modal-wan-animate) — Wan-Animate-2 エンドツーエンドのキャラクターアニメーション（キャラクター画像 + 駆動動画、姿勢抽出なし）
-- [tongflow-modal-scail2](https://github.com/tong-io/tongflow-modal-scail2) — SCAIL-2 制御可能なキャラクターアニメーション（画像 + 駆動動画）とキャラクター置換
-- [tongflow-modal-minimax-h3](https://github.com/tong-io/tongflow-modal-minimax-h3) — MiniMax-H3 33B 動画生成、ネイティブステレオ音声（テキスト / 最初と最後のフレーム / 複数画像 / マルチ参照）
-- [tongflow-modal-bernini](https://github.com/tong-io/tongflow-modal-bernini) — Bernini-R 1.3B 統合動画レンダラー（テキスト/画像 → 画像/動画、動画編集、字幕 / ウォーターマーク除去）
-- [tongflow-modal-sam3](https://github.com/tong-io/tongflow-modal-sam3) — SAM 3 / SAM 3.1 テキスト誘導マッティング：記述した概念の全インスタンスを画像から切り抜き（透過 PNG）、動画では全編トラッキング（グリーンバック出力）
-- [tongflow-modal-triposplat](https://github.com/tong-io/tongflow-modal-triposplat) — TripoSplat 1 枚の画像から 3D ガウシアンスプラット
-- [tongflow-modal-sam-3d-objects](https://github.com/tong-io/tongflow-modal-sam-3d-objects) — SAM 3D Objects 1 枚の画像から前景オブジェクトの 3D ガウシアンスプラットを再構築（自動マスク、オクルージョンに強い；代替）
-- [tongflow-modal-sam-3d-body](https://github.com/tong-io/tongflow-modal-sam-3d-body) — SAM 3D Body 1 枚の画像から全身 3D 人体メッシュ GLB（複数人、MHR リグ；代替）、および**動画モーションキャプチャ**（フレーム毎 MHR 回帰 → キャラクターアニメーション GLB；代替）
-- [tongflow-modal-sapiens2](https://github.com/tong-io/tongflow-modal-sapiens2) — Sapiens2（Meta）人体スイート：ポーズ検出、身体部位セグメンテーション、表面法線、人物マッティング、画像 → 3D 点群、**動画モーションキャプチャ**（幾何エンジン：キーポイント + pointmap → MHR キャラクターアニメーション GLB）
-- [tongflow-modal-sensenova-vision](https://github.com/tong-io/tongflow-modal-sensenova-vision) — SenseNova-Vision（SenseTime）統一ビジョンモデル：画像理解 / ビジュアル QA、検出・OCR の構造化テキスト、シーン全体の表面法線、顕著オブジェクトのマッティング、人体ポーズオーバーレイ（代替）
-- [tongflow-modal-seedvr2](https://github.com/tong-io/tongflow-modal-seedvr2) — SeedVR2 画像 / 動画の超解像
-- [tongflow-modal-gemma4](https://github.com/tong-io/tongflow-modal-gemma4) — Gemma-4 マルチモーダルテキスト（画像 / 動画理解）
-- [tongflow-modal-qwen38](https://github.com/tong-io/tongflow-modal-qwen38) — Qwen3.8-27B マルチモーダルテキスト（テキスト生成、画像 / 動画理解；代替）
-- [tongflow-modal-qwen3asr](https://github.com/tong-io/tongflow-modal-qwen3asr) — Qwen3 音声認識
-- [tongflow-modal-qwen3tts](https://github.com/tong-io/tongflow-modal-qwen3tts) — Qwen3 テキストから音声
-- [tongflow-modal-indextts2](https://github.com/tong-io/tongflow-modal-indextts2) — IndexTTS-2.5 感情表現テキスト読み上げ：ゼロショット音声クローン（代替）+ 参照音声による感情制御音声合成
-- [tongflow-modal-seed-vc](https://github.com/tong-io/tongflow-modal-seed-vc) — Seed-VC ゼロショット声質変換：短い参照音声の声色で、話し声や歌声を置き換え（GPL-3.0）
-- [tongflow-modal-whisper](https://github.com/tong-io/tongflow-modal-whisper) — Whisper 音声認識（タイムスタンプ付き、代替）
-- [tongflow-modal-moss-transcribe-diarize](https://github.com/tong-io/tongflow-modal-moss-transcribe-diarize) — MOSS-Transcribe-Diarize 0.9B：長時間・複数話者の音声を一度の推論でタイムスタンプ＋話者ラベル付き文字起こしにし、話者ごとの音声トラックも出力（50+ 言語、最長約 90 分）
-- [tongflow-modal-ace-step](https://github.com/tong-io/tongflow-modal-ace-step) — ACE-Step 1.5 音楽スイート：テキストから音楽（sft / base / turbo 選択可）、リペイント、カバー、ステム抽出、トラック追加、編曲補完、音楽ブリーフ、音楽理解
-- [tongflow-modal-levo](https://github.com/tong-io/tongflow-modal-levo) — LeVo 2 / SongGeneration テキストから音楽生成（多言語・商用グレード）
-- [tongflow-modal-minimax-music3](https://github.com/tong-io/tongflow-modal-minimax-music3) — MiniMax-Music3 11B 楽曲生成：歌詞 + 説明 → ボーカル入り完全楽曲（最長約 5 分、32 kHz ステレオ）
-- [tongflow-modal-yue2](https://github.com/tong-io/tongflow-modal-yue2) — YuE2 楽曲生成：スタイル + 歌詞 → 編集できる楽譜 → ボーカル入り完全楽曲（48 kHz ステレオ）。インスト曲も作れて、SheetSage2 で採譜してカバーも可能（重みは CC BY-NC 4.0。個人クリエイターは作品を収益化でき、企業の商用利用には別途ライセンスが必要）
-- [tongflow-modal-sam-audio](https://github.com/tong-io/tongflow-modal-sam-audio) — SAM-Audio テキスト指示による音源分離：ノイズ除去、ボーカル分離、自由記述での任意サウンド抽出（「背景のピアノ」）
-- [tongflow-modal-docling](https://github.com/tong-io/tongflow-modal-docling) — Docling ドキュメント → テキスト
-- [tongflow-modal-paddle](https://github.com/tong-io/tongflow-modal-paddle) — PaddleOCR ドキュメント → テキスト
-- [tongflow-modal-unlimited-ocr](https://github.com/tong-io/tongflow-modal-unlimited-ocr) — Unlimited OCR 2 超長文ドキュメント / 数百ページの PDF → テキスト
-- [tongflow-modal-crawl4ai](https://github.com/tong-io/tongflow-modal-crawl4ai) — Crawl4AI URL / リンク → テキスト
-- [tongflow-modal-scrapling](https://github.com/tong-io/tongflow-modal-scrapling) — Scrapling ステルスブラウザ URL / リンク → テキスト
+**オンラインで試す**：[app.tongflow.com](https://app.tongflow.com)。ブラウザまたはデスクトップアプリで開けます。ご自身で環境を構築する必要はありません。モデルのAPIキーと計算資源のアカウントは、お客様ご自身のものを使います。利用料はお客様のアカウントに請求され、データもお客様のもとに残ります。生成クレジットは販売していません。お試し用の環境です。動作の保証はありません。7日間は無料でお試しいただけます。その後も続けて利用する場合は、製品内でのご契約が必要です。
 
-## ソースコードから起動
+## サービスと進め方
 
-```bash
-pnpm install
-pnpm plugins:install   # 公式プラグインを plugins/ にクローン
-pnpm start:prod        # 一度ビルドしてから http://localhost:3000 で起動
-```
+- **プライベート導入**
+- **カスタムノード・プラグインの開発**
+- **AIフロー構築のコンサルティング**
 
-**Node**（`pnpm` を含む）と、`PATH` 上に **Python 3.10+** インタープリタが必要です（`PYTHON` で特定のものを指定可能）。プラグインはローカルのPythonプロセスとして実行されます。TongFlow は自動的に各プラグイン用の隔離された venv を作成し、初回利用時に各プラグインの `requirements.txt` をインストールします——Pythonの手動設定は不要です。
+進め方：要件のヒアリング → 試行検証（PoC）→ 本番導入 → 展開と定着。
 
-**`http://localhost:3000`** を開けば、キャンバスがすぐに使えます。サーバーは localhost からのアクセスにだけ応答します。別のマシンから使うには `TONGFLOW_AUTH_TOKEN` を設定し、`-H 0.0.0.0` で起動して、`http://<ホスト>:3000/?token=<トークン>` を一度開いてください。その後は[セルフホストのセットアップ](#セルフホストのセットアッププラグインと認証情報)に従って設定してください（認証情報はアプリ内の**設定**ダイアログ、またはプロジェクトの `.env` に入力）。
+[導入のご相談](https://www.tongflow.com/ja/contact)、または**business@tongflow.com**までご連絡ください。費用についてはお問い合わせください。
 
-## Docker で起動
+## オープンソースとライセンス
 
-セルフホスト用イメージが GHCR に公開されています——Node/Python/pnpm のセットアップは不要です：
+TongFlowはAGPL-3.0のオープンソースです。商用ライセンスもご用意しています（デュアルライセンス）。
 
-```bash
-docker run -d -p 127.0.0.1:3000:3000 \
-  -v tongflow-data:/data -v tongflow-plugins:/plugins \
-  ghcr.io/tong-io/tongflow:latest
-```
+- **[AGPL-3.0](../LICENSE)**：AGPLの各条項（第13条のネットワーク利用時のソース公開義務を含む）に従ってご利用いただけます。
+- **[商用ライセンス](../COMMERCIAL-LICENSE.md)**：クローズドソースやSaaSの製品でソース公開義務を負わずに使いたい組織、または保証やサポートが必要な組織向けです。**business@tongflow.com**までご連絡ください。
 
-コンテナはログにログイン用リンク（`http://localhost:3000/?token=…`）を出力します。`docker logs <コンテナ>` で確認し、一度開いてください。トークンはデータボリュームに自動生成されます。自分で決める場合は `-e TONGFLOW_AUTH_TOKEN=…` を指定します。または Compose で（本リポジトリの [`docker-compose.yml`](../docker-compose.yml) をクローンします）：
+ライセンスはリポジトリ全体（PyPIの`tongflow`パッケージである`sdk/`ディレクトリを含む）に適用されます。コードの貢献には[CLA](../CLA.md)が適用されます。
 
-```bash
-docker compose up -d
-```
+## 開発者の方へ
 
-プルする代わりに自分でイメージをビルドするには：`docker build -t tongflow .`
-
-**データと認証情報。** 書き込み可能なものはすべて `/data` ボリュームに保存されます（SQLite DB、アップロード、設定）。API キーは任意です——アプリ内の**設定**ダイアログで設定するか、起動時に渡します（`-e OPENROUTER_API_KEY=…`）。対応キー：`OPENROUTER_API_KEY`、`GEMINI_API_KEY`、`OPENAI_API_KEY`、`MODAL_TOKEN_ID` / `MODAL_TOKEN_SECRET`。
-
-**プラグイン。** イメージにはプラグインが含まれていません——アプリ内のプラグインマネージャーからインストールしてください（初回インストールには GitHub へのネットワークアクセスが必要）。初回実行時、プラグインは `/data/.tongflow/plugin-venv` の下に共有 Python venv を作成します（PyPI から SDK とそのプラグインの `requirements.txt` をインストール）。そのため初回実行は遅く、ネットワークが必要です。Modal ベースのプラグインにはさらに Modal トークンが必要です。
-
-## セルフホストのセットアップ（プラグインと認証情報）
-
-セルフホストの TongFlow はプラグインを一切同梱しておらず、キャンバスにはサンプルワークフローがあらかじめ読み込まれています。以下の3ステップで動かせます：
-
-### 1 — プラグインをインストール
-
-**プラグインマネージャー**（右上の四角いアイコン）を開き、必要に応じてインストールしてください。新しくインストールしたプラグインは再起動不要で即座に利用できます。
-
-あらかじめ読み込まれた**サンプルワークフロー**（テキスト → 画像 → 融合 → 動画）を実行するには、以下の3つのプラグインが必要です：
-
-- [tongflow-modal-z-image](https://github.com/tong-io/tongflow-modal-z-image) — テキストから画像生成
-- [tongflow-modal-qwen-image-edit](https://github.com/tong-io/tongflow-modal-qwen-image-edit) — 画像の融合 / ミックス
-- [tongflow-modal-minimax-h3](https://github.com/tong-io/tongflow-modal-minimax-h3) — 画像から動画生成
-
-これらのプラグインは [Modal](https://modal.com) 上で動作します（毎月最大 **$30** 分の無料GPU演算）。**設定**で `MODAL_TOKEN_ID` / `MODAL_TOKEN_SECRET` を入力してください。トークンは [modal.com/settings/tokens](https://modal.com/settings/tokens) で作成できます。他のどのプラットフォームでも同じ方法で自分のプラグインを公開できます。
-
-プラグインマネージャーでは完全なカタログを閲覧できます——公式API プラグイン（OpenAI / Gemini / OpenRouter）やその他のGPU/CPUプラグインなど。
-
-### 2 — 認証情報を設定
-
-**設定**（右上の歯車アイコン）を開き、プラグインが必要とする環境変数を入力します——たとえばAPIプラグイン用の `OPENAI_API_KEY` や、GPU/CPUプラグインに必要な認証情報など。
-
-> **プラグインの認証情報はすべて「設定」にあります。** TongFlow は特定のプラットフォームに縛られず、どのプロバイダーもハードコードしていません。設定ダイアログは汎用的な環境変数の key/value エディタで、その値がプラグインに渡されます。各プラグインがどのキーを必要とするかは、それぞれの README に記載されています。値はローカルに保存され、変更は即座に反映され、再起動は不要です。
-
-### 3 — サンプルワークフローを実行
-
-あらかじめ読み込まれたサンプルをノードごとに実行することも、実行モードに切り替えて実行ボタンをクリックし、一括で実行することもできます。
-
-## 自分のエージェントに組み込む
-
-TongFlow は**自分のエージェントの中で動かす**こともできます。デスクトップアプリも、自前のサーバーも要りません。
-
-役割がはっきり分かれているのがポイントです。エージェントはプロジェクトを設計し、計画・設定・プロンプトをふつうのファイルとして書きます。生成を担うのは TongFlow で、生成物はすべて、その隣に置かれた `.tongflow.json` ワークフローから生まれます——だからキャンバスで開いて、手を入れて、もう一度実行できます。「画像を生成する」ようなツールも、プロジェクトのテンプレートもありません。
-
-### Claude Code
-
-```
-/plugin marketplace add tong-io/tongflow
-/plugin install tongflow@tongflow
-```
-
-あとは作りたいものを伝えるだけです。プラグインが TongFlow のツールと作業の進め方を Claude に渡します。「スタジオを開いて」と頼めば、プロジェクトのフォルダツリー、プレビュー、キャンバス、実行履歴、プラグインのキー設定がそろったローカルの Web ページを出してくれます。お金のかかる実行の前には、Claude が毎回確認します。
-
-### MCP 対応のクライアント
-
-```json
-{ "mcpServers": { "tongflow": { "command": "npx", "args": ["-y", "tongflow-studio", "mcp"] } } }
-```
-
-同じツールと同じ Studio ページを、MCP に対応したどのエージェントからでも使えます。
-
-### DeepSeek Harness（dsh）
-
-```sh
-npx @deepseek-ai/dsh@next plugin --profile web add dsh-tongflow
-npx @deepseek-ai/dsh@next web
-```
-
-あとは、**最初のメッセージを `@tongflow` で始めて**セッションを開くだけです。そのセッションが Studio に変わり——チャット、プロジェクトのフォルダツリー、プレビュー / エディタ / キャンバス、実行履歴のドロワー——エージェントは TongFlow のツール一式を使えるようになります。ほかのセッションはこれまでどおりの dsh のままです。
-
-どの方法でも、初回利用時に自前の Python venv を用意し、公式プラグインをクローンするので、キャンバスで選べるノードとプラグインはホスト版と同じです。動作要件と設定項目は **[packages/tongflow-studio/README.md](../packages/tongflow-studio/README.md)**（Claude Code、MCP）と **[packages/dsh-tongflow/README.md](../packages/dsh-tongflow/README.md)**（dsh）を参照してください。
-
-## カスタムプラグイン
-
-キャンバス上で動作するすべてのノードは**機能**であり、その背後には**契約**——ABI（[`packages/tongflow/abi/tongflow.abi.json`](../packages/tongflow/abi/tongflow.abi.json)）があります。これは「どんな機能があるか」と「各機能の入出力がどんな形か」を定義し、「誰が実装するか」とは無関係です。プラグインはその**実装**です。小さなPythonパッケージで、ABI の中の1つまたは複数のスロットを選び、tongflow Python SDK を使って、ABI から生成された型で**どう実装するか**の部分を提供します。ノードの背後のプラグインを差し替えても、まわりのワークフローは変わりません。
-
-完全な開発フロー——ABI、`@node_slot` デコレータ、SDK、ディレクトリ構造、公開方法については **[docs/plugins.md](plugins.md)** を参照してください。
-
-### 非公式プラグイン
-
-使い方は公式プラグインと同じですが、最初からはインストールされません。たいていはモデルのライセンスが理由です。インストールするには、Studio の **Plugins & keys** ダイアログに git の URL を貼り付けてください。セルフホストの場合は `plugins/` に `git clone` します。
-
-- [tongflow-modal-minimax-h3-image](https://github.com/tong-io/tongflow-modal-minimax-h3-image) — MiniMax-H3-Image 33.1B をお客様自身の Modal（B200）で動かします。テキストからの画像生成、画像編集、複数画像の合成（参照画像は最大 16 枚）に対応し、6 ステップで最大約 2000 万画素の画像を生成します。⚠️ 重みのライセンスは米国・EU・英国・韓国を対象外としており、他者向けにサービスとして提供するには MiniMax の書面による許可が必要です。ご利用前に[ライセンス](https://huggingface.co/MiniMaxAI/MiniMax-H3-Image/blob/main/LICENSE)をご確認ください。
-
-## コミュニティ
-
-**[Discord](https://discord.gg/K7V8az94Zf)** に参加するか、下記の**WeChatグループ**のQRコードをスキャンしてください。
-
-<div>
-  <img src="assets/qr.png" alt="WeChatグループQRコード" width="180" />
-</div>
-
-## ビジネス協業
-
-ビジネス協業については business@tongflow.com までお問い合わせください。
-
-- **オープンソースモデルのオーナー**：あなたのモデルを統合し、ユーザーにスムーズな体験を提供できます。
-- **エンタープライズユーザー**：ローカルGPUへのデプロイ、カスタムノードやプラグインの構築などを支援できます。
-- **プラットフォーム / ルーター**：あなたのAPIを接続できます。
-- **VC**：[TongFlow クラウド](https://www.tongflow.com/ja)（ホスト型ワークスペース）を軸にした協業をぜひご相談ください。
-
-## オープンソース
-
-このプロジェクトが気に入ったら、GitHub で Star をいただけると大変助かります。ありがとうございます！
-
-<img src="assets/star.gif" alt="Star on GitHub" width="480" />
-
-## ライセンス
-
-TongFlow は **デュアルライセンス（dual-licensing）** モデルを採用しています：
-
-- **[AGPL-3.0](../LICENSE)** —— 個人、研究、オープンソースプロジェクト、および AGPL（第13条の
-  ネットワーク/ソース公開義務を含む）を遵守する利用者には**無料**。
-- **[商用ライセンス](../COMMERCIAL-LICENSE.md)** —— **クローズドソース / SaaS** 製品で TongFlow を
-  使用し、**ソースを公開したくない**組織、あるいは保証条項やプラットフォームの技術サポートを
-  必要とする組織向け。価格は応相談、**business@tongflow.com** までご連絡ください。
-
-上記のライセンスはリポジトリ全体（PyPI に公開される `tongflow` パッケージを含む `sdk/` ディレクトリ）をカバーします。
-コードの貢献は [CLA](../CLA.md) に従います。
+ソースコードやDockerでの起動、機能の一覧、公式プラグイン、プラグインの作り方、AIエージェントとの接続：英語の[開発者向けドキュメント](developers.md)をご覧ください。

@@ -1,5 +1,5 @@
 /**
- * tongflow-studio — TongFlow's media studio without a host: projects as plain
+ * tongflow-studio — TongFlow for agents, without a host: projects as plain
  * folders, one workflow file per generated asset, the engine that runs them,
  * and the agent tools and HTTP routes over all of it. A host (the dsh plugin,
  * the MCP server in this package) supplies sessions, a tool registry and a
