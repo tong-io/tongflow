@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.0] - 2026-11-12
+
+TongFlow 1.0 is a brand upgrade. TongFlow is now the **Agent-Human-Friendly,
+Modality-First, Enterprise-Level GenAI Workflow Platform**: AI agents and
+people build the same workflows, across seven modalities, in a form an
+organization can run on its own infrastructure. Nothing in the workflow
+format, the ABI or the plugin contract changes; existing workflows and plugins
+keep working.
+
 ### Added
 
 - **Document → text also returns the document's pictures.** `parse-document`
@@ -15,7 +24,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `![image N](#image-N)`, N being its position in `images`. The
   Unlimited-OCR plugin crops the figures it detects; Docling exports its
   picture items. Plugins that only read text (PaddleOCR) leave it empty.
-  SDK 0.3.5 carries the field.
+  SDK 1.0.0 carries the field.
 
 ### Changed
 
@@ -26,6 +35,42 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   instead of v1's ~270, which cut dense pages short. The plugin also strips
   the model's grounding markup from the Markdown. Same `parse-document` slot
   and node; the new weights download on first use.
+- **New positioning everywhere.** The READMEs, `CLAUDE.md`, the app's page
+  description and every package description use the new theme sentence in
+  place of "Modality-First GenAI Platform".
+- **READMEs are written for organizations** (English, 简体中文, 日本語): the
+  four strengths (Agent-Friendly, Human-Friendly, Modality-First,
+  Enterprise-Level), where teams start, self-hosting and private deployment,
+  services, and the license. The Chinese README introduces the Chinese name
+  通流智汇.
+- **Developer content moved to [`docs/developers.md`](docs/developers.md)**:
+  running from source or Docker, self-host setup, the capability list
+  (including split & batch), the official plugins, custom plugins, and
+  connecting AI agents. Registering an official plugin now edits only this
+  file.
+- **New logo.** The angular TONGFLOW wordmark and the square T-and-triangle
+  mark replace the pixel logo: in the README header (follows GitHub's light or
+  dark theme), at the top left of the canvas, as the favicon (dark square in
+  light mode, white square in dark mode), and as the desktop app icon (with a
+  macOS margin). Brand files live in `public/brand/`.
+- **TongFlow for agents.** `tongflow-studio`, `dsh-tongflow` and the Claude
+  Code plugin describe themselves as "TongFlow for agents: your agent builds
+  and runs TongFlow workflows. Each run is recorded, and people can open, edit
+  and rerun the result." The agent instructions use the same name instead of
+  "media studio"; the rules are unchanged.
+- **Everything is 1.0.0**: the app and desktop app, the Python SDK
+  (`tongflow` on PyPI), the npm packages `tongflow`, `tongflow-studio` and
+  `dsh-tongflow`, and the Claude Code plugin (which now pins
+  `tongflow-studio@1.0.0`). Official plugins pin `tongflow==1.0.0`.
+- **Package keywords** drop `media` and `aigc` and add `agent`, `enterprise`
+  and `generative-ai`.
+
+### Removed
+
+- The pixel logo (`public/logo.svg`, `public/logo_icon.svg`) and the README's
+  `star.gif`.
+- Prices from the docs, including sponsors' prices, a plugin provider's
+  per-second rates and Modal's free-allowance amount.
 
 ## [0.3.6] - 2026-10-06
 

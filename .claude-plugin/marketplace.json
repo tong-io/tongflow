@@ -8,7 +8,7 @@
         {
             "name": "tongflow",
             "source": "./claude-plugin/tongflow",
-            "description": "TongFlow media studio for Claude Code: the tongflow_* tools (MCP) and the studio working method (skill)."
+            "description": "TongFlow for agents: your agent builds and runs TongFlow workflows. Each run is recorded, and people can open, edit and rerun the result. Adds the tongflow_* tools (MCP) and the studio working method (skill) to Claude Code."
         }
     ]
 }
