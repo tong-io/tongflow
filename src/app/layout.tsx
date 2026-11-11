@@ -18,14 +18,30 @@ const geistMono = Geist_Mono({
     subsets: ["latin"],
 });
 
+// The favicon follows the system theme: the dark square in light mode, the
+// white square in dark mode. The SVG switches on its own; the PNG sets carry a
+// media query for browsers that pick a raster icon.
+const FAVICON_SIZES = [16, 32, 48, 96, 512] as const;
+const faviconSet = (file: string, scheme: "light" | "dark") =>
+    FAVICON_SIZES.map((size) => ({
+        url: `/brand/icons/${file}-${size}.png`,
+        sizes: `${size}x${size}`,
+        type: "image/png",
+        media: `(prefers-color-scheme: ${scheme})`,
+    }));
+
 export const metadata: Metadata = {
     title: "TongFlow",
     description:
-        "Open-source AI workflow editor — drag and drop to create AI workflows with an infinite canvas.",
+        "Agent-Human-Friendly, Modality-First, Enterprise-Level GenAI Workflow Platform. Build generative AI workflows across text, images, audio, video, 3D, documents and links on one canvas, with AI agents or by hand.",
     icons: {
-        icon: "/apple-touch-icon.png",
-        shortcut: "/apple-touch-icon.png",
-        apple: "/apple-touch-icon.png",
+        icon: [
+            { url: "/brand/tongflow-mark-adaptive.svg", type: "image/svg+xml" },
+            ...faviconSet("tongflow-mark", "light"),
+            ...faviconSet("tongflow-mark-white", "dark"),
+        ],
+        shortcut: "/favicon.ico",
+        apple: { url: "/apple-touch-icon.png", sizes: "180x180" },
     },
 };
 

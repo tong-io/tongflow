@@ -16,7 +16,7 @@ npm install -g pake-cli
 
 # From the repo root. First build compiles Tauri and takes ~10 minutes.
 pake https://app.tongflow.com --name TongFlow \
-  --icon desktop/icon.png \
+  --icon desktop/icon-macos.png \
   --width 1440 --height 900 \
   --enable-drag-drop \
   --safe-domain accounts.google.com,github.com,appleid.apple.com,open.weixin.qq.com \
@@ -28,7 +28,7 @@ Platform notes:
 
 - **macOS universal** build: add `--targets universal` (requires
   `rustup target add aarch64-apple-darwin x86_64-apple-darwin`).
-- **Windows**: add `--targets x64`; drop the `--user-agent` / `--camera` /
+- **Windows**: add `--targets x64` and use `--icon desktop/icon.png`; drop the `--user-agent` / `--camera` /
   `--microphone` flags (they are macOS concerns — the custom Safari UA works
   around Google's embedded-WebView OAuth block in WKWebView).
 - `--safe-domain` keeps the OAuth redirects (Google / GitHub / Apple / WeChat)
@@ -48,6 +48,13 @@ xattr -cr /Applications/TongFlow.app
 
 ## Icon
 
-`icon.png` (1024×1024) is rendered from [`public/logo_icon.svg`](../public/logo_icon.svg)
-composited onto a dark rounded plate. Pake converts it to `.icns` / `.ico`
-per platform automatically.
+Both icons are the TongFlow square mark (the T with the green play triangle on
+the dark rounded square), 1024×1024, exported from
+[`public/brand/tongflow-mark.svg`](../public/brand/tongflow-mark.svg):
+
+- `icon-macos.png` keeps about 10% empty margin around the square, as macOS
+  app icons do.
+- `icon.png` fills the canvas, for Windows.
+
+Pake converts them to `.icns` / `.ico` per platform automatically. The app name
+stays **TongFlow**.
