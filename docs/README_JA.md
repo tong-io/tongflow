@@ -372,6 +372,12 @@ npx @deepseek-ai/dsh@next web
 
 完全な開発フロー——ABI、`@node_slot` デコレータ、SDK、ディレクトリ構造、公開方法については **[docs/plugins.md](plugins.md)** を参照してください。
 
+### 非公式プラグイン
+
+使い方は公式プラグインと同じですが、最初からはインストールされません。たいていはモデルのライセンスが理由です。インストールするには、Studio の **Plugins & keys** ダイアログに git の URL を貼り付けてください。セルフホストの場合は `plugins/` に `git clone` します。
+
+- [tongflow-modal-minimax-h3-image](https://github.com/tong-io/tongflow-modal-minimax-h3-image) — MiniMax-H3-Image 33.1B をお客様自身の Modal（B200）で動かします。テキストからの画像生成、画像編集、複数画像の合成（参照画像は最大 16 枚）に対応し、6 ステップで最大約 2000 万画素の画像を生成します。⚠️ 重みのライセンスは米国・EU・英国・韓国を対象外としており、他者向けにサービスとして提供するには MiniMax の書面による許可が必要です。ご利用前に[ライセンス](https://huggingface.co/MiniMaxAI/MiniMax-H3-Image/blob/main/LICENSE)をご確認ください。
+
 ## コミュニティ
 
 **[Discord](https://discord.gg/K7V8az94Zf)** に参加するか、下記の**WeChatグループ**のQRコードをスキャンしてください。
