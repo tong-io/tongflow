@@ -372,6 +372,12 @@ Every runnable node is a **capability** backed by a contract — the ABI ([`pack
 
 The full development flow — the ABI, the `@node_slot` decorator, the SDK, directory layout, and how to publish — lives in **[docs/plugins.md](docs/plugins.md)**.
 
+### Unofficial plugins
+
+These plugins work like the official ones but are not installed by default, usually because of the model's license. To install one, paste its git URL into the Studio's **Plugins & keys** dialog, or `git clone` it into `plugins/` when self-hosting.
+
+- [tongflow-modal-minimax-h3-image](https://github.com/tong-io/tongflow-modal-minimax-h3-image) — MiniMax-H3-Image 33.1B on your own Modal (B200): text → image, image edit and multi-image fusion (up to 16 references), up to ~20 MP in 6 steps. ⚠️ The weights' license excludes the US, EU, UK and South Korea, and hosting it for others needs MiniMax's written permission; read the [license](https://huggingface.co/MiniMaxAI/MiniMax-H3-Image/blob/main/LICENSE) first.
+
 ## Community
 
 Join the community on **[Discord](https://discord.gg/K7V8az94Zf)** or scan the **WeChat group** QR code below.
