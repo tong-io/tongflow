@@ -57,6 +57,8 @@
 - What an agent makes is a workflow file. People can open it, edit it and run it again.
 - Each run leaves a record, and a run that costs money waits for a person's approval.
 
+![TongFlow Studio: a project folder an agent built, with each asset next to the workflow file that made it](docs/assets/screens/en/agent.webp)
+
 Also available as custom delivery: human confirmation at key steps, and a remote MCP server.
 
 **Result:** what an agent produces can be checked and traced.
@@ -69,6 +71,8 @@ Also available as custom delivery: human confirmation at key steps, and a remote
 - Each step's output stays on the canvas, so you can pick up from a result in the middle.
 - A workflow can be reused: run it again with new materials, or hand it to a colleague.
 
+![The TongFlow canvas: materials added, transformed and combined, with each step's output on the canvas](docs/assets/screens/en/canvas.webp)
+
 **Result:** your people put AI to work in their own jobs.
 
 ### Modality-First
@@ -79,6 +83,8 @@ Also available as custom delivery: human confirmation at key steps, and a remote
 - Capabilities are separate from models, so the implementation behind a step can change.
 - More than sixty capabilities and more than fifty official plugins, through commercial APIs, model gateways and open models.
 
+![Selecting an image on the canvas lists what it can become next: video, 3D, pose and more](docs/assets/screens/en/plugins.webp)
+
 **Result:** change the model, keep the workflow.
 
 ### Enterprise-Level
@@ -88,6 +94,8 @@ Also available as custom delivery: human confirmation at key steps, and a remote
 - Deploy TongFlow in your own environment.
 - Run history records the workflow, each step, the plugin and model used, inputs and outputs, and the time.
 - The core is open source, and models and compute run on your own contracts.
+
+![TongFlow Studio: every output stays next to the workflow file that produced it](docs/assets/screens/en/run-history.webp)
 
 **Custom delivery** — developed and delivered to your requirements as part of a private deployment:
 
