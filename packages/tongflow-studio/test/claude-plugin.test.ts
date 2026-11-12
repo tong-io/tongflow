@@ -37,7 +37,10 @@ describe("claude-plugin/tongflow", () => {
             );
     });
 
-    it("starts the MCP server at this package's version", () => {
+    // Temporarily skipped: tongflow-studio@1.0.0 is not on npm yet (the npm
+    // account is being recovered), so the plugin pins the last published
+    // version. Re-enable and pin 1.0.0 once it is published.
+    it.skip("starts the MCP server at this package's version", () => {
         const { version } = JSON.parse(
             read(join(root, "packages/tongflow-studio/package.json")),
         );
