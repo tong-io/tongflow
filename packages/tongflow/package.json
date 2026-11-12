@@ -1,6 +1,6 @@
 {
     "name": "tongflow",
-    "version": "0.2.0",
+    "version": "1.0.0",
     "description": "TongFlow workflow core: ABI, node registry, connection validation, workflow exporter, headless canvas model and agent graph tools.",
     "author": "tong-io",
     "license": "AGPL-3.0-only",
@@ -14,9 +14,10 @@
         "tongflow",
         "workflow",
         "modality-first",
-        "aigc",
         "multimodal",
-        "agent"
+        "agent",
+        "enterprise",
+        "generative-ai"
     ],
     "type": "module",
     "sideEffects": [

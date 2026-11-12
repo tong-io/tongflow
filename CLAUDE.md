@@ -1,8 +1,10 @@
 # CLAUDE.md
 
-**TongFlow:** Modality-First GenAI Platform. Authoritative setup: [`README.md`](README.md).
+**TongFlow:** Agent-Human-Friendly, Modality-First, Enterprise-Level GenAI Workflow Platform. Authoritative setup: [`docs/developers.md`](docs/developers.md). The three READMEs ([`README.md`](README.md), [`docs/README_ZH.md`](docs/README_ZH.md), [`docs/README_JA.md`](docs/README_JA.md)) are written for organizations evaluating TongFlow; developer content (setup, capability list, official plugins, agents) lives only in `docs/developers.md`.
 
 **Editing:** Follow existing patterns; keep PRs narrowly scoped; no secrets in git. **Comments in code:** English only.
+
+**Brand:** the wordmark and the square mark live in [`public/brand/`](public/brand/) (dark and white versions; favicons in `public/brand/icons/`). Use those files, never redraw them; the old pixel logo is retired. Prose writes TongFlow (all caps only inside the wordmark); code and package names write `tongflow`. No prices in public docs, including other companies' prices.
 
 ## Directory conventions
 
@@ -60,9 +62,10 @@
 ## Registering an official plugin
 
 - **Source of truth:** [`config/official-plugins.json`](config/official-plugins.json) is the only file the plugins scanner reads; adding the plugin id there is what actually registers it (the scanner AST-discovers its `@deploy` / `@node_slot`).
-- **The READMEs are hand-maintained and silently drift.** Registering a plugin does **not** update the docs. When you add one, also edit **all three** READMEs ([`README.md`](README.md), [`docs/README_ZH.md`](docs/README_ZH.md), [`docs/README_JA.md`](docs/README_JA.md)):
-  - the **Official plugins** list (**GPU/CPU plugins** or **API plugins**) — one entry, ordered to match `official-plugins.json`;
-  - the **capability matrix** — flip the node from ⬜ to ✅ if this is the first official plugin for that ABI slot (e.g. TripoSplat made `image-gen-model` / "Image → 3D" available).
+- **The developer guide is hand-maintained and silently drifts.** Registering a plugin does **not** update the docs. When you add one, also edit [`docs/developers.md`](docs/developers.md) — the only place the plugin list and the capability list live (the three READMEs carry neither; leave them alone):
+  - the **Official plugins** list (**API**, **Router** or **GPU/CPU plugins**) — one entry, ordered to match `official-plugins.json`;
+  - the **capability list** — flip the node from ⬜ to ✅ if this is the first official plugin for that ABI slot (e.g. TripoSplat made `image-gen-model` / "Image → 3D" available).
+- **No prices in docs.** Plugin entries describe what a plugin does; they never quote a provider's prices or free allowances.
 
 ## Wire / persistence shape
 

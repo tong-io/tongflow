@@ -1,6 +1,8 @@
 # dsh-tongflow
 
-**TongFlow as a [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness) (dsh) plugin — a media studio inside your agent.**
+**TongFlow for agents: your agent builds and runs TongFlow workflows. Each run is recorded, and people can open, edit and rerun the result.**
+
+This package brings it to [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness) (dsh) as a plugin.
 
 Three layers, never mixed up:
 

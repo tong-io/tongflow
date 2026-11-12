@@ -1,7 +1,7 @@
 {
     "name": "tongflow-studio",
-    "version": "0.1.0",
-    "description": "TongFlow's media studio for agents: projects as plain folders, one TongFlow workflow per generated asset stored next to its outputs, deterministic media generation — served as an MCP server with a Studio web page.",
+    "version": "1.0.0",
+    "description": "TongFlow for agents: your agent builds and runs TongFlow workflows. Each run is recorded, and people can open, edit and rerun the result. An MCP server with a Studio web page.",
     "author": "tong-io",
     "license": "AGPL-3.0-only",
     "repository": {
@@ -14,9 +14,10 @@
         "tongflow",
         "mcp",
         "mcp-server",
-        "aigc",
         "workflow",
-        "agent"
+        "agent",
+        "enterprise",
+        "generative-ai"
     ],
     "type": "module",
     "bin": {

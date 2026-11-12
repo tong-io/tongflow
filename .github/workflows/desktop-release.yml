@@ -44,6 +44,8 @@ jobs:
             matrix:
                 include:
                     - os: macos-14
+                      # macOS icons keep ~10% margin on the 1024 canvas.
+                      icon: desktop/icon-macos.png
                       # Single universal build covers Apple Silicon + Intel.
                       pake_flags: >-
                           --targets universal
@@ -52,6 +54,8 @@ jobs:
                       artifact_glob: "*.dmg"
                       artifact_name: TongFlow-mac-universal.dmg
                     - os: windows-latest
+                      # Windows icons are full-bleed.
+                      icon: desktop/icon.png
                       pake_flags: "--targets x64"
                       artifact_glob: "*.msi"
                       artifact_name: TongFlow-win-x64.msi
@@ -94,7 +98,7 @@ jobs:
                   # Google's embedded-WebView OAuth block; --safe-domain keeps the
                   # OAuth redirects inside the app window.
                   pake https://app.tongflow.com --name TongFlow \
-                    --icon desktop/icon.png \
+                    --icon ${{ matrix.icon }} \
                     --width 1440 --height 900 \
                     --enable-drag-drop \
                     --safe-domain accounts.google.com,github.com,appleid.apple.com,open.weixin.qq.com \

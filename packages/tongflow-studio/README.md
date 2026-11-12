@@ -1,6 +1,8 @@
 # tongflow-studio
 
-**TongFlow's media studio for agents — an MCP server with a Studio web page.**
+**TongFlow for agents: your agent builds and runs TongFlow workflows. Each run is recorded, and people can open, edit and rerun the result.**
+
+An MCP server with a Studio web page.
 
 Three layers, never mixed up:
 

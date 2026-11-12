@@ -1,12 +1,14 @@
 {
     "name": "tongflow-app",
-    "version": "0.3.6",
-    "description": "TongFlow — the open-source Modality-First GenAI Platform: AI workflows across text, image, audio, video and 3D",
+    "version": "1.0.0",
+    "description": "TongFlow — Agent-Human-Friendly, Modality-First, Enterprise-Level GenAI Workflow Platform",
     "author": "tong-io",
     "keywords": [
-        "aigc",
         "ai",
+        "generative-ai",
         "workflow",
+        "agent",
+        "enterprise",
         "multimodal",
         "modality-first",
         "next.js"

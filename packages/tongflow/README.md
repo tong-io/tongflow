@@ -1,7 +1,8 @@
 # tongflow
 
-The core of [TongFlow](https://github.com/tong-io/tongflow), the open-source
-Modality-First GenAI Platform, as an npm package with two entries:
+The core of [TongFlow](https://github.com/tong-io/tongflow), the
+Agent-Human-Friendly, Modality-First, Enterprise-Level GenAI Workflow Platform,
+as an npm package with two entries:
 
 - **`tongflow`** — framework-free: the ABI contract, the static node
   registry, connection validation, the workflow exporter, canvas layout, a

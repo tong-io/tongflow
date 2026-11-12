@@ -19,6 +19,7 @@ import { FlowCanvas, useFlow, useTaskStore } from "tongflow/canvas";
 import { usePreloadFeatures } from "@/hooks/use-features";
 import { useWorkflowRecovery } from "@/hooks/use-workflow-recovery";
 import { AppView } from "./app-view/app-view";
+import { BrandWordmark } from "./brand-wordmark";
 import { ModeSwitch } from "./mode-switch";
 import { OnboardingGate } from "./onboarding/onboarding-gate";
 import SmartIsland from "./smart-island";
@@ -191,6 +192,7 @@ function WorkspaceInner({
                 )}
 
                 <div className="absolute left-5 top-5 z-10 flex items-center gap-3">
+                    <BrandWordmark />
                     <WorkflowTitleMenu />
                     <WorkspaceLeftNav />
                     <UndoRedoButtons />

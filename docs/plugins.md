@@ -2,10 +2,10 @@
 
 This is the complete guide to building a TongFlow plugin: what a plugin is, how the
 platform invokes one, the directory layout, the SDK contract, and the shape of each
-runner. For complete, working code, the [official plugins](../README.md#official-plugins)
+runner. For complete, working code, the [official plugins](developers.md#official-plugins)
 are the reference implementations — clone any of them and use it as a template.
 
-If you just want to *install* existing plugins, that same list is in the README. This
+If you just want to *install* existing plugins, that same list is in the [developer guide](developers.md#official-plugins). This
 document is for plugin **authors**.
 
 ---
@@ -349,7 +349,7 @@ parser; an `entry.py` plugin's handlers are found by the per-file walk. Either w
 ### Reference implementations
 
 This guide deliberately doesn't reproduce a full plugin — the real ones stay correct as the SDK
-evolves. The [**official plugins list in the README**](../README.md#official-plugins) is the
+evolves. The [**official plugins list in the developer guide**](developers.md#official-plugins) is the
 set of working examples; pick one close to what you're building, `git clone` it into
 `plugins/`, and use it as your template.
 

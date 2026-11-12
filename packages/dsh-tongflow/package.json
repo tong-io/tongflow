@@ -1,7 +1,7 @@
 {
     "name": "dsh-tongflow",
-    "version": "0.8.4",
-    "description": "TongFlow studio plugin for DeepSeek Harness (dsh): agent-designed project folders, one TongFlow workflow per generated asset stored next to its outputs, deterministic media generation, embedded canvas.",
+    "version": "1.0.0",
+    "description": "TongFlow for agents: your agent builds and runs TongFlow workflows. Each run is recorded, and people can open, edit and rerun the result. A plugin for DeepSeek Harness (dsh), with the TongFlow canvas built in.",
     "author": "tong-io",
     "license": "AGPL-3.0-only",
     "repository": {
@@ -14,9 +14,10 @@
         "dsh-plugin",
         "deepseek-harness",
         "tongflow",
-        "aigc",
         "workflow",
-        "agent"
+        "agent",
+        "enterprise",
+        "generative-ai"
     ],
     "type": "module",
     "main": "./lib/index.js",
