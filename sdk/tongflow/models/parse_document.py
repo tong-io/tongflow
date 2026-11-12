@@ -15,5 +15,6 @@ class ParseDocumentOutput(BaseModel):
 
     success: bool
     error: str | None = None
+    images: list[Asset] | None = None
     text: str | None = None
 
