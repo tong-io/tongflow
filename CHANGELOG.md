@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **Document → text also returns the document's pictures.** `parse-document`
+  gains an optional `images` output, so the node can feed an image node
+  alongside the text. The Markdown marks where each picture sat as
+  `![image N](#image-N)`, N being its position in `images`. The
+  Unlimited-OCR plugin crops the figures it detects; Docling exports its
+  picture items. Plugins that only read text (PaddleOCR) leave it empty.
+  SDK 0.3.5 carries the field.
+
 ### Changed
 
 - **Unlimited-OCR plugin moves to Unlimited OCR 2** — Baidu released

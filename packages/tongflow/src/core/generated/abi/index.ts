@@ -1084,6 +1084,26 @@ const _slot_parse_document_outputs = {
         text: {
             type: "string",
         },
+        images: {
+            type: "array",
+            items: {
+                type: "object",
+                required: ["file_key"],
+                properties: {
+                    file_key: {
+                        type: "string",
+                        minLength: 1,
+                    },
+                    mime: {
+                        type: "string",
+                    },
+                    filename: {
+                        type: "string",
+                    },
+                },
+                additionalProperties: false,
+            },
+        },
     },
     additionalProperties: false,
 } as const;
@@ -5280,6 +5300,12 @@ export const ABI_NODES = {
                 },
                 text: {
                     type: "string",
+                },
+                images: {
+                    type: "array",
+                    items: {
+                        $ref: "#/$defs/ImageRef",
+                    },
                 },
             },
             additionalProperties: false,

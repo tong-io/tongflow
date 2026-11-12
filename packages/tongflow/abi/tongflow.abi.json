@@ -744,6 +744,12 @@
                     },
                     "text": {
                         "type": "string"
+                    },
+                    "images": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/$defs/ImageRef"
+                        }
                     }
                 },
                 "additionalProperties": false
