@@ -7,12 +7,18 @@
  *   Canvas-compat API              /tongflow/p/:pid/api/…  — what `tongflow/canvas` calls when its
  *                                  apiBaseUrl is `/tongflow/p/:pid` (task create/wait/stop, plugins registry,
  *                                  upload, uploads, material stubs).
+ *   Remote executor                /tongflow/p/:pid/api/engine/invoke[/stop] — one node of a browser-run
+ *                                  workflow (`createHttpRemoteExecutor` with baseUrl `/tongflow/p/:pid`).
  */
 
 import { unlink } from "node:fs/promises";
 import type { IncomingMessage, ServerResponse } from "node:http";
 
 import { TaskStatus } from "tongflow";
+import {
+    parseRemoteInvokeRequest,
+    type RemoteInvokeFrame,
+} from "tongflow/engine";
 import type { StudioApi } from "../api.ts";
 import type { RunRecord } from "../engine/runs.ts";
 import type { CanvasTaskBody } from "../engine/single-node.ts";
@@ -40,6 +46,12 @@ import {
 
 /** Where files dropped onto the canvas land inside a project. */
 const UPLOADS_DIR = "uploads";
+
+/**
+ * Largest remote-executor request: a materialized prompt carries its assets
+ * as base64 (hosts cap one file at 100 MB, i.e. ~134 MB encoded).
+ */
+const INVOKE_BODY_LIMIT = 512 * 1024 * 1024;
 
 export interface RouteEnv {
     studio: Studio;
@@ -592,6 +604,48 @@ function buildRoutes(env: RouteEnv): Route[] {
                 json(c, { status: "cancelled", wasRunning });
             },
         },
+        /* ---------------- remote executor (`tongflow/engine` createHttpRemoteExecutor) ---------------- */
+        {
+            method: "POST",
+            pattern: "/p/:pid/api/engine/invoke",
+            handler: async (c) => {
+                const parsed = parseRemoteInvokeRequest(
+                    await readJson<unknown>(c.req, INVOKE_BODY_LIMIT),
+                );
+                if ("error" in parsed)
+                    throw new HttpError(400, parsed.error, "invalid_request");
+                const started = await api.startInvoke(
+                    c.params.pid,
+                    parsed.request,
+                );
+                if (!started.ok) {
+                    json(c, started.body, started.status);
+                    return;
+                }
+                streamInvoke(c, started.record, started.nodeId);
+            },
+        },
+        {
+            method: "POST",
+            pattern: "/p/:pid/api/engine/invoke/stop",
+            handler: async (c) => {
+                const body = await readJson<{ invocationId?: string }>(c.req);
+                const r = body.invocationId
+                    ? api.getRun(body.invocationId)
+                    : undefined;
+                if (!r || r.summary.projectId !== c.params.pid)
+                    throw new HttpError(
+                        404,
+                        "unknown invocation",
+                        "unknown_invocation",
+                    );
+                const wasRunning =
+                    r.summary.status === "running" ||
+                    r.summary.status === "queued";
+                r.cancel("stopped by the remote executor");
+                json(c, { status: "cancelled", wasRunning });
+            },
+        },
         {
             method: "POST",
             pattern: "/p/:pid/api/task/update-status",
@@ -684,6 +738,55 @@ function streamRun<T>(
         setTimeout(() => sse.close(), 50);
     });
     c.req.on("close", off);
+}
+
+/**
+ * Stream one remote-executor invocation: `started`, the plugin's progress,
+ * then its inline output or its error. The client closing the connection
+ * cancels the run.
+ */
+function streamInvoke(c: RouteContext, r: RunRecord, nodeId: string): void {
+    const sse = openSse(c.req, c.res);
+    const send = (frame: RemoteInvokeFrame) => sse.send(frame);
+    send({ type: "started", invocationId: r.summary.runId });
+    const off = r.subscribe((event) => {
+        if (event.type === "plugin_progress" && event.message) {
+            send({
+                type: "progress",
+                message: event.message,
+                ...(event.percent !== undefined
+                    ? { percent: event.percent }
+                    : {}),
+            });
+        }
+    });
+    c.res.on("close", () => {
+        off();
+        if (!r.summary.finishedAt) r.cancel("remote executor disconnected");
+    });
+    void r.done.then(() => {
+        off();
+        const { status } = r.summary;
+        if (status === "completed") {
+            const outputs = r.outcome?.result.outputs ?? {};
+            const output = (outputs[nodeId] ?? {}) as Record<string, unknown>;
+            send({ type: "result", output });
+        } else if (status === "cancelled") {
+            send({ type: "error", error: "cancelled", code: "cancelled" });
+        } else {
+            // The node's own error ("model exploded") over the run's summary
+            // ("Node invoke failed: model exploded").
+            const failed = [...r.events]
+                .reverse()
+                .find((e) => e.type === "node_failed" && e.error);
+            send({
+                type: "error",
+                error: failed?.error ?? r.error ?? "remote run failed",
+                code: "failed",
+            });
+        }
+        sse.close();
+    });
 }
 
 function canvasNodeId(r: RunRecord): string | null {

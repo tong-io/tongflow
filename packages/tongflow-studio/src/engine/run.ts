@@ -45,6 +45,12 @@ export interface RunRequest {
     label?: string;
     /** Keep `.runs/<runId>` after ingest (default: removed when empty). */
     keepRunDir?: boolean;
+    /**
+     * Return outputs inline (`bytesBase64` in the result) and place nothing in
+     * the project: no `.runs/<runId>`, no numbered outputs, no provenance.
+     * For remote-executor invocations, whose caller keeps the files.
+     */
+    inlineOutputs?: boolean;
 }
 
 export interface RunOutcome {
@@ -124,8 +130,9 @@ export async function executeRun(
     await resolveEmbeddedRefs(project.root, baseDir, workflow);
 
     // 3. Engine.
+    const inline = request.inlineOutputs === true;
     const runDir = join(project.root, RUNS_DIR, runId);
-    await mkdir(runDir, { recursive: true });
+    if (!inline) await mkdir(runDir, { recursive: true });
     const python = await studio.python(emitLog(emit));
     const engineRequest: EngineRequest = {
         workflow,
@@ -136,7 +143,7 @@ export async function executeRun(
             out_dir: runDir,
             ...(studio.abiPath ? { abi_path: studio.abiPath } : {}),
             file_key_base: project.root,
-            inline_outputs: false,
+            inline_outputs: inline,
             auto_install: true,
             org: studio.config.pluginOrg,
             plugin_git_urls: studio.config.pluginGitUrls,
@@ -157,6 +164,10 @@ export async function executeRun(
                 ? result.errors.join("; ")
                 : "workflow failed";
         throw new Error(detail);
+    }
+
+    if (inline) {
+        return { summary, result, texts: {}, loose: [], no: 0 };
     }
 
     // 4. Place outputs next to the workflow.

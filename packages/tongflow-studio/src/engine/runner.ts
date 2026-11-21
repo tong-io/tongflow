@@ -15,7 +15,8 @@ export interface EngineOptions {
     out_dir: string;
     abi_path?: string;
     file_key_base: string;
-    inline_outputs: false;
+    /** True: outputs come back in the result as `bytesBase64` and nothing is written to `out_dir`. */
+    inline_outputs: boolean;
     auto_install: boolean;
     org: string;
     plugin_git_urls?: Record<string, string>;

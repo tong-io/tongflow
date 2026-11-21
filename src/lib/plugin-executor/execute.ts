@@ -5,8 +5,18 @@ import { getPluginConfig } from "@/lib/plugins/plugins-registry.server";
 import { convertAssetOutputsToFileRefs } from "./convert-output-fileref";
 import type { PluginExecRequest, PluginExecResult } from "./types";
 
+export interface ExecutePluginOptions {
+    /**
+     * Return the plugin's raw ABI output, binary fields still `bytesBase64`,
+     * instead of persisting them as `{file_key}` refs. For the remote
+     * executor, whose caller (the browser engine) stores the files itself.
+     */
+    inlineOutputs?: boolean;
+}
+
 export async function executePlugin<S extends NodeSlot = NodeSlot>(
     req: PluginExecRequest<S>,
+    options: ExecutePluginOptions = {},
 ): Promise<PluginExecResult<S>> {
     const cfg = getPluginConfig(req.pluginId);
     if (!cfg) throw new Error(`Unknown plugin: ${req.pluginId}`);
@@ -23,6 +33,7 @@ export async function executePlugin<S extends NodeSlot = NodeSlot>(
     // cloud) is the plugin's own concern.
     const { execPlugin } = await import("./runners/generic");
     const raw = await execPlugin(req);
+    if (options.inlineOutputs) return raw;
 
     // Persist any binary `Asset` outputs into `{file_key}` refs, uniformly for
     // every plugin. ABI-driven (walks the slot's output schema for

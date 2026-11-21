@@ -54,6 +54,8 @@ Consequences:
   [Canvas host transport & workflow runner](#canvas-host-transport--workflow-runner)).
 - The browser engine (`tongflow/engine`, below), with a conformance suite shared with the
   Python engine.
+- Mixed graphs: the HTTP remote executor and the `/api/engine/invoke` endpoint in Studio and
+  the Next app (see [Mixed graphs & remote executor](#mixed-graphs--remote-executor)).
 - The edge plugins themselves are follow-up work.
 
 ## Browser engine (`tongflow/engine`)
@@ -100,8 +102,8 @@ const result = await runWorkflow(executableWorkflow, {
   as with the Python invoker. `createCompositeExecutor` sends `runtime: "browser"` plugins (or
   an unregistered `tongflow-edge-*` id) to the edge executor and `python` plugins to the remote
   executor. Without a remote executor a Python node fails with *"No remote executor
-  configured"*. The remote executor (a `NodeExecutor` that calls a TongFlow backend) is
-  implemented by a later change.
+  configured"*. `createHttpRemoteExecutor` is the remote executor for a Studio or Next
+  backend (see [Mixed graphs & remote executor](#mixed-graphs--remote-executor)).
 - **Assets.** A `$ref: Asset` input holding a key becomes `{bytesBase64, filename, mime?}`:
   filename from the key's last path segment, mime from its extension, exactly as in Python.
   References resolve as a data URL, a key the asset store holds, or an http(s) URL. Outputs typed
@@ -192,6 +194,102 @@ outputs and each node's events must be equal and levels must run in order.
   form. There is no filesystem search: a key the store does not hold fails the node.
 - `plugin_progress` from a plugin always carries `nodeId` (Python's subprocess progress only
   carries `pluginId`).
+
+## Mixed graphs & remote executor
+
+A browser-run workflow can mix edge nodes with server nodes. The composite executor sends
+`runtime: "browser"` plugins to the edge executor and every other plugin to a remote executor;
+`createHttpRemoteExecutor` (in `tongflow/engine`, HTTP only, no DOM) runs those nodes on a
+TongFlow backend:
+
+```ts
+import {
+    createCompositeExecutor,
+    createHttpRemoteExecutor,
+    runWorkflow,
+} from "tongflow/engine";
+
+const remote = createHttpRemoteExecutor({
+    baseUrl: "/tongflow/p/PRJ-1", // Studio; "" or "https://app.example" for the Next app
+    headers: { authorization: `Bearer ${token}` }, // optional; or () => headers per request
+    confirm: async (c) => window.confirm(`${c.pluginId} bills you (${c.billing}): ${c.note}`),
+});
+await runWorkflow(doc, {
+    executor: createCompositeExecutor({ registry, edge, remote }),
+    store,
+});
+```
+
+`baseUrl` is the same base the canvas uses as `apiBaseUrl`. `fetch` defaults to
+`globalThis.fetch`. The browser decides which nodes leave it: only the inputs of a server node
+are sent to the server, as the engine already materialized them (`bytesBase64`, per the ABI).
+
+### Endpoint contract
+
+Both hosts serve the same two endpoints under their API base (Studio:
+`/tongflow/p/:pid/api/engine/…`; Next app: `/api/engine/…`). The types live in
+`tongflow/engine` (`RemoteInvokeRequest`, `RemoteInvokeFrame`, `RemoteInvokeErrorBody`).
+
+`POST {base}/api/engine/invoke`
+
+```json
+{ "pluginId": "tongflow-modal-x", "nodeSlot": "image-upscale",
+  "prompt": { "image": { "bytesBase64": "…", "filename": "a.png", "mime": "image/png" } },
+  "model": "optional", "_params": { "steps": 4 }, "confirmed": true }
+```
+
+`prompt` holds the ABI business fields; the node's advanced params ride top-level as
+`_params` (the executor takes them out of the engine's prompt). `confirmed` is set only after
+the user agreed to a paid run.
+
+**Progress is streamed** (SSE read through `fetch`, not `EventSource`, so the request has a body
+and the host's headers). The `200` response is `text/event-stream`; each `data:` line is one
+JSON frame:
+
+| Frame | When |
+|---|---|
+| `{type: "started", invocationId}` | First. The id the stop endpoint takes |
+| `{type: "progress", message, percent?}` | The plugin's progress (0–100); becomes the node's `plugin_progress` |
+| `{type: "result", output}` | Last, on success: the raw ABI output, assets as `bytesBase64`. The browser engine stores them, so downstream nodes see browser keys |
+| `{type: "error", error, code?}` | Last, on failure (`code: "failed"`, `error` = the plugin's message) or cancellation (`"cancelled"`) |
+
+A call refused before it starts gets a JSON error instead, `{error, code, …}`:
+
+| Status | `code` | Why |
+|---|---|---|
+| 400 | `invalid_request` | Malformed body, unknown slot, or the plugin lacks the slot |
+| 400 | `browser_plugin` | A `runtime: "browser"` plugin (or an unregistered `tongflow-edge-*` id): the server cannot run it |
+| 400 | `plugin_not_installed` | The plugin is not in the host's registry |
+| 409 | `needs_confirmation` | Studio only: a paid plugin (API key or Modal) without `confirmed`. Carries `confirmation: {pluginId, nodeSlot, billing, note}` |
+| 400 | `missing_api_key` | Next app only: a required key is unset (with `key`, `url`), the same preflight as a single-node task |
+| 401 / 403 | — | The host's own auth refused the request |
+
+The executor turns every refusal and `error` frame into a `RemoteExecutorError` (`code`,
+`status`, `confirmation`), so the node fails with the message. For `needs_confirmation` it
+calls `confirm(confirmation)` first when given: `true` resends the call with
+`confirmed: true`; otherwise the node fails with *"Plugin X (nodeSlot=…) bills you (api: …).
+Confirm the run before it executes on the server."* `confirm` is called every time the backend
+asks; nothing is remembered.
+
+**Cancellation.** Aborting the node's signal posts `POST {base}/api/engine/invoke/stop`
+`{invocationId}` (answer `{status: "cancelled", wasRunning}`) and drops the stream. Both hosts
+also stop the run when the stream's connection closes, so a lost stop request still stops it.
+
+### Hosts
+
+- **Studio** (`packages/tongflow-studio`, `StudioApi.startInvoke`): the prompt becomes a
+  one-node document (`singleNodeDocument`, as for a canvas run) with the node's `_params`,
+  run by `executeRun` with **inline outputs**: the Python engine keeps outputs in memory and
+  returns `bytesBase64`, and nothing is written into the project (no `.runs/`, no numbered
+  outputs, no provenance). The run is listed as `invoke <slot>`. Auth is the Studio page's
+  token cookie and same-origin check. The billing checkpoint is the one `tongflow_workflow_run`
+  uses: `pluginBilling` says `api` or `modal` → `needs_confirmation` unless `confirmed`.
+- **Next app** (`src/app/api/engine/invoke`, `src/lib/task/remote-invoke.server.ts`): the
+  single-node task path without the tasks table: the missing-key preflight, then
+  `executePlugin` with `inlineOutputs`, which skips the `{file_key}` conversion. Progress comes
+  from the plugin runner's task events. Auth is the self-host access gate (middleware). The
+  Next app has no per-run billing confirmation, so it never answers `needs_confirmation` and
+  ignores `confirmed`.
 
 ## Graph rules for edge nodes
 
