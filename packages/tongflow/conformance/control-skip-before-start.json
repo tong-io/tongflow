@@ -1,6 +1,6 @@
 {
     "name": "control-skip-before-start",
-    "description": "skipNode('b') before it starts (default 'abort' policy): b is 'skipped by user', its closure c and d 'upstream skipped' although c's other input from 'a' is satisfied. Skipping the completed 'a' is refused. Status partial.",
+    "description": "skipNode('b') before it starts (default 'abort' policy): b is 'skipped by user'; 'c' collects (collectAll) from 'a' and 'b', so it still runs with a's value alone, and 'd' after it. Skipping the completed 'a' is refused. Status partial.",
     "engines": ["ts"],
     "workflow": {
         "name": "control-skip-before-start",
@@ -284,10 +284,19 @@
             "a": {
                 "success": true,
                 "text": "A(x)"
+            },
+            "c": {
+                "success": true,
+                "chunks": ["A(x)!"]
+            },
+            "d": {
+                "success": true,
+                "text": "D(A(x)!)"
             }
         },
         "outputsByName": {
-            "output_ta": ["A(x)"]
+            "output_ta": ["A(x)"],
+            "output_out": ["D(A(x)!)"]
         },
         "errors": [],
         "failures": [],
@@ -295,14 +304,6 @@
             {
                 "nodeId": "b",
                 "reason": "skipped by user"
-            },
-            {
-                "nodeId": "c",
-                "reason": "upstream skipped"
-            },
-            {
-                "nodeId": "d",
-                "reason": "upstream skipped"
             }
         ],
         "control": [true, false],
@@ -318,16 +319,6 @@
                 "reason": "skipped by user"
             },
             {
-                "type": "node_skipped",
-                "nodeId": "c",
-                "reason": "upstream skipped"
-            },
-            {
-                "type": "node_skipped",
-                "nodeId": "d",
-                "reason": "upstream skipped"
-            },
-            {
                 "type": "node_started",
                 "nodeId": "a",
                 "level": 1
@@ -335,6 +326,24 @@
             {
                 "type": "node_completed",
                 "nodeId": "a"
+            },
+            {
+                "type": "node_started",
+                "nodeId": "c",
+                "level": 2
+            },
+            {
+                "type": "node_completed",
+                "nodeId": "c"
+            },
+            {
+                "type": "node_started",
+                "nodeId": "d",
+                "level": 3
+            },
+            {
+                "type": "node_completed",
+                "nodeId": "d"
             },
             {
                 "type": "workflow_completed",

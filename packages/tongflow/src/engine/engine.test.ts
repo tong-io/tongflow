@@ -15,12 +15,20 @@ import { createInProcessEdgeExecutor } from "./executors/in-process";
 import { MemoryAssetStore } from "./memory-store";
 import { createRunController } from "./run-controller";
 import { runWorkflow } from "./run-workflow";
-import type { EngineEvent, InvokeRequest, NodeExecutor } from "./types";
+import type {
+    EngineEvent,
+    InvokeRequest,
+    NodeExecutor,
+    RunController,
+} from "./types";
 import { defineEdgePlugin, edgeMethod } from "./worker/define-edge-plugin";
 
 const ABI = {
     "gen-text": {
-        inputs: { properties: { text: { type: "string" } } },
+        inputs: {
+            required: ["text"],
+            properties: { text: { type: "string" } },
+        },
         outputs: { properties: { text: { type: "string" } } },
     },
     "image-orient": {
@@ -486,6 +494,164 @@ describe("failure policy and run controller", () => {
         );
         controller.resume();
         expect((await first).status).toBe("success");
+    });
+});
+
+describe("branch skip rule", () => {
+    /** Slots whose inputs are all optional (no `required`). */
+    const RULE_ABI = {
+        ...ABI,
+        "opt-text": {
+            inputs: { properties: { text: { type: "string" } } },
+            outputs: { properties: { text: { type: "string" } } },
+        },
+        "opt-texts": {
+            inputs: {
+                properties: {
+                    texts: { type: "array", items: { type: "string" } },
+                },
+            },
+            outputs: { properties: { text: { type: "string" } } },
+        },
+        "req-texts": {
+            inputs: {
+                required: ["texts"],
+                properties: {
+                    texts: { type: "array", items: { type: "string" } },
+                },
+            },
+            outputs: { properties: { text: { type: "string" } } },
+        },
+    };
+
+    /** `in` → `ok` and `bad` (level 1) → `consumer` (level 2). */
+    function withConsumer(consumer: Partial<ExecutableNode>) {
+        const doc = oneLevel([
+            { id: "ok", pluginId: "ok" },
+            { id: "bad", pluginId: "bad" },
+        ]);
+        doc.executableNodes.push({
+            id: "consumer",
+            type: "x",
+            feature: "opt-text",
+            pluginId: "ok",
+            bindings: {},
+            outputs: [],
+            dependencies: [],
+            level: 2,
+            ...consumer,
+        });
+        doc.executionLevels.push(["consumer"]);
+        return doc;
+    }
+
+    const handle = (sources: string[], consumerShape: "scalar" | "array") => ({
+        kind: "handle" as const,
+        sources: sources.map((fromNodeId) => ({
+            fromNodeId,
+            fromField: "text",
+        })),
+        targetHandle: "in:x",
+        consumerShape,
+    });
+
+    async function run(
+        doc: ExecutableWorkflow,
+        controller?: RunController,
+        onEvent?: (e: EngineEvent) => void,
+    ) {
+        const prompts: Record<string, Record<string, unknown>[]> = {};
+        const executor: NodeExecutor = {
+            invoke: async ({ pluginId, prompt }) => {
+                if (pluginId === "bad") return { success: false, error: "x" };
+                const id = Object.keys(prompt).join(",");
+                prompts[id] = [...(prompts[id] ?? []), prompt];
+                return { success: true, text: `${pluginId}:${prompt.text}` };
+            },
+        };
+        const result = await runWorkflow(doc, {
+            executor,
+            store: new MemoryAssetStore(),
+            abi: RULE_ABI,
+            failurePolicy: "branch",
+            ...(controller ? { controller } : {}),
+            ...(onEvent ? { onEvent } : {}),
+        });
+        return { result, prompts };
+    }
+
+    it("runs a consumer whose optional single input lost its producer", async () => {
+        const { result } = await run(
+            withConsumer({ bindings: { text: handle(["bad"], "scalar") } }),
+        );
+        expect(result.status).toBe("partial");
+        expect(result.skipped).toEqual([]);
+        expect(result.outputs.consumer).toEqual({
+            success: true,
+            text: "ok:undefined",
+        });
+    });
+
+    it("skips a fan-out over a failed producer even when the field is optional", async () => {
+        const { result } = await run(
+            withConsumer({
+                bindings: { text: handle(["ok", "bad"], "scalar") },
+                batchField: "text",
+            }),
+        );
+        expect(result.skipped).toEqual([
+            { nodeId: "consumer", reason: "upstream failed" },
+        ]);
+    });
+
+    it("runs an optional collect input with nothing left, empty", async () => {
+        const { result, prompts } = await run(
+            withConsumer({
+                feature: "opt-texts",
+                bindings: { texts: handle(["bad"], "array") },
+            }),
+        );
+        expect(result.skipped).toEqual([]);
+        expect(prompts.texts).toEqual([{ texts: [] }]);
+    });
+
+    it("skips a consumer whose ordering-only dependency failed", async () => {
+        const { result } = await run(
+            withConsumer({
+                bindings: { text: handle(["ok"], "scalar") },
+                dependencies: ["ok", "bad"],
+            }),
+        );
+        expect(result.skipped).toEqual([
+            { nodeId: "consumer", reason: "upstream failed" },
+        ]);
+    });
+
+    it("reruns a consumer that ran on partial collect inputs when the failed producer is replaced", async () => {
+        const controller = createRunController();
+        const doc = withConsumer({
+            feature: "req-texts",
+            bindings: { texts: handle(["ok", "bad"], "array") },
+        });
+        // Hold the run open once the consumer ran on the partial input.
+        let held = false;
+        const pending = run(doc, controller, (e) => {
+            if (e.type === "node_completed" && e.nodeId === "consumer") {
+                if (!held) controller.pause();
+                held = true;
+            }
+        });
+        await until(() => controller.nodeStatus("consumer") === "completed");
+        expect(
+            controller.replaceImplementation("bad", { pluginId: "v2" }),
+        ).toBe(true);
+        controller.resume();
+        const { result, prompts } = await pending;
+        expect(result.status).toBe("success");
+        expect(prompts.texts).toEqual([
+            { texts: ["ok:x"] },
+            { texts: ["ok:x", "v2:x"] },
+        ]);
     });
 });
 

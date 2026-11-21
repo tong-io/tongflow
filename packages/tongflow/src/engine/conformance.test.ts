@@ -86,6 +86,8 @@ describe("engine conformance fixtures", () => {
         }
         for (const required of [
             "branch-failure-isolation",
+            "branch-collect-partial-producers",
+            "branch-collect-all-producers-failed",
             "control-skip-before-start",
             "control-skip-while-running",
             "control-pause-resume",

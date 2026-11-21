@@ -26,9 +26,12 @@ export * from "./executors/in-process";
 export * from "./executors/remote";
 export * from "./executors/remote-protocol";
 export {
+    blockingUpstreams,
     buildExecutableGraph,
     downstreamClosure,
     type ExecutableGraph,
+    type InputDeps,
+    type InputShape,
 } from "./graph";
 export * from "./memory-store";
 export * from "./output-view";

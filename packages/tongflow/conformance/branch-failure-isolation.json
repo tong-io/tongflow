@@ -1,6 +1,6 @@
 {
     "name": "branch-failure-isolation",
-    "description": "failurePolicy 'branch': 'bad' fails, its downstream closure ('badNext', and 'join', which also reads the healthy branch) is skipped as 'upstream failed'; the sibling branch 'ok' -> 'okNext' completes. Status partial.",
+    "description": "failurePolicy 'branch': 'bad' fails and 'badNext' (a required single input from it) is skipped as 'upstream failed'; 'join' collects (collectAll) from 'okNext' and 'badNext', so it still runs with the healthy branch's value alone. The sibling branch 'ok' -> 'okNext' completes. Status partial.",
     "engines": ["ts"],
     "failurePolicy": "branch",
     "workflow": {
@@ -317,10 +317,15 @@
             "okNext": {
                 "success": true,
                 "text": "next(ok:go)"
+            },
+            "join": {
+                "success": true,
+                "chunks": ["next(ok:go)!"]
             }
         },
         "outputsByName": {
-            "output_t_ok_next": ["next(ok:go)"]
+            "output_t_ok_next": ["next(ok:go)"],
+            "output_t_join": ["next(ok:go)!"]
         },
         "errors": ["Node bad failed: boom"],
         "failures": [
@@ -332,10 +337,6 @@
         "skipped": [
             {
                 "nodeId": "badNext",
-                "reason": "upstream failed"
-            },
-            {
-                "nodeId": "join",
                 "reason": "upstream failed"
             }
         ],
@@ -370,11 +371,6 @@
                 "reason": "upstream failed"
             },
             {
-                "type": "node_skipped",
-                "nodeId": "join",
-                "reason": "upstream failed"
-            },
-            {
                 "type": "node_started",
                 "nodeId": "okNext",
                 "level": 2
@@ -382,6 +378,15 @@
             {
                 "type": "node_completed",
                 "nodeId": "okNext"
+            },
+            {
+                "type": "node_started",
+                "nodeId": "join",
+                "level": 3
+            },
+            {
+                "type": "node_completed",
+                "nodeId": "join"
             },
             {
                 "type": "workflow_completed",
