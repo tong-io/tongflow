@@ -12,6 +12,12 @@
  *   (every other node keeps `/api/task/create`);
  * - a confirm dialog before a large model download (`models.json`).
  *
+ * "Run workflow" is offered only for graphs with at least one browser-plugin
+ * node (`createEdgeHostRuntime`); a graph of server nodes keeps ▷, the
+ * server run (`/api/workflow/execute`), exactly as without a browser plugin.
+ * A host that cannot run Python nodes for a browser run (HTTP 501) or needs
+ * a subscription for them (402) fails the node with a localized message.
+ *
  * Files bridge through the app's uploads (see docs/edge-runtime.md, "Hosts"):
  * an asset input that is an upload key is fetched from `/api/uploads/<key>`
  * when a node needs it; a binary output (edge or server) is uploaded through
@@ -26,6 +32,9 @@ import {
     createHostAssetStore,
     createHttpRemoteExecutor,
     type HostUploadTarget,
+    type InvokeTarget,
+    type RemoteExecutor,
+    RemoteExecutorError,
 } from "tongflow/engine";
 import {
     createEdgeHostRuntime,
@@ -90,6 +99,50 @@ async function uploadOutput(
     return body.fileKey;
 }
 
+/** Localized node errors for refusals of `/api/engine/invoke`. */
+export interface RemoteRefusalMessages {
+    /** 501: this server cannot run server nodes inside a browser run. */
+    unavailable: (target: InvokeTarget) => string;
+    /** 402: running server nodes needs a subscription. */
+    paymentRequired: (target: InvokeTarget) => string;
+}
+
+/**
+ * `remote` with its 501 / 402 refusals reworded through `messages` (the
+ * backend's own text is English and host specific); every other error is
+ * passed through unchanged.
+ */
+export function localizeRemoteRefusals(
+    remote: RemoteExecutor,
+    messages: RemoteRefusalMessages,
+): RemoteExecutor {
+    return {
+        ...remote,
+        async invoke(request) {
+            try {
+                return await remote.invoke(request);
+            } catch (e) {
+                if (!(e instanceof RemoteExecutorError)) throw e;
+                const target = {
+                    pluginId: request.pluginId,
+                    nodeSlot: request.nodeSlot,
+                };
+                const message =
+                    e.status === 501
+                        ? messages.unavailable(target)
+                        : e.status === 402
+                          ? messages.paymentRequired(target)
+                          : undefined;
+                if (!message) throw e;
+                throw new RemoteExecutorError(message, {
+                    ...(e.code ? { code: e.code } : {}),
+                    status: e.status,
+                });
+            }
+        },
+    };
+}
+
 export interface AppEdgeRuntimeOptions {
     /** Read on every call: the hook keeps `plugins` in step with the canvas registry. */
     registry: Pick<PluginsRegistry, "plugins">;
@@ -100,6 +153,8 @@ export interface AppEdgeRuntimeOptions {
         request: ConsentRequest,
         signal: AbortSignal,
     ) => Promise<boolean>;
+    /** Node errors for a refused server node (see {@link localizeRemoteRefusals}). */
+    remoteMessages: RemoteRefusalMessages;
 }
 
 /** `null` when no browser plugin is installed. */
@@ -129,7 +184,10 @@ export async function loadAppEdgeRuntime(
         registry,
         entryUrl: (id) => info.plugins[id]?.entryUrl ?? "",
         modelBase: info.modelBase,
-        remote: createHttpRemoteExecutor({ baseUrl: "" }),
+        remote: localizeRemoteRefusals(
+            createHttpRemoteExecutor({ baseUrl: "" }),
+            options.remoteMessages,
+        ),
         store,
         fallbackTransport: options.fallbackTransport,
         consent: {

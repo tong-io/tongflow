@@ -22,7 +22,9 @@
         "installedCommunity": "Installed community plugins",
         "cancel": "Cancel",
         "runsInBrowser": "Runs in the browser",
-        "edgeDownloadConfirm": "The node {slot} needs {label}. It is downloaded once into this browser and runs on this device. Download it now?"
+        "edgeDownloadConfirm": "The node {slot} needs {label}. It is downloaded once into this browser and runs on this device. Download it now?",
+        "edgeRemoteUnavailable": "The server can't run the server node {slot} inside a browser \"Run workflow\". Run this node on its own instead.",
+        "edgeRemotePaymentRequired": "Running the server node {slot} needs an active subscription."
     },
     "Settings": {
         "title": "Settings",

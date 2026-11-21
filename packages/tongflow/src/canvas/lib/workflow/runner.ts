@@ -49,6 +49,7 @@ import type {
 
 export type {
     CanvasNodeImplementation,
+    CanvasWorkflowGraph,
     CanvasWorkflowRunControls,
     CanvasWorkflowRunEvent,
     CanvasWorkflowRunner,

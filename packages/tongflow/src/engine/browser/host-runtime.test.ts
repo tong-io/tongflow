@@ -200,6 +200,23 @@ describe("createEdgeHostRuntime", () => {
         return { rt, remote, ask };
     }
 
+    it("offers Run workflow only for graphs with a browser-plugin node", () => {
+        const { rt } = runtime();
+        const handles = rt.runner.handles;
+        expect(handles).toBeTypeOf("function");
+        // Server-only graphs keep the host's own run path (the ▷ button).
+        expect(handles?.({ pluginIds: [] })).toBe(false);
+        expect(handles?.({ pluginIds: ["tongflow-api-y"] })).toBe(false);
+        expect(handles?.({ pluginIds: ["tongflow-modal-unknown"] })).toBe(
+            false,
+        );
+        // One browser node (registered, or an unregistered edge id) is enough.
+        expect(
+            handles?.({ pluginIds: ["tongflow-api-y", "tongflow-edge-x"] }),
+        ).toBe(true);
+        expect(handles?.({ pluginIds: ["tongflow-edge-later"] })).toBe(true);
+    });
+
     it("runs a mixed workflow: edge node in the browser, Python node remote", async () => {
         const { rt, remote } = runtime();
         const events: CanvasWorkflowRunEvent[] = [];

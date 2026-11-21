@@ -2,20 +2,52 @@
  * Run the whole canvas workflow through the host's `CanvasWorkflowRunner`.
  *
  * `available` is false when the host configured no runner (the TongFlow app
- * and Studio today), in which case the canvas offers no "Run workflow"
- * action at all. `controllable` is true when the runner also exposes live
- * `controls` (pause / resume, node skip / replace).
+ * and Studio without a browser plugin), or when the runner's `handles` turns
+ * down the graph on screen (a host's edge runtime takes only graphs with a
+ * browser-plugin node); the canvas then offers no "Run workflow" action at
+ * all. A run in flight stays available, so Stop never disappears.
+ * `controllable` is true when the runner also exposes live `controls`
+ * (pause / resume, node skip / replace).
  */
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { exportWorkflow } from "../../core";
 import { useCanvasWorkflowRunner } from "../host";
-import { runCanvasWorkflow } from "../lib/workflow/runner";
-import { useFlow } from "./use-flow";
+import {
+    type CanvasWorkflowRunner,
+    runCanvasWorkflow,
+} from "../lib/workflow/runner";
+import { type FlowState, useFlow } from "./use-flow";
+import { usePluginsRegistryStore } from "./use-plugins-registry";
 import { useTaskStore } from "./use-task";
 
+/**
+ * The distinct plugin ids bound on the graph's nodes, sorted and joined by
+ * `\n` (a string, so the selector result is stable across renders).
+ */
+export function selectGraphPluginIds(state: Pick<FlowState, "nodes">): string {
+    const ids = new Set<string>();
+    for (const node of state.nodes) {
+        const id = (node.data as { pluginId?: unknown } | undefined)?.pluginId;
+        if (typeof id === "string" && id.trim()) ids.add(id.trim());
+    }
+    return [...ids].sort().join("\n");
+}
+
+/** Whether `runner` takes a graph whose {@link selectGraphPluginIds} is `pluginIdsKey`. */
+export function runnerTakesGraph(
+    runner: CanvasWorkflowRunner | undefined,
+    pluginIdsKey: string,
+): boolean {
+    if (!runner) return false;
+    if (!runner.handles) return true;
+    return runner.handles({
+        pluginIds: pluginIdsKey ? pluginIdsKey.split("\n") : [],
+    });
+}
+
 export interface UseWorkflowRunReturn {
-    /** The host provided a workflow runner. */
+    /** The host's runner takes the graph on screen, or a run is in flight. */
     available: boolean;
     /** A run started here has not settled yet. */
     running: boolean;
@@ -75,12 +107,17 @@ export function useWorkflowRun(): UseWorkflowRunReturn {
     }, [runner]);
 
     const workflowStatus = useTaskStore((s) => s.workflowExecutionStatus);
+    const pluginIdsKey = useFlow(selectGraphPluginIds);
+    // `handles` may read the registry (a plugin's runtime): re-evaluate when
+    // it loads or changes.
+    usePluginsRegistryStore((s) => s.registry);
+    const handled = runnerTakesGraph(runner, pluginIdsKey);
 
     // Leaving the canvas stops its run.
     useEffect(() => () => controllerRef.current?.abort(), []);
 
     return {
-        available: !!runner,
+        available: handled || running,
         running,
         run,
         stop,
