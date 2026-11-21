@@ -14,7 +14,8 @@
  * Files bridge through the project (see docs/edge-runtime.md, "Hosts"): an
  * asset input that is a project key is fetched from `<prefix>/p/<pid>/files/`
  * when a node needs it; a binary output (edge or server) is uploaded into
- * `.runs/browser/` of the project and travels as that project key, so the
+ * `.runs/browser/<id>/<filename>` of the project and travels as that project
+ * key (its last segment is the producer's filename), so the
  * canvas shows it, the saved workflow keeps it and the server can read it.
  *
  * With no browser plugin installed, `loadStudioEdgeRuntime` resolves `null`
@@ -22,10 +23,10 @@
  */
 import type { PluginsRegistry } from "tongflow";
 import {
-    type AssetPutMeta,
     type ConsentRequest,
     createHostAssetStore,
     createHttpRemoteExecutor,
+    type HostUploadTarget,
     type NodeExecutor,
     type RemoteConfirmation,
 } from "tongflow/engine";
@@ -102,8 +103,8 @@ export async function loadStudioEdgeRuntime(
                 ? null
                 : `${origin}${projectBase}/files/${encodeKey(key.replace(/^\/+/, ""))}`,
         fetch: (url, init) => fetch(url, { ...init, headers: { ...headers } }),
-        upload: (bytes, meta) =>
-            uploadOutput(`${origin}${projectBase}`, headers, bytes, meta),
+        upload: (bytes, target) =>
+            uploadOutput(`${origin}${projectBase}`, headers, bytes, target),
     });
 
     const runtime = createEdgeHostRuntime({
@@ -151,30 +152,32 @@ export async function loadStudioEdgeRuntime(
     };
 }
 
-/** One binary output → `POST <project>/upload?dir=.runs/browser` → its project key. */
+/**
+ * One binary output → `POST <project>/upload?dir=…` → its project key:
+ * `.runs/browser/<id>/<name>` (the key keeps the producer's filename, see
+ * docs/edge-runtime.md "Asset store keys"), or `.runs/browser/<id>.<ext>`
+ * for an output without a filename.
+ */
 async function uploadOutput(
     projectUrl: string,
     headers: Record<string, string>,
     bytes: Uint8Array,
-    meta: AssetPutMeta,
+    target: HostUploadTarget,
 ): Promise<string> {
-    const stem =
-        (meta.filename ?? "output")
-            .replace(/\.[^.]*$/, "")
-            .replace(/[^\w.-]+/g, "_")
-            .slice(0, 60) || "output";
-    const unique = Math.random().toString(36).slice(2, 8);
-    const name = `${stem}-${unique}.${meta.ext}`;
+    const dir = target.name
+        ? `${BROWSER_OUTPUT_DIR}/${target.id}`
+        : BROWSER_OUTPUT_DIR;
+    const name = target.name ?? `${target.id}.${target.ext}`;
     const form = new FormData();
     form.append(
         "file",
         new Blob([bytes as Uint8Array<ArrayBuffer>], {
-            type: meta.mime ?? "application/octet-stream",
+            type: target.mime ?? "application/octet-stream",
         }),
         name,
     );
     const res = await fetch(
-        `${projectUrl}/upload?dir=${encodeURIComponent(BROWSER_OUTPUT_DIR)}`,
+        `${projectUrl}/upload?dir=${encodeURIComponent(dir)}`,
         { method: "POST", body: form, headers, credentials: "same-origin" },
     );
     const body = (await res.json().catch(() => ({}))) as {

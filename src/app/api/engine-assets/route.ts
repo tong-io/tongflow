@@ -2,7 +2,7 @@
  * Loopback asset sink for the SDK engine (see HttpStore in the Python SDK).
  *
  * GET  ?file_key=...                 -> raw bytes (404 when unknown)
- * POST ?ext=...&mime=...&filename=.. -> {"file_key": "..."}
+ * POST ?ext=...&mime=...&filename=.. -> {"file_key": "..."} (`<id>/<filename>` when named)
  *
  * Auth: a per-run bearer token minted by the engine delegate, bound to the
  * run's tenant scope and taskId. Storage goes through the registered
@@ -11,6 +11,7 @@
  */
 
 import { type NextRequest, NextResponse } from "next/server";
+import { storeKeyName } from "tongflow/engine";
 import { getStorage } from "@/lib/file/storage.server";
 import { runWithScope } from "@/lib/runtime/scope.server";
 import { bindingForEngineAssetToken } from "@/lib/task/engine-asset-tokens.server";
@@ -51,10 +52,21 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
     const ext = request.nextUrl.searchParams.get("ext") ?? "bin";
+    // The producer's filename stays the key's last segment (`<id>/<name>`),
+    // as in every asset store (docs/edge-runtime.md, "Asset store keys").
+    const name = storeKeyName(
+        request.nextUrl.searchParams.get("filename") ?? undefined,
+        ext,
+    );
     const data = Buffer.from(await request.arrayBuffer());
     try {
         const fileKey = await runWithScope(binding.scope, () =>
-            getStorage().saveFile(data, ext, binding.taskId),
+            getStorage().saveFile(
+                data,
+                ext,
+                binding.taskId,
+                name ? { name } : undefined,
+            ),
         );
         return NextResponse.json({ file_key: fileKey });
     } catch {

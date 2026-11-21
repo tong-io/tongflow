@@ -15,16 +15,17 @@
  * Files bridge through the app's uploads (see docs/edge-runtime.md, "Hosts"):
  * an asset input that is an upload key is fetched from `/api/uploads/<key>`
  * when a node needs it; a binary output (edge or server) is uploaded through
- * `POST /api/upload` and travels as that file key, so the canvas shows it,
+ * `POST /api/upload` and travels as that file key (`<id>/<filename>`: the
+ * producer's filename stays the last segment), so the canvas shows it,
  * the saved workflow keeps it and server runs can read it.
  */
 
 import type { PluginsRegistry } from "tongflow";
 import {
-    type AssetPutMeta,
     type ConsentRequest,
     createHostAssetStore,
     createHttpRemoteExecutor,
+    type HostUploadTarget,
 } from "tongflow/engine";
 import {
     createEdgeHostRuntime,
@@ -55,24 +56,24 @@ async function getJson<T>(url: string): Promise<T> {
     return (await res.json()) as T;
 }
 
-/** One binary output → `POST /api/upload` → its file key. */
+/**
+ * One binary output → `POST /api/upload` → its file key: `<id>/<name>` when
+ * the output has a filename (`keyName`; the key keeps the producer's
+ * filename, see docs/edge-runtime.md "Asset store keys"), else `<id>.<ext>`.
+ */
 async function uploadOutput(
     bytes: Uint8Array,
-    meta: AssetPutMeta,
+    target: HostUploadTarget,
 ): Promise<string> {
-    const stem =
-        (meta.filename ?? "output")
-            .replace(/\.[^.]*$/, "")
-            .replace(/[^\w.-]+/g, "_")
-            .slice(0, 60) || "output";
     const form = new FormData();
     form.append(
         "file",
         new Blob([bytes as Uint8Array<ArrayBuffer>], {
-            type: meta.mime ?? "application/octet-stream",
+            type: target.mime ?? "application/octet-stream",
         }),
-        `${stem}.${meta.ext}`,
+        target.name ?? `output.${target.ext}`,
     );
+    if (target.name) form.append("keyName", target.name);
     const res = await fetch("/api/upload", {
         method: "POST",
         body: form,

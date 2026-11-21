@@ -1,7 +1,13 @@
 import { describe, expect, it } from "vitest";
+import type { PluginsRegistry } from "../core/registry/plugins-registry-schema";
+import type { ExecutableWorkflow } from "../core/workflow/executable-workflow";
+import { base64ToUtf8, utf8ToBase64 } from "./base64";
 import { createConsentGate } from "./consent-gate";
+import { createInProcessEdgeExecutor } from "./executors/in-process";
 import { createHostAssetStore } from "./host-store";
+import { runWorkflow } from "./run-workflow";
 import type { InvokeRequest, NodeExecutor } from "./types";
+import { defineEdgePlugin, edgeMethod } from "./worker/define-edge-plugin";
 
 const enc = (s: string) => new TextEncoder().encode(s);
 const dec = (b: Uint8Array | null) => (b ? new TextDecoder().decode(b) : null);
@@ -11,12 +17,14 @@ function fakeHost() {
         ["uploads/a.txt", enc("hello")],
     ]);
     const fetched: string[] = [];
-    let n = 0;
     const store = createHostAssetStore({
         resolveUrl: (key) =>
             key.startsWith("opfs://") ? null : `/files/${key}`,
-        upload: async (bytes, meta) => {
-            const key = `.runs/browser/${++n}.${meta.ext}`;
+        // The Studio layout: `<dir>/<id>/<name>`, else `<dir>/<id>.<ext>`.
+        upload: async (bytes, { id, name, ext }) => {
+            const key = name
+                ? `.runs/browser/${id}/${name}`
+                : `.runs/browser/${id}.${ext}`;
             files.set(key, bytes);
             return key;
         },
@@ -48,18 +56,22 @@ describe("createHostAssetStore", () => {
         expect(fetched).toEqual(["/files/uploads/missing.png"]);
     });
 
-    it("uploads outputs and returns the host key", async () => {
+    it("uploads outputs under a key that keeps the filename", async () => {
         const { store, files, fetched } = fakeHost();
         const ref = await store.put(enc("png!"), {
             ext: "png",
             mime: "image/png",
-            filename: "page.png",
+            filename: "page 1:r03.png",
         });
         expect(ref).toEqual({
-            file_key: ".runs/browser/1.png",
+            file_key: expect.stringMatching(
+                /^\.runs\/browser\/[0-9a-f]{32}\/page_1_r03\.png$/,
+            ),
             mime: "image/png",
-            filename: "page.png",
+            filename: "page 1:r03.png",
         });
+        const bare = await store.put(enc("x"), { ext: "bin" });
+        expect(bare.file_key).toMatch(/^\.runs\/browser\/[0-9a-f]{32}\.bin$/);
         expect(dec(files.get(ref.file_key) ?? null)).toBe("png!");
         expect(store.owns(ref.file_key)).toBe(true);
         // Served from the cache: no download of what was just uploaded.
@@ -77,6 +89,131 @@ describe("createHostAssetStore", () => {
         expect(fetched).toEqual([]);
         expect(dec(await store.get(b.file_key))).toBe("bbbb");
         expect(fetched).toEqual([`/files/${b.file_key}`]);
+    });
+
+    it("refuses a host key that drops the filename", async () => {
+        const store = createHostAssetStore({
+            resolveUrl: (k) => `/files/${k}`,
+            upload: async () => "uploads/abc123.png",
+        });
+        await expect(
+            store.put(enc("x"), { ext: "png", filename: "table.png" }),
+        ).rejects.toThrow("drops its filename 'table.png'");
+    });
+
+    it("a named edge output reaches the downstream node with its filename", async () => {
+        const { store } = fakeHost();
+        const registry: Pick<PluginsRegistry, "plugins"> = {
+            plugins: {
+                "tongflow-edge-x": {
+                    localSubdir: "tongflow-edge-x",
+                    entryFile: "dist/index.js",
+                    runtime: "browser",
+                    methodsByNodeSlot: {
+                        "image-orient": { methodName: "orient" },
+                        "ocr-image": { methodName: "ocr" },
+                    },
+                },
+            },
+        };
+        const plugin = defineEdgePlugin({
+            methods: {
+                orient: edgeMethod("image-orient", async (input) => ({
+                    success: true,
+                    image: {
+                        bytesBase64: utf8ToBase64(
+                            `up:${base64ToUtf8(input.image.bytesBase64)}`,
+                        ),
+                        mime: "image/png",
+                        filename: "page1-r03-table.png",
+                    },
+                })),
+                ocr: edgeMethod("ocr-image", async (input) => ({
+                    success: true,
+                    text: `${input.image.filename}|${base64ToUtf8(input.image.bytesBase64)}`,
+                })),
+            },
+        });
+        const handle = (fromNodeId: string, fromField: string) => ({
+            kind: "handle",
+            sources: [{ fromNodeId, fromField }],
+            targetHandle: "in:image",
+            consumerShape: "scalar",
+        });
+        const doc = {
+            name: "named",
+            version: "1.0",
+            exportedAt: "2026-01-01T00:00:00.000Z",
+            inputs: [],
+            outputs: [],
+            dataNodes: [
+                {
+                    id: "src",
+                    type: "imageNode",
+                    dataType: "image",
+                    level: 0,
+                    staticData: { fileKeys: ["uploads/a.txt"] },
+                },
+                { id: "mid", type: "imageNode", dataType: "image", level: 2 },
+                { id: "txt", type: "textNode", dataType: "text", level: 4 },
+            ],
+            executableNodes: [
+                {
+                    id: "orient",
+                    type: "imageOrientNode",
+                    feature: "image-orient",
+                    pluginId: "tongflow-edge-x",
+                    label: "orient",
+                    bindings: { image: handle("src", "fileKeys") },
+                    outputs: [
+                        {
+                            sourceField: "image",
+                            nodeType: "imageNode",
+                            dataField: "fileKeys",
+                            expandEach: false,
+                            itemValuePath: "file_key",
+                            downstreamDataNodeId: "mid",
+                        },
+                    ],
+                    dependencies: ["src"],
+                    level: 1,
+                },
+                {
+                    id: "ocr",
+                    type: "ocrImageNode",
+                    feature: "ocr-image",
+                    pluginId: "tongflow-edge-x",
+                    label: "ocr",
+                    bindings: { image: handle("orient", "image") },
+                    outputs: [
+                        {
+                            sourceField: "text",
+                            nodeType: "textNode",
+                            dataField: "texts",
+                            expandEach: false,
+                            downstreamDataNodeId: "txt",
+                        },
+                    ],
+                    dependencies: ["mid"],
+                    level: 3,
+                },
+            ],
+            executionLevels: [["orient"], ["ocr"]],
+            dataNodeEdges: [],
+            originalFlow: { nodes: [], edges: [] },
+        } as unknown as ExecutableWorkflow;
+        const result = await runWorkflow(doc, {
+            executor: createInProcessEdgeExecutor({
+                registry,
+                loadPlugin: () => plugin,
+            }),
+            store,
+        });
+        expect(result.errors).toEqual([]);
+        const key = (result.outputs.orient.image as { file_key: string })
+            .file_key;
+        expect(key).toMatch(/\/page1-r03-table\.png$/);
+        expect(result.outputs.ocr.text).toBe("page1-r03-table.png|up:hello");
     });
 
     it("fails on a server error", async () => {

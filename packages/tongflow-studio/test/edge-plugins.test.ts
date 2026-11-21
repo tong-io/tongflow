@@ -83,7 +83,7 @@ process.stdin.on("end", () => {
   emit({ event: { type: "node_started", nodeId: node.id, level: 1, feature: node.feature, label: node.label } });
   const output = {
     success: true,
-    image: { bytesBase64: b64("upscaled(" + node.pluginId + "):" + unb64(prompt.image.bytesBase64)), mime: "image/png", filename: "up.png" },
+    image: { bytesBase64: b64("upscaled(" + node.pluginId + "):" + prompt.image.filename + "|" + unb64(prompt.image.bytesBase64)), mime: "image/png", filename: "up.png" },
   };
   emit({ event: { type: "node_completed", nodeId: node.id, output, label: node.label } });
   emit({ result: { status: "success", outputs: { [node.id]: output }, outputs_by_name: {}, errors: [], failures: [] } });
@@ -116,7 +116,7 @@ const FIXTURE = {
         orient: async (input, ctx) => {
             ctx.progress("orienting", 50);
             const text = new TextDecoder().decode(Uint8Array.from(atob(input.image.bytesBase64), (c) => c.charCodeAt(0)));
-            return { success: true, image: { bytesBase64: btoa("oriented(" + (ctx.model ?? "default") + "):" + text), mime: "image/png", filename: "oriented.png" } };
+            return { success: true, image: { bytesBase64: btoa("oriented(" + (ctx.model ?? "default") + "):" + input.image.filename + "|" + text), mime: "image/png", filename: "oriented.png" } };
         },
     },
 };
@@ -576,14 +576,18 @@ describe("Studio canvas runner wiring (browser edge runtime)", () => {
                 | { output: { image: { file_key: string } } }
                 | undefined;
 
-        // The edge node read the uploaded file from the server and its output
-        // was uploaded back into the project under a project key...
+        // The edge node read the uploaded file from the server (with its
+        // filename) and its named output was uploaded back into the project
+        // under a key that keeps the name...
         const mid = done("orient")?.output.image.file_key ?? "";
-        expect(mid.startsWith(`${BROWSER_OUTPUT_DIR}/oriented-`)).toBe(true);
-        expect(mid.endsWith(".png")).toBe(true);
-        expect(await projectFile(mid)).toBe("oriented(default):PHOTO");
-        // ...the paid Python node asked first, got those bytes, and its
-        // result is a project file too.
+        expect(mid).toMatch(
+            new RegExp(`^${BROWSER_OUTPUT_DIR}/[0-9a-f]{32}/oriented\\.png$`),
+        );
+        expect(await projectFile(mid)).toBe(
+            "oriented(default):photo.png|PHOTO",
+        );
+        // ...the paid Python node asked first, got those bytes under the
+        // same filename, and its result is a project file too.
         expect(paid).toEqual([
             expect.objectContaining({
                 pluginId: "tongflow-api-paid",
@@ -592,9 +596,11 @@ describe("Studio canvas runner wiring (browser edge runtime)", () => {
             }),
         ]);
         const big = done("up")?.output.image.file_key ?? "";
-        expect(big.startsWith(`${BROWSER_OUTPUT_DIR}/up-`)).toBe(true);
+        expect(big).toMatch(
+            new RegExp(`^${BROWSER_OUTPUT_DIR}/[0-9a-f]{32}/up\\.png$`),
+        );
         expect(await projectFile(big)).toBe(
-            "upscaled(tongflow-api-paid):oriented(default):PHOTO",
+            "upscaled(tongflow-api-paid):oriented.png|oriented(default):photo.png|PHOTO",
         );
         expect(downloads).toEqual([]);
 
@@ -642,7 +648,7 @@ describe("Studio canvas runner wiring (browser edge runtime)", () => {
         };
         expect(last.status).toBe("COMPLETED");
         expect(await projectFile(last.data.image.file_key)).toBe(
-            "oriented(tiny-ori):PHOTO",
+            "oriented(tiny-ori):photo.png|PHOTO",
         );
         await rt.taskTransport.createTask({
             feature: "image-upscale",

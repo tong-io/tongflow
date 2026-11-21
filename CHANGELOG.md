@@ -19,7 +19,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   listed by `…/plugins/edge`): browser plugins only, no traversal or dot-files,
   `application/wasm` / `text/javascript`, `Range`, immutable per version. Canvas
   files bridge through the host's storage: inputs are fetched when a node needs
-  them, binary outputs are uploaded through the existing upload endpoint. Studio
+  them, binary outputs are uploaded through the existing upload endpoint under a
+  key that keeps the producer's filename (`<id>/<name>`; the app's `/api/upload`
+  takes `keyName`, its storage driver `{name}`, and `/api/engine-assets` keeps the
+  Python `HttpStore`'s `filename`). Studio
   asks before a paid Python node (`needs_confirmation`) and both ask once before
   a large model download (`models.json`). Model base `TONGFLOW_EDGE_MODEL_BASE`
   (default `https://models.ctsource.cn/`); opt-in COOP / COEP with

@@ -11,12 +11,41 @@
  *   `resolveAssetUrl`, a saved workflow keeps a key the server can read, and a
  *   Python node (remote executor) or a later server run can consume it.
  *
+ * Keys keep the producer's filename, as every store's do (docs/edge-runtime.md,
+ * "Asset store keys"): the store hands `upload` a fresh `id` and the key name
+ * `storeKeyName(filename, ext)`, and the host stores the output under a key
+ * whose last path segment is exactly that name (`<dir>/<id>/<name>`), or
+ * `<dir>/<id>.<ext>` when the output has no filename. The engine derives a
+ * downstream Asset input's `filename` from that last segment.
+ *
  * Bytes it has seen are kept in a small in-memory LRU, so a file uploaded by
  * one node and read by the next is not downloaded again. Platform neutral:
  * only `fetch`.
  */
 
+import { baseName, storeKeyName } from "./assets";
 import type { AssetPutMeta, AssetStore, FileRefPayload } from "./types";
+
+/** What {@link HostAssetStoreOptions.upload} stores. */
+export interface HostUploadTarget extends AssetPutMeta {
+    /** A fresh 32-hex id for this output (the host may use its own). */
+    id: string;
+    /**
+     * `storeKeyName(filename, ext)`: the last path segment the host key must
+     * end in, e.g. `<dir>/<id>/<name>`. Absent when the output has no
+     * filename; the host then keys it `<dir>/<id>.<ext>`.
+     */
+    name?: string;
+}
+
+function newId(): string {
+    const c = globalThis.crypto;
+    if (c?.randomUUID) return c.randomUUID().replace(/-/g, "");
+    return `${Date.now().toString(16)}${Math.random().toString(16).slice(2)}`.slice(
+        0,
+        32,
+    );
+}
 
 export interface HostAssetStoreOptions {
     /**
@@ -25,8 +54,12 @@ export interface HostAssetStoreOptions {
      * canvas's own `resolveAssetUrl`.
      */
     resolveUrl: (fileKey: string) => string | null;
-    /** Upload one output; resolve the host file key it is stored under. */
-    upload: (bytes: Uint8Array, meta: AssetPutMeta) => Promise<string>;
+    /**
+     * Upload one output; resolve the host file key it is stored under. With
+     * `target.name` set, the key's last path segment must be that name (the
+     * store refuses another one), so the filename reaches downstream nodes.
+     */
+    upload: (bytes: Uint8Array, target: HostUploadTarget) => Promise<string>;
     /** Default `globalThis.fetch`. Requests are same-origin with credentials. */
     fetch?: (url: string, init?: RequestInit) => Promise<Response>;
     /** Upper bound of the in-memory byte cache. Default 256 MiB; 0 disables it. */
@@ -85,7 +118,17 @@ export function createHostAssetStore(
 
     return {
         async put(bytes, meta) {
-            const key = await options.upload(bytes, meta);
+            const name = storeKeyName(meta.filename, meta.ext);
+            const key = await options.upload(bytes, {
+                ...meta,
+                id: newId(),
+                ...(name ? { name } : {}),
+            });
+            if (name && baseName(key) !== name) {
+                throw new Error(
+                    `The host stored an output as '${key}', which drops its filename '${name}': the key's last segment must be the name it was given.`,
+                );
+            }
             issued.add(key);
             remember(key, bytes);
             const ref: FileRefPayload = { file_key: key };

@@ -154,7 +154,9 @@ extension gets `.<ext>` (from the mime); the stem is cut to 120 UTF-8 bytes, kee
 extension. The ref's own `filename` field still carries the producer's name unchanged. Keys
 of the older flat form (`opfs://<id>.<ext>`, `mem://<id>`) still resolve. A host-owned store
 (Python `HttpStore`, or a TS store over the host's uploads) gets the key from the host's upload
-endpoint, which receives the `filename` with the bytes and should keep it the same way.
+endpoint, which receives the `filename` with the bytes and should keep it the same way;
+`createHostAssetStore` enforces it, and Studio and the Next app key such files
+`<dir>/<id>/<name>` (see [Asset bridge](#asset-bridge)).
 
 ### Fault tolerance and run control
 
@@ -583,8 +585,14 @@ The canvas files of both hosts already live on the server (Studio: project keys 
   are resolved by the engine as before.
 - **Writing.** Every binary output of a browser run (an edge node's `bytesBase64`, and a
   Python node's inline result from the remote executor) goes through `put`, which uploads it
-  through the host's existing upload endpoint (Studio `POST /tongflow/p/<pid>/upload?dir=
-  .runs/browser`, the app `POST /api/upload`) and returns the host key. So the canvas shows it
+  through the host's existing upload endpoint and returns the host key. The key keeps the
+  producer's filename like every store's ([Asset store keys](#asset-store-keys)): the store
+  passes `upload` a fresh `id` and `name = storeKeyName(filename, ext)` and refuses a key
+  whose last segment is not `name`. Studio stores it as `.runs/browser/<id>/<name>`
+  (`POST /tongflow/p/<pid>/upload?dir=.runs/browser/<id>`), the app as `<id>/<name>`
+  (`POST /api/upload` with the `keyName` form field; the storage driver's `saveFile` takes
+  `{name}`, and `/api/engine-assets` keeps the Python `HttpStore`'s `filename` the same way).
+  An output without a filename is `…/<id>.<ext>`. So the canvas shows it
   with its usual `resolveAssetUrl`, the saved workflow keeps a key the server can read, a
   later server run can consume it, and a downstream Python node gets its bytes (the engine
   materializes them into the invoke request; the upload makes the file persistent, not a
