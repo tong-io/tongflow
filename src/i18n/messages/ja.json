@@ -22,7 +22,9 @@
         "installedCommunity": "インストール済みのコミュニティプラグイン",
         "cancel": "キャンセル",
         "runsInBrowser": "ブラウザで実行",
-        "edgeDownloadConfirm": "ノード {slot} には {label} が必要です。このブラウザに一度だけダウンロードされ、この端末で実行されます。今すぐダウンロードしますか?"
+        "edgeDownloadConfirm": "ノード {slot} には {label} が必要です。このブラウザに一度だけダウンロードされ、この端末で実行されます。今すぐダウンロードしますか?",
+        "edgeRemoteUnavailable": "サーバーはブラウザの「ワークフローを実行」の中でサーバーノード {slot} を実行できません。このノードを単独で実行してください。",
+        "edgeRemotePaymentRequired": "サーバーノード {slot} の実行には有効なサブスクリプションが必要です。"
     },
     "Settings": {
         "title": "設定",

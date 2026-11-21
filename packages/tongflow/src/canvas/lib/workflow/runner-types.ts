@@ -91,6 +91,12 @@ export interface CanvasWorkflowRunControls {
     ): boolean;
 }
 
+/** What the canvas tells a runner about the graph on screen (see `handles`). */
+export interface CanvasWorkflowGraph {
+    /** The distinct plugin ids bound on the graph's nodes (sorted). */
+    pluginIds: readonly string[];
+}
+
 export interface CanvasWorkflowRunner {
     /**
      * Run the whole workflow. Resolve when it ends (ideally after emitting
@@ -106,4 +112,12 @@ export interface CanvasWorkflowRunner {
      * implementation" in a node's menu while a run is in flight.
      */
     controls?: CanvasWorkflowRunControls;
+    /**
+     * Optional: whether this runner takes the graph on screen. The canvas
+     * offers "Run workflow" only while it returns `true` (and keeps Stop
+     * while a run is in flight), so a host whose other run path covers some
+     * graphs leaves those to it. Absent = every graph. Called on every graph
+     * change; keep it cheap.
+     */
+    handles?: (graph: CanvasWorkflowGraph) => boolean;
 }

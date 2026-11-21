@@ -22,7 +22,9 @@
         "installedCommunity": "已安装的社区插件",
         "cancel": "取消",
         "runsInBrowser": "在浏览器中运行",
-        "edgeDownloadConfirm": "节点 {slot} 需要 {label}。模型只下载一次,保存在本浏览器里,在本机运行。现在下载吗?"
+        "edgeDownloadConfirm": "节点 {slot} 需要 {label}。模型只下载一次,保存在本浏览器里,在本机运行。现在下载吗?",
+        "edgeRemoteUnavailable": "服务器无法在浏览器的「运行工作流」中运行服务器节点 {slot}。请单独运行这个节点。",
+        "edgeRemotePaymentRequired": "运行服务器节点 {slot} 需要有效的订阅。"
     },
     "Settings": {
         "title": "设置",

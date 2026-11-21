@@ -6,7 +6,10 @@
  *   entry URL + `?modelBase=`), Python plugins through the host's remote
  *   executor, behind an optional consent gate (large model downloads);
  * - the canvas `workflowRunner` (`createEngineCanvasRunner`, `branch`
- *   failure policy) for "Run workflow";
+ *   failure policy) for "Run workflow", offered only for graphs with at
+ *   least one browser-plugin node: a graph of server nodes only keeps the
+ *   host's own whole-workflow run (the Next app's ▷, Studio's Run), exactly
+ *   as without a browser plugin;
  * - the canvas `taskTransport` for single-node runs: nodes bound to a
  *   browser plugin run as a one-node workflow on the same executor and
  *   store, every other node keeps the host's own transport.
@@ -141,6 +144,10 @@ export function createEdgeHostRuntime(
         executor,
         store: options.store,
         failurePolicy: "branch",
+        handles: ({ pluginIds }) =>
+            pluginIds.some(
+                (id) => pluginRuntimeOf(options.registry, id) === "browser",
+            ),
         ...(options.onEngineEvent
             ? { onEngineEvent: options.onEngineEvent }
             : {}),

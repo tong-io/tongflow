@@ -12,6 +12,7 @@
 
 import type {
     CanvasNodeImplementation,
+    CanvasWorkflowGraph,
     CanvasWorkflowRunControls,
     CanvasWorkflowRunEvent,
     CanvasWorkflowRunner,
@@ -37,6 +38,7 @@ export {
 
 export type {
     CanvasNodeImplementation,
+    CanvasWorkflowGraph,
     CanvasWorkflowRunControls,
     CanvasWorkflowRunEvent,
     CanvasWorkflowRunner,
@@ -53,6 +55,8 @@ export interface EngineCanvasRunnerOptions
     onEngineEvent?: (event: EngineEvent) => void;
     /** Called with each finished run's result. */
     onResult?: (result: RunResult) => void;
+    /** The runner's `handles` (which graphs offer "Run workflow"); absent = all. */
+    handles?: CanvasWorkflowRunner["handles"];
 }
 
 export interface EngineCanvasRunner extends CanvasWorkflowRunner {
@@ -166,6 +170,7 @@ export function createEngineCanvasRunner(
     const {
         onEngineEvent,
         onResult,
+        handles,
         failurePolicy = "branch",
         ...engineOptions
     } = options;
@@ -181,6 +186,7 @@ export function createEngineCanvasRunner(
 
     return {
         controls,
+        ...(handles ? { handles } : {}),
         get controller() {
             return active;
         },

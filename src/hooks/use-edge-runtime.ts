@@ -13,9 +13,10 @@ import { loadAppEdgeRuntime } from "@/lib/plugins/edge-runtime";
 /**
  * Puts the browser edge runtime behind the canvas while at least one browser
  * plugin (`tongflow-edge-*`) is installed: the canvas then offers "Run
- * workflow" on the TypeScript engine and runs single edge nodes in the
- * browser. Follows the canvas's plugins registry, so installing or removing
- * a browser plugin takes effect without a reload. With none installed the
+ * workflow" on the TypeScript engine for graphs with a browser-plugin node
+ * (a graph of server nodes keeps ▷, the server run) and runs single edge
+ * nodes in the browser. Follows the canvas's plugins registry, so installing
+ * or removing a browser plugin takes effect without a reload. With none installed the
  * canvas host config is left untouched (every node runs on the server).
  */
 export function useEdgeRuntime(): void {
@@ -54,6 +55,16 @@ export function useEdgeRuntime(): void {
                         label: r.label,
                     }),
                 ),
+            remoteMessages: {
+                unavailable: (r) =>
+                    tRef.current("edgeRemoteUnavailable", {
+                        slot: r.nodeSlot,
+                    }),
+                paymentRequired: (r) =>
+                    tRef.current("edgeRemotePaymentRequired", {
+                        slot: r.nodeSlot,
+                    }),
+            },
         })
             .then((rt) => {
                 if (!rt) return;

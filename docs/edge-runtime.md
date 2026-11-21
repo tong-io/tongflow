@@ -451,6 +451,8 @@ A call refused before it starts gets a JSON error instead, `{error, code, …}`:
 | 409 | `needs_confirmation` | Studio only: a paid plugin (API key or Modal) without `confirmed`. Carries `confirmation: {pluginId, nodeSlot, billing, note}` |
 | 400 | `missing_api_key` | Next app only: a required key is unset (with `key`, `url`), the same preflight as a single-node task |
 | 401 / 403 | — | The host's own auth refused the request |
+| 402 | (host's) | The host requires a subscription to run server nodes (TongFlow Cloud) |
+| 501 | (host's) | The host cannot run server nodes for a browser run at all |
 
 The executor turns every refusal and `error` frame into a `RemoteExecutorError` (`code`,
 `status`, `confirmation`), so the node fails with the message. For `needs_confirmation` it
@@ -484,7 +486,11 @@ also stop the run when the stream's connection closes, so a lost stop request st
 Studio (`packages/tongflow-studio`) and the Next app (`src/`) run browser plugins the same
 way scanall's web app does: the plugin is served same-origin, its entry runs in a module Web
 Worker, and the canvas gets the engine as its runner. Nothing of this is active until a
-browser plugin is installed; without one both canvases are exactly what they were.
+browser plugin is installed; without one both canvases are exactly what they were. With one
+installed, **Run workflow** appears only on graphs that contain at least one
+`runtime: "browser"` node; a graph of server nodes keeps the host's own whole-workflow run
+(the Next app's ▷, `/api/workflow/execute`; Studio's Run), so installing a browser plugin
+changes nothing for existing server workflows.
 
 ### Serving the plugin files
 
@@ -547,6 +553,14 @@ const runtime = createEdgeHostRuntime({
   module worker per plugin), Python plugins to `createHttpRemoteExecutor` on the host's own
   `/api/engine/invoke`. The canvas runner is `createEngineCanvasRunner` with
   `failurePolicy: "branch"`, so pause / resume / skip / replace implementation appear too.
+- **Which graphs.** The runner's `handles` takes a graph only when one of its nodes is bound
+  to a browser plugin (`pluginRuntimeOf(registry, pluginId) === "browser"`). Otherwise the
+  canvas hides Run workflow and the graph runs where it always did, on the host's server
+  run. Hiding was chosen over routing Run workflow to the server run: the server run has
+  its own entry and flow (the Next app's ▷ opens the save dialog, saves, then runs; Studio
+  records numbered outputs and `runs.json`), and with the action hidden a server workflow
+  looks and runs exactly as before browser plugins existed. A mixed graph (browser and
+  Python nodes) gets Run workflow; its Python nodes go to the remote executor.
 - **Single-node runs.** `createEngineTaskTransport` runs a task whose plugin is a browser
   plugin as a one-node workflow (`singleNodeWorkflow`: every prompt field a static binding,
   the slot's output routes, the node's model and advanced params) on the same executor and
@@ -570,6 +584,7 @@ const runtime = createEdgeHostRuntime({
 | Remote base | `/tongflow/p/<pid>` (cookie, same-origin check) | `""` (access gate) |
 | Paid Python nodes | `needs_confirmation` → `confirm()` → the canvas's confirm dialog (plugin, slot, billing note); asked every time, as the backend asks | never asked (the app has no per-run billing confirmation; missing keys still fail the node) |
 | Download consent | the same dialog | `window.confirm` |
+| Refused server node | the backend's message | 501 (the server cannot run server nodes for a browser run) and 402 (subscription required) become localized node errors (`Plugins.edgeRemoteUnavailable` / `edgeRemotePaymentRequired`, `localizeRemoteRefusals`); other refusals keep the backend's message |
 
 ### Asset bridge
 
@@ -699,6 +714,7 @@ interface CanvasWorkflowRunner {
         onEvent(event: CanvasWorkflowRunEvent): void;
     }): Promise<void>;
     controls?: CanvasWorkflowRunControls; // optional, see below
+    handles?(graph: { pluginIds: readonly string[] }): boolean; // optional; absent = every graph
 }
 interface CanvasWorkflowRunControls {
     pause(): boolean;
@@ -709,7 +725,11 @@ interface CanvasWorkflowRunControls {
 ```
 
 When `workflowRunner` is set, the canvas shows a **Run workflow** action in its top-right
-corner. The action becomes **Stop** while a run is in flight. Clicking it exports the
+corner (`FlowCanvas runActionPosition` moves it; the Next app puts it top-center). A runner
+may narrow that with `handles(graph)`: the canvas passes `{pluginIds}` (the distinct plugin
+ids bound on the graph's nodes, sorted) on every graph change and shows the action only
+while it returns `true`; a run in flight keeps Stop regardless. `createEdgeHostRuntime`
+takes only graphs with a browser-plugin node (see [Runner wiring](#runner-wiring)). The action becomes **Stop** while a run is in flight. Clicking it exports the
 current graph with `exportWorkflow(nodes, edges)` and calls `run`. Stop aborts `signal`;
 the canvas then resets to idle and ignores later events. The canvas depends only on this
 interface, not on any engine package. An engine adapts its own events to these:

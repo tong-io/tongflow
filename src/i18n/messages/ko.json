@@ -22,7 +22,9 @@
         "installedCommunity": "설치된 커뮤니티 플러그인",
         "cancel": "취소",
         "runsInBrowser": "브라우저에서 실행",
-        "edgeDownloadConfirm": "노드 {slot}에 {label}이(가) 필요합니다. 이 브라우저에 한 번만 다운로드되어 이 기기에서 실행됩니다. 지금 다운로드할까요?"
+        "edgeDownloadConfirm": "노드 {slot}에 {label}이(가) 필요합니다. 이 브라우저에 한 번만 다운로드되어 이 기기에서 실행됩니다. 지금 다운로드할까요?",
+        "edgeRemoteUnavailable": "서버가 브라우저의 \"워크플로 실행\" 안에서 서버 노드 {slot}을(를) 실행할 수 없습니다. 이 노드를 단독으로 실행하세요.",
+        "edgeRemotePaymentRequired": "서버 노드 {slot}을(를) 실행하려면 활성 구독이 필요합니다."
     },
     "Settings": {
         "title": "설정",

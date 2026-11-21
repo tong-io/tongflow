@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- **"Run workflow" no longer takes over server workflows.** With a browser plugin
+  installed, the canvas offered the browser-engine "Run workflow" on every graph, so
+  a graph of server nodes ran each node through `/api/engine/invoke` instead of the
+  server run (and failed where that endpoint is unavailable, e.g. TongFlow Cloud).
+  The action now appears only on graphs with at least one `runtime: "browser"` node;
+  server workflows keep ▷ (Next app) / Run (Studio) exactly as before. New optional
+  `CanvasWorkflowRunner.handles(graph)` (`createEngineCanvasRunner({handles})`);
+  `createEdgeHostRuntime` sets it. In the Next app a 501 or 402 refusal of a server
+  node in a browser run is a localized node error (zh / en / ja / ko).
+
 ## [1.1.0] - 2026-11-21
 
 ### Added

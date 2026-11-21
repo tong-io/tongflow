@@ -117,6 +117,24 @@ describe("createEngineCanvasRunner", () => {
         expect(b).toMatchObject({ output: { text: "A(x)" } });
     });
 
+    it("passes handles through, and keeps controller live", () => {
+        const f = fixture("control-pause-resume");
+        const plain = createEngineCanvasRunner({
+            executor: fakeExecutor(f.plugins),
+            store: new MemoryAssetStore(),
+        });
+        expect(plain.handles).toBeUndefined();
+        const handles = ({ pluginIds }: { pluginIds: readonly string[] }) =>
+            pluginIds.length > 0;
+        const runner = createEngineCanvasRunner({
+            executor: fakeExecutor(f.plugins),
+            store: new MemoryAssetStore(),
+            handles,
+        });
+        expect(runner.handles).toBe(handles);
+        expect(runner.controller).toBeNull();
+    });
+
     it("maps progress percent to a fraction and model downloads to a label", async () => {
         const runner = createEngineCanvasRunner({
             executor: {
