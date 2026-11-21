@@ -1,0 +1,10 @@
+{
+    "extends": "./tsconfig.json",
+    "compilerOptions": {
+        "lib": ["ES2022"],
+        "jsx": "preserve",
+        "types": ["node"]
+    },
+    "include": ["src/engine/**/*.ts"],
+    "exclude": ["src/engine/browser/**", "src/engine/**/*.test.ts"]
+}
