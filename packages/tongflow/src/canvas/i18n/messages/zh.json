@@ -287,7 +287,8 @@
                 "runSkippedUpstreamFailed": "上游失败",
                 "skipNode": "跳过",
                 "replaceImplementation": "换实现",
-                "replaceImplementationEmpty": "没有安装其他实现"
+                "replaceImplementationEmpty": "没有安装其他实现",
+                "replaceImplementationModel": "模型：{model}"
             },
             "common": {
                 "enterInstructions": "请输入指令...",

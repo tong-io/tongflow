@@ -287,7 +287,8 @@
                 "runSkippedUpstreamFailed": "上流が失敗しました",
                 "skipNode": "スキップ",
                 "replaceImplementation": "実装を切り替え",
-                "replaceImplementationEmpty": "ほかの実装がインストールされていません"
+                "replaceImplementationEmpty": "ほかの実装がインストールされていません",
+                "replaceImplementationModel": "モデル：{model}"
             },
             "common": {
                 "enterInstructions": "指示を入力してください...",
