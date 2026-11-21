@@ -66,6 +66,8 @@ function ensureDevWatcher(): void {
     watcher = chokidar.watch(
         [
             join(pluginsDir(), "**", "*.py"),
+            // Edge (browser) plugins declare their slots in this manifest.
+            join(pluginsDir(), "*", "tongflow.plugin.json"),
             join(resourcesDir(), "config", "tongflow.abi.json"),
         ],
         {

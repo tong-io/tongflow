@@ -22,7 +22,7 @@ import sys
 from pathlib import Path
 from typing import Any, Callable, Optional
 
-from ..scan import scan
+from ..scan import EDGE_PREFIX, RUNTIME_BROWSER, scan
 from ._subproc import utf8_env
 
 DEFAULT_ORG = "https://github.com/tong-io"
@@ -32,6 +32,31 @@ DEFAULT_ORG = "https://github.com/tong-io"
 SDK_ROOT = Path(__file__).resolve().parents[2]
 
 LogCb = Callable[[str], None]
+
+
+def is_edge_plugin_id(plugin_id: str) -> bool:
+    """True for a ``tongflow-edge-*`` id: a browser plugin this engine never runs."""
+    return plugin_id.startswith(EDGE_PREFIX)
+
+
+def is_browser_plugin(plugin_id: str, cfg: Optional[dict[str, Any]]) -> bool:
+    """True when the plugin runs in the browser edge runtime, not here.
+
+    Decided by the scanned ``runtime`` field, or by the ``tongflow-edge-``
+    prefix when the plugin is not installed (and so was never scanned).
+    """
+    if cfg and cfg.get("runtime") == RUNTIME_BROWSER:
+        return True
+    return is_edge_plugin_id(plugin_id)
+
+
+def browser_runtime_error(plugin_id: str, node_slot: str) -> str:
+    return (
+        f"Plugin {plugin_id} (nodeSlot={node_slot}) is a browser plugin and "
+        "requires the browser edge runtime; the Python engine cannot run it. "
+        "Run this node in a TongFlow host with the edge runtime, or pick a "
+        "Python plugin for the node."
+    )
 
 
 def collect_plugin_ids(workflow: dict[str, Any]) -> list[str]:
@@ -79,7 +104,13 @@ def ensure_plugins_present(
     log: LogCb,
 ) -> None:
     overrides = plugin_git_urls or {}
-    missing = [pid for pid in plugin_ids if not (plugins_dir / pid).is_dir()]
+    # Browser (edge) plugins are never cloned or run here; the node that uses
+    # one fails with a clear "requires the browser edge runtime" error instead.
+    missing = [
+        pid
+        for pid in plugin_ids
+        if not is_edge_plugin_id(pid) and not (plugins_dir / pid).is_dir()
+    ]
     if not missing:
         return
     if not auto_install:
@@ -219,6 +250,8 @@ def prepare_python_env(
     try:
         py = _ensure_shared_venv(data_dir, log)
         for pid in plugin_ids:
+            if is_edge_plugin_id(pid):
+                continue
             _ensure_plugin_requirements(pid, plugins_dir / pid, py, data_dir, log)
         return str(py)
     except Exception as e:  # noqa: BLE001 - degrade to plain interpreter

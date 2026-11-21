@@ -2,8 +2,10 @@ import { z } from "zod";
 
 /**
  * Optional per-plugin env declaration file: `tongflow.plugin.json` at the
- * plugin repo root. It only feeds the Settings UI (per-plugin env var cards);
- * plugin/handler registration stays annotation-driven and never reads it.
+ * plugin repo root. For Python plugins it only feeds the Settings UI
+ * (per-plugin env var cards); handler registration stays annotation-driven.
+ * Edge (browser) plugins also declare `runtime` / `entry` / `slots` here — the
+ * Python scanner reads those keys; this schema ignores them.
  */
 export const PluginEnvVarSchema = z.object({
     /** Env key, conventional UPPER_SNAKE. */

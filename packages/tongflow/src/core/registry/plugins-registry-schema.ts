@@ -3,10 +3,15 @@ import { z } from "zod";
 /**
  * Plugins registry produced by the Python scanner over `plugins/*`.
  *
- * There is one kind of plugin and one way to run it: the platform spawns the
- * plugin's local entry and exchanges ABI JSON over stdin/stdout. Where the work
- * actually runs (locally, on Modal, on another cloud) is the plugin's own
- * concern — the platform binds to no backend.
+ * Plugins come in two runtimes:
+ * - `python` (default; `tongflow-modal-*` / `-api-*` / `-router-*` /
+ *   `-local-*`): the platform spawns the plugin's local entry and exchanges
+ *   ABI JSON over stdin/stdout. Where the work actually runs (locally, on
+ *   Modal, on another cloud) is the plugin's own concern — the platform binds
+ *   to no backend.
+ * - `browser` (`tongflow-edge-*`): a TypeScript ESM module the browser edge
+ *   runtime loads; the Python engine never runs it. Its slots come from the
+ *   plugin's `tongflow.plugin.json` instead of Python sources.
  *
  * - nodePluginMap: nodeSlot -> list of `pluginId` (directory name under `plugins/`).
  *   The head of each list is that slot's **default implementation**: what a
@@ -89,15 +94,22 @@ export const PluginModelCatalogSchema = z.object({
     ),
 });
 
+/** Where a plugin's slot handlers execute. Absent means `python`. */
+export const PluginRuntimeSchema = z.enum(["python", "browser"]);
+
 export const PluginConfigSchema = z.object({
     /** Relative to repo root, e.g. `plugins/tongflow-<runner>-foo` */
     localSubdir: z.string().min(1),
     /** nodeSlot -> handler that implements it (informational; the plugin
      * dispatches in-process by nodeSlot). */
     methodsByNodeSlot: z.record(z.string().min(1), PluginMethodSchema),
-    /** Generic runner executes `python <entryFile>`; every plugin ships its
-     * own entry.py. */
+    /** Python plugins: the generic runner executes `python <entryFile>`
+     * (every Python plugin ships its own entry.py). Browser plugins: the ESM
+     * module the edge runtime imports, relative to `localSubdir`. */
     entryFile: z.string().min(1).optional(),
+    /** `python` (default when absent) or `browser` (`tongflow-edge-*`, run by
+     * the browser edge runtime only). Read it through `pluginRuntime()`. */
+    runtime: PluginRuntimeSchema.optional(),
     /** True when the plugin's class is marked `@deploy` (a deploy-first backend
      * such as Modal): its entry.py deploys once before invoking. Informational —
      * the deploy step lives inside the plugin's entry.py. */
@@ -132,3 +144,20 @@ export type PluginsRegistry = z.infer<typeof PluginsRegistrySchema>;
 export type PluginConfig = z.infer<typeof PluginConfigSchema>;
 export type PluginModelCatalog = z.infer<typeof PluginModelCatalogSchema>;
 export type PluginParamSpec = z.infer<typeof PluginParamSpecSchema>;
+export type PluginRuntime = z.infer<typeof PluginRuntimeSchema>;
+
+/** A plugin's runtime, defaulting to `python` for registries that predate the
+ * field (scanner < 9) and for an unknown / missing plugin. */
+export function pluginRuntime(
+    plugin: Pick<PluginConfig, "runtime"> | null | undefined,
+): PluginRuntime {
+    return plugin?.runtime ?? "python";
+}
+
+/** True when the plugin runs in the browser edge runtime (never in the Python
+ * engine). */
+export function isBrowserPlugin(
+    plugin: Pick<PluginConfig, "runtime"> | null | undefined,
+): boolean {
+    return pluginRuntime(plugin) === "browser";
+}
