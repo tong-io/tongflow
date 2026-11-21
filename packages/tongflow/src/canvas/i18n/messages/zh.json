@@ -280,7 +280,14 @@
                 "missingImplTitle": "未配置实现",
                 "missingImplDescription": "该节点尚未安装可用插件（或未选择）。请先在插件管理中安装一个插件，或选择一个已安装的插件，然后再运行。",
                 "downloadingModel": "下载模型 {loaded}/{total} MB",
-                "downloadingModelNoTotal": "下载模型 {loaded} MB"
+                "downloadingModelNoTotal": "下载模型 {loaded} MB",
+                "runSkipped": "已跳过",
+                "runSkippedByUser": "手动跳过",
+                "runSkippedUpstream": "上游已跳过",
+                "runSkippedUpstreamFailed": "上游失败",
+                "skipNode": "跳过",
+                "replaceImplementation": "换实现",
+                "replaceImplementationEmpty": "没有安装其他实现"
             },
             "common": {
                 "enterInstructions": "请输入指令...",
@@ -1023,7 +1030,9 @@
         },
         "toolbar": {
             "runWorkflow": "运行工作流",
-            "stopWorkflow": "停止"
+            "stopWorkflow": "停止",
+            "pauseWorkflow": "暂停",
+            "resumeWorkflow": "继续"
         }
     },
     "Upload": {

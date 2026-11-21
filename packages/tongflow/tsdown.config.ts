@@ -3,10 +3,11 @@ import { defineConfig } from "tsdown";
 /**
  * Entries:
  *  - `index`  → `tongflow`        (framework-free core; platform neutral)
- *  - `engine` / `engine-browser` / `engine-worker` → `tongflow/engine`,
- *    `tongflow/engine/browser`, `tongflow/engine/worker` (the TS workflow
- *    engine). Built with the core so they share its chunks; the browser entry
- *    only touches browser globals (Worker, OPFS) at call time.
+ *  - `engine` / `engine-browser` / `engine-worker` / `engine-canvas` →
+ *    `tongflow/engine`, `tongflow/engine/browser`, `tongflow/engine/worker`,
+ *    `tongflow/engine/canvas` (the TS workflow engine and its canvas runner
+ *    adapter). Built with the core so they share its chunks; the browser
+ *    entry only touches browser globals (Worker, OPFS) at call time.
  *  - `canvas` → `tongflow/canvas` (React canvas; browser)
  * Dependencies / peers stay external; only the source tree is bundled.
  * The canvas entry keeps its "use client" directive at the top of the chunk
@@ -23,6 +24,7 @@ export default defineConfig([
             engine: "src/engine/index.ts",
             "engine-browser": "src/engine/browser/index.ts",
             "engine-worker": "src/engine/worker/index.ts",
+            "engine-canvas": "src/engine/canvas/index.ts",
         },
         format: ["esm", "cjs"],
         platform: "neutral",

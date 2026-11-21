@@ -280,7 +280,14 @@
                 "missingImplTitle": "Missing Implementation",
                 "missingImplDescription": "No plugin is installed for this node (or none is selected). Install one from the plugin manager, or pick an installed plugin, before running.",
                 "downloadingModel": "Downloading model {loaded}/{total} MB",
-                "downloadingModelNoTotal": "Downloading model {loaded} MB"
+                "downloadingModelNoTotal": "Downloading model {loaded} MB",
+                "runSkipped": "Skipped",
+                "runSkippedByUser": "by you",
+                "runSkippedUpstream": "an upstream node was skipped",
+                "runSkippedUpstreamFailed": "an upstream node failed",
+                "skipNode": "Skip",
+                "replaceImplementation": "Replace implementation",
+                "replaceImplementationEmpty": "No other implementation installed"
             },
             "common": {
                 "enterInstructions": "Enter instructions...",
@@ -1023,7 +1030,9 @@
         },
         "toolbar": {
             "runWorkflow": "Run workflow",
-            "stopWorkflow": "Stop"
+            "stopWorkflow": "Stop",
+            "pauseWorkflow": "Pause",
+            "resumeWorkflow": "Resume"
         }
     },
     "Upload": {

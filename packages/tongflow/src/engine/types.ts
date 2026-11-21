@@ -118,6 +118,47 @@ export type WorkflowInputValue =
     | string[]
     | string;
 
+/**
+ * Live control over a run, created with `createRunController()` and passed as
+ * {@link RunWorkflowOptions.controller}. Every method is synchronous, may be
+ * called from an `onEvent` handler, and returns whether it changed anything
+ * (`false` for an unknown node, a request the node's state does not allow,
+ * or when no run is attached).
+ */
+export interface RunController {
+    /** True between `pause()` and `resume()`. */
+    readonly paused: boolean;
+    /** True while a run is attached and has not ended. */
+    readonly active: boolean;
+    /**
+     * No new node starts; running nodes finish. Emits `workflow_paused`. A
+     * paused run does not end even when nothing is left to run, so a failed
+     * or finished node can still be replaced. Allowed before the run starts
+     * (it then starts paused).
+     */
+    pause(): boolean;
+    /** Emits `workflow_resumed`; scheduling continues. */
+    resume(): boolean;
+    /**
+     * Skip a node that has not started (`pending`) or is `running` (its
+     * executor signal is aborted). Its whole downstream closure is skipped
+     * as well, including nodes that have other, satisfied inputs.
+     */
+    skipNode(nodeId: string): boolean;
+    /**
+     * Switch a node to another implementation of its slot. Before the node
+     * starts: it will run with `impl`. After it `completed` or `failed`: it
+     * runs again with `impl`, every downstream node that already ran (or is
+     * running) becomes stale and runs again, and nodes skipped because of it
+     * (`upstream failed` / `upstream skipped`) are un-skipped when nothing
+     * else blocks them. Refused while the node runs or once it is skipped.
+     * Advanced params are kept only when `pluginId` does not change.
+     */
+    replaceImplementation(nodeId: string, impl: NodeImplementation): boolean;
+    /** The node's state in the attached run; `undefined` when unknown or no run is attached. */
+    nodeStatus(nodeId: string): NodeRunStatus | undefined;
+}
+
 /** Events, named and shaped like the Python engine's `on_progress` events. */
 export type EngineEvent =
     | { type: "workflow_started"; totalNodes: number; levels: number }
@@ -155,23 +196,93 @@ export type EngineEvent =
       }
     | { type: "node_failed"; nodeId: string; error: string; label: string }
     | {
-          /** TypeScript engine only: a running node stopped by cancellation or by a sibling's failure. */
+          /**
+           * TypeScript engine only: a running node stopped by cancellation, by
+           * a sibling's failure (`abort` policy) or because an upstream rerun
+           * made it stale (it starts again later).
+           */
           type: "node_cancelled";
           nodeId: string;
           label: string;
       }
     | {
+          /**
+           * TypeScript engine only: the node will not run (or stopped
+           * running). `reason` is {@link SKIP_REASONS}`.user` for a
+           * `skipNode` target, `.upstreamSkipped` / `.upstreamFailed` for its
+           * downstream closure.
+           */
+          type: "node_skipped";
+          nodeId: string;
+          reason: string;
+          label: string;
+      }
+    | {
+          /** TypeScript engine only: `RunController.pause()` / `resume()`. */
+          type: "workflow_paused" | "workflow_resumed";
+      }
+    | {
+          /**
+           * `workflow_completed` carries `success` or `partial`,
+           * `workflow_failed` carries `failed`, `workflow_cancelled`
+           * carries `cancelled`.
+           */
           type: "workflow_completed" | "workflow_failed" | "workflow_cancelled";
           status: RunStatus;
           outputs: Record<string, Record<string, unknown>>;
           errors: string[];
       };
 
-export type RunStatus = "success" | "failed" | "cancelled";
+/**
+ * How a run ended; see `runWorkflow` for the exact rules. `partial` (some
+ * nodes failed or were skipped, at least one completed) only occurs with the
+ * `branch` failure policy or after a `skipNode`.
+ */
+export type RunStatus = "success" | "partial" | "failed" | "cancelled";
+
+/** The `reason` values of `node_skipped`. */
+export const SKIP_REASONS = {
+    /** The node itself was skipped with `RunController.skipNode`. */
+    user: "skipped by user",
+    /** An upstream node was skipped. */
+    upstreamSkipped: "upstream skipped",
+    /** An upstream node failed (`branch` policy). */
+    upstreamFailed: "upstream failed",
+} as const;
+
+/**
+ * What the engine does when a node fails:
+ *  - `abort` (default, the Python engine's semantics): the run fails, running
+ *    siblings are cancelled and no later level starts;
+ *  - `branch`: only the failed node's downstream closure is skipped
+ *    (`upstream failed`); unrelated branches keep running.
+ */
+export type FailurePolicy = "abort" | "branch";
+
+/** A node's state within a run, as `RunController.nodeStatus` reports it. */
+export type NodeRunStatus =
+    | "pending"
+    | "running"
+    | "completed"
+    | "failed"
+    | "skipped"
+    | "cancelled";
+
+/** The implementation `RunController.replaceImplementation` switches a node to. */
+export interface NodeImplementation {
+    pluginId: string;
+    /** Absent = the plugin's default model. */
+    model?: string;
+}
 
 export interface NodeFailure {
     nodeId: string;
     summary: string;
+}
+
+export interface NodeSkip {
+    nodeId: string;
+    reason: string;
 }
 
 /** Result of {@link runWorkflow}; Python's result with camelCase keys. */
@@ -183,6 +294,8 @@ export interface RunResult {
     outputsByName: Record<string, string[]>;
     errors: string[];
     failures: NodeFailure[];
+    /** Nodes that ended skipped, in level order. */
+    skipped: NodeSkip[];
 }
 
 /** A slot's input/output JSON Schemas, as in `ABI_NODES`. */
@@ -198,6 +311,14 @@ export interface RunWorkflowOptions {
     inputs?: Record<string, WorkflowInputValue>;
     /** Abort to cancel: running nodes are stopped and the run ends `cancelled`. */
     signal?: AbortSignal;
+    /** Default `abort` (Python semantics). See {@link FailurePolicy}. */
+    failurePolicy?: FailurePolicy;
+    /**
+     * Pause / resume the run, skip a node or switch its implementation while
+     * it runs. Create one with `createRunController()`; one controller drives
+     * one run at a time.
+     */
+    controller?: RunController;
     onEvent?: (event: EngineEvent) => void;
     /**
      * How many nodes of one level run at once. Default: all of them. `1`

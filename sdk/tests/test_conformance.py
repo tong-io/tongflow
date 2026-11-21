@@ -9,6 +9,11 @@ runtime ``inputs`` and the ``expected`` outcome. The Python engine is the
 reference: ``python tests/test_conformance.py --record`` rewrites every
 fixture's ``expected`` from the current Python semantics.
 
+Fixtures flagged ``"engines": ["ts"]`` cover semantics only the TypeScript
+engine implements so far (the ``branch`` failure policy, pause / resume, skip
+and replace-and-rerun through a run controller). They are skipped here and
+never recorded; the Python engine will follow in a later change.
+
 The fake plugins run through ``run_workflow(invoker=...)``; the step
 interpreter below is mirrored by ``src/engine/testing/fake-plugins.ts``.
 """
@@ -207,12 +212,19 @@ def _fixture_paths() -> list[Path]:
     return sorted(CONFORMANCE_DIR.glob("*.json"))
 
 
+def _runs_on_python(fixture: dict[str, Any]) -> bool:
+    engines = fixture.get("engines")
+    return engines is None or "python" in engines
+
+
 @pytest.mark.skipif(
     not _fixture_paths(), reason="conformance fixtures live in the repo checkout"
 )
 @pytest.mark.parametrize("path", _fixture_paths(), ids=lambda p: p.stem)
 def test_conformance_fixture(path: Path, tmp_path: Path) -> None:
     fixture = json.loads(path.read_text(encoding="utf-8"))
+    if not _runs_on_python(fixture):
+        pytest.skip(f"TypeScript-only fixture (engines={fixture['engines']})")
     assert "expected" in fixture, f"{path.name} has no expected block"
     assert run_fixture(fixture, tmp_path) == fixture["expected"]
 
@@ -237,6 +249,9 @@ def _record() -> None:
     """Rewrite every fixture's ``expected`` block from the Python engine."""
     for path in _fixture_paths():
         fixture = json.loads(path.read_text(encoding="utf-8"))
+        if not _runs_on_python(fixture):
+            print(f"skipped {path.name}: TypeScript-only")
+            continue
         with tempfile.TemporaryDirectory() as tmp:
             fixture["expected"] = run_fixture(fixture, Path(tmp))
         path.write_text(

@@ -1,0 +1,299 @@
+{
+    "name": "control-replace-failed-unskip",
+    "description": "failurePolicy 'branch': 'a' fails and 'b' is skipped ('upstream failed'); replaceImplementation('a', v2) from the node_skipped handler reruns 'a', un-skips 'b' and it runs on the new output. The failure is dropped from the result. Status success.",
+    "engines": ["ts"],
+    "failurePolicy": "branch",
+    "workflow": {
+        "name": "control-replace-failed-unskip",
+        "version": "1.0",
+        "exportedAt": "2026-01-01T00:00:00.000Z",
+        "inputs": [],
+        "outputs": [
+            {
+                "name": "output_tc",
+                "type": "text",
+                "nodeId": "tc",
+                "field": "texts"
+            },
+            {
+                "name": "output_tb",
+                "type": "text",
+                "nodeId": "tb",
+                "field": "texts"
+            }
+        ],
+        "dataNodes": [
+            {
+                "id": "in",
+                "type": "textNode",
+                "dataType": "text",
+                "isInput": false,
+                "level": 0,
+                "staticData": {
+                    "texts": ["x"]
+                }
+            },
+            {
+                "id": "ta",
+                "type": "textNode",
+                "dataType": "text",
+                "isInput": false,
+                "level": 2
+            },
+            {
+                "id": "tc",
+                "type": "textNode",
+                "dataType": "text",
+                "isInput": false,
+                "level": 2
+            },
+            {
+                "id": "tb",
+                "type": "textNode",
+                "dataType": "text",
+                "isInput": false,
+                "level": 4
+            }
+        ],
+        "executableNodes": [
+            {
+                "id": "a",
+                "type": "genTextNode",
+                "feature": "gen-text",
+                "pluginId": "tongflow-api-fake-v1",
+                "bindings": {
+                    "text": {
+                        "kind": "handle",
+                        "sources": [
+                            {
+                                "fromNodeId": "in",
+                                "fromField": "texts"
+                            }
+                        ],
+                        "targetHandle": "in:text",
+                        "consumerShape": "scalar"
+                    }
+                },
+                "batchField": "text",
+                "outputs": [
+                    {
+                        "sourceField": "text",
+                        "nodeType": "textNode",
+                        "dataField": "texts",
+                        "expandEach": false,
+                        "downstreamDataNodeId": "ta"
+                    }
+                ],
+                "dependencies": ["in"],
+                "level": 1
+            },
+            {
+                "id": "c",
+                "type": "genTextNode",
+                "feature": "gen-text",
+                "pluginId": "tongflow-api-fake-c",
+                "bindings": {
+                    "text": {
+                        "kind": "handle",
+                        "sources": [
+                            {
+                                "fromNodeId": "in",
+                                "fromField": "texts"
+                            }
+                        ],
+                        "targetHandle": "in:text",
+                        "consumerShape": "scalar"
+                    }
+                },
+                "batchField": "text",
+                "outputs": [
+                    {
+                        "sourceField": "text",
+                        "nodeType": "textNode",
+                        "dataField": "texts",
+                        "expandEach": false,
+                        "downstreamDataNodeId": "tc"
+                    }
+                ],
+                "dependencies": ["in"],
+                "level": 1
+            },
+            {
+                "id": "b",
+                "type": "genTextNode",
+                "feature": "gen-text",
+                "pluginId": "tongflow-api-fake-b",
+                "bindings": {
+                    "text": {
+                        "kind": "handle",
+                        "sources": [
+                            {
+                                "fromNodeId": "a",
+                                "fromField": "text"
+                            }
+                        ],
+                        "targetHandle": "in:text",
+                        "consumerShape": "scalar"
+                    }
+                },
+                "batchField": "text",
+                "outputs": [
+                    {
+                        "sourceField": "text",
+                        "nodeType": "textNode",
+                        "dataField": "texts",
+                        "expandEach": false,
+                        "downstreamDataNodeId": "tb"
+                    }
+                ],
+                "dependencies": ["ta"],
+                "level": 3
+            }
+        ],
+        "executionLevels": [["a", "c"], ["b"]],
+        "dataNodeEdges": [
+            {
+                "source": "in",
+                "target": "a"
+            },
+            {
+                "source": "a",
+                "target": "ta"
+            },
+            {
+                "source": "in",
+                "target": "c"
+            },
+            {
+                "source": "c",
+                "target": "tc"
+            },
+            {
+                "source": "ta",
+                "target": "b"
+            },
+            {
+                "source": "b",
+                "target": "tb"
+            }
+        ]
+    },
+    "plugins": {
+        "tongflow-api-fake-v1": [
+            {
+                "op": "fail",
+                "error": "v1 broke on {text}"
+            }
+        ],
+        "tongflow-api-fake-v2": [
+            {
+                "op": "format",
+                "field": "text",
+                "template": "v2({text})"
+            }
+        ],
+        "tongflow-api-fake-c": [
+            {
+                "op": "format",
+                "field": "text",
+                "template": "c({text})"
+            }
+        ],
+        "tongflow-api-fake-b": [
+            {
+                "op": "format",
+                "field": "text",
+                "template": "B({text})"
+            }
+        ]
+    },
+    "control": [
+        {
+            "on": {
+                "type": "node_skipped",
+                "nodeId": "b"
+            },
+            "do": "replaceImplementation",
+            "nodeId": "a",
+            "pluginId": "tongflow-api-fake-v2"
+        }
+    ],
+    "expected": {
+        "status": "success",
+        "outputs": {
+            "a": {
+                "success": true,
+                "text": "v2(x)"
+            },
+            "c": {
+                "success": true,
+                "text": "c(x)"
+            },
+            "b": {
+                "success": true,
+                "text": "B(v2(x))"
+            }
+        },
+        "outputsByName": {
+            "output_tc": ["c(x)"],
+            "output_tb": ["B(v2(x))"]
+        },
+        "errors": [],
+        "failures": [],
+        "control": [true],
+        "events": [
+            {
+                "type": "workflow_started",
+                "totalNodes": 3,
+                "levels": 2
+            },
+            {
+                "type": "node_started",
+                "nodeId": "a",
+                "level": 1
+            },
+            {
+                "type": "node_failed",
+                "nodeId": "a",
+                "error": "v1 broke on x"
+            },
+            {
+                "type": "node_skipped",
+                "nodeId": "b",
+                "reason": "upstream failed"
+            },
+            {
+                "type": "node_started",
+                "nodeId": "a",
+                "level": 1
+            },
+            {
+                "type": "node_completed",
+                "nodeId": "a"
+            },
+            {
+                "type": "node_started",
+                "nodeId": "c",
+                "level": 1
+            },
+            {
+                "type": "node_completed",
+                "nodeId": "c"
+            },
+            {
+                "type": "node_started",
+                "nodeId": "b",
+                "level": 2
+            },
+            {
+                "type": "node_completed",
+                "nodeId": "b"
+            },
+            {
+                "type": "workflow_completed",
+                "status": "success",
+                "errors": []
+            }
+        ]
+    }
+}

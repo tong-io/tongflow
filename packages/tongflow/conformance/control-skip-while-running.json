@@ -1,0 +1,289 @@
+{
+    "name": "control-skip-while-running",
+    "description": "failurePolicy 'branch': 'slow' reports progress, then blocks until its signal aborts; skipNode('slow') while it runs cancels it through the signal, skips 'next' ('upstream skipped'), and the sibling 'other' completes. Status partial.",
+    "engines": ["ts"],
+    "failurePolicy": "branch",
+    "workflow": {
+        "name": "control-skip-while-running",
+        "version": "1.0",
+        "exportedAt": "2026-01-01T00:00:00.000Z",
+        "inputs": [],
+        "outputs": [
+            {
+                "name": "output_t_other",
+                "type": "text",
+                "nodeId": "t_other",
+                "field": "texts"
+            },
+            {
+                "name": "output_t_next",
+                "type": "text",
+                "nodeId": "t_next",
+                "field": "texts"
+            }
+        ],
+        "dataNodes": [
+            {
+                "id": "in",
+                "type": "textNode",
+                "dataType": "text",
+                "isInput": false,
+                "level": 0,
+                "staticData": {
+                    "texts": ["x"]
+                }
+            },
+            {
+                "id": "t_slow",
+                "type": "textNode",
+                "dataType": "text",
+                "isInput": false,
+                "level": 2
+            },
+            {
+                "id": "t_other",
+                "type": "textNode",
+                "dataType": "text",
+                "isInput": false,
+                "level": 2
+            },
+            {
+                "id": "t_next",
+                "type": "textNode",
+                "dataType": "text",
+                "isInput": false,
+                "level": 4
+            }
+        ],
+        "executableNodes": [
+            {
+                "id": "slow",
+                "type": "genTextNode",
+                "feature": "gen-text",
+                "pluginId": "tongflow-api-fake-slow",
+                "bindings": {
+                    "text": {
+                        "kind": "handle",
+                        "sources": [
+                            {
+                                "fromNodeId": "in",
+                                "fromField": "texts"
+                            }
+                        ],
+                        "targetHandle": "in:text",
+                        "consumerShape": "scalar"
+                    }
+                },
+                "batchField": "text",
+                "outputs": [
+                    {
+                        "sourceField": "text",
+                        "nodeType": "textNode",
+                        "dataField": "texts",
+                        "expandEach": false,
+                        "downstreamDataNodeId": "t_slow"
+                    }
+                ],
+                "dependencies": ["in"],
+                "level": 1
+            },
+            {
+                "id": "other",
+                "type": "genTextNode",
+                "feature": "gen-text",
+                "pluginId": "tongflow-api-fake-other",
+                "bindings": {
+                    "text": {
+                        "kind": "handle",
+                        "sources": [
+                            {
+                                "fromNodeId": "in",
+                                "fromField": "texts"
+                            }
+                        ],
+                        "targetHandle": "in:text",
+                        "consumerShape": "scalar"
+                    }
+                },
+                "batchField": "text",
+                "outputs": [
+                    {
+                        "sourceField": "text",
+                        "nodeType": "textNode",
+                        "dataField": "texts",
+                        "expandEach": false,
+                        "downstreamDataNodeId": "t_other"
+                    }
+                ],
+                "dependencies": ["in"],
+                "level": 1
+            },
+            {
+                "id": "next",
+                "type": "genTextNode",
+                "feature": "gen-text",
+                "pluginId": "tongflow-api-fake-next",
+                "bindings": {
+                    "text": {
+                        "kind": "handle",
+                        "sources": [
+                            {
+                                "fromNodeId": "slow",
+                                "fromField": "text"
+                            }
+                        ],
+                        "targetHandle": "in:text",
+                        "consumerShape": "scalar"
+                    }
+                },
+                "batchField": "text",
+                "outputs": [
+                    {
+                        "sourceField": "text",
+                        "nodeType": "textNode",
+                        "dataField": "texts",
+                        "expandEach": false,
+                        "downstreamDataNodeId": "t_next"
+                    }
+                ],
+                "dependencies": ["t_slow"],
+                "level": 3
+            }
+        ],
+        "executionLevels": [["slow", "other"], ["next"]],
+        "dataNodeEdges": [
+            {
+                "source": "in",
+                "target": "slow"
+            },
+            {
+                "source": "slow",
+                "target": "t_slow"
+            },
+            {
+                "source": "in",
+                "target": "other"
+            },
+            {
+                "source": "other",
+                "target": "t_other"
+            },
+            {
+                "source": "t_slow",
+                "target": "next"
+            },
+            {
+                "source": "next",
+                "target": "t_next"
+            }
+        ]
+    },
+    "plugins": {
+        "tongflow-api-fake-slow": [
+            {
+                "op": "progress",
+                "message": "working on {text}",
+                "percent": 10
+            },
+            {
+                "op": "wait-for-abort"
+            },
+            {
+                "op": "format",
+                "field": "text",
+                "template": "never"
+            }
+        ],
+        "tongflow-api-fake-other": [
+            {
+                "op": "format",
+                "field": "text",
+                "template": "O({text})"
+            }
+        ],
+        "tongflow-api-fake-next": [
+            {
+                "op": "format",
+                "field": "text",
+                "template": "N({text})"
+            }
+        ]
+    },
+    "control": [
+        {
+            "on": {
+                "type": "plugin_progress",
+                "nodeId": "slow",
+                "message": "working on x"
+            },
+            "do": "skipNode",
+            "nodeId": "slow"
+        }
+    ],
+    "expected": {
+        "status": "partial",
+        "outputs": {
+            "other": {
+                "success": true,
+                "text": "O(x)"
+            }
+        },
+        "outputsByName": {
+            "output_t_other": ["O(x)"]
+        },
+        "errors": [],
+        "failures": [],
+        "skipped": [
+            {
+                "nodeId": "slow",
+                "reason": "skipped by user"
+            },
+            {
+                "nodeId": "next",
+                "reason": "upstream skipped"
+            }
+        ],
+        "control": [true],
+        "events": [
+            {
+                "type": "workflow_started",
+                "totalNodes": 3,
+                "levels": 2
+            },
+            {
+                "type": "node_started",
+                "nodeId": "slow",
+                "level": 1
+            },
+            {
+                "type": "plugin_progress",
+                "nodeId": "slow",
+                "message": "working on x"
+            },
+            {
+                "type": "node_skipped",
+                "nodeId": "slow",
+                "reason": "skipped by user"
+            },
+            {
+                "type": "node_skipped",
+                "nodeId": "next",
+                "reason": "upstream skipped"
+            },
+            {
+                "type": "node_started",
+                "nodeId": "other",
+                "level": 1
+            },
+            {
+                "type": "node_completed",
+                "nodeId": "other"
+            },
+            {
+                "type": "workflow_completed",
+                "status": "partial",
+                "errors": []
+            }
+        ]
+    }
+}

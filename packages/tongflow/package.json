@@ -89,6 +89,16 @@
                 "default": "./dist/engine-worker.cjs"
             }
         },
+        "./engine/canvas": {
+            "import": {
+                "types": "./dist/engine-canvas.d.ts",
+                "default": "./dist/engine-canvas.js"
+            },
+            "require": {
+                "types": "./dist/engine-canvas.d.cts",
+                "default": "./dist/engine-canvas.cjs"
+            }
+        },
         "./canvas.css": "./dist/canvas.css",
         "./abi": "./abi/tongflow.abi.json",
         "./package.json": "./package.json"

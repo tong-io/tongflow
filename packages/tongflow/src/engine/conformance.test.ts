@@ -15,6 +15,14 @@ import {
  *  - the default (whole level in parallel, with staggered plugin latency so
  *    siblings finish out of order) must produce the same outputs, the same
  *    events per node and level-ordered scheduling.
+ *
+ * Fixtures flagged `"engines": ["ts"]` (the `branch` failure policy and the
+ * run controller) are TypeScript-only until the Python engine follows; their
+ * `expected` was written from this engine and reviewed by hand. Their
+ * parallel run checks the result only: controller steps react to events, so
+ * the event order (and a rerun's return to an earlier level) is
+ * timing-dependent there, and it runs without staggered latency so the
+ * steps fire at the same points.
  */
 
 const dir = fileURLToPath(new URL("../../conformance/", import.meta.url));
@@ -76,6 +84,18 @@ describe("engine conformance fixtures", () => {
         ]) {
             expect(names).toContain(required);
         }
+        for (const required of [
+            "branch-failure-isolation",
+            "control-skip-before-start",
+            "control-skip-while-running",
+            "control-pause-resume",
+            "control-replace-rerun",
+            "control-replace-failed-unskip",
+        ]) {
+            expect(names).toContain(required);
+            const f = fixtures.find((x) => x.name === required);
+            expect(f?.engines).toEqual(["ts"]);
+        }
     });
 
     for (const fixture of fixtures) {
@@ -87,6 +107,26 @@ describe("engine conformance fixtures", () => {
                 );
                 expect(run).toEqual(fixture.expected);
             });
+
+            if (fixture.control?.length || fixture.failurePolicy === "branch") {
+                it("produces the same result with parallel levels", async () => {
+                    const run = await runConformanceFixture(fixture, {
+                        ...(fixture.control?.length
+                            ? {}
+                            : { delayMs: stagger }),
+                    });
+                    const exp = fixture.expected;
+                    expect(run.status).toBe(exp.status);
+                    expect(run.outputs).toEqual(exp.outputs);
+                    expect(run.outputsByName).toEqual(exp.outputsByName);
+                    expect(run.errors).toEqual(exp.errors);
+                    expect(run.failures).toEqual(exp.failures);
+                    expect(run.skipped).toEqual(exp.skipped);
+                    if (!fixture.control?.length)
+                        expectLevelOrder(fixture, run);
+                });
+                return;
+            }
 
             it("produces the same outputs with parallel levels", async () => {
                 const run = await runConformanceFixture(fixture, {

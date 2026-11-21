@@ -13,6 +13,7 @@ import { base64ToUtf8, utf8ToBase64 } from "./base64";
 import { createCompositeExecutor } from "./executors/composite";
 import { createInProcessEdgeExecutor } from "./executors/in-process";
 import { MemoryAssetStore } from "./memory-store";
+import { createRunController } from "./run-controller";
 import { runWorkflow } from "./run-workflow";
 import type { EngineEvent, InvokeRequest, NodeExecutor } from "./types";
 import { defineEdgePlugin, edgeMethod } from "./worker/define-edge-plugin";
@@ -312,6 +313,179 @@ describe("runWorkflow scheduling", () => {
         });
         expect(called).toBe(false);
         expect(result.errors[0]).toContain("Invalid nodeSlot=no-such-slot");
+    });
+});
+
+/** Resolves once `cond()` holds, polling on macrotasks. */
+async function until(cond: () => boolean) {
+    for (let i = 0; i < 200 && !cond(); i++) await sleep(1);
+    expect(cond()).toBe(true);
+}
+
+describe("failure policy and run controller", () => {
+    it("ends `failed` under `branch` when no node completed", async () => {
+        const executor: NodeExecutor = {
+            invoke: async () => ({ success: false, error: "no" }),
+        };
+        const doc = oneLevel([{ id: "a", pluginId: "p" }]);
+        doc.executableNodes.push(
+            textNode("b", "p", { node: "a", field: "text" }, 2),
+        );
+        doc.executionLevels.push(["b"]);
+        const result = await runWorkflow(doc, {
+            executor,
+            store: new MemoryAssetStore(),
+            abi: ABI,
+            failurePolicy: "branch",
+        });
+        expect(result.status).toBe("failed");
+        expect(result.skipped).toEqual([
+            { nodeId: "b", reason: "upstream failed" },
+        ]);
+    });
+
+    it("aborts the executor's signal when a running node is skipped", async () => {
+        let seen: AbortSignal | undefined;
+        const executor: NodeExecutor = {
+            invoke: ({ signal }) => {
+                seen = signal;
+                return new Promise(() => {});
+            },
+        };
+        const controller = createRunController();
+        const pending = runWorkflow(oneLevel([{ id: "a", pluginId: "p" }]), {
+            executor,
+            store: new MemoryAssetStore(),
+            abi: ABI,
+            controller,
+        });
+        await until(() => seen !== undefined);
+        expect(controller.nodeStatus("a")).toBe("running");
+        expect(controller.skipNode("a")).toBe(true);
+        expect(seen?.aborted).toBe(true);
+        const result = await pending;
+        expect(result.status).toBe("failed");
+        expect(result.skipped).toEqual([
+            { nodeId: "a", reason: "skipped by user" },
+        ]);
+        expect(controller.active).toBe(false);
+        expect(controller.skipNode("a")).toBe(false);
+    });
+
+    it("starts paused, and a paused run stays open for a rerun after everything settled", async () => {
+        let attempt = 0;
+        const executor: NodeExecutor = {
+            invoke: async ({ pluginId, prompt }) =>
+                pluginId === "broken"
+                    ? { success: false, error: `try ${++attempt}` }
+                    : { success: true, text: `${pluginId}:${prompt.text}` },
+        };
+        const controller = createRunController();
+        controller.pause();
+        const events: EngineEvent[] = [];
+        const doc = oneLevel([
+            { id: "a", pluginId: "broken" },
+            { id: "b", pluginId: "ok" },
+        ]);
+        const pending = runWorkflow(doc, {
+            executor,
+            store: new MemoryAssetStore(),
+            abi: ABI,
+            failurePolicy: "branch",
+            controller,
+            onEvent: (e) => {
+                events.push(e);
+                // Hold the run open once the level has settled.
+                if (e.type === "node_failed") controller.pause();
+            },
+        });
+        expect(events.map((e) => e.type)).toEqual([
+            "workflow_started",
+            "workflow_paused",
+        ]);
+        await sleep(2);
+        expect(controller.nodeStatus("a")).toBe("pending");
+        // Swap before start is allowed while paused.
+        expect(controller.replaceImplementation("b", { pluginId: "ok2" })).toBe(
+            true,
+        );
+        controller.resume();
+        await until(() => controller.nodeStatus("b") === "completed");
+        expect(controller.nodeStatus("a")).toBe("failed");
+        expect(controller.paused).toBe(true);
+        await sleep(2);
+        // Nothing is left to run, but the paused run has not ended.
+        expect(controller.active).toBe(true);
+        expect(controller.replaceImplementation("a", { pluginId: "ok" })).toBe(
+            true,
+        );
+        controller.resume();
+        const result = await pending;
+        expect(result.status).toBe("success");
+        expect(result.errors).toEqual([]);
+        expect(result.outputs).toEqual({
+            a: { success: true, text: "ok:x" },
+            b: { success: true, text: "ok2:x" },
+        });
+    });
+
+    it("keeps advanced params only when the plugin stays the same", async () => {
+        const calls: InvokeRequest[] = [];
+        const executor: NodeExecutor = {
+            async invoke(req) {
+                calls.push(req);
+                return { success: true, text: "ok" };
+            },
+        };
+        const run = async (impl: { pluginId: string; model?: string }) => {
+            calls.length = 0;
+            const controller = createRunController();
+            controller.pause();
+            const pending = runWorkflow(
+                oneLevel([{ id: "a", pluginId: "p" }], {
+                    model: "old",
+                    params: { steps: 2 },
+                }),
+                {
+                    executor,
+                    store: new MemoryAssetStore(),
+                    abi: ABI,
+                    controller,
+                },
+            );
+            controller.replaceImplementation("a", impl);
+            controller.resume();
+            await pending;
+            return calls[0];
+        };
+        const same = await run({ pluginId: "p", model: "new" });
+        expect(same.model).toBe("new");
+        expect(same.prompt._params).toEqual({ steps: 2 });
+        const other = await run({ pluginId: "q" });
+        expect(other.pluginId).toBe("q");
+        expect(other.model).toBeUndefined();
+        expect(other.prompt._params).toBeUndefined();
+    });
+
+    it("refuses a controller shared by two runs at once", async () => {
+        const controller = createRunController();
+        controller.pause();
+        const executor: NodeExecutor = {
+            invoke: async () => ({ success: true, text: "" }),
+        };
+        const doc = oneLevel([{ id: "a", pluginId: "p" }]);
+        const opts = {
+            executor,
+            store: new MemoryAssetStore(),
+            abi: ABI,
+            controller,
+        };
+        const first = runWorkflow(doc, opts);
+        await expect(runWorkflow(doc, opts)).rejects.toThrow(
+            /already attached/,
+        );
+        controller.resume();
+        expect((await first).status).toBe("success");
     });
 });
 

@@ -25,8 +25,14 @@ export {
 export * from "./executors/in-process";
 export * from "./executors/remote";
 export * from "./executors/remote-protocol";
+export {
+    buildExecutableGraph,
+    downstreamClosure,
+    type ExecutableGraph,
+} from "./graph";
 export * from "./memory-store";
 export * from "./output-view";
+export { createRunController } from "./run-controller";
 export * from "./run-workflow";
 export * from "./types";
 export type {
