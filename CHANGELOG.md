@@ -148,6 +148,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `run_workflow` reused the `params` name, so a node's `TONGFLOW_SLOT_PARAMS`
   values were replaced by its business inputs under `_params`.
 
+### Removed
+
+- **The desktop app (Pake shell) is discontinued.** No more macOS / Windows
+  installers are built, and `desktop/` and the desktop release workflow are
+  gone. Use the web app at [app.tongflow.com](https://app.tongflow.com), or
+  self-host Studio or the Docker image (`ghcr.io/tong-io/tongflow`); see
+  [docs/developers.md](docs/developers.md). Installers up to v0.3.6 stay on
+  the Releases page, unmaintained. Each `v*` tag still gets a GitHub Release,
+  with its CHANGELOG section as the notes.
+
 ## [1.0.0] - 2026-11-12
 
 TongFlow 1.0 is a brand upgrade. TongFlow is now the **Agent-Human-Friendly,

@@ -125,7 +125,7 @@ Also available as custom delivery: human confirmation at key steps, and a remote
 - **Self-hosting** — run it from source or with Docker. Open source under the AGPL-3.0, with a commercial license available. See the [developer guide](docs/developers.md).
 - **Private deployment** — we set up a dedicated workflow platform in your own environment and deliver the custom delivery items to your requirements. [Contact sales](https://www.tongflow.com/en/contact).
 
-**Try it online** at [app.tongflow.com](https://app.tongflow.com). Open it in a browser or the desktop app. There is nothing to deploy. You use your own model API keys and compute accounts. Usage is billed to your accounts, and your data stays with you. We don't sell generation credits. It is for evaluation only, with no guarantees. It is free for 7 days. To keep using it after that, you subscribe inside the product.
+**Try it online** at [app.tongflow.com](https://app.tongflow.com). Open it in a browser. There is nothing to deploy. You use your own model API keys and compute accounts. Usage is billed to your accounts, and your data stays with you. We don't sell generation credits. It is for evaluation only, with no guarantees. It is free for 7 days. To keep using it after that, you subscribe inside the product.
 
 ## Services
 

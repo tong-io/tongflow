@@ -1,0 +1,42 @@
+name: GitHub Release
+
+# On a v* tag, publish a GitHub Release whose notes are the matching
+# `## [X.Y.Z]` section of CHANGELOG.md. The Docker image is built separately by
+# docker-publish.yml on the same tag.
+on:
+    push:
+        tags:
+            - "v*"
+
+permissions:
+    contents: write
+
+jobs:
+    release:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
+
+            - name: Extract CHANGELOG section
+              run: |
+                  version="${GITHUB_REF_NAME#v}"
+                  awk -v v="$version" '
+                      index($0, "## [" v "]") == 1 { found = 1; next }
+                      found && /^## \[/ { exit }
+                      found { print }
+                  ' CHANGELOG.md > notes.md
+                  if [[ ! -s notes.md ]]; then
+                    echo "CHANGELOG.md has no '## [${version}]' section" >&2
+                    exit 1
+                  fi
+
+            - name: Create the GitHub Release
+              env:
+                  GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+              run: |
+                  if gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1; then
+                    echo "Release $GITHUB_REF_NAME already exists; leaving it as is."
+                  else
+                    gh release create "$GITHUB_REF_NAME" --title "$GITHUB_REF_NAME" \
+                      --notes-file notes.md --verify-tag --latest
+                  fi

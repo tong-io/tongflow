@@ -143,8 +143,8 @@ fused result.
 - **API keys:** API-based plugins need provider keys — Settings → Connect.
   GPU plugins run on your Modal account — Settings → Modal connect walks
   through it.
-- **Desktop:** the desktop app is a shell over the cloud version; download is
-  on the GitHub releases page.
+- **Desktop:** there is no desktop app any more (discontinued in 1.1.0). Use
+  the web app at app.tongflow.com, or self-host Studio or the Docker image.
 - Anything beyond this FAQ: consult the product documentation if the host
   provides a search tool; if the docs do not cover it, say so and point to the
   project's GitHub or Discord — never invent UI steps.

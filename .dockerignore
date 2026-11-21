@@ -15,7 +15,7 @@ data
 plugins
 .tongflow
 
-# Electron desktop app — its own node_modules + Electron runtime are hundreds of MB
+# Local leftovers from the discontinued desktop app — hundreds of MB
 desktop
 
 # Repo meta the build doesn't need

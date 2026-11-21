@@ -38,12 +38,12 @@ const nextConfig: NextConfig = {
     // Workspace package consumed from source (tsconfig paths) — let Next
     // transpile it like app code.
     transpilePackages: ["tongflow"],
-    // NOTE: do not add outputFileTracingExcludes for data//plugins//desktop
-    // here — its glob matching is unanchored, so "data/**" (even as
-    // "./data/**") also strips next/dist/lib/metadata/** from the standalone
-    // server and breaks it at startup. Tracing may pull those mutable dev
-    // dirs into .next/standalone on dev machines; the desktop assemble script
-    // (desktop/scripts/assemble-app.mjs) skips them when bundling instead.
+    // NOTE: do not add outputFileTracingExcludes for data//plugins/ here —
+    // its glob matching is unanchored, so "data/**" (even as "./data/**")
+    // also strips next/dist/lib/metadata/** from the standalone server and
+    // breaks it at startup. Tracing may pull those mutable dev dirs into
+    // .next/standalone on dev machines; the Docker build copies only what it
+    // needs, so they never reach the image.
     webpack: (config) => {
         // @sparkjsdev/spark (Gaussian-splat renderer) references its WASM module
         // via `new URL(...)`. Webpack's URL asset parser mis-resolves it and

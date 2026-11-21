@@ -4,11 +4,11 @@
 
 - 🌐 Website: **https://www.tongflow.com**
 - ▶️ Try it online: **https://app.tongflow.com**
-- 📦 Source, desktop app & docs: **https://github.com/tong-io/tongflow** (developer guide: [docs/developers.md](https://github.com/tong-io/tongflow/blob/main/docs/developers.md))
+- 📦 Source & docs: **https://github.com/tong-io/tongflow** (developer guide: [docs/developers.md](https://github.com/tong-io/tongflow/blob/main/docs/developers.md))
 
 `pip install tongflow` gives you the `tongflow` import package. It has two uses:
 
-1. **[Run workflows](#run-a-workflow-as-an-embedded-engine)** — execute a workflow exported from the TongFlow canvas as an embedded engine, straight from Python (no desktop app needed).
+1. **[Run workflows](#run-a-workflow-as-an-embedded-engine)** — execute a workflow exported from the TongFlow canvas as an embedded engine, straight from Python (no TongFlow app or server needed).
 2. **[Author plugins](#author-a-plugin)** — implement node capabilities against TongFlow's ABI contract.
 
 ## Install
@@ -75,7 +75,7 @@ plugin registry JSON (the ABI defaults to the copy bundled with the SDK) and
 
 ### Where it writes to disk
 
-Defaults follow the desktop app's per-user directory, so the SDK and the app **share**
+Defaults follow TongFlow's per-user directory (the one the former desktop app used), so SDK runs **share**
 plugins/venv and the SDK does **not** pollute your working directory:
 
 | What | Default location | Override |
