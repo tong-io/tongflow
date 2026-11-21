@@ -14,6 +14,14 @@ export default defineConfig({
                 __dirname,
                 "./packages/tongflow/src/canvas/i18n/messages.ts",
             ),
+            "tongflow/engine/browser": path.resolve(
+                __dirname,
+                "./packages/tongflow/src/engine/browser/index.ts",
+            ),
+            "tongflow/engine/canvas": path.resolve(
+                __dirname,
+                "./packages/tongflow/src/engine/canvas/index.ts",
+            ),
             "tongflow/engine": path.resolve(
                 __dirname,
                 "./packages/tongflow/src/engine/index.ts",

@@ -3,8 +3,38 @@ import createNextIntlPlugin from "next-intl/plugin";
 
 const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");
 
+// Opt-in cross-origin isolation (COOP / COEP) so browser edge plugins run
+// multi-threaded wasm. Off by default: `require-corp` blocks cross-origin
+// embeds without CORP/CORS (e.g. presigned upload redirects, third-party
+// iframes) and `same-origin` COOP breaks OAuth popups. The edge runtime falls
+// back to single-threaded without it. Read at build / start time.
+const crossOriginIsolation = /^(1|true|yes|on)$/i.test(
+    process.env.TONGFLOW_CROSS_ORIGIN_ISOLATION?.trim() ?? "",
+);
+
 const nextConfig: NextConfig = {
     output: "standalone",
+    ...(crossOriginIsolation
+        ? {
+              async headers() {
+                  return [
+                      {
+                          source: "/:path*",
+                          headers: [
+                              {
+                                  key: "Cross-Origin-Opener-Policy",
+                                  value: "same-origin",
+                              },
+                              {
+                                  key: "Cross-Origin-Embedder-Policy",
+                                  value: "require-corp",
+                              },
+                          ],
+                      },
+                  ];
+              },
+          }
+        : {}),
     // Workspace package consumed from source (tsconfig paths) — let Next
     // transpile it like app code.
     transpilePackages: ["tongflow"],
