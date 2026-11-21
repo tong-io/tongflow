@@ -56,6 +56,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   refused with `needs_confirmation` until the user agrees. Browser plugins are
   refused with 400. See
   [docs/edge-runtime.md](docs/edge-runtime.md#mixed-graphs--remote-executor).
+- **Branch fault tolerance and run control in the browser engine.**
+  `runWorkflow` takes `failurePolicy: "abort" | "branch"` (default `abort`,
+  Python's semantics); under `branch` a failed node only skips its downstream
+  closure (`node_skipped`, reason "upstream failed") and unrelated branches
+  keep running. Runs can now end `partial`. A `createRunController()` passed
+  as `controller` pauses and resumes a run (`workflow_paused` /
+  `workflow_resumed`), skips a node before or while it runs (with its
+  downstream), and replaces a node's implementation before it starts or
+  after it finished or failed, rerunning it and its stale downstream.
+  TypeScript only for now: the new conformance fixtures are flagged
+  `"engines": ["ts"]` and the Python engine follows later. See
+  [docs/edge-runtime.md](docs/edge-runtime.md#fault-tolerance-and-run-control).
+- **Canvas adapter for the browser engine (`tongflow/engine/canvas`).**
+  `createEngineCanvasRunner({ executor, store, ... })` is a canvas
+  `workflowRunner` on the engine (failure policy `branch` by default) that
+  exposes the run controller as `controls`. The canvas runner contract gains
+  `node-skipped`, `run-paused` / `run-resumed` and optional `controls`: a
+  skipped node shows a grey "Skipped" state, and with controls the canvas
+  shows Pause / Resume next to Stop and "Skip" / "Replace implementation" in a
+  node's menu during a run. Hosts without a runner are unchanged.
 
 ### Fixed
 
