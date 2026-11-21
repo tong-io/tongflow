@@ -3,7 +3,8 @@
  *
  * `available` is false when the host configured no runner (the TongFlow app
  * and Studio today), in which case the canvas offers no "Run workflow"
- * action at all.
+ * action at all. `controllable` is true when the runner also exposes live
+ * `controls` (pause / resume, node skip / replace).
  */
 
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -11,6 +12,7 @@ import { exportWorkflow } from "../../core";
 import { useCanvasWorkflowRunner } from "../host";
 import { runCanvasWorkflow } from "../lib/workflow/runner";
 import { useFlow } from "./use-flow";
+import { useTaskStore } from "./use-task";
 
 export interface UseWorkflowRunReturn {
     /** The host provided a workflow runner. */
@@ -21,6 +23,14 @@ export interface UseWorkflowRunReturn {
     run: () => Promise<void>;
     /** Abort the run in flight (no-op when idle). */
     stop: () => void;
+    /** The runner exposes live controls. */
+    controllable: boolean;
+    /** The run in flight is paused (it reported `run-paused`). */
+    paused: boolean;
+    /** Pause the run in flight (no-op when idle or not controllable). */
+    pause: () => void;
+    /** Resume a paused run. */
+    resume: () => void;
 }
 
 export function useWorkflowRun(): UseWorkflowRunReturn {
@@ -56,8 +66,27 @@ export function useWorkflowRun(): UseWorkflowRunReturn {
         controllerRef.current?.abort();
     }, []);
 
+    const pause = useCallback(() => {
+        if (controllerRef.current) runner?.controls?.pause();
+    }, [runner]);
+
+    const resume = useCallback(() => {
+        if (controllerRef.current) runner?.controls?.resume();
+    }, [runner]);
+
+    const workflowStatus = useTaskStore((s) => s.workflowExecutionStatus);
+
     // Leaving the canvas stops its run.
     useEffect(() => () => controllerRef.current?.abort(), []);
 
-    return { available: !!runner, running, run, stop };
+    return {
+        available: !!runner,
+        running,
+        run,
+        stop,
+        controllable: !!runner?.controls,
+        paused: running && workflowStatus === "paused",
+        pause,
+        resume,
+    };
 }

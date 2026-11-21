@@ -280,7 +280,14 @@
                 "missingImplTitle": "구현 누락",
                 "missingImplDescription": "실행하기 전에 이 노드에서 플러그인 구현을 선택하세요.",
                 "downloadingModel": "모델 다운로드 중 {loaded}/{total} MB",
-                "downloadingModelNoTotal": "모델 다운로드 중 {loaded} MB"
+                "downloadingModelNoTotal": "모델 다운로드 중 {loaded} MB",
+                "runSkipped": "건너뜀",
+                "runSkippedByUser": "직접 건너뜀",
+                "runSkippedUpstream": "상위 노드를 건너뜀",
+                "runSkippedUpstreamFailed": "상위 노드 실패",
+                "skipNode": "건너뛰기",
+                "replaceImplementation": "구현 바꾸기",
+                "replaceImplementationEmpty": "설치된 다른 구현이 없습니다"
             },
             "common": {
                 "enterInstructions": "지시 사항 입력...",
@@ -1023,7 +1030,9 @@
         },
         "toolbar": {
             "runWorkflow": "워크플로 실행",
-            "stopWorkflow": "중지"
+            "stopWorkflow": "중지",
+            "pauseWorkflow": "일시 정지",
+            "resumeWorkflow": "재개"
         }
     },
     "Upload": {

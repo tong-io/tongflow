@@ -82,6 +82,8 @@ export interface NodeRunProgress {
     message?: string;
     download?: { loaded: number; total?: number; label: string };
     error?: string;
+    /** Set when the runner skipped the node: the reason ("" when none). */
+    skipped?: string;
 }
 
 export interface TaskState {

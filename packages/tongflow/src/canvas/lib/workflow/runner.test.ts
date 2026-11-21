@@ -103,6 +103,26 @@ function scriptedRunner(
 describe("workflow runner events → node state", () => {
     beforeEach(reset);
 
+    it("greys out a skipped node and tracks pause / resume", () => {
+        const { nodeId, doc } = setupImageGen();
+        const apply = createWorkflowRunEventApplier(doc);
+        apply({ type: "run-start" });
+        apply({ type: "run-paused" });
+        expect(useTaskStore.getState().workflowExecutionStatus).toBe("paused");
+        apply({ type: "run-resumed" });
+        expect(useTaskStore.getState().workflowExecutionStatus).toBe("running");
+        apply({ type: "node-skipped", nodeId, reason: "upstream failed" });
+        expect(status(nodeId)).toBe("skipped");
+        expect(progress(nodeId)).toEqual({ skipped: "upstream failed" });
+        // A rerun that un-skips the node replaces the skipped state.
+        apply({ type: "node-start", nodeId });
+        expect(status(nodeId)).toBe("running");
+        expect(progress(nodeId)).toBeUndefined();
+        apply({ type: "node-skipped", nodeId });
+        apply({ type: "run-done", ok: true });
+        expect(status(nodeId)).toBe("skipped");
+    });
+
     it("walks a node through start, progress, download and done", () => {
         const { nodeId, doc } = setupImageGen();
         const apply = createWorkflowRunEventApplier(doc);

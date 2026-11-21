@@ -280,7 +280,14 @@
                 "missingImplTitle": "実装が未選択",
                 "missingImplDescription": "このノードに利用可能なプラグインがインストールされていません（または未選択です）。実行前に、プラグインマネージャーからインストールするか、インストール済みのプラグインを選択してください。",
                 "downloadingModel": "モデルをダウンロード中 {loaded}/{total} MB",
-                "downloadingModelNoTotal": "モデルをダウンロード中 {loaded} MB"
+                "downloadingModelNoTotal": "モデルをダウンロード中 {loaded} MB",
+                "runSkipped": "スキップ済み",
+                "runSkippedByUser": "手動でスキップ",
+                "runSkippedUpstream": "上流がスキップされました",
+                "runSkippedUpstreamFailed": "上流が失敗しました",
+                "skipNode": "スキップ",
+                "replaceImplementation": "実装を切り替え",
+                "replaceImplementationEmpty": "ほかの実装がインストールされていません"
             },
             "common": {
                 "enterInstructions": "指示を入力してください...",
@@ -937,7 +944,9 @@
         },
         "toolbar": {
             "runWorkflow": "ワークフローを実行",
-            "stopWorkflow": "停止"
+            "stopWorkflow": "停止",
+            "pauseWorkflow": "一時停止",
+            "resumeWorkflow": "再開"
         }
     },
     "Upload": {

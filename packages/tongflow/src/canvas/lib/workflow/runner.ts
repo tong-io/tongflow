@@ -17,9 +17,16 @@
  * | `node-download` | `nodeId`, `loaded`, `total?` (bytes), `label` | model-download bar ("Downloading model 120/237 MB") |
  * | `node-done`     | `nodeId`, `outputView`, `output?`         | node status `completed`; results routed into downstream data nodes |
  * | `node-error`    | `nodeId`, `message`                       | node status `failed`; message shown on the node |
+ * | `node-skipped`  | `nodeId`, `reason?`                       | node status `skipped`; grey "skipped" state |
+ * | `run-paused`    | —                                         | workflow status `paused` |
+ * | `run-resumed`   | —                                         | workflow status `running` |
  * | `run-done`      | `ok`, `error?`                            | workflow status `completed` / `failed`; touched components tidied |
+ *
+ * A runner may also expose `controls` (pause / resume / skip / replace); the
+ * canvas then offers them while a run is in flight.
  */
 
+import { create } from "zustand";
 import {
     type ExecutableWorkflow,
     getAbiNodeBySlot,
@@ -35,59 +42,26 @@ import {
     applyResolvedOutputRoutes,
     normalizeTaskPayloadData,
 } from "../task/payload";
+import type {
+    CanvasWorkflowRunEvent,
+    CanvasWorkflowRunner,
+} from "./runner-types";
 
-export type CanvasWorkflowRunEvent =
-    | { type: "run-start" }
-    | { type: "node-start"; nodeId: string }
-    | {
-          type: "node-progress";
-          nodeId: string;
-          /** Completed fraction in [0, 1]; absent = indeterminate. */
-          fraction?: number;
-          message?: string;
-      }
-    | {
-          type: "node-download";
-          nodeId: string;
-          /** Bytes downloaded so far. */
-          loaded: number;
-          /** Total bytes, when known. */
-          total?: number;
-          /** What is being downloaded (model name, file …). */
-          label: string;
-      }
-    | {
-          type: "node-done";
-          nodeId: string;
-          /** `computeOutputView(node.outputs, result)` of the node's result. */
-          outputView: AbiOutputView;
-          /**
-           * The raw plugin result, when the runner has it. Preferred over
-           * `outputView` for routing because it keeps array-of-arrays
-           * groups intact, exactly like a single-node task.
-           */
-          output?: Record<string, unknown>;
-      }
-    | { type: "node-error"; nodeId: string; message: string }
-    | { type: "run-done"; ok: boolean; error?: string };
+export type {
+    CanvasNodeImplementation,
+    CanvasWorkflowRunControls,
+    CanvasWorkflowRunEvent,
+    CanvasWorkflowRunner,
+    CanvasWorkflowRunOptions,
+} from "./runner-types";
 
-export interface CanvasWorkflowRunOptions {
-    /** Aborted when the user stops the run. */
-    signal: AbortSignal;
-    /** Report progress; events after `signal` aborts are ignored. */
-    onEvent: (event: CanvasWorkflowRunEvent) => void;
-}
-
-export interface CanvasWorkflowRunner {
-    /**
-     * Run the whole workflow. Resolve when it ends (ideally after emitting
-     * `run-done`); reject on a failure that has no `run-done` of its own.
-     */
-    run: (
-        doc: ExecutableWorkflow,
-        options: CanvasWorkflowRunOptions,
-    ) => Promise<void>;
-}
+/**
+ * The runner whose run is in flight on this canvas (`null` when idle), so
+ * node menus can reach its `controls`.
+ */
+export const useWorkflowRunSession = create<{
+    runner: CanvasWorkflowRunner | null;
+}>(() => ({ runner: null }));
 
 /* ------------------------------------------------------------------ */
 /* Output routing                                                      */
@@ -219,6 +193,19 @@ export function createWorkflowRunEventApplier(
                 patchProgress(event.nodeId, { error: event.message });
                 return;
 
+            case "node-skipped":
+                tasks().setNodeExecutionStatus(event.nodeId, "skipped");
+                patchProgress(event.nodeId, { skipped: event.reason ?? "" });
+                return;
+
+            case "run-paused":
+                tasks().setWorkflowExecutionStatus("paused");
+                return;
+
+            case "run-resumed":
+                tasks().setWorkflowExecutionStatus("running");
+                return;
+
             case "run-done": {
                 // Nodes the runner never finished must not keep spinning.
                 const statuses = new Map(tasks().nodeExecutionStatusMap);
@@ -274,6 +261,7 @@ export async function runCanvasWorkflow(
         apply(event);
     };
 
+    useWorkflowRunSession.setState({ runner });
     try {
         await runner.run(doc, { signal, onEvent });
         if (finished) return;
@@ -291,5 +279,9 @@ export async function runCanvasWorkflow(
             ok: false,
             error: error instanceof Error ? error.message : String(error),
         });
+    } finally {
+        if (useWorkflowRunSession.getState().runner === runner) {
+            useWorkflowRunSession.setState({ runner: null });
+        }
     }
 }
