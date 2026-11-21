@@ -134,19 +134,45 @@ conformance run skips these fixtures, see below).
 
 - `"abort"` (default, Python's semantics): the first failure fails the run; siblings already
   running are cancelled; no later level starts.
-- `"branch"`: a failed node marks every node of its downstream closure `skipped` with the
-  reason `"upstream failed"` (one `node_skipped` per node, right after its `node_failed`);
-  every other node keeps running. The closure follows the graph: an executable depends on
-  another one when it binds its output, lists it in `dependencies`, or depends on a data
-  node the other one feeds. A node with an input from a healthy branch is still skipped
-  when another input comes from the failed one.
+- `"branch"`: a failed node confines the failure to its downstream closure: the nodes of
+  that closure that can no longer run (see the skip rule below) are marked `skipped` with
+  the reason `"upstream failed"` (one `node_skipped` per node, right after its
+  `node_failed`, in level order); every other node keeps running. The closure follows the
+  graph: an executable depends on another one when it binds its output, lists it in
+  `dependencies`, or depends on a data node the other one feeds.
+
+**Skip rule** (`"branch"` failures and `skipNode`, the same rule for both). An upstream
+executable is *down* when it failed or was skipped; a binding source is down when every
+executable feeding it is down (a standalone data node, an upload or a workflow input never
+is). A not-yet-run node downstream of a down node is skipped only when one of these holds,
+judged per handle-bound input, with "required" read from the slot's ABI input schema
+(`required`; a slot without an input schema counts every input as required):
+
+| Input | Missing when | Skips the node when |
+|---|---|---|
+| collect input: `consumerShape: "array"` (a `collectAll` sourceSpec, or an ABI array input) | **every** one of its sources is down, so it would be empty | it is required |
+| the fan-out field (`batchField`, from `batchOn`) | any of its sources is down | always, required or not |
+| any other (scalar) input | any of its sources is down | it is required |
+| an ordering-only dependency (in `dependencies`, read by no binding) | it is down | always |
+
+Otherwise the node runs: a collect input holds only the values its live sources produced,
+in source order (a `chunk-text` collecting parse, OCR and transcript texts still chunks the
+texts it has when the OCR fails, and the embed and kb-write after it still run), and an
+optional input without a value is left out of the prompt. A fan-out never runs over a
+partial item list: if any producer of the batch field is down, the node is skipped, as
+before; inside one producer, a failed batch item still fails that producer (it never
+produces a partial list). Skips cascade in level order: a skipped node is down for its own
+consumers. Every skip in the closure carries the reason of its origin (`"upstream failed"`
+for a failure, `"upstream skipped"` for `skipNode`). `"abort"` is unaffected: there the
+first failure ends the run.
 
 **Final status** (`RunResult.status`), the first rule that applies:
 
 1. `failed`: a node failed under `"abort"`;
 2. `cancelled`: the caller's `signal` aborted before every node settled;
 3. `success`: every scheduled node completed;
-4. `partial`: at least one node completed, the others failed or were skipped;
+4. `partial`: at least one node completed, the others failed or were skipped (a run whose
+   collect consumers ran on the values that were left is `partial`, because a node failed);
 5. `failed`: no node completed (every node failed or was skipped).
 
 `success` and `partial` end with `workflow_completed` (its `status` tells them apart),
@@ -175,9 +201,9 @@ controller.paused; controller.active;
 |---|---|---|
 | `pause()` | not paused (also before the run starts: it starts paused) | `workflow_paused` at once; nodes already running finish and report as usual. A paused run does not end even when nothing is left to run, so a finished or failed node can still be replaced. A caller abort, or a failure under `"abort"`, still ends it. |
 | `resume()` | paused | `workflow_resumed`; scheduling continues. |
-| `skipNode(id)` | `pending` or `running` | The node becomes `skipped` (`"skipped by user"`); a running node's executor `signal` is aborted and its late result ignored. Its whole downstream closure is skipped (`"upstream skipped"`), **including nodes that have other, satisfied inputs**: skipping is a statement about the branch, not about a single input. Skipping is not a failure, so it does not abort a run under `"abort"`. |
+| `skipNode(id)` | `pending` or `running` | The node becomes `skipped` (`"skipped by user"`); a running node's executor `signal` is aborted and its late result ignored. The nodes of its downstream closure that can no longer run are skipped (`"upstream skipped"`), by the skip rule above: a collector with other live sources still runs. Skipping is not a failure, so it does not abort a run under `"abort"`. |
 | `replaceImplementation(id, {pluginId, model?})` | `pending` (not started) | The node will run with that plugin / model. |
-| | `completed` or `failed` | The node reruns with it. Every downstream node that already ran (or is running, which is cancelled with `node_cancelled`) becomes stale and reruns. Under `"branch"`, nodes skipped because of it are un-skipped unless another failed or skipped upstream still blocks them; nodes the user skipped stay skipped. Refused while the node runs or once it is skipped. |
+| | `completed` or `failed` | The node reruns with it. Every downstream node that already ran (or is running, which is cancelled with `node_cancelled`) becomes stale and reruns. Nodes skipped because of it are un-skipped unless another failed or skipped upstream still blocks them (by the skip rule); a collector that ran without its output is stale and reruns with it; nodes the user skipped stay skipped. Refused while the node runs or once it is skipped. |
 
 `model` omitted means the plugin's default model. The node's advanced params (`_params`)
 are kept only when `pluginId` does not change, since they are plugin-specific.
@@ -295,8 +321,10 @@ same vocabulary and drops the flag.
 
 | Fixture | Covers |
 |---|---|
-| `branch-failure-isolation` | `branch`: a failure skips its downstream closure, including a collector also fed by the healthy branch; the sibling branch completes; `partial` |
-| `control-skip-before-start` | skip before start skips the closure despite a satisfied input; skipping a completed node is refused |
+| `branch-failure-isolation` | `branch`: a failure skips the required single input downstream of it; a collector also fed by the healthy branch runs on that branch alone; `partial` |
+| `branch-collect-partial-producers` | `branch`: one of three `collectAll` producers fails; the collector runs with the two values and its downstream runs; `partial`, nothing skipped |
+| `branch-collect-all-producers-failed` | `branch`: every producer of a required `collectAll` input fails; the collector and its downstream are skipped, an unrelated sibling completes; `partial` |
+| `control-skip-before-start` | skip before start under `abort`: the collector fed by the skipped node and a healthy one still runs, and so does its downstream; skipping a completed node is refused |
 | `control-skip-while-running` | skip while running aborts the node's signal; sibling completes |
 | `control-pause-resume` | running node finishes after `pause`, the next one waits for `resume`; a second `pause` is refused |
 | `control-replace-rerun` | replace before start (plugin and model), refused while running, after completion: rerun plus stale downstream rerun |
@@ -553,9 +581,20 @@ return whether they were accepted). While a run started from the canvas is in fl
 - a **Pause** / **Resume** button (暂停 / 继续) sits next to **Stop**;
 - an executable node's menu offers **Skip** (跳过) while the node has not started or is
   running, and **Replace implementation** (换实现) while it has not started or has
-  completed or failed: a submenu of the other installed plugins of the node's slot, from
-  the plugins registry. Choosing one calls `replaceImplementation(nodeId, {pluginId})` and,
-  when accepted, sets the node's `pluginId` on the canvas so the next run uses it too.
+  completed or failed. The submenu lists, from the plugins registry:
+  - the models of the current plugin's slot entry (`methodsByNodeSlot[slot].models`: an
+    edge plugin's manifest `slots[].models`, a Python plugin's `TONGFLOW_SLOT_MODELS`,
+    plus live-catalog extras), as **模型：pp-ocrv6-tiny** and so on, when it declares at
+    least two; the model the node uses (its `pluginModel`, else the plugin's default, the
+    first declared) is checked and not selectable. Choosing one calls
+    `replaceImplementation(nodeId, {pluginId: <same>, model})` and, when accepted, sets the
+    node's `pluginModel`;
+  - the other installed plugins of the node's slot. Choosing one calls
+    `replaceImplementation(nodeId, {pluginId})` (the plugin's default model) and, when
+    accepted, sets the node's `pluginId` and its `pluginModel` to that plugin's first
+    declared model (or clears it).
+
+  Either way the canvas then matches what runs, so the next run and the export use it too.
 
 Without `controls`, or without a runner at all (the Next app and Studio today), none of
 this appears. `tongflow/engine/canvas` implements the whole contract on the browser engine
