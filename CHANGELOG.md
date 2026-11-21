@@ -79,6 +79,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **Engines: stored outputs keep the producer's filename.** An output asset
+  carrying `bytesBase64` and a `filename` was stored under a random key
+  (`opfs://<id>.<ext>`, `mem://<id>`, `<out_dir>/<id>.<ext>`), and a
+  downstream Asset input, whose `filename` comes from the key's last path
+  segment, received the id: `page1-r03-table.png` from `layout-detect`
+  reached `table-recognize` as `3f2a….png`, its label lost. Store keys now end
+  in the sanitized original name: `opfs://<id>/<name>` (one OPFS directory
+  per output), `mem://<id>/<name>` and, in the Python `DiskStore`,
+  `<out_dir>/<id>/<name>`. Path separators, control characters, spaces and
+  `? # % : * " < > |` become `_`, a name without an extension gets one from
+  the mime, and names are capped at 120 UTF-8 bytes (`storeKeyName` /
+  `store_key_name`). Both engines key the same way; outputs without a
+  `filename` keep the old key form, and old keys still resolve. The
+  `asset-roundtrip` and `expand-each-assets` fixtures now check the names a
+  consumer receives. See
+  [docs/edge-runtime.md](docs/edge-runtime.md#asset-store-keys).
 - **Browser engine: the `branch` policy and user skips no longer over-skip
   collectors.** A node downstream of a failed or skipped one is now skipped
   only when a required non-collect input loses its value, the fan-out

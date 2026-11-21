@@ -146,7 +146,7 @@
                 "op": "asset",
                 "field": "image",
                 "filename": "again.bin",
-                "content": "again[{image.mime}]:{image.text}"
+                "content": "again[{image.filename}|{image.mime}]:{image.text}"
             }
         ]
     },
@@ -164,13 +164,15 @@
             "r2": {
                 "success": true,
                 "image": {
-                    "bytesBase64": "YWdhaW5bXTpyb3RhdGVkW2ltYWdlL3BuZ106UE5HREFUQQ==",
+                    "bytesBase64": "YWdhaW5bcm90LXBob3RvLnBuZ3xpbWFnZS9wbmddOnJvdGF0ZWRbaW1hZ2UvcG5nXTpQTkdEQVRB",
                     "filename": "again.bin"
                 }
             }
         },
         "outputsByName": {
-            "output_out": ["YWdhaW5bXTpyb3RhdGVkW2ltYWdlL3BuZ106UE5HREFUQQ=="]
+            "output_out": [
+                "YWdhaW5bcm90LXBob3RvLnBuZ3xpbWFnZS9wbmddOnJvdGF0ZWRbaW1hZ2UvcG5nXTpQTkdEQVRB"
+            ]
         },
         "errors": [],
         "failures": [],

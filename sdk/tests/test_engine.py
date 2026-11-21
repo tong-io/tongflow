@@ -18,7 +18,12 @@ from tongflow.engine.assets import (
 from tongflow.engine.bindings import resolve_node_param_sets, resolve_node_params
 from tongflow.engine.invoker import parse_progress_line
 from tongflow.engine.output_view import compute_output_view
-from tongflow.engine.store import DiskStore, MemoryStore
+from tongflow.engine.store import (
+    STORE_KEY_NAME_MAX_BYTES,
+    DiskStore,
+    MemoryStore,
+    store_key_name,
+)
 
 # --- compute_output_view ----------------------------------------------------
 
@@ -344,6 +349,92 @@ def test_convert_asset_outputs_passthrough_file_key(tmp_path):
         "image-edit", raw, abi, MemoryStore()
     )
     assert result["image"] == {"file_key": "already.png", "mime": "image/png"}
+
+
+# --- store keys keep the producer's filename --------------------------------
+# Same cases as `packages/tongflow/src/engine/store-keys.test.ts`.
+
+
+@pytest.mark.parametrize(
+    ("filename", "ext", "expected"),
+    [
+        ("page1-r03-table.png", "png", "page1-r03-table.png"),
+        ("第1页-表格.png", "png", "第1页-表格.png"),
+        ("again.bin", "bin", "again.bin"),
+        (None, "png", None),
+        ("", "png", None),
+        ("...", "png", None),
+        ("a/b\\c.png", "png", "a_b_c.png"),
+        ("../../etc/passwd", "bin", "_.._etc_passwd"),
+        ("x\u0000y\n z.png", "png", "x_y__z.png"),
+        ('q?a#b%c:d*e"f<g>h|i.png', "png", "q_a_b_c_d_e_f_g_h_i.png"),
+        (".hidden.png", "png", "hidden.png"),
+        ("trailing.png..", "png", "trailing.png"),
+        ("region-3", "jpg", "region-3.jpg"),
+        ("README", "", "README"),
+        ("a" * 300 + ".png", "png", "a" * (STORE_KEY_NAME_MAX_BYTES - 4) + ".png"),
+        ("表" * 100 + ".png", "png", "表" * 38 + ".png"),
+    ],
+)
+def test_store_key_name(filename, ext, expected):
+    assert store_key_name(filename, ext) == expected
+
+
+_REGIONS = [
+    ("page1-r01-text.png", "image/png", "page1-r01-text.png"),
+    ("page1-r03-table.png", "image/png", "page1-r03-table.png"),
+    ("page1-r04-figure.jpg", "image/jpeg", "page1-r04-figure.jpg"),
+    ("crops/page2 r01.png", "image/png", "crops_page2_r01.png"),
+]
+
+
+def _layout_roundtrip(tmp_path, store, search_dirs):
+    """A layout-like producer stores named regions; the consumer reads them back."""
+    abi = load_abi_schema(_write_abi(tmp_path))
+    received = []
+    for filename, mime, _ in _REGIONS:
+        raw = {
+            "success": True,
+            "image": {
+                "bytesBase64": base64.b64encode(filename.encode()).decode(),
+                "mime": mime,
+                "filename": filename,
+            },
+        }
+        ref = convert_asset_outputs_to_file_refs("image-edit", raw, abi, store)
+        assert ref["image"]["filename"] == filename
+        out = materialize_asset_inputs(
+            "image-edit", {"image": ref["image"]["file_key"]}, abi, search_dirs, store
+        )
+        img = out["image"]
+        assert base64.b64decode(img["bytesBase64"]) == filename.encode()
+        received.append((img["filename"], img.get("mime"), ref["image"]["file_key"]))
+    assert [(n, m) for n, m, _ in received] == [(k, m) for _, m, k in _REGIONS]
+    return [fk for _, _, fk in received]
+
+
+def test_memory_store_keys_keep_filename(tmp_path):
+    keys = _layout_roundtrip(tmp_path, MemoryStore(), [tmp_path])
+    assert all(k.startswith("mem://") for k in keys)
+    assert keys[1].split("/")[-1] == "page1-r03-table.png"
+    # A nameless output keeps the old `mem://<id>` form.
+    bare = MemoryStore().put(b"x", ext="bin")["file_key"]
+    assert bare.startswith("mem://") and "/" not in bare[len("mem://") :]
+
+
+def test_disk_store_keys_keep_filename(tmp_path):
+    base = tmp_path / "uploads"
+    store = DiskStore(base / "tasks" / "t1", file_key_base=base)
+    keys = _layout_roundtrip(tmp_path, store, [base])
+    for k in keys:
+        # tasks/t1/<id>/<name>: one directory per output, the name kept.
+        parts = k.split("/")
+        assert parts[:2] == ["tasks", "t1"] and len(parts) == 4
+        assert (base / k).is_file()
+    # A nameless output keeps the flat `<id>.<ext>` form.
+    bare = store.put(b"x", ext="png")["file_key"]
+    assert bare.startswith("tasks/t1/") and bare.count("/") == 2
+    assert bare.endswith(".png")
 
 
 # --- progress parsing -------------------------------------------------------

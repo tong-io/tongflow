@@ -1,17 +1,24 @@
 """Asset stores: where a node's binary output lives between/after execution.
 
 - :class:`MemoryStore` (default, ``inline_outputs=True``): outputs stay in
-  memory keyed by a ``mem://<id>`` handle — zero files on disk. The runner
-  resolves the handles back to ``bytesBase64`` for the caller at the end.
+  memory keyed by a ``mem://<id>/<name>`` handle (``mem://<id>`` without a
+  filename) — zero files on disk. The runner resolves the handles back to
+  ``bytesBase64`` for the caller at the end.
 - :class:`DiskStore` (``inline_outputs=False`` / desktop delegation): outputs
-  are written to ``out_dir`` and the ``file_key`` is a path (relative to
-  ``file_key_base`` when set, else absolute), matching the server's
-  ``saveFile`` contract so the canvas can read them via ``/api/uploads``.
+  are written to ``out_dir/<id>/<name>`` (``out_dir/<id>.<ext>`` without a
+  filename) and the ``file_key`` is a path (relative to ``file_key_base`` when
+  set, else absolute), matching the server's ``saveFile`` contract so the
+  canvas can read them via ``/api/uploads``.
 - :class:`HttpStore` (``asset_endpoint`` option): the embedding host owns
   file storage (e.g. a cloud backend writing to object storage). ``put``
   POSTs raw bytes over loopback HTTP and gets back the host-assigned
   ``file_key``; ``get`` fetches bytes for any ``file_key`` the host knows.
   The engine never sees storage credentials.
+
+``<name>`` is the producer's sanitized ``filename`` (:func:`store_key_name`).
+A downstream Asset input derives its ``filename`` from the key's last path
+segment, so it receives the producer's own name (``page1-r03-table.png``), not
+a random id. The TypeScript engine's stores key the same way.
 
 ``get`` returns the bytes for a key the store owns, else ``None`` (so the
 filesystem/URL resolver in :mod:`assets` handles plain file_keys / URLs).
@@ -21,12 +28,67 @@ from __future__ import annotations
 
 import json
 import os
+import re
 import urllib.error
 import urllib.parse
 import urllib.request
 import uuid
 from pathlib import Path
 from typing import Optional, Protocol
+
+
+#: Longest :func:`store_key_name` in UTF-8 bytes (under the 255-byte limit).
+STORE_KEY_NAME_MAX_BYTES = 120
+
+# Controls, space, path separators, and characters a URL, a query split or a
+# Windows file name would trip over.
+_UNSAFE_NAME_CHARS = re.compile(r'[\x00-\x20\x7f/\\?#%:*"<>|]')
+
+
+def _suffix_of(name: str) -> str:
+    """``PurePath(name).suffix`` without the dot ("" when there is none)."""
+    i = name.rfind(".")
+    if i <= 0 or i == len(name) - 1:
+        return ""
+    return name[i + 1 :]
+
+
+def _utf8_len(s: str) -> int:
+    return len(s.encode("utf-8", "surrogatepass"))
+
+
+def store_key_name(filename: Optional[str], ext: str) -> Optional[str]:
+    """The last key segment that keeps a producer's ``filename``.
+
+    Mirrors ``storeKeyName`` in ``packages/tongflow/src/engine/assets.ts``:
+    control characters, spaces, path separators and ``? # % : * " < > |``
+    become ``_``; leading and trailing dots are dropped; a name without an
+    extension gets ``.<ext>``; the stem is cut to fit
+    :data:`STORE_KEY_NAME_MAX_BYTES` (the extension is kept). ``None`` when
+    there is no usable name (the store keeps its name-less key form).
+    """
+    if not filename:
+        return None
+    name = _UNSAFE_NAME_CHARS.sub("_", filename).lstrip(".").rstrip(".")
+    if not name:
+        return None
+    clean_ext = _UNSAFE_NAME_CHARS.sub("_", ext.lstrip("."))
+    suffix = _suffix_of(name)
+    if not suffix and clean_ext:
+        name = f"{name}.{clean_ext}"
+        suffix = clean_ext
+    if _utf8_len(name) <= STORE_KEY_NAME_MAX_BYTES:
+        return name
+    tail = f".{suffix}" if suffix and len(suffix) <= 16 else ""
+    budget = STORE_KEY_NAME_MAX_BYTES - _utf8_len(tail)
+    stem = ""
+    for ch in name[: len(name) - len(tail)]:
+        size = _utf8_len(ch)
+        if size > budget:
+            break
+        stem += ch
+        budget -= size
+    return f"{stem}{tail}"
 
 
 class AssetStore(Protocol):
@@ -56,7 +118,8 @@ class MemoryStore:
         filename: Optional[str] = None,
         ext: str = "bin",
     ) -> dict[str, str]:
-        key = f"{self.SCHEME}{uuid.uuid4().hex}"
+        name = store_key_name(filename, ext)
+        key = f"{self.SCHEME}{uuid.uuid4().hex}" + (f"/{name}" if name else "")
         self._blobs[key] = data
         out: dict[str, str] = {"file_key": key}
         if mime:
@@ -90,8 +153,13 @@ class DiskStore:
         filename: Optional[str] = None,
         ext: str = "bin",
     ) -> dict[str, str]:
-        self.out_dir.mkdir(parents=True, exist_ok=True)
-        path = self.out_dir / f"{uuid.uuid4().hex}.{ext.lstrip('.') or 'bin'}"
+        ext = ext.lstrip(".") or "bin"
+        file_id = uuid.uuid4().hex
+        name = store_key_name(filename, ext)
+        path = (
+            self.out_dir / file_id / name if name else self.out_dir / f"{file_id}.{ext}"
+        )
+        path.parent.mkdir(parents=True, exist_ok=True)
         path.write_bytes(data)
         out: dict[str, str] = {"file_key": self._file_key_for(path)}
         if mime:
