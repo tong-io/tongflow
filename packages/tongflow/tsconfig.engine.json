@@ -6,5 +6,9 @@
         "types": ["node"]
     },
     "include": ["src/engine/**/*.ts"],
-    "exclude": ["src/engine/browser/**", "src/engine/**/*.test.ts"]
+    "exclude": [
+        "src/engine/browser/**",
+        "src/engine/**/*.test.ts",
+        "src/engine/testing/fake-opfs.ts"
+    ]
 }
