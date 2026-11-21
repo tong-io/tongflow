@@ -22,6 +22,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   and the canvas list them; Studio bills them as local. The Python engine and
   the Next single-node runner refuse them with "requires the browser edge
   runtime" instead of spawning or cloning them.
+- **Canvas host transport and workflow runner.** `CanvasHostConfig` gains
+  `taskTransport` (replaces task create / wait / stop / update-status; the
+  default `httpTaskTransport` keeps the HTTP API and `EventSource`) and
+  `workflowRunner`. With a runner, the canvas shows a "Run workflow" action
+  and projects the runner's `run-start` / `node-start` / `node-progress` /
+  `node-download` / `node-done` / `node-error` / `run-done` events onto the
+  nodes: running state, progress, a model-download view and results routed
+  into downstream data nodes. Hosts that set neither are unchanged. See
+  [docs/edge-runtime.md](docs/edge-runtime.md#canvas-host-transport--workflow-runner).
 
 ## [1.0.0] - 2026-11-12
 

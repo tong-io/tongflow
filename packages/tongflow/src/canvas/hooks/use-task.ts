@@ -1,6 +1,7 @@
 /**
  * Task management hook.
- * Uses SSE (Server-Sent Events) for realtime task updates.
+ * Streams realtime task updates through the host's task transport
+ * (`getTaskTransport()`; SSE over the HTTP API by default).
  */
 
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -11,29 +12,24 @@ import {
     isTerminalStatus,
     logger,
     mapSSEStatusToTaskStatus,
-    type SSEStatusType,
     TaskStatus,
 } from "../../core";
-import { hostFetch } from "../host";
-import { createTask as apiCreateTask, updateTaskStatus } from "../lib/api/task";
-import { getTaskStopUrl, getTaskWaitUrl } from "../lib/task/api-url";
 import {
     emitSSEConnected,
     emitSSETaskMessage,
     TASK_CANCEL_REQUEST_EVENT,
 } from "../lib/task/sse-events";
+import {
+    getTaskTransport,
+    openTaskWait,
+    type TaskWaitConnection,
+    type TaskWaitHandlers,
+    type TaskWaitMessage,
+} from "../lib/task/transport";
 import type { SSEMessage } from "../types/sse";
 
-// SSE message shape for the `/api/task/wait` stream
-interface SSETaskMessage {
-    id: string;
-    status: SSEStatusType;
-    data?: Record<string, unknown>;
-    progress?: number;
-    error?: string;
-    /** Optional field from backend (e.g. workflow NODE_* metadata) */
-    nodeId?: string | null;
-}
+// Message shape of the task wait stream (`/api/task/wait` SSE by default)
+type SSETaskMessage = TaskWaitMessage;
 
 function emitTaskProgressFromSSE(payload: SSETaskMessage) {
     const nodeId =
@@ -76,6 +72,18 @@ export type WorkflowExecutionStatus =
 
 export const WORKSPACE_MODE_KEY = "workspace-mode";
 
+/**
+ * Live detail for a node during a host-runner workflow run (see
+ * `CanvasWorkflowRunner`): progress, a model download, or the failure.
+ */
+export interface NodeRunProgress {
+    /** Completed fraction in [0, 1]. */
+    fraction?: number;
+    message?: string;
+    download?: { loaded: number; total?: number; label: string };
+    error?: string;
+}
+
 export interface TaskState {
     tasks: Map<string, Task>;
     // Workspace mode
@@ -91,6 +99,13 @@ export interface TaskState {
     nodeExecutionStatusMap: Map<string, string>; // nodeId -> status
     setNodeExecutionStatus: (nodeId: string, status: string) => void;
     clearNodeExecutionStatus: () => void;
+    // Node id -> live run detail (host workflow runner only)
+    nodeRunProgressMap: Map<string, NodeRunProgress>;
+    /** Replace a node's run detail; `null` removes it. */
+    setNodeRunProgress: (
+        nodeId: string,
+        progress: NodeRunProgress | null,
+    ) => void;
     // trackTaskToNode(taskId, nodeId) remembers which node created the task
     taskNodeMap: Map<string, string>; // taskId -> nodeId
     // registerNodeHandler(nodeId, handler) registers per-node handlers
@@ -169,6 +184,7 @@ export const useTaskStore = create<TaskState>((set, get) => ({
     workflowExecutionStatus: "idle" as WorkflowExecutionStatus,
     currentExecutionLevel: -1,
     nodeExecutionStatusMap: new Map(),
+    nodeRunProgressMap: new Map(),
 
     setWorkspaceMode: (mode) => {
         if (typeof window !== "undefined") {
@@ -194,7 +210,25 @@ export const useTaskStore = create<TaskState>((set, get) => ({
     },
 
     clearNodeExecutionStatus: () => {
-        set({ nodeExecutionStatusMap: new Map(), currentExecutionLevel: -1 });
+        set((state) => ({
+            nodeExecutionStatusMap: new Map(),
+            currentExecutionLevel: -1,
+            // Keep the reference when already empty (no extra re-renders
+            // for hosts that never use a workflow runner).
+            ...(state.nodeRunProgressMap.size > 0
+                ? { nodeRunProgressMap: new Map() }
+                : {}),
+        }));
+    },
+
+    setNodeRunProgress: (nodeId, progress) => {
+        set((state) => {
+            if (!progress && !state.nodeRunProgressMap.has(nodeId)) return {};
+            const newMap = new Map(state.nodeRunProgressMap);
+            if (progress) newMap.set(nodeId, progress);
+            else newMap.delete(nodeId);
+            return { nodeRunProgressMap: newMap };
+        });
     },
 
     setTask: (taskId, task) =>
@@ -350,7 +384,7 @@ export function useTaskSubscription(
     const [status, setStatus] = useState<
         "connecting" | "connected" | "reconnecting" | "disconnected" | "error"
     >("disconnected");
-    const eventSourceRef = useRef<EventSource | null>(null);
+    const eventSourceRef = useRef<TaskWaitConnection | null>(null);
     const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
     const reconnectAttemptsRef = useRef(0);
     const maxRetries = options?.maxRetries ?? SSE_DEFAULT_MAX_RETRIES;
@@ -374,171 +408,179 @@ export function useTaskSubscription(
                         : "connecting",
                 );
 
-                // Open SSE connection
-                const eventSource = new EventSource(getTaskWaitUrl(taskId));
-                eventSourceRef.current = eventSource;
-
-                eventSource.onopen = () => {
-                    if (!isSubscribed) return;
-                    setStatus("connected");
-                    reconnectAttemptsRef.current = 0;
-                    // Emit SSE connected
-                    emitSSEConnected(taskId);
-                    if (options?.onStatusChange) {
-                        options.onStatusChange("connected");
-                    }
-                };
-
-                eventSource.onmessage = (event) => {
-                    if (!isSubscribed) return;
-
-                    try {
-                        const message: SSETaskMessage = JSON.parse(event.data);
-                        logger.debug(`[SSE] Received message:`, message);
-
-                        emitTaskProgressFromSSE(message);
-
-                        const taskStatus = mapSSEStatusToTaskStatus(
-                            message.status,
-                        );
-
-                        const msgNodeId = message.nodeId;
-
-                        const internalTask: Task = {
-                            id: message.id,
-                            status: taskStatus,
-                            progress: message.progress || 0,
-                            data: message.data,
-                            error:
-                                message.error ||
-                                ((message.data as Record<string, unknown>)
-                                    ?.error as string),
-                            nodeId:
-                                (msgNodeId != null && msgNodeId !== ""
-                                    ? String(msgNodeId)
-                                    : undefined) ??
-                                useTaskStore
-                                    .getState()
-                                    .getTaskNodeId(message.id),
-                        };
-
-                        // Update global task store
-                        setTask(internalTask.id, internalTask);
-                        logger.debug(
-                            `[SSE] Task updated: ${internalTask.id} (${internalTask.status})`,
-                        );
-
-                        // Toast on success; failures are surfaced globally by
-                        // TaskFailureToaster (persistent error toast).
-                        if (taskStatus === "COMPLETED") {
-                            toast.success(t("taskCompleted"));
+                // Task stream (SSE by default). `openTaskWait` never calls a
+                // handler before it returns, so `eventSource` is assigned
+                // whenever a handler runs.
+                const handlers: TaskWaitHandlers = {
+                    onOpen: () => {
+                        if (!isSubscribed) return;
+                        setStatus("connected");
+                        reconnectAttemptsRef.current = 0;
+                        // Emit SSE connected
+                        emitSSEConnected(taskId);
+                        if (options?.onStatusChange) {
+                            options.onStatusChange("connected");
                         }
+                    },
 
-                        // Frontend backup: persist terminal status without saving materials
-                        if (isTerminalStatus(message.status)) {
-                            updateTaskStatus({
-                                taskId: message.id,
-                                status: message.status,
+                    onMessage: (message: SSETaskMessage) => {
+                        if (!isSubscribed) return;
+
+                        try {
+                            logger.debug(`[SSE] Received message:`, message);
+
+                            emitTaskProgressFromSSE(message);
+
+                            const taskStatus = mapSSEStatusToTaskStatus(
+                                message.status,
+                            );
+
+                            const msgNodeId = message.nodeId;
+
+                            const internalTask: Task = {
+                                id: message.id,
+                                status: taskStatus,
+                                progress: message.progress || 0,
                                 data: message.data,
-                            }).catch((error) => {
-                                logger.error(
-                                    "[SSE] Failed to update task status (frontend backup):",
-                                    error,
-                                );
-                            });
-                        }
+                                error:
+                                    message.error ||
+                                    ((message.data as Record<string, unknown>)
+                                        ?.error as string),
+                                nodeId:
+                                    (msgNodeId != null && msgNodeId !== ""
+                                        ? String(msgNodeId)
+                                        : undefined) ??
+                                    useTaskStore
+                                        .getState()
+                                        .getTaskNodeId(message.id),
+                            };
 
-                        // Route to node handlers
-                        routeTaskToNode(internalTask);
+                            // Update global task store
+                            setTask(internalTask.id, internalTask);
+                            logger.debug(
+                                `[SSE] Task updated: ${internalTask.id} (${internalTask.status})`,
+                            );
 
-                        // Invoke optional subscriber
-                        if (options?.onTaskUpdate) {
-                            options.onTaskUpdate(internalTask);
-                        }
-
-                        // Terminal status: tear down the stream and disable
-                        // reconnect. The wait endpoint closes the connection
-                        // on terminal state, and a reconnect without
-                        // `reconnect=true` re-executes the task — that is
-                        // exactly the unwanted "auto retry" behavior.
-                        if (isTerminalStatus(message.status)) {
-                            isSubscribed = false;
-                            if (reconnectTimeoutRef.current) {
-                                clearTimeout(reconnectTimeoutRef.current);
-                                reconnectTimeoutRef.current = null;
+                            // Toast on success; failures are surfaced globally by
+                            // TaskFailureToaster (persistent error toast).
+                            if (taskStatus === "COMPLETED") {
+                                toast.success(t("taskCompleted"));
                             }
-                            eventSource.close();
-                            eventSourceRef.current = null;
-                            setStatus("disconnected");
-                            if (options?.onStatusChange) {
-                                options.onStatusChange("disconnected");
+
+                            // Frontend backup: persist terminal status without saving materials
+                            if (isTerminalStatus(message.status)) {
+                                getTaskTransport()
+                                    .updateTaskStatus({
+                                        taskId: message.id,
+                                        status: message.status,
+                                        data: message.data,
+                                    })
+                                    .catch((error) => {
+                                        logger.error(
+                                            "[SSE] Failed to update task status (frontend backup):",
+                                            error,
+                                        );
+                                    });
                             }
-                        }
-                    } catch (error) {
-                        logger.error(
-                            "[SSE] Error parsing message:",
-                            error,
-                            event.data,
-                        );
-                    }
-                };
 
-                // Backend may emit custom `close` event
-                eventSource.addEventListener("close", () => {
-                    logger.debug("[SSE] Server sent close event");
-                    if (!isSubscribed) return;
-                    isSubscribed = false; // Stop reconnect loops
-                    eventSource.close();
-                    eventSourceRef.current = null;
-                    setStatus("disconnected");
-                    if (options?.onStatusChange) {
-                        options.onStatusChange("disconnected");
-                    }
-                });
+                            // Route to node handlers
+                            routeTaskToNode(internalTask);
 
-                eventSource.onerror = (error) => {
-                    if (!isSubscribed) return;
-
-                    logger.error("[SSE] Connection error:", error);
-                    eventSource.close();
-                    eventSourceRef.current = null;
-
-                    // Reconnect with exponential backoff
-                    if (reconnectAttemptsRef.current < maxRetries) {
-                        reconnectAttemptsRef.current++;
-                        // Backoff: 2s, 4s, 8s, 16s, capped at 30s
-                        const delay = Math.min(
-                            baseRetryDelay *
-                                2 ** (reconnectAttemptsRef.current - 1),
-                            SSE_MAX_RETRY_DELAY,
-                        );
-                        logger.debug(
-                            `[SSE] Reconnecting in ${delay}ms (attempt ${reconnectAttemptsRef.current}/${maxRetries})`,
-                        );
-
-                        setStatus("reconnecting");
-                        if (options?.onStatusChange) {
-                            options.onStatusChange("reconnecting");
-                        }
-
-                        reconnectTimeoutRef.current = setTimeout(() => {
-                            if (isSubscribed) {
-                                connect();
+                            // Invoke optional subscriber
+                            if (options?.onTaskUpdate) {
+                                options.onTaskUpdate(internalTask);
                             }
-                        }, delay);
-                    } else {
-                        logger.error("[SSE] Max reconnection attempts reached");
-                        setStatus("error");
-                        if (options?.onStatusChange) {
-                            options.onStatusChange("error");
-                        }
-                        if (options?.onError) {
-                            options.onError(
-                                new Error("Max reconnection attempts reached"),
+
+                            // Terminal status: tear down the stream and disable
+                            // reconnect. The wait endpoint closes the connection
+                            // on terminal state, and a reconnect without
+                            // `reconnect=true` re-executes the task — that is
+                            // exactly the unwanted "auto retry" behavior.
+                            if (isTerminalStatus(message.status)) {
+                                isSubscribed = false;
+                                if (reconnectTimeoutRef.current) {
+                                    clearTimeout(reconnectTimeoutRef.current);
+                                    reconnectTimeoutRef.current = null;
+                                }
+                                eventSource.close();
+                                eventSourceRef.current = null;
+                                setStatus("disconnected");
+                                if (options?.onStatusChange) {
+                                    options.onStatusChange("disconnected");
+                                }
+                            }
+                        } catch (error) {
+                            logger.error(
+                                "[SSE] Error parsing message:",
+                                error,
+                                message,
                             );
                         }
-                    }
+                    },
+
+                    // Backend may emit custom `close` event
+                    onClose: () => {
+                        logger.debug("[SSE] Server sent close event");
+                        if (!isSubscribed) return;
+                        isSubscribed = false; // Stop reconnect loops
+                        eventSource.close();
+                        eventSourceRef.current = null;
+                        setStatus("disconnected");
+                        if (options?.onStatusChange) {
+                            options.onStatusChange("disconnected");
+                        }
+                    },
+
+                    onError: (error) => {
+                        if (!isSubscribed) return;
+
+                        logger.error("[SSE] Connection error:", error);
+                        eventSource.close();
+                        eventSourceRef.current = null;
+
+                        // Reconnect with exponential backoff
+                        if (reconnectAttemptsRef.current < maxRetries) {
+                            reconnectAttemptsRef.current++;
+                            // Backoff: 2s, 4s, 8s, 16s, capped at 30s
+                            const delay = Math.min(
+                                baseRetryDelay *
+                                    2 ** (reconnectAttemptsRef.current - 1),
+                                SSE_MAX_RETRY_DELAY,
+                            );
+                            logger.debug(
+                                `[SSE] Reconnecting in ${delay}ms (attempt ${reconnectAttemptsRef.current}/${maxRetries})`,
+                            );
+
+                            setStatus("reconnecting");
+                            if (options?.onStatusChange) {
+                                options.onStatusChange("reconnecting");
+                            }
+
+                            reconnectTimeoutRef.current = setTimeout(() => {
+                                if (isSubscribed) {
+                                    connect();
+                                }
+                            }, delay);
+                        } else {
+                            logger.error(
+                                "[SSE] Max reconnection attempts reached",
+                            );
+                            setStatus("error");
+                            if (options?.onStatusChange) {
+                                options.onStatusChange("error");
+                            }
+                            if (options?.onError) {
+                                options.onError(
+                                    new Error(
+                                        "Max reconnection attempts reached",
+                                    ),
+                                );
+                            }
+                        }
+                    },
                 };
+                const eventSource = openTaskWait(taskId, handlers);
+                eventSourceRef.current = eventSource;
             } catch (error) {
                 logger.error("[SSE] Failed to create EventSource:", error);
                 setStatus("error");
@@ -592,7 +634,7 @@ export function useCreateTask(options?: TaskSubscriptionOptions) {
             setError(null);
 
             try {
-                const { taskId } = await apiCreateTask(config);
+                const { taskId } = await getTaskTransport().createTask(config);
 
                 // Persisted id kicks off SSE subscription
                 setCreatedTaskId(taskId);
@@ -649,7 +691,7 @@ export function useBatchTaskManager(
     const [currentBatchTaskIds, setCurrentBatchTaskIds] = useState<Set<string>>(
         new Set(),
     );
-    const eventSourcesRef = useRef<Map<string, EventSource>>(new Map());
+    const eventSourcesRef = useRef<Map<string, TaskWaitConnection>>(new Map());
     const activeConnectionsRef = useRef<Set<string>>(new Set());
     /** Shared cancel fallback timeout between SSE handlers and cancelTasks */
     const batchCancelTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(
@@ -676,7 +718,8 @@ export function useBatchTaskManager(
                 const taskIds: string[] = [];
 
                 const createPromises = taskConfigs.map(async (taskConfig) => {
-                    const { taskId } = await apiCreateTask(taskConfig);
+                    const { taskId } =
+                        await getTaskTransport().createTask(taskConfig);
                     taskIds.push(taskId);
 
                     setTask(taskId, {
@@ -690,173 +733,194 @@ export function useBatchTaskManager(
                     // Link task -> node for routing
                     trackTaskToNode(taskId, taskConfig.nodeId);
 
-                    // Per-task SSE (with backoff reconnect)
+                    // Per-task stream (with backoff reconnect)
                     const connectTaskSSE = (tid: string) => {
-                        const es = new EventSource(getTaskWaitUrl(tid));
-
-                        es.onopen = () => {
-                            logger.debug(
-                                `[SSE Batch] Connected for task ${tid}`,
-                            );
-                            reconnectAttemptsRef.current.set(tid, 0);
-                            activeConnectionsRef.current.add(tid);
-                            emitSSEConnected(tid);
-                        };
-
-                        es.onmessage = (event) => {
-                            try {
-                                const message: SSETaskMessage = JSON.parse(
-                                    event.data,
-                                );
+                        // `openTaskWait` never calls a handler before it
+                        // returns, so `es` is assigned whenever one runs.
+                        const handlers: TaskWaitHandlers = {
+                            onOpen: () => {
                                 logger.debug(
-                                    `[SSE Batch] Message for task ${tid}:`,
-                                    message,
+                                    `[SSE Batch] Connected for task ${tid}`,
                                 );
+                                reconnectAttemptsRef.current.set(tid, 0);
+                                activeConnectionsRef.current.add(tid);
+                                emitSSEConnected(tid);
+                            },
 
-                                emitTaskProgressFromSSE(message);
+                            onMessage: (message: SSETaskMessage) => {
+                                try {
+                                    logger.debug(
+                                        `[SSE Batch] Message for task ${tid}:`,
+                                        message,
+                                    );
 
-                                const taskStatus = mapSSEStatusToTaskStatus(
-                                    message.status,
-                                );
-                                const msgNodeId = message.nodeId;
+                                    emitTaskProgressFromSSE(message);
 
-                                const internalTask: Task = {
-                                    id: message.id,
-                                    status: taskStatus,
-                                    progress: message.progress || 0,
-                                    data: message.data,
-                                    error: message.error,
-                                    nodeId:
-                                        (msgNodeId != null && msgNodeId !== ""
-                                            ? String(msgNodeId)
-                                            : undefined) ??
-                                        useTaskStore
-                                            .getState()
-                                            .getTaskNodeId(message.id),
-                                };
+                                    const taskStatus = mapSSEStatusToTaskStatus(
+                                        message.status,
+                                    );
+                                    const msgNodeId = message.nodeId;
 
-                                setTask(internalTask.id, internalTask);
-                                routeTaskToNode(internalTask);
-
-                                if (taskStatus === "COMPLETED") {
-                                    toast.success(t("taskCompleted"));
-                                } else if (taskStatus === "CANCELLED") {
-                                    if (batchCancelTimeoutRef.current != null) {
-                                        clearTimeout(
-                                            batchCancelTimeoutRef.current,
-                                        );
-                                        batchCancelTimeoutRef.current = null;
-                                    }
-                                }
-
-                                if (isTerminalStatus(message.status)) {
-                                    updateTaskStatus({
-                                        taskId: message.id,
-                                        status: message.status,
+                                    const internalTask: Task = {
+                                        id: message.id,
+                                        status: taskStatus,
+                                        progress: message.progress || 0,
                                         data: message.data,
-                                    }).catch((err) => {
-                                        logger.error(
-                                            "[SSE Batch] Failed to update task status (frontend backup):",
-                                            err,
-                                        );
-                                    });
+                                        error: message.error,
+                                        nodeId:
+                                            (msgNodeId != null &&
+                                            msgNodeId !== ""
+                                                ? String(msgNodeId)
+                                                : undefined) ??
+                                            useTaskStore
+                                                .getState()
+                                                .getTaskNodeId(message.id),
+                                    };
 
-                                    // Stop reconnect loop and close stream so
-                                    // the server doesn't re-execute the task
-                                    // on the next reconnect attempt.
-                                    const pending =
-                                        reconnectTimeoutsRef.current.get(tid);
-                                    if (pending != null) {
-                                        clearTimeout(pending);
+                                    setTask(internalTask.id, internalTask);
+                                    routeTaskToNode(internalTask);
+
+                                    if (taskStatus === "COMPLETED") {
+                                        toast.success(t("taskCompleted"));
+                                    } else if (taskStatus === "CANCELLED") {
+                                        if (
+                                            batchCancelTimeoutRef.current !=
+                                            null
+                                        ) {
+                                            clearTimeout(
+                                                batchCancelTimeoutRef.current,
+                                            );
+                                            batchCancelTimeoutRef.current =
+                                                null;
+                                        }
+                                    }
+
+                                    if (isTerminalStatus(message.status)) {
+                                        getTaskTransport()
+                                            .updateTaskStatus({
+                                                taskId: message.id,
+                                                status: message.status,
+                                                data: message.data,
+                                            })
+                                            .catch((err) => {
+                                                logger.error(
+                                                    "[SSE Batch] Failed to update task status (frontend backup):",
+                                                    err,
+                                                );
+                                            });
+
+                                        // Stop reconnect loop and close stream so
+                                        // the server doesn't re-execute the task
+                                        // on the next reconnect attempt.
+                                        const pending =
+                                            reconnectTimeoutsRef.current.get(
+                                                tid,
+                                            );
+                                        if (pending != null) {
+                                            clearTimeout(pending);
+                                            reconnectTimeoutsRef.current.delete(
+                                                tid,
+                                            );
+                                        }
+                                        reconnectAttemptsRef.current.set(
+                                            tid,
+                                            Number.POSITIVE_INFINITY,
+                                        );
+                                        es.close();
+                                        eventSourcesRef.current.delete(tid);
+                                        activeConnectionsRef.current.delete(
+                                            tid,
+                                        );
+                                        if (
+                                            activeConnectionsRef.current
+                                                .size === 0
+                                        ) {
+                                            setIsLoading(false);
+                                            if (taskStatus === "CANCELLED") {
+                                                setCurrentBatchTaskIds(
+                                                    new Set(),
+                                                );
+                                            }
+                                        }
+                                    }
+
+                                    if (options?.onTaskUpdate) {
+                                        options.onTaskUpdate(internalTask);
+                                    }
+                                } catch (err) {
+                                    logger.error(
+                                        `[SSE Batch] Error parsing message:`,
+                                        err,
+                                    );
+                                }
+                            },
+
+                            onClose: () => {
+                                logger.debug(
+                                    `[SSE Batch] Server sent close event for task ${tid}`,
+                                );
+                                es.close();
+                                eventSourcesRef.current.delete(tid);
+                                activeConnectionsRef.current.delete(tid);
+                                if (activeConnectionsRef.current.size === 0) {
+                                    setIsLoading(false);
+                                    logger.debug(
+                                        "[SSE Batch] All connections closed, loading stopped",
+                                    );
+                                }
+                            },
+
+                            onError: () => {
+                                es.close();
+                                eventSourcesRef.current.delete(tid);
+
+                                const attempts =
+                                    (reconnectAttemptsRef.current.get(tid) ??
+                                        0) + 1;
+                                if (attempts <= SSE_DEFAULT_MAX_RETRIES) {
+                                    reconnectAttemptsRef.current.set(
+                                        tid,
+                                        attempts,
+                                    );
+                                    const delay = Math.min(
+                                        SSE_DEFAULT_RETRY_DELAY *
+                                            2 ** (attempts - 1),
+                                        SSE_MAX_RETRY_DELAY,
+                                    );
+                                    logger.debug(
+                                        `[SSE Batch] Reconnecting task ${tid} in ${delay}ms (attempt ${attempts}/${SSE_DEFAULT_MAX_RETRIES})`,
+                                    );
+                                    const timeoutId = setTimeout(() => {
                                         reconnectTimeoutsRef.current.delete(
                                             tid,
                                         );
-                                    }
-                                    reconnectAttemptsRef.current.set(
+                                        connectTaskSSE(tid);
+                                    }, delay);
+                                    reconnectTimeoutsRef.current.set(
                                         tid,
-                                        Number.POSITIVE_INFINITY,
+                                        timeoutId,
                                     );
-                                    es.close();
-                                    eventSourcesRef.current.delete(tid);
+                                } else {
+                                    logger.error(
+                                        `[SSE Batch] Max reconnection attempts reached for task ${tid}`,
+                                    );
                                     activeConnectionsRef.current.delete(tid);
                                     if (
                                         activeConnectionsRef.current.size === 0
                                     ) {
                                         setIsLoading(false);
-                                        if (taskStatus === "CANCELLED") {
-                                            setCurrentBatchTaskIds(new Set());
-                                        }
+                                    }
+                                    if (options?.onError) {
+                                        options.onError(
+                                            new Error(
+                                                `Max reconnection attempts reached for task ${tid}`,
+                                            ),
+                                        );
                                     }
                                 }
-
-                                if (options?.onTaskUpdate) {
-                                    options.onTaskUpdate(internalTask);
-                                }
-                            } catch (err) {
-                                logger.error(
-                                    `[SSE Batch] Error parsing message:`,
-                                    err,
-                                );
-                            }
+                            },
                         };
-
-                        es.addEventListener("close", () => {
-                            logger.debug(
-                                `[SSE Batch] Server sent close event for task ${tid}`,
-                            );
-                            es.close();
-                            eventSourcesRef.current.delete(tid);
-                            activeConnectionsRef.current.delete(tid);
-                            if (activeConnectionsRef.current.size === 0) {
-                                setIsLoading(false);
-                                logger.debug(
-                                    "[SSE Batch] All connections closed, loading stopped",
-                                );
-                            }
-                        });
-
-                        es.onerror = () => {
-                            es.close();
-                            eventSourcesRef.current.delete(tid);
-
-                            const attempts =
-                                (reconnectAttemptsRef.current.get(tid) ?? 0) +
-                                1;
-                            if (attempts <= SSE_DEFAULT_MAX_RETRIES) {
-                                reconnectAttemptsRef.current.set(tid, attempts);
-                                const delay = Math.min(
-                                    SSE_DEFAULT_RETRY_DELAY *
-                                        2 ** (attempts - 1),
-                                    SSE_MAX_RETRY_DELAY,
-                                );
-                                logger.debug(
-                                    `[SSE Batch] Reconnecting task ${tid} in ${delay}ms (attempt ${attempts}/${SSE_DEFAULT_MAX_RETRIES})`,
-                                );
-                                const timeoutId = setTimeout(() => {
-                                    reconnectTimeoutsRef.current.delete(tid);
-                                    connectTaskSSE(tid);
-                                }, delay);
-                                reconnectTimeoutsRef.current.set(
-                                    tid,
-                                    timeoutId,
-                                );
-                            } else {
-                                logger.error(
-                                    `[SSE Batch] Max reconnection attempts reached for task ${tid}`,
-                                );
-                                activeConnectionsRef.current.delete(tid);
-                                if (activeConnectionsRef.current.size === 0) {
-                                    setIsLoading(false);
-                                }
-                                if (options?.onError) {
-                                    options.onError(
-                                        new Error(
-                                            `Max reconnection attempts reached for task ${tid}`,
-                                        ),
-                                    );
-                                }
-                            }
-                        };
+                        const es = openTaskWait(tid, handlers);
 
                         eventSourcesRef.current.set(tid, es);
                     };
@@ -931,17 +995,11 @@ export function useBatchTaskManager(
         // 2. Hit backend stop endpoints
         const stopPromises = taskIds.map(async (taskId) => {
             try {
-                const response = await hostFetch(getTaskStopUrl(), {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify({ taskId }),
-                });
+                const ok = await getTaskTransport().stopTask(taskId);
                 logger.debug(
                     `[BatchTaskManager] Stop request sent for task: ${taskId}`,
                 );
-                return response.ok;
+                return ok;
             } catch (error) {
                 logger.error(
                     `[BatchTaskManager] Failed to send stop request for task ${taskId}:`,

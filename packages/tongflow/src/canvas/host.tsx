@@ -8,10 +8,16 @@
  * resolves asset `file_key`s to URLs. A host points it at that API through
  * `configureCanvasHost` / `<CanvasProvider>`; by default everything is
  * same-origin, which is what the TongFlow app itself uses.
+ *
+ * A host can also take over task execution (`taskTransport`) and offer a
+ * whole-workflow runner (`workflowRunner`); see docs/edge-runtime.md,
+ * "Canvas host transport & workflow runner".
  */
 
-import { type ReactNode, useEffect } from "react";
+import { type ReactNode, useEffect, useSyncExternalStore } from "react";
 import { setCanvasLocale } from "./i18n/client";
+import type { CanvasTaskTransport } from "./lib/task/transport";
+import type { CanvasWorkflowRunner } from "./lib/workflow/runner";
 
 export interface CanvasHostConfig {
     /**
@@ -26,17 +32,55 @@ export interface CanvasHostConfig {
     resolveAssetUrl?: (fileKey: string) => string;
     /** Custom fetch (auth headers, credentials, …). Defaults to global fetch. */
     fetch?: typeof fetch;
+    /**
+     * Replaces task create / wait / stop / update-status for single-node
+     * runs. Defaults to `httpTaskTransport` (the HTTP API + `EventSource`).
+     */
+    taskTransport?: CanvasTaskTransport;
+    /**
+     * Runs a whole workflow. When set, the canvas shows a "Run workflow"
+     * toolbar action that delegates to it; absent = no such action.
+     */
+    workflowRunner?: CanvasWorkflowRunner;
 }
 
 const host: CanvasHostConfig = { apiBaseUrl: "" };
 
+// Notified (deferred) after every `configureCanvasHost`, so React consumers
+// such as `useCanvasWorkflowRunner` see values configured after mount.
+const hostListeners = new Set<() => void>();
+
 /** Replace the host configuration (merges with the current one). */
 export function configureCanvasHost(config: Partial<CanvasHostConfig>): void {
     Object.assign(host, config);
+    if (hostListeners.size === 0) return;
+    // Deferred: `CanvasProvider` configures during render, and listeners
+    // must not update other components mid-render.
+    queueMicrotask(() => {
+        for (const listener of hostListeners) listener();
+    });
 }
 
 export function getCanvasHost(): Readonly<CanvasHostConfig> {
     return host;
+}
+
+function subscribeCanvasHost(listener: () => void): () => void {
+    hostListeners.add(listener);
+    return () => {
+        hostListeners.delete(listener);
+    };
+}
+
+const getWorkflowRunner = () => host.workflowRunner;
+
+/** The host's workflow runner (reactive); `undefined` when none is configured. */
+export function useCanvasWorkflowRunner(): CanvasWorkflowRunner | undefined {
+    return useSyncExternalStore(
+        subscribeCanvasHost,
+        getWorkflowRunner,
+        getWorkflowRunner,
+    );
 }
 
 /** Absolute (or origin-relative) URL for an API path such as `/api/task/create`. */
