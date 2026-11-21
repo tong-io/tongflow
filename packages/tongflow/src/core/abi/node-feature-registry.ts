@@ -77,6 +77,14 @@ export const NODE_TYPE_TO_ABI_FEATURE: Readonly<Record<string, NodeSlot>> = {
     musicExtractNode: "music-extract",
     musicLegoNode: "music-lego",
     musicCompleteNode: "music-complete",
+    imageOrientNode: "image-orient",
+    ocrImageNode: "ocr-image",
+    tableRecognizeNode: "table-recognize",
+    detectObjectsNode: "detect-objects",
+    embedImageNode: "embed-image",
+    diarizeSpeakersNode: "diarize-speakers",
+    audioTagNode: "audio-tag",
+    detectLanguageNode: "detect-language",
 
     // batch/
     dropVideoNode: "drop-video",
@@ -99,12 +107,18 @@ export const NODE_TYPE_TO_ABI_FEATURE: Readonly<Record<string, NodeSlot>> = {
     textsGenTextNode: "combine-text",
     concatVideoComposeNode: "concat-videos",
     musicCoverNode: "music-cover",
+    chunkTextNode: "chunk-text",
+    embedTextNode: "embed-text",
+    kbWriteNode: "kb-write",
 
     // decompose/
     splitVideoNode: "split-video",
     splitTextNode: "split-text",
     musicBriefNode: "music-brief",
     separateSoundNode: "separate-sound",
+    renderPagesNode: "render-pages",
+    layoutDetectNode: "layout-detect",
+    vadSegmentNode: "vad-segment",
 };
 
 export function featureForNodeType(
@@ -280,6 +294,33 @@ export const NODE_TYPE_SOURCE_SPEC: Partial<
     separateSoundNode: {
         audio: handle({ nodeType: "audioNode" }),
         text: handle({ nodeType: "textNode", path: "texts[0]", manual: true }),
+    },
+    // ── Edge-runtime document / media understanding slots ──────────────
+    // `document` is a bare Asset (field-name inference would say image), so
+    // pin it to fileNode like parse-document; one render per file.
+    renderPagesNode: { document: batchOn({ nodeType: "fileNode" }) },
+    imageOrientNode: { image: batchOn() },
+    layoutDetectNode: { image: batchOn() },
+    ocrImageNode: { image: batchOn() },
+    tableRecognizeNode: { image: batchOn() },
+    detectObjectsNode: { image: batchOn() },
+    embedImageNode: { image: batchOn() },
+    vadSegmentNode: { audio: batchOn() },
+    diarizeSpeakersNode: { audio: batchOn() },
+    audioTagNode: { audio: batchOn() },
+    detectLanguageNode: {
+        text: batchOn({ nodeType: "textNode", path: "texts" }),
+    },
+    // Every connected text node is merged into one chunking call.
+    chunkTextNode: { texts: collectAll({ nodeType: "textNode" }) },
+    embedTextNode: { texts: collectAll({ nodeType: "textNode" }) },
+    // Chunks come from a text node, their vectors from the file node that
+    // embed-text writes (`vectors` is a bare Asset, so pin fileNode); the
+    // source file name is typed in the node.
+    kbWriteNode: {
+        chunks: collectAll({ nodeType: "textNode" }),
+        vectors: handle({ nodeType: "fileNode" }),
+        source: configField(),
     },
 };
 

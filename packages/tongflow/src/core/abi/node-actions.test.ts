@@ -50,6 +50,12 @@ describe("single modality selections", () => {
             "imageBodySegNode",
             "imageNormalNode",
             "imageMattingNode",
+            "imageOrientNode",
+            "ocrImageNode",
+            "tableRecognizeNode",
+            "layoutDetectNode",
+            "detectObjectsNode",
+            "embedImageNode",
         ]);
     });
 
@@ -64,7 +70,10 @@ describe("single modality selections", () => {
     });
 
     it("offers document / link parsing", () => {
-        expect(types({ fileNode: 1 })).toEqual(["fileGenTextNode"]);
+        expect(types({ fileNode: 1 })).toEqual([
+            "fileGenTextNode",
+            "renderPagesNode",
+        ]);
         expect(types({ linkNode: 1 })).toEqual(["linkGenTextNode"]);
     });
 
@@ -73,6 +82,32 @@ describe("single modality selections", () => {
             "imageGenTextNode",
             "imageGenVideoNode",
         ]);
+    });
+});
+
+describe("edge-runtime slots", () => {
+    it("offers chunking, embedding and language detection for texts", () => {
+        for (const n of [1, 3]) {
+            const got = types({ textNode: n });
+            expect(got).toContain("chunkTextNode");
+            expect(got).toContain("embedTextNode");
+        }
+        expect(types({ textNode: 1 })).toContain("detectLanguageNode");
+        // detect-language takes one text handle (batched over its items).
+        expect(types({ textNode: 2 })).not.toContain("detectLanguageNode");
+    });
+
+    it("offers the audio analysis nodes for one clip", () => {
+        const got = types({ audioNode: 1 });
+        expect(got).toContain("vadSegmentNode");
+        expect(got).toContain("diarizeSpeakersNode");
+        expect(got).toContain("audioTagNode");
+    });
+
+    it("needs chunks and their vectors to write the knowledge base", () => {
+        expect(types({ textNode: 1, fileNode: 1 })).toContain("kbWriteNode");
+        expect(types({ textNode: 1 })).not.toContain("kbWriteNode");
+        expect(types({ fileNode: 1 })).not.toContain("kbWriteNode");
     });
 });
 

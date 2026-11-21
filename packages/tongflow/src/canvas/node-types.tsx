@@ -22,12 +22,15 @@ import ArrangeTextNode from "./nodes/batch/arrange-text";
 import DropVideoNode from "./nodes/batch/drop-video";
 // Compose nodes
 import AudioVideoLipSyncNode from "./nodes/compose/audio-video-lip-sync";
+import ChunkTextNode from "./nodes/compose/chunk-text";
 import ConcatVideoNode from "./nodes/compose/concat-video";
 import ConcatVideoComposeNode from "./nodes/compose/concat-video";
+import EmbedTextNode from "./nodes/compose/embed-text";
 import ImageFusionNode from "./nodes/compose/image-fusion";
 import ImageGenVideoComposeNode from "./nodes/compose/image-gen-video-compose";
 import ImageImageGenVideoNode from "./nodes/compose/image-image-gen-video";
 import ImagesGenVideoNode from "./nodes/compose/images-gen-video";
+import KbWriteNode from "./nodes/compose/kb-write";
 import MergeVideoAudioNode from "./nodes/compose/merge-video-audio";
 import MusicCoverNode from "./nodes/compose/music-cover";
 import RefsGenVideoNode from "./nodes/compose/refs-gen-video";
@@ -39,11 +42,14 @@ import TextGenSpeechCloneComposeNode from "./nodes/compose/text-gen-speech-clone
 import TextsGenTextNode from "./nodes/compose/texts-gen-text";
 import VideoImageGenVideoMixNode from "./nodes/compose/video-image-gen-video-mix";
 import VideoImageGenVideoMoveNode from "./nodes/compose/video-image-gen-video-move";
+import LayoutDetectNode from "./nodes/decompose/layout-detect";
 import MusicBriefNode from "./nodes/decompose/music-brief";
+import RenderPagesNode from "./nodes/decompose/render-pages";
 import SeparateSoundNode from "./nodes/decompose/separate-sound";
 import SplitTextNode from "./nodes/decompose/split-text";
 // Decompose nodes
 import SplitVideoNode from "./nodes/decompose/split-video";
+import VadSegmentNode from "./nodes/decompose/vad-segment";
 import AudioNode from "./nodes/modality/audio-node";
 import FileNode from "./nodes/modality/file-node";
 // Data nodes
@@ -54,8 +60,13 @@ import TextNode from "./nodes/modality/text-node";
 import VideoNode from "./nodes/modality/video-node";
 import AudioDescribeNode from "./nodes/transfer/audio-describe";
 import AudioGenTextSpeechRecognizeNode from "./nodes/transfer/audio-gen-text-speech-recognize";
+import AudioTagNode from "./nodes/transfer/audio-tag";
 import ConvertVoiceNode from "./nodes/transfer/convert-voice";
 import DenoiseAudioNode from "./nodes/transfer/denoise-audio";
+import DetectLanguageNode from "./nodes/transfer/detect-language";
+import DetectObjectsNode from "./nodes/transfer/detect-objects";
+import DiarizeSpeakersNode from "./nodes/transfer/diarize-speakers";
+import EmbedImageNode from "./nodes/transfer/embed-image";
 import ExtractAudioNode from "./nodes/transfer/extract-audio";
 import FileGenTextNode from "./nodes/transfer/file-gen-text";
 import GetFirstFrameNode from "./nodes/transfer/get-first-frame";
@@ -69,18 +80,21 @@ import ImageGenTextNode from "./nodes/transfer/image-gen-text";
 import ImageGenVideoNode from "./nodes/transfer/image-gen-video";
 import ImageMattingNode from "./nodes/transfer/image-matting";
 import ImageNormalNode from "./nodes/transfer/image-normal";
+import ImageOrientNode from "./nodes/transfer/image-orient";
 import ImagePoseNode from "./nodes/transfer/image-pose";
 import LinkGenTextNode from "./nodes/transfer/link-gen-text";
 import MusicCompleteNode from "./nodes/transfer/music-complete";
 import MusicExtractNode from "./nodes/transfer/music-extract";
 import MusicLegoNode from "./nodes/transfer/music-lego";
 import MusicRepaintNode from "./nodes/transfer/music-repaint";
+import OcrImageNode from "./nodes/transfer/ocr-image";
 import RemoveVideoSubtitleNode from "./nodes/transfer/remove-subtitle";
 import RemoveVideoAudioNode from "./nodes/transfer/remove-video-audio";
 import RemoveWatermarkNode from "./nodes/transfer/remove-watermark";
 import SeparateAudioTrackNode from "./nodes/transfer/separate-audio-track";
 import SeparateSpeakerNode from "./nodes/transfer/separate-speaker";
 import SpeechGenVideoNode from "./nodes/transfer/speech-gen-video";
+import TableRecognizeNode from "./nodes/transfer/table-recognize";
 import TextGenAudioNode from "./nodes/transfer/text-gen-audio";
 import TextGenImageNode from "./nodes/transfer/text-gen-image";
 import TextGenMusicNode from "./nodes/transfer/text-gen-music";
@@ -162,6 +176,14 @@ export const NODE_TYPES: NodeTypes = {
     musicExtractNode: MusicExtractNode,
     musicLegoNode: MusicLegoNode,
     musicCompleteNode: MusicCompleteNode,
+    imageOrientNode: ImageOrientNode,
+    ocrImageNode: OcrImageNode,
+    tableRecognizeNode: TableRecognizeNode,
+    detectObjectsNode: DetectObjectsNode,
+    embedImageNode: EmbedImageNode,
+    diarizeSpeakersNode: DiarizeSpeakersNode,
+    audioTagNode: AudioTagNode,
+    detectLanguageNode: DetectLanguageNode,
 
     // Batch nodes - Implemented
     dropVideoNode: DropVideoNode,
@@ -184,11 +206,17 @@ export const NODE_TYPES: NodeTypes = {
     textsGenTextNode: TextsGenTextNode,
     concatVideoComposeNode: ConcatVideoComposeNode,
     musicCoverNode: MusicCoverNode,
+    chunkTextNode: ChunkTextNode,
+    embedTextNode: EmbedTextNode,
+    kbWriteNode: KbWriteNode,
     // Decompose nodes - Implemented
     splitVideoNode: SplitVideoNode,
     splitTextNode: SplitTextNode,
     musicBriefNode: MusicBriefNode,
     separateSoundNode: SeparateSoundNode,
+    renderPagesNode: RenderPagesNode,
+    layoutDetectNode: LayoutDetectNode,
+    vadSegmentNode: VadSegmentNode,
 };
 
 /**
@@ -268,6 +296,14 @@ export const NODE_CATEGORIES = {
         "musicExtractNode",
         "musicLegoNode",
         "musicCompleteNode",
+        "imageOrientNode",
+        "ocrImageNode",
+        "tableRecognizeNode",
+        "detectObjectsNode",
+        "embedImageNode",
+        "diarizeSpeakersNode",
+        "audioTagNode",
+        "detectLanguageNode",
     ],
     BATCH: ["dropVideoNode", "arrangeNode", "concatVideoNode"],
     COMPOSE: [
@@ -288,11 +324,17 @@ export const NODE_CATEGORIES = {
         "textsGenTextNode",
         "concatVideoComposeNode",
         "musicCoverNode",
+        "chunkTextNode",
+        "embedTextNode",
+        "kbWriteNode",
     ],
     DECOMPOSE: [
         "splitVideoNode",
         "splitTextNode",
         "musicBriefNode",
         "separateSoundNode",
+        "renderPagesNode",
+        "layoutDetectNode",
+        "vadSegmentNode",
     ],
 } as const;

@@ -104,6 +104,9 @@ export const NODE_ACTION_META: Readonly<Record<string, NodeActionMeta>> = {
         order: 190,
         limits: { textNode: [2, Number.POSITIVE_INFINITY] },
     },
+    chunkTextNode: { label: "chunkText", order: 192 },
+    embedTextNode: { label: "embed", order: 194 },
+    detectLanguageNode: { label: "detectLanguage", order: 196 },
 
     // ── from image ───────────────────────────────────────────────────────
     imageGenTextNode: {
@@ -124,6 +127,12 @@ export const NODE_ACTION_META: Readonly<Record<string, NodeActionMeta>> = {
     imageBodySegNode: { label: "segmentBody", order: 260 },
     imageNormalNode: { label: "estimateNormal", order: 270 },
     imageMattingNode: { label: "extractForeground", order: 280 },
+    imageOrientNode: { label: "fixOrientation", order: 281 },
+    ocrImageNode: { label: "ocr", order: 282 },
+    tableRecognizeNode: { label: "recognizeTable", order: 283 },
+    layoutDetectNode: { label: "detectLayout", order: 284 },
+    detectObjectsNode: { label: "detectObjects", order: 285 },
+    embedImageNode: { label: "embed", order: 286 },
     // Gemini 3 Pro takes up to 14 reference images.
     imageFusionNode: {
         label: "imageFusion",
@@ -173,9 +182,13 @@ export const NODE_ACTION_META: Readonly<Record<string, NodeActionMeta>> = {
     musicExtractNode: { label: "extractStem", order: 490 },
     musicLegoNode: { label: "addTrack", order: 491 },
     musicCompleteNode: { label: "completeMusic", order: 492 },
+    vadSegmentNode: { label: "splitBySpeech", order: 493 },
+    diarizeSpeakersNode: { label: "diarizeSpeakers", order: 494 },
+    audioTagNode: { label: "tagAudio", order: 495 },
 
     // ── from a document / link ───────────────────────────────────────────
     fileGenTextNode: { label: "parseDocument", order: 500 },
+    renderPagesNode: { label: "renderPages", order: 505 },
     linkGenTextNode: { label: "extractContent", order: 510 },
 
     // ── cross-modality combinations ──────────────────────────────────────
@@ -189,6 +202,8 @@ export const NODE_ACTION_META: Readonly<Record<string, NodeActionMeta>> = {
     speechGenVideoNode: { label: "generateVideo", order: 661 },
     textAudioGenSpeechNode: { label: "speakWithStyle", order: 670 },
     textGenSpeechCloneComposeNode: { label: "cloneVoice", order: 680 },
+    // Chunks (text) + their vectors (file from embed-text).
+    kbWriteNode: { label: "writeKnowledgeBase", order: 685 },
     // Omni-reference, matching MiniMax-H3 Ref2VA: 9 images, 3 clips, 3 audio,
     // 12 reference files in total.
     refsGenVideoNode: {
