@@ -13,7 +13,7 @@ import { exists, writeFileAtomic } from "../util/fsx.ts";
 const execFile = promisify(execFileCb);
 
 /** SDK version installed into the studio venv when `sdkSpec` is not configured. */
-export const DEFAULT_TONGFLOW_SDK_VERSION = "0.3.0";
+export const DEFAULT_TONGFLOW_SDK_VERSION = "1.1.0";
 
 export const MIN_PYTHON: [number, number] = [3, 10];
 
