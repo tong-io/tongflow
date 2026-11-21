@@ -52,7 +52,146 @@ Consequences:
   spawn an `entry.py` for it or clone it.
 - The canvas task transport and the run-whole-workflow entry (see
   [Canvas host transport & workflow runner](#canvas-host-transport--workflow-runner)).
-- The browser engine itself and the edge plugins are follow-up work.
+- The browser engine (`tongflow/engine`, below), with a conformance suite shared with the
+  Python engine.
+- The edge plugins themselves are follow-up work.
+
+## Browser engine (`tongflow/engine`)
+
+A TypeScript port of the Python engine (`sdk/tongflow/engine`): bindings and batch fan-out,
+Asset materialization, output views and batch merging. It lives in `packages/tongflow/src/engine`
+(the core stays I/O-free) and ships as three entry points:
+
+| Import | What |
+|---|---|
+| `tongflow/engine` | `runWorkflow`, `MemoryAssetStore`, `createCompositeExecutor`, `createInProcessEdgeExecutor`, `inlineAssets`, the types. Platform neutral. |
+| `tongflow/engine/browser` | `createWorkerEdgeExecutor` (Web Workers) and `OpfsAssetStore` (Origin Private File System). |
+| `tongflow/engine/worker` | For plugin authors: `defineEdgePlugin`, `edgeMethod`, the worker protocol types. |
+
+```ts
+import { createCompositeExecutor, runWorkflow } from "tongflow/engine";
+import { OpfsAssetStore, createWorkerEdgeExecutor } from "tongflow/engine/browser";
+
+const edge = createWorkerEdgeExecutor({
+    registry,
+    resolveModuleUrl: (id, plugin) => `/plugins/${plugin.localSubdir}/${plugin.entryFile}`,
+});
+const result = await runWorkflow(executableWorkflow, {
+    executor: createCompositeExecutor({ registry, edge /*, remote */ }),
+    store: new OpfsAssetStore(),
+    inputs: { photo: ["opfs://3f2a….png"] },
+    signal: abortController.signal,
+    onEvent: (event) => console.log(event.type),
+});
+// result: { status: "success" | "failed" | "cancelled", outputs, outputsByName, errors, failures }
+```
+
+- **Events** have the Python engine's names and fields: `workflow_started`, `node_started`,
+  `plugin_progress`, `node_completed`, `node_failed`, `workflow_completed` / `workflow_failed`.
+  The TypeScript engine adds `model_download` (model weights being fetched, apart from
+  progress), `node_cancelled` and `workflow_cancelled`.
+  A host that plugs the engine into the canvas `workflowRunner` maps them one to one:
+  `node_started` → `node-start`, `plugin_progress` → `node-progress` (`percent / 100`),
+  `model_download` → `node-download`, `node_completed` → `node-done` (with the raw `output`),
+  `node_failed` → `node-error`, `workflow_*` → `run-done`.
+- **Executors.** A `NodeExecutor` gets `{pluginId, nodeSlot, prompt, model?, signal,
+  onProgress}` and returns the raw ABI output; an optional `check()` fails a node before its
+  inputs are read. `prompt` is the materialized input; advanced params ride under `_params`,
+  as with the Python invoker. `createCompositeExecutor` sends `runtime: "browser"` plugins (or
+  an unregistered `tongflow-edge-*` id) to the edge executor and `python` plugins to the remote
+  executor. Without a remote executor a Python node fails with *"No remote executor
+  configured"*. The remote executor (a `NodeExecutor` that calls a TongFlow backend) is
+  implemented by a later change.
+- **Assets.** A `$ref: Asset` input holding a key becomes `{bytesBase64, filename, mime?}`:
+  filename from the key's last path segment, mime from its extension, exactly as in Python.
+  References resolve as a data URL, a key the asset store holds, or an http(s) URL. Outputs typed
+  `FileRef` / `ImageRef` / `VideoRef` / `AudioRef` that carry `bytesBase64` are put into the
+  store and become `{file_key, mime?, filename?}`; `ModelRef` is left as returned. Stores:
+  `MemoryAssetStore` (`mem://` keys, for tests) and `OpfsAssetStore` (`opfs://<id>.<ext>`).
+- **Failures** follow Python for now: the first failed node fails the run, nodes of later
+  levels never start. Branch-level fault tolerance, pause and skip come next.
+
+### Edge plugin worker protocol
+
+An edge plugin's ESM entry runs in its own dedicated module worker, one per plugin, reused
+across nodes and runs. Its default export is `defineEdgePlugin({ methods })`; the method names
+are the `method` values of its `tongflow.plugin.json` slots:
+
+```ts
+import { defineEdgePlugin, edgeMethod } from "tongflow/engine/worker";
+
+export default defineEdgePlugin({
+    methods: {
+        ocrImage: edgeMethod("ocr-image", async (input, ctx) => {
+            ctx.modelDownload({ model: "pp-ocrv6", loaded, total });
+            ctx.progress("recognizing", 40);
+            return { success: true, text: await recognize(input.image.bytesBase64, ctx.signal) };
+        }),
+    },
+});
+```
+
+`edgeMethod` types `input` as `SlotInput<S>` and the return as `SlotOutput<S>` with
+`bytesBase64` allowed in ref fields. `ctx` carries `nodeSlot`, `model`, `params`, an abort
+`signal`, `progress(message, percent?)` and `modelDownload({loaded, total?, model?, file?})`.
+The messages (protocol version 1, plain structured-clone data):
+
+| Direction | Message |
+|---|---|
+| worker → host | `{type: "ready", protocol: 1, methods}`, once on load |
+| host → worker | `{type: "invoke", id, method, nodeSlot, input, model?, params?}` |
+| worker → host | `{type: "progress", id, message, percent?}` |
+| worker → host | `{type: "model-download", id, loaded, total?, model?, file?}` |
+| worker → host | `{type: "result", id, output}` or `{type: "error", id, message, name?}` |
+| host → worker | `{type: "cancel", id}` (aborts `ctx.signal`) |
+
+A worker `error` event fails the plugin's pending calls; the next call starts a new worker.
+`terminateOnAbort` terminates the worker on cancel instead, for plugins that cannot stop
+mid-call. `createInProcessEdgeExecutor({ registry, loadPlugin })` calls the same definitions
+without a worker, for tests and workerless hosts.
+
+### Conformance suite
+
+`packages/tongflow/conformance/*.json` is run by both engines: the TypeScript engine in vitest
+(`src/engine/conformance.test.ts`), the Python engine in pytest (`sdk/tests/test_conformance.py`,
+through `run_workflow(invoker=…)`). Each fixture holds an exported `ExecutableWorkflow`, fake
+plugins declared as data (`plugins`: plugin id → steps such as `format`, `map`, `asset`,
+`assets`, `fail`, `raise`, optionally `when`), seeded files (`assets`), runtime `inputs`, and
+the `expected` result and events. Python is the reference: `python tests/test_conformance.py
+--record` (from `sdk/`) rewrites `expected`; review the diff before committing it.
+
+| Fixture | Covers |
+|---|---|
+| `linear-chain` | two nodes through a text node |
+| `batch-fan-out` | `batchField` fan-out, config broadcast, `batch i/N` progress |
+| `collect-all` | `collectAll` array input from two text nodes |
+| `expand-each-assets` | file in → `x-expand-each` ImageRef pages → fan-out over the pages |
+| `asset-roundtrip` | uploaded image → Asset → stored ref → re-materialized downstream |
+| `workflow-inputs` | runtime inputs over start data nodes, a `data:` URL |
+| `model-ref-excluded` | `ModelRef` output is not stored |
+| `multi-level-dag` | diamond, collector, fan-out; level order |
+| `model-and-params` | model and `_params` reach the plugin |
+| `failure-abort` | `success: false` fails the run; sibling kept, downstream never starts |
+| `failure-batch-item` | a failed batch item, `(batch item 2/3)` suffix |
+| `plugin-exception` | a plugin that throws |
+| `scalar-overflow` | several values into a non-batch scalar input |
+
+Every fixture runs twice in TypeScript: with `concurrency: 1` the result and the event stream
+must equal Python's exactly; with the default (whole level in parallel, staggered latency) the
+outputs and each node's events must be equal and levels must run in order.
+
+**Documented differences** (none visible in a successful run's result):
+
+- Nodes of one level run concurrently by default (Python runs them one by one), so events of
+  sibling nodes interleave. State is still committed in level order, and the outputs are
+  identical. `concurrency: 1` restores Python's order.
+- When a node fails, siblings already running in its level are cancelled (`node_cancelled`);
+  Python would not have started the ones after it. The errors, failures and the outputs of
+  earlier levels are identical.
+- Results keep store keys (`{file_key}`); `inlineAssets(value, store)` gives Python's inline
+  form. There is no filesystem search: a key the store does not hold fails the node.
+- `plugin_progress` from a plugin always carries `nodeId` (Python's subprocess progress only
+  carries `pluginId`).
 
 ## Graph rules for edge nodes
 
