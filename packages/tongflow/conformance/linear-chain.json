@@ -1,0 +1,191 @@
+{
+    "name": "linear-chain",
+    "description": "Two executables chained through a text node; the second reads the first's output view.",
+    "workflow": {
+        "name": "linear-chain",
+        "version": "1.0",
+        "exportedAt": "2026-01-01T00:00:00.000Z",
+        "inputs": [],
+        "outputs": [
+            {
+                "name": "output_out",
+                "type": "text",
+                "nodeId": "out",
+                "field": "texts"
+            }
+        ],
+        "dataNodes": [
+            {
+                "id": "in",
+                "type": "textNode",
+                "dataType": "text",
+                "isInput": false,
+                "staticData": {
+                    "texts": ["hello"]
+                },
+                "level": 0
+            },
+            {
+                "id": "mid",
+                "type": "textNode",
+                "dataType": "text",
+                "isInput": false,
+                "level": 2
+            },
+            {
+                "id": "out",
+                "type": "textNode",
+                "dataType": "text",
+                "isInput": false,
+                "level": 4
+            }
+        ],
+        "executableNodes": [
+            {
+                "id": "a",
+                "type": "genTextNode",
+                "feature": "gen-text",
+                "pluginId": "tongflow-api-fake-a",
+                "bindings": {
+                    "text": {
+                        "kind": "handle",
+                        "sources": [
+                            {
+                                "fromNodeId": "in",
+                                "fromField": "texts"
+                            }
+                        ],
+                        "targetHandle": "in:text",
+                        "consumerShape": "scalar"
+                    }
+                },
+                "batchField": "text",
+                "outputs": [
+                    {
+                        "sourceField": "text",
+                        "nodeType": "textNode",
+                        "dataField": "texts",
+                        "expandEach": false,
+                        "downstreamDataNodeId": "mid"
+                    }
+                ],
+                "dependencies": ["in"],
+                "level": 1
+            },
+            {
+                "id": "b",
+                "type": "genTextNode",
+                "feature": "gen-text",
+                "pluginId": "tongflow-api-fake-b",
+                "bindings": {
+                    "text": {
+                        "kind": "handle",
+                        "sources": [
+                            {
+                                "fromNodeId": "a",
+                                "fromField": "text"
+                            }
+                        ],
+                        "targetHandle": "in:text",
+                        "consumerShape": "scalar"
+                    }
+                },
+                "batchField": "text",
+                "outputs": [
+                    {
+                        "sourceField": "text",
+                        "nodeType": "textNode",
+                        "dataField": "texts",
+                        "expandEach": false,
+                        "downstreamDataNodeId": "out"
+                    }
+                ],
+                "dependencies": ["mid"],
+                "level": 3
+            }
+        ],
+        "executionLevels": [["a"], ["b"]],
+        "dataNodeEdges": [
+            {
+                "source": "in",
+                "target": "a"
+            },
+            {
+                "source": "a",
+                "target": "mid"
+            },
+            {
+                "source": "mid",
+                "target": "b"
+            },
+            {
+                "source": "b",
+                "target": "out"
+            }
+        ]
+    },
+    "plugins": {
+        "tongflow-api-fake-a": [
+            {
+                "op": "format",
+                "field": "text",
+                "template": "A({text})"
+            }
+        ],
+        "tongflow-api-fake-b": [
+            {
+                "op": "format",
+                "field": "text",
+                "template": "B({text})"
+            }
+        ]
+    },
+    "expected": {
+        "status": "success",
+        "outputs": {
+            "a": {
+                "success": true,
+                "text": "A(hello)"
+            },
+            "b": {
+                "success": true,
+                "text": "B(A(hello))"
+            }
+        },
+        "outputsByName": {
+            "output_out": ["B(A(hello))"]
+        },
+        "errors": [],
+        "failures": [],
+        "events": [
+            {
+                "type": "workflow_started",
+                "totalNodes": 2,
+                "levels": 2
+            },
+            {
+                "type": "node_started",
+                "nodeId": "a",
+                "level": 1
+            },
+            {
+                "type": "node_completed",
+                "nodeId": "a"
+            },
+            {
+                "type": "node_started",
+                "nodeId": "b",
+                "level": 2
+            },
+            {
+                "type": "node_completed",
+                "nodeId": "b"
+            },
+            {
+                "type": "workflow_completed",
+                "status": "success",
+                "errors": []
+            }
+        ]
+    }
+}

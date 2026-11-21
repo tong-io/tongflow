@@ -140,9 +140,10 @@ the scanner reads its `tongflow.plugin.json` instead of Python sources:
 - **`entry`** — the plugin's ESM module, relative to the plugin directory. The file must exist
   (ship the built output, or build before installing).
 - **`slots`** — one entry per implemented slot: `nodeSlot` (a slot name from the ABI), `method`
-  (the exported handler that implements it, typed with the generated `SlotInput<S>` /
-  `SlotOutput<S>`), and optional `models` (model ids for the node's model picker, default
-  first — the same shape as `TONGFLOW_SLOT_MODELS`).
+  (the key of the handler in the entry's `export default defineEdgePlugin({ methods })`, typed
+  with the generated `SlotInput<S>` / `SlotOutput<S>` via `edgeMethod`; see
+  [edge-runtime.md](edge-runtime.md#edge-plugin-worker-protocol)), and optional `models` (model
+  ids for the node's model picker, default first — the same shape as `TONGFLOW_SLOT_MODELS`).
 - **`plugin`** / **`env`** — optional presentation metadata, as for any plugin
   ([§6.1](#61-declaring-environment-variables--tongflowpluginjson)).
 

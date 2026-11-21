@@ -1,0 +1,135 @@
+{
+    "name": "model-ref-excluded",
+    "description": "A ModelRef output carrying bytesBase64 is left as returned (not stored), so its output view is empty.",
+    "workflow": {
+        "name": "model-ref-excluded",
+        "version": "1.0",
+        "exportedAt": "2026-01-01T00:00:00.000Z",
+        "inputs": [],
+        "outputs": [
+            {
+                "name": "output_model",
+                "type": "model",
+                "nodeId": "model",
+                "field": "fileKeys"
+            }
+        ],
+        "dataNodes": [
+            {
+                "id": "img",
+                "type": "imageNode",
+                "dataType": "image",
+                "isInput": false,
+                "staticData": {
+                    "fileKeys": ["uploads/chair.png"]
+                },
+                "level": 0
+            },
+            {
+                "id": "model",
+                "type": "modelNode",
+                "dataType": "model",
+                "isInput": false,
+                "level": 2
+            }
+        ],
+        "executableNodes": [
+            {
+                "id": "m",
+                "type": "imageGenModelNode",
+                "feature": "image-gen-model",
+                "pluginId": "tongflow-api-fake-3d",
+                "bindings": {
+                    "image": {
+                        "kind": "handle",
+                        "sources": [
+                            {
+                                "fromNodeId": "img",
+                                "fromField": "fileKeys"
+                            }
+                        ],
+                        "targetHandle": "in:image",
+                        "consumerShape": "scalar"
+                    }
+                },
+                "batchField": "image",
+                "outputs": [
+                    {
+                        "sourceField": "model",
+                        "nodeType": "modelNode",
+                        "dataField": "fileKeys",
+                        "expandEach": false,
+                        "itemValuePath": "file_key",
+                        "downstreamDataNodeId": "model"
+                    }
+                ],
+                "dependencies": ["img"],
+                "level": 1
+            }
+        ],
+        "executionLevels": [["m"]],
+        "dataNodeEdges": [
+            {
+                "source": "img",
+                "target": "m"
+            },
+            {
+                "source": "m",
+                "target": "model"
+            }
+        ]
+    },
+    "assets": {
+        "uploads/chair.png": {
+            "text": "CHAIR"
+        }
+    },
+    "plugins": {
+        "tongflow-api-fake-3d": [
+            {
+                "op": "asset",
+                "field": "model",
+                "mime": "model/gltf-binary",
+                "filename": "chair.glb",
+                "content": "GLB:{image.text}"
+            }
+        ]
+    },
+    "expected": {
+        "status": "success",
+        "outputs": {
+            "m": {
+                "success": true,
+                "model": {
+                    "bytesBase64": "R0xCOkNIQUlS",
+                    "mime": "model/gltf-binary",
+                    "filename": "chair.glb"
+                }
+            }
+        },
+        "outputsByName": {},
+        "errors": [],
+        "failures": [],
+        "events": [
+            {
+                "type": "workflow_started",
+                "totalNodes": 1,
+                "levels": 1
+            },
+            {
+                "type": "node_started",
+                "nodeId": "m",
+                "level": 1
+            },
+            {
+                "type": "node_completed",
+                "nodeId": "m"
+            },
+            {
+                "type": "workflow_completed",
+                "status": "success",
+                "errors": []
+            }
+        ]
+    }
+}

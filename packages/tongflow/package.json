@@ -1,7 +1,7 @@
 {
     "name": "tongflow",
     "version": "1.0.0",
-    "description": "TongFlow workflow core: ABI, node registry, connection validation, workflow exporter, headless canvas model and agent graph tools.",
+    "description": "TongFlow workflow core: ABI, node registry, connection validation, workflow exporter, headless canvas model, agent graph tools and the browser-side workflow engine.",
     "author": "tong-io",
     "license": "AGPL-3.0-only",
     "repository": {
@@ -59,6 +59,36 @@
                 "default": "./dist/canvas-messages.cjs"
             }
         },
+        "./engine": {
+            "import": {
+                "types": "./dist/engine.d.ts",
+                "default": "./dist/engine.js"
+            },
+            "require": {
+                "types": "./dist/engine.d.cts",
+                "default": "./dist/engine.cjs"
+            }
+        },
+        "./engine/browser": {
+            "import": {
+                "types": "./dist/engine-browser.d.ts",
+                "default": "./dist/engine-browser.js"
+            },
+            "require": {
+                "types": "./dist/engine-browser.d.cts",
+                "default": "./dist/engine-browser.cjs"
+            }
+        },
+        "./engine/worker": {
+            "import": {
+                "types": "./dist/engine-worker.d.ts",
+                "default": "./dist/engine-worker.js"
+            },
+            "require": {
+                "types": "./dist/engine-worker.d.cts",
+                "default": "./dist/engine-worker.cjs"
+            }
+        },
         "./canvas.css": "./dist/canvas.css",
         "./abi": "./abi/tongflow.abi.json",
         "./package.json": "./package.json"
@@ -72,7 +102,7 @@
         "gen:abi": "tsx scripts/gen-abi-types.ts",
         "build": "tsdown && tailwindcss -i src/canvas/styles/canvas.css -o dist/canvas.css --minify",
         "test": "vitest run",
-        "typecheck": "tsc --noEmit -p tsconfig.core.json && tsc --noEmit -p tsconfig.json && tsc --noEmit -p tsconfig.react18.json"
+        "typecheck": "tsc --noEmit -p tsconfig.core.json && tsc --noEmit -p tsconfig.engine.json && tsc --noEmit -p tsconfig.json && tsc --noEmit -p tsconfig.react18.json"
     },
     "dependencies": {
         "@types/json-schema": "7.0.15",

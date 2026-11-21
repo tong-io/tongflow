@@ -31,6 +31,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   nodes: running state, progress, a model-download view and results routed
   into downstream data nodes. Hosts that set neither are unchanged. See
   [docs/edge-runtime.md](docs/edge-runtime.md#canvas-host-transport--workflow-runner).
+- **Browser workflow engine (`tongflow/engine`).** A TypeScript port of the
+  Python engine that runs an `ExecutableWorkflow` in the browser: bindings and
+  batch fan-out, `bytesBase64` Asset materialization, output views and batch
+  merging, Python's event names, cancellation through `AbortSignal`, and
+  parallel nodes within a level. Node execution is injected: a Web Worker edge
+  executor for `tongflow-edge-*` plugins (`tongflow/engine/browser`, with an
+  OPFS asset store), an in-process one for tests, and a composite executor
+  that sends Python plugins to a remote executor. Plugin authors use
+  `defineEdgePlugin` from `tongflow/engine/worker`. A conformance suite
+  (`packages/tongflow/conformance/`) runs the same fixtures through both
+  engines. See [docs/edge-runtime.md](docs/edge-runtime.md).
+
+### Fixed
+
+- **Python engine: advanced params reach the plugin again.** The batch loop in
+  `run_workflow` reused the `params` name, so a node's `TONGFLOW_SLOT_PARAMS`
+  values were replaced by its business inputs under `_params`.
 
 ## [1.0.0] - 2026-11-12
 

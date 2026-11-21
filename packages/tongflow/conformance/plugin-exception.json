@@ -1,0 +1,123 @@
+{
+    "name": "plugin-exception",
+    "description": "A plugin that raises fails its node with the exception message.",
+    "workflow": {
+        "name": "plugin-exception",
+        "version": "1.0",
+        "exportedAt": "2026-01-01T00:00:00.000Z",
+        "inputs": [],
+        "outputs": [
+            {
+                "name": "output_out",
+                "type": "text",
+                "nodeId": "out",
+                "field": "texts"
+            }
+        ],
+        "dataNodes": [
+            {
+                "id": "in",
+                "type": "textNode",
+                "dataType": "text",
+                "isInput": false,
+                "staticData": {
+                    "texts": ["x"]
+                },
+                "level": 0
+            },
+            {
+                "id": "out",
+                "type": "textNode",
+                "dataType": "text",
+                "isInput": false,
+                "level": 2
+            }
+        ],
+        "executableNodes": [
+            {
+                "id": "g",
+                "type": "genTextNode",
+                "feature": "gen-text",
+                "pluginId": "tongflow-api-fake-crash",
+                "bindings": {
+                    "text": {
+                        "kind": "handle",
+                        "sources": [
+                            {
+                                "fromNodeId": "in",
+                                "fromField": "texts"
+                            }
+                        ],
+                        "targetHandle": "in:text",
+                        "consumerShape": "scalar"
+                    }
+                },
+                "batchField": "text",
+                "outputs": [
+                    {
+                        "sourceField": "text",
+                        "nodeType": "textNode",
+                        "dataField": "texts",
+                        "expandEach": false,
+                        "downstreamDataNodeId": "out"
+                    }
+                ],
+                "dependencies": ["in"],
+                "level": 1
+            }
+        ],
+        "executionLevels": [["g"]],
+        "dataNodeEdges": [
+            {
+                "source": "in",
+                "target": "g"
+            },
+            {
+                "source": "g",
+                "target": "out"
+            }
+        ]
+    },
+    "plugins": {
+        "tongflow-api-fake-crash": [
+            {
+                "op": "raise",
+                "error": "kaput"
+            }
+        ]
+    },
+    "expected": {
+        "status": "failed",
+        "outputs": {},
+        "outputsByName": {},
+        "errors": ["Node g failed: kaput"],
+        "failures": [
+            {
+                "nodeId": "g",
+                "summary": "kaput"
+            }
+        ],
+        "events": [
+            {
+                "type": "workflow_started",
+                "totalNodes": 1,
+                "levels": 1
+            },
+            {
+                "type": "node_started",
+                "nodeId": "g",
+                "level": 1
+            },
+            {
+                "type": "node_failed",
+                "nodeId": "g",
+                "error": "kaput"
+            },
+            {
+                "type": "workflow_failed",
+                "status": "failed",
+                "errors": ["Node g failed: kaput"]
+            }
+        ]
+    }
+}

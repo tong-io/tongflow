@@ -364,7 +364,9 @@ def run_workflow(
                 plugin_dir = plugins_dir / cfg["localSubdir"]
                 total = len(param_sets)
                 item_results: list[dict[str, Any]] = []
-                for item_idx, params in enumerate(param_sets):
+                # `item_params` is one fan-out's business input; `params` stays the
+                # node's advanced params (the `_params` reserved key).
+                for item_idx, item_params in enumerate(param_sets):
                     if total > 1:
                         emit(
                             {
@@ -374,7 +376,7 @@ def run_workflow(
                             }
                         )
                     business_input = materialize_asset_inputs(
-                        slot, params, abi, search_dirs, store
+                        slot, item_params, abi, search_dirs, store
                     )
                     if invoker is not None:
                         # Host-owned invoker has a fixed signature; hand it the

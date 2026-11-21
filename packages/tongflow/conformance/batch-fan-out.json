@@ -1,0 +1,144 @@
+{
+    "name": "batch-fan-out",
+    "description": "A text node with three items fans a batchOn field out into three calls; outputs merge in batch order.",
+    "workflow": {
+        "name": "batch-fan-out",
+        "version": "1.0",
+        "exportedAt": "2026-01-01T00:00:00.000Z",
+        "inputs": [],
+        "outputs": [
+            {
+                "name": "output_out",
+                "type": "text",
+                "nodeId": "out",
+                "field": "texts"
+            }
+        ],
+        "dataNodes": [
+            {
+                "id": "in",
+                "type": "textNode",
+                "dataType": "text",
+                "isInput": false,
+                "staticData": {
+                    "texts": ["alpha", "beta", "gamma"]
+                },
+                "level": 0
+            },
+            {
+                "id": "out",
+                "type": "textNode",
+                "dataType": "text",
+                "isInput": false,
+                "level": 2
+            }
+        ],
+        "executableNodes": [
+            {
+                "id": "g",
+                "type": "genTextNode",
+                "feature": "gen-text",
+                "pluginId": "tongflow-api-fake-upper",
+                "bindings": {
+                    "text": {
+                        "kind": "handle",
+                        "sources": [
+                            {
+                                "fromNodeId": "in",
+                                "fromField": "texts"
+                            }
+                        ],
+                        "targetHandle": "in:text",
+                        "consumerShape": "scalar"
+                    },
+                    "userPrompt": {
+                        "kind": "config",
+                        "value": "shout"
+                    }
+                },
+                "batchField": "text",
+                "outputs": [
+                    {
+                        "sourceField": "text",
+                        "nodeType": "textNode",
+                        "dataField": "texts",
+                        "expandEach": false,
+                        "downstreamDataNodeId": "out"
+                    }
+                ],
+                "dependencies": ["in"],
+                "level": 1
+            }
+        ],
+        "executionLevels": [["g"]],
+        "dataNodeEdges": [
+            {
+                "source": "in",
+                "target": "g"
+            },
+            {
+                "source": "g",
+                "target": "out"
+            }
+        ]
+    },
+    "plugins": {
+        "tongflow-api-fake-upper": [
+            {
+                "op": "format",
+                "field": "text",
+                "template": "{userPrompt}:{text}"
+            }
+        ]
+    },
+    "expected": {
+        "status": "success",
+        "outputs": {
+            "g": {
+                "success": true,
+                "text": ["shout:alpha", "shout:beta", "shout:gamma"]
+            }
+        },
+        "outputsByName": {
+            "output_out": ["shout:alpha", "shout:beta", "shout:gamma"]
+        },
+        "errors": [],
+        "failures": [],
+        "events": [
+            {
+                "type": "workflow_started",
+                "totalNodes": 1,
+                "levels": 1
+            },
+            {
+                "type": "node_started",
+                "nodeId": "g",
+                "level": 1
+            },
+            {
+                "type": "plugin_progress",
+                "nodeId": "g",
+                "message": "batch 1/3"
+            },
+            {
+                "type": "plugin_progress",
+                "nodeId": "g",
+                "message": "batch 2/3"
+            },
+            {
+                "type": "plugin_progress",
+                "nodeId": "g",
+                "message": "batch 3/3"
+            },
+            {
+                "type": "node_completed",
+                "nodeId": "g"
+            },
+            {
+                "type": "workflow_completed",
+                "status": "success",
+                "errors": []
+            }
+        ]
+    }
+}
