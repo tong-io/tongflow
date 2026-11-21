@@ -16,6 +16,12 @@ import { pluginsDir, resourcesDir } from "@/lib/runtime/paths.server";
 export interface OfficialPluginManifest {
     org: string;
     plugins: string[];
+    /**
+     * Plugin id → runtime, for the plugins that do not run in Python
+     * (absent = `python`). `browser` plugins are run by the browser edge
+     * runtime; they install like any other plugin.
+     */
+    runtimes?: Record<string, "browser">;
 }
 
 export interface OfficialPluginInfo {
@@ -26,6 +32,8 @@ export interface OfficialPluginInfo {
     description?: string;
     /** App-root path or URL to the plugin icon (manifest, else public convention). */
     icon?: string;
+    /** Set for plugins the browser edge runtime runs (`tongflow-edge-*`). */
+    runtime?: "browser";
 }
 
 function manifestPath(): string {
@@ -81,12 +89,16 @@ export function listOfficialPlugins(): {
             // Manifest icon wins; otherwise fall back to the public convention
             // so even not-yet-installed plugins can show an icon.
             const icon = meta?.icon ?? publicIconPath(id) ?? undefined;
+            const browser =
+                manifest.runtimes?.[id] === "browser" ||
+                id.startsWith("tongflow-edge-");
             return {
                 id,
                 installed: isPluginInstalled(id),
                 name: meta?.name,
                 description: meta?.description,
                 icon,
+                ...(browser ? { runtime: "browser" as const } : {}),
             };
         }),
     };

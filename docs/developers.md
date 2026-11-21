@@ -135,7 +135,7 @@ Each node below is a capability from the ABI. People meet three actions on the c
 #### Text
 
 - ✅ **Generate / rewrite**: create or edit copy from a prompt.
-- ⬜ **Language detection**: ISO 639-1 code of a text's language.
+- ✅ **Language detection**: ISO 639-1 code of a text's language.
 
 #### Image
 
@@ -147,11 +147,11 @@ Each node below is a capability from the ABI. People meet three actions on the c
 - ✅ **Body-part segmentation**: 29-class human parsing overlay.
 - ✅ **Surface normals**: per-pixel normal map — human-centric or full scene.
 - ✅ **Matting**: cut the human or salient foreground out as a transparent PNG.
-- ⬜ **Orientation correction**: rotate a scanned or photographed page upright.
-- ⬜ **Image OCR**: recognize the text in an image.
-- ⬜ **Table recognition**: a table image → HTML table structure.
-- ⬜ **Object detection**: classes, boxes and scores as JSON.
-- ⬜ **Image embedding**: an image → vector file for search.
+- ✅ **Orientation correction**: rotate a scanned or photographed page upright.
+- ✅ **Image OCR**: recognize the text in an image.
+- ✅ **Table recognition**: a table image → HTML table structure.
+- ✅ **Object detection**: classes, boxes and scores as JSON.
+- ✅ **Image embedding**: an image → vector file for search.
 
 #### Video
 
@@ -183,8 +183,8 @@ Each node below is a capability from the ABI. People meet three actions on the c
 - ✅ **Voice / timbre replacement**: re-voice speech or singing in the timbre of a reference clip.
 - ✅ **Multi-track / vocal-accompaniment separation**: isolate vocals, drums, bass, guitar, and 8 more stems.
 - ✅ **Open-vocabulary sound separation**: describe any sound in words ("dog barking") and split the audio into that sound and everything else.
-- ⬜ **Who spoke when**: speaker turns (speaker, start, end) as JSON.
-- ⬜ **Audio event tagging**: sound-event labels and scores as JSON.
+- ✅ **Who spoke when**: speaker turns (speaker, start, end) as JSON.
+- ✅ **Audio event tagging**: sound-event labels and scores as JSON.
 
 #### 3D, documents & links
 
@@ -203,9 +203,9 @@ Each node below is a capability from the ABI. People meet three actions on the c
 - ✅ **Combine text**: merge multiple text nodes into one.
 - ✅ **Concatenate clips**: join multiple videos end to end.
 - ✅ **Mux audio + video**: merge into one file.
-- ⬜ **Text chunking**: merge connected texts and cut them into embedding-sized chunks.
-- ⬜ **Text embedding**: chunks → one vector file (float32, header with dimension and count).
-- ⬜ **Knowledge base write**: chunks + their vectors + source file name → stored by the host, returns a summary.
+- ✅ **Text chunking**: merge connected texts and cut them into embedding-sized chunks.
+- ✅ **Text embedding**: chunks → one vector file (float32, header with dimension and count).
+- ✅ **Knowledge base write**: chunks + their vectors + source file name → stored by the host, returns a summary.
 
 ### Split & batch
 
@@ -213,9 +213,9 @@ Each node below is a capability from the ABI. People meet three actions on the c
 - ✅ **Split video & audio**: demux a video into separate video and audio tracks.
 - ✅ **Extract audio track**: pull audio into its own asset.
 - ✅ **Split long text**: break a long passage into chunks.
-- ⬜ **Document → page images**: render each page of a document as an image.
-- ⬜ **Layout analysis**: a page image → region list (JSON) plus one cropped image per region.
-- ⬜ **Speech segmentation (VAD)**: cut audio into one clip per speech segment.
+- ✅ **Document → page images**: render each page of a document as an image.
+- ✅ **Layout analysis**: a page image → region list (JSON) plus one cropped image per region.
+- ✅ **Speech segmentation (VAD)**: cut audio into one clip per speech segment.
 - ✅ **Merge / tidy text blocks**: combine segments (use the auto-merge option).
 - ✅ **Filter or drop clips**: drop unwanted clips by rule or selection.
 - ✅ **Arrange & batch groups**: group and arrange text/clip batches for downstream processing.
@@ -291,6 +291,12 @@ Aggregators — one key, many third-party models across labs:
 - [tongflow-modal-unlimited-ocr](https://github.com/tong-io/tongflow-modal-unlimited-ocr) — Unlimited OCR 2 unlimited-horizon document / hundred-page PDF → text
 - [tongflow-modal-crawl4ai](https://github.com/tong-io/tongflow-modal-crawl4ai) — Crawl4AI URL / link → text
 - [tongflow-modal-scrapling](https://github.com/tong-io/tongflow-modal-scrapling) — Scrapling stealth-browser URL / link → text
+
+### Browser plugins
+
+Run inside the user's browser (a Web Worker per plugin) through the browser edge runtime: no key, no server compute, files stay on the device. Studio and the app load them same-origin and add **Run workflow** to the canvas once one is installed; see [edge-runtime.md](edge-runtime.md#hosts).
+
+- [tongflow-edge-essentials](https://github.com/tong-io/tongflow-edge-essentials) — on-device document parsing (PDF, Office, e-mail, HTML, EPUB, legacy formats), PDF page rendering, audio / first-frame extraction, language detection, text chunking and embedding for a knowledge base, OCR (PP-OCRv6), page orientation, layout, tables, shot splitting, object detection, transcription, speech segmentation, speaker turns and audio tagging; optional WebGPU nodes for image understanding, GLM-OCR, image embeddings and key-point extraction (large models, downloaded once after the user agrees)
 
 ## Custom plugins
 

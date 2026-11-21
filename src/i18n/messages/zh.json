@@ -20,7 +20,9 @@
         "uninstallConfirmTitle": "卸载插件？",
         "uninstallConfirmDescription": "将从磁盘删除 {id} 文件夹，之后可以随时重新安装。",
         "installedCommunity": "已安装的社区插件",
-        "cancel": "取消"
+        "cancel": "取消",
+        "runsInBrowser": "在浏览器中运行",
+        "edgeDownloadConfirm": "节点 {slot} 需要 {label}。模型只下载一次,保存在本浏览器里,在本机运行。现在下载吗?"
     },
     "Settings": {
         "title": "设置",

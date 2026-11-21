@@ -20,7 +20,9 @@
         "uninstallConfirmTitle": "Uninstall plugin?",
         "uninstallConfirmDescription": "This removes the {id} folder from disk. You can reinstall it anytime.",
         "installedCommunity": "Installed community plugins",
-        "cancel": "Cancel"
+        "cancel": "Cancel",
+        "runsInBrowser": "Runs in the browser",
+        "edgeDownloadConfirm": "The node {slot} needs {label}. It is downloaded once into this browser and runs on this device. Download it now?"
     },
     "Settings": {
         "title": "Settings",

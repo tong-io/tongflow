@@ -20,7 +20,9 @@
         "uninstallConfirmTitle": "플러그인을 제거하시겠습니까?",
         "uninstallConfirmDescription": "{id} 폴더를 디스크에서 삭제합니다. 나중에 언제든지 다시 설치할 수 있습니다.",
         "installedCommunity": "설치된 커뮤니티 플러그인",
-        "cancel": "취소"
+        "cancel": "취소",
+        "runsInBrowser": "브라우저에서 실행",
+        "edgeDownloadConfirm": "노드 {slot}에 {label}이(가) 필요합니다. 이 브라우저에 한 번만 다운로드되어 이 기기에서 실행됩니다. 지금 다운로드할까요?"
     },
     "Settings": {
         "title": "설정",
