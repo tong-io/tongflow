@@ -20,7 +20,8 @@ and so on. The ABI describes only the contract — text in, image out, which fie
 required — and says **nothing** about *who* fulfills it or *which model* does the work.
 
 **A plugin is an implementation of one or more node slots.** It is a small Python package
-that picks slots from the ABI and supplies the *how*.
+that picks slots from the ABI and supplies the *how* — or, for the browser edge runtime, a
+TypeScript package (see [§3.1](#31-edge-browser-plugins--tongflow-edge-)).
 
 Because capability (ABI) and implementation (plugin) are cleanly separated:
 
@@ -73,22 +74,34 @@ The exact scan rules and the annotations a handler must carry are in
 
 ## 3. Directory & naming conventions
 
-A plugin is a directory under `plugins/`; the directory name **is** the plugin id. **There is
-no registration manifest** — handlers are never registered or listed anywhere; the scanner
-derives everything from the SDK decorator + type annotations in your Python (the slot
-bindings — see [§5](#5-what-registers-a-handler)). A plugin *may* additionally ship an optional
-`tongflow.plugin.json` that declares the env vars it reads, purely so the Settings dialog can
-render them as a pre-filled card (see [§6.1](#61-declaring-environment-variables--tongflowpluginjson));
-it plays no part in discovery or execution.
+A plugin is a directory under `plugins/`; the directory name **is** the plugin id. For a Python
+plugin **there is no registration manifest** — handlers are never registered or listed anywhere;
+the scanner derives everything from the SDK decorator + type annotations in your Python (the slot
+bindings — see [§5](#5-what-registers-a-handler)). The one exception is an edge (browser) plugin,
+which has no Python to scan and declares its slots in `tongflow.plugin.json`
+(see [§3.1](#31-edge-browser-plugins--tongflow-edge-)). A Python plugin *may* additionally ship an
+optional `tongflow.plugin.json` that declares the env vars it reads, purely so the Settings dialog
+can render them as a pre-filled card (see [§6.1](#61-declaring-environment-variables--tongflowpluginjson));
+for a Python plugin it plays no part in discovery or execution.
 
 The naming convention the scanner enforces:
 
 - The directory name must be **all lowercase**.
-- It must begin with `tongflow-api-…`, `tongflow-modal-…`, or `tongflow-router-…` (aggregator
-  plugins routing one key to many third-party models). **The prefix no longer selects an
-  execution backend** — every plugin runs the same way (see [§5](#5-what-registers-a-handler)).
-  It is now just a **label** shown in the node's plugin picker, a hint about where the work
-  tends to run (a local/API adapter vs. hosted compute).
+- It must begin with one of these prefixes:
+
+  | Prefix | Runtime | What it is |
+  |---|---|---|
+  | `tongflow-api-…` | Python | An adapter calling a provider's API with the user's key. |
+  | `tongflow-router-…` | Python | An aggregator routing one key to many third-party models. |
+  | `tongflow-modal-…` | Python | Hosted GPU/CPU compute (a `@deploy` class, see [§5](#5-what-registers-a-handler)). |
+  | `tongflow-local-…` | Python | On-device compute on the user's machine (e.g. a native Metal binary): an `entry.py` plugin with no key and no remote calls. |
+  | `tongflow-edge-…` | Browser | A TypeScript plugin the browser edge runtime runs; no `entry.py` (see [§3.1](#31-edge-browser-plugins--tongflow-edge-)). |
+
+  For the four Python prefixes **the prefix does not select an execution backend** — every
+  Python plugin runs the same way (see [§5](#5-what-registers-a-handler)); the prefix is a
+  **label** shown in the node's plugin picker, a hint about where the work tends to run.
+  `tongflow-edge-` is different: it switches discovery to the edge manifest and marks the
+  plugin `runtime: "browser"` in the registry.
 - It must **not** encode hardware (`gpu` / `cpu`) — that's the plugin's own concern, not part
   of the id.
 
@@ -103,6 +116,52 @@ One entry point per plugin, by convention:
   `modal`.
 
 Beyond that, your code can be laid out however you like.
+
+### 3.1 Edge (browser) plugins — `tongflow-edge-*`
+
+An edge plugin implements ABI slots in TypeScript for the browser edge runtime (see
+[edge-runtime.md](edge-runtime.md)): the workflow is scheduled in the browser and the user's
+files never leave it. It is a directory like any other plugin, but it has **no `entry.py`** —
+the scanner reads its `tongflow.plugin.json` instead of Python sources:
+
+```json
+{
+    "plugin": { "name": "Edge essentials", "description": "On-device document and audio nodes" },
+    "runtime": "browser",
+    "entry": "dist/index.js",
+    "slots": [
+        { "nodeSlot": "ocr-image", "method": "ocrImage", "models": ["pp-ocrv6", "glm-ocr"] },
+        { "nodeSlot": "render-pages", "method": "renderPages" }
+    ]
+}
+```
+
+- **`runtime`** — must be `"browser"`.
+- **`entry`** — the plugin's ESM module, relative to the plugin directory. The file must exist
+  (ship the built output, or build before installing).
+- **`slots`** — one entry per implemented slot: `nodeSlot` (a slot name from the ABI), `method`
+  (the exported handler that implements it, typed with the generated `SlotInput<S>` /
+  `SlotOutput<S>`), and optional `models` (model ids for the node's model picker, default
+  first — the same shape as `TONGFLOW_SLOT_MODELS`).
+- **`plugin`** / **`env`** — optional presentation metadata, as for any plugin
+  ([§6.1](#61-declaring-environment-variables--tongflowpluginjson)).
+
+The scanner turns that into an ordinary registry entry — `nodePluginMap[slot]` lists the
+plugin and `plugins[id]` carries `methodsByNodeSlot`, `entryFile` (the ESM path) and
+`runtime: "browser"`. Python plugins carry `runtime: "python"`; registries without the field
+read as `python`. So the canvas plugin picker, `validate_workflow`, the Studio node catalog and
+the Next app list browser plugins next to Python ones. Studio treats them as free (`local`)
+when it asks before paid runs.
+
+The Python engine never runs a browser plugin and never clones a missing `tongflow-edge-*`
+plugin: a node bound to one fails with *"… requires the browser edge runtime"*, and so does the
+Next app's single-node runner.
+
+Scan errors are reported like any other (`path:line: reason; fix: hint`) and skip the bad part:
+a missing or invalid manifest, a `runtime` other than `"browser"`, a missing `entry` or entry
+file, an empty `slots` list, an unknown `nodeSlot`, a slot listed twice, or a slot without
+`method` (a malformed `models` list is reported and dropped). A plugin with no valid slot left
+is not registered.
 
 ## 4. The SDK contract
 
@@ -479,6 +538,10 @@ Common scan errors and fixes:
 - *"pluginId must not encode gpu/cpu"* → drop `gpu`/`cpu` from the name.
 - An unknown slot in `@node_slot(...)` → the string isn't in the ABI; use a `NodeSlots.*`
   constant.
+- *"unknown nodeSlot '…' (not in tongflow.abi.json)"* in a `tongflow.plugin.json` → an edge
+  plugin names a slot the ABI doesn't have.
+- *"missing entry"* / *"entry file '…' not found"* → an edge plugin's manifest lacks `entry`,
+  or the built module isn't there yet.
 
 ---
 

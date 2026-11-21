@@ -135,6 +135,7 @@ Each node below is a capability from the ABI. People meet three actions on the c
 #### Text
 
 - ✅ **Generate / rewrite**: create or edit copy from a prompt.
+- ⬜ **Language detection**: ISO 639-1 code of a text's language.
 
 #### Image
 
@@ -146,6 +147,11 @@ Each node below is a capability from the ABI. People meet three actions on the c
 - ✅ **Body-part segmentation**: 29-class human parsing overlay.
 - ✅ **Surface normals**: per-pixel normal map — human-centric or full scene.
 - ✅ **Matting**: cut the human or salient foreground out as a transparent PNG.
+- ⬜ **Orientation correction**: rotate a scanned or photographed page upright.
+- ⬜ **Image OCR**: recognize the text in an image.
+- ⬜ **Table recognition**: a table image → HTML table structure.
+- ⬜ **Object detection**: classes, boxes and scores as JSON.
+- ⬜ **Image embedding**: an image → vector file for search.
 
 #### Video
 
@@ -177,6 +183,8 @@ Each node below is a capability from the ABI. People meet three actions on the c
 - ✅ **Voice / timbre replacement**: re-voice speech or singing in the timbre of a reference clip.
 - ✅ **Multi-track / vocal-accompaniment separation**: isolate vocals, drums, bass, guitar, and 8 more stems.
 - ✅ **Open-vocabulary sound separation**: describe any sound in words ("dog barking") and split the audio into that sound and everything else.
+- ⬜ **Who spoke when**: speaker turns (speaker, start, end) as JSON.
+- ⬜ **Audio event tagging**: sound-event labels and scores as JSON.
 
 #### 3D, documents & links
 
@@ -195,6 +203,9 @@ Each node below is a capability from the ABI. People meet three actions on the c
 - ✅ **Combine text**: merge multiple text nodes into one.
 - ✅ **Concatenate clips**: join multiple videos end to end.
 - ✅ **Mux audio + video**: merge into one file.
+- ⬜ **Text chunking**: merge connected texts and cut them into embedding-sized chunks.
+- ⬜ **Text embedding**: chunks → one vector file (float32, header with dimension and count).
+- ⬜ **Knowledge base write**: chunks + their vectors + source file name → stored by the host, returns a summary.
 
 ### Split & batch
 
@@ -202,6 +213,9 @@ Each node below is a capability from the ABI. People meet three actions on the c
 - ✅ **Split video & audio**: demux a video into separate video and audio tracks.
 - ✅ **Extract audio track**: pull audio into its own asset.
 - ✅ **Split long text**: break a long passage into chunks.
+- ⬜ **Document → page images**: render each page of a document as an image.
+- ⬜ **Layout analysis**: a page image → region list (JSON) plus one cropped image per region.
+- ⬜ **Speech segmentation (VAD)**: cut audio into one clip per speech segment.
 - ✅ **Merge / tidy text blocks**: combine segments (use the auto-merge option).
 - ✅ **Filter or drop clips**: drop unwanted clips by rule or selection.
 - ✅ **Arrange & batch groups**: group and arrange text/clip batches for downstream processing.
