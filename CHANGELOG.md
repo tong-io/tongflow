@@ -42,6 +42,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `defineEdgePlugin` from `tongflow/engine/worker`. A conformance suite
   (`packages/tongflow/conformance/`) runs the same fixtures through both
   engines. See [docs/edge-runtime.md](docs/edge-runtime.md).
+- **Mixed graphs: the HTTP remote executor.** `createHttpRemoteExecutor({
+  baseUrl, fetch?, headers?, confirm? })` in `tongflow/engine` runs a
+  workflow's `runtime: python` nodes on a TongFlow backend, so the browser
+  engine runs edge nodes locally and server nodes remotely in one graph. Each
+  call posts the materialized prompt to a new `POST /api/engine/invoke`
+  endpoint, reads progress and the raw output (assets as `bytesBase64`, kept
+  in the browser store) from its SSE stream, and posts
+  `/api/engine/invoke/stop` on abort. Studio (`/tongflow/p/:pid/api/engine/…`,
+  inline-output runs that write nothing to the project) and the Next app
+  (`executePlugin`, nothing written to the tasks table) both serve it behind
+  their existing auth. Studio's billing checkpoint applies: a paid plugin is
+  refused with `needs_confirmation` until the user agrees. Browser plugins are
+  refused with 400. See
+  [docs/edge-runtime.md](docs/edge-runtime.md#mixed-graphs--remote-executor).
 
 ### Fixed
 
