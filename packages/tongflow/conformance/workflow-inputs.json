@@ -1,0 +1,233 @@
+{
+    "name": "workflow-inputs",
+    "description": "Start data nodes without static data become workflow inputs; runtime inputs (texts and a data: URL) seed them.",
+    "workflow": {
+        "name": "workflow-inputs",
+        "version": "1.0",
+        "exportedAt": "2026-01-01T00:00:00.000Z",
+        "inputs": [
+            {
+                "name": "prompt",
+                "type": "text[]",
+                "description": "Input data for textNode",
+                "required": true,
+                "nodeId": "prompt"
+            },
+            {
+                "name": "photo",
+                "type": "file[]",
+                "description": "Input data for imageNode",
+                "required": true,
+                "nodeId": "photo"
+            }
+        ],
+        "outputs": [
+            {
+                "name": "output_ocr",
+                "type": "text",
+                "nodeId": "ocr",
+                "field": "texts"
+            },
+            {
+                "name": "output_out",
+                "type": "text",
+                "nodeId": "out",
+                "field": "texts"
+            }
+        ],
+        "dataNodes": [
+            {
+                "id": "prompt",
+                "type": "textNode",
+                "dataType": "text",
+                "isInput": true,
+                "inputName": "prompt",
+                "level": 0
+            },
+            {
+                "id": "photo",
+                "type": "imageNode",
+                "dataType": "image",
+                "isInput": true,
+                "inputName": "photo",
+                "level": 0
+            },
+            {
+                "id": "out",
+                "type": "textNode",
+                "dataType": "text",
+                "isInput": false,
+                "level": 2
+            },
+            {
+                "id": "ocr",
+                "type": "textNode",
+                "dataType": "text",
+                "isInput": false,
+                "level": 2
+            }
+        ],
+        "executableNodes": [
+            {
+                "id": "g",
+                "type": "genTextNode",
+                "feature": "gen-text",
+                "pluginId": "tongflow-api-fake-gen",
+                "bindings": {
+                    "text": {
+                        "kind": "handle",
+                        "sources": [
+                            {
+                                "fromNodeId": "prompt",
+                                "fromField": "texts"
+                            }
+                        ],
+                        "targetHandle": "in:text",
+                        "consumerShape": "scalar"
+                    }
+                },
+                "batchField": "text",
+                "outputs": [
+                    {
+                        "sourceField": "text",
+                        "nodeType": "textNode",
+                        "dataField": "texts",
+                        "expandEach": false,
+                        "downstreamDataNodeId": "out"
+                    }
+                ],
+                "dependencies": ["prompt"],
+                "level": 1
+            },
+            {
+                "id": "o",
+                "type": "ocrImageNode",
+                "feature": "ocr-image",
+                "pluginId": "tongflow-api-fake-ocr",
+                "bindings": {
+                    "image": {
+                        "kind": "handle",
+                        "sources": [
+                            {
+                                "fromNodeId": "photo",
+                                "fromField": "fileKeys"
+                            }
+                        ],
+                        "targetHandle": "in:image",
+                        "consumerShape": "scalar"
+                    }
+                },
+                "batchField": "image",
+                "outputs": [
+                    {
+                        "sourceField": "text",
+                        "nodeType": "textNode",
+                        "dataField": "texts",
+                        "expandEach": false,
+                        "downstreamDataNodeId": "ocr"
+                    }
+                ],
+                "dependencies": ["photo"],
+                "level": 1
+            }
+        ],
+        "executionLevels": [["g", "o"]],
+        "dataNodeEdges": [
+            {
+                "source": "photo",
+                "target": "o"
+            },
+            {
+                "source": "o",
+                "target": "ocr"
+            },
+            {
+                "source": "prompt",
+                "target": "g"
+            },
+            {
+                "source": "g",
+                "target": "out"
+            }
+        ]
+    },
+    "inputs": {
+        "prompt": ["first", "second"],
+        "photo": ["data:image/png;base64,SU1HMQ=="]
+    },
+    "plugins": {
+        "tongflow-api-fake-ocr": [
+            {
+                "op": "format",
+                "field": "text",
+                "template": "{image.text}|{image.mime}|{image.filename}"
+            }
+        ],
+        "tongflow-api-fake-gen": [
+            {
+                "op": "format",
+                "field": "text",
+                "template": "gen:{text}"
+            }
+        ]
+    },
+    "expected": {
+        "status": "success",
+        "outputs": {
+            "g": {
+                "success": true,
+                "text": ["gen:first", "gen:second"]
+            },
+            "o": {
+                "success": true,
+                "text": "IMG1|image/png|"
+            }
+        },
+        "outputsByName": {
+            "output_ocr": ["IMG1|image/png|"],
+            "output_out": ["gen:first", "gen:second"]
+        },
+        "errors": [],
+        "failures": [],
+        "events": [
+            {
+                "type": "workflow_started",
+                "totalNodes": 2,
+                "levels": 1
+            },
+            {
+                "type": "node_started",
+                "nodeId": "g",
+                "level": 1
+            },
+            {
+                "type": "plugin_progress",
+                "nodeId": "g",
+                "message": "batch 1/2"
+            },
+            {
+                "type": "plugin_progress",
+                "nodeId": "g",
+                "message": "batch 2/2"
+            },
+            {
+                "type": "node_completed",
+                "nodeId": "g"
+            },
+            {
+                "type": "node_started",
+                "nodeId": "o",
+                "level": 1
+            },
+            {
+                "type": "node_completed",
+                "nodeId": "o"
+            },
+            {
+                "type": "workflow_completed",
+                "status": "success",
+                "errors": []
+            }
+        ]
+    }
+}

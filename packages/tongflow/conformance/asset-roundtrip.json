@@ -1,0 +1,208 @@
+{
+    "name": "asset-roundtrip",
+    "description": "An uploaded image is materialized as an Asset, the bytesBase64 output is stored and re-materialized downstream.",
+    "workflow": {
+        "name": "asset-roundtrip",
+        "version": "1.0",
+        "exportedAt": "2026-01-01T00:00:00.000Z",
+        "inputs": [],
+        "outputs": [
+            {
+                "name": "output_out",
+                "type": "image",
+                "nodeId": "out",
+                "field": "fileKeys"
+            }
+        ],
+        "dataNodes": [
+            {
+                "id": "photo",
+                "type": "imageNode",
+                "dataType": "image",
+                "isInput": false,
+                "staticData": {
+                    "fileKeys": ["uploads/photo.png"]
+                },
+                "level": 0
+            },
+            {
+                "id": "mid",
+                "type": "imageNode",
+                "dataType": "image",
+                "isInput": false,
+                "level": 2
+            },
+            {
+                "id": "out",
+                "type": "imageNode",
+                "dataType": "image",
+                "isInput": false,
+                "level": 4
+            }
+        ],
+        "executableNodes": [
+            {
+                "id": "r1",
+                "type": "imageOrientNode",
+                "feature": "image-orient",
+                "pluginId": "tongflow-api-fake-orient",
+                "bindings": {
+                    "image": {
+                        "kind": "handle",
+                        "sources": [
+                            {
+                                "fromNodeId": "photo",
+                                "fromField": "fileKeys"
+                            }
+                        ],
+                        "targetHandle": "in:image",
+                        "consumerShape": "scalar"
+                    }
+                },
+                "batchField": "image",
+                "outputs": [
+                    {
+                        "sourceField": "image",
+                        "nodeType": "imageNode",
+                        "dataField": "fileKeys",
+                        "expandEach": false,
+                        "itemValuePath": "file_key",
+                        "downstreamDataNodeId": "mid"
+                    }
+                ],
+                "dependencies": ["photo"],
+                "level": 1
+            },
+            {
+                "id": "r2",
+                "type": "imageOrientNode",
+                "feature": "image-orient",
+                "pluginId": "tongflow-api-fake-again",
+                "bindings": {
+                    "image": {
+                        "kind": "handle",
+                        "sources": [
+                            {
+                                "fromNodeId": "r1",
+                                "fromField": "image"
+                            }
+                        ],
+                        "targetHandle": "in:image",
+                        "consumerShape": "scalar"
+                    }
+                },
+                "batchField": "image",
+                "outputs": [
+                    {
+                        "sourceField": "image",
+                        "nodeType": "imageNode",
+                        "dataField": "fileKeys",
+                        "expandEach": false,
+                        "itemValuePath": "file_key",
+                        "downstreamDataNodeId": "out"
+                    }
+                ],
+                "dependencies": ["mid"],
+                "level": 3
+            }
+        ],
+        "executionLevels": [["r1"], ["r2"]],
+        "dataNodeEdges": [
+            {
+                "source": "photo",
+                "target": "r1"
+            },
+            {
+                "source": "r1",
+                "target": "mid"
+            },
+            {
+                "source": "mid",
+                "target": "r2"
+            },
+            {
+                "source": "r2",
+                "target": "out"
+            }
+        ]
+    },
+    "assets": {
+        "uploads/photo.png": {
+            "text": "PNGDATA"
+        }
+    },
+    "plugins": {
+        "tongflow-api-fake-orient": [
+            {
+                "op": "asset",
+                "field": "image",
+                "mime": "image/jpeg",
+                "filename": "rot-{image.filename}",
+                "content": "rotated[{image.mime}]:{image.text}"
+            }
+        ],
+        "tongflow-api-fake-again": [
+            {
+                "op": "asset",
+                "field": "image",
+                "filename": "again.bin",
+                "content": "again[{image.mime}]:{image.text}"
+            }
+        ]
+    },
+    "expected": {
+        "status": "success",
+        "outputs": {
+            "r1": {
+                "success": true,
+                "image": {
+                    "bytesBase64": "cm90YXRlZFtpbWFnZS9wbmddOlBOR0RBVEE=",
+                    "mime": "image/jpeg",
+                    "filename": "rot-photo.png"
+                }
+            },
+            "r2": {
+                "success": true,
+                "image": {
+                    "bytesBase64": "YWdhaW5bXTpyb3RhdGVkW2ltYWdlL3BuZ106UE5HREFUQQ==",
+                    "filename": "again.bin"
+                }
+            }
+        },
+        "outputsByName": {
+            "output_out": ["YWdhaW5bXTpyb3RhdGVkW2ltYWdlL3BuZ106UE5HREFUQQ=="]
+        },
+        "errors": [],
+        "failures": [],
+        "events": [
+            {
+                "type": "workflow_started",
+                "totalNodes": 2,
+                "levels": 2
+            },
+            {
+                "type": "node_started",
+                "nodeId": "r1",
+                "level": 1
+            },
+            {
+                "type": "node_completed",
+                "nodeId": "r1"
+            },
+            {
+                "type": "node_started",
+                "nodeId": "r2",
+                "level": 2
+            },
+            {
+                "type": "node_completed",
+                "nodeId": "r2"
+            },
+            {
+                "type": "workflow_completed",
+                "status": "success",
+                "errors": []
+            }
+        ]
+    }
+}

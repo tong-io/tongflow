@@ -1,0 +1,127 @@
+{
+    "name": "scalar-overflow",
+    "description": "Several values into a scalar input that is not the batch field fail the node instead of dropping values.",
+    "workflow": {
+        "name": "scalar-overflow",
+        "version": "1.0",
+        "exportedAt": "2026-01-01T00:00:00.000Z",
+        "inputs": [],
+        "outputs": [
+            {
+                "name": "output_out",
+                "type": "text",
+                "nodeId": "out",
+                "field": "texts"
+            }
+        ],
+        "dataNodes": [
+            {
+                "id": "in",
+                "type": "textNode",
+                "dataType": "text",
+                "isInput": false,
+                "staticData": {
+                    "texts": ["one", "two"]
+                },
+                "level": 0
+            },
+            {
+                "id": "out",
+                "type": "textNode",
+                "dataType": "text",
+                "isInput": false,
+                "level": 2
+            }
+        ],
+        "executableNodes": [
+            {
+                "id": "g",
+                "type": "genTextNode",
+                "feature": "gen-text",
+                "pluginId": "tongflow-api-fake-a",
+                "bindings": {
+                    "text": {
+                        "kind": "handle",
+                        "sources": [
+                            {
+                                "fromNodeId": "in",
+                                "fromField": "texts"
+                            }
+                        ],
+                        "targetHandle": "in:text",
+                        "consumerShape": "scalar"
+                    }
+                },
+                "outputs": [
+                    {
+                        "sourceField": "text",
+                        "nodeType": "textNode",
+                        "dataField": "texts",
+                        "expandEach": false,
+                        "downstreamDataNodeId": "out"
+                    }
+                ],
+                "dependencies": ["in"],
+                "level": 1
+            }
+        ],
+        "executionLevels": [["g"]],
+        "dataNodeEdges": [
+            {
+                "source": "in",
+                "target": "g"
+            },
+            {
+                "source": "g",
+                "target": "out"
+            }
+        ]
+    },
+    "plugins": {
+        "tongflow-api-fake-a": [
+            {
+                "op": "format",
+                "field": "text",
+                "template": "A({text})"
+            }
+        ]
+    },
+    "expected": {
+        "status": "failed",
+        "outputs": {},
+        "outputsByName": {},
+        "errors": [
+            "Node g failed: Node 'gen-text' input 'text' expects a single value but received 2 upstream values. Refusing to silently drop all but the first — reduce the upstream to one value."
+        ],
+        "failures": [
+            {
+                "nodeId": "g",
+                "summary": "Node 'gen-text' input 'text' expects a single value but received 2 upstream values. Refusing to silently drop all but the first — reduce the upstream to one value."
+            }
+        ],
+        "events": [
+            {
+                "type": "workflow_started",
+                "totalNodes": 1,
+                "levels": 1
+            },
+            {
+                "type": "node_started",
+                "nodeId": "g",
+                "level": 1
+            },
+            {
+                "type": "node_failed",
+                "nodeId": "g",
+                "error": "Node 'gen-text' input 'text' expects a single value but received 2 upstream values. Refusing to silently drop all but the first — reduce the upstream to one value."
+            },
+            {
+                "type": "workflow_failed",
+                "status": "failed",
+                "errors": [
+                    "Node g failed: Node 'gen-text' input 'text' expects a single value but received 2 upstream values. Refusing to silently drop all but the first — reduce the upstream to one value."
+                ]
+            }
+        ]
+    }
+}

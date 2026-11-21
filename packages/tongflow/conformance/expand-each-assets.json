@@ -1,0 +1,239 @@
+{
+    "name": "expand-each-assets",
+    "description": "render-pages emits N ImageRef pages (x-expand-each) from an uploaded file; ocr-image fans out over the pages.",
+    "workflow": {
+        "name": "expand-each-assets",
+        "version": "1.0",
+        "exportedAt": "2026-01-01T00:00:00.000Z",
+        "inputs": [],
+        "outputs": [
+            {
+                "name": "output_text",
+                "type": "text",
+                "nodeId": "text",
+                "field": "texts"
+            }
+        ],
+        "dataNodes": [
+            {
+                "id": "doc",
+                "type": "fileNode",
+                "dataType": "file",
+                "isInput": false,
+                "staticData": {
+                    "fileKeys": ["uploads/report.pdf"]
+                },
+                "level": 0
+            },
+            {
+                "id": "pages",
+                "type": "imageNode",
+                "dataType": "image",
+                "isInput": false,
+                "level": 2
+            },
+            {
+                "id": "text",
+                "type": "textNode",
+                "dataType": "text",
+                "isInput": false,
+                "level": 4
+            }
+        ],
+        "executableNodes": [
+            {
+                "id": "r",
+                "type": "renderPagesNode",
+                "feature": "render-pages",
+                "pluginId": "tongflow-api-fake-render",
+                "bindings": {
+                    "document": {
+                        "kind": "handle",
+                        "sources": [
+                            {
+                                "fromNodeId": "doc",
+                                "fromField": "fileKeys"
+                            }
+                        ],
+                        "targetHandle": "in:document",
+                        "consumerShape": "scalar"
+                    }
+                },
+                "batchField": "document",
+                "outputs": [
+                    {
+                        "sourceField": "pages",
+                        "nodeType": "imageNode",
+                        "dataField": "fileKeys",
+                        "expandEach": true,
+                        "itemValuePath": "file_key",
+                        "downstreamDataNodeId": "pages"
+                    }
+                ],
+                "dependencies": ["doc"],
+                "level": 1
+            },
+            {
+                "id": "o",
+                "type": "ocrImageNode",
+                "feature": "ocr-image",
+                "pluginId": "tongflow-api-fake-ocr",
+                "bindings": {
+                    "image": {
+                        "kind": "handle",
+                        "sources": [
+                            {
+                                "fromNodeId": "r",
+                                "fromField": "pages"
+                            }
+                        ],
+                        "targetHandle": "in:image",
+                        "consumerShape": "scalar"
+                    }
+                },
+                "batchField": "image",
+                "outputs": [
+                    {
+                        "sourceField": "text",
+                        "nodeType": "textNode",
+                        "dataField": "texts",
+                        "expandEach": false,
+                        "downstreamDataNodeId": "text"
+                    }
+                ],
+                "dependencies": ["pages"],
+                "level": 3
+            }
+        ],
+        "executionLevels": [["r"], ["o"]],
+        "dataNodeEdges": [
+            {
+                "source": "doc",
+                "target": "r"
+            },
+            {
+                "source": "r",
+                "target": "pages"
+            },
+            {
+                "source": "pages",
+                "target": "o"
+            },
+            {
+                "source": "o",
+                "target": "text"
+            }
+        ]
+    },
+    "assets": {
+        "uploads/report.pdf": {
+            "text": "%PDF report"
+        }
+    },
+    "plugins": {
+        "tongflow-api-fake-render": [
+            {
+                "op": "assets",
+                "field": "pages",
+                "count": 3,
+                "mime": "image/png",
+                "filename": "page-{i}.png",
+                "content": "page {i} of {document.filename} ({document.mime}): {document.text}"
+            }
+        ],
+        "tongflow-api-fake-ocr": [
+            {
+                "op": "format",
+                "field": "text",
+                "template": "{image.text}|mime={image.mime}"
+            }
+        ]
+    },
+    "expected": {
+        "status": "success",
+        "outputs": {
+            "r": {
+                "success": true,
+                "pages": [
+                    {
+                        "bytesBase64": "cGFnZSAxIG9mIHJlcG9ydC5wZGYgKGFwcGxpY2F0aW9uL3BkZik6ICVQREYgcmVwb3J0",
+                        "mime": "image/png",
+                        "filename": "page-1.png"
+                    },
+                    {
+                        "bytesBase64": "cGFnZSAyIG9mIHJlcG9ydC5wZGYgKGFwcGxpY2F0aW9uL3BkZik6ICVQREYgcmVwb3J0",
+                        "mime": "image/png",
+                        "filename": "page-2.png"
+                    },
+                    {
+                        "bytesBase64": "cGFnZSAzIG9mIHJlcG9ydC5wZGYgKGFwcGxpY2F0aW9uL3BkZik6ICVQREYgcmVwb3J0",
+                        "mime": "image/png",
+                        "filename": "page-3.png"
+                    }
+                ]
+            },
+            "o": {
+                "success": true,
+                "text": [
+                    "page 1 of report.pdf (application/pdf): %PDF report|mime=",
+                    "page 2 of report.pdf (application/pdf): %PDF report|mime=",
+                    "page 3 of report.pdf (application/pdf): %PDF report|mime="
+                ]
+            }
+        },
+        "outputsByName": {
+            "output_text": [
+                "page 1 of report.pdf (application/pdf): %PDF report|mime=",
+                "page 2 of report.pdf (application/pdf): %PDF report|mime=",
+                "page 3 of report.pdf (application/pdf): %PDF report|mime="
+            ]
+        },
+        "errors": [],
+        "failures": [],
+        "events": [
+            {
+                "type": "workflow_started",
+                "totalNodes": 2,
+                "levels": 2
+            },
+            {
+                "type": "node_started",
+                "nodeId": "r",
+                "level": 1
+            },
+            {
+                "type": "node_completed",
+                "nodeId": "r"
+            },
+            {
+                "type": "node_started",
+                "nodeId": "o",
+                "level": 2
+            },
+            {
+                "type": "plugin_progress",
+                "nodeId": "o",
+                "message": "batch 1/3"
+            },
+            {
+                "type": "plugin_progress",
+                "nodeId": "o",
+                "message": "batch 2/3"
+            },
+            {
+                "type": "plugin_progress",
+                "nodeId": "o",
+                "message": "batch 3/3"
+            },
+            {
+                "type": "node_completed",
+                "nodeId": "o"
+            },
+            {
+                "type": "workflow_completed",
+                "status": "success",
+                "errors": []
+            }
+        ]
+    }
+}

@@ -1,0 +1,129 @@
+{
+    "name": "model-and-params",
+    "description": "The node's model and advanced params reach the plugin (params under the reserved _params key).",
+    "workflow": {
+        "name": "model-and-params",
+        "version": "1.0",
+        "exportedAt": "2026-01-01T00:00:00.000Z",
+        "inputs": [],
+        "outputs": [
+            {
+                "name": "output_out",
+                "type": "text",
+                "nodeId": "out",
+                "field": "texts"
+            }
+        ],
+        "dataNodes": [
+            {
+                "id": "in",
+                "type": "textNode",
+                "dataType": "text",
+                "isInput": false,
+                "staticData": {
+                    "texts": ["hi"]
+                },
+                "level": 0
+            },
+            {
+                "id": "out",
+                "type": "textNode",
+                "dataType": "text",
+                "isInput": false,
+                "level": 2
+            }
+        ],
+        "executableNodes": [
+            {
+                "id": "g",
+                "type": "genTextNode",
+                "feature": "gen-text",
+                "pluginId": "tongflow-api-fake-router",
+                "model": "fast",
+                "params": {
+                    "steps": 4
+                },
+                "bindings": {
+                    "text": {
+                        "kind": "handle",
+                        "sources": [
+                            {
+                                "fromNodeId": "in",
+                                "fromField": "texts"
+                            }
+                        ],
+                        "targetHandle": "in:text",
+                        "consumerShape": "scalar"
+                    }
+                },
+                "batchField": "text",
+                "outputs": [
+                    {
+                        "sourceField": "text",
+                        "nodeType": "textNode",
+                        "dataField": "texts",
+                        "expandEach": false,
+                        "downstreamDataNodeId": "out"
+                    }
+                ],
+                "dependencies": ["in"],
+                "level": 1
+            }
+        ],
+        "executionLevels": [["g"]],
+        "dataNodeEdges": [
+            {
+                "source": "in",
+                "target": "g"
+            },
+            {
+                "source": "g",
+                "target": "out"
+            }
+        ]
+    },
+    "plugins": {
+        "tongflow-api-fake-router": [
+            {
+                "op": "format",
+                "field": "text",
+                "template": "{text}|model={_model}|steps={_params.steps}"
+            }
+        ]
+    },
+    "expected": {
+        "status": "success",
+        "outputs": {
+            "g": {
+                "success": true,
+                "text": "hi|model=fast|steps=4"
+            }
+        },
+        "outputsByName": {
+            "output_out": ["hi|model=fast|steps=4"]
+        },
+        "errors": [],
+        "failures": [],
+        "events": [
+            {
+                "type": "workflow_started",
+                "totalNodes": 1,
+                "levels": 1
+            },
+            {
+                "type": "node_started",
+                "nodeId": "g",
+                "level": 1
+            },
+            {
+                "type": "node_completed",
+                "nodeId": "g"
+            },
+            {
+                "type": "workflow_completed",
+                "status": "success",
+                "errors": []
+            }
+        ]
+    }
+}

@@ -1,0 +1,147 @@
+{
+    "name": "collect-all",
+    "description": "chunk-text collects every connected text node into one array input (no fan-out).",
+    "workflow": {
+        "name": "collect-all",
+        "version": "1.0",
+        "exportedAt": "2026-01-01T00:00:00.000Z",
+        "inputs": [],
+        "outputs": [
+            {
+                "name": "output_out",
+                "type": "text",
+                "nodeId": "out",
+                "field": "texts"
+            }
+        ],
+        "dataNodes": [
+            {
+                "id": "t1",
+                "type": "textNode",
+                "dataType": "text",
+                "isInput": false,
+                "staticData": {
+                    "texts": ["one"]
+                },
+                "level": 0
+            },
+            {
+                "id": "t2",
+                "type": "textNode",
+                "dataType": "text",
+                "isInput": false,
+                "staticData": {
+                    "texts": ["two", "three"]
+                },
+                "level": 0
+            },
+            {
+                "id": "out",
+                "type": "textNode",
+                "dataType": "text",
+                "isInput": false,
+                "level": 2
+            }
+        ],
+        "executableNodes": [
+            {
+                "id": "c",
+                "type": "chunkTextNode",
+                "feature": "chunk-text",
+                "pluginId": "tongflow-api-fake-chunk",
+                "bindings": {
+                    "texts": {
+                        "kind": "handle",
+                        "sources": [
+                            {
+                                "fromNodeId": "t1",
+                                "fromField": "texts"
+                            },
+                            {
+                                "fromNodeId": "t2",
+                                "fromField": "texts"
+                            }
+                        ],
+                        "targetHandle": "in:texts",
+                        "consumerShape": "array"
+                    },
+                    "max_chars": {
+                        "kind": "config",
+                        "value": 100
+                    }
+                },
+                "outputs": [
+                    {
+                        "sourceField": "chunks",
+                        "nodeType": "textNode",
+                        "dataField": "texts",
+                        "expandEach": false,
+                        "downstreamDataNodeId": "out"
+                    }
+                ],
+                "dependencies": ["t1", "t2"],
+                "level": 1
+            }
+        ],
+        "executionLevels": [["c"]],
+        "dataNodeEdges": [
+            {
+                "source": "t1",
+                "target": "c"
+            },
+            {
+                "source": "t2",
+                "target": "c"
+            },
+            {
+                "source": "c",
+                "target": "out"
+            }
+        ]
+    },
+    "plugins": {
+        "tongflow-api-fake-chunk": [
+            {
+                "op": "map",
+                "field": "chunks",
+                "from": "texts",
+                "template": "[{item}]"
+            }
+        ]
+    },
+    "expected": {
+        "status": "success",
+        "outputs": {
+            "c": {
+                "success": true,
+                "chunks": ["[one]", "[two]", "[three]"]
+            }
+        },
+        "outputsByName": {
+            "output_out": ["[one]", "[two]", "[three]"]
+        },
+        "errors": [],
+        "failures": [],
+        "events": [
+            {
+                "type": "workflow_started",
+                "totalNodes": 1,
+                "levels": 1
+            },
+            {
+                "type": "node_started",
+                "nodeId": "c",
+                "level": 1
+            },
+            {
+                "type": "node_completed",
+                "nodeId": "c"
+            },
+            {
+                "type": "workflow_completed",
+                "status": "success",
+                "errors": []
+            }
+        ]
+    }
+}
