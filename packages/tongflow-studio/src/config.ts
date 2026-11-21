@@ -8,7 +8,7 @@ export interface StudioConfig {
     studioRoot?: string;
     /** Python ≥ 3.10 used to create the studio venv; auto-detected when empty. */
     pythonPath?: string;
-    /** pip requirement installed into the studio venv (e.g. `tongflow==0.3.0` or `-e /path/to/sdk`). */
+    /** pip requirement installed into the studio venv (e.g. `tongflow==1.1.0` or `-e /path/to/sdk`). */
     sdkSpec: string;
     /** Git organisation official plugins are cloned from. */
     pluginOrg: string;
