@@ -84,6 +84,59 @@ function suffixOf(name: string): string {
     return name.slice(i + 1);
 }
 
+/** Longest {@link storeKeyName} in UTF-8 bytes (well under the 255-byte file name limit). */
+export const STORE_KEY_NAME_MAX_BYTES = 120;
+
+// Controls, space, path separators, and characters a URL, a query split or a
+// Windows file name would trip over.
+// biome-ignore lint/suspicious/noControlCharactersInRegex: control characters are what it replaces
+const UNSAFE_NAME_CHARS = /[\u0000- \u007f/\\?#%:*"<>|]/g;
+const utf8 = new TextEncoder();
+
+/**
+ * The last segment of a store key that keeps a producer's `filename`, so the
+ * filename {@link materializeAssetInputs} derives from the key (its last path
+ * segment) is the producer's own name: `page1-r03-table.png` stays
+ * `page1-r03-table.png` downstream. Mirrors `store_key_name` in
+ * `sdk/tongflow/engine/store.py`:
+ *
+ * - control characters, spaces, path separators and `? # % : * " < > |`
+ *   become `_`; leading and trailing dots are dropped;
+ * - a name without an extension gets `.<ext>`, so the mime stays recoverable;
+ * - the stem is cut to fit {@link STORE_KEY_NAME_MAX_BYTES} (the extension is kept).
+ *
+ * `undefined` when there is no usable name: the store then keeps its
+ * name-less key form.
+ */
+export function storeKeyName(
+    filename: string | undefined,
+    ext: string,
+): string | undefined {
+    if (!filename) return undefined;
+    let name = filename
+        .replace(UNSAFE_NAME_CHARS, "_")
+        .replace(/^\.+/, "")
+        .replace(/\.+$/, "");
+    if (!name) return undefined;
+    const cleanExt = ext.replace(/^\.+/, "").replace(UNSAFE_NAME_CHARS, "_");
+    let suffix = suffixOf(name);
+    if (!suffix && cleanExt) {
+        name = `${name}.${cleanExt}`;
+        suffix = cleanExt;
+    }
+    if (utf8.encode(name).length <= STORE_KEY_NAME_MAX_BYTES) return name;
+    const tail = suffix && suffix.length <= 16 ? `.${suffix}` : "";
+    let budget = STORE_KEY_NAME_MAX_BYTES - utf8.encode(tail).length;
+    let stem = "";
+    for (const ch of Array.from(name.slice(0, name.length - tail.length))) {
+        const size = utf8.encode(ch).length;
+        if (size > budget) break;
+        stem += ch;
+        budget -= size;
+    }
+    return `${stem}${tail}`;
+}
+
 export function mimeFromExt(name: string): string | undefined {
     return MIME_BY_EXT[suffixOf(name).toLowerCase()];
 }

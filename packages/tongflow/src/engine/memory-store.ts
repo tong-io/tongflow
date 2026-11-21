@@ -1,9 +1,12 @@
 /**
  * In-memory {@link AssetStore}, the counterpart of Python's `MemoryStore`:
- * outputs live in a map under `mem://<id>` handles. Tests, and hosts that
- * keep a run's files only for the page's lifetime, use it.
+ * outputs live in a map under `mem://<id>/<name>` handles, `<name>` being the
+ * producer's sanitized `filename` ({@link storeKeyName}), so a downstream node
+ * receives the same filename; an output without one is keyed `mem://<id>`.
+ * Tests, and hosts that keep a run's files only for the page's lifetime, use it.
  */
 
+import { storeKeyName } from "./assets";
 import type { AssetPutMeta, AssetStore, FileRefPayload } from "./types";
 
 export const MEMORY_SCHEME = "mem://";
@@ -29,7 +32,8 @@ export class MemoryAssetStore implements AssetStore {
     }
 
     async put(bytes: Uint8Array, meta: AssetPutMeta): Promise<FileRefPayload> {
-        const key = `${MEMORY_SCHEME}${newId()}`;
+        const name = storeKeyName(meta.filename, meta.ext);
+        const key = `${MEMORY_SCHEME}${newId()}${name ? `/${name}` : ""}`;
         this.blobs.set(key, bytes);
         const ref: FileRefPayload = { file_key: key };
         if (meta.mime) ref.mime = meta.mime;

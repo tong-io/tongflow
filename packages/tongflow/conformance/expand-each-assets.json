@@ -145,7 +145,7 @@
             {
                 "op": "format",
                 "field": "text",
-                "template": "{image.text}|mime={image.mime}"
+                "template": "{image.text}|mime={image.mime}|filename={image.filename}"
             }
         ]
     },
@@ -175,17 +175,17 @@
             "o": {
                 "success": true,
                 "text": [
-                    "page 1 of report.pdf (application/pdf): %PDF report|mime=",
-                    "page 2 of report.pdf (application/pdf): %PDF report|mime=",
-                    "page 3 of report.pdf (application/pdf): %PDF report|mime="
+                    "page 1 of report.pdf (application/pdf): %PDF report|mime=image/png|filename=page-1.png",
+                    "page 2 of report.pdf (application/pdf): %PDF report|mime=image/png|filename=page-2.png",
+                    "page 3 of report.pdf (application/pdf): %PDF report|mime=image/png|filename=page-3.png"
                 ]
             }
         },
         "outputsByName": {
             "output_text": [
-                "page 1 of report.pdf (application/pdf): %PDF report|mime=",
-                "page 2 of report.pdf (application/pdf): %PDF report|mime=",
-                "page 3 of report.pdf (application/pdf): %PDF report|mime="
+                "page 1 of report.pdf (application/pdf): %PDF report|mime=image/png|filename=page-1.png",
+                "page 2 of report.pdf (application/pdf): %PDF report|mime=image/png|filename=page-2.png",
+                "page 3 of report.pdf (application/pdf): %PDF report|mime=image/png|filename=page-3.png"
             ]
         },
         "errors": [],

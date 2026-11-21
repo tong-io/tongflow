@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, it } from "vitest";
 import type { PluginsRegistry } from "../../core/registry/plugins-registry-schema";
+import { fakeOpfsDir } from "../testing/fake-opfs";
 import type { ExecutorProgress } from "../types";
 import {
     defineEdgePlugin,
@@ -197,56 +198,16 @@ describe("worker edge executor (protocol over a MessageChannel)", () => {
 });
 
 /** A minimal in-memory FileSystemDirectoryHandle for the OPFS store. */
-function fakeDir(): FileSystemDirectoryHandle {
-    const files = new Map<string, Uint8Array>();
-    const dirs = new Map<string, FileSystemDirectoryHandle>();
-    const notFound = () =>
-        Object.assign(new Error("not found"), { name: "NotFoundError" });
-    const dir = {
-        async getDirectoryHandle(name: string, opts?: { create?: boolean }) {
-            if (!dirs.has(name)) {
-                if (!opts?.create) throw notFound();
-                dirs.set(name, fakeDir());
-            }
-            return dirs.get(name);
-        },
-        async getFileHandle(name: string, opts?: { create?: boolean }) {
-            if (!files.has(name)) {
-                if (!opts?.create) throw notFound();
-                files.set(name, new Uint8Array());
-            }
-            return {
-                async getFile() {
-                    const bytes = files.get(name) ?? new Uint8Array();
-                    return { arrayBuffer: async () => bytes.slice().buffer };
-                },
-                async createWritable() {
-                    return {
-                        async write(data: Uint8Array) {
-                            files.set(name, new Uint8Array(data));
-                        },
-                        async close() {},
-                    };
-                },
-            };
-        },
-        async removeEntry(name: string) {
-            if (!files.delete(name) && !dirs.delete(name)) throw notFound();
-        },
-    };
-    return dir as unknown as FileSystemDirectoryHandle;
-}
-
 describe("OpfsAssetStore", () => {
     it("puts, gets, owns and deletes files under opfs:// keys", async () => {
-        const root = fakeDir();
+        const root = fakeOpfsDir();
         const store = new OpfsAssetStore({ root: async () => root });
         const ref = await store.put(new TextEncoder().encode("img"), {
             ext: "png",
             mime: "image/png",
             filename: "a.png",
         });
-        expect(ref.file_key).toMatch(/^opfs:\/\/[0-9a-f]{32}\.png$/);
+        expect(ref.file_key).toMatch(/^opfs:\/\/[0-9a-f]{32}\/a\.png$/);
         expect(ref).toMatchObject({ mime: "image/png", filename: "a.png" });
         expect(store.owns(ref.file_key)).toBe(true);
         expect(store.owns("uploads/a.png")).toBe(false);
@@ -257,8 +218,19 @@ describe("OpfsAssetStore", () => {
         ).toBe("img");
         expect(await store.get("opfs://nope.png")).toBeNull();
         expect(await store.get("opfs://../escape")).toBeNull();
+        expect(await store.get("opfs://a/../b.png")).toBeNull();
+        expect(await store.get("opfs://a/b/c.png")).toBeNull();
+        const [id] = ref.file_key.slice("opfs://".length).split("/");
+        expect(await store.delete(`opfs://${id}/other.png`)).toBe(false);
         expect(await store.delete(ref.file_key)).toBe(true);
         expect(await store.get(ref.file_key)).toBeNull();
+        expect(await store.delete(ref.file_key)).toBe(false);
+
+        // A nameless output keeps the flat `<id>.<ext>` form.
+        const flat = await store.put(new Uint8Array([7]), { ext: "png" });
+        expect(flat.file_key).toMatch(/^opfs:\/\/[0-9a-f]{32}\.png$/);
+        expect(await store.get(flat.file_key)).toEqual(new Uint8Array([7]));
+        expect(await store.delete(flat.file_key)).toBe(true);
         await store.put(new Uint8Array([1]), { ext: "bin" });
         await store.clear();
         await expect(
