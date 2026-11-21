@@ -23,7 +23,8 @@ const PLUGIN_GIT_AUTHOR = { name: "tongflow", email: "tongflow@local" };
 // The scanner only detects directories that follow the naming convention; a
 // plugin cloned under any other name is silently ignored. We enforce the prefix
 // up front so a custom git URL either yields a usable plugin or a clear error.
-const PLUGIN_ID_RE = /^tongflow-(modal|api|router|local)-[a-z0-9][a-z0-9-]*$/;
+const PLUGIN_ID_RE =
+    /^tongflow-(modal|api|router|local|edge)-[a-z0-9][a-z0-9-]*$/;
 
 export interface InstallResult {
     id: string;
@@ -70,7 +71,7 @@ function assertSafeGitUrl(gitUrl: string): void {
 function assertValidPluginId(id: string): void {
     if (!PLUGIN_ID_RE.test(id)) {
         throw new PluginInstallError(
-            `Plugin directory "${id}" must match the tongflow-modal-*, tongflow-api-*, tongflow-router-* or tongflow-local-* convention, otherwise the scanner cannot detect it.`,
+            `Plugin directory "${id}" must match the tongflow-modal-*, tongflow-api-*, tongflow-router-*, tongflow-local-* or tongflow-edge-* convention, otherwise the scanner cannot detect it.`,
         );
     }
 }

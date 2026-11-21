@@ -4,6 +4,7 @@ import argparse
 import ast
 import json
 from pathlib import Path
+from typing import Any
 
 from .abi import load_abi
 from ._ast_utils import (
@@ -21,7 +22,14 @@ from ._ast_utils import (
 )
 from .parse_deploy import _slot_to_ident, parse_deploy_py
 
-SCANNER_VERSION = 8
+SCANNER_VERSION = 9
+
+# Edge (browser) plugins are TypeScript packages the browser edge runtime loads;
+# the scanner reads their declarative manifest instead of Python sources.
+EDGE_PREFIX = "tongflow-edge-"
+PLUGIN_MANIFEST_FILE = "tongflow.plugin.json"
+RUNTIME_PYTHON = "python"
+RUNTIME_BROWSER = "browser"
 
 SKIP_DIR_NAMES = frozenset(
     {
@@ -66,6 +74,7 @@ def _detect_runner(plugin_dir: Path) -> tuple[str | None, str | None]:
         or lowered.startswith("tongflow-api-")
         or lowered.startswith("tongflow-router-")
         or lowered.startswith("tongflow-local-")
+        or lowered.startswith(EDGE_PREFIX)
     ):
         return None, (
             f"{plugin_dir}:1: pluginId must be all lowercase; "
@@ -100,11 +109,15 @@ def _detect_runner(plugin_dir: Path) -> tuple[str | None, str | None]:
         # On-device engine plugins (e.g. a native Metal binary) — entry.py-based
         # local runners like "api", named honestly: no key, no remote calls.
         prefix_runner = "api"
+    elif plugin_id.startswith(EDGE_PREFIX):
+        # Browser edge plugins: TypeScript, run by the browser edge runtime.
+        # No entry.py — discovery reads tongflow.plugin.json instead.
+        return RUNTIME_BROWSER, None
     else:
         return None, (
             f"{plugin_dir}:1: unknown pluginId prefix; "
             "fix: use tongflow-modal-<name>, tongflow-api-<name>, "
-            "tongflow-router-<name>, or tongflow-local-<name>"
+            "tongflow-router-<name>, tongflow-local-<name>, or tongflow-edge-<name>"
         )
 
     if not has_deploy and not has_entry:
@@ -333,6 +346,196 @@ def _scan_default_slots_in_dir(plugin_dir: Path) -> tuple[list[str], list[str]]:
     return slots, problems
 
 
+def _scan_edge_plugin(
+    plugin_dir: Path, valid_slots: "frozenset[str] | set[str]"
+) -> tuple[dict[str, Any] | None, list[str]]:
+    """Build the registry entry of a ``tongflow-edge-*`` (browser) plugin.
+
+    Such a plugin is a TypeScript package; there is no Python to AST-scan, so
+    its ``tongflow.plugin.json`` declares everything the registry needs::
+
+        {
+          "runtime": "browser",
+          "entry": "dist/index.js",
+          "slots": [{"nodeSlot": "ocr-image", "method": "ocrImage",
+                     "models": ["pp-ocrv6"]}]
+        }
+
+    Returns ``(entry, problems)``; ``entry`` is ``None`` when the manifest is
+    unusable or declares no valid slot. Problems use the scanner's usual
+    ``path:line: reason; fix: hint`` shape.
+    """
+
+    manifest_path = plugin_dir / PLUGIN_MANIFEST_FILE
+    problems: list[str] = []
+    if not manifest_path.is_file():
+        return None, [
+            _scan_error(
+                manifest_path,
+                f"missing {PLUGIN_MANIFEST_FILE}",
+                'add a manifest with runtime "browser", entry and slots',
+            )
+        ]
+    try:
+        manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    except (OSError, ValueError) as e:
+        return None, [
+            _scan_error(
+                manifest_path,
+                f"{PLUGIN_MANIFEST_FILE} is not valid JSON ({e})",
+                "fix the JSON syntax",
+            )
+        ]
+    if not isinstance(manifest, dict):
+        return None, [
+            _scan_error(
+                manifest_path,
+                f"{PLUGIN_MANIFEST_FILE} must be a JSON object",
+                'declare {"runtime": "browser", "entry": ..., "slots": [...]}',
+            )
+        ]
+
+    runtime = manifest.get("runtime")
+    if runtime != RUNTIME_BROWSER:
+        return None, [
+            _scan_error(
+                manifest_path,
+                f"edge plugin must declare runtime {RUNTIME_BROWSER!r} "
+                f"(got {runtime!r})",
+                f'set "runtime": "{RUNTIME_BROWSER}"',
+            )
+        ]
+
+    entry = manifest.get("entry")
+    if not isinstance(entry, str) or not entry.strip():
+        return None, [
+            _scan_error(
+                manifest_path,
+                "missing entry (the plugin's ESM module path)",
+                'set "entry" to the built module, e.g. "dist/index.js"',
+            )
+        ]
+    entry = entry.strip()
+    entry_rel = Path(entry)
+    if entry_rel.is_absolute() or ".." in entry_rel.parts:
+        return None, [
+            _scan_error(
+                manifest_path,
+                f"entry {entry!r} must be a path inside the plugin directory",
+                "use a relative path such as dist/index.js",
+            )
+        ]
+    if not (plugin_dir / entry_rel).is_file():
+        return None, [
+            _scan_error(
+                manifest_path,
+                f"entry file {entry!r} not found",
+                "build the plugin or point entry at an existing ESM module",
+            )
+        ]
+
+    slots = manifest.get("slots")
+    if not isinstance(slots, list) or not slots:
+        return None, [
+            _scan_error(
+                manifest_path,
+                "slots must be a non-empty list",
+                'declare "slots": [{"nodeSlot": ..., "method": ...}]',
+            )
+        ]
+
+    methods: dict[str, dict[str, object]] = {}
+    for idx, item in enumerate(slots):
+        where = f"slots[{idx}]"
+        if not isinstance(item, dict):
+            problems.append(
+                _scan_error(
+                    manifest_path,
+                    f"{where} must be an object",
+                    'use {"nodeSlot": ..., "method": ...}',
+                )
+            )
+            continue
+        slot = item.get("nodeSlot")
+        method = item.get("method")
+        if not isinstance(slot, str) or not slot:
+            problems.append(
+                _scan_error(
+                    manifest_path,
+                    f"{where} is missing nodeSlot",
+                    "name an ABI nodeSlot, e.g. ocr-image",
+                )
+            )
+            continue
+        if slot not in valid_slots:
+            problems.append(
+                _scan_error(
+                    manifest_path,
+                    f"unknown nodeSlot {slot!r} (not in tongflow.abi.json)",
+                    "use a nodeSlot defined in the ABI",
+                )
+            )
+            continue
+        if slot in methods:
+            problems.append(
+                _scan_error(
+                    manifest_path,
+                    f"nodeSlot {slot!r} is declared more than once",
+                    "keep one entry per slot",
+                )
+            )
+            continue
+        if not isinstance(method, str) or not method.strip():
+            problems.append(
+                _scan_error(
+                    manifest_path,
+                    f"{where} ({slot}) is missing method",
+                    "name the exported handler that implements the slot",
+                )
+            )
+            continue
+        cfg: dict[str, object] = {"methodName": method.strip()}
+        models = item.get("models")
+        if models is not None:
+            if (
+                not isinstance(models, list)
+                or not models
+                or not all(isinstance(m, str) and m for m in models)
+            ):
+                problems.append(
+                    _scan_error(
+                        manifest_path,
+                        f"{where} ({slot}) models must be a non-empty list of strings",
+                        "list model ids, default first, or drop the key",
+                    )
+                )
+            else:
+                cfg["models"] = list(models)
+        methods[slot] = cfg
+
+    if not methods:
+        if not problems:
+            problems.append(
+                _scan_error(
+                    manifest_path,
+                    "no valid slots declared",
+                    'declare at least one {"nodeSlot": ..., "method": ...}',
+                )
+            )
+        return None, problems
+
+    return (
+        {
+            "localSubdir": plugin_dir.name,
+            "methodsByNodeSlot": methods,
+            "entryFile": entry_rel.as_posix(),
+            "needsDeploy": False,
+            "runtime": RUNTIME_BROWSER,
+        },
+        problems,
+    )
+
+
 def scan(plugins_root: Path, abi_path: Path) -> dict[str, object]:
     abi = load_abi(abi_path)
     valid = abi.node_slots
@@ -346,9 +549,22 @@ def scan(plugins_root: Path, abi_path: Path) -> dict[str, object]:
 
     for pdir in _iter_plugin_dirs(plugins_root):
         plugin_id = pdir.name
-        _runner, runner_error = _detect_runner(pdir)
+        runner, runner_error = _detect_runner(pdir)
         if runner_error:
             errors.append({"pluginId": plugin_id, "message": runner_error})
+            continue
+
+        if runner == RUNTIME_BROWSER:
+            edge_entry, edge_problems = _scan_edge_plugin(pdir, valid)
+            for message in edge_problems:
+                errors.append({"pluginId": plugin_id, "message": message})
+            if edge_entry is None:
+                continue
+            plugins[plugin_id] = edge_entry
+            for slot in edge_entry["methodsByNodeSlot"]:
+                node_plugin_map.setdefault(slot, [])
+                if plugin_id not in node_plugin_map[slot]:
+                    node_plugin_map[slot].append(plugin_id)
             continue
 
         # Every plugin is spawned the same way: the platform runs the plugin's
@@ -518,6 +734,7 @@ def scan(plugins_root: Path, abi_path: Path) -> dict[str, object]:
             "methodsByNodeSlot": llm_methods,
             "entryFile": "entry.py",
             "needsDeploy": needs_deploy,
+            "runtime": RUNTIME_PYTHON,
         }
         if model_catalog is not None:
             plugins[plugin_id]["modelCatalog"] = model_catalog

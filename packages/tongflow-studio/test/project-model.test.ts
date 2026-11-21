@@ -5,6 +5,7 @@ import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { renderTree, StudioApi } from "../src/api.ts";
 import { studioConfig } from "../src/config.ts";
 import { ingestOutputs } from "../src/engine/ingest.ts";
+import { isPluginId } from "../src/engine/registry.ts";
 import { workflowsInFolder } from "../src/project/compose.ts";
 import {
     createProject,
@@ -461,6 +462,63 @@ describe("billing checkpoint", () => {
         expect(
             (await api.paidPlugins(projectId, modal)).map((p) => p.billing),
         ).toEqual(["modal"]);
+    });
+
+    it("treats browser (edge) plugins as local, even with required env", async () => {
+        const api = new StudioApi(
+            new Studio({ config: studioConfig({ studioRoot: studio }) }),
+        );
+        (api.studio.registry as unknown as { cache: unknown }).cache = {
+            registry: {
+                plugins: {
+                    "tongflow-edge-essentials": {
+                        localSubdir: "tongflow-edge-essentials",
+                        entryFile: "dist/index.js",
+                        needsDeploy: false,
+                        runtime: "browser",
+                        methodsByNodeSlot: {
+                            "ocr-image": { methodName: "ocrImage" },
+                        },
+                    },
+                },
+                nodePluginMap: { "ocr-image": ["tongflow-edge-essentials"] },
+            },
+            meta: {
+                "tongflow-edge-essentials": {
+                    env: [{ key: "SOME_KEY", required: true }],
+                },
+            },
+            scannedAt: "now",
+        };
+        const billing = await api.pluginBilling("tongflow-edge-essentials");
+        expect(billing.billing).toBe("local");
+        expect(billing.note).toMatch(/browser edge runtime/);
+        const wf = "scan/ocr.tongflow.json";
+        await writeWorkflowDocument(root, wf, {
+            name: "ocr",
+            flow: { nodes: [], edges: [] },
+            executable: {
+                inputs: [],
+                outputs: [],
+                dataNodes: [],
+                executableNodes: [
+                    {
+                        id: "o",
+                        feature: "ocr-image",
+                        pluginId: "tongflow-edge-essentials",
+                        bindings: {},
+                        outputs: [],
+                    },
+                ],
+            } as never,
+            meta: {},
+        });
+        expect(await api.paidPlugins(projectId, wf)).toEqual([]);
+        // The agent's node catalog lists it, flagged as browser-only.
+        expect(await api.nodeCatalog()).toContain(
+            "- ocrImageNode (ocr-image): wires image←image batch*; config -; out text→text; plugins: tongflow-edge-essentials (browser edge runtime only)",
+        );
+        expect(isPluginId("tongflow-edge-essentials")).toBe(true);
     });
 });
 

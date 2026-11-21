@@ -16,6 +16,7 @@ import {
     type ExecuteToolContext,
     executeGraphTool,
     type GraphPatch,
+    isBrowserPlugin,
     KNOWN_NODE_TYPES,
     NODE_TYPE_TO_ABI_FEATURE,
     renderCanvas,
@@ -390,10 +391,16 @@ export class StudioApi {
         pluginId: string,
     ): Promise<{ billing: PluginBilling; note: string }> {
         const { registry, meta } = await this.studio.registry.get();
-        const plugin = registry.plugins[pluginId] as
-            | { needsDeploy?: boolean }
-            | undefined;
+        const plugin = registry.plugins[pluginId];
         const env = meta[pluginId]?.env ?? [];
+        // Browser plugins run on the user's device inside the edge runtime:
+        // nothing is billed, whatever their manifest declares.
+        if (isBrowserPlugin(plugin)) {
+            return {
+                billing: "local",
+                note: "Runs in the browser edge runtime on this device; nothing is billed. The studio's Python engine cannot run it.",
+            };
+        }
         if (plugin?.needsDeploy) {
             return {
                 billing: "modal",
@@ -613,7 +620,12 @@ export class StudioApi {
                 const outs = spec.topology.outputs.map(
                     (o) => `${o.field}→${o.nodeType.replace(/Node$/, "")}`,
                 );
-                const plugins = registry.nodePluginMap[feature] ?? [];
+                const plugins = (registry.nodePluginMap[feature] ?? []).map(
+                    (id) =>
+                        isBrowserPlugin(registry.plugins[id])
+                            ? `${id} (browser edge runtime only)`
+                            : id,
+                );
                 line = `- ${type} (${feature}): wires ${wires.join(", ") || "-"}; config ${config.join(", ") || "-"}; out ${outs.join(", ") || "-"}; plugins: ${plugins.length ? plugins.join(", ") : "NONE INSTALLED"}`;
             }
             if (cat) byCat.get(cat)!.push(line);

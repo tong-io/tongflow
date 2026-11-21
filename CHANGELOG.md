@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **ABI slots for the browser edge runtime.** Fourteen new slots, each with a
+  canvas node: `render-pages`, `image-orient`, `layout-detect`, `ocr-image`,
+  `table-recognize`, `chunk-text`, `embed-text`, `embed-image`, `kb-write`,
+  `vad-segment`, `diarize-speakers`, `audio-tag`, `detect-objects` and
+  `detect-language`. No official plugin implements them yet. See
+  [docs/edge-runtime.md](docs/edge-runtime.md). SDK 1.1.0 carries the models.
+- **Browser plugins in the registry.** Plugin entries gain
+  `runtime: "python" | "browser"` (absent reads as `python`). The scanner
+  accepts `tongflow-edge-*` plugins: no `entry.py`, slots declared in
+  `tongflow.plugin.json` (`runtime`, `entry`, `slots`). Studio, the Next app
+  and the canvas list them; Studio bills them as local. The Python engine and
+  the Next single-node runner refuse them with "requires the browser edge
+  runtime" instead of spawning or cloning them.
+
 ## [1.0.0] - 2026-11-12
 
 TongFlow 1.0 is a brand upgrade. TongFlow is now the **Agent-Human-Friendly,

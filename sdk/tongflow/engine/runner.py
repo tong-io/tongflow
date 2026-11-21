@@ -34,8 +34,10 @@ from .paths import resolve_data_dir, resolve_plugins_dir
 from .plugins import (
     DEFAULT_ORG,
     SDK_ROOT,
+    browser_runtime_error,
     collect_plugin_ids,
     ensure_plugins_present,
+    is_browser_plugin,
     prepare_python_env,
     scan_manifest,
 )
@@ -349,6 +351,8 @@ def run_workflow(
                         f"Invalid nodeSlot={slot}: not in ABI. Cannot execute workflow node."
                     )
                 cfg = plugin_cfgs.get(plugin_id)
+                if is_browser_plugin(plugin_id, cfg):
+                    raise RuntimeError(browser_runtime_error(plugin_id, slot))
                 if not cfg:
                     raise RuntimeError(
                         f"Plugin {plugin_id} not found in scanned manifest."

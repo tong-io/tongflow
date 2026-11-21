@@ -4363,6 +4363,705 @@ export type VideoGenModelOutput = FromSchema<
     typeof _slot_video_gen_model_outputs
 >;
 
+const _slot_render_pages_inputs = {
+    type: "object",
+    required: ["document"],
+    properties: {
+        document: {
+            type: "object",
+            required: ["bytesBase64"],
+            properties: {
+                bytesBase64: {
+                    type: "string",
+                    minLength: 1,
+                },
+                filename: {
+                    type: "string",
+                },
+                mime: {
+                    type: "string",
+                },
+            },
+            additionalProperties: false,
+        },
+    },
+    additionalProperties: false,
+} as const;
+export type RenderPagesInput = FromSchema<typeof _slot_render_pages_inputs>;
+const _slot_render_pages_outputs = {
+    type: "object",
+    required: ["success"],
+    properties: {
+        success: {
+            type: "boolean",
+        },
+        error: {
+            type: "string",
+        },
+        pages: {
+            type: "array",
+            items: {
+                type: "object",
+                required: ["file_key"],
+                properties: {
+                    file_key: {
+                        type: "string",
+                        minLength: 1,
+                    },
+                    mime: {
+                        type: "string",
+                    },
+                    filename: {
+                        type: "string",
+                    },
+                },
+                additionalProperties: false,
+            },
+            "x-expand-each": true,
+        },
+    },
+    additionalProperties: false,
+} as const;
+export type RenderPagesOutput = FromSchema<typeof _slot_render_pages_outputs>;
+
+const _slot_image_orient_inputs = {
+    type: "object",
+    required: ["image"],
+    properties: {
+        image: {
+            type: "object",
+            required: ["bytesBase64"],
+            properties: {
+                bytesBase64: {
+                    type: "string",
+                    minLength: 1,
+                },
+                filename: {
+                    type: "string",
+                },
+                mime: {
+                    type: "string",
+                },
+            },
+            additionalProperties: false,
+        },
+    },
+    additionalProperties: false,
+} as const;
+export type ImageOrientInput = FromSchema<typeof _slot_image_orient_inputs>;
+const _slot_image_orient_outputs = {
+    type: "object",
+    required: ["success"],
+    properties: {
+        success: {
+            type: "boolean",
+        },
+        error: {
+            type: "string",
+        },
+        image: {
+            type: "object",
+            required: ["file_key"],
+            properties: {
+                file_key: {
+                    type: "string",
+                    minLength: 1,
+                },
+                mime: {
+                    type: "string",
+                },
+                filename: {
+                    type: "string",
+                },
+            },
+            additionalProperties: false,
+        },
+    },
+    additionalProperties: false,
+} as const;
+export type ImageOrientOutput = FromSchema<typeof _slot_image_orient_outputs>;
+
+const _slot_layout_detect_inputs = {
+    type: "object",
+    required: ["image"],
+    properties: {
+        image: {
+            type: "object",
+            required: ["bytesBase64"],
+            properties: {
+                bytesBase64: {
+                    type: "string",
+                    minLength: 1,
+                },
+                filename: {
+                    type: "string",
+                },
+                mime: {
+                    type: "string",
+                },
+            },
+            additionalProperties: false,
+        },
+    },
+    additionalProperties: false,
+} as const;
+export type LayoutDetectInput = FromSchema<typeof _slot_layout_detect_inputs>;
+const _slot_layout_detect_outputs = {
+    type: "object",
+    required: ["success"],
+    properties: {
+        success: {
+            type: "boolean",
+        },
+        error: {
+            type: "string",
+        },
+        layout: {
+            type: "string",
+        },
+        regions: {
+            type: "array",
+            items: {
+                type: "object",
+                required: ["file_key"],
+                properties: {
+                    file_key: {
+                        type: "string",
+                        minLength: 1,
+                    },
+                    mime: {
+                        type: "string",
+                    },
+                    filename: {
+                        type: "string",
+                    },
+                },
+                additionalProperties: false,
+            },
+            "x-expand-each": true,
+        },
+    },
+    additionalProperties: false,
+} as const;
+export type LayoutDetectOutput = FromSchema<typeof _slot_layout_detect_outputs>;
+
+const _slot_ocr_image_inputs = {
+    type: "object",
+    required: ["image"],
+    properties: {
+        image: {
+            type: "object",
+            required: ["bytesBase64"],
+            properties: {
+                bytesBase64: {
+                    type: "string",
+                    minLength: 1,
+                },
+                filename: {
+                    type: "string",
+                },
+                mime: {
+                    type: "string",
+                },
+            },
+            additionalProperties: false,
+        },
+    },
+    additionalProperties: false,
+} as const;
+export type OcrImageInput = FromSchema<typeof _slot_ocr_image_inputs>;
+const _slot_ocr_image_outputs = {
+    type: "object",
+    required: ["success"],
+    properties: {
+        success: {
+            type: "boolean",
+        },
+        error: {
+            type: "string",
+        },
+        text: {
+            type: "string",
+        },
+    },
+    additionalProperties: false,
+} as const;
+export type OcrImageOutput = FromSchema<typeof _slot_ocr_image_outputs>;
+
+const _slot_table_recognize_inputs = {
+    type: "object",
+    required: ["image"],
+    properties: {
+        image: {
+            type: "object",
+            required: ["bytesBase64"],
+            properties: {
+                bytesBase64: {
+                    type: "string",
+                    minLength: 1,
+                },
+                filename: {
+                    type: "string",
+                },
+                mime: {
+                    type: "string",
+                },
+            },
+            additionalProperties: false,
+        },
+    },
+    additionalProperties: false,
+} as const;
+export type TableRecognizeInput = FromSchema<
+    typeof _slot_table_recognize_inputs
+>;
+const _slot_table_recognize_outputs = {
+    type: "object",
+    required: ["success"],
+    properties: {
+        success: {
+            type: "boolean",
+        },
+        error: {
+            type: "string",
+        },
+        html: {
+            type: "string",
+        },
+    },
+    additionalProperties: false,
+} as const;
+export type TableRecognizeOutput = FromSchema<
+    typeof _slot_table_recognize_outputs
+>;
+
+const _slot_chunk_text_inputs = {
+    type: "object",
+    required: ["texts"],
+    properties: {
+        texts: {
+            type: "array",
+            items: {
+                type: "string",
+                minLength: 1,
+            },
+        },
+        max_chars: {
+            type: "integer",
+        },
+    },
+    additionalProperties: false,
+} as const;
+export type ChunkTextInput = FromSchema<typeof _slot_chunk_text_inputs>;
+const _slot_chunk_text_outputs = {
+    type: "object",
+    required: ["success"],
+    properties: {
+        success: {
+            type: "boolean",
+        },
+        error: {
+            type: "string",
+        },
+        chunks: {
+            type: "array",
+            items: {
+                type: "string",
+            },
+        },
+    },
+    additionalProperties: false,
+} as const;
+export type ChunkTextOutput = FromSchema<typeof _slot_chunk_text_outputs>;
+
+const _slot_embed_text_inputs = {
+    type: "object",
+    required: ["texts"],
+    properties: {
+        texts: {
+            type: "array",
+            items: {
+                type: "string",
+                minLength: 1,
+            },
+        },
+    },
+    additionalProperties: false,
+} as const;
+export type EmbedTextInput = FromSchema<typeof _slot_embed_text_inputs>;
+const _slot_embed_text_outputs = {
+    type: "object",
+    required: ["success"],
+    properties: {
+        success: {
+            type: "boolean",
+        },
+        error: {
+            type: "string",
+        },
+        vectors: {
+            type: "object",
+            required: ["file_key"],
+            properties: {
+                file_key: {
+                    type: "string",
+                    minLength: 1,
+                },
+                mime: {
+                    type: "string",
+                },
+                filename: {
+                    type: "string",
+                },
+            },
+            additionalProperties: false,
+        },
+    },
+    additionalProperties: false,
+} as const;
+export type EmbedTextOutput = FromSchema<typeof _slot_embed_text_outputs>;
+
+const _slot_embed_image_inputs = {
+    type: "object",
+    required: ["image"],
+    properties: {
+        image: {
+            type: "object",
+            required: ["bytesBase64"],
+            properties: {
+                bytesBase64: {
+                    type: "string",
+                    minLength: 1,
+                },
+                filename: {
+                    type: "string",
+                },
+                mime: {
+                    type: "string",
+                },
+            },
+            additionalProperties: false,
+        },
+    },
+    additionalProperties: false,
+} as const;
+export type EmbedImageInput = FromSchema<typeof _slot_embed_image_inputs>;
+const _slot_embed_image_outputs = {
+    type: "object",
+    required: ["success"],
+    properties: {
+        success: {
+            type: "boolean",
+        },
+        error: {
+            type: "string",
+        },
+        vectors: {
+            type: "object",
+            required: ["file_key"],
+            properties: {
+                file_key: {
+                    type: "string",
+                    minLength: 1,
+                },
+                mime: {
+                    type: "string",
+                },
+                filename: {
+                    type: "string",
+                },
+            },
+            additionalProperties: false,
+        },
+    },
+    additionalProperties: false,
+} as const;
+export type EmbedImageOutput = FromSchema<typeof _slot_embed_image_outputs>;
+
+const _slot_kb_write_inputs = {
+    type: "object",
+    required: ["chunks", "vectors", "source"],
+    properties: {
+        chunks: {
+            type: "array",
+            items: {
+                type: "string",
+                minLength: 1,
+            },
+        },
+        vectors: {
+            type: "object",
+            required: ["bytesBase64"],
+            properties: {
+                bytesBase64: {
+                    type: "string",
+                    minLength: 1,
+                },
+                filename: {
+                    type: "string",
+                },
+                mime: {
+                    type: "string",
+                },
+            },
+            additionalProperties: false,
+        },
+        source: {
+            type: "string",
+            minLength: 1,
+        },
+    },
+    additionalProperties: false,
+} as const;
+export type KbWriteInput = FromSchema<typeof _slot_kb_write_inputs>;
+const _slot_kb_write_outputs = {
+    type: "object",
+    required: ["success"],
+    properties: {
+        success: {
+            type: "boolean",
+        },
+        error: {
+            type: "string",
+        },
+        text: {
+            type: "string",
+        },
+    },
+    additionalProperties: false,
+} as const;
+export type KbWriteOutput = FromSchema<typeof _slot_kb_write_outputs>;
+
+const _slot_vad_segment_inputs = {
+    type: "object",
+    required: ["audio"],
+    properties: {
+        audio: {
+            type: "object",
+            required: ["bytesBase64"],
+            properties: {
+                bytesBase64: {
+                    type: "string",
+                    minLength: 1,
+                },
+                filename: {
+                    type: "string",
+                },
+                mime: {
+                    type: "string",
+                },
+            },
+            additionalProperties: false,
+        },
+    },
+    additionalProperties: false,
+} as const;
+export type VadSegmentInput = FromSchema<typeof _slot_vad_segment_inputs>;
+const _slot_vad_segment_outputs = {
+    type: "object",
+    required: ["success"],
+    properties: {
+        success: {
+            type: "boolean",
+        },
+        error: {
+            type: "string",
+        },
+        segments: {
+            type: "array",
+            items: {
+                type: "object",
+                required: ["file_key"],
+                properties: {
+                    file_key: {
+                        type: "string",
+                        minLength: 1,
+                    },
+                    mime: {
+                        type: "string",
+                    },
+                    filename: {
+                        type: "string",
+                    },
+                },
+                additionalProperties: false,
+            },
+            "x-expand-each": true,
+        },
+    },
+    additionalProperties: false,
+} as const;
+export type VadSegmentOutput = FromSchema<typeof _slot_vad_segment_outputs>;
+
+const _slot_diarize_speakers_inputs = {
+    type: "object",
+    required: ["audio"],
+    properties: {
+        audio: {
+            type: "object",
+            required: ["bytesBase64"],
+            properties: {
+                bytesBase64: {
+                    type: "string",
+                    minLength: 1,
+                },
+                filename: {
+                    type: "string",
+                },
+                mime: {
+                    type: "string",
+                },
+            },
+            additionalProperties: false,
+        },
+    },
+    additionalProperties: false,
+} as const;
+export type DiarizeSpeakersInput = FromSchema<
+    typeof _slot_diarize_speakers_inputs
+>;
+const _slot_diarize_speakers_outputs = {
+    type: "object",
+    required: ["success"],
+    properties: {
+        success: {
+            type: "boolean",
+        },
+        error: {
+            type: "string",
+        },
+        segments: {
+            type: "string",
+        },
+    },
+    additionalProperties: false,
+} as const;
+export type DiarizeSpeakersOutput = FromSchema<
+    typeof _slot_diarize_speakers_outputs
+>;
+
+const _slot_audio_tag_inputs = {
+    type: "object",
+    required: ["audio"],
+    properties: {
+        audio: {
+            type: "object",
+            required: ["bytesBase64"],
+            properties: {
+                bytesBase64: {
+                    type: "string",
+                    minLength: 1,
+                },
+                filename: {
+                    type: "string",
+                },
+                mime: {
+                    type: "string",
+                },
+            },
+            additionalProperties: false,
+        },
+    },
+    additionalProperties: false,
+} as const;
+export type AudioTagInput = FromSchema<typeof _slot_audio_tag_inputs>;
+const _slot_audio_tag_outputs = {
+    type: "object",
+    required: ["success"],
+    properties: {
+        success: {
+            type: "boolean",
+        },
+        error: {
+            type: "string",
+        },
+        tags: {
+            type: "string",
+        },
+    },
+    additionalProperties: false,
+} as const;
+export type AudioTagOutput = FromSchema<typeof _slot_audio_tag_outputs>;
+
+const _slot_detect_objects_inputs = {
+    type: "object",
+    required: ["image"],
+    properties: {
+        image: {
+            type: "object",
+            required: ["bytesBase64"],
+            properties: {
+                bytesBase64: {
+                    type: "string",
+                    minLength: 1,
+                },
+                filename: {
+                    type: "string",
+                },
+                mime: {
+                    type: "string",
+                },
+            },
+            additionalProperties: false,
+        },
+    },
+    additionalProperties: false,
+} as const;
+export type DetectObjectsInput = FromSchema<typeof _slot_detect_objects_inputs>;
+const _slot_detect_objects_outputs = {
+    type: "object",
+    required: ["success"],
+    properties: {
+        success: {
+            type: "boolean",
+        },
+        error: {
+            type: "string",
+        },
+        objects: {
+            type: "string",
+        },
+    },
+    additionalProperties: false,
+} as const;
+export type DetectObjectsOutput = FromSchema<
+    typeof _slot_detect_objects_outputs
+>;
+
+const _slot_detect_language_inputs = {
+    type: "object",
+    required: ["text"],
+    properties: {
+        text: {
+            type: "string",
+            minLength: 1,
+        },
+    },
+    additionalProperties: false,
+} as const;
+export type DetectLanguageInput = FromSchema<
+    typeof _slot_detect_language_inputs
+>;
+const _slot_detect_language_outputs = {
+    type: "object",
+    required: ["success"],
+    properties: {
+        success: {
+            type: "boolean",
+        },
+        error: {
+            type: "string",
+        },
+        language: {
+            type: "string",
+        },
+    },
+    additionalProperties: false,
+} as const;
+export type DetectLanguageOutput = FromSchema<
+    typeof _slot_detect_language_outputs
+>;
+
 // --- NodeSlot union ---
 export type NodeSlot =
     | "gen-text"
@@ -4427,7 +5126,21 @@ export type NodeSlot =
     | "image-body-seg"
     | "image-normal"
     | "image-matting"
-    | "video-gen-model";
+    | "video-gen-model"
+    | "render-pages"
+    | "image-orient"
+    | "layout-detect"
+    | "ocr-image"
+    | "table-recognize"
+    | "chunk-text"
+    | "embed-text"
+    | "embed-image"
+    | "kb-write"
+    | "vad-segment"
+    | "diarize-speakers"
+    | "audio-tag"
+    | "detect-objects"
+    | "detect-language";
 
 // --- Lookup maps ---
 export type SlotInputsMap = {
@@ -4494,6 +5207,20 @@ export type SlotInputsMap = {
     "image-normal": ImageNormalInput;
     "image-matting": ImageMattingInput;
     "video-gen-model": VideoGenModelInput;
+    "render-pages": RenderPagesInput;
+    "image-orient": ImageOrientInput;
+    "layout-detect": LayoutDetectInput;
+    "ocr-image": OcrImageInput;
+    "table-recognize": TableRecognizeInput;
+    "chunk-text": ChunkTextInput;
+    "embed-text": EmbedTextInput;
+    "embed-image": EmbedImageInput;
+    "kb-write": KbWriteInput;
+    "vad-segment": VadSegmentInput;
+    "diarize-speakers": DiarizeSpeakersInput;
+    "audio-tag": AudioTagInput;
+    "detect-objects": DetectObjectsInput;
+    "detect-language": DetectLanguageInput;
 };
 
 export type SlotOutputsMap = {
@@ -4560,6 +5287,20 @@ export type SlotOutputsMap = {
     "image-normal": ImageNormalOutput;
     "image-matting": ImageMattingOutput;
     "video-gen-model": VideoGenModelOutput;
+    "render-pages": RenderPagesOutput;
+    "image-orient": ImageOrientOutput;
+    "layout-detect": LayoutDetectOutput;
+    "ocr-image": OcrImageOutput;
+    "table-recognize": TableRecognizeOutput;
+    "chunk-text": ChunkTextOutput;
+    "embed-text": EmbedTextOutput;
+    "embed-image": EmbedImageOutput;
+    "kb-write": KbWriteOutput;
+    "vad-segment": VadSegmentOutput;
+    "diarize-speakers": DiarizeSpeakersOutput;
+    "audio-tag": AudioTagOutput;
+    "detect-objects": DetectObjectsOutput;
+    "detect-language": DetectLanguageOutput;
 };
 
 export type SlotInput<S extends NodeSlot> = SlotInputsMap[S];
@@ -7136,6 +7877,439 @@ export const ABI_NODES = {
                 },
                 model: {
                     $ref: "#/$defs/ModelRef",
+                },
+            },
+            additionalProperties: false,
+        },
+    },
+    "render-pages": {
+        inputs: {
+            type: "object",
+            required: ["document"],
+            properties: {
+                document: {
+                    $ref: "#/$defs/Asset",
+                },
+            },
+            additionalProperties: false,
+        },
+        outputs: {
+            type: "object",
+            required: ["success"],
+            properties: {
+                success: {
+                    type: "boolean",
+                },
+                error: {
+                    type: "string",
+                },
+                pages: {
+                    type: "array",
+                    items: {
+                        $ref: "#/$defs/ImageRef",
+                    },
+                    "x-expand-each": true,
+                },
+            },
+            additionalProperties: false,
+        },
+    },
+    "image-orient": {
+        inputs: {
+            type: "object",
+            required: ["image"],
+            properties: {
+                image: {
+                    $ref: "#/$defs/Asset",
+                },
+            },
+            additionalProperties: false,
+        },
+        outputs: {
+            type: "object",
+            required: ["success"],
+            properties: {
+                success: {
+                    type: "boolean",
+                },
+                error: {
+                    type: "string",
+                },
+                image: {
+                    $ref: "#/$defs/ImageRef",
+                },
+            },
+            additionalProperties: false,
+        },
+    },
+    "layout-detect": {
+        inputs: {
+            type: "object",
+            required: ["image"],
+            properties: {
+                image: {
+                    $ref: "#/$defs/Asset",
+                },
+            },
+            additionalProperties: false,
+        },
+        outputs: {
+            type: "object",
+            required: ["success"],
+            properties: {
+                success: {
+                    type: "boolean",
+                },
+                error: {
+                    type: "string",
+                },
+                layout: {
+                    type: "string",
+                },
+                regions: {
+                    type: "array",
+                    items: {
+                        $ref: "#/$defs/ImageRef",
+                    },
+                    "x-expand-each": true,
+                },
+            },
+            additionalProperties: false,
+        },
+    },
+    "ocr-image": {
+        inputs: {
+            type: "object",
+            required: ["image"],
+            properties: {
+                image: {
+                    $ref: "#/$defs/Asset",
+                },
+            },
+            additionalProperties: false,
+        },
+        outputs: {
+            type: "object",
+            required: ["success"],
+            properties: {
+                success: {
+                    type: "boolean",
+                },
+                error: {
+                    type: "string",
+                },
+                text: {
+                    type: "string",
+                },
+            },
+            additionalProperties: false,
+        },
+    },
+    "table-recognize": {
+        inputs: {
+            type: "object",
+            required: ["image"],
+            properties: {
+                image: {
+                    $ref: "#/$defs/Asset",
+                },
+            },
+            additionalProperties: false,
+        },
+        outputs: {
+            type: "object",
+            required: ["success"],
+            properties: {
+                success: {
+                    type: "boolean",
+                },
+                error: {
+                    type: "string",
+                },
+                html: {
+                    type: "string",
+                },
+            },
+            additionalProperties: false,
+        },
+    },
+    "chunk-text": {
+        inputs: {
+            type: "object",
+            required: ["texts"],
+            properties: {
+                texts: {
+                    type: "array",
+                    items: {
+                        type: "string",
+                        minLength: 1,
+                    },
+                },
+                max_chars: {
+                    type: "integer",
+                },
+            },
+            additionalProperties: false,
+        },
+        outputs: {
+            type: "object",
+            required: ["success"],
+            properties: {
+                success: {
+                    type: "boolean",
+                },
+                error: {
+                    type: "string",
+                },
+                chunks: {
+                    type: "array",
+                    items: {
+                        type: "string",
+                    },
+                },
+            },
+            additionalProperties: false,
+        },
+    },
+    "embed-text": {
+        inputs: {
+            type: "object",
+            required: ["texts"],
+            properties: {
+                texts: {
+                    type: "array",
+                    items: {
+                        type: "string",
+                        minLength: 1,
+                    },
+                },
+            },
+            additionalProperties: false,
+        },
+        outputs: {
+            type: "object",
+            required: ["success"],
+            properties: {
+                success: {
+                    type: "boolean",
+                },
+                error: {
+                    type: "string",
+                },
+                vectors: {
+                    $ref: "#/$defs/FileRef",
+                },
+            },
+            additionalProperties: false,
+        },
+    },
+    "embed-image": {
+        inputs: {
+            type: "object",
+            required: ["image"],
+            properties: {
+                image: {
+                    $ref: "#/$defs/Asset",
+                },
+            },
+            additionalProperties: false,
+        },
+        outputs: {
+            type: "object",
+            required: ["success"],
+            properties: {
+                success: {
+                    type: "boolean",
+                },
+                error: {
+                    type: "string",
+                },
+                vectors: {
+                    $ref: "#/$defs/FileRef",
+                },
+            },
+            additionalProperties: false,
+        },
+    },
+    "kb-write": {
+        inputs: {
+            type: "object",
+            required: ["chunks", "vectors", "source"],
+            properties: {
+                chunks: {
+                    type: "array",
+                    items: {
+                        type: "string",
+                        minLength: 1,
+                    },
+                },
+                vectors: {
+                    $ref: "#/$defs/Asset",
+                },
+                source: {
+                    type: "string",
+                    minLength: 1,
+                },
+            },
+            additionalProperties: false,
+        },
+        outputs: {
+            type: "object",
+            required: ["success"],
+            properties: {
+                success: {
+                    type: "boolean",
+                },
+                error: {
+                    type: "string",
+                },
+                text: {
+                    type: "string",
+                },
+            },
+            additionalProperties: false,
+        },
+    },
+    "vad-segment": {
+        inputs: {
+            type: "object",
+            required: ["audio"],
+            properties: {
+                audio: {
+                    $ref: "#/$defs/Asset",
+                },
+            },
+            additionalProperties: false,
+        },
+        outputs: {
+            type: "object",
+            required: ["success"],
+            properties: {
+                success: {
+                    type: "boolean",
+                },
+                error: {
+                    type: "string",
+                },
+                segments: {
+                    type: "array",
+                    items: {
+                        $ref: "#/$defs/AudioRef",
+                    },
+                    "x-expand-each": true,
+                },
+            },
+            additionalProperties: false,
+        },
+    },
+    "diarize-speakers": {
+        inputs: {
+            type: "object",
+            required: ["audio"],
+            properties: {
+                audio: {
+                    $ref: "#/$defs/Asset",
+                },
+            },
+            additionalProperties: false,
+        },
+        outputs: {
+            type: "object",
+            required: ["success"],
+            properties: {
+                success: {
+                    type: "boolean",
+                },
+                error: {
+                    type: "string",
+                },
+                segments: {
+                    type: "string",
+                },
+            },
+            additionalProperties: false,
+        },
+    },
+    "audio-tag": {
+        inputs: {
+            type: "object",
+            required: ["audio"],
+            properties: {
+                audio: {
+                    $ref: "#/$defs/Asset",
+                },
+            },
+            additionalProperties: false,
+        },
+        outputs: {
+            type: "object",
+            required: ["success"],
+            properties: {
+                success: {
+                    type: "boolean",
+                },
+                error: {
+                    type: "string",
+                },
+                tags: {
+                    type: "string",
+                },
+            },
+            additionalProperties: false,
+        },
+    },
+    "detect-objects": {
+        inputs: {
+            type: "object",
+            required: ["image"],
+            properties: {
+                image: {
+                    $ref: "#/$defs/Asset",
+                },
+            },
+            additionalProperties: false,
+        },
+        outputs: {
+            type: "object",
+            required: ["success"],
+            properties: {
+                success: {
+                    type: "boolean",
+                },
+                error: {
+                    type: "string",
+                },
+                objects: {
+                    type: "string",
+                },
+            },
+            additionalProperties: false,
+        },
+    },
+    "detect-language": {
+        inputs: {
+            type: "object",
+            required: ["text"],
+            properties: {
+                text: {
+                    type: "string",
+                    minLength: 1,
+                },
+            },
+            additionalProperties: false,
+        },
+        outputs: {
+            type: "object",
+            required: ["success"],
+            properties: {
+                success: {
+                    type: "boolean",
+                },
+                error: {
+                    type: "string",
+                },
+                language: {
+                    type: "string",
                 },
             },
             additionalProperties: false,

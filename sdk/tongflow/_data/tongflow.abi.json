@@ -2630,6 +2630,453 @@
                 },
                 "additionalProperties": false
             }
+        },
+        {
+            "nodeSlot": "render-pages",
+            "inputs": {
+                "type": "object",
+                "required": ["document"],
+                "properties": {
+                    "document": {
+                        "$ref": "#/$defs/Asset"
+                    }
+                },
+                "additionalProperties": false
+            },
+            "outputs": {
+                "type": "object",
+                "required": ["success"],
+                "properties": {
+                    "success": {
+                        "type": "boolean"
+                    },
+                    "error": {
+                        "type": "string"
+                    },
+                    "pages": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/$defs/ImageRef"
+                        },
+                        "x-expand-each": true
+                    }
+                },
+                "additionalProperties": false
+            }
+        },
+        {
+            "nodeSlot": "image-orient",
+            "inputs": {
+                "type": "object",
+                "required": ["image"],
+                "properties": {
+                    "image": {
+                        "$ref": "#/$defs/Asset"
+                    }
+                },
+                "additionalProperties": false
+            },
+            "outputs": {
+                "type": "object",
+                "required": ["success"],
+                "properties": {
+                    "success": {
+                        "type": "boolean"
+                    },
+                    "error": {
+                        "type": "string"
+                    },
+                    "image": {
+                        "$ref": "#/$defs/ImageRef"
+                    }
+                },
+                "additionalProperties": false
+            }
+        },
+        {
+            "nodeSlot": "layout-detect",
+            "inputs": {
+                "type": "object",
+                "required": ["image"],
+                "properties": {
+                    "image": {
+                        "$ref": "#/$defs/Asset"
+                    }
+                },
+                "additionalProperties": false
+            },
+            "outputs": {
+                "type": "object",
+                "required": ["success"],
+                "properties": {
+                    "success": {
+                        "type": "boolean"
+                    },
+                    "error": {
+                        "type": "string"
+                    },
+                    "layout": {
+                        "type": "string"
+                    },
+                    "regions": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/$defs/ImageRef"
+                        },
+                        "x-expand-each": true
+                    }
+                },
+                "additionalProperties": false
+            }
+        },
+        {
+            "nodeSlot": "ocr-image",
+            "inputs": {
+                "type": "object",
+                "required": ["image"],
+                "properties": {
+                    "image": {
+                        "$ref": "#/$defs/Asset"
+                    }
+                },
+                "additionalProperties": false
+            },
+            "outputs": {
+                "type": "object",
+                "required": ["success"],
+                "properties": {
+                    "success": {
+                        "type": "boolean"
+                    },
+                    "error": {
+                        "type": "string"
+                    },
+                    "text": {
+                        "type": "string"
+                    }
+                },
+                "additionalProperties": false
+            }
+        },
+        {
+            "nodeSlot": "table-recognize",
+            "inputs": {
+                "type": "object",
+                "required": ["image"],
+                "properties": {
+                    "image": {
+                        "$ref": "#/$defs/Asset"
+                    }
+                },
+                "additionalProperties": false
+            },
+            "outputs": {
+                "type": "object",
+                "required": ["success"],
+                "properties": {
+                    "success": {
+                        "type": "boolean"
+                    },
+                    "error": {
+                        "type": "string"
+                    },
+                    "html": {
+                        "type": "string"
+                    }
+                },
+                "additionalProperties": false
+            }
+        },
+        {
+            "nodeSlot": "chunk-text",
+            "inputs": {
+                "type": "object",
+                "required": ["texts"],
+                "properties": {
+                    "texts": {
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "minLength": 1
+                        }
+                    },
+                    "max_chars": {
+                        "type": "integer"
+                    }
+                },
+                "additionalProperties": false
+            },
+            "outputs": {
+                "type": "object",
+                "required": ["success"],
+                "properties": {
+                    "success": {
+                        "type": "boolean"
+                    },
+                    "error": {
+                        "type": "string"
+                    },
+                    "chunks": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "additionalProperties": false
+            }
+        },
+        {
+            "nodeSlot": "embed-text",
+            "inputs": {
+                "type": "object",
+                "required": ["texts"],
+                "properties": {
+                    "texts": {
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "minLength": 1
+                        }
+                    }
+                },
+                "additionalProperties": false
+            },
+            "outputs": {
+                "type": "object",
+                "required": ["success"],
+                "properties": {
+                    "success": {
+                        "type": "boolean"
+                    },
+                    "error": {
+                        "type": "string"
+                    },
+                    "vectors": {
+                        "$ref": "#/$defs/FileRef"
+                    }
+                },
+                "additionalProperties": false
+            }
+        },
+        {
+            "nodeSlot": "embed-image",
+            "inputs": {
+                "type": "object",
+                "required": ["image"],
+                "properties": {
+                    "image": {
+                        "$ref": "#/$defs/Asset"
+                    }
+                },
+                "additionalProperties": false
+            },
+            "outputs": {
+                "type": "object",
+                "required": ["success"],
+                "properties": {
+                    "success": {
+                        "type": "boolean"
+                    },
+                    "error": {
+                        "type": "string"
+                    },
+                    "vectors": {
+                        "$ref": "#/$defs/FileRef"
+                    }
+                },
+                "additionalProperties": false
+            }
+        },
+        {
+            "nodeSlot": "kb-write",
+            "inputs": {
+                "type": "object",
+                "required": ["chunks", "vectors", "source"],
+                "properties": {
+                    "chunks": {
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "minLength": 1
+                        }
+                    },
+                    "vectors": {
+                        "$ref": "#/$defs/Asset"
+                    },
+                    "source": {
+                        "type": "string",
+                        "minLength": 1
+                    }
+                },
+                "additionalProperties": false
+            },
+            "outputs": {
+                "type": "object",
+                "required": ["success"],
+                "properties": {
+                    "success": {
+                        "type": "boolean"
+                    },
+                    "error": {
+                        "type": "string"
+                    },
+                    "text": {
+                        "type": "string"
+                    }
+                },
+                "additionalProperties": false
+            }
+        },
+        {
+            "nodeSlot": "vad-segment",
+            "inputs": {
+                "type": "object",
+                "required": ["audio"],
+                "properties": {
+                    "audio": {
+                        "$ref": "#/$defs/Asset"
+                    }
+                },
+                "additionalProperties": false
+            },
+            "outputs": {
+                "type": "object",
+                "required": ["success"],
+                "properties": {
+                    "success": {
+                        "type": "boolean"
+                    },
+                    "error": {
+                        "type": "string"
+                    },
+                    "segments": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/$defs/AudioRef"
+                        },
+                        "x-expand-each": true
+                    }
+                },
+                "additionalProperties": false
+            }
+        },
+        {
+            "nodeSlot": "diarize-speakers",
+            "inputs": {
+                "type": "object",
+                "required": ["audio"],
+                "properties": {
+                    "audio": {
+                        "$ref": "#/$defs/Asset"
+                    }
+                },
+                "additionalProperties": false
+            },
+            "outputs": {
+                "type": "object",
+                "required": ["success"],
+                "properties": {
+                    "success": {
+                        "type": "boolean"
+                    },
+                    "error": {
+                        "type": "string"
+                    },
+                    "segments": {
+                        "type": "string"
+                    }
+                },
+                "additionalProperties": false
+            }
+        },
+        {
+            "nodeSlot": "audio-tag",
+            "inputs": {
+                "type": "object",
+                "required": ["audio"],
+                "properties": {
+                    "audio": {
+                        "$ref": "#/$defs/Asset"
+                    }
+                },
+                "additionalProperties": false
+            },
+            "outputs": {
+                "type": "object",
+                "required": ["success"],
+                "properties": {
+                    "success": {
+                        "type": "boolean"
+                    },
+                    "error": {
+                        "type": "string"
+                    },
+                    "tags": {
+                        "type": "string"
+                    }
+                },
+                "additionalProperties": false
+            }
+        },
+        {
+            "nodeSlot": "detect-objects",
+            "inputs": {
+                "type": "object",
+                "required": ["image"],
+                "properties": {
+                    "image": {
+                        "$ref": "#/$defs/Asset"
+                    }
+                },
+                "additionalProperties": false
+            },
+            "outputs": {
+                "type": "object",
+                "required": ["success"],
+                "properties": {
+                    "success": {
+                        "type": "boolean"
+                    },
+                    "error": {
+                        "type": "string"
+                    },
+                    "objects": {
+                        "type": "string"
+                    }
+                },
+                "additionalProperties": false
+            }
+        },
+        {
+            "nodeSlot": "detect-language",
+            "inputs": {
+                "type": "object",
+                "required": ["text"],
+                "properties": {
+                    "text": {
+                        "type": "string",
+                        "minLength": 1
+                    }
+                },
+                "additionalProperties": false
+            },
+            "outputs": {
+                "type": "object",
+                "required": ["success"],
+                "properties": {
+                    "success": {
+                        "type": "boolean"
+                    },
+                    "error": {
+                        "type": "string"
+                    },
+                    "language": {
+                        "type": "string"
+                    }
+                },
+                "additionalProperties": false
+            }
         }
     ]
 }

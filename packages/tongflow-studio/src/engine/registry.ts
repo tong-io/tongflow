@@ -4,6 +4,11 @@
  * `python -m tongflow scan`, cached in memory, invalidated on install /
  * uninstall. Presentation metadata (name / description / icon / env) is merged
  * from each plugin's `tongflow.plugin.json`, as the TongFlow app does.
+ *
+ * Browser plugins (`tongflow-edge-*`, registry `runtime: "browser"`) are listed
+ * like any other — the canvas plugin picker and `validate_workflow` see them —
+ * but the studio's Python engine refuses to run them ("requires the browser
+ * edge runtime").
  */
 import { execFile as execFileCb } from "node:child_process";
 import { mkdir, readdir, rm } from "node:fs/promises";
@@ -96,7 +101,9 @@ export const OFFICIAL_PLUGINS: readonly string[] = [
 export const OFFICIAL_PLUGINS_URL =
     "https://raw.githubusercontent.com/tong-io/tongflow/main/config/official-plugins.json";
 
-const PLUGIN_ID_RE = /^tongflow-(modal|api|router|local)-[a-z0-9-]+$/;
+// `edge` = browser plugins (TypeScript, run by the browser edge runtime); the
+// scanner lists them from their `tongflow.plugin.json` with runtime "browser".
+const PLUGIN_ID_RE = /^tongflow-(modal|api|router|local|edge)-[a-z0-9-]+$/;
 
 export function isPluginId(id: string): boolean {
     return PLUGIN_ID_RE.test(id);
@@ -267,7 +274,7 @@ export class RegistryManager {
         }
         if (!isPluginId(id)) {
             throw new Error(
-                `"${id}" is not a TongFlow plugin id (tongflow-modal-*/api-*/router-*/local-*)`,
+                `"${id}" is not a TongFlow plugin id (tongflow-modal-*/api-*/router-*/local-*/edge-*)`,
             );
         }
         const dest = join(this.opts.pluginsDir, id);

@@ -1,6 +1,6 @@
 import "server-only";
 
-import type { NodeSlot } from "tongflow";
+import { isBrowserPlugin, type NodeSlot } from "tongflow";
 import { getPluginConfig } from "@/lib/plugins/plugins-registry.server";
 import { convertAssetOutputsToFileRefs } from "./convert-output-fileref";
 import type { PluginExecRequest, PluginExecResult } from "./types";
@@ -10,6 +10,13 @@ export async function executePlugin<S extends NodeSlot = NodeSlot>(
 ): Promise<PluginExecResult<S>> {
     const cfg = getPluginConfig(req.pluginId);
     if (!cfg) throw new Error(`Unknown plugin: ${req.pluginId}`);
+    // Browser (edge) plugins ship no entry.py; only the browser edge runtime
+    // can run them.
+    if (isBrowserPlugin(cfg)) {
+        throw new Error(
+            `Plugin ${req.pluginId} (nodeSlot=${req.nodeSlot}) is a browser plugin and requires the browser edge runtime; the server cannot run it.`,
+        );
+    }
 
     // One generic runner for every plugin: spawn the plugin's local entry and
     // exchange ABI JSON. Where the work actually runs (local, Modal, another
