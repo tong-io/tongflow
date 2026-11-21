@@ -9,6 +9,9 @@
  *                                  upload, uploads, material stubs).
  *   Remote executor                /tongflow/p/:pid/api/engine/invoke[/stop] — one node of a browser-run
  *                                  workflow (`createHttpRemoteExecutor` with baseUrl `/tongflow/p/:pid`).
+ *   Edge plugins                   /tongflow/plugins/edge (what is installed, model base) and
+ *                                  /tongflow/plugins/files/:id/:version/<path> (the plugin's files, Range,
+ *                                  immutable per version) — what the browser edge runtime loads.
  */
 
 import { unlink } from "node:fs/promises";
@@ -20,6 +23,7 @@ import {
     type RemoteInvokeFrame,
 } from "tongflow/engine";
 import type { StudioApi } from "../api.ts";
+import { crossOriginIsolation } from "../config.ts";
 import type { RunRecord } from "../engine/runs.ts";
 import type { CanvasTaskBody } from "../engine/single-node.ts";
 import { getSessionProject } from "../session-projects.ts";
@@ -31,6 +35,7 @@ import type {
 import type { Studio } from "../studio.ts";
 import { writeFileAtomic } from "../util/fsx.ts";
 import { serveFile } from "./files.ts";
+import { pluginFileHeaders } from "./plugin-files.ts";
 import { openSse } from "./sse.ts";
 import {
     assertSameOrigin,
@@ -117,6 +122,7 @@ function requireQ(url: URL, name: string): string {
 
 function buildRoutes(env: RouteEnv): Route[] {
     const { api, studio } = env;
+    const prefix = routePrefix(env.prefix);
     const json = (c: RouteContext, body: unknown, status = 200) =>
         sendJson(c.res, status, body);
 
@@ -465,6 +471,7 @@ function buildRoutes(env: RouteEnv): Route[] {
                     meta,
                     scannedAt,
                     official: OFFICIAL_PLUGINS,
+                    officialRuntimes: await studio.registry.officialRuntimes(),
                 });
             },
         },
@@ -491,6 +498,36 @@ function buildRoutes(env: RouteEnv): Route[] {
             pattern: "/plugins/update",
             handler: async (c) =>
                 json(c, { changed: await api.updatePlugins() }),
+        },
+        /** Installed browser edge plugins: versioned URLs and the model base. */
+        {
+            method: "GET",
+            pattern: "/plugins/edge",
+            handler: async (c) => json(c, await api.edgePlugins(prefix)),
+        },
+        /** A browser plugin's own files, for its Web Worker (same-origin, Range). */
+        {
+            method: "GET",
+            pattern: "/plugins/files/:id/:version/*",
+            handler: async (c) => {
+                const { path, current } = await api.edgePluginFile(
+                    c.params.id,
+                    c.params.version,
+                    c.rest,
+                );
+                await serveFile(
+                    c.req,
+                    c.res,
+                    path,
+                    pluginFileHeaders({
+                        path,
+                        current,
+                        crossOriginIsolation: crossOriginIsolation(
+                            studio.config,
+                        ),
+                    }),
+                );
+            },
         },
         {
             method: "GET",

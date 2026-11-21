@@ -1,5 +1,6 @@
 /** Same-origin client for the studio's HTTP routes (`/tongflow/…`). */
 import type {
+    EdgePluginsInfo,
     OutputInfo,
     PluginConfirmation,
     ProjectSummary,
@@ -168,6 +169,7 @@ export const studio = {
                     {
                         name?: string;
                         description?: string;
+                        runtime?: "python" | "browser";
                         methodsByNodeSlot: Record<string, unknown>;
                     }
                 >;
@@ -184,7 +186,9 @@ export const studio = {
                 }
             >;
             official: string[];
+            officialRuntimes?: Record<string, "browser">;
         }>("GET", "/plugins"),
+    edgePlugins: () => call<EdgePluginsInfo>("GET", "/plugins/edge"),
     installPlugin: (idOrUrl: string) =>
         call<{ id: string; alreadyInstalled: boolean }>(
             "POST",

@@ -18,6 +18,7 @@ import {
 } from "node:http";
 import type { AddressInfo } from "node:net";
 import { extname, join, normalize, sep } from "node:path";
+import { crossOriginIsolation } from "./config.ts";
 import { createRouteHandler, routePrefix } from "./http/routes.ts";
 import type { ToolEnv } from "./tools/support.ts";
 
@@ -50,6 +51,16 @@ export async function serveStudio(
     const prefix = routePrefix(env.studio.config.httpPrefix);
     const routes = createRouteHandler({ ...env, prefix });
     const token = randomBytes(24).toString("base64url");
+    // Opt-in (TONGFLOW_CROSS_ORIGIN_ISOLATION): edge plugins then get
+    // threaded wasm. The plugin files route adds COEP to its worker scripts.
+    const isolation: Record<string, string> = crossOriginIsolation(
+        env.studio.config,
+    )
+        ? {
+              "cross-origin-opener-policy": "same-origin",
+              "cross-origin-embedder-policy": "require-corp",
+          }
+        : {};
     let port = 0;
     // Cookies are scoped by host, not by port: name ours after the port so
     // two studios on this machine do not overwrite each other's.
@@ -86,6 +97,7 @@ export async function serveStudio(
             res.writeHead(200, {
                 "content-type": "text/html; charset=utf-8",
                 "cache-control": "no-store",
+                ...isolation,
             });
             res.end(PAGE);
             return;
@@ -96,7 +108,12 @@ export async function serveStudio(
             return;
         }
         if (url.pathname.startsWith("/web/"))
-            return asset(res, webDir, url.pathname.slice("/web/".length));
+            return asset(
+                res,
+                webDir,
+                url.pathname.slice("/web/".length),
+                isolation,
+            );
         if (url.pathname === prefix || url.pathname.startsWith(`${prefix}/`))
             return routes(req, res);
         plain(res, 404, "not found");
@@ -151,6 +168,7 @@ async function asset(
     res: ServerResponse,
     webDir: string,
     name: string,
+    headers: Record<string, string>,
 ): Promise<void> {
     const type = WEB_TYPES[extname(name)];
     if (!type || normalize(name).includes(sep) || name.includes(".."))
@@ -168,6 +186,7 @@ async function asset(
         "content-length": info.size,
         // File names carry no content hash for the entry; always revalidate.
         "cache-control": "no-cache",
+        ...headers,
     });
     createReadStream(path).pipe(res);
 }

@@ -95,7 +95,17 @@ export const OFFICIAL_PLUGINS: readonly string[] = [
     "tongflow-modal-unlimited-ocr",
     "tongflow-modal-crawl4ai",
     "tongflow-modal-scrapling",
+    "tongflow-edge-essentials",
 ];
+
+/**
+ * Runtime of the official plugins that do not run in Python — snapshot of
+ * `runtimes` in `config/official-plugins.json` (absent = `python`). Browser
+ * plugins are installed like any other; the browser edge runtime runs them.
+ */
+export const OFFICIAL_PLUGIN_RUNTIMES: Readonly<Record<string, "browser">> = {
+    "tongflow-edge-essentials": "browser",
+};
 
 /** Where the live official list is fetched from. */
 export const OFFICIAL_PLUGINS_URL =
@@ -109,10 +119,32 @@ export function isPluginId(id: string): boolean {
     return PLUGIN_ID_RE.test(id);
 }
 
+/**
+ * `runtimes` of the official list: plugin id → `"browser"`. Unknown values
+ * are dropped; a `tongflow-edge-*` id is a browser plugin either way.
+ */
+export function parseRuntimes(
+    raw: unknown,
+    ids: readonly string[],
+): Record<string, "browser"> {
+    const out: Record<string, "browser"> = {};
+    const given =
+        raw && typeof raw === "object" && !Array.isArray(raw)
+            ? (raw as Record<string, unknown>)
+            : {};
+    for (const id of ids) {
+        if (given[id] === "browser" || id.startsWith("tongflow-edge-"))
+            out[id] = "browser";
+    }
+    return out;
+}
+
 export class RegistryManager {
     private cache: StudioRegistry | undefined;
     private inflight: Promise<StudioRegistry> | undefined;
-    private officialCache: { ids: string[]; at: number } | undefined;
+    private officialCache:
+        | { ids: string[]; runtimes: Record<string, "browser">; at: number }
+        | undefined;
 
     constructor(
         private readonly opts: {
@@ -165,29 +197,49 @@ export class RegistryManager {
 
     /** The official plugin list: live from GitHub (cached 1 h), else the built-in snapshot. */
     async officialIds(): Promise<string[]> {
+        return (await this.official()).ids;
+    }
+
+    /** Official plugin id → `browser` for those that run in the browser edge runtime. */
+    async officialRuntimes(): Promise<Record<string, "browser">> {
+        return (await this.official()).runtimes;
+    }
+
+    private async official(): Promise<{
+        ids: string[];
+        runtimes: Record<string, "browser">;
+    }> {
         const now = Date.now();
         if (this.officialCache && now - this.officialCache.at < 3_600_000)
-            return this.officialCache.ids;
+            return this.officialCache;
         let ids: string[] = [...OFFICIAL_PLUGINS];
+        let runtimes: Record<string, "browser"> = {
+            ...OFFICIAL_PLUGIN_RUNTIMES,
+        };
         try {
             const res = await fetch(OFFICIAL_PLUGINS_URL, {
                 signal: AbortSignal.timeout(8000),
             });
             if (res.ok) {
-                const body = (await res.json()) as { plugins?: unknown };
+                const body = (await res.json()) as {
+                    plugins?: unknown;
+                    runtimes?: unknown;
+                };
                 if (
                     Array.isArray(body.plugins) &&
                     body.plugins.every(
                         (p) => typeof p === "string" && isPluginId(p),
                     )
-                )
+                ) {
                     ids = body.plugins as string[];
+                    runtimes = parseRuntimes(body.runtimes, ids);
+                }
             }
         } catch {
             // offline: keep the snapshot
         }
-        this.officialCache = { ids, at: now };
-        return ids;
+        this.officialCache = { ids, runtimes, at: now };
+        return this.officialCache;
     }
 
     /**
@@ -254,14 +306,15 @@ export class RegistryManager {
         );
     }
 
-    /** `git clone --depth 1` a plugin (id → official org, or a full git URL). */
+    /** `git clone --depth 1` a plugin (id → official org, or a full git URL, `file://` included). */
     async install(
         idOrUrl: string,
         signal?: AbortSignal,
     ): Promise<{ id: string; url: string; alreadyInstalled: boolean }> {
         let id: string;
         let url: string;
-        if (/^(https?:\/\/|git@|ssh:\/\/)/.test(idOrUrl)) {
+        // file:// clones a local checkout (plugin development, tests).
+        if (/^(https?:\/\/|git@|ssh:\/\/|file:\/\/)/.test(idOrUrl)) {
             url = idOrUrl;
             id = idOrUrl
                 .replace(/\/+$/, "")

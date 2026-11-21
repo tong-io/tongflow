@@ -58,7 +58,12 @@ export function PluginsDialog({ onClose }: { onClose: () => void }) {
                             <tr key={id}>
                                 <td>
                                     <b>{p.name ?? id}</b>
-                                    <div className="tfs-muted">{id}</div>
+                                    <div className="tfs-muted">
+                                        {id}
+                                        {p.runtime === "browser"
+                                            ? ` · ${t("browserPlugin")}`
+                                            : ""}
+                                    </div>
                                 </td>
                                 <td className="tfs-muted">
                                     {Object.keys(p.methodsByNodeSlot).join(
@@ -106,7 +111,9 @@ export function PluginsDialog({ onClose }: { onClose: () => void }) {
                     <option value="">{t("officialPlugin")}</option>
                     {official.map((id) => (
                         <option key={id} value={id}>
-                            {id}
+                            {plugins.data?.officialRuntimes?.[id] === "browser"
+                                ? `${id} · ${t("browserPlugin")}`
+                                : id}
                         </option>
                     ))}
                 </select>
@@ -114,7 +121,9 @@ export function PluginsDialog({ onClose }: { onClose: () => void }) {
                     className="tfs-input"
                     style={{ flex: 1 }}
                     placeholder={t("orGitUrl")}
-                    value={installing.startsWith("http") ? installing : ""}
+                    value={
+                        /^(https?|file):\/\//.test(installing) ? installing : ""
+                    }
                     onChange={(e) => setInstalling(e.target.value)}
                 />
                 <button
