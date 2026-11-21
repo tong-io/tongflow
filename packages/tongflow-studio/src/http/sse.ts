@@ -7,7 +7,7 @@ export interface SseStream {
     readonly closed: boolean;
 }
 
-export function openSse(req: IncomingMessage, res: ServerResponse): SseStream {
+export function openSse(_req: IncomingMessage, res: ServerResponse): SseStream {
     res.writeHead(200, {
         "content-type": "text/event-stream; charset=utf-8",
         "cache-control": "no-cache, no-transform",
@@ -30,7 +30,9 @@ export function openSse(req: IncomingMessage, res: ServerResponse): SseStream {
             // ignore
         }
     };
-    req.on("close", finish);
+    // The response's close, not the request's: a request emits `close` as
+    // soon as its body has been read, which for a POST is before streaming.
+    res.on("close", finish);
     return {
         send(data, event) {
             if (closed) return;

@@ -61,8 +61,9 @@ export async function readBody(
 
 export async function readJson<T = Record<string, unknown>>(
     req: IncomingMessage,
+    limit?: number,
 ): Promise<T> {
-    const buf = await readBody(req);
+    const buf = await readBody(req, limit);
     if (buf.length === 0) return {} as T;
     try {
         return JSON.parse(buf.toString("utf8")) as T;

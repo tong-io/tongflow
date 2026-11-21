@@ -16,6 +16,7 @@ import {
     type ExecuteToolContext,
     executeGraphTool,
     type GraphPatch,
+    getAbiNodeBySlot,
     isBrowserPlugin,
     KNOWN_NODE_TYPES,
     NODE_TYPE_TO_ABI_FEATURE,
@@ -23,6 +24,11 @@ import {
     resolvedSpecForNodeType,
     type ToolResult,
 } from "tongflow";
+import {
+    EDGE_PLUGIN_PREFIX,
+    type RemoteInvokeErrorBody,
+    type RemoteInvokeRequest,
+} from "tongflow/engine";
 import {
     categoryOf,
     NODE_CATEGORY_ORDER,
@@ -533,6 +539,94 @@ export class StudioApi {
             label: `canvas ${body.feature}`,
             keepRunDir: true,
         });
+    }
+
+    /**
+     * A remote-executor call (`POST /p/:pid/api/engine/invoke`): one node of a
+     * browser-run workflow, its prompt already materialized. Runs as a one-node
+     * inline document like a canvas run, but with inline outputs, so nothing
+     * lands in the project and the caller gets `bytesBase64` back.
+     *
+     * Refused before it starts: browser plugins (400 `browser_plugin`),
+     * plugins that are not installed or lack the slot (400), and — the
+     * studio's billing checkpoint — a paid plugin without `confirmed`
+     * (409 `needs_confirmation`, with what to tell the user).
+     */
+    async startInvoke(
+        projectId: string,
+        request: RemoteInvokeRequest,
+    ): Promise<
+        | { ok: true; record: RunRecord; nodeId: string }
+        | { ok: false; status: number; body: RemoteInvokeErrorBody }
+    > {
+        const project = await this.project(projectId);
+        const { pluginId, nodeSlot } = request;
+        const refuse = (
+            status: number,
+            body: RemoteInvokeErrorBody,
+        ): { ok: false; status: number; body: RemoteInvokeErrorBody } => ({
+            ok: false,
+            status,
+            body,
+        });
+        if (!getAbiNodeBySlot(nodeSlot)) {
+            return refuse(400, {
+                error: `Invalid nodeSlot=${nodeSlot}: not in the ABI.`,
+                code: "invalid_request",
+            });
+        }
+        const { registry } = await this.studio.registry.get();
+        const plugin = Object.hasOwn(registry.plugins, pluginId)
+            ? registry.plugins[pluginId]
+            : undefined;
+        if (
+            isBrowserPlugin(plugin) ||
+            (!plugin && pluginId.startsWith(EDGE_PLUGIN_PREFIX))
+        ) {
+            return refuse(400, {
+                error: `Plugin ${pluginId} (nodeSlot=${nodeSlot}) is a browser plugin and requires the browser edge runtime; the server cannot run it.`,
+                code: "browser_plugin",
+            });
+        }
+        if (!plugin) {
+            return refuse(400, {
+                error: `Plugin not installed: ${pluginId}. Install it in the studio before running this node on the server.`,
+                code: "plugin_not_installed",
+            });
+        }
+        if (!plugin.methodsByNodeSlot[nodeSlot]) {
+            return refuse(400, {
+                error: `Plugin ${pluginId} does not implement nodeSlot=${nodeSlot}.`,
+                code: "invalid_request",
+            });
+        }
+        if (!request.confirmed) {
+            const { billing, note } = await this.pluginBilling(pluginId);
+            if (billing !== "local") {
+                return refuse(409, {
+                    error: `Plugin ${pluginId} bills you (${billing}): the user must agree before it runs.`,
+                    code: "needs_confirmation",
+                    confirmation: { pluginId, nodeSlot, billing, note },
+                });
+            }
+        }
+        const nodeId = "invoke";
+        const document = await singleNodeDocument(project.root, {
+            feature: nodeSlot,
+            pluginId,
+            ...(request.model ? { model: request.model } : {}),
+            prompt: request.prompt,
+            nodeId,
+        });
+        const node = document.executable?.executableNodes[0];
+        if (node && request._params) node.params = request._params;
+        const record = this.studio.runs.start(project, {
+            projectId,
+            document,
+            label: `invoke ${nodeSlot}`,
+            inlineOutputs: true,
+        });
+        return { ok: true, record, nodeId };
     }
 
     getRun(runId: string): RunRecord | undefined {
