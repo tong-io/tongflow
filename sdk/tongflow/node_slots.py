@@ -81,6 +81,20 @@ class NodeSlots:
     IMAGE_NORMAL: Final[str] = 'image-normal'
     IMAGE_MATTING: Final[str] = 'image-matting'
     VIDEO_GEN_MODEL: Final[str] = 'video-gen-model'
+    RENDER_PAGES: Final[str] = 'render-pages'
+    IMAGE_ORIENT: Final[str] = 'image-orient'
+    LAYOUT_DETECT: Final[str] = 'layout-detect'
+    OCR_IMAGE: Final[str] = 'ocr-image'
+    TABLE_RECOGNIZE: Final[str] = 'table-recognize'
+    CHUNK_TEXT: Final[str] = 'chunk-text'
+    EMBED_TEXT: Final[str] = 'embed-text'
+    EMBED_IMAGE: Final[str] = 'embed-image'
+    KB_WRITE: Final[str] = 'kb-write'
+    VAD_SEGMENT: Final[str] = 'vad-segment'
+    DIARIZE_SPEAKERS: Final[str] = 'diarize-speakers'
+    AUDIO_TAG: Final[str] = 'audio-tag'
+    DETECT_OBJECTS: Final[str] = 'detect-objects'
+    DETECT_LANGUAGE: Final[str] = 'detect-language'
 
 
 ALL_NODE_SLOTS: Final[tuple[str, ...]] = (
@@ -147,5 +161,19 @@ ALL_NODE_SLOTS: Final[tuple[str, ...]] = (
     'image-normal',
     'image-matting',
     'video-gen-model',
+    'render-pages',
+    'image-orient',
+    'layout-detect',
+    'ocr-image',
+    'table-recognize',
+    'chunk-text',
+    'embed-text',
+    'embed-image',
+    'kb-write',
+    'vad-segment',
+    'diarize-speakers',
+    'audio-tag',
+    'detect-objects',
+    'detect-language',
 )
 
