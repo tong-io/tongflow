@@ -278,7 +278,9 @@
                 "pluginRegistryLoadError": "プラグイン登録情報を読み込めませんでした：{message}",
                 "pluginSelectPlaceholder": "リポジトリを選択…",
                 "missingImplTitle": "実装が未選択",
-                "missingImplDescription": "このノードに利用可能なプラグインがインストールされていません（または未選択です）。実行前に、プラグインマネージャーからインストールするか、インストール済みのプラグインを選択してください。"
+                "missingImplDescription": "このノードに利用可能なプラグインがインストールされていません（または未選択です）。実行前に、プラグインマネージャーからインストールするか、インストール済みのプラグインを選択してください。",
+                "downloadingModel": "モデルをダウンロード中 {loaded}/{total} MB",
+                "downloadingModelNoTotal": "モデルをダウンロード中 {loaded} MB"
             },
             "common": {
                 "enterInstructions": "指示を入力してください...",
@@ -932,6 +934,10 @@
                 "sourcePlaceholder": "例: 契約書-2026.pdf",
                 "hint": "チャンク（テキスト）と対応するベクトル（ファイル）を接続します。保存はホストが行い、このノードは概要を返します。"
             }
+        },
+        "toolbar": {
+            "runWorkflow": "ワークフローを実行",
+            "stopWorkflow": "停止"
         }
     },
     "Upload": {

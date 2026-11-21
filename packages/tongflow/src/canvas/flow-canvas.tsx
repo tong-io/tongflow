@@ -6,10 +6,12 @@
  * Renders the node/edge components over the flow store, enforces the ABI
  * connection contract while the user drags, handles reconnect / drop-to-
  * delete, follows newly created nodes with the camera and exposes an
- * imperative handle (`fitView` / `focusNode` / `tidyLayout`). Everything that
- * is application shell — navigation, dialogs, persistence, execution
- * plumbing, onboarding — lives in the host (`workspace.tsx`), which passes
- * overlays in as `children` (rendered inside a React Flow `Panel`).
+ * imperative handle (`fitView` / `focusNode` / `tidyLayout`). When the host
+ * configured a `workflowRunner`, a "Run workflow" action sits top-right.
+ * Everything else that is application shell — navigation, dialogs,
+ * persistence, execution plumbing, onboarding — lives in the host
+ * (`workspace.tsx`), which passes overlays in as `children` (rendered inside
+ * a React Flow `Panel`).
  */
 
 import type {
@@ -40,6 +42,7 @@ import {
 import { useTranslations } from "use-intl";
 import { useShallow } from "zustand/react/shallow";
 import { isValidFlowConnection } from "../core";
+import { RunWorkflowAction } from "./components/run-workflow-action";
 import type { FlowState } from "./hooks/use-flow";
 import { useFlow } from "./hooks/use-flow";
 import { cn } from "./lib/utils";
@@ -340,6 +343,8 @@ export const FlowCanvas = forwardRef<FlowCanvasHandle, FlowCanvasProps>(
                     >
                         <Background />
                         {showControls && <Controls />}
+                        {/* Renders nothing without a host workflow runner. */}
+                        <RunWorkflowAction />
                         {children ? (
                             <Panel
                                 position={panelPosition}

@@ -278,7 +278,9 @@
                 "pluginRegistryLoadError": "플러그인 레지스트리를 불러올 수 없습니다: {message}",
                 "pluginSelectPlaceholder": "저장소 선택…",
                 "missingImplTitle": "구현 누락",
-                "missingImplDescription": "실행하기 전에 이 노드에서 플러그인 구현을 선택하세요."
+                "missingImplDescription": "실행하기 전에 이 노드에서 플러그인 구현을 선택하세요.",
+                "downloadingModel": "모델 다운로드 중 {loaded}/{total} MB",
+                "downloadingModelNoTotal": "모델 다운로드 중 {loaded} MB"
             },
             "common": {
                 "enterInstructions": "지시 사항 입력...",
@@ -1018,6 +1020,10 @@
                 "sourcePlaceholder": "예: 계약서-2026.pdf",
                 "hint": "청크(텍스트)와 해당 벡터(파일)를 연결하세요. 저장은 호스트가 맡고 이 노드는 요약을 반환합니다."
             }
+        },
+        "toolbar": {
+            "runWorkflow": "워크플로 실행",
+            "stopWorkflow": "중지"
         }
     },
     "Upload": {

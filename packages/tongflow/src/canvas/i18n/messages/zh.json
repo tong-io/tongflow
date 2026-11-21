@@ -278,7 +278,9 @@
                 "pluginRegistryLoadError": "无法加载插件注册表：{message}",
                 "pluginSelectPlaceholder": "选择一个仓库…",
                 "missingImplTitle": "未配置实现",
-                "missingImplDescription": "该节点尚未安装可用插件（或未选择）。请先在插件管理中安装一个插件，或选择一个已安装的插件，然后再运行。"
+                "missingImplDescription": "该节点尚未安装可用插件（或未选择）。请先在插件管理中安装一个插件，或选择一个已安装的插件，然后再运行。",
+                "downloadingModel": "下载模型 {loaded}/{total} MB",
+                "downloadingModelNoTotal": "下载模型 {loaded} MB"
             },
             "common": {
                 "enterInstructions": "请输入指令...",
@@ -1018,6 +1020,10 @@
                 "sourcePlaceholder": "例如 合同-2026.pdf",
                 "hint": "接入文本块（文本）和对应的向量（文件）。实际存储由宿主负责，本节点返回入库摘要。"
             }
+        },
+        "toolbar": {
+            "runWorkflow": "运行工作流",
+            "stopWorkflow": "停止"
         }
     },
     "Upload": {

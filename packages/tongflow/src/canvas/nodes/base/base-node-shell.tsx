@@ -5,13 +5,14 @@
  */
 
 import { useNodeId, useStore } from "@xyflow/react";
-import { Wand2 } from "lucide-react";
+import { AlertCircle, Wand2 } from "lucide-react";
 import type { HTMLAttributes, ReactNode } from "react";
 import { forwardRef } from "react";
 import { useTranslations } from "use-intl";
 import type { BaseNodeData } from "../../../core";
 import { isModalityNode } from "../../../core";
 import useFlow from "../../hooks/use-flow";
+import type { NodeRunProgress } from "../../hooks/use-task";
 import { cn } from "../../lib/utils";
 import {
     AlertDialog,
@@ -63,6 +64,11 @@ export type BaseNodeShellProps = HTMLAttributes<HTMLDivElement> & {
     progressLabel?: string | null;
     /** Streamed reasoning shown in the auto-scrolling bubble beside the node. */
     thinkingText?: string | null;
+    /**
+     * Host workflow-runner detail for this node: progress fraction, model
+     * download (shown while `loading`) or the failure message (shown after).
+     */
+    runProgress?: NodeRunProgress | null;
     /** When true, hides the execute button (already in execute mode). */
     isExecuteMode?: boolean;
     /**
@@ -108,6 +114,7 @@ export const BaseNodeShell = forwardRef<HTMLDivElement, BaseNodeShellProps>(
             elapsedSeconds = 0,
             progressLabel = null,
             thinkingText = null,
+            runProgress = null,
             isExecuteMode = false,
             onExecute,
             onCancel,
@@ -192,6 +199,8 @@ export const BaseNodeShell = forwardRef<HTMLDivElement, BaseNodeShellProps>(
                             loading={loading}
                             elapsedSeconds={elapsedSeconds}
                             progressLabel={progressLabel}
+                            progressFraction={runProgress?.fraction ?? null}
+                            download={runProgress?.download ?? null}
                             onCancel={onCancel}
                         />
 
@@ -266,6 +275,19 @@ export const BaseNodeShell = forwardRef<HTMLDivElement, BaseNodeShellProps>(
                                     nodeSlot={feature}
                                     data={data ?? { feature }}
                                 />
+                            </div>
+                        )}
+
+                        {/* Workflow-runner failure */}
+                        {!loading && runProgress?.error && (
+                            <div
+                                className="mx-4 mt-3 flex items-start gap-2 rounded-md border border-red-200 bg-red-50 px-2 py-1.5 text-xs text-red-700 dark:border-red-800 dark:bg-red-950/40 dark:text-red-300"
+                                title={runProgress.error}
+                            >
+                                <AlertCircle className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+                                <span className="line-clamp-3 break-words">
+                                    {runProgress.error}
+                                </span>
                             </div>
                         )}
 

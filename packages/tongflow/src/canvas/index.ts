@@ -15,6 +15,7 @@
  */
 
 export * from "./components/lib-input";
+export * from "./components/run-workflow-action";
 export * from "./components/speaker-voice-recorder";
 export * from "./constants/qwen-speakers";
 export * from "./flow-canvas";
@@ -29,6 +30,7 @@ export * from "./hooks/use-plugins-registry";
 export * from "./hooks/use-task";
 export * from "./hooks/use-upload";
 export * from "./hooks/use-upstream-ids";
+export * from "./hooks/use-workflow-run";
 export * from "./host";
 export * from "./i18n/client";
 export * from "./i18n/messages";
@@ -42,9 +44,11 @@ export * from "./lib/file/url-cache";
 export * from "./lib/task/api-url";
 export * from "./lib/task/payload";
 export * from "./lib/task/sse-events";
+export * from "./lib/task/transport";
 export * from "./lib/upload/limits";
 export * from "./lib/upload/validation";
 export * from "./lib/utils";
+export * from "./lib/workflow/runner";
 export * from "./node-types";
 export * from "./nodes/base/node-plugin-id-select";
 export * from "./nodes/modality/model-node.formats";

@@ -278,7 +278,9 @@
                 "pluginRegistryLoadError": "Could not load the plugin registry: {message}",
                 "pluginSelectPlaceholder": "Select a repo…",
                 "missingImplTitle": "Missing Implementation",
-                "missingImplDescription": "No plugin is installed for this node (or none is selected). Install one from the plugin manager, or pick an installed plugin, before running."
+                "missingImplDescription": "No plugin is installed for this node (or none is selected). Install one from the plugin manager, or pick an installed plugin, before running.",
+                "downloadingModel": "Downloading model {loaded}/{total} MB",
+                "downloadingModelNoTotal": "Downloading model {loaded} MB"
             },
             "common": {
                 "enterInstructions": "Enter instructions...",
@@ -1018,6 +1020,10 @@
                 "sourcePlaceholder": "e.g. contract-2026.pdf",
                 "hint": "Connect the chunks (text) and their vectors (file). The host stores them; this node returns a summary."
             }
+        },
+        "toolbar": {
+            "runWorkflow": "Run workflow",
+            "stopWorkflow": "Stop"
         }
     },
     "Upload": {

@@ -33,6 +33,7 @@ import { useNodeAbiSpec, useNodeType } from "./use-node-abi-spec";
 import { useNodePluginResolver } from "./use-node-plugin-resolver";
 import { usePluginsRegistry } from "./use-plugins-registry";
 import {
+    type NodeRunProgress,
     type Task,
     useBatchTaskManager,
     useNodeTaskUpdate,
@@ -79,6 +80,8 @@ export interface UseAbiExecutionReturn {
     progressLabel: string | null;
     /** Live streamed reasoning ("thinking") for the node bubble. Null when none. */
     thinkingText: string | null;
+    /** Host workflow-runner detail (progress / download / error). Null when none. */
+    runProgress: NodeRunProgress | null;
     canRun: boolean;
     /** ABI feature being executed. */
     feature: string;
@@ -252,6 +255,13 @@ export function useAbiExecution<F extends NodeSlot>(
         ),
     );
 
+    const runProgress = useTaskStore(
+        useCallback(
+            (s) => s.nodeRunProgressMap.get(nodeId ?? "") ?? null,
+            [nodeId],
+        ),
+    );
+
     const expands = useFlow((s) => s.expands);
     const {
         isLoading: taskLoading,
@@ -409,6 +419,9 @@ export function useAbiExecution<F extends NodeSlot>(
             prompt: prompts.length === 1 ? prompts[0] : prompts,
         });
 
+        // A fresh single-node run supersedes a workflow-runner failure.
+        useTaskStore.getState().setNodeRunProgress(nodeId, null);
+
         const model = resolveActiveModel();
         const params = resolveActiveParams();
 
@@ -450,8 +463,10 @@ export function useAbiExecution<F extends NodeSlot>(
         canCancel: taskLoading,
         loading,
         elapsedSeconds,
-        progressLabel,
+        // A workflow runner's status text wins while it reports one.
+        progressLabel: runProgress?.message ?? progressLabel,
         thinkingText,
+        runProgress,
         canRun,
         feature,
         isExecuteMode,
