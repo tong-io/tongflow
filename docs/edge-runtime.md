@@ -50,7 +50,9 @@ Consequences:
 - The Python engine (Studio runs, Next workflow runs) and the Next single-node runner refuse a
   browser plugin with a clear *"requires the browser edge runtime"* error. They never try to
   spawn an `entry.py` for it or clone it.
-- The browser engine itself, the canvas transport and the edge plugins are follow-up work.
+- The canvas task transport and the run-whole-workflow entry (see
+  [Canvas host transport & workflow runner](#canvas-host-transport--workflow-runner)).
+- The browser engine itself and the edge plugins are follow-up work.
 
 ## Graph rules for edge nodes
 
@@ -98,3 +100,75 @@ array: on the canvas each item becomes its own data-node entry.
 text node means the plugin receives an array, and the plugin joins the parts before chunking.
 
 No official plugin implements these slots yet; the developer guide lists them as planned.
+
+## Canvas host transport & workflow runner
+
+The canvas (`tongflow/canvas`) never assumes where a task runs. Two optional
+`CanvasHostConfig` fields (set with `<CanvasProvider>` or `configureCanvasHost`) let a
+host run nodes in the browser. Hosts that set neither, such as the Next app and Studio
+today, behave exactly as before.
+
+### Task transport (single-node runs)
+
+```ts
+interface CanvasTaskTransport {
+    createTask(request: CreateTaskRequest): Promise<CreateTaskResponse>; // {taskId}
+    waitTask(taskId: string, handlers: TaskWaitHandlers): TaskWaitConnection;
+    stopTask(taskId: string): Promise<boolean>; // true = stop accepted
+    updateTaskStatus(request: UpdateStatusRequest): Promise<UpdateStatusResponse>;
+}
+interface TaskWaitHandlers {
+    onOpen(): void;
+    onMessage(message: TaskWaitMessage): void; // {id, status, data?, progress?, error?, nodeId?}
+    onClose(): void;          // the producer ended the stream on purpose
+    onError(error: unknown): void; // the stream dropped; the canvas reconnects with backoff
+}
+interface TaskWaitConnection { close(): void }
+```
+
+- `taskTransport` replaces task create, wait, stop and update-status for every node run
+  (`useCreateTask`, `useBatchTaskManager`). The default, `httpTaskTransport`, is the
+  previous behaviour: `POST /api/task/create`, an `EventSource` on `/api/task/wait`,
+  `POST /api/task/stop` and `POST /api/task/update-status`, all through `host.fetch`
+  except the `EventSource`.
+- `TaskWaitMessage` is the `/api/task/wait` SSE message. `status` uses the task status
+  strings (`PENDING`, `RUNNING`, `COMPLETED`, `FAILED`, `CANCELLED` …). On `COMPLETED`,
+  `data` is the plugin output; the node routes it into its downstream data nodes as it
+  does for a server task. Any terminal status makes the canvas call `updateTaskStatus`
+  and `close()`.
+- A transport may call the handlers at any time after `waitTask` returns. Calls made
+  synchronously inside `waitTask` are deferred to a microtask.
+- To override only part of it, spread the default:
+  `{ ...httpTaskTransport, waitTask: myWait }`.
+
+### Workflow runner (whole-workflow runs)
+
+```ts
+interface CanvasWorkflowRunner {
+    run(doc: ExecutableWorkflow, options: {
+        signal: AbortSignal;
+        onEvent(event: CanvasWorkflowRunEvent): void;
+    }): Promise<void>;
+}
+```
+
+When `workflowRunner` is set, the canvas shows a **Run workflow** action in its top-right
+corner. The action becomes **Stop** while a run is in flight. Clicking it exports the
+current graph with `exportWorkflow(nodes, edges)` and calls `run`. Stop aborts `signal`;
+the canvas then resets to idle and ignores later events. The canvas depends only on this
+interface, not on any engine package. An engine adapts its own events to these:
+
+| Event | Payload | What the canvas does |
+|---|---|---|
+| `run-start` | — | Clears the previous run's node states; workflow status `running` |
+| `node-start` | `nodeId` | The node shows its running spinner and timer |
+| `node-progress` | `nodeId`, `fraction?` (0..1), `message?` | Progress bar with percentage; `message` replaces the status text |
+| `node-download` | `nodeId`, `loaded`, `total?` (bytes), `label` | A separate download view: "Downloading model 120/237 MB" plus `label` and a bar. The next `node-progress` replaces it |
+| `node-done` | `nodeId`, `outputView`, `output?` | Node `completed`; results go into downstream data nodes through the same `expands` path as a single-node task (`output`, the raw plugin result, is preferred when present because it keeps array-of-arrays groups; otherwise `outputView`, i.e. `computeOutputView(node.outputs, result)`) |
+| `node-error` | `nodeId`, `message` | Node `failed`; the message is shown on the node |
+| `run-done` | `ok`, `error?` | Workflow status `completed` / `failed`; nodes still marked running are cleared; components that received results are tidied |
+
+`nodeId` is the canvas node id (`ExecutableNode.id`). If `run` resolves without a
+`run-done`, the canvas adds `run-done {ok: true}`. If it rejects, the canvas adds
+`{ok: false}`. Node states live in the exported `useTaskStore` (`nodeExecutionStatusMap`,
+`nodeRunProgressMap`), so a host can also show them elsewhere.
