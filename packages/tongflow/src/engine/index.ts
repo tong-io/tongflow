@@ -6,8 +6,9 @@
  * (bindings and batch fan-out, Asset materialization, output views and batch
  * merging). Node execution is injected: the edge executor runs browser plugins
  * (`tongflow/engine/browser` for Web Workers, {@link createInProcessEdgeExecutor}
- * without), a remote executor runs Python plugins on a TongFlow backend, and
- * {@link createCompositeExecutor} routes between them by registry `runtime`.
+ * without), {@link createHttpRemoteExecutor} runs Python plugins on a TongFlow
+ * backend, and {@link createCompositeExecutor} routes between them by registry
+ * `runtime`.
  * Plugin authors import `tongflow/engine/worker`.
  */
 
@@ -22,6 +23,8 @@ export {
     pluginRuntimeOf,
 } from "./executors/edge-target";
 export * from "./executors/in-process";
+export * from "./executors/remote";
+export * from "./executors/remote-protocol";
 export * from "./memory-store";
 export * from "./output-view";
 export * from "./run-workflow";

@@ -107,7 +107,8 @@ export interface NodeExecutor {
  * runtime) and returns its raw ABI output. Same contract as any
  * {@link NodeExecutor}: the prompt arrives materialized, so assets cross to
  * the server only for nodes the graph explicitly runs there. Implemented by a
- * host; the engine only routes to it (see `createCompositeExecutor`).
+ * host, or `createHttpRemoteExecutor` for a Studio or Next backend; the engine
+ * only routes to it (see `createCompositeExecutor`).
  */
 export type RemoteExecutor = NodeExecutor;
 
