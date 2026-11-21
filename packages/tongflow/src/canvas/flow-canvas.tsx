@@ -87,6 +87,12 @@ export interface FlowCanvasProps {
     className?: string;
     /** Follow newly created nodes with the camera (default true). */
     followNewNodes?: boolean;
+    /**
+     * Where the "Run workflow" action sits when the host configured a
+     * `workflowRunner` (default top-right), for hosts whose own chrome
+     * covers that corner.
+     */
+    runActionPosition?: PanelPosition;
 }
 
 const FIT_VIEW_OPTS = {
@@ -139,6 +145,7 @@ export const FlowCanvas = forwardRef<FlowCanvasHandle, FlowCanvasProps>(
             showControls = true,
             className,
             followNewNodes = true,
+            runActionPosition = "top-right",
         },
         ref,
     ) {
@@ -344,7 +351,7 @@ export const FlowCanvas = forwardRef<FlowCanvasHandle, FlowCanvasProps>(
                         <Background />
                         {showControls && <Controls />}
                         {/* Renders nothing without a host workflow runner. */}
-                        <RunWorkflowAction />
+                        <RunWorkflowAction position={runActionPosition} />
                         {children ? (
                             <Panel
                                 position={panelPosition}

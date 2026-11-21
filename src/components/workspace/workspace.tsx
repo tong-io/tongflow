@@ -185,7 +185,8 @@ function WorkspaceInner({
     return (
         <div className="flex w-full h-full">
             <div className="relative flex-1 min-w-0 h-full overflow-hidden [&_.react-flow]:!bg-[#f6f7f9] dark:[&_.react-flow]:!bg-background">
-                <FlowCanvas hidden={isAppMode}>
+                {/* The workspace nav covers the top-right corner. */}
+                <FlowCanvas hidden={isAppMode} runActionPosition="top-center">
                     <SmartIsland />
                 </FlowCanvas>
 

@@ -8,13 +8,17 @@
  * Stop during the run.
  */
 
-import { Panel } from "@xyflow/react";
+import { Panel, type PanelPosition } from "@xyflow/react";
 import { Loader2, Pause, Play } from "lucide-react";
 import { useTranslations } from "use-intl";
 import { useWorkflowRun } from "../hooks/use-workflow-run";
 import { Button } from "../ui/button";
 
-export function RunWorkflowAction() {
+export function RunWorkflowAction({
+    position = "top-right",
+}: {
+    position?: PanelPosition;
+} = {}) {
     const t = useTranslations("Workspace.toolbar");
     const {
         available,
@@ -29,7 +33,7 @@ export function RunWorkflowAction() {
     if (!available) return null;
 
     return (
-        <Panel position="top-right" className="z-10 flex gap-2">
+        <Panel position={position} className="z-10 flex gap-2">
             {running && controllable && (
                 <Button
                     type="button"
