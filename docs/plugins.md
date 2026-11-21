@@ -156,13 +156,42 @@ when it asks before paid runs.
 
 The Python engine never runs a browser plugin and never clones a missing `tongflow-edge-*`
 plugin: a node bound to one fails with *"… requires the browser edge runtime"*, and so does the
-Next app's single-node runner.
+Next app's server-side single-node runner. On the canvas a browser node never gets there: the
+hosts run it in the page (see [§3.2](#32-hosts)).
 
 Scan errors are reported like any other (`path:line: reason; fix: hint`) and skip the bad part:
 a missing or invalid manifest, a `runtime` other than `"browser"`, a missing `entry` or entry
 file, an empty `slots` list, an unknown `nodeSlot`, a slot listed twice, or a slot without
 `method` (a malformed `models` list is reported and dropped). A plugin with no valid slot left
 is not registered.
+
+### 3.2 Hosts
+
+Studio and the Next app run browser plugins in the page; what a plugin can rely on there
+(details in [edge-runtime.md, Hosts](edge-runtime.md#hosts)):
+
+- **Installing.** Like any plugin: a clone under the plugins directory (Studio also accepts a
+  `file://` URL of a local checkout). The official list marks browser plugins with
+  `"runtimes": {"<id>": "browser"}` in [`config/official-plugins.json`](../config/official-plugins.json)
+  (a `tongflow-edge-*` id is a browser plugin either way); the plugin managers label them.
+- **Served same-origin, whole directory.** `<host>/plugins/files/<id>/<version>/<path>` (Studio
+  under `/tongflow`, the Next app under `/api`) serves every regular file of the plugin
+  directory except dot-files, with `Range` and the right types (`.js` / `.mjs`
+  `text/javascript`, `.wasm` `application/wasm`). Resolve your assets relative to the entry
+  (`new URL("assets/…", import.meta.url)`); `<version>` changes with your manifest, entry,
+  `package.json`, `models.json` or git HEAD, and everything under it is cached immutable.
+- **Entry URL.** The entry runs in a dedicated module worker, loaded as
+  `<…>/<entry>?modelBase=<absolute URL>`. The model base is the host's
+  `TONGFLOW_EDGE_MODEL_BASE` (default `https://models.ctsource.cn/`).
+- **Large downloads.** Ship a `models.json` (`[{id, approxMB, …}]`, ids as in your manifest's
+  `slots[].models`) and the host asks the user once before a node whose model is 200 MB or
+  more runs (the node's model, else the slot's default, the first `models` entry).
+- **Files in, files out.** Asset inputs arrive as `bytesBase64` as everywhere; the host
+  fetches them from its own storage when a node needs them. Return binary outputs as
+  `bytesBase64`; the host stores them with its uploads, so they show on the canvas and feed
+  Python nodes.
+- **Threads.** Only when the host opts into cross-origin isolation
+  (`TONGFLOW_CROSS_ORIGIN_ISOLATION=1`); otherwise expect single-threaded wasm.
 
 ## 4. The SDK contract
 
