@@ -86,7 +86,7 @@ const edge = createWorkerEdgeExecutor({
 const result = await runWorkflow(executableWorkflow, {
     executor: createCompositeExecutor({ registry, edge /*, remote */ }),
     store: new OpfsAssetStore(),
-    inputs: { photo: ["opfs://3f2a….png"] },
+    inputs: { photo: ["opfs://3f2a…/photo.png"] },
     signal: abortController.signal,
     onEvent: (event) => console.log(event.type),
 });
@@ -120,10 +120,36 @@ const result = await runWorkflow(executableWorkflow, {
   References resolve as a data URL, a key the asset store holds, or an http(s) URL. Outputs typed
   `FileRef` / `ImageRef` / `VideoRef` / `AudioRef` that carry `bytesBase64` are put into the
   store and become `{file_key, mime?, filename?}`; `ModelRef` is left as returned. Stores:
-  `MemoryAssetStore` (`mem://` keys, for tests) and `OpfsAssetStore` (`opfs://<id>.<ext>`).
+  `MemoryAssetStore` (`mem://` keys, for tests) and `OpfsAssetStore` (`opfs://` keys). Keys
+  keep the producer's filename, so a downstream node receives the same name; see
+  [Asset store keys](#asset-store-keys).
 - **Failures** follow Python by default (`failurePolicy: "abort"`): the first failed node
   fails the run, nodes of later levels never start. `failurePolicy: "branch"` confines a
   failure to its own downstream; see below.
+
+### Asset store keys
+
+A store key ends in the producer's `filename`, so the filename a downstream Asset input derives
+from the key (its last path segment) is the name the producer gave: `page1-r03-table.png`
+from `layout-detect` reaches `table-recognize` as `page1-r03-table.png`, with its label, and
+its mime follows from the extension. Both engines key the same way:
+
+| Store | Output with a `filename` | Output without one |
+|---|---|---|
+| `OpfsAssetStore` (TS) | `opfs://<id>/<name>`, stored as `<directory>/<id>/<name>` | `opfs://<id>.<ext>` (flat file) |
+| `MemoryAssetStore` (TS) | `mem://<id>/<name>` | `mem://<id>` |
+| `MemoryStore` (Python) | `mem://<id>/<name>` | `mem://<id>` |
+| `DiskStore` (Python) | `<out_dir>/<id>/<name>` (relative to `file_key_base` when set) | `<out_dir>/<id>.<ext>` |
+
+`<id>` is a random 32-hex id, one per output, so two outputs with the same name never collide.
+`<name>` is `storeKeyName(filename, ext)` (TS, exported from `tongflow/engine`) /
+`store_key_name` (Python): control characters, spaces, path separators and
+`? # % : * " < > |` become `_`; leading and trailing dots are dropped; a name without an
+extension gets `.<ext>` (from the mime); the stem is cut to 120 UTF-8 bytes, keeping the
+extension. The ref's own `filename` field still carries the producer's name unchanged. Keys
+of the older flat form (`opfs://<id>.<ext>`, `mem://<id>`) still resolve. A host-owned store
+(Python `HttpStore`, or a TS store over the host's uploads) gets the key from the host's upload
+endpoint, which receives the `filename` with the bytes and should keep it the same way.
 
 ### Fault tolerance and run control
 
