@@ -45,7 +45,7 @@ ENV NODE_ENV=production \
     PYTHON=python3 \
     NEXT_TELEMETRY_DISABLED=1
 
-# Mirror desktop/scripts/assemble-app.mjs: next only traces node_modules, so the
+# next only traces node_modules, so the
 # runtime fs assets (drizzle migrations, config/, sdk/) must be copied by hand.
 COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static

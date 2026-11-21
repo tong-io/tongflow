@@ -4,7 +4,7 @@ TongFlow is the Agent-Human-Friendly, Modality-First, Enterprise-Level GenAI Wor
 
 - [Concepts](#concepts)
 - [Run from source](#run-from-source) · [Run with Docker](#run-with-docker) · [Self-host setup](#self-host-setup-plugins--credentials)
-- [Try it online and the desktop app](#try-it-online-and-the-desktop-app)
+- [Try it online](#try-it-online)
 - [Capabilities](#capabilities)
 - [Official plugins](#official-plugins) · [Custom plugins](#custom-plugins)
 - [Use it inside an agent](#use-it-inside-an-agent)
@@ -89,26 +89,11 @@ Open **Settings** (the gear icon, top-right) and add the environment variables y
 
 Run the preloaded example node by node, or switch to Execute Mode and hit the run button to run the whole thing in one click.
 
-## Try it online and the desktop app
+## Try it online
 
 [app.tongflow.com](https://app.tongflow.com) runs TongFlow in a browser: sign in, connect your own model API keys or Modal account, and build. It is for evaluation only, with no guarantees. It is free for 7 days. To keep using it after that, you subscribe inside the product.
 
-The desktop app is a lightweight shell around the same page (see [desktop/README.md](../desktop/README.md)):
-
-- **macOS (Universal — Apple Silicon & Intel):** [TongFlow-mac-universal.dmg](https://github.com/tong-io/tongflow/releases/latest/download/TongFlow-mac-universal.dmg)
-- **Windows:** [TongFlow-win-x64.msi](https://github.com/tong-io/tongflow/releases/latest/download/TongFlow-win-x64.msi)
-
-All builds are on the [Releases](https://github.com/tong-io/tongflow/releases/latest) page.
-
-> **macOS:** the builds are not yet notarized with Apple, so Gatekeeper blocks the first launch ("TongFlow is damaged and can't be opened"). After moving the app to Applications, clear the quarantine flag once:
->
-> ```bash
-> xattr -cr /Applications/TongFlow.app
-> ```
->
-> Download from this page directly — installers passed through chat apps (e.g. WeChat) may be renamed or re-flagged.
-
-For a fully local, account-free TongFlow, self-host it (above). The desktop app up to v0.1.13 bundled a local runtime; those installers remain on the [Releases](https://github.com/tong-io/tongflow/releases) page.
+There is no desktop app: it was discontinued in 1.1.0. Use the web app, or self-host TongFlow (above) for a fully local, account-free setup, with Studio (`npx -y tongflow-studio serve`) or the Docker image (`ghcr.io/tong-io/tongflow`). Old desktop installers (≤ v0.3.6) remain on the [Releases](https://github.com/tong-io/tongflow/releases) page but are no longer maintained.
 
 ## Capabilities
 

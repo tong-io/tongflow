@@ -72,3 +72,6 @@ __pycache__/
 
 # workspace package build output
 packages/*/dist
+
+# Local leftovers from the discontinued desktop app (safe to delete)
+/desktop/

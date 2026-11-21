@@ -92,7 +92,7 @@ Run before every commit; CI ([`.github/workflows/ci.yml`](.github/workflows/ci.y
 
 ## Release checklist
 
-Two independently-versioned artifacts: the **PyPI `tongflow` SDK** and the **desktop app**. Release the SDK first whenever plugins depend on new types.
+Independently-versioned artifacts: the **PyPI `tongflow` SDK**, the npm packages, and the **GitHub release + Docker image** cut from a `v*` tag. Release the SDK first whenever plugins depend on new types.
 
 **SDK → PyPI** (publishing convention also in [`sdk/README.md`](sdk/README.md)):
 
@@ -101,11 +101,13 @@ Two independently-versioned artifacts: the **PyPI `tongflow` SDK** and the **des
 - [ ] Publish: `pnpm tongflow:publish` ([`scripts/publish-tongflow-pypi.sh`](scripts/publish-tongflow-pypi.sh) — needs `TWINE_USERNAME=__token__` + `TWINE_PASSWORD` in `.env`; dry-run to TestPyPI with `TONGFLOW_UPLOAD_TESTPYPI=1`).
 - [ ] Bump every Modal plugin's `pip_install("tongflow==X.Y.Z")` pin to the just-published version (see "Plugin authoring rules").
 
-**Desktop app + GitHub release:**
+**GitHub release + Docker image:**
 
-The desktop app is a Pake (Tauri) cloud shell for `https://app.tongflow.com` — see [`desktop/README.md`](desktop/README.md). Its version comes from the tag (`--app-version`); there is no desktop package.json.
+There is no desktop app (discontinued in 1.1.0). Pushing a `v*` tag runs two workflows:
 
-- [ ] Update [`CHANGELOG.md`](CHANGELOG.md) (Keep a Changelog format) and the app version in [`package.json`](package.json) if it's cut.
-- [ ] Tag the release (`git tag vX.Y.Z`); [`.github/workflows/desktop-release.yml`](.github/workflows/desktop-release.yml) builds `TongFlow-mac-universal.dmg` and `TongFlow-win-x64.msi` into a draft GitHub Release and flips it public. Dry-run first via workflow_dispatch (artifacts only, no release) and manually verify OAuth sign-in (especially Google) in the built shell.
-- [ ] Add the CHANGELOG entry as the release notes.
+- [`.github/workflows/github-release.yml`](.github/workflows/github-release.yml) creates the GitHub Release, marked Latest, with the tag's `## [X.Y.Z]` CHANGELOG section as the notes.
+- [`.github/workflows/docker-publish.yml`](.github/workflows/docker-publish.yml) pushes `ghcr.io/tong-io/tongflow` (`X.Y.Z`, `X.Y`, `sha-…`, `latest`) for linux/amd64 + linux/arm64.
+
+- [ ] Update [`CHANGELOG.md`](CHANGELOG.md) (Keep a Changelog format) and the app version in [`package.json`](package.json); the `## [X.Y.Z]` heading must match the tag.
+- [ ] Tag the merge commit on `main` (`git tag -a vX.Y.Z -m "TongFlow X.Y.Z" && git push origin vX.Y.Z`) and watch both runs. For richer notes, `gh release edit vX.Y.Z --notes-file …` afterwards.
 - [ ] Note: root `package.json` stays `"private": true` — it is the app, not an npm library; never `npm publish` it.
