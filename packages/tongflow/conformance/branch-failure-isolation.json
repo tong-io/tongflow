@@ -1,0 +1,393 @@
+{
+    "name": "branch-failure-isolation",
+    "description": "failurePolicy 'branch': 'bad' fails, its downstream closure ('badNext', and 'join', which also reads the healthy branch) is skipped as 'upstream failed'; the sibling branch 'ok' -> 'okNext' completes. Status partial.",
+    "engines": ["ts"],
+    "failurePolicy": "branch",
+    "workflow": {
+        "name": "branch-failure-isolation",
+        "version": "1.0",
+        "exportedAt": "2026-01-01T00:00:00.000Z",
+        "inputs": [],
+        "outputs": [
+            {
+                "name": "output_t_ok_next",
+                "type": "text",
+                "nodeId": "t_ok_next",
+                "field": "texts"
+            },
+            {
+                "name": "output_t_join",
+                "type": "text",
+                "nodeId": "t_join",
+                "field": "texts"
+            }
+        ],
+        "dataNodes": [
+            {
+                "id": "in",
+                "type": "textNode",
+                "dataType": "text",
+                "isInput": false,
+                "level": 0,
+                "staticData": {
+                    "texts": ["go"]
+                }
+            },
+            {
+                "id": "t_ok",
+                "type": "textNode",
+                "dataType": "text",
+                "isInput": false,
+                "level": 2
+            },
+            {
+                "id": "t_bad",
+                "type": "textNode",
+                "dataType": "text",
+                "isInput": false,
+                "level": 2
+            },
+            {
+                "id": "t_ok_next",
+                "type": "textNode",
+                "dataType": "text",
+                "isInput": false,
+                "level": 4
+            },
+            {
+                "id": "t_bad_next",
+                "type": "textNode",
+                "dataType": "text",
+                "isInput": false,
+                "level": 4
+            },
+            {
+                "id": "t_join",
+                "type": "textNode",
+                "dataType": "text",
+                "isInput": false,
+                "level": 6
+            }
+        ],
+        "executableNodes": [
+            {
+                "id": "ok",
+                "type": "genTextNode",
+                "feature": "gen-text",
+                "pluginId": "tongflow-api-fake-ok",
+                "bindings": {
+                    "text": {
+                        "kind": "handle",
+                        "sources": [
+                            {
+                                "fromNodeId": "in",
+                                "fromField": "texts"
+                            }
+                        ],
+                        "targetHandle": "in:text",
+                        "consumerShape": "scalar"
+                    }
+                },
+                "batchField": "text",
+                "outputs": [
+                    {
+                        "sourceField": "text",
+                        "nodeType": "textNode",
+                        "dataField": "texts",
+                        "expandEach": false,
+                        "downstreamDataNodeId": "t_ok"
+                    }
+                ],
+                "dependencies": ["in"],
+                "level": 1
+            },
+            {
+                "id": "bad",
+                "type": "genTextNode",
+                "feature": "gen-text",
+                "pluginId": "tongflow-api-fake-bad",
+                "bindings": {
+                    "text": {
+                        "kind": "handle",
+                        "sources": [
+                            {
+                                "fromNodeId": "in",
+                                "fromField": "texts"
+                            }
+                        ],
+                        "targetHandle": "in:text",
+                        "consumerShape": "scalar"
+                    }
+                },
+                "batchField": "text",
+                "outputs": [
+                    {
+                        "sourceField": "text",
+                        "nodeType": "textNode",
+                        "dataField": "texts",
+                        "expandEach": false,
+                        "downstreamDataNodeId": "t_bad"
+                    }
+                ],
+                "dependencies": ["in"],
+                "level": 1
+            },
+            {
+                "id": "okNext",
+                "type": "genTextNode",
+                "feature": "gen-text",
+                "pluginId": "tongflow-api-fake-next",
+                "bindings": {
+                    "text": {
+                        "kind": "handle",
+                        "sources": [
+                            {
+                                "fromNodeId": "ok",
+                                "fromField": "text"
+                            }
+                        ],
+                        "targetHandle": "in:text",
+                        "consumerShape": "scalar"
+                    }
+                },
+                "batchField": "text",
+                "outputs": [
+                    {
+                        "sourceField": "text",
+                        "nodeType": "textNode",
+                        "dataField": "texts",
+                        "expandEach": false,
+                        "downstreamDataNodeId": "t_ok_next"
+                    }
+                ],
+                "dependencies": ["t_ok"],
+                "level": 3
+            },
+            {
+                "id": "badNext",
+                "type": "genTextNode",
+                "feature": "gen-text",
+                "pluginId": "tongflow-api-fake-next",
+                "bindings": {
+                    "text": {
+                        "kind": "handle",
+                        "sources": [
+                            {
+                                "fromNodeId": "bad",
+                                "fromField": "text"
+                            }
+                        ],
+                        "targetHandle": "in:text",
+                        "consumerShape": "scalar"
+                    }
+                },
+                "batchField": "text",
+                "outputs": [
+                    {
+                        "sourceField": "text",
+                        "nodeType": "textNode",
+                        "dataField": "texts",
+                        "expandEach": false,
+                        "downstreamDataNodeId": "t_bad_next"
+                    }
+                ],
+                "dependencies": ["t_bad"],
+                "level": 3
+            },
+            {
+                "id": "join",
+                "type": "chunkTextNode",
+                "feature": "chunk-text",
+                "pluginId": "tongflow-api-fake-join",
+                "bindings": {
+                    "texts": {
+                        "kind": "handle",
+                        "sources": [
+                            {
+                                "fromNodeId": "okNext",
+                                "fromField": "text"
+                            },
+                            {
+                                "fromNodeId": "badNext",
+                                "fromField": "text"
+                            }
+                        ],
+                        "targetHandle": "in:texts",
+                        "consumerShape": "array"
+                    }
+                },
+                "outputs": [
+                    {
+                        "sourceField": "chunks",
+                        "nodeType": "textNode",
+                        "dataField": "texts",
+                        "expandEach": false,
+                        "downstreamDataNodeId": "t_join"
+                    }
+                ],
+                "dependencies": ["t_ok_next", "t_bad_next"],
+                "level": 5
+            }
+        ],
+        "executionLevels": [["ok", "bad"], ["okNext", "badNext"], ["join"]],
+        "dataNodeEdges": [
+            {
+                "source": "in",
+                "target": "ok"
+            },
+            {
+                "source": "ok",
+                "target": "t_ok"
+            },
+            {
+                "source": "in",
+                "target": "bad"
+            },
+            {
+                "source": "bad",
+                "target": "t_bad"
+            },
+            {
+                "source": "t_ok",
+                "target": "okNext"
+            },
+            {
+                "source": "okNext",
+                "target": "t_ok_next"
+            },
+            {
+                "source": "t_bad",
+                "target": "badNext"
+            },
+            {
+                "source": "badNext",
+                "target": "t_bad_next"
+            },
+            {
+                "source": "t_ok_next",
+                "target": "join"
+            },
+            {
+                "source": "t_bad_next",
+                "target": "join"
+            },
+            {
+                "source": "join",
+                "target": "t_join"
+            }
+        ]
+    },
+    "plugins": {
+        "tongflow-api-fake-ok": [
+            {
+                "op": "format",
+                "field": "text",
+                "template": "ok:{text}"
+            }
+        ],
+        "tongflow-api-fake-bad": [
+            {
+                "op": "fail",
+                "error": "boom"
+            }
+        ],
+        "tongflow-api-fake-next": [
+            {
+                "op": "format",
+                "field": "text",
+                "template": "next({text})"
+            }
+        ],
+        "tongflow-api-fake-join": [
+            {
+                "op": "map",
+                "field": "chunks",
+                "from": "texts",
+                "template": "{item}!"
+            }
+        ]
+    },
+    "expected": {
+        "status": "partial",
+        "outputs": {
+            "ok": {
+                "success": true,
+                "text": "ok:go"
+            },
+            "okNext": {
+                "success": true,
+                "text": "next(ok:go)"
+            }
+        },
+        "outputsByName": {
+            "output_t_ok_next": ["next(ok:go)"]
+        },
+        "errors": ["Node bad failed: boom"],
+        "failures": [
+            {
+                "nodeId": "bad",
+                "summary": "boom"
+            }
+        ],
+        "skipped": [
+            {
+                "nodeId": "badNext",
+                "reason": "upstream failed"
+            },
+            {
+                "nodeId": "join",
+                "reason": "upstream failed"
+            }
+        ],
+        "events": [
+            {
+                "type": "workflow_started",
+                "totalNodes": 5,
+                "levels": 3
+            },
+            {
+                "type": "node_started",
+                "nodeId": "ok",
+                "level": 1
+            },
+            {
+                "type": "node_completed",
+                "nodeId": "ok"
+            },
+            {
+                "type": "node_started",
+                "nodeId": "bad",
+                "level": 1
+            },
+            {
+                "type": "node_failed",
+                "nodeId": "bad",
+                "error": "boom"
+            },
+            {
+                "type": "node_skipped",
+                "nodeId": "badNext",
+                "reason": "upstream failed"
+            },
+            {
+                "type": "node_skipped",
+                "nodeId": "join",
+                "reason": "upstream failed"
+            },
+            {
+                "type": "node_started",
+                "nodeId": "okNext",
+                "level": 2
+            },
+            {
+                "type": "node_completed",
+                "nodeId": "okNext"
+            },
+            {
+                "type": "workflow_completed",
+                "status": "partial",
+                "errors": ["Node bad failed: boom"]
+            }
+        ]
+    }
+}

@@ -1,0 +1,379 @@
+{
+    "name": "control-pause-resume",
+    "description": "pause() while 'a' runs: 'a' still completes, 'b' does not start until resume() (called from a later macrotask once the run is idle); the run then finishes normally. Pausing twice is refused.",
+    "engines": ["ts"],
+    "workflow": {
+        "name": "control-pause-resume",
+        "version": "1.0",
+        "exportedAt": "2026-01-01T00:00:00.000Z",
+        "inputs": [],
+        "outputs": [
+            {
+                "name": "output_ta",
+                "type": "text",
+                "nodeId": "ta",
+                "field": "texts"
+            },
+            {
+                "name": "output_out",
+                "type": "text",
+                "nodeId": "out",
+                "field": "texts"
+            }
+        ],
+        "dataNodes": [
+            {
+                "id": "in",
+                "type": "textNode",
+                "dataType": "text",
+                "isInput": false,
+                "level": 0,
+                "staticData": {
+                    "texts": ["x"]
+                }
+            },
+            {
+                "id": "ta",
+                "type": "textNode",
+                "dataType": "text",
+                "isInput": false,
+                "level": 2
+            },
+            {
+                "id": "tb",
+                "type": "textNode",
+                "dataType": "text",
+                "isInput": false,
+                "level": 2
+            },
+            {
+                "id": "tc",
+                "type": "textNode",
+                "dataType": "text",
+                "isInput": false,
+                "level": 4
+            },
+            {
+                "id": "out",
+                "type": "textNode",
+                "dataType": "text",
+                "isInput": false,
+                "level": 6
+            }
+        ],
+        "executableNodes": [
+            {
+                "id": "a",
+                "type": "genTextNode",
+                "feature": "gen-text",
+                "pluginId": "tongflow-api-fake-a",
+                "bindings": {
+                    "text": {
+                        "kind": "handle",
+                        "sources": [
+                            {
+                                "fromNodeId": "in",
+                                "fromField": "texts"
+                            }
+                        ],
+                        "targetHandle": "in:text",
+                        "consumerShape": "scalar"
+                    }
+                },
+                "batchField": "text",
+                "outputs": [
+                    {
+                        "sourceField": "text",
+                        "nodeType": "textNode",
+                        "dataField": "texts",
+                        "expandEach": false,
+                        "downstreamDataNodeId": "ta"
+                    }
+                ],
+                "dependencies": ["in"],
+                "level": 1
+            },
+            {
+                "id": "b",
+                "type": "genTextNode",
+                "feature": "gen-text",
+                "pluginId": "tongflow-api-fake-b",
+                "bindings": {
+                    "text": {
+                        "kind": "handle",
+                        "sources": [
+                            {
+                                "fromNodeId": "in",
+                                "fromField": "texts"
+                            }
+                        ],
+                        "targetHandle": "in:text",
+                        "consumerShape": "scalar"
+                    }
+                },
+                "batchField": "text",
+                "outputs": [
+                    {
+                        "sourceField": "text",
+                        "nodeType": "textNode",
+                        "dataField": "texts",
+                        "expandEach": false,
+                        "downstreamDataNodeId": "tb"
+                    }
+                ],
+                "dependencies": ["in"],
+                "level": 1
+            },
+            {
+                "id": "c",
+                "type": "chunkTextNode",
+                "feature": "chunk-text",
+                "pluginId": "tongflow-api-fake-chunk",
+                "bindings": {
+                    "texts": {
+                        "kind": "handle",
+                        "sources": [
+                            {
+                                "fromNodeId": "a",
+                                "fromField": "text"
+                            },
+                            {
+                                "fromNodeId": "b",
+                                "fromField": "text"
+                            }
+                        ],
+                        "targetHandle": "in:texts",
+                        "consumerShape": "array"
+                    }
+                },
+                "outputs": [
+                    {
+                        "sourceField": "chunks",
+                        "nodeType": "textNode",
+                        "dataField": "texts",
+                        "expandEach": false,
+                        "downstreamDataNodeId": "tc"
+                    }
+                ],
+                "dependencies": ["ta", "tb"],
+                "level": 3
+            },
+            {
+                "id": "d",
+                "type": "genTextNode",
+                "feature": "gen-text",
+                "pluginId": "tongflow-api-fake-d",
+                "bindings": {
+                    "text": {
+                        "kind": "handle",
+                        "sources": [
+                            {
+                                "fromNodeId": "c",
+                                "fromField": "chunks"
+                            }
+                        ],
+                        "targetHandle": "in:text",
+                        "consumerShape": "scalar"
+                    }
+                },
+                "batchField": "text",
+                "outputs": [
+                    {
+                        "sourceField": "text",
+                        "nodeType": "textNode",
+                        "dataField": "texts",
+                        "expandEach": false,
+                        "downstreamDataNodeId": "out"
+                    }
+                ],
+                "dependencies": ["tc"],
+                "level": 5
+            }
+        ],
+        "executionLevels": [["a", "b"], ["c"], ["d"]],
+        "dataNodeEdges": [
+            {
+                "source": "in",
+                "target": "a"
+            },
+            {
+                "source": "a",
+                "target": "ta"
+            },
+            {
+                "source": "in",
+                "target": "b"
+            },
+            {
+                "source": "b",
+                "target": "tb"
+            },
+            {
+                "source": "ta",
+                "target": "c"
+            },
+            {
+                "source": "tb",
+                "target": "c"
+            },
+            {
+                "source": "c",
+                "target": "tc"
+            },
+            {
+                "source": "tc",
+                "target": "d"
+            },
+            {
+                "source": "d",
+                "target": "out"
+            }
+        ]
+    },
+    "plugins": {
+        "tongflow-api-fake-a": [
+            {
+                "op": "format",
+                "field": "text",
+                "template": "A({text})"
+            }
+        ],
+        "tongflow-api-fake-b": [
+            {
+                "op": "format",
+                "field": "text",
+                "template": "B({text})"
+            }
+        ],
+        "tongflow-api-fake-chunk": [
+            {
+                "op": "map",
+                "field": "chunks",
+                "from": "texts",
+                "template": "{item}!"
+            }
+        ],
+        "tongflow-api-fake-d": [
+            {
+                "op": "format",
+                "field": "text",
+                "template": "D({text})"
+            }
+        ]
+    },
+    "control": [
+        {
+            "on": {
+                "type": "node_started",
+                "nodeId": "a"
+            },
+            "do": "pause"
+        },
+        {
+            "on": {
+                "type": "node_completed",
+                "nodeId": "a"
+            },
+            "do": "pause"
+        },
+        {
+            "on": {
+                "type": "workflow_paused"
+            },
+            "do": "resume",
+            "defer": true
+        }
+    ],
+    "expected": {
+        "status": "success",
+        "outputs": {
+            "a": {
+                "success": true,
+                "text": "A(x)"
+            },
+            "b": {
+                "success": true,
+                "text": "B(x)"
+            },
+            "c": {
+                "success": true,
+                "chunks": ["A(x)!", "B(x)!"]
+            },
+            "d": {
+                "success": true,
+                "text": ["D(A(x)!)", "D(B(x)!)"]
+            }
+        },
+        "outputsByName": {
+            "output_ta": ["A(x)"],
+            "output_out": ["D(A(x)!)", "D(B(x)!)"]
+        },
+        "errors": [],
+        "failures": [],
+        "control": [true, false, true],
+        "events": [
+            {
+                "type": "workflow_started",
+                "totalNodes": 4,
+                "levels": 3
+            },
+            {
+                "type": "node_started",
+                "nodeId": "a",
+                "level": 1
+            },
+            {
+                "type": "workflow_paused"
+            },
+            {
+                "type": "node_completed",
+                "nodeId": "a"
+            },
+            {
+                "type": "workflow_resumed"
+            },
+            {
+                "type": "node_started",
+                "nodeId": "b",
+                "level": 1
+            },
+            {
+                "type": "node_completed",
+                "nodeId": "b"
+            },
+            {
+                "type": "node_started",
+                "nodeId": "c",
+                "level": 2
+            },
+            {
+                "type": "node_completed",
+                "nodeId": "c"
+            },
+            {
+                "type": "node_started",
+                "nodeId": "d",
+                "level": 3
+            },
+            {
+                "type": "plugin_progress",
+                "nodeId": "d",
+                "message": "batch 1/2"
+            },
+            {
+                "type": "plugin_progress",
+                "nodeId": "d",
+                "message": "batch 2/2"
+            },
+            {
+                "type": "node_completed",
+                "nodeId": "d"
+            },
+            {
+                "type": "workflow_completed",
+                "status": "success",
+                "errors": []
+            }
+        ]
+    }
+}
