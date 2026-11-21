@@ -79,6 +79,14 @@ const en = {
     uploaded: "{n} file(s) → {dir}/",
     uploadFailed: "upload failed",
     dropHere: "Drop files here to add them to this folder",
+    browserPlugin: "runs in the browser",
+    confirmPaidTitle: "Confirm a paid run",
+    confirmPaidBody: "The node {slot} runs {plugin} on the server: {billing}.",
+    confirmDownloadTitle: "Download a model?",
+    confirmDownloadBody:
+        "The node {slot} needs {label}. It is downloaded once into this browser and runs on this device.",
+    allow: "Run it",
+    decline: "Don't run",
 } as const;
 
 export type UiKey = keyof typeof en;
@@ -158,6 +166,14 @@ const zh: Record<UiKey, string> = {
     uploaded: "{n} 个文件 → {dir}/",
     uploadFailed: "上传失败",
     dropHere: "把文件拖到这里,加入此文件夹",
+    browserPlugin: "在浏览器中运行",
+    confirmPaidTitle: "确认付费运行",
+    confirmPaidBody: "节点 {slot} 会在服务器上调用 {plugin}:{billing}。",
+    confirmDownloadTitle: "下载模型?",
+    confirmDownloadBody:
+        "节点 {slot} 需要 {label}。模型只下载一次,保存在本浏览器里,在本机运行。",
+    allow: "运行",
+    decline: "不运行",
 };
 
 const dicts: Record<string, Record<UiKey, string>> = { en, zh };

@@ -18,12 +18,16 @@ import { storageDriver } from "@ext/storage-driver";
 export interface StorageDriver {
     /**
      * Persist bytes and return the fileKey (path relative to the uploads
-     * root, e.g. `tasks/<taskId>/<id>.png`).
+     * root, e.g. `tasks/<taskId>/<id>.png`). With `options.name` (a
+     * `storeKeyName` from `tongflow/engine`), the key must end in that name
+     * as its last path segment (`<id>/<name>`), so the producer's filename
+     * reaches downstream nodes (docs/edge-runtime.md, "Asset store keys").
      */
     saveFile(
         data: Buffer | Uint8Array,
         ext: string,
         taskId?: string,
+        options?: { name?: string },
     ): Promise<string>;
     /** Read bytes by fileKey. Throws on missing files and invalid keys. */
     readFile(fileKey: string): Promise<Buffer>;

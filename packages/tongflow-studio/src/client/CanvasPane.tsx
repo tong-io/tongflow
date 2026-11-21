@@ -5,20 +5,36 @@
  * whose `./x` refs are rewritten to project keys), and the document is
  * synced file ↔ canvas: load on open, debounced
  * save on change (the host re-exports the executable on save).
+ *
+ * With a browser edge plugin installed, the canvas also runs workflows in the
+ * browser ("Run workflow", and "Run" on an edge node): see `edge-runtime.ts`.
  */
 import "@xyflow/react/dist/style.css";
 import "tongflow/canvas.css";
 import { ReactFlowProvider } from "@xyflow/react";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+    type ReactNode,
+    useCallback,
+    useEffect,
+    useMemo,
+    useRef,
+    useState,
+} from "react";
 import {
     CanvasProvider,
     FlowCanvas,
     type FlowCanvasHandle,
+    httpTaskTransport,
     useFlow,
 } from "tongflow/canvas";
 import { canvasMessages, isCanvasLocale } from "tongflow/canvas/messages";
 import { IntlProvider } from "use-intl";
 import { fileUrl, PREFIX, studio, type WorkflowDoc } from "./api.ts";
+import { Modal, useT } from "./common.tsx";
+import {
+    loadStudioEdgeRuntime,
+    type StudioEdgeRuntime,
+} from "./edge-runtime.ts";
 
 export interface CanvasPaneProps {
     pid: string;
@@ -49,6 +65,7 @@ export function CanvasPane({
         (fileKey: string) => fileUrl(pid, fileKey),
         [pid],
     );
+    const edge = useEdgeRuntime(pid);
 
     // Load the file into the (singleton) canvas store.
     useEffect(() => {
@@ -157,6 +174,10 @@ export function CanvasPane({
                         apiBaseUrl={`${PREFIX}/p/${pid}`}
                         resolveAssetUrl={resolveAssetUrl}
                         locale={lang}
+                        // Both stay undefined without a browser plugin: the
+                        // canvas then runs every node on the server, as before.
+                        workflowRunner={edge.runtime?.runner}
+                        taskTransport={edge.runtime?.taskTransport}
                     >
                         <ReactFlowProvider>
                             <FlowCanvas ref={handle} />
@@ -164,6 +185,110 @@ export function CanvasPane({
                     </CanvasProvider>
                 </IntlProvider>
             </div>
+            {edge.dialog}
         </div>
     );
+}
+
+interface Question {
+    title: string;
+    body: string;
+    answer: (ok: boolean) => void;
+}
+
+/**
+ * The project's browser edge runtime (`null` until loaded, and when no
+ * browser plugin is installed) and the confirmation dialog it asks through:
+ * a paid server node (the studio's billing checkpoint) or a large model
+ * download. Questions are shown one at a time.
+ */
+function useEdgeRuntime(pid: string): {
+    runtime: StudioEdgeRuntime | null;
+    dialog: ReactNode;
+} {
+    const t = useT();
+    const tRef = useRef(t);
+    tRef.current = t;
+    const [runtime, setRuntime] = useState<StudioEdgeRuntime | null>(null);
+    const [questions, setQuestions] = useState<Question[]>([]);
+
+    useEffect(() => {
+        let alive = true;
+        let loaded: StudioEdgeRuntime | null = null;
+        const ask = (title: string, body: string, signal?: AbortSignal) =>
+            new Promise<boolean>((resolve) => {
+                let done = false;
+                const q: Question = {
+                    title,
+                    body,
+                    answer: (ok) => {
+                        if (done) return;
+                        done = true;
+                        setQuestions((all) => all.filter((x) => x !== q));
+                        resolve(ok);
+                    },
+                };
+                signal?.addEventListener("abort", () => q.answer(false), {
+                    once: true,
+                });
+                setQuestions((all) => [...all, q]);
+            });
+        loadStudioEdgeRuntime({
+            pid,
+            fallbackTransport: httpTaskTransport,
+            confirmPaid: (c) => {
+                const tr = tRef.current;
+                const billing = tr(
+                    c.billing === "modal" ? "billingModal" : "billingApi",
+                );
+                return ask(
+                    tr("confirmPaidTitle"),
+                    `${tr("confirmPaidBody", { slot: c.nodeSlot, plugin: c.pluginId, billing })}\n\n${c.note}`,
+                );
+            },
+            confirmDownload: (r, signal) => {
+                const tr = tRef.current;
+                return ask(
+                    tr("confirmDownloadTitle"),
+                    tr("confirmDownloadBody", {
+                        slot: r.nodeSlot,
+                        label: r.label,
+                    }),
+                    signal,
+                );
+            },
+        })
+            .then((rt) => {
+                if (!alive) return rt?.dispose();
+                loaded = rt;
+                setRuntime(rt);
+            })
+            .catch(() => alive && setRuntime(null));
+        return () => {
+            alive = false;
+            loaded?.dispose();
+            setRuntime(null);
+        };
+    }, [pid]);
+
+    const q = questions[0];
+    const dialog = q ? (
+        <Modal title={q.title} onClose={() => q.answer(false)}>
+            <p style={{ whiteSpace: "pre-wrap", margin: "0 0 12px" }}>
+                {q.body}
+            </p>
+            <div className="tfs-row">
+                <button
+                    className="tfs-btn primary"
+                    onClick={() => q.answer(true)}
+                >
+                    {t("allow")}
+                </button>
+                <button className="tfs-btn" onClick={() => q.answer(false)}>
+                    {t("decline")}
+                </button>
+            </div>
+        </Modal>
+    ) : null;
+    return { runtime, dialog };
 }

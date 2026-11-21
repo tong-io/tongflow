@@ -49,7 +49,8 @@ Consequences:
 - Registry `runtime` field and `tongflow-edge-*` discovery from `tongflow.plugin.json`.
 - The Python engine (Studio runs, Next workflow runs) and the Next single-node runner refuse a
   browser plugin with a clear *"requires the browser edge runtime"* error. They never try to
-  spawn an `entry.py` for it or clone it.
+  spawn an `entry.py` for it or clone it. (On the canvas, a browser node never reaches them:
+  the hosts run it in the page, see [Hosts](#hosts).)
 - The canvas task transport and the run-whole-workflow entry (see
   [Canvas host transport & workflow runner](#canvas-host-transport--workflow-runner)).
 - The browser engine (`tongflow/engine`, below), with a conformance suite shared with the
@@ -60,20 +61,24 @@ Consequences:
   engine ([Fault tolerance and run control](#fault-tolerance-and-run-control)), and the canvas
   adapter that drives them from the canvas (`tongflow/engine/canvas`). The Python engine
   follows later.
-- The edge plugins themselves are follow-up work.
+- The first edge plugin, the official
+  [`tongflow-edge-essentials`](https://github.com/tong-io/tongflow-edge-essentials), which
+  implements every slot below.
+- Both hosts run browser plugins: Studio and the Next app serve the plugin files same-origin
+  and put the engine behind their canvas once one is installed (see [Hosts](#hosts)).
 
 ## Browser engine (`tongflow/engine`)
 
 A TypeScript port of the Python engine (`sdk/tongflow/engine`): bindings and batch fan-out,
 Asset materialization, output views and batch merging. It lives in `packages/tongflow/src/engine`
-(the core stays I/O-free) and ships as three entry points:
+(the core stays I/O-free) and ships as four entry points:
 
 | Import | What |
 |---|---|
-| `tongflow/engine` | `runWorkflow`, `MemoryAssetStore`, `createCompositeExecutor`, `createInProcessEdgeExecutor`, `inlineAssets`, the types. Platform neutral. |
-| `tongflow/engine/browser` | `createWorkerEdgeExecutor` (Web Workers) and `OpfsAssetStore` (Origin Private File System). |
+| `tongflow/engine` | `runWorkflow`, `MemoryAssetStore`, `createHostAssetStore`, `createCompositeExecutor`, `createInProcessEdgeExecutor`, `createHttpRemoteExecutor`, `createConsentGate`, `inlineAssets`, the types. Platform neutral. |
+| `tongflow/engine/browser` | `createWorkerEdgeExecutor` (Web Workers), `OpfsAssetStore` (Origin Private File System), and the host wiring `createEdgeHostRuntime` / `edgeEntryUrl` / `largeModelConsent` ([Hosts](#hosts)). |
 | `tongflow/engine/worker` | For plugin authors: `defineEdgePlugin`, `edgeMethod`, the worker protocol types. |
-| `tongflow/engine/canvas` | `createEngineCanvasRunner` (a canvas `workflowRunner` on this engine) and `createCanvasEventMapper`. Platform neutral, no React. |
+| `tongflow/engine/canvas` | `createEngineCanvasRunner` (a canvas `workflowRunner` on this engine), `createCanvasEventMapper`, and `createEngineTaskTransport` / `singleNodeWorkflow` (single-node runs on the engine). Platform neutral, no React. |
 
 ```ts
 import { createCompositeExecutor, runWorkflow } from "tongflow/engine";
@@ -149,7 +154,9 @@ extension gets `.<ext>` (from the mime); the stem is cut to 120 UTF-8 bytes, kee
 extension. The ref's own `filename` field still carries the producer's name unchanged. Keys
 of the older flat form (`opfs://<id>.<ext>`, `mem://<id>`) still resolve. A host-owned store
 (Python `HttpStore`, or a TS store over the host's uploads) gets the key from the host's upload
-endpoint, which receives the `filename` with the bytes and should keep it the same way.
+endpoint, which receives the `filename` with the bytes and should keep it the same way;
+`createHostAssetStore` enforces it, and Studio and the Next app key such files
+`<dir>/<id>/<name>` (see [Asset bridge](#asset-bridge)).
 
 ### Fault tolerance and run control
 
@@ -456,7 +463,7 @@ asks; nothing is remembered.
 `{invocationId}` (answer `{status: "cancelled", wasRunning}`) and drops the stream. Both hosts
 also stop the run when the stream's connection closes, so a lost stop request still stops it.
 
-### Hosts
+### Server side of the endpoint
 
 - **Studio** (`packages/tongflow-studio`, `StudioApi.startInvoke`): the prompt becomes a
   one-node document (`singleNodeDocument`, as for a canvas run) with the node's `_params`,
@@ -471,6 +478,128 @@ also stop the run when the stream's connection closes, so a lost stop request st
   from the plugin runner's task events. Auth is the self-host access gate (middleware). The
   Next app has no per-run billing confirmation, so it never answers `needs_confirmation` and
   ignores `confirmed`.
+
+## Hosts
+
+Studio (`packages/tongflow-studio`) and the Next app (`src/`) run browser plugins the same
+way scanall's web app does: the plugin is served same-origin, its entry runs in a module Web
+Worker, and the canvas gets the engine as its runner. Nothing of this is active until a
+browser plugin is installed; without one both canvases are exactly what they were.
+
+### Serving the plugin files
+
+| | Studio | Next app |
+|---|---|---|
+| What is installed | `GET /tongflow/plugins/edge` | `GET /api/plugins/edge` |
+| A plugin file | `GET /tongflow/plugins/files/<id>/<version>/<path>` | `GET /api/plugins/files/<id>/<version>/<path>` |
+| Code | `src/http/plugin-files.ts`, `StudioApi.edgePlugins` / `edgePluginFile` | `src/lib/plugins/edge-plugin-files.server.ts` |
+| Auth | the page's token cookie (dsh: its own) | the self-host access gate |
+
+`…/plugins/edge` answers `{modelBase, crossOriginIsolated, plugins: {<id>: {version, base,
+entryUrl, modelsUrl?}}}` for every registry entry with `runtime: "browser"`. `<version>` is 12
+hex chars of a hash over the plugin's `tongflow.plugin.json`, entry file, `package.json`,
+`models.json` and git HEAD. It sits in the path, not in a query, so every URL the entry
+resolves relative to itself (`dist/chunks/…`, `dist/assets/…wasm`) carries it: a request for
+the current version is `Cache-Control: public, max-age=31536000, immutable`, any other version
+gets the current file with `no-cache`, so `index.js` is never stale after `git pull`. The
+route serves only `runtime: "browser"` plugins, only regular files under the plugin directory
+(symlinks resolved, so a link pointing out is refused; the plugin directory itself may be a
+symlink), and never a segment starting with `.` (`..`, `.git`, `.env`). Types: `.js` / `.mjs`
+`text/javascript`, `.wasm` `application/wasm`, `.json`, fonts, images; `.html` as
+`text/plain` (never rendered on the host's origin); anything else `application/octet-stream`;
+`X-Content-Type-Options: nosniff` on all. Single-range `Range` requests get 206 / 416
+(transformers.js probes sizes with `bytes=0-0`).
+
+The model base (`?modelBase=` on the entry URL, the plugin's contract) is
+`TONGFLOW_EDGE_MODEL_BASE`, else `https://models.ctsource.cn/` (Studio: also the
+`edgeModelBase` config field). That host's CORS allows `https://scan.ctsource.cn` and
+`http://localhost:*` only, so a model-backed node works from a page on `http://localhost:…`;
+Studio's link is `http://127.0.0.1:…`, which it does not allow yet, and a deployed Next app
+needs its origin added there (or a model base of its own). Zero-model nodes (document parsing,
+page rendering, media extraction, language detection, chunking) need no model host.
+
+**Cross-origin isolation** (threaded wasm, ≈2.6× faster for the ML nodes) is opt-in:
+`TONGFLOW_CROSS_ORIGIN_ISOLATION=1` makes Studio's own web server send COOP / COEP on the
+page and the Next app send them on every route (`next.config.ts`, read at build / start), and
+the plugin files route add COEP to the worker scripts. It is off by default because
+`require-corp` blocks cross-origin embeds without CORP / CORS (e.g. presigned upload
+redirects) and `same-origin` COOP breaks OAuth popups. Without it the plugins run
+single-threaded.
+
+### Runner wiring
+
+`createEdgeHostRuntime` (`tongflow/engine/browser`) builds what both hosts give their canvas:
+
+```ts
+const runtime = createEdgeHostRuntime({
+    registry,                                 // read on every call; refresh `registry.plugins` in place
+    entryUrl: (id) => info.plugins[id].entryUrl,
+    modelBase: info.modelBase,                // → `${entryUrl}?modelBase=<absolute>` (edgeEntryUrl)
+    remote: createHttpRemoteExecutor({ baseUrl, confirm }),
+    store: createHostAssetStore({ resolveUrl, upload }),
+    fallbackTransport: httpTaskTransport,     // non-browser single-node runs
+    consent: { requires: largeModelConsent({ registry, models }), ask },
+});
+<CanvasProvider workflowRunner={runtime.runner} taskTransport={runtime.taskTransport}>
+```
+
+- **Executor.** `createCompositeExecutor`: browser plugins to `createWorkerEdgeExecutor` (one
+  module worker per plugin), Python plugins to `createHttpRemoteExecutor` on the host's own
+  `/api/engine/invoke`. The canvas runner is `createEngineCanvasRunner` with
+  `failurePolicy: "branch"`, so pause / resume / skip / replace implementation appear too.
+- **Single-node runs.** `createEngineTaskTransport` runs a task whose plugin is a browser
+  plugin as a one-node workflow (`singleNodeWorkflow`: every prompt field a static binding,
+  the slot's output routes, the node's model and advanced params) on the same executor and
+  store, and hands every other task to the host's `httpTaskTransport` unchanged. On
+  `COMPLETED` the message `data` is the node's raw output, routed into downstream data nodes
+  like a server task's.
+- **Consent before large downloads.** Like scanall's tier-3 gate: `largeModelConsent` reads
+  the plugin's `models.json` (`[{id, approxMB}]`, served next to it) and asks once per model,
+  per page session, before an edge node whose model (the node's, else the slot default) is at
+  least 200 MB. `createConsentGate` queues the questions (one dialog at a time), shares one
+  answer between concurrent nodes, and withdraws the question when the run is stopped. A
+  refusal fails the node ("Not run: you declined …"), so only its branch is skipped. For
+  `tongflow-edge-essentials` that is the WebGPU models (Qwen3.5-0.8B, GLM-OCR,
+  EmbeddingGemma 2, LFM2.5-350M).
+
+| | Studio | Next app |
+|---|---|---|
+| Code | `src/client/edge-runtime.ts`, `CanvasPane.tsx` | `src/lib/plugins/edge-runtime.ts`, `src/hooks/use-edge-runtime.ts` (in `workspace.tsx`) |
+| When | per project, when the canvas mounts; registry re-read before each run | follows the canvas plugins registry: installing / removing a browser plugin switches it on / off without a reload |
+| How it reaches the canvas | `<CanvasProvider workflowRunner taskTransport>` (both `undefined` without a browser plugin) | `configureCanvasHost({workflowRunner, taskTransport})`, reset to `undefined` on unmount |
+| Remote base | `/tongflow/p/<pid>` (cookie, same-origin check) | `""` (access gate) |
+| Paid Python nodes | `needs_confirmation` → `confirm()` → the canvas's confirm dialog (plugin, slot, billing note); asked every time, as the backend asks | never asked (the app has no per-run billing confirmation; missing keys still fail the node) |
+| Download consent | the same dialog | `window.confirm` |
+
+### Asset bridge
+
+The canvas files of both hosts already live on the server (Studio: project keys such as
+`uploads/photo.png`; the app: upload file keys), so the hosts do not use the OPFS store:
+`createHostAssetStore` (`tongflow/engine`) is an `AssetStore` over the host's own files.
+
+- **Reading.** When the engine materializes a `$ref: Asset` input whose value is a host key,
+  `get(key)` fetches it from the host (Studio `/tongflow/p/<pid>/files/<key>`, the app
+  `/api/uploads/<key>`; an `/api/uploads/…` URL is used as is) with the page's credentials.
+  Only the node that needs it triggers the download; bytes are kept in an in-memory LRU
+  (256 MB) so the next node does not download them again. `data:` and `http(s)` references
+  are resolved by the engine as before.
+- **Writing.** Every binary output of a browser run (an edge node's `bytesBase64`, and a
+  Python node's inline result from the remote executor) goes through `put`, which uploads it
+  through the host's existing upload endpoint and returns the host key. The key keeps the
+  producer's filename like every store's ([Asset store keys](#asset-store-keys)): the store
+  passes `upload` a fresh `id` and `name = storeKeyName(filename, ext)` and refuses a key
+  whose last segment is not `name`. Studio stores it as `.runs/browser/<id>/<name>`
+  (`POST /tongflow/p/<pid>/upload?dir=.runs/browser/<id>`), the app as `<id>/<name>`
+  (`POST /api/upload` with the `keyName` form field; the storage driver's `saveFile` takes
+  `{name}`, and `/api/engine-assets` keeps the Python `HttpStore`'s `filename` the same way).
+  An output without a filename is `…/<id>.<ext>`. So the canvas shows it
+  with its usual `resolveAssetUrl`, the saved workflow keeps a key the server can read, a
+  later server run can consume it, and a downstream Python node gets its bytes (the engine
+  materializes them into the invoke request; the upload makes the file persistent, not a
+  prerequisite of the call). Text outputs never touch the store.
+- **Privacy.** In these hosts the input files were uploaded to the server in the first place,
+  and browser outputs are stored next to them. The device-only guarantee of the edge runtime
+  holds for a host that keeps files out of its server (scanall: OPFS store, no remote).
 
 ## Graph rules for edge nodes
 
@@ -517,14 +646,16 @@ array: on the canvas each item becomes its own data-node entry.
 `chunk-text` takes `texts: string[]` rather than a single `text`: collecting every connected
 text node means the plugin receives an array, and the plugin joins the parts before chunking.
 
-No official plugin implements these slots yet; the developer guide lists them as planned.
+The official `tongflow-edge-essentials` implements all of them (and `parse-document`,
+`transcribe`, `extract-audio`, `split-video`, `get-first-frame`, `image-describe`,
+`image-gen-text`, `gen-text`).
 
 ## Canvas host transport & workflow runner
 
 The canvas (`tongflow/canvas`) never assumes where a task runs. Two optional
 `CanvasHostConfig` fields (set with `<CanvasProvider>` or `configureCanvasHost`) let a
-host run nodes in the browser. Hosts that set neither, such as the Next app and Studio
-today, behave exactly as before.
+host run nodes in the browser. Hosts that set neither behave exactly as before; Studio and
+the Next app set both only while a browser plugin is installed ([Hosts](#hosts)).
 
 ### Task transport (single-node runs)
 
@@ -622,6 +753,6 @@ return whether they were accepted). While a run started from the canvas is in fl
 
   Either way the canvas then matches what runs, so the next run and the export use it too.
 
-Without `controls`, or without a runner at all (the Next app and Studio today), none of
-this appears. `tongflow/engine/canvas` implements the whole contract on the browser engine
+Without `controls`, or without a runner at all (Studio and the Next app without a browser
+plugin), none of this appears. `tongflow/engine/canvas` implements the whole contract on the browser engine
 ([Canvas adapter](#canvas-adapter-tongflowenginecanvas)).

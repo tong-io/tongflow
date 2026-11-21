@@ -16,6 +16,7 @@ export * from "./abi-schema";
 export * from "./assets";
 export * from "./base64";
 export * from "./bindings";
+export * from "./consent-gate";
 export * from "./executors/composite";
 export {
     EDGE_PLUGIN_PREFIX,
@@ -33,6 +34,7 @@ export {
     type InputDeps,
     type InputShape,
 } from "./graph";
+export * from "./host-store";
 export * from "./memory-store";
 export * from "./output-view";
 export { createRunController } from "./run-controller";

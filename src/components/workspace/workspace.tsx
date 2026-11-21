@@ -16,6 +16,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { useCallback, useEffect } from "react";
 import { logger, parseWorkflowImportJson } from "tongflow";
 import { FlowCanvas, useFlow, useTaskStore } from "tongflow/canvas";
+import { useEdgeRuntime } from "@/hooks/use-edge-runtime";
 import { usePreloadFeatures } from "@/hooks/use-features";
 import { useWorkflowRecovery } from "@/hooks/use-workflow-recovery";
 import { AppView } from "./app-view/app-view";
@@ -49,6 +50,9 @@ function WorkspaceInner({
 
     // Preload feature data
     usePreloadFeatures();
+
+    // Browser edge plugins: "Run workflow" and edge-node runs in the browser.
+    useEdgeRuntime();
 
     // Node data update callback (does not depend on nodes; gets the latest state directly from the store)
     const handleNodeDataUpdate = useCallback(
@@ -181,7 +185,8 @@ function WorkspaceInner({
     return (
         <div className="flex w-full h-full">
             <div className="relative flex-1 min-w-0 h-full overflow-hidden [&_.react-flow]:!bg-[#f6f7f9] dark:[&_.react-flow]:!bg-background">
-                <FlowCanvas hidden={isAppMode}>
+                {/* The workspace nav covers the top-right corner. */}
+                <FlowCanvas hidden={isAppMode} runActionPosition="top-center">
                     <SmartIsland />
                 </FlowCanvas>
 

@@ -9,11 +9,40 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Studio and the Next app run browser edge plugins.** With a `tongflow-edge-*`
+  plugin installed, the canvas gets "Run workflow" on the TypeScript engine (edge
+  nodes in a Web Worker per plugin, Python nodes through the host's
+  `/api/engine/invoke`, branch failure policy with pause / resume / skip /
+  replace), and "Run" on a single edge node runs it in the page too. Plugin files
+  are served same-origin under a content-versioned path
+  (`/tongflow/plugins/files/<id>/<version>/…`, `/api/plugins/files/<id>/<version>/…`,
+  listed by `…/plugins/edge`): browser plugins only, no traversal or dot-files,
+  `application/wasm` / `text/javascript`, `Range`, immutable per version. Canvas
+  files bridge through the host's storage: inputs are fetched when a node needs
+  them, binary outputs are uploaded through the existing upload endpoint under a
+  key that keeps the producer's filename (`<id>/<name>`; the app's `/api/upload`
+  takes `keyName`, its storage driver `{name}`, and `/api/engine-assets` keeps the
+  Python `HttpStore`'s `filename`). Studio
+  asks before a paid Python node (`needs_confirmation`) and both ask once before
+  a large model download (`models.json`). Model base `TONGFLOW_EDGE_MODEL_BASE`
+  (default `https://models.ctsource.cn/`); opt-in COOP / COEP with
+  `TONGFLOW_CROSS_ORIGIN_ISOLATION=1`. Without a browser plugin nothing changes.
+  New in `tongflow`: `createHostAssetStore`, `createConsentGate`
+  (`tongflow/engine`), `createEngineTaskTransport`, `singleNodeWorkflow`
+  (`tongflow/engine/canvas`), `createEdgeHostRuntime`, `edgeEntryUrl`,
+  `largeModelConsent` (`tongflow/engine/browser`). See
+  [docs/edge-runtime.md](docs/edge-runtime.md#hosts).
+- **`tongflow-edge-essentials` is an official plugin**, the first browser one:
+  on-device document parsing, page rendering, media extraction, language
+  detection, knowledge-base chunking and embedding, OCR, layout, tables, audio
+  and vision models, and optional WebGPU nodes. `config/official-plugins.json`
+  gains an optional `runtimes` map (`{"<id>": "browser"}`); the plugin managers
+  label browser plugins. Studio installs plugins from `file://` URLs too.
 - **ABI slots for the browser edge runtime.** Fourteen new slots, each with a
   canvas node: `render-pages`, `image-orient`, `layout-detect`, `ocr-image`,
   `table-recognize`, `chunk-text`, `embed-text`, `embed-image`, `kb-write`,
   `vad-segment`, `diarize-speakers`, `audio-tag`, `detect-objects` and
-  `detect-language`. No official plugin implements them yet. See
+  `detect-language`. The official `tongflow-edge-essentials` implements them. See
   [docs/edge-runtime.md](docs/edge-runtime.md). SDK 1.1.0 carries the models.
 - **Browser plugins in the registry.** Plugin entries gain
   `runtime: "python" | "browser"` (absent reads as `python`). The scanner

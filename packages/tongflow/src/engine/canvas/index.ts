@@ -4,8 +4,10 @@
  * `CanvasWorkflowRunner` contract (pass it as `CanvasHostConfig.workflowRunner`):
  * engine events become canvas events, and the engine's run controller is
  * exposed as the runner's `controls` so the canvas offers pause / resume,
- * skip and replace implementation. Platform neutral, no React: it only
- * shares the canvas's type contract.
+ * skip and replace implementation. {@link createEngineTaskTransport} runs
+ * single-node runs of the same nodes on the engine (pass it as
+ * `CanvasHostConfig.taskTransport`). Platform neutral, no React: it only
+ * shares the canvas's type contracts.
  */
 
 import type {
@@ -24,6 +26,14 @@ import type {
     RunResult,
     RunWorkflowOptions,
 } from "../types";
+
+export {
+    type CanvasTaskTransport,
+    createEngineTaskTransport,
+    ENGINE_TASK_PREFIX,
+    type EngineTaskTransportOptions,
+    singleNodeWorkflow,
+} from "./task-transport";
 
 export type {
     CanvasNodeImplementation,

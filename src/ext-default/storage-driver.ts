@@ -16,12 +16,17 @@ async function uploadsRoot(): Promise<string> {
 }
 
 export const storageDriver: StorageDriver = {
-    async saveFile(data, ext, taskId) {
+    async saveFile(data, ext, taskId, options) {
         const root = await uploadsRoot();
-        const dir = taskId ? path.join(root, "tasks", taskId) : root;
+        const base = taskId ? path.join(root, "tasks", taskId) : root;
+        // A named output keeps its name: `<id>/<name>` (the caller passes a
+        // `storeKeyName`, already free of separators); else `<id>.<ext>`.
+        const name = options?.name;
+        const safe = name && !/[/\\]/.test(name) && !name.startsWith(".");
+        const dir = safe ? path.join(base, nanoid()) : base;
         await mkdir(dir, { recursive: true });
 
-        const filename = ext ? `${nanoid()}.${ext}` : nanoid();
+        const filename = safe ? name : ext ? `${nanoid()}.${ext}` : nanoid();
         const filePath = path.join(dir, filename);
         await writeFile(filePath, data);
 

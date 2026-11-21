@@ -222,3 +222,24 @@ export const MEDIA_EXT: Record<string, Modality> = {
 export function modalityOfExt(ext: string): Modality {
     return MEDIA_EXT[ext.toLowerCase().replace(/^\./, "")] ?? "file";
 }
+
+/** How the studio serves one installed browser edge plugin (`GET /plugins/edge`). */
+export interface EdgePluginServing {
+    /** Content hash of the plugin: part of every URL below. */
+    version: string;
+    /** Same-origin URL of the plugin directory, with a trailing slash. */
+    base: string;
+    /** The ESM entry (`tongflow.plugin.json` `entry`) under `base`. */
+    entryUrl: string;
+    /** The plugin's `models.json` (model ids and download sizes), when it ships one. */
+    modelsUrl?: string;
+}
+
+/** `GET /plugins/edge`: the installed browser plugins and where models come from. */
+export interface EdgePluginsInfo {
+    /** `?modelBase=` handed to every plugin entry (absolute URL). */
+    modelBase: string;
+    /** The page is served with COOP / COEP (multi-threaded wasm). */
+    crossOriginIsolated: boolean;
+    plugins: Record<string, EdgePluginServing>;
+}

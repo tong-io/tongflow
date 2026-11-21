@@ -29,6 +29,7 @@ import {
     type RemoteInvokeErrorBody,
     type RemoteInvokeRequest,
 } from "tongflow/engine";
+import { crossOriginIsolation, edgeModelBase } from "./config.ts";
 import {
     categoryOf,
     NODE_CATEGORY_ORDER,
@@ -40,6 +41,11 @@ import {
     type CanvasTaskBody,
     singleNodeDocument,
 } from "./engine/single-node.ts";
+import {
+    edgePluginVersion,
+    PLUGIN_FILES_PATH,
+    resolvePluginFile,
+} from "./http/plugin-files.ts";
 import {
     COMPOSED_SUFFIX,
     type ComposeResult,
@@ -76,6 +82,7 @@ import {
     workflowHash,
 } from "./project/workflow-file.ts";
 import type {
+    EdgePluginsInfo,
     OutputInfo,
     PluginBilling,
     PluginConfirmation,
@@ -655,6 +662,62 @@ export class StudioApi {
 
     async registry() {
         return this.studio.registry.get();
+    }
+
+    /**
+     * The installed browser edge plugins and the URLs the page loads them
+     * from (`<prefix>/plugins/files/<id>/<version>/…`), plus the model base.
+     * Empty `plugins` when none is installed: the canvas then runs nothing
+     * in the browser.
+     */
+    async edgePlugins(prefix: string): Promise<EdgePluginsInfo> {
+        const { registry } = await this.studio.registry.get();
+        const plugins: EdgePluginsInfo["plugins"] = {};
+        for (const [id, plugin] of Object.entries(registry.plugins)) {
+            if (!isBrowserPlugin(plugin) || !plugin.entryFile) continue;
+            const dir = join(this.studio.paths.plugins, plugin.localSubdir);
+            const version = await edgePluginVersion(dir, plugin.entryFile);
+            const base = `${prefix}${PLUGIN_FILES_PATH}/${encodeURIComponent(id)}/${version}/`;
+            plugins[id] = {
+                version,
+                base,
+                entryUrl: `${base}${plugin.entryFile.split("/").map(encodeURIComponent).join("/")}`,
+                ...((await exists(join(dir, "models.json")))
+                    ? { modelsUrl: `${base}models.json` }
+                    : {}),
+            };
+        }
+        return {
+            modelBase: edgeModelBase(this.studio.config),
+            crossOriginIsolated: crossOriginIsolation(this.studio.config),
+            plugins,
+        };
+    }
+
+    /**
+     * The file of a browser plugin a `GET <prefix>/plugins/files/…` request
+     * names; `current` when `version` is the plugin's current one (the
+     * response may then be cached immutable). Throws a 404-ish error for a
+     * plugin that is not an installed browser plugin, or a path outside it.
+     */
+    async edgePluginFile(
+        pluginId: string,
+        version: string,
+        rel: string,
+    ): Promise<{ path: string; current: boolean }> {
+        const { registry } = await this.studio.registry.get();
+        const plugin = Object.hasOwn(registry.plugins, pluginId)
+            ? registry.plugins[pluginId]
+            : undefined;
+        if (!plugin || !isBrowserPlugin(plugin))
+            throw new Error(`browser plugin not found: ${pluginId}`);
+        const dir = join(this.studio.paths.plugins, plugin.localSubdir);
+        const path = await resolvePluginFile(dir, rel);
+        if (!path) throw new Error(`plugin file not found: ${rel}`);
+        const current =
+            !!plugin.entryFile &&
+            version === (await edgePluginVersion(dir, plugin.entryFile));
+        return { path, current };
     }
 
     async installPlugin(idOrUrl: string) {

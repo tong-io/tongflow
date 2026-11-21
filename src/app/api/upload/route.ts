@@ -2,11 +2,16 @@
  * POST /api/upload
  * File upload endpoint. Persists via the storage driver (local disk by
  * default, under the scoped uploads directory).
+ *
+ * Optional form field `keyName`: keep that name as the key's last segment
+ * (`<id>/<storeKeyName(keyName)>`). The browser edge runtime sends the
+ * producer's filename so it reaches downstream nodes.
  */
 
 import path from "node:path";
 import { type NextRequest, NextResponse } from "next/server";
 import { logger } from "tongflow";
+import { storeKeyName } from "tongflow/engine";
 import { getStorage } from "@/lib/file/storage.server";
 
 export async function POST(request: NextRequest) {
@@ -23,7 +28,17 @@ export async function POST(request: NextRequest) {
 
         const ext = path.extname(file.name).replace(/^\./, "");
         const buffer = Buffer.from(await file.arrayBuffer());
-        const fileKey = await getStorage().saveFile(buffer, ext);
+        const keyName = formData.get("keyName");
+        const name =
+            typeof keyName === "string" && keyName
+                ? storeKeyName(keyName, ext)
+                : undefined;
+        const fileKey = await getStorage().saveFile(
+            buffer,
+            ext,
+            undefined,
+            name ? { name } : undefined,
+        );
 
         const url = `/api/uploads/${fileKey}`;
 

@@ -79,6 +79,8 @@ interface OfficialPlugin {
     name?: string;
     description?: string;
     icon?: string;
+    /** Run by the browser edge runtime instead of a Python process. */
+    runtime?: "browser";
 }
 
 interface OfficialResponse {
@@ -330,6 +332,11 @@ export function PluginsDialog() {
                                             >
                                                 {p.name || p.id}
                                             </a>
+                                            {p.runtime === "browser" ? (
+                                                <span className="mt-0.5 inline-block rounded bg-muted px-1.5 py-0.5 text-[10px] text-muted-foreground">
+                                                    {t("runsInBrowser")}
+                                                </span>
+                                            ) : null}
                                             {p.description ? (
                                                 <p className="text-xs text-muted-foreground leading-snug">
                                                     {p.description}

@@ -20,7 +20,9 @@
         "uninstallConfirmTitle": "プラグインをアンインストールしますか？",
         "uninstallConfirmDescription": "{id} フォルダーをディスクから削除します。後でいつでも再インストールできます。",
         "installedCommunity": "インストール済みのコミュニティプラグイン",
-        "cancel": "キャンセル"
+        "cancel": "キャンセル",
+        "runsInBrowser": "ブラウザで実行",
+        "edgeDownloadConfirm": "ノード {slot} には {label} が必要です。このブラウザに一度だけダウンロードされ、この端末で実行されます。今すぐダウンロードしますか?"
     },
     "Settings": {
         "title": "設定",

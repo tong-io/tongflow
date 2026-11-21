@@ -24,6 +24,12 @@
             "tongflow": ["./packages/tongflow/src/core/index.ts"],
             "tongflow/canvas": ["./packages/tongflow/src/canvas/index.ts"],
             "tongflow/engine": ["./packages/tongflow/src/engine/index.ts"],
+            "tongflow/engine/browser": [
+                "./packages/tongflow/src/engine/browser/index.ts"
+            ],
+            "tongflow/engine/canvas": [
+                "./packages/tongflow/src/engine/canvas/index.ts"
+            ],
             "tongflow/canvas/messages": [
                 "./packages/tongflow/src/canvas/i18n/messages.ts"
             ]

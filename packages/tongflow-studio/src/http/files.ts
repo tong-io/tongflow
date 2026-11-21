@@ -1,4 +1,4 @@
-/** Static file serving with HTTP Range support (video scrubbing) for project files. */
+/** Static file serving with HTTP Range support (video scrubbing, model probes) for project and plugin files. */
 import { createReadStream } from "node:fs";
 import { stat } from "node:fs/promises";
 import type { IncomingMessage, ServerResponse } from "node:http";
@@ -37,10 +37,16 @@ export function mimeFor(path: string): string {
     );
 }
 
+/**
+ * Send one file, honouring a single-range `Range` header (206 / 416).
+ * `headers` override the defaults (`content-type` from the extension,
+ * `cache-control: no-cache`).
+ */
 export async function serveFile(
     req: IncomingMessage,
     res: ServerResponse,
     path: string,
+    headers?: Record<string, string>,
 ): Promise<void> {
     let st: Awaited<ReturnType<typeof stat>>;
     try {
@@ -51,11 +57,12 @@ export async function serveFile(
     if (!st.isFile()) throw new HttpError(404, "not a file");
     const size = st.size;
     const type = mimeFor(path);
-    const headers: Record<string, string | number> = {
+    const base: Record<string, string | number> = {
         "content-type": type,
         "accept-ranges": "bytes",
         "cache-control": "no-cache",
         "last-modified": st.mtime.toUTCString(),
+        ...headers,
     };
     const range = req.headers.range;
     if (range) {
@@ -80,7 +87,7 @@ export async function serveFile(
             return;
         }
         res.writeHead(206, {
-            ...headers,
+            ...base,
             "content-range": `bytes ${start}-${end}/${size}`,
             "content-length": end - start + 1,
         });
@@ -91,7 +98,7 @@ export async function serveFile(
         createReadStream(path, { start, end }).pipe(res);
         return;
     }
-    res.writeHead(200, { ...headers, "content-length": size });
+    res.writeHead(200, { ...base, "content-length": size });
     if (req.method === "HEAD") {
         res.end();
         return;

@@ -45,6 +45,8 @@ The page reads and writes your project files and API keys, so it is not open to 
 
 `tongflow-studio serve` runs the page without an agent and prints its link.
 
+**Browser plugins.** With a browser edge plugin installed (`tongflow-edge-*`, e.g. the official `tongflow-edge-essentials`), the canvas gets a **Run workflow** action that runs the workflow in the page: edge nodes in a Web Worker, other nodes on the studio (paid ones still ask first), with large model downloads confirmed once. "Run" on a single edge node runs it in the page too. Without one, the canvas is unchanged. See [edge-runtime.md, Hosts](https://github.com/tong-io/tongflow/blob/main/docs/edge-runtime.md#hosts). A plugin can also be installed from a local checkout with a `file://` URL.
+
 ## Configuration
 
 Environment variables of the server process:
@@ -58,6 +60,8 @@ Environment variables of the server process:
 | `TONGFLOW_STUDIO_LOCALE` | language of new projects | `en` |
 | `TONGFLOW_STUDIO_PORT` | port of the Studio page | a free one |
 | `TONGFLOW_STUDIO_HTTP` | `0` to run `mcp` without the Studio page | on |
+| `TONGFLOW_EDGE_MODEL_BASE` | where browser edge plugins download model weights (`?modelBase=`) | `https://models.ctsource.cn/` |
+| `TONGFLOW_CROSS_ORIGIN_ISOLATION` | `1` to serve the page with COOP / COEP (multi-threaded wasm for browser plugins) | off |
 
 **Plugin API keys** (`GEMINI_API_KEY`, Modal tokens, …) are read from the server's environment and from `<root>/env.json` (`{ "KEY": "value" }`, the file wins). You set them — the Studio page's **Plugins & keys** dialog writes that file; the agent is told never to ask for a key in chat.
 

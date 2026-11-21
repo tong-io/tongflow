@@ -14,6 +14,8 @@
  *   TONGFLOW_STUDIO_LOCALE        language of new projects (default en)
  *   TONGFLOW_STUDIO_PORT          port of the Studio web page (default: a free one)
  *   TONGFLOW_STUDIO_HTTP          "0" for `mcp` without the Studio web page
+ *   TONGFLOW_EDGE_MODEL_BASE      model base of browser edge plugins (default https://models.ctsource.cn/)
+ *   TONGFLOW_CROSS_ORIGIN_ISOLATION  "1" to serve the page with COOP / COEP
  */
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
