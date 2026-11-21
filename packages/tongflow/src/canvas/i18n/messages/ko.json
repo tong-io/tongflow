@@ -287,7 +287,8 @@
                 "runSkippedUpstreamFailed": "상위 노드 실패",
                 "skipNode": "건너뛰기",
                 "replaceImplementation": "구현 바꾸기",
-                "replaceImplementationEmpty": "설치된 다른 구현이 없습니다"
+                "replaceImplementationEmpty": "설치된 다른 구현이 없습니다",
+                "replaceImplementationModel": "모델: {model}"
             },
             "common": {
                 "enterInstructions": "지시 사항 입력...",

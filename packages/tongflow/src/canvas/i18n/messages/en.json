@@ -287,7 +287,8 @@
                 "runSkippedUpstreamFailed": "an upstream node failed",
                 "skipNode": "Skip",
                 "replaceImplementation": "Replace implementation",
-                "replaceImplementationEmpty": "No other implementation installed"
+                "replaceImplementationEmpty": "No other implementation installed",
+                "replaceImplementationModel": "Model: {model}"
             },
             "common": {
                 "enterInstructions": "Enter instructions...",

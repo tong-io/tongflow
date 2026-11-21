@@ -141,8 +141,11 @@ export interface RunController {
     resume(): boolean;
     /**
      * Skip a node that has not started (`pending`) or is `running` (its
-     * executor signal is aborted). Its whole downstream closure is skipped
-     * as well, including nodes that have other, satisfied inputs.
+     * executor signal is aborted). The nodes of its downstream closure that
+     * can no longer run are skipped as well (`upstream skipped`): a node is
+     * kept when its required inputs still have a value; a collect input
+     * (`consumerShape: "array"`) keeps the values of its other sources. See
+     * `blockingUpstreams` and docs/edge-runtime.md "Skip rule".
      */
     skipNode(nodeId: string): boolean;
     /**
@@ -254,8 +257,12 @@ export const SKIP_REASONS = {
  * What the engine does when a node fails:
  *  - `abort` (default, the Python engine's semantics): the run fails, running
  *    siblings are cancelled and no later level starts;
- *  - `branch`: only the failed node's downstream closure is skipped
- *    (`upstream failed`); unrelated branches keep running.
+ *  - `branch`: only the nodes downstream of the failed one that can no
+ *    longer run are skipped (`upstream failed`): a required input without a
+ *    value, a fan-out field missing a producer, or a required collect input
+ *    whose producers all failed or were skipped. A collect input with live
+ *    sources keeps their values and its node runs; unrelated branches keep
+ *    running.
  */
 export type FailurePolicy = "abort" | "branch";
 

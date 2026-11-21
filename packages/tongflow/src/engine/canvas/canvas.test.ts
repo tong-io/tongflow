@@ -36,7 +36,8 @@ describe("createEngineCanvasRunner", () => {
             "node-start",
             "node-error",
             "node-skipped",
-            "node-skipped",
+            "node-start",
+            "node-done",
             "node-start",
             "node-done",
             "run-done",
@@ -55,6 +56,12 @@ describe("createEngineCanvasRunner", () => {
             type: "node-skipped",
             nodeId: "badNext",
             reason: "upstream failed",
+        });
+        // 'join' collects from both branches: it runs on the healthy one.
+        expect(events[9]).toMatchObject({
+            type: "node-done",
+            nodeId: "join",
+            output: { success: true, chunks: ["next(ok:go)!"] },
         });
         // `partial` still ends ok; failed / skipped nodes keep their state.
         expect(events.at(-1)).toEqual({ type: "run-done", ok: true });

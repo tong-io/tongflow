@@ -1,0 +1,480 @@
+{
+    "name": "branch-collect-all-producers-failed",
+    "description": "failurePolicy 'branch': every producer of the required collectAll input 'texts' of 'chunk' fails, so the input would be empty: 'chunk' is skipped ('upstream failed') and so is 'after'. The unrelated sibling 'other' completes. Status partial.",
+    "engines": ["ts"],
+    "failurePolicy": "branch",
+    "workflow": {
+        "name": "branch-collect-all-producers-failed",
+        "version": "1.0",
+        "exportedAt": "2026-01-01T00:00:00.000Z",
+        "inputs": [],
+        "outputs": [
+            {
+                "name": "output_t_chunk",
+                "type": "text",
+                "nodeId": "t_chunk",
+                "field": "texts"
+            },
+            {
+                "name": "output_t_after",
+                "type": "text",
+                "nodeId": "t_after",
+                "field": "texts"
+            }
+        ],
+        "dataNodes": [
+            {
+                "id": "in",
+                "type": "textNode",
+                "dataType": "text",
+                "isInput": false,
+                "level": 0,
+                "staticData": {
+                    "texts": ["doc"]
+                }
+            },
+            {
+                "id": "t_p1",
+                "type": "textNode",
+                "dataType": "text",
+                "isInput": false,
+                "level": 2
+            },
+            {
+                "id": "t_p2",
+                "type": "textNode",
+                "dataType": "text",
+                "isInput": false,
+                "level": 2
+            },
+            {
+                "id": "t_p3",
+                "type": "textNode",
+                "dataType": "text",
+                "isInput": false,
+                "level": 2
+            },
+            {
+                "id": "t_chunk",
+                "type": "textNode",
+                "dataType": "text",
+                "isInput": false,
+                "level": 4
+            },
+            {
+                "id": "t_after",
+                "type": "textNode",
+                "dataType": "text",
+                "isInput": false,
+                "level": 6
+            },
+            {
+                "id": "t_other",
+                "type": "textNode",
+                "dataType": "text",
+                "isInput": false,
+                "level": 2
+            }
+        ],
+        "executableNodes": [
+            {
+                "id": "p1",
+                "type": "genTextNode",
+                "feature": "gen-text",
+                "pluginId": "tongflow-api-fake-bad-1",
+                "bindings": {
+                    "text": {
+                        "kind": "handle",
+                        "sources": [
+                            {
+                                "fromNodeId": "in",
+                                "fromField": "texts"
+                            }
+                        ],
+                        "targetHandle": "in:text",
+                        "consumerShape": "scalar"
+                    }
+                },
+                "batchField": "text",
+                "outputs": [
+                    {
+                        "sourceField": "text",
+                        "nodeType": "textNode",
+                        "dataField": "texts",
+                        "expandEach": false,
+                        "downstreamDataNodeId": "t_p1"
+                    }
+                ],
+                "dependencies": ["in"],
+                "level": 1
+            },
+            {
+                "id": "p2",
+                "type": "genTextNode",
+                "feature": "gen-text",
+                "pluginId": "tongflow-api-fake-bad-2",
+                "bindings": {
+                    "text": {
+                        "kind": "handle",
+                        "sources": [
+                            {
+                                "fromNodeId": "in",
+                                "fromField": "texts"
+                            }
+                        ],
+                        "targetHandle": "in:text",
+                        "consumerShape": "scalar"
+                    }
+                },
+                "batchField": "text",
+                "outputs": [
+                    {
+                        "sourceField": "text",
+                        "nodeType": "textNode",
+                        "dataField": "texts",
+                        "expandEach": false,
+                        "downstreamDataNodeId": "t_p2"
+                    }
+                ],
+                "dependencies": ["in"],
+                "level": 1
+            },
+            {
+                "id": "p3",
+                "type": "genTextNode",
+                "feature": "gen-text",
+                "pluginId": "tongflow-api-fake-bad-3",
+                "bindings": {
+                    "text": {
+                        "kind": "handle",
+                        "sources": [
+                            {
+                                "fromNodeId": "in",
+                                "fromField": "texts"
+                            }
+                        ],
+                        "targetHandle": "in:text",
+                        "consumerShape": "scalar"
+                    }
+                },
+                "batchField": "text",
+                "outputs": [
+                    {
+                        "sourceField": "text",
+                        "nodeType": "textNode",
+                        "dataField": "texts",
+                        "expandEach": false,
+                        "downstreamDataNodeId": "t_p3"
+                    }
+                ],
+                "dependencies": ["in"],
+                "level": 1
+            },
+            {
+                "id": "other",
+                "type": "genTextNode",
+                "feature": "gen-text",
+                "pluginId": "tongflow-api-fake-other",
+                "bindings": {
+                    "text": {
+                        "kind": "handle",
+                        "sources": [
+                            {
+                                "fromNodeId": "in",
+                                "fromField": "texts"
+                            }
+                        ],
+                        "targetHandle": "in:text",
+                        "consumerShape": "scalar"
+                    }
+                },
+                "batchField": "text",
+                "outputs": [
+                    {
+                        "sourceField": "text",
+                        "nodeType": "textNode",
+                        "dataField": "texts",
+                        "expandEach": false,
+                        "downstreamDataNodeId": "t_other"
+                    }
+                ],
+                "dependencies": ["in"],
+                "level": 1
+            },
+            {
+                "id": "chunk",
+                "type": "chunkTextNode",
+                "feature": "chunk-text",
+                "pluginId": "tongflow-api-fake-chunk",
+                "bindings": {
+                    "texts": {
+                        "kind": "handle",
+                        "sources": [
+                            {
+                                "fromNodeId": "p1",
+                                "fromField": "text"
+                            },
+                            {
+                                "fromNodeId": "p2",
+                                "fromField": "text"
+                            },
+                            {
+                                "fromNodeId": "p3",
+                                "fromField": "text"
+                            }
+                        ],
+                        "targetHandle": "in:texts",
+                        "consumerShape": "array"
+                    }
+                },
+                "outputs": [
+                    {
+                        "sourceField": "chunks",
+                        "nodeType": "textNode",
+                        "dataField": "texts",
+                        "expandEach": false,
+                        "downstreamDataNodeId": "t_chunk"
+                    }
+                ],
+                "dependencies": ["t_p1", "t_p2", "t_p3"],
+                "level": 3
+            },
+            {
+                "id": "after",
+                "type": "genTextNode",
+                "feature": "gen-text",
+                "pluginId": "tongflow-api-fake-after",
+                "bindings": {
+                    "text": {
+                        "kind": "handle",
+                        "sources": [
+                            {
+                                "fromNodeId": "chunk",
+                                "fromField": "chunks"
+                            }
+                        ],
+                        "targetHandle": "in:text",
+                        "consumerShape": "scalar"
+                    }
+                },
+                "batchField": "text",
+                "outputs": [
+                    {
+                        "sourceField": "text",
+                        "nodeType": "textNode",
+                        "dataField": "texts",
+                        "expandEach": false,
+                        "downstreamDataNodeId": "t_after"
+                    }
+                ],
+                "dependencies": ["t_chunk"],
+                "level": 5
+            }
+        ],
+        "executionLevels": [["p1", "p2", "p3", "other"], ["chunk"], ["after"]],
+        "dataNodeEdges": [
+            {
+                "source": "in",
+                "target": "p1"
+            },
+            {
+                "source": "p1",
+                "target": "t_p1"
+            },
+            {
+                "source": "in",
+                "target": "p2"
+            },
+            {
+                "source": "p2",
+                "target": "t_p2"
+            },
+            {
+                "source": "in",
+                "target": "p3"
+            },
+            {
+                "source": "p3",
+                "target": "t_p3"
+            },
+            {
+                "source": "in",
+                "target": "other"
+            },
+            {
+                "source": "other",
+                "target": "t_other"
+            },
+            {
+                "source": "t_p1",
+                "target": "chunk"
+            },
+            {
+                "source": "t_p2",
+                "target": "chunk"
+            },
+            {
+                "source": "t_p3",
+                "target": "chunk"
+            },
+            {
+                "source": "chunk",
+                "target": "t_chunk"
+            },
+            {
+                "source": "t_chunk",
+                "target": "after"
+            },
+            {
+                "source": "after",
+                "target": "t_after"
+            }
+        ]
+    },
+    "plugins": {
+        "tongflow-api-fake-bad-2": [
+            {
+                "op": "fail",
+                "error": "ocr down"
+            }
+        ],
+        "tongflow-api-fake-bad-1": [
+            {
+                "op": "fail",
+                "error": "parse down"
+            }
+        ],
+        "tongflow-api-fake-bad-3": [
+            {
+                "op": "fail",
+                "error": "asr down"
+            }
+        ],
+        "tongflow-api-fake-other": [
+            {
+                "op": "format",
+                "field": "text",
+                "template": "other({text})"
+            }
+        ],
+        "tongflow-api-fake-chunk": [
+            {
+                "op": "map",
+                "field": "chunks",
+                "from": "texts",
+                "template": "[{item}]"
+            }
+        ],
+        "tongflow-api-fake-after": [
+            {
+                "op": "format",
+                "field": "text",
+                "template": "embed({text})"
+            }
+        ]
+    },
+    "expected": {
+        "status": "partial",
+        "outputs": {
+            "other": {
+                "success": true,
+                "text": "other(doc)"
+            }
+        },
+        "outputsByName": {},
+        "errors": [
+            "Node p1 failed: parse down",
+            "Node p2 failed: ocr down",
+            "Node p3 failed: asr down"
+        ],
+        "failures": [
+            {
+                "nodeId": "p1",
+                "summary": "parse down"
+            },
+            {
+                "nodeId": "p2",
+                "summary": "ocr down"
+            },
+            {
+                "nodeId": "p3",
+                "summary": "asr down"
+            }
+        ],
+        "skipped": [
+            {
+                "nodeId": "chunk",
+                "reason": "upstream failed"
+            },
+            {
+                "nodeId": "after",
+                "reason": "upstream failed"
+            }
+        ],
+        "events": [
+            {
+                "type": "workflow_started",
+                "totalNodes": 6,
+                "levels": 3
+            },
+            {
+                "type": "node_started",
+                "nodeId": "p1",
+                "level": 1
+            },
+            {
+                "type": "node_failed",
+                "nodeId": "p1",
+                "error": "parse down"
+            },
+            {
+                "type": "node_started",
+                "nodeId": "p2",
+                "level": 1
+            },
+            {
+                "type": "node_failed",
+                "nodeId": "p2",
+                "error": "ocr down"
+            },
+            {
+                "type": "node_started",
+                "nodeId": "p3",
+                "level": 1
+            },
+            {
+                "type": "node_failed",
+                "nodeId": "p3",
+                "error": "asr down"
+            },
+            {
+                "type": "node_skipped",
+                "nodeId": "chunk",
+                "reason": "upstream failed"
+            },
+            {
+                "type": "node_skipped",
+                "nodeId": "after",
+                "reason": "upstream failed"
+            },
+            {
+                "type": "node_started",
+                "nodeId": "other",
+                "level": 1
+            },
+            {
+                "type": "node_completed",
+                "nodeId": "other"
+            },
+            {
+                "type": "workflow_completed",
+                "status": "partial",
+                "errors": [
+                    "Node p1 failed: parse down",
+                    "Node p2 failed: ocr down",
+                    "Node p3 failed: asr down"
+                ]
+            }
+        ]
+    }
+}

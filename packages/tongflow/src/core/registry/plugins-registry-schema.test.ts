@@ -47,6 +47,17 @@ describe("plugin runtime", () => {
         );
     });
 
+    it("keeps a browser slot's model alternatives in declared order", () => {
+        const models = ["pp-ocrv6-small", "pp-ocrv6-tiny", "glm-ocr"];
+        const parsed = PluginConfigSchema.parse({
+            ...browserPlugin,
+            methodsByNodeSlot: {
+                "ocr-image": { methodName: "ocrImage", models },
+            },
+        });
+        expect(parsed.methodsByNodeSlot["ocr-image"].models).toEqual(models);
+    });
+
     it("rejects an unknown runtime", () => {
         expect(
             PluginConfigSchema.safeParse({ ...pythonPlugin, runtime: "wasm" })

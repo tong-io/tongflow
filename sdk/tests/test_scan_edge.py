@@ -125,6 +125,26 @@ def test_edge_manifest_builds_browser_entry(tmp_path):
     assert payload["nodePluginMap"]["gen-text"] == [_EDGE_ID]
 
 
+def test_edge_slot_models_keep_declared_order(tmp_path):
+    # Model-level alternatives of one slot entry (the method picks by ctx.model);
+    # the canvas lists them under "Replace implementation", default first.
+    models = ["pp-ocrv6-small", "pp-ocrv6-tiny", "glm-ocr"]
+    root = tmp_path / "plugins"
+    _write_edge(
+        root,
+        _manifest(
+            slots=[{"nodeSlot": "ocr-image", "method": "ocrImage", "models": models}]
+        ),
+    )
+    payload = scan(root, _write_abi(tmp_path))
+
+    assert payload["errors"] == []
+    assert payload["plugins"][_EDGE_ID]["methodsByNodeSlot"]["ocr-image"] == {
+        "methodName": "ocrImage",
+        "models": models,
+    }
+
+
 def test_python_plugins_are_tagged_python(tmp_path):
     root = tmp_path / "plugins"
     pdir = root / "tongflow-api-fake"

@@ -79,6 +79,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **Browser engine: the `branch` policy and user skips no longer over-skip
+  collectors.** A node downstream of a failed or skipped one is now skipped
+  only when a required non-collect input loses its value, the fan-out
+  (`batchField`) input misses a producer, an ordering-only dependency is
+  down, or every producer of a required collect input (`collectAll` / ABI
+  array) failed or was skipped. Otherwise it runs, its collect inputs holding
+  the values that were produced: a `chunk-text` fed by several optional
+  producers keeps chunking, embedding and writing when one of them fails.
+  `abort` is unchanged. TypeScript only, like the rest of the policy (new
+  fixtures `branch-collect-partial-producers` and
+  `branch-collect-all-producers-failed`). See
+  [docs/edge-runtime.md](docs/edge-runtime.md#fault-tolerance-and-run-control).
+- **Canvas: "Replace implementation" lists the current plugin's models.**
+  Besides the slot's other plugins, the submenu offers the other models of
+  the current plugin's slot entry (e.g. an edge plugin's manifest
+  `slots[].models`) as "模型：…", with the current one checked; picking one
+  calls `replaceImplementation(nodeId, {pluginId, model})` and sets the
+  node's `pluginModel`.
 - **Python engine: advanced params reach the plugin again.** The batch loop in
   `run_workflow` reused the `params` name, so a node's `TONGFLOW_SLOT_PARAMS`
   values were replaced by its business inputs under `_params`.

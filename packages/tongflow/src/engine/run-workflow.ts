@@ -31,7 +31,11 @@ import {
     materializeAssetInputs,
 } from "./assets";
 import { type DataNodeState, resolveNodeParamSets } from "./bindings";
-import { buildExecutableGraph, downstreamClosure } from "./graph";
+import {
+    blockingUpstreams,
+    buildExecutableGraph,
+    downstreamClosure,
+} from "./graph";
 import { type AbiOutputView, computeOutputView } from "./output-view";
 import { attachRunController } from "./run-controller";
 import {
@@ -435,12 +439,49 @@ export async function runWorkflow(
         });
     };
 
-    /** Skip the not-yet-settled nodes of `id`'s downstream closure. */
+    /** A failed or skipped node: what it would have produced is missing. */
+    const isDown = (id: string) => {
+        const status = runs.get(id)?.status;
+        return status === "failed" || status === "skipped";
+    };
+
+    /** The slot's required input fields; `null` when its input schema is unknown. */
+    const requiredCache = new Map<string, ReadonlySet<string> | null>();
+    const requiredInputs = (node: ExecutableNode) => {
+        const slot = (node.feature ?? "").trim();
+        if (requiredCache.has(slot)) return requiredCache.get(slot) ?? null;
+        const schema = abi[slot]?.inputs as
+            | { required?: unknown }
+            | null
+            | undefined;
+        const required =
+            schema && typeof schema === "object"
+                ? new Set(
+                      Array.isArray(schema.required)
+                          ? schema.required.filter(
+                                (f): f is string => typeof f === "string",
+                            )
+                          : [],
+                  )
+                : null;
+        requiredCache.set(slot, required);
+        return required;
+    };
+
+    /** The down upstreams that keep `r` from running (see {@link blockingUpstreams}). */
+    const blockersOf = (r: NodeRun) =>
+        blockingUpstreams(graph, r.node.id, isDown, requiredInputs(r.node));
+
+    /**
+     * Skip the not-yet-settled nodes of `id`'s downstream closure that can no
+     * longer run, in level order (so a skip cascades). A node that still has
+     * every required input (a collect input keeps the values of its live
+     * sources) stays pending and runs.
+     */
     const skipClosure = (id: string, reason: string) => {
         for (const d of byOrder(downstreamClosure(graph, id))) {
-            if (d.status === "pending" || d.status === "running") {
-                markSkipped(d, "upstream", reason);
-            }
+            if (d.status !== "pending" && d.status !== "running") continue;
+            if (blockersOf(d).length > 0) markSkipped(d, "upstream", reason);
         }
     };
 
@@ -509,15 +550,13 @@ export async function runWorkflow(
         // still blocks. Only a node that was not skipped before is reported.
         for (const d of closure) {
             if (d.status !== "pending") continue;
-            let reason: string | undefined;
-            for (const u of graph.upstream.get(d.node.id) ?? []) {
-                const status = runs.get(u)?.status;
-                if (status === "failed") reason = SKIP_REASONS.upstreamFailed;
-                else if (status === "skipped") {
-                    reason ??= SKIP_REASONS.upstreamSkipped;
-                }
-            }
-            if (!reason) continue;
+            const blockers = blockersOf(d);
+            if (blockers.length === 0) continue;
+            const reason = blockers.some(
+                (u) => runs.get(u)?.status === "failed",
+            )
+                ? SKIP_REASONS.upstreamFailed
+                : SKIP_REASONS.upstreamSkipped;
             if (wasSkipped.has(d)) {
                 d.status = "skipped";
                 d.skipCause = "upstream";
