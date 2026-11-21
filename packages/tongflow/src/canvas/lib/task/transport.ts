@@ -10,68 +10,26 @@
  * touches the HTTP API for tasks.
  */
 
-import { logger, type SSEStatusType } from "../../../core";
+import { logger } from "../../../core";
 import { getCanvasHost, hostFetch } from "../../host";
 import {
     createTask as apiCreateTask,
     updateTaskStatus as apiUpdateTaskStatus,
-    type CreateTaskRequest,
-    type CreateTaskResponse,
-    type UpdateStatusRequest,
-    type UpdateStatusResponse,
 } from "../api/task";
 import { getTaskStopUrl, getTaskWaitUrl } from "./api-url";
+import type {
+    CanvasTaskTransport,
+    TaskWaitConnection,
+    TaskWaitHandlers,
+    TaskWaitMessage,
+} from "./transport-types";
 
-/**
- * One task update, the shape of each `/api/task/wait` SSE message. A
- * terminal `status` (`COMPLETED` / `FAILED` / `CANCELLED` …) ends the task;
- * on `COMPLETED`, `data` is the plugin output the canvas routes into
- * downstream data nodes.
- */
-export interface TaskWaitMessage {
-    id: string;
-    status: SSEStatusType;
-    data?: Record<string, unknown>;
-    progress?: number;
-    error?: string;
-    /** Optional field from backend (e.g. workflow NODE_* metadata) */
-    nodeId?: string | null;
-}
-
-/**
- * Callbacks a transport drives while the canvas waits on a task. They mirror
- * `EventSource`: `onOpen` once the stream is live, `onMessage` per update,
- * `onClose` when the producer ends the stream on purpose, `onError` when the
- * stream drops (the canvas then reconnects with backoff by calling
- * `waitTask` again).
- */
-export interface TaskWaitHandlers {
-    onOpen: () => void;
-    onMessage: (message: TaskWaitMessage) => void;
-    onClose: () => void;
-    onError: (error: unknown) => void;
-}
-
-/** A live wait; `close()` stops delivery and releases the stream. */
-export interface TaskWaitConnection {
-    close: () => void;
-}
-
-export interface CanvasTaskTransport {
-    /** Create (and start) one task. */
-    createTask: (request: CreateTaskRequest) => Promise<CreateTaskResponse>;
-    /** Stream a task's updates until a terminal status or `close()`. */
-    waitTask: (
-        taskId: string,
-        handlers: TaskWaitHandlers,
-    ) => TaskWaitConnection;
-    /** Ask the task to stop; resolves `true` when the request was accepted. */
-    stopTask: (taskId: string) => Promise<boolean>;
-    /** Report a terminal status the canvas observed (a persistence backstop). */
-    updateTaskStatus: (
-        request: UpdateStatusRequest,
-    ) => Promise<UpdateStatusResponse>;
-}
+export type {
+    CanvasTaskTransport,
+    TaskWaitConnection,
+    TaskWaitHandlers,
+    TaskWaitMessage,
+};
 
 /** Today's HTTP + `EventSource` behaviour. */
 export const httpTaskTransport: CanvasTaskTransport = {

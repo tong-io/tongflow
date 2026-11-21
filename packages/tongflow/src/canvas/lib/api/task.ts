@@ -2,7 +2,20 @@
  * Task API client
  */
 
+import type {
+    CreateTaskRequest,
+    CreateTaskResponse,
+    UpdateStatusRequest,
+    UpdateStatusResponse,
+} from "../task/transport-types";
 import { apiGet, apiPost } from "./client";
+
+export type {
+    CreateTaskRequest,
+    CreateTaskResponse,
+    UpdateStatusRequest,
+    UpdateStatusResponse,
+};
 
 /** A persisted task row as returned by the task list API. */
 export interface TaskRecord {
@@ -16,23 +29,6 @@ export interface TaskRecord {
     error?: string;
     createdAt: Date;
     updatedAt: Date;
-}
-
-export interface CreateTaskRequest {
-    feature: string;
-    pluginId: string;
-    /** Selected model for router-style plugins; omitted otherwise. */
-    model?: string;
-    /** Advanced parameters (plugin's `TONGFLOW_SLOT_PARAMS` keys); omitted
-     * when the node runs on plugin defaults. */
-    params?: Record<string, unknown>;
-    prompt: Record<string, unknown>;
-    nodeId: string;
-    workflowId?: number;
-}
-
-export interface CreateTaskResponse {
-    taskId: string;
 }
 
 /**
@@ -58,18 +54,6 @@ export async function listTasks(
     return await apiGet<ListTasksResponse>(
         `/api/task/list?page=${page}&pageSize=${pageSize}`,
     );
-}
-
-export interface UpdateStatusRequest {
-    taskId: string;
-    status: string;
-    data?: Record<string, unknown>;
-}
-
-export interface UpdateStatusResponse {
-    success: boolean;
-    taskUpdated?: boolean;
-    skipped?: boolean;
 }
 
 /**
