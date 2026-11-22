@@ -55,7 +55,6 @@ describe("single modality selections", () => {
             "tableRecognizeNode",
             "layoutDetectNode",
             "detectObjectsNode",
-            "embedImageNode",
         ]);
     });
 
@@ -86,12 +85,7 @@ describe("single modality selections", () => {
 });
 
 describe("edge-runtime slots", () => {
-    it("offers chunking, embedding and language detection for texts", () => {
-        for (const n of [1, 3]) {
-            const got = types({ textNode: n });
-            expect(got).toContain("chunkTextNode");
-            expect(got).toContain("embedTextNode");
-        }
+    it("offers language detection for one text", () => {
         expect(types({ textNode: 1 })).toContain("detectLanguageNode");
         // detect-language takes one text handle (batched over its items).
         expect(types({ textNode: 2 })).not.toContain("detectLanguageNode");
@@ -102,12 +96,6 @@ describe("edge-runtime slots", () => {
         expect(got).toContain("vadSegmentNode");
         expect(got).toContain("diarizeSpeakersNode");
         expect(got).toContain("audioTagNode");
-    });
-
-    it("needs chunks and their vectors to write the knowledge base", () => {
-        expect(types({ textNode: 1, fileNode: 1 })).toContain("kbWriteNode");
-        expect(types({ textNode: 1 })).not.toContain("kbWriteNode");
-        expect(types({ fileNode: 1 })).not.toContain("kbWriteNode");
     });
 });
 

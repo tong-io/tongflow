@@ -19,9 +19,6 @@
             "ref_audio": "Reference audio",
             "ref_text": "Reference text",
             "document": "Document",
-            "texts": "Texts",
-            "chunks": "Chunks",
-            "vectors": "Vectors",
             "byFeature": {
                 "image-image-gen-video": {
                     "image": "First frame",
@@ -167,13 +164,10 @@
             "ocr": "OCR",
             "recognizeTable": "Table",
             "detectObjects": "Detect Objects",
-            "embed": "Embed",
-            "chunkText": "Chunk",
             "detectLanguage": "Detect Language",
             "splitBySpeech": "Split by Speech",
             "diarizeSpeakers": "Who Spoke When",
-            "tagAudio": "Sound Events",
-            "writeKnowledgeBase": "Save to Knowledge Base"
+            "tagAudio": "Sound Events"
         },
         "toast": {
             "executing": "Executing...",
@@ -479,10 +473,6 @@
                 "layoutDetect": "Layout Analysis",
                 "ocrImage": "Image OCR",
                 "tableRecognize": "Table Recognition",
-                "chunkText": "Text Chunking",
-                "embedText": "Text Embedding",
-                "embedImage": "Image Embedding",
-                "kbWrite": "Knowledge Base Write",
                 "vadSegment": "Speech Segmentation (VAD)",
                 "diarizeSpeakers": "Speaker Diarization",
                 "audioTag": "Audio Event Tagging",
@@ -554,9 +544,6 @@
                 "detectLayout": "Detect Layout",
                 "recognizeText": "Recognize Text",
                 "recognizeTable": "Recognize Table",
-                "chunkText": "Chunk Text",
-                "embed": "Embed",
-                "writeKnowledgeBase": "Save to Knowledge Base",
                 "splitBySpeech": "Split Speech",
                 "diarizeSpeakers": "Diarize Speakers",
                 "tagAudio": "Tag Sound Events",
@@ -1017,16 +1004,6 @@
                 "promptLabel": "Audio prompt",
                 "promptPlaceholder": "Describe the whole scene: who speaks and how, background ambience, sound effects. Quote the lines, e.g. @voice1 says: \"It's sunny today.\" Rain patters on the window.",
                 "hint": "One pass renders speech, sound effects and ambience together. Connect up to 3 audio clips as reference voices and click one to insert @voice1…@voice3."
-            },
-            "chunkText": {
-                "maxChars": "Max characters per chunk",
-                "maxCharsPlaceholder": "Plugin default",
-                "hint": "Every connected text is merged, then split into chunks for embedding."
-            },
-            "kbWrite": {
-                "sourceLabel": "Source file name",
-                "sourcePlaceholder": "e.g. contract-2026.pdf",
-                "hint": "Connect the chunks (text) and their vectors (file). The host stores them; this node returns a summary."
             }
         },
         "toolbar": {

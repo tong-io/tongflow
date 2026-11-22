@@ -22,15 +22,12 @@ import ArrangeTextNode from "./nodes/batch/arrange-text";
 import DropVideoNode from "./nodes/batch/drop-video";
 // Compose nodes
 import AudioVideoLipSyncNode from "./nodes/compose/audio-video-lip-sync";
-import ChunkTextNode from "./nodes/compose/chunk-text";
 import ConcatVideoNode from "./nodes/compose/concat-video";
 import ConcatVideoComposeNode from "./nodes/compose/concat-video";
-import EmbedTextNode from "./nodes/compose/embed-text";
 import ImageFusionNode from "./nodes/compose/image-fusion";
 import ImageGenVideoComposeNode from "./nodes/compose/image-gen-video-compose";
 import ImageImageGenVideoNode from "./nodes/compose/image-image-gen-video";
 import ImagesGenVideoNode from "./nodes/compose/images-gen-video";
-import KbWriteNode from "./nodes/compose/kb-write";
 import MergeVideoAudioNode from "./nodes/compose/merge-video-audio";
 import MusicCoverNode from "./nodes/compose/music-cover";
 import RefsGenVideoNode from "./nodes/compose/refs-gen-video";
@@ -66,7 +63,6 @@ import DenoiseAudioNode from "./nodes/transfer/denoise-audio";
 import DetectLanguageNode from "./nodes/transfer/detect-language";
 import DetectObjectsNode from "./nodes/transfer/detect-objects";
 import DiarizeSpeakersNode from "./nodes/transfer/diarize-speakers";
-import EmbedImageNode from "./nodes/transfer/embed-image";
 import ExtractAudioNode from "./nodes/transfer/extract-audio";
 import FileGenTextNode from "./nodes/transfer/file-gen-text";
 import GetFirstFrameNode from "./nodes/transfer/get-first-frame";
@@ -180,7 +176,6 @@ export const NODE_TYPES: NodeTypes = {
     ocrImageNode: OcrImageNode,
     tableRecognizeNode: TableRecognizeNode,
     detectObjectsNode: DetectObjectsNode,
-    embedImageNode: EmbedImageNode,
     diarizeSpeakersNode: DiarizeSpeakersNode,
     audioTagNode: AudioTagNode,
     detectLanguageNode: DetectLanguageNode,
@@ -206,9 +201,6 @@ export const NODE_TYPES: NodeTypes = {
     textsGenTextNode: TextsGenTextNode,
     concatVideoComposeNode: ConcatVideoComposeNode,
     musicCoverNode: MusicCoverNode,
-    chunkTextNode: ChunkTextNode,
-    embedTextNode: EmbedTextNode,
-    kbWriteNode: KbWriteNode,
     // Decompose nodes - Implemented
     splitVideoNode: SplitVideoNode,
     splitTextNode: SplitTextNode,
@@ -300,7 +292,6 @@ export const NODE_CATEGORIES = {
         "ocrImageNode",
         "tableRecognizeNode",
         "detectObjectsNode",
-        "embedImageNode",
         "diarizeSpeakersNode",
         "audioTagNode",
         "detectLanguageNode",
@@ -324,9 +315,6 @@ export const NODE_CATEGORIES = {
         "textsGenTextNode",
         "concatVideoComposeNode",
         "musicCoverNode",
-        "chunkTextNode",
-        "embedTextNode",
-        "kbWriteNode",
     ],
     DECOMPOSE: [
         "splitVideoNode",

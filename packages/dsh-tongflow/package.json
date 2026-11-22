@@ -1,6 +1,6 @@
 {
     "name": "dsh-tongflow",
-    "version": "1.1.0",
+    "version": "1.1.1",
     "description": "TongFlow for agents: your agent builds and runs TongFlow workflows. Each run is recorded, and people can open, edit and rerun the result. A plugin for DeepSeek Harness (dsh), with the TongFlow canvas built in.",
     "author": "tong-io",
     "license": "AGPL-3.0-only",

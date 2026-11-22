@@ -92,7 +92,6 @@ export const NODE_TYPE_CATEGORY: Readonly<Record<string, NodeCategory>> = {
     ocrImageNode: "transfer",
     tableRecognizeNode: "transfer",
     detectObjectsNode: "transfer",
-    embedImageNode: "transfer",
     diarizeSpeakersNode: "transfer",
     audioTagNode: "transfer",
     detectLanguageNode: "transfer",
@@ -115,9 +114,6 @@ export const NODE_TYPE_CATEGORY: Readonly<Record<string, NodeCategory>> = {
     textsGenTextNode: "compose",
     concatVideoComposeNode: "compose",
     musicCoverNode: "compose",
-    chunkTextNode: "compose",
-    embedTextNode: "compose",
-    kbWriteNode: "compose",
     // decompose/
     splitVideoNode: "decompose",
     splitTextNode: "decompose",

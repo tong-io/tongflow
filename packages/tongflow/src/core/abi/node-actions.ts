@@ -104,8 +104,6 @@ export const NODE_ACTION_META: Readonly<Record<string, NodeActionMeta>> = {
         order: 190,
         limits: { textNode: [2, Number.POSITIVE_INFINITY] },
     },
-    chunkTextNode: { label: "chunkText", order: 192 },
-    embedTextNode: { label: "embed", order: 194 },
     detectLanguageNode: { label: "detectLanguage", order: 196 },
 
     // ── from image ───────────────────────────────────────────────────────
@@ -132,7 +130,6 @@ export const NODE_ACTION_META: Readonly<Record<string, NodeActionMeta>> = {
     tableRecognizeNode: { label: "recognizeTable", order: 283 },
     layoutDetectNode: { label: "detectLayout", order: 284 },
     detectObjectsNode: { label: "detectObjects", order: 285 },
-    embedImageNode: { label: "embed", order: 286 },
     // Gemini 3 Pro takes up to 14 reference images.
     imageFusionNode: {
         label: "imageFusion",
@@ -202,8 +199,6 @@ export const NODE_ACTION_META: Readonly<Record<string, NodeActionMeta>> = {
     speechGenVideoNode: { label: "generateVideo", order: 661 },
     textAudioGenSpeechNode: { label: "speakWithStyle", order: 670 },
     textGenSpeechCloneComposeNode: { label: "cloneVoice", order: 680 },
-    // Chunks (text) + their vectors (file from embed-text).
-    kbWriteNode: { label: "writeKnowledgeBase", order: 685 },
     // Omni-reference, matching MiniMax-H3 Ref2VA: 9 images, 3 clips, 3 audio,
     // 12 reference files in total.
     refsGenVideoNode: {

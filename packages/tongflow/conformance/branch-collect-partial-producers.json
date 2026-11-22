@@ -1,6 +1,6 @@
 {
     "name": "branch-collect-partial-producers",
-    "description": "failurePolicy 'branch': 'chunk' collects (collectAll, required 'texts') from three producers; 'p2' fails, so 'chunk' still runs with the two values 'p1' and 'p3' produced (in source order) and 'after' runs on its chunks. Only the failed node is missing: status partial, nothing is skipped.",
+    "description": "failurePolicy 'branch': 'chunk' collects (collectAll, required 'texts') from three producers; 'p2' fails, so 'chunk' still runs with the two values 'p1' and 'p3' produced (in source order) and 'after' runs on its output. Only the failed node is missing: status partial, nothing is skipped.",
     "engines": ["ts"],
     "failurePolicy": "branch",
     "workflow": {
@@ -165,8 +165,8 @@
             },
             {
                 "id": "chunk",
-                "type": "chunkTextNode",
-                "feature": "chunk-text",
+                "type": "textsGenTextNode",
+                "feature": "combine-text",
                 "pluginId": "tongflow-api-fake-chunk",
                 "bindings": {
                     "texts": {
@@ -191,7 +191,7 @@
                 },
                 "outputs": [
                     {
-                        "sourceField": "chunks",
+                        "sourceField": "text",
                         "nodeType": "textNode",
                         "dataField": "texts",
                         "expandEach": false,
@@ -212,7 +212,7 @@
                         "sources": [
                             {
                                 "fromNodeId": "chunk",
-                                "fromField": "chunks"
+                                "fromField": "text"
                             }
                         ],
                         "targetHandle": "in:text",
@@ -309,7 +309,7 @@
         "tongflow-api-fake-chunk": [
             {
                 "op": "map",
-                "field": "chunks",
+                "field": "text",
                 "from": "texts",
                 "template": "[{item}]"
             }
@@ -335,7 +335,7 @@
             },
             "chunk": {
                 "success": true,
-                "chunks": ["[parse(doc)]", "[asr(doc)]"]
+                "text": ["[parse(doc)]", "[asr(doc)]"]
             },
             "after": {
                 "success": true,

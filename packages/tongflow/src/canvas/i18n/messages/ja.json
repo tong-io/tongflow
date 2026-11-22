@@ -19,9 +19,6 @@
             "ref_audio": "参照音声",
             "ref_text": "参照テキスト",
             "document": "ドキュメント",
-            "texts": "テキスト",
-            "chunks": "チャンク",
-            "vectors": "ベクトル",
             "byFeature": {
                 "image-image-gen-video": {
                     "image": "開始フレーム",
@@ -167,13 +164,10 @@
             "ocr": "文字認識",
             "recognizeTable": "表認識",
             "detectObjects": "物体検出",
-            "embed": "ベクトル化",
-            "chunkText": "チャンク分割",
             "detectLanguage": "言語判定",
             "splitBySpeech": "発話で分割",
             "diarizeSpeakers": "話者区間",
-            "tagAudio": "音響イベント",
-            "writeKnowledgeBase": "ナレッジベースに保存"
+            "tagAudio": "音響イベント"
         },
         "toast": {
             "executing": "実行中...",
@@ -479,10 +473,6 @@
                 "layoutDetect": "レイアウト解析",
                 "ocrImage": "画像の文字認識",
                 "tableRecognize": "表構造認識",
-                "chunkText": "テキストのチャンク分割",
-                "embedText": "テキストのベクトル化",
-                "embedImage": "画像のベクトル化",
-                "kbWrite": "ナレッジベース書き込み",
                 "vadSegment": "発話区間分割（VAD）",
                 "diarizeSpeakers": "話者ダイアライゼーション",
                 "audioTag": "音響イベント認識",
@@ -554,9 +544,6 @@
                 "detectLayout": "レイアウトを解析",
                 "recognizeText": "文字を認識",
                 "recognizeTable": "表を認識",
-                "chunkText": "チャンクに分割",
-                "embed": "ベクトル化",
-                "writeKnowledgeBase": "ナレッジベースに保存",
                 "splitBySpeech": "発話で分割",
                 "diarizeSpeakers": "話者を区間分け",
                 "tagAudio": "音響イベントを認識",
@@ -931,16 +918,6 @@
                 "promptLabel": "オーディオの説明",
                 "promptPlaceholder": "場面をまるごと書きます：誰がどう話すか、背景の環境音、効果音。セリフは引用符で囲みます。例：@voice1 が言う：「今日はいい天気だね。」窓の外で小雨が降っている。",
                 "hint": "話し声・効果音・環境音を一度に生成します。参照ボイスとして音声を最大 3 本つなぎ、クリックすると @voice1…@voice3 が挿入されます。"
-            },
-            "chunkText": {
-                "maxChars": "チャンクあたりの最大文字数",
-                "maxCharsPlaceholder": "プラグインの既定値",
-                "hint": "接続したテキストをすべて結合してから、ベクトル化しやすいチャンクに分割します。"
-            },
-            "kbWrite": {
-                "sourceLabel": "元ファイル名",
-                "sourcePlaceholder": "例: 契約書-2026.pdf",
-                "hint": "チャンク（テキスト）と対応するベクトル（ファイル）を接続します。保存はホストが行い、このノードは概要を返します。"
             }
         },
         "toolbar": {
