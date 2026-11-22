@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.1.1] - 2026-11-22
+
+### Removed
+
+- Removed the `chunk-text`, `embed-text`, `embed-image` and `kb-write` slots added in
+  1.1.0. They were application-specific and are now handled by host applications.
+
 ### Fixed
 
 - **"Run workflow" no longer takes over server workflows.** With a browser plugin

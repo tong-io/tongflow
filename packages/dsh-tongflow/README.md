@@ -118,7 +118,7 @@ It is published to npm with the built `lib/`; the GitHub source tree does not co
 |---|---|---|
 | `studioRoot` | `<DSH_HOME>/tongflow` | projects, venv, plugins, data |
 | `pythonPath` | auto-detect | Python ≥ 3.10 used to create the venv |
-| `sdkSpec` | `tongflow==1.1.0` | pip spec installed into the venv (`-e /path/to/sdk` for development) |
+| `sdkSpec` | `tongflow==1.1.1` | pip spec installed into the venv (`-e /path/to/sdk` for development) |
 | `pluginOrg` | `https://github.com/tong-io` | where official plugins are cloned from |
 | `pluginGitUrls` | `{}` | plugin id → git URL overrides |
 | `env` | `{}` | environment for plugin processes (API keys); the Studio's key store (`env.json`) is merged over it |
