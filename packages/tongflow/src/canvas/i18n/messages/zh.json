@@ -19,9 +19,6 @@
             "ref_audio": "参考音频",
             "ref_text": "参考文本",
             "document": "文档",
-            "texts": "文本",
-            "chunks": "文本块",
-            "vectors": "向量",
             "byFeature": {
                 "image-image-gen-video": {
                     "image": "首帧图片",
@@ -167,13 +164,10 @@
             "ocr": "文字识别",
             "recognizeTable": "表格识别",
             "detectObjects": "目标检测",
-            "embed": "向量化",
-            "chunkText": "切块",
             "detectLanguage": "语种识别",
             "splitBySpeech": "语音切段",
             "diarizeSpeakers": "说话人分段",
-            "tagAudio": "音频事件",
-            "writeKnowledgeBase": "写入知识库"
+            "tagAudio": "音频事件"
         },
         "toast": {
             "executing": "执行中...",
@@ -479,10 +473,6 @@
                 "layoutDetect": "版面分析",
                 "ocrImage": "图片文字识别",
                 "tableRecognize": "表格结构识别",
-                "chunkText": "文本切块",
-                "embedText": "文本向量化",
-                "embedImage": "图像向量化",
-                "kbWrite": "写入知识库",
                 "vadSegment": "语音切段（VAD）",
                 "diarizeSpeakers": "说话人分段",
                 "audioTag": "音频事件识别",
@@ -554,9 +544,6 @@
                 "detectLayout": "分析版面",
                 "recognizeText": "识别文字",
                 "recognizeTable": "识别表格",
-                "chunkText": "切块",
-                "embed": "向量化",
-                "writeKnowledgeBase": "写入知识库",
                 "splitBySpeech": "切分语音",
                 "diarizeSpeakers": "分段说话人",
                 "tagAudio": "识别音频事件",
@@ -1017,16 +1004,6 @@
                 "promptLabel": "音频描述",
                 "promptPlaceholder": "把整段场景写出来：谁在说话、怎么说，背景环境，音效。台词用引号，例如：@voice1 说：“今天天气真好。”窗外下着小雨。",
                 "hint": "一次生成人声、音效和环境声。最多连 3 段音频作参考音色，点一下就把 @voice1…@voice3 插进描述里。"
-            },
-            "chunkText": {
-                "maxChars": "每块最大字符数",
-                "maxCharsPlaceholder": "使用插件默认值",
-                "hint": "所有接入的文本先合并，再切成适合向量化的块。"
-            },
-            "kbWrite": {
-                "sourceLabel": "来源文件名",
-                "sourcePlaceholder": "例如 合同-2026.pdf",
-                "hint": "接入文本块（文本）和对应的向量（文件）。实际存储由宿主负责，本节点返回入库摘要。"
             }
         },
         "toolbar": {

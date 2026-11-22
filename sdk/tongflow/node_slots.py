@@ -86,10 +86,6 @@ class NodeSlots:
     LAYOUT_DETECT: Final[str] = 'layout-detect'
     OCR_IMAGE: Final[str] = 'ocr-image'
     TABLE_RECOGNIZE: Final[str] = 'table-recognize'
-    CHUNK_TEXT: Final[str] = 'chunk-text'
-    EMBED_TEXT: Final[str] = 'embed-text'
-    EMBED_IMAGE: Final[str] = 'embed-image'
-    KB_WRITE: Final[str] = 'kb-write'
     VAD_SEGMENT: Final[str] = 'vad-segment'
     DIARIZE_SPEAKERS: Final[str] = 'diarize-speakers'
     AUDIO_TAG: Final[str] = 'audio-tag'
@@ -166,10 +162,6 @@ ALL_NODE_SLOTS: Final[tuple[str, ...]] = (
     'layout-detect',
     'ocr-image',
     'table-recognize',
-    'chunk-text',
-    'embed-text',
-    'embed-image',
-    'kb-write',
     'vad-segment',
     'diarize-speakers',
     'audio-tag',

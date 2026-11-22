@@ -81,7 +81,6 @@ export const NODE_TYPE_TO_ABI_FEATURE: Readonly<Record<string, NodeSlot>> = {
     ocrImageNode: "ocr-image",
     tableRecognizeNode: "table-recognize",
     detectObjectsNode: "detect-objects",
-    embedImageNode: "embed-image",
     diarizeSpeakersNode: "diarize-speakers",
     audioTagNode: "audio-tag",
     detectLanguageNode: "detect-language",
@@ -107,9 +106,6 @@ export const NODE_TYPE_TO_ABI_FEATURE: Readonly<Record<string, NodeSlot>> = {
     textsGenTextNode: "combine-text",
     concatVideoComposeNode: "concat-videos",
     musicCoverNode: "music-cover",
-    chunkTextNode: "chunk-text",
-    embedTextNode: "embed-text",
-    kbWriteNode: "kb-write",
 
     // decompose/
     splitVideoNode: "split-video",
@@ -304,23 +300,11 @@ export const NODE_TYPE_SOURCE_SPEC: Partial<
     ocrImageNode: { image: batchOn() },
     tableRecognizeNode: { image: batchOn() },
     detectObjectsNode: { image: batchOn() },
-    embedImageNode: { image: batchOn() },
     vadSegmentNode: { audio: batchOn() },
     diarizeSpeakersNode: { audio: batchOn() },
     audioTagNode: { audio: batchOn() },
     detectLanguageNode: {
         text: batchOn({ nodeType: "textNode", path: "texts" }),
-    },
-    // Every connected text node is merged into one chunking call.
-    chunkTextNode: { texts: collectAll({ nodeType: "textNode" }) },
-    embedTextNode: { texts: collectAll({ nodeType: "textNode" }) },
-    // Chunks come from a text node, their vectors from the file node that
-    // embed-text writes (`vectors` is a bare Asset, so pin fileNode); the
-    // source file name is typed in the node.
-    kbWriteNode: {
-        chunks: collectAll({ nodeType: "textNode" }),
-        vectors: handle({ nodeType: "fileNode" }),
-        source: configField(),
     },
 };
 

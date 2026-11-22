@@ -1,6 +1,6 @@
 {
     "name": "collect-all",
-    "description": "chunk-text collects every connected text node into one array input (no fan-out).",
+    "description": "combine-text collects every connected text node into one array input (no fan-out).",
     "workflow": {
         "name": "collect-all",
         "version": "1.0",
@@ -46,8 +46,8 @@
         "executableNodes": [
             {
                 "id": "c",
-                "type": "chunkTextNode",
-                "feature": "chunk-text",
+                "type": "textsGenTextNode",
+                "feature": "combine-text",
                 "pluginId": "tongflow-api-fake-chunk",
                 "bindings": {
                     "texts": {
@@ -65,14 +65,14 @@
                         "targetHandle": "in:texts",
                         "consumerShape": "array"
                     },
-                    "max_chars": {
+                    "userPrompt": {
                         "kind": "config",
-                        "value": 100
+                        "value": "merge"
                     }
                 },
                 "outputs": [
                     {
-                        "sourceField": "chunks",
+                        "sourceField": "text",
                         "nodeType": "textNode",
                         "dataField": "texts",
                         "expandEach": false,
@@ -103,7 +103,7 @@
         "tongflow-api-fake-chunk": [
             {
                 "op": "map",
-                "field": "chunks",
+                "field": "text",
                 "from": "texts",
                 "template": "[{item}]"
             }
@@ -114,7 +114,7 @@
         "outputs": {
             "c": {
                 "success": true,
-                "chunks": ["[one]", "[two]", "[three]"]
+                "text": ["[one]", "[two]", "[three]"]
             }
         },
         "outputsByName": {

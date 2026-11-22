@@ -189,8 +189,8 @@ judged per handle-bound input, with "required" read from the slot's ABI input sc
 | an ordering-only dependency (in `dependencies`, read by no binding) | it is down | always |
 
 Otherwise the node runs: a collect input holds only the values its live sources produced,
-in source order (a `chunk-text` collecting parse, OCR and transcript texts still chunks the
-texts it has when the OCR fails, and the embed and kb-write after it still run), and an
+in source order (a `combine-text` collecting parse, OCR and transcript texts still combines
+the texts it has when the OCR fails, and the nodes after it still run), and an
 optional input without a value is left out of the prompt. A fan-out never runs over a
 partial item list: if any producer of the batch field is down, the node is skipped, as
 before; inside one producer, a failed batch item still fails that producer (it never
@@ -522,7 +522,7 @@ The model base (`?modelBase=` on the entry URL, the plugin's contract) is
 `http://localhost:*` only, so a model-backed node works from a page on `http://localhost:…`;
 Studio's link is `http://127.0.0.1:…`, which it does not allow yet, and a deployed Next app
 needs its origin added there (or a model base of its own). Zero-model nodes (document parsing,
-page rendering, media extraction, language detection, chunking) need no model host.
+page rendering, media extraction, language detection) need no model host.
 
 **Cross-origin isolation** (threaded wasm, ≈2.6× faster for the ML nodes) is opt-in:
 `TONGFLOW_CROSS_ORIGIN_ISOLATION=1` makes Studio's own web server send COOP / COEP on the
@@ -574,7 +574,7 @@ const runtime = createEdgeHostRuntime({
   answer between concurrent nodes, and withdraws the question when the run is stopped. A
   refusal fails the node ("Not run: you declined …"), so only its branch is skipped. For
   `tongflow-edge-essentials` that is the WebGPU models (Qwen3.5-0.8B, GLM-OCR,
-  EmbeddingGemma 2, LFM2.5-350M).
+  LFM2.5-350M).
 
 | | Studio | Next app |
 |---|---|---|
@@ -648,18 +648,11 @@ array: on the canvas each item becomes its own data-node entry.
 | `layout-detect` | `layoutDetectNode` (decompose) | `image`: Asset, batched | `layout`: string (JSON region list); `regions`: ImageRef[] (expands; cropped regions) |
 | `ocr-image` | `ocrImageNode` (transfer) | `image`: Asset, batched | `text`: string (PP-OCRv6 by default; GLM-OCR is a tier-3 implementation of the same slot) |
 | `table-recognize` | `tableRecognizeNode` (transfer) | `image`: Asset, batched | `html`: string |
-| `chunk-text` | `chunkTextNode` (compose) | `texts`: string[], every connected text node collected; `max_chars`?: integer (config) | `chunks`: string[] |
-| `embed-text` | `embedTextNode` (compose) | `texts`: string[], collected | `vectors`: FileRef (float32 binary; header carries dimension and count) |
-| `embed-image` | `embedImageNode` (transfer) | `image`: Asset, batched | `vectors`: FileRef (tier 3, EmbeddingGemma 2) |
-| `kb-write` | `kbWriteNode` (compose) | `chunks`: string[], collected from text nodes; `vectors`: Asset, from a file node; `source`: string (config, the source file name) | `text`: string (summary of what was stored). The host does the actual storage. |
 | `vad-segment` | `vadSegmentNode` (decompose) | `audio`: Asset, batched | `segments`: AudioRef[] (expands) |
 | `diarize-speakers` | `diarizeSpeakersNode` (transfer) | `audio`: Asset, batched | `segments`: string (JSON: speaker / start / end) |
 | `audio-tag` | `audioTagNode` (transfer) | `audio`: Asset, batched | `tags`: string (JSON labels and scores) |
 | `detect-objects` | `detectObjectsNode` (transfer) | `image`: Asset, batched | `objects`: string (JSON classes, boxes, scores) |
 | `detect-language` | `detectLanguageNode` (transfer) | `text`: string, batched over a text node's items | `language`: string (ISO 639-1) |
-
-`chunk-text` takes `texts: string[]` rather than a single `text`: collecting every connected
-text node means the plugin receives an array, and the plugin joins the parts before chunking.
 
 The official `tongflow-edge-essentials` implements all of them (and `parse-document`,
 `transcribe`, `extract-audio`, `split-video`, `get-first-frame`, `image-describe`,

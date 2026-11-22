@@ -19,9 +19,6 @@
             "ref_audio": "참조 오디오",
             "ref_text": "참조 텍스트",
             "document": "문서",
-            "texts": "텍스트",
-            "chunks": "청크",
-            "vectors": "벡터",
             "byFeature": {
                 "image-image-gen-video": {
                     "image": "첫 프레임",
@@ -167,13 +164,10 @@
             "ocr": "문자 인식",
             "recognizeTable": "표 인식",
             "detectObjects": "객체 감지",
-            "embed": "임베딩",
-            "chunkText": "청크 분할",
             "detectLanguage": "언어 감지",
             "splitBySpeech": "음성 구간 분할",
             "diarizeSpeakers": "화자 구간 분할",
-            "tagAudio": "오디오 이벤트",
-            "writeKnowledgeBase": "지식 베이스에 저장"
+            "tagAudio": "오디오 이벤트"
         },
         "toast": {
             "executing": "실행 중...",
@@ -479,10 +473,6 @@
                 "layoutDetect": "레이아웃 분석",
                 "ocrImage": "이미지 문자 인식",
                 "tableRecognize": "표 구조 인식",
-                "chunkText": "텍스트 청크 분할",
-                "embedText": "텍스트 임베딩",
-                "embedImage": "이미지 임베딩",
-                "kbWrite": "지식 베이스 쓰기",
                 "vadSegment": "음성 구간 분할 (VAD)",
                 "diarizeSpeakers": "화자 다이어라이제이션",
                 "audioTag": "오디오 이벤트 태깅",
@@ -554,9 +544,6 @@
                 "detectLayout": "레이아웃 분석",
                 "recognizeText": "문자 인식",
                 "recognizeTable": "표 인식",
-                "chunkText": "청크 분할",
-                "embed": "임베딩",
-                "writeKnowledgeBase": "지식 베이스에 저장",
                 "splitBySpeech": "음성 분할",
                 "diarizeSpeakers": "화자 구간 분할",
                 "tagAudio": "오디오 이벤트 태깅",
@@ -1017,16 +1004,6 @@
                 "promptLabel": "오디오 설명",
                 "promptPlaceholder": "장면 전체를 적어 주세요. 누가 어떻게 말하는지, 배경 소리, 효과음까지. 대사는 따옴표로 묶어요. 예: @voice1이 말한다: \"오늘 날씨 좋다.\" 창밖에 가랑비가 내린다.",
                 "hint": "말소리, 효과음, 배경음을 한 번에 만들어요. 참조 음색으로 오디오를 최대 3개까지 연결하고, 누르면 @voice1…@voice3이 설명에 들어가요."
-            },
-            "chunkText": {
-                "maxChars": "청크당 최대 글자 수",
-                "maxCharsPlaceholder": "플러그인 기본값",
-                "hint": "연결된 모든 텍스트를 합친 뒤 임베딩하기 좋은 청크로 나눕니다."
-            },
-            "kbWrite": {
-                "sourceLabel": "원본 파일 이름",
-                "sourcePlaceholder": "예: 계약서-2026.pdf",
-                "hint": "청크(텍스트)와 해당 벡터(파일)를 연결하세요. 저장은 호스트가 맡고 이 노드는 요약을 반환합니다."
             }
         },
         "toolbar": {

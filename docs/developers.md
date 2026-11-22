@@ -136,7 +136,6 @@ Each node below is a capability from the ABI. People meet three actions on the c
 - ✅ **Image OCR**: recognize the text in an image.
 - ✅ **Table recognition**: a table image → HTML table structure.
 - ✅ **Object detection**: classes, boxes and scores as JSON.
-- ✅ **Image embedding**: an image → vector file for search.
 
 #### Video
 
@@ -188,9 +187,6 @@ Each node below is a capability from the ABI. People meet three actions on the c
 - ✅ **Combine text**: merge multiple text nodes into one.
 - ✅ **Concatenate clips**: join multiple videos end to end.
 - ✅ **Mux audio + video**: merge into one file.
-- ✅ **Text chunking**: merge connected texts and cut them into embedding-sized chunks.
-- ✅ **Text embedding**: chunks → one vector file (float32, header with dimension and count).
-- ✅ **Knowledge base write**: chunks + their vectors + source file name → stored by the host, returns a summary.
 
 ### Split & batch
 
@@ -281,7 +277,7 @@ Aggregators — one key, many third-party models across labs:
 
 Run inside the user's browser (a Web Worker per plugin) through the browser edge runtime: no key, no server compute, files stay on the device. Studio and the app load them same-origin and add **Run workflow** to the canvas once one is installed; see [edge-runtime.md](edge-runtime.md#hosts).
 
-- [tongflow-edge-essentials](https://github.com/tong-io/tongflow-edge-essentials) — on-device document parsing (PDF, Office, e-mail, HTML, EPUB, legacy formats), PDF page rendering, audio / first-frame extraction, language detection, text chunking and embedding for a knowledge base, OCR (PP-OCRv6), page orientation, layout, tables, shot splitting, object detection, transcription, speech segmentation, speaker turns and audio tagging; optional WebGPU nodes for image understanding, GLM-OCR, image embeddings and key-point extraction (large models, downloaded once after the user agrees)
+- [tongflow-edge-essentials](https://github.com/tong-io/tongflow-edge-essentials) — on-device document parsing (PDF, Office, e-mail, HTML, EPUB, legacy formats), PDF page rendering, audio / first-frame extraction, language detection, OCR (PP-OCRv6), page orientation, layout, tables, shot splitting, object detection, transcription, speech segmentation, speaker turns and audio tagging; optional WebGPU nodes for image understanding, GLM-OCR and key-point extraction (large models, downloaded once after the user agrees)
 
 ## Custom plugins
 

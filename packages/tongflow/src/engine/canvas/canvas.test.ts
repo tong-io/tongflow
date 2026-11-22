@@ -61,7 +61,7 @@ describe("createEngineCanvasRunner", () => {
         expect(events[9]).toMatchObject({
             type: "node-done",
             nodeId: "join",
-            output: { success: true, chunks: ["next(ok:go)!"] },
+            output: { success: true, text: ["next(ok:go)!"] },
         });
         // `partial` still ends ok; failed / skipped nodes keep their state.
         expect(events.at(-1)).toEqual({ type: "run-done", ok: true });

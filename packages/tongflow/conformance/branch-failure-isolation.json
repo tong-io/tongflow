@@ -196,8 +196,8 @@
             },
             {
                 "id": "join",
-                "type": "chunkTextNode",
-                "feature": "chunk-text",
+                "type": "textsGenTextNode",
+                "feature": "combine-text",
                 "pluginId": "tongflow-api-fake-join",
                 "bindings": {
                     "texts": {
@@ -218,7 +218,7 @@
                 },
                 "outputs": [
                     {
-                        "sourceField": "chunks",
+                        "sourceField": "text",
                         "nodeType": "textNode",
                         "dataField": "texts",
                         "expandEach": false,
@@ -301,7 +301,7 @@
         "tongflow-api-fake-join": [
             {
                 "op": "map",
-                "field": "chunks",
+                "field": "text",
                 "from": "texts",
                 "template": "{item}!"
             }
@@ -320,7 +320,7 @@
             },
             "join": {
                 "success": true,
-                "chunks": ["next(ok:go)!"]
+                "text": ["next(ok:go)!"]
             }
         },
         "outputsByName": {
